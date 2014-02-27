@@ -2,7 +2,7 @@
 
 ## Flume-based cosmos-injector (proof of concept)
 
-This proof of concept is meant to analyze wether or not Flume is suitable for developing the FI-WARE Orion Connectors, and in case it is possible, how easy or difficult it is. The tested injector has been cosmos-injector, which is a (conceptual) derivative work of ngsi2cosmos (https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
+This proof of concept is meant to analyze whether or not Flume is suitable for developing the FI-WARE Orion Connectors, and in case it is possible, how easy or difficult it is. The tested injector has been cosmos-injector, which is a (conceptual) derivative work of ngsi2cosmos (https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
 ### Development
 
@@ -19,41 +19,41 @@ There exists a wide collection of already developed sources, channels and sinks.
 
 Let's consider the following notification in Json format coming from an Orion Context Broker instance:
 
-POST http://localhost:1028/accumulate
-Content-Length: 492
-User-Agent: orion/0.9.0
-Host: localhost:1028
-Accept: application/xml, application/json
-Content-Type: application/json
-
-{
-  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-  "originator" : "localhost",
-  "contextResponses" : [
+    POST http://localhost:1028/accumulate
+    Content-Length: 492
+    User-Agent: orion/0.9.0
+    Host: localhost:1028
+    Accept: application/xml, application/json
+    Content-Type: application/json
+    
     {
-      "contextElement" : {
-        "attributes" : [
-          {
-            "name" : "temperature",
-            "type" : "centigrade",
-            "value" : "26.5"
+      "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
+      "originator" : "localhost",
+      "contextResponses" : [
+        {
+          "contextElement" : {
+            "attributes" : [
+              {
+                "name" : "temperature",
+                "type" : "centigrade",
+                "value" : "26.5"
+              }
+            ],
+            "type" : "Room",
+            "isPattern" : "false",
+            "id" : "Room1"
+          },
+          "statusCode" : {
+            "code" : "200",
+            "reasonPhrase" : "OK"
           }
-        ],
-        "type" : "Room",
-        "isPattern" : "false",
-        "id" : "Room1"
-      },
-      "statusCode" : {
-        "code" : "200",
-        "reasonPhrase" : "OK"
-      }
+        }
+      ]
     }
-  ]
-}
 
 Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (it is a POST request, the target is "notify" and the headers are OK), detecting the content type (it is in Json format), extracting the data (the Json part) and creating an event to be put in the channel:
 
-event={body={the_json_part...},headers={{"content-type","application/json"}}}
+    event={body={the_json_part...},headers={{"content-type","application/json"}}}
 
 The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the OrionHDFSSink extracts the events.
 
@@ -67,28 +67,28 @@ The developed classes must be packaged in a Java jar file which must be added to
 
 The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the OrionHDFSSink is shown below:
 
-# apache_flume_home/conf/cosmos-injector.conf
-orionagent.sources = http-source
-orionagent.sinks = hdfs-sink
-orionagent.channels = notifications
-
-orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
-orionagent.sources.http-source.channels = notifications
-orionagent.sources.http-source.port = 5050
-orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
-
-orionagent.sinks.hdfs-sink.channel = notifications
-orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
-orionagent.sinks.hdfs-sink.cosmos_host = 130.206.80.46
-orionagent.sinks.hdfs-sink.cosmos_port = 14000
-orionagent.sinks.hdfs-sink.cosmos_username = opendata
-orionagent.sinks.hdfs-sink.cosmos_basedir = test
-orionagent.sinks.hdfs-sink.hdfs_api = httpfs
-
-orionagent.channels.notifications.type = memory
-orionagent.channels.notifications.capacity = 1000
-orionagent.channels.notifications.transactionCapacity = 100
+    # apache_flume_home/conf/cosmos-injector.conf
+    orionagent.sources = http-source
+    orionagent.sinks = hdfs-sink
+    orionagent.channels = notifications
+    
+    orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+    orionagent.sources.http-source.channels = notifications
+    orionagent.sources.http-source.port = 5050
+    orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+    
+    orionagent.sinks.hdfs-sink.channel = notifications
+    orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+    orionagent.sinks.hdfs-sink.cosmos_host = 130.206.80.46
+    orionagent.sinks.hdfs-sink.cosmos_port = 14000
+    orionagent.sinks.hdfs-sink.cosmos_username = opendata
+    orionagent.sinks.hdfs-sink.cosmos_basedir = test
+    orionagent.sinks.hdfs-sink.hdfs_api = httpfs
+    
+    orionagent.channels.notifications.type = memory
+    orionagent.channels.notifications.capacity = 1000
+    orionagent.channels.notifications.transactionCapacity = 100
 
 ### Running
 
-apache_flume_home/bin/flume-ng agent -f apache_flume_home/conf/cosmos-injector.cont -n orionagent
+    apache_flume_home/bin/flume-ng agent -f apache_flume_home/conf/cosmos-injector.cont -n orionagent
