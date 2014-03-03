@@ -75,15 +75,15 @@ In order to install Java SDK (not JRE), just type (CentOS machines):
 
     $ yum install java-1.6.0-openjdk-devel
 
-Maven is installed by downloading it from http://maven.apache.org/download.cgi and install it at APACHE_MAVEN_HOME:
+Maven is installed by downloading it from http://maven.apache.org/download.cgi. Install it in a folder of your choice (represented by APACHE_MAVEN_HOME):
 
-    $ wget http://apache.rediris.es/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
+    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
     $ tar xzvf apache-maven-3.2.1-bin.tar.gz
     $ mv apache-maven-3.2.1-bin APACHE_MAVEN_HOME
 
 ### Installation
 
-Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a flder of your choice.
+Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a folder of your choice (represented by APACHE_FLUME_HOME):
 
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
