@@ -67,11 +67,25 @@ data lines in the form
     
 Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if not existing) will contain a new line such as "2014-02-27 14_46_21|13453464536|Room1|Room|temperature|centigrade|26.5".
 
+### Prerequisites
+
+Java JRE and Maven are needed in order to install and run the injector.
+
+In order to install Java, just type (CentOS machines):
+
+    $ yum install java
+
+Maven is installed by downloading it from http://maven.apache.org/download.cgi and install it at APACHE_MAVEN_HOME:
+
+    $ wget http://apache.rediris.es/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
+    $ tar xzvf apache-maven-3.2.1-bin.tar.gz
+    $ mv apache-maven-3.2.1-bin APACHE_MAVEN_HOME
+
 ### Installation
 
 Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a flder of your choice.
 
-    $ wget http://www.apache.org/dyn/closer.cgi/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
+    $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
 
@@ -79,7 +93,7 @@ Then, the developed classes must be packaged in a Java jar file which must be ad
 
     $ git clone https://github.com/telefonicaid/fiware-orion-connectors.git
     $ cd fiware-orion-connectors/cosmos-injector
-    $ mvn package
+    $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cosmos-injector-1.0-SNAPSHOT.jar APACHE_FLUME_HOME/lib
     $ ...
     $ wget http://archive.apache.org/dist/httpcomponents/httpclient/binary/httpcomponents-client-4.3.1-bin.tar.gz
