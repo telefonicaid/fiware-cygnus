@@ -69,11 +69,11 @@ Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if n
 
 ### Prerequisites
 
-Java JRE and Maven are needed in order to install and run the injector.
+Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install and run the injector.
 
-In order to install Java, just type (CentOS machines):
+In order to install Java SDK (not JRE), just type (CentOS machines):
 
-    $ yum install java
+    $ yum install java-1.6.0-openjdk-devel
 
 Maven is installed by downloading it from http://maven.apache.org/download.cgi and install it at APACHE_MAVEN_HOME:
 
