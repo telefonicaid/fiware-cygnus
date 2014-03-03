@@ -102,7 +102,7 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
     
     orionagent.sinks.hdfs-sink.channel = notifications
     orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
-    orionagent.sinks.hdfs-sink.cosmos_host = 130.206.80.46
+    orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
     orionagent.sinks.hdfs-sink.cosmos_port = 14000
     orionagent.sinks.hdfs-sink.cosmos_username = opendata
     orionagent.sinks.hdfs-sink.cosmos_basedir = test
