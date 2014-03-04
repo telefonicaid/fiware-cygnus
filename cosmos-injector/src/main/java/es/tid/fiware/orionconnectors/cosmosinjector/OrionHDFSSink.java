@@ -8,10 +8,13 @@ import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequ
 import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HDFSBackend;
 import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HttpFSBackend;
 import es.tid.fiware.orionconnectors.cosmosinjector.http.HttpClientFactory;
+import java.io.StringReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -20,6 +23,8 @@ import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * 
@@ -29,7 +34,7 @@ import org.apache.log4j.Logger;
  * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
  *  - File names format: <entity_name>-<entity_type>-<attribute-name>-<attribute_type>.txt
- *  - File lines format: <ts>|<ts_ms>|<entity_name>|<entity_type>|<attribute-name>|<attribute_type>|<value>.txt
+ *  - File lines format: <ts>|<ts_ms>|<entity_name>|<entity_type>|<attribute-name>|<attribute_type>|<value>
  * 
  * As can be seen, a file is created per each entity-attribute-pair, containing all the historical values an entity's
  * attribute has had.
@@ -43,7 +48,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
     private String cosmosHost;
     private String cosmosPort;
     private String cosmosUsername;
-    private String cosmosBasedir;
+    private String cosmosDataset;
     private String hdfsAPI;
     private HttpClientFactory httpClientFactory;
     private HDFSBackend persistenceBackend;
@@ -54,7 +59,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         cosmosHost = context.getString("cosmos_host", "localhost");
         cosmosPort = context.getString("cosmos_port", "14000");
         cosmosUsername = context.getString("cosmos_username", "opendata");
-        cosmosBasedir = context.getString("cosmos_basedir", "unknown");
+        cosmosDataset = context.getString("cosmos_dataset", "unknown");
         hdfsAPI = context.getString("hdfs_api", "httpfs");
     } // configure
 
@@ -67,9 +72,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         persistenceBackend = null;
         
         if (hdfsAPI.equals("httpfs")) {
-            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosBasedir);
+            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         } else if (hdfsAPI.equals("webhdfs")) {
-            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosBasedir);
+            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         } else {
             logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
         } // if else if
@@ -140,6 +145,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
      * related file.
      * 
      * @param event A Flume event containing the data to be persisted and certain metadata (headers).
+     * @throws Exception
      */
     private void persist(Event event) throws Exception {
         String eventData = new String(event.getBody());
@@ -147,18 +153,22 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         
         // parse the eventData
         NotifyContextRequest notification = null;
-
+        
         if (eventHeaders.get("content-type").contains("application/json")) {
             Gson gson = new Gson();
             notification = gson.fromJson(eventData, NotifyContextRequest.class);
         } else if (eventHeaders.get("content-type").contains("application/xml")) {
-            Gson gson = new Gson();
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(eventData));
+            Document doc = dBuilder.parse(is);
+            doc.getDocumentElement().normalize();
+            notification = new NotifyContextRequest(doc);
         } else {
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
 
-        // process the eventData
+        // process the event data
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponse();
 
         for (int i = 0; i < contextResponses.size(); i++) {
@@ -171,9 +181,10 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 String fileName = contextElement.getId() + "-" + contextElement.getType() + "-"
                         + contextAttribute.getName() + "-" + contextAttribute.getType() + ".txt";
                 Date date = new Date();
-                String line = new Timestamp(date.getTime()) + "|" + date.getTime() + "|" + contextElement.getId()
-                        + "|" + contextElement.getType() + "|" + contextAttribute.getName() + "|"
-                        + contextAttribute.getType() + "|" + contextAttribute.getContextValue();
+                String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "|" + date.getTime()
+                        + "|" + contextElement.getId() + "|" + contextElement.getType() + "|"
+                        + contextAttribute.getName() + "|" + contextAttribute.getType() + "|"
+                        + contextAttribute.getContextValue();
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line + ")");
                 
                 if (persistenceBackend.exists(httpClientFactory.getHttpClient(false), fileName)) {

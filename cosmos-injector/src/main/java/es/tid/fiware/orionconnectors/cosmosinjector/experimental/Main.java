@@ -1,13 +1,24 @@
 package es.tid.fiware.orionconnectors.cosmosinjector.experimental;
 
 import es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink;
+import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.channel.ChannelProcessor;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.channel.ReplicatingChannelSelector;
 import org.apache.flume.conf.Configurables;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *

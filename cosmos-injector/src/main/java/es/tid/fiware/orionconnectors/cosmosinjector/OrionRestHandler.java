@@ -7,27 +7,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.event.EventBuilder;
 import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author frb
  * 
- * Custom HTTP handler for the default HTTP Flume source. It checks the method, target and headers are the ones
- * tipically sent by an instance of Orion Context Broker when notifying a context event. If everything is OK, a Flume
- * event is created in order the HTTP Flume source sends it to the Flume channel connecting the source with the sink.
- * This event contains both the context event data and a header specifying the content type (Json or XML).
+ * Custom HTTP handler for the default HTTP Flume source. It checks the method, notificationsTarget and headers are the
+ * ones tipically sent by an instance of Orion Context Broker when notifying a context event. If everything is OK, a
+ * Flume event is created in order the HTTP Flume source sends it to the Flume channel connecting the source with the
+ * sink. This event contains both the context event data and a header specifying the content type (Json or XML).
  */
 public class OrionRestHandler implements HTTPSourceHandler {
+    
+    private Logger logger;
+    private Pattern pattern;
+    private String notificationsTarget;
 
     @Override
     public void configure(Context context) {
+        logger = Logger.getLogger(OrionRestHandler.class);
+        pattern = Pattern.compile("orion/" + context.getString("orion_version", "*"));
+        notificationsTarget = context.getString("notification_target", "notify");
         
+        if (notificationsTarget.charAt(0) != '/') {
+            notificationsTarget = "/" + notificationsTarget;
+        } // if
     } // configure
             
     @Override
@@ -39,10 +52,10 @@ public class OrionRestHandler implements HTTPSourceHandler {
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
 
-        // check the target
+        // check the notificationsTarget
         String target = request.getRequestURI();
         
-        if (!target.equals("/notify")) {
+        if (!target.equals(notificationsTarget)) {
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
@@ -55,7 +68,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName);
             
             if (headerName.equals("User-Agent")) {
-                if (!headerValue.equals("orion/0.9.0")) {
+                Matcher matcher = pattern.matcher(headerValue);
+                
+                if (!matcher.matches()) {
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
             } else if (headerName.equals("Content-Type")) {

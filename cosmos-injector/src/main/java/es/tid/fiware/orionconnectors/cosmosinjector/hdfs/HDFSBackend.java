@@ -13,7 +13,7 @@ public interface HDFSBackend {
      * Creates a directory in HDFS.
      * 
      * @param httpClient HTTP client for accessing the backend server.
-     * @param dirName Directory to be created.
+     * @param dirPath Directory to be created.
      */
     void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception;
     

@@ -75,6 +75,12 @@ In order to install Java SDK (not JRE), just type (CentOS machines):
 
     $ yum install java-1.6.0-openjdk-devel
 
+Remember to export the JAVA_HOME environment variable.
+
+    $ export JAVA_HOME=...
+
+In order to do it permanently, edit /root/.bash_profile (root user) or /etc/profile (other users).
+
 Maven is installed by downloading it from http://maven.apache.org/download.cgi. Install it in a folder of your choice (represented by APACHE_MAVEN_HOME):
 
     $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
@@ -96,9 +102,11 @@ Then, the developed classes must be packaged in a Java jar file which must be ad
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cosmos-injector-1.0-SNAPSHOT.jar APACHE_FLUME_HOME/lib
     $ ...
+    $ mkdir httpcomponents-client-4.3.1-bin
+    $ cd httpcomponents-client-4.3.1-bin
     $ wget http://archive.apache.org/dist/httpcomponents/httpclient/binary/httpcomponents-client-4.3.1-bin.tar.gz
     $ tar xzvf httpcomponents-client-4.3.1-bin.tar.gz
-    $ cp httpcomponents-client-4.3.1-bin APACHE_FLUME_HOME/lib
+    $ cp lib/* APACHE_FLUME_HOME/lib
 
 ### Configuration
 
@@ -113,13 +121,15 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
     orionagent.sources.http-source.channels = notifications
     orionagent.sources.http-source.port = 5050
     orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+    orionagent.sources.http-source.handler.orion_version = 0\.10\.*
+    orionagent.sources.http-source.handler.notification_target = /notify
     
     orionagent.sinks.hdfs-sink.channel = notifications
     orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
     orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
     orionagent.sinks.hdfs-sink.cosmos_port = 14000
     orionagent.sinks.hdfs-sink.cosmos_username = opendata
-    orionagent.sinks.hdfs-sink.cosmos_basedir = test
+    orionagent.sinks.hdfs-sink.cosmos_dataset = test
     orionagent.sinks.hdfs-sink.hdfs_api = httpfs
     
     orionagent.channels.notifications.type = memory
@@ -130,8 +140,12 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
 
 In foreground (with logging):
 
-    APACHE_FLUME_HOME/bin/flume-ng agent -f APACHE_FLUME_HOME/conf/cosmos-injector.cont -n orionagent -Dflume.root.logger=INFO,console 
+    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,console 
+
+If wanting to log to the Flume log file (APACHE_FLUME_HOME/logs/flume.log), set the appropiate file appender:
+
+    -Dflume.root.logger=INFO,LOGFILE
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent -f APACHE_FLUME_HOME/conf/cosmos-injector.cont -n orionagent &
+    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent &

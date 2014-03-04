@@ -21,28 +21,28 @@ public class HttpFSBackend implements HDFSBackend {
     private String cosmosHost;
     private String cosmosPort;
     private String cosmosUsername;
-    private String cosmosBasedir;
+    private String cosmosDataset;
     
     /**
      * 
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
-     * @param cosmosBasedir
+     * @param cosmosDataset
      */
-    public HttpFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosBasedir) {
+    public HttpFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
         this.cosmosUsername = cosmosUsername;
-        this.cosmosBasedir = cosmosBasedir;
+        this.cosmosDataset = cosmosDataset;
     } // HttpFSBackend
    
     @Override
     public void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosBasedir + "/" + dirPath + "?op=mkdirs&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + dirPath + "?op=mkdirs&user.name=" + cosmosUsername;
         
         // do the put
         HttpPut request = new HttpPut(url);
@@ -62,7 +62,7 @@ public class HttpFSBackend implements HDFSBackend {
     public void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosBasedir + "/" + filePath + "?op=create&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=create&user.name=" + cosmosUsername;
         
         // do the put (first step)
         HttpPut request = new HttpPut(url);
@@ -97,7 +97,7 @@ public class HttpFSBackend implements HDFSBackend {
     public void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosBasedir + "/" + filePath + "?op=append&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=append&user.name=" + cosmosUsername;
         
         // do the post (first step)
         HttpPost request = new HttpPost(url);
@@ -132,7 +132,7 @@ public class HttpFSBackend implements HDFSBackend {
     public boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosBasedir + "/" + filePath + "?op=getfilestatus&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=getfilestatus&user.name=" + cosmosUsername;
         
         // do the get
         HttpGet request = new HttpGet(url);
