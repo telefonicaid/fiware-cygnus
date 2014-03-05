@@ -181,8 +181,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 String fileName = encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + "-"
                         + encode(contextAttribute.getName()) + "-" + encode(contextAttribute.getType()) + ".txt";
                 Date date = new Date();
-                String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "|" + date.getTime()
-                        + "|" + encode(contextElement.getId()) + "|" + encode(contextElement.getType()) + "|"
+                String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "000|"
+                        + (date.getTime() / 1000) + "|" + encode(contextElement.getId()) + "|"
+                        + encode(contextElement.getType()) + "|"
                         + encode(contextAttribute.getName()) + "|" + encode(contextAttribute.getType()) + "|"
                         + contextAttribute.getContextValue();
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line + ")");
