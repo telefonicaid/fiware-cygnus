@@ -157,7 +157,7 @@ public class HttpFSBackend implements HDFSBackend {
      * @return The encoded version of the input string.
      */
     private String encode(String in) {
-        return in.replaceAll(":", "_");
+        return in.replaceAll(":-", "_");
     } // encode
     
 } // HttpFSBackend
