@@ -95,18 +95,14 @@ Apache Flume can be easily installed by downloading its latests version from htt
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
 
-Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/lib directory. In addition, it may be necessary to add the jars regarding httpcomponents-client-4.3.1-bin.tar.gz (the version used by default in the development, see the pom.xml file).
+Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/lib directory:
 
     $ git clone https://github.com/telefonicaid/fiware-orion-connectors.git
     $ cd fiware-orion-connectors/cosmos-injector
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cosmos-injector-1.0-SNAPSHOT.jar APACHE_FLUME_HOME/lib
-    $ ...
-    $ mkdir httpcomponents-client-4.3.1-bin
-    $ cd httpcomponents-client-4.3.1-bin
-    $ wget http://archive.apache.org/dist/httpcomponents/httpclient/binary/httpcomponents-client-4.3.1-bin.tar.gz
-    $ tar xzvf httpcomponents-client-4.3.1-bin.tar.gz
-    $ cp lib/* APACHE_FLUME_HOME/lib
+
+Please observe the cosmos-injector code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
 
 ### Configuration
 
@@ -148,4 +144,4 @@ If wanting to log to the Flume log file (APACHE_FLUME_HOME/logs/flume.log), set 
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent &
+    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
