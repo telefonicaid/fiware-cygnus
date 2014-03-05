@@ -42,7 +42,7 @@ public class HttpFSBackend implements HDFSBackend {
     public void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + encode(dirPath) + "?op=mkdirs&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + dirPath + "?op=mkdirs&user.name=" + cosmosUsername;
         
         // do the put
         HttpPut request = new HttpPut(url);
@@ -62,7 +62,7 @@ public class HttpFSBackend implements HDFSBackend {
     public void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + encode(filePath) + "?op=create&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=create&user.name=" + cosmosUsername;
         
         // do the put (first step)
         HttpPut request = new HttpPut(url);
@@ -97,7 +97,7 @@ public class HttpFSBackend implements HDFSBackend {
     public void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + encode(filePath) + "?op=append&user.name=" + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=append&user.name=" + cosmosUsername;
         
         // do the post (first step)
         HttpPost request = new HttpPost(url);
@@ -132,8 +132,7 @@ public class HttpFSBackend implements HDFSBackend {
     public boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception {
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + encode(filePath) + "?op=getfilestatus&user.name="
-                + cosmosUsername;
+                + cosmosDataset + "/" + filePath + "?op=getfilestatus&user.name=" + cosmosUsername;
         
         // do the get
         HttpGet request = new HttpGet(url);
@@ -149,15 +148,5 @@ public class HttpFSBackend implements HDFSBackend {
             return false;
         } // if else
     } // exists
-    
-    /**
-     * Encodes a string replacing ":" by "_".
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    private String encode(String in) {
-        return in.replaceAll(":", "_").replaceAll("-", "_");
-    } // encode
     
 } // HttpFSBackend

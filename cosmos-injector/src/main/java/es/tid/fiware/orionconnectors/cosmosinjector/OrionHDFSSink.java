@@ -178,12 +178,12 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                String fileName = contextElement.getId() + "-" + contextElement.getType() + "-"
-                        + contextAttribute.getName() + "-" + contextAttribute.getType() + ".txt";
+                String fileName = encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + "-"
+                        + encode(contextAttribute.getName()) + "-" + encode(contextAttribute.getType()) + ".txt";
                 Date date = new Date();
                 String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "|" + date.getTime()
-                        + "|" + contextElement.getId() + "|" + contextElement.getType() + "|"
-                        + contextAttribute.getName() + "|" + contextAttribute.getType() + "|"
+                        + "|" + encode(contextElement.getId()) + "|" + encode(contextElement.getType()) + "|"
+                        + encode(contextAttribute.getName()) + "|" + encode(contextAttribute.getType()) + "|"
                         + contextAttribute.getContextValue();
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line + ")");
                 
@@ -195,5 +195,15 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
             } // for
         } // for
     } // persist
+    
+    /**
+     * Encodes a string replacing ":" by "_".
+     * 
+     * @param in
+     * @return The encoded version of the input string.
+     */
+    private String encode(String in) {
+        return in.replaceAll(":", "_").replaceAll("-", "_");
+    } // encode
     
 } // OrionHDFSSink
