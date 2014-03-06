@@ -104,7 +104,7 @@ Then, the developed classes must be packaged in a Java jar file which must be ad
 
 Please observe the cosmos-injector code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
 
-### Configuration
+### cosmos-injector configuration
 
 The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the OrionHDFSSink is shown below:
 
@@ -132,16 +132,36 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
     orionagent.channels.notifications.capacity = 1000
     orionagent.channels.notifications.transactionCapacity = 100
 
+### log4j configuration
+
+The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of the cosmos-injector running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
+
+    log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
+    log4j.appender.cosmosinjector1028.MaxFileSize=100MB
+    log4j.appender.cosmosinjector1028.MaxBackupIndex=10
+    log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cosmos-injector.1028.log
+    log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+
+    log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
+    log4j.appender.cosmosinjector1029.MaxFileSize=100MB
+    log4j.appender.cosmosinjector1029.MaxBackupIndex=10
+    log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1028.log
+    log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+
+Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
+
+    -Dflume.root.logger=<loggin_level>,cosmos-injector.<TCP_port>.log
+
 ### Running
 
 In foreground (with logging):
 
     APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,console 
 
-If wanting to log to the Flume log file (APACHE_FLUME_HOME/logs/flume.log), set the appropiate file appender:
-
-    -Dflume.root.logger=INFO,LOGFILE
-
 In background:
 
     nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
+
+Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.

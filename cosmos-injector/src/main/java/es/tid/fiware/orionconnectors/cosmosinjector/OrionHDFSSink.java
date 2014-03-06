@@ -1,3 +1,22 @@
+/**
+ * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of cosmos-injector (FI-WARE project).
+ *
+ * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with [PROJECT NAME]. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+ * frb@tid.es
+ */
+ 
 package es.tid.fiware.orionconnectors.cosmosinjector;
 
 import com.google.gson.Gson;
@@ -181,7 +200,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 String fileName = encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + "-"
                         + encode(contextAttribute.getName()) + "-" + encode(contextAttribute.getType()) + ".txt";
                 Date date = new Date();
-                String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "000|"
+                String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "|"
                         + (date.getTime() / 1000) + "|" + encode(contextElement.getId()) + "|"
                         + encode(contextElement.getType()) + "|"
                         + encode(contextAttribute.getName()) + "|" + encode(contextAttribute.getType()) + "|"

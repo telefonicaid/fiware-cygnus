@@ -1,3 +1,22 @@
+/**
+ * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of cosmos-injector (FI-WARE project).
+ *
+ * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with [PROJECT NAME]. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+ * frb@tid.es
+ */
+
 package es.tid.fiware.orionconnectors.cosmosinjector.containers;
 
 import java.util.ArrayList;
@@ -35,7 +54,7 @@ public class NotifyContextRequest {
         NodeList domSubscriptionIds = doc.getElementsByTagName("subscriptionId");
         
         if (domSubscriptionIds.getLength() == 0) {
-            throw new Exception();
+            throw new Exception("No <subscriptionId> tag in the XML document");
         } // if
         
         subscriptionId = domSubscriptionIds.item(0).getTextContent();
@@ -49,7 +68,7 @@ public class NotifyContextRequest {
         NodeList domContextResponseLists = doc.getElementsByTagName("contextResponseList");
         
         if (domContextResponseLists.getLength() == 0) {
-            throw new Exception();
+            throw new Exception("No <contextResponseList> tag in the XML document");
         } // if
         
         Element contextResponseList = (Element) domContextResponseLists.item(0);
@@ -98,14 +117,14 @@ public class NotifyContextRequest {
             NodeList domContextElements = domContextElementResponse.getElementsByTagName("contextElement");
 
             if (domContextElements.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <contextElement> tag in the XML document");
             } // if
 
             contextElement = new ContextElement((Element) domContextElements.item(0));
             NodeList domStatusCodes = domContextElementResponse.getElementsByTagName("statusCode");
 
             if (domStatusCodes.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <statusCode> tag in the XML document");
             } // if
 
             statusCode = new StatusCode((Element) domStatusCodes.item(0));
@@ -148,7 +167,7 @@ public class NotifyContextRequest {
             NodeList domIdentityIds = domContextElement.getElementsByTagName("entityId");
             
             if (domIdentityIds.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <entityId> tag in the XML document");
             } // if
             
             type = domIdentityIds.item(0).getAttributes().getNamedItem("type").getTextContent();
@@ -156,7 +175,7 @@ public class NotifyContextRequest {
             NodeList domIds = ((Element) domIdentityIds.item(0)).getElementsByTagName("id");
             
             if (domIds.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <id> tag in the XML document");
             } // if
             
             id = domIds.item(0).getTextContent();
@@ -211,21 +230,21 @@ public class NotifyContextRequest {
             NodeList domNames = domContextAttribute.getElementsByTagName("name");
             
             if (domNames.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <name> tag in the XML document");
             } // if
             
             name = domNames.item(0).getTextContent();
             NodeList domTypes = domContextAttribute.getElementsByTagName("type");
             
             if (domTypes.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <type> tag in the XML document");
             } // if
             
             type = domTypes.item(0).getTextContent();
             NodeList domValues = domContextAttribute.getElementsByTagName("contextValue");
             
             if (domValues.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <contextValue> tag in the XML document");
             } // if
             
             value = domValues.item(0).getTextContent();
@@ -269,14 +288,14 @@ public class NotifyContextRequest {
             NodeList domCodes = domStatusCode.getElementsByTagName("code");
 
             if (domCodes.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <code> tag in the XML document");
             } // if
 
             code = domCodes.item(0).getTextContent();
             NodeList domReasonPhrases = domStatusCode.getElementsByTagName("reasonPhrase");
 
             if (domReasonPhrases.getLength() == 0) {
-                throw new Exception();
+                throw new Exception("No <reasonPhrase> tag in the XML document");
             } // if
 
             reasonPhrase = domReasonPhrases.item(0).getTextContent();
