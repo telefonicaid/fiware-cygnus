@@ -200,6 +200,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 String fileName = encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + "-"
                         + encode(contextAttribute.getName()) + "-" + encode(contextAttribute.getType()) + ".txt";
                 Date date = new Date();
+                
+                // create line to be persisted, the timestamp must be devided by 1000 since it is expressed in terms of
+                // microsenconds and we want miliseconds
                 String line = new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "|"
                         + (date.getTime() / 1000) + "|" + encode(contextElement.getId()) + "|"
                         + encode(contextElement.getType()) + "|"

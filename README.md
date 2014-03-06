@@ -112,24 +112,40 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
     orionagent.sources = http-source
     orionagent.sinks = hdfs-sink
     orionagent.channels = notifications
-    
+   
+    # Flume source, must not be changed
     orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+    # channel name where to write the notification events
     orionagent.sources.http-source.channels = notifications
+    # listening port the Flume source will use for receiving incoming notifications
     orionagent.sources.http-source.port = 5050
+    # Flume handler that will parse the notifications, must not be changed
     orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+    # regular expression for the orion version the notifications will have in their headers
     orionagent.sources.http-source.handler.orion_version = 0\.10\.*
+    # URL target
     orionagent.sources.http-source.handler.notification_target = /notify
     
+    # channel name from where to read notification events
     orionagent.sinks.hdfs-sink.channel = notifications
+    # Flume sink that will process and persist in HDFS the notification events, must not be changed
     orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+    # IP address of the Cosmos deployment where the notification events will be persisted
     orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+    # port of the Cosmos service (webhdfs or httpfs) listening for persistence operations
     orionagent.sinks.hdfs-sink.cosmos_port = 14000
+    # username allowed to write in HDFS (/user/username)
     orionagent.sinks.hdfs-sink.cosmos_username = opendata
+    # dataset where to persist the data (/user/username/dataset)
     orionagent.sinks.hdfs-sink.cosmos_dataset = test
+    # HDFS backend type (webhdfs or httpfs)
     orionagent.sinks.hdfs-sink.hdfs_api = httpfs
     
+    # channel name
     orionagent.channels.notifications.type = memory
+    # capacity of the channel
     orionagent.channels.notifications.capacity = 1000
+    # amount of bytes that can be sent per transaction
     orionagent.channels.notifications.transactionCapacity = 100
 
 ### log4j configuration
@@ -146,7 +162,7 @@ The injector uses the log4j facilities added by Flume for logging purposes. You 
     log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
     log4j.appender.cosmosinjector1029.MaxFileSize=100MB
     log4j.appender.cosmosinjector1029.MaxBackupIndex=10
-    log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1028.log
+    log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
     log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
     log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 

@@ -66,7 +66,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
-
+        
         if (!method.equals("POST")) {
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
@@ -83,16 +83,16 @@ public class OrionRestHandler implements HTTPSourceHandler {
         String contentType = null;
         
         while (headerNames.hasMoreElements()) {
-            String headerName = (String) headerNames.nextElement();
-            String headerValue = request.getHeader(headerName);
+            String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
+            String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
             
-            if (headerName.equals("User-Agent")) {
+            if (headerName.equals("user-agent")) {
                 Matcher matcher = pattern.matcher(headerValue);
                 
                 if (!matcher.matches()) {
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
-            } else if (headerName.equals("Content-Type")) {
+            } else if (headerName.equals("content-type")) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
