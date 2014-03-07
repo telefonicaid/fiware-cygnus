@@ -15,7 +15,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
 * OrionHDFSSink. A custom HDFS sink for persiting Orion context data in the appropriate way. Data from Orion must be persisted in the Cosmos HDFS in the form of files containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. In addition, each file only considers the values for a (entity,attribute) pair.
 
-### Example
+### Json notification example
 
 Let's consider the following notification in Json format coming from an Orion Context Broker instance:
 
@@ -66,6 +66,14 @@ data lines in the form
     <ts>|<ts_ms>|<entity_name>|<entity_type>|<attribute_name>|<attribute_type>|<value>
     
 Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if not existing) will contain a new line such as "2014-02-27 14_46_21|13453464536|Room1|Room|temperature|centigrade|26.5".
+
+### XML notification example
+
+The injector also works with XML-based notifications sent to the injector. The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+
+    event={body={the_json_part...},headers={{"content-type","application/json"}}}
+
+The key point is the behaviour remains the same than in the Json example: the same file will be created, and the same data line will be persisted within it.
 
 ### Prerequisites
 
