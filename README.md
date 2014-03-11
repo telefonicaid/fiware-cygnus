@@ -12,10 +12,10 @@ Thus, according to the above guidelines, there are the following FI-WARE connect
 
 | Connector | Description |
 | :-------- | :---------- |
-| fiware-connectors/cosmos/cygnus | Flume-based connector for Cosmos mainly used to persist context data coming from Orion |
-| fiware-connectors/cosmos/sftp-injector | SFTP server for injecting data files in HDFS |
+| cosmos/cygnus | Flume-based connector for Cosmos mainly used to persist context data coming from Orion |
+| cosmos/sftp-injector | SFTP server for injecting data files in HDFS |
 
 ## Contact
 
-Fermín Galán Márquez (fgalan at tid dot es)
-Francisco Romero Bueno (frb at tid dot es)
+Fermín Galán Márquez (fgalan at tid dot es).
+Francisco Romero Bueno (frb at tid dot es).
