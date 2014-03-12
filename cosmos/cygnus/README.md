@@ -11,7 +11,7 @@ All the details about Flume can be found at http://flume.apache.org/ but, as a r
 
 There exists a wide collection of already developed sources, channels and sinks. The Flume-based cosmos-injector development extends that collection by adding:
 * OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
-* OrionHDFSSink. A custom HDFS sink for persiting Orion context data in the appropriate way. Data from Orion must be persisted in the Cosmos HDFS in the form of files containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. In addition, each file only considers the values for a (entity,attribute) pair.
+* OrionHDFSSink. A custom HDFS sink for persiting Orion context data in the appropriate way. Data from Orion must be persisted in the Cosmos HDFS in the form of files containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. In addition, each file only considers the values for a (entity,attribute) pair. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 
 ## Json notification example
 
@@ -67,7 +67,7 @@ Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if n
 
 ## XML notification example
 
-The injector also works with XML-based notifications sent to the injector. The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+The injector also works with XML-based notifications sent to the injector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
 
     event={body={the_json_part...},headers={{"content-type","application/json"}}}
 
@@ -144,7 +144,7 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
     orionagent.sinks.hdfs-sink.cosmos_username = opendata
     # dataset where to persist the data (/user/username/dataset)
     orionagent.sinks.hdfs-sink.cosmos_dataset = test
-    # HDFS backend type (webhdfs or httpfs)
+    # HDFS backend type (webhdfs, httpfs or infinity)
     orionagent.sinks.hdfs-sink.hdfs_api = httpfs
     
     # channel name
@@ -187,3 +187,35 @@ In background:
     nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
 
 Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
+
+## Orion subscription
+
+Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
+
+    (curl localhost:1026/NGSI10/subscribeContext -s -S --header 'Content-Type: application/xml' -d @- | xmllint --format -) <<EOF
+    <?xml version="1.0"?>
+    <subscribeContextRequest>
+      <entityIdList>
+        <entityId type="Room" isPattern="false">
+          <id>Room1</id>
+        </entityId>
+      <entityIdList>
+      <attributeList>
+        <attribute>temperature</attribute>
+      </attributeList>
+      <!-- This is the part where the cosmos-injector is specified -->
+      <reference>http://host_running_the_cosmos-injector:5050/notify</reference>
+      <duration>P1M</duration>
+      <notifyConditions>
+        <notifyCondition>
+          <type>ONCHANGE</type>
+          <condValueList>
+            <condValue>pressure</condValue>
+          </condValueList>
+        </notifyCondition>
+      </notifyConditions>
+      <throttling>PT5S</throttling>
+    </subscribeContextRequest>
+    EOF
+
+Its equivalent in Json format can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE

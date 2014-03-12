@@ -32,7 +32,11 @@ import org.apache.log4j.Logger;
  *
  * @author frb
  * 
- * HDFS persistence based on the Hadoop's standard WebHDFS service (TCP/50070).
+ * HDFS persistence based on the Hadoop's standard WebHDFS service (TCP/50070). Most of data-related operations within
+ * WebHDFS require two steps. The firsts one, when the namenode is accessed at TCP/50070 port in order to find the
+ * datanode hosting the data block to be read or write; a temporary redirection is sent back containing the URL for the
+ * datanoed. The second step occurs when the specific datanode is accessed according the redirection (at TCP/50075 port)
+ * in order to perform the final I/O operation.
  */
 public class WebHDFSBackend implements HDFSBackend {
     
