@@ -26,6 +26,7 @@ import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequ
 import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HDFSBackend;
 import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HttpFSBackend;
+import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.WebHDFSBackend;
 import es.tid.fiware.orionconnectors.cosmosinjector.http.HttpClientFactory;
 import java.io.StringReader;
 import java.sql.Timestamp;
@@ -93,7 +94,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         if (hdfsAPI.equals("httpfs")) {
             persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         } else if (hdfsAPI.equals("webhdfs")) {
-            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
+            persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         } else {
             logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
         } // if else if
