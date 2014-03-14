@@ -114,63 +114,66 @@ Please observe the cosmos-injector code has been built using the Flume provided 
 
 The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the OrionHDFSSink is shown below:
 
-    # APACHE_FLUME_HOME/conf/cosmos-injector.conf
-    orionagent.sources = http-source
-    orionagent.sinks = hdfs-sink
-    orionagent.channels = notifications
-   
-    # Flume source, must not be changed
-    orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
-    # channel name where to write the notification events
-    orionagent.sources.http-source.channels = notifications
-    # listening port the Flume source will use for receiving incoming notifications
-    orionagent.sources.http-source.port = 5050
-    # Flume handler that will parse the notifications, must not be changed
-    orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
-    # regular expression for the orion version the notifications will have in their headers
-    orionagent.sources.http-source.handler.orion_version = 0\.10\.*
-    # URL target
-    orionagent.sources.http-source.handler.notification_target = /notify
-    
-    # channel name from where to read notification events
-    orionagent.sinks.hdfs-sink.channel = notifications
-    # Flume sink that will process and persist in HDFS the notification events, must not be changed
-    orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
-    # IP address of the Cosmos deployment where the notification events will be persisted
-    orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
-    # port of the Cosmos service (webhdfs or httpfs) listening for persistence operations
-    orionagent.sinks.hdfs-sink.cosmos_port = 14000
-    # username allowed to write in HDFS (/user/username)
-    orionagent.sinks.hdfs-sink.cosmos_username = opendata
-    # dataset where to persist the data (/user/username/dataset)
-    orionagent.sinks.hdfs-sink.cosmos_dataset = test
-    # HDFS backend type (webhdfs, httpfs or infinity)
-    orionagent.sinks.hdfs-sink.hdfs_api = httpfs
-    
-    # channel name
-    orionagent.channels.notifications.type = memory
-    # capacity of the channel
-    orionagent.channels.notifications.capacity = 1000
-    # amount of bytes that can be sent per transaction
-    orionagent.channels.notifications.transactionCapacity = 100
+```Python
+# APACHE_FLUME_HOME/conf/cosmos-injector.conf
+orionagent.sources = http-source
+orionagent.sinks = hdfs-sink
+orionagent.channels = notifications
+
+# Flume source, must not be changed
+orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+# channel name where to write the notification events
+orionagent.sources.http-source.channels = notifications
+# listening port the Flume source will use for receiving incoming notifications
+orionagent.sources.http-source.port = 5050
+# Flume handler that will parse the notifications, must not be changed
+orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+# regular expression for the orion version the notifications will have in their headers
+orionagent.sources.http-source.handler.orion_version = 0\.10\.*
+# URL target
+orionagent.sources.http-source.handler.notification_target = /notify
+
+# channel name from where to read notification events
+orionagent.sinks.hdfs-sink.channel = notifications
+# Flume sink that will process and persist in HDFS the notification events, must not be changed
+orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+# IP address of the Cosmos deployment where the notification events will be persisted
+orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+# port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
+orionagent.sinks.hdfs-sink.cosmos_port = 14000
+# username allowed to write in HDFS (/user/username)
+orionagent.sinks.hdfs-sink.cosmos_username = opendata
+# dataset where to persist the data (/user/username/dataset)
+orionagent.sinks.hdfs-sink.cosmos_dataset = test
+# HDFS backend type (webhdfs, httpfs or infinity)
+orionagent.sinks.hdfs-sink.hdfs_api = httpfs
+
+# channel name
+orionagent.channels.notifications.type = memory
+# capacity of the channel
+orionagent.channels.notifications.capacity = 1000
+# amount of bytes that can be sent per transaction
+orionagent.channels.notifications.transactionCapacity = 100
+```
 
 ## log4j configuration
 
 The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of the cosmos-injector running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
 
-    log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
-    log4j.appender.cosmosinjector1028.MaxFileSize=100MB
-    log4j.appender.cosmosinjector1028.MaxBackupIndex=10
-    log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cosmos-injector.1028.log
-    log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
-    log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+```Python
+log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
+log4j.appender.cosmosinjector1028.MaxFileSize=100MB
+log4j.appender.cosmosinjector1028.MaxBackupIndex=10
+log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cosmos-injector.1028.log
+log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
+log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 
-    log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
-    log4j.appender.cosmosinjector1029.MaxFileSize=100MB
-    log4j.appender.cosmosinjector1029.MaxBackupIndex=10
-    log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
-    log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
-    log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
+log4j.appender.cosmosinjector1029.MaxFileSize=100MB
+log4j.appender.cosmosinjector1029.MaxBackupIndex=10
+log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
+log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
+log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
 
