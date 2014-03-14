@@ -174,6 +174,7 @@ log4j.appender.cosmosinjector1029.MaxBackupIndex=10
 log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
 log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+```
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
 
