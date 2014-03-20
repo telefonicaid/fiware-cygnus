@@ -6,4 +6,4 @@ This is an example of a SFTP client implementation based ion the JSch library (h
 
 ## Contact
 
-Francisco Romero Bueno (frb at tid dot es).
+* Francisco Romero Bueno (frb at tid dot es).

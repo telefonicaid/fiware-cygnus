@@ -223,3 +223,8 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
     EOF
 
 Its equivalent in Json format can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE
+
+## Contact
+
+* Fermín Galán Márquez (fermin at tid dot es).
+* Francisco Romero Bueno (frb at tid dot es).
