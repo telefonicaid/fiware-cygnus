@@ -3,12 +3,12 @@
 ## Installation and run
 Build the Hive basic client with Maven:
 
-  $ cd resources/hive-basic-client
-  $ mvn package
+    $ cd resources/hive-basic-client
+    $ mvn package
 
 You can run the built application by using Maven too:
 
-  $ mvn exec:java -Dexec.args="<hive-server-ip> <hive-port> <hadoop-user> <hadoop-password>"
+    $ mvn exec:java -Dexec.args="<hive-server-ip> <hive-port> <hadoop-user> <hadoop-password>"
 
 ## Contact
 
