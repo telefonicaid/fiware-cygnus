@@ -37,4 +37,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>es.tid.fiware.cosmos.hivebasicclient.HiveBasicClient</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
