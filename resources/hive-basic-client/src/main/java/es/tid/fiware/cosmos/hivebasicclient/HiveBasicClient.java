@@ -47,6 +47,8 @@ public final class HiveBasicClient {
         } // try catch
       
         try {
+            System.out.println("Connecting to jdbc:hive://" + hiveServer + ":" + hivePort
+                    + "/default?user=" + hadoopUser + "&password=XXXXXXXXXX");
             // return a connection based on the Hive JDBC driver
             return DriverManager.getConnection("jdbc:hive://" + hiveServer + ":" + hivePort
                     + "/default?user=" + hadoopUser + "&password=" + hadoopPassword);
@@ -101,6 +103,11 @@ public final class HiveBasicClient {
         // get a connection to the Hive server running on the specified IP address, listening on 10000/TCP port
         // authenticate using my credentials
         con = getConnection(hiveServer, hivePort, cosmosUser, cosmosPassword);
+        
+        if (con == null) {
+            System.out.println("Could not connect to the Hive server!");
+            System.exit(-1);
+        } // if
         
         while (true) {
             // prompt the user for a set of HiveQL sentence (';' separated)
