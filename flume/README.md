@@ -103,8 +103,8 @@ Apache Flume can be easily installed by downloading its latests version from htt
 
 Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/lib directory:
 
-    $ git clone https://github.com/telefonicaid/fiware-orion-connectors.git
-    $ cd fiware-orion-connectors/cosmos-injector
+    $ git clone https://github.com/telefonicaid/fiware-connectors.git
+    $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cosmos-injector-1.0-SNAPSHOT.jar APACHE_FLUME_HOME/lib
 
