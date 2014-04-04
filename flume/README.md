@@ -143,7 +143,7 @@ orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 orionagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/myusername)
 orionagent.sinks.hdfs-sink.cosmos_username = myusername
-# dataset where to persist the data (/user/username/path/to/my/dataset)
+# dataset where to persist the data (/user/myusername/path/to/my/dataset)
 orionagent.sinks.hdfs-sink.cosmos_dataset = path/to/my/dataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 orionagent.sinks.hdfs-sink.hdfs_api = httpfs
@@ -207,8 +207,8 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
       <attributeList>
         <attribute>temperature</attribute>
       </attributeList>
-      <!-- This is the part where the cosmos-injector is specified -->
-      <reference>http://host_running_the_cosmos-injector:5050/notify</reference>
+      <!-- This is the part where Cygnus is specified -->
+      <reference>http://host_running_cygnus:5050/notify</reference>
       <duration>P1M</duration>
       <notifyConditions>
         <notifyCondition>
