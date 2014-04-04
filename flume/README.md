@@ -141,8 +141,8 @@ orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.O
 orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 orionagent.sinks.hdfs-sink.cosmos_port = 14000
-# username allowed to write in HDFS (/user/username)
-orionagent.sinks.hdfs-sink.cosmos_username = opendata
+# username allowed to write in HDFS (/user/myusername)
+orionagent.sinks.hdfs-sink.cosmos_username = myusername
 # dataset where to persist the data (/user/username/path/to/my/dataset)
 orionagent.sinks.hdfs-sink.cosmos_dataset = path/to/my/dataset
 # HDFS backend type (webhdfs, httpfs or infinity)
