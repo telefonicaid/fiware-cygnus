@@ -143,8 +143,8 @@ orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 orionagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/username)
 orionagent.sinks.hdfs-sink.cosmos_username = opendata
-# dataset where to persist the data (/user/username/dataset)
-orionagent.sinks.hdfs-sink.cosmos_dataset = test
+# dataset where to persist the data (/user/username/path/to/my/dataset)
+orionagent.sinks.hdfs-sink.cosmos_dataset = path/to/my/dataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 orionagent.sinks.hdfs-sink.hdfs_api = httpfs
 
