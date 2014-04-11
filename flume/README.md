@@ -81,9 +81,9 @@ In order to install Java SDK (not JRE), just type (CentOS machines):
 
     $ yum install java-1.6.0-openjdk-devel
 
-Remember to export the JAVA_HOME environment variable.
+Remember to export the JAVA_HOME environment variable. In the case of using yum install as shown above, it would be:
 
-    $ export JAVA_HOME=...
+    $ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
 
 In order to do it permanently, edit /root/.bash_profile (root user) or /etc/profile (other users).
 
@@ -226,5 +226,5 @@ Its equivalent in Json format can be seen at https://forge.fi-ware.eu/plugins/me
 
 ## Contact
 
-* Fermín Galán Márquez (fermin at tid dot es).
+* Fermï¿½n Galï¿½n Mï¿½rquez (fermin at tid dot es).
 * Francisco Romero Bueno (frb at tid dot es).
