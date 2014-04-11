@@ -9,7 +9,7 @@ All the details about Flume can be found at http://flume.apache.org/ but, as a r
 * A Flume channel is a pasive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
 * A Flume sink connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
 
-There exists a wide collection of already developed sources, channels and sinks. The Flume-based cosmos-injector development extends that collection by adding:
+There exists a wide collection of already developed sources, channels and sinks. The Flume-based cosmos-injector, also called Cygnus, development extends that collection by adding:
 * OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
 * OrionHDFSSink. A custom HDFS sink for persiting Orion context data in the appropriate way. Data from Orion must be persisted in the Cosmos HDFS in the form of files containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. In addition, each file only considers the values for a (entity,attribute) pair. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 
@@ -17,7 +17,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 
 Let's consider the following notification in Json format coming from an Orion Context Broker instance:
 
-    POST http://localhost:1028/accumulate
+    POST http://localhost:1028/notify
     Content-Length: 492
     User-Agent: orion/0.9.0
     Host: localhost:1028
@@ -67,7 +67,7 @@ Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if n
 
 ## XML notification example
 
-The injector also works with XML-based notifications sent to the injector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+Cygnus also works with XML-based notifications sent to the injector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
 
     event={body={the_json_part...},headers={{"content-type","application/json"}}}
 
@@ -91,7 +91,7 @@ Maven is installed by downloading it from http://maven.apache.org/download.cgi. 
 
     $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
     $ tar xzvf apache-maven-3.2.1-bin.tar.gz
-    $ mv apache-maven-3.2.1-bin APACHE_MAVEN_HOME
+    $ mv apache-maven-3.2.1 APACHE_MAVEN_HOME
 
 ## Installation
 
@@ -106,16 +106,16 @@ Then, the developed classes must be packaged in a Java jar file which must be ad
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
-    $ cp target/cosmos-injector-1.0-SNAPSHOT.jar APACHE_FLUME_HOME/lib
+    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/lib
 
-Please observe the cosmos-injector code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
+Please observe the Cygnus code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
 
 ## cosmos-injector configuration
 
-The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the OrionHDFSSink is shown below:
+The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the OrionHDFSSink is shown below (the file cygnus.conf must be created from the scratch):
 
 ```Python
-# APACHE_FLUME_HOME/conf/cosmos-injector.conf
+# APACHE_FLUME_HOME/conf/cygnus.conf
 orionagent.sources = http-source
 orionagent.sinks = hdfs-sink
 orionagent.channels = notifications
@@ -143,8 +143,8 @@ orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 orionagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/myusername)
 orionagent.sinks.hdfs-sink.cosmos_username = myusername
-# dataset where to persist the data (/user/myusername/path/to/my/dataset)
-orionagent.sinks.hdfs-sink.cosmos_dataset = path/to/my/dataset
+# dataset where to persist the data (/user/myusername/mydataset)
+orionagent.sinks.hdfs-sink.cosmos_dataset = mydataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 orionagent.sinks.hdfs-sink.hdfs_api = httpfs
 
@@ -184,11 +184,11 @@ Once the log4j has been properly configured, you only have to add to the Flume c
 
 In foreground (with logging):
 
-    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,console 
+    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,console 
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cosmos-injector.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
+    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
 
 Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
 
@@ -207,8 +207,8 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
       <attributeList>
         <attribute>temperature</attribute>
       </attributeList>
-      <!-- This is the part where Cygnus is specified -->
-      <reference>http://host_running_cygnus:5050/notify</reference>
+      <!-- This is the part where the cosmos-injector is specified -->
+      <reference>http://host_running_the_cosmos-injector:5050/notify</reference>
       <duration>P1M</duration>
       <notifyConditions>
         <notifyCondition>
