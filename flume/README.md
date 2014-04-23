@@ -136,10 +136,10 @@ Please observe the Cygnus code has been built using the Flume provided versions 
 
 ### Additional packages to install under FLUME_HOME/lib
 
-Depending on the Cygnus components you are goind to use, you may need to install additional .jar files under FLUME_HOME/lib.
+Depending on the Cygnus components you are going to use, you may need to install additional .jar files under FLUME_HOME/lib.
 Otherwise, you may get "not class found exception" crashes when you run Flume. Until we can develop an smarter solution, the recommended
 installation way is just copying the .jar file to FLUME_HOME/lib using the cp command :). Typically, you can get the .jar file from
-your Maven respository (under .m2 in your user home directory).
+your Maven repository (under .m2 in your user home directory).
 
 For OrionCKANSink you need the following .jar:
 
