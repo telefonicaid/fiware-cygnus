@@ -116,11 +116,16 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 logger.info("Creating Hive external table " + cosmosUsername + "_"
                         + cosmosDataset.replaceAll("/", "_"));
                 HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername);
-                hiveClient.doCreateTable("create external table " + cosmosUsername + "_"
+                String query = "create external table " + cosmosUsername + "_"
                         + cosmosDataset.replaceAll("/", "_") + " (ts bigint, dateStr string, entityId string, "
                         + "entityType string, attrName string, attrType string, attrValue string) row format serde "
                         + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
-                        + "'");
+                        + "'";
+                
+                if (!hiveClient.doCreateTable(query)) {
+                    logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                            + "Check your Hive/Shark installation");
+                } // if
             } // if
         } catch (Exception e) {
             logger.error(e.getMessage());
