@@ -34,6 +34,7 @@ public interface CKANBackend {
      * it otherwise) and populates the entity to resource id map based on its content.
      *
      * @param httpClient HTTP client for accessing the backend server.
+     * @throws Exception
      */
     void init(DefaultHttpClient httpClient) throws Exception;
 
@@ -42,10 +43,11 @@ public interface CKANBackend {
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
-     * @param entity entity string (including ID and type)
-     * @param attrName attribute name
-     * @param attrType attribute type
-     * @param attrValue attribute value
+     * @param entity entity string (including ID and type).
+     * @param attrName attribute name.
+     * @param attrType attribute type.
+     * @param attrValue attribute value.
+     * @throws Exception
      */
     void persist(DefaultHttpClient httpClient, Date date, String entity, String attrName, String attrType,
                  String attrValue) throws Exception;

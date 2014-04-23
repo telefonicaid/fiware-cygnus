@@ -20,6 +20,7 @@
 package es.tid.fiware.orionconnectors.cosmosinjector.ckan;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -55,6 +56,12 @@ public class CKANBackendImpl implements CKANBackend {
     // this map implements the f(NGSIentity) = CKANresourceId function
     private HashMap<String, String> resourceIds;
 
+    /**
+     * @param apiKey
+     * @param ckanHost
+     * @param ckanPort
+     * @param dataset
+     */
     public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String dataset) {
         logger = Logger.getLogger(CKANBackendImpl.class);
         this.apiKey = apiKey;
@@ -68,33 +75,22 @@ public class CKANBackendImpl implements CKANBackend {
     @Override
     public void init(DefaultHttpClient httpClient) throws Exception {
 
-        // Get package information
-        String url = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + dataset;
-
-        // do the get
-        HttpGet request = new HttpGet(url);
-        logger.info("CKAN operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        String res = reader.readLine();
-        request.releaseConnection();
-        long l = response.getEntity().getContentLength();
-        logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
-        logger.debug("payload: " + res);
+        // do CKAN request
+        CKANResponse res = doCKANRequest(httpClient, "GET",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + dataset);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (res.getStatusCode() == 200) {
             // package exists, populate resourcesId map
-            JSONObject o = responseJsonData(res);
-            JSONObject result = (JSONObject)o.get("result");
+            JSONObject result = (JSONObject)res.getJsonObject().get("result");
             packageId = result.get("id").toString();
             logger.info("package found - package ID: " + packageId);
             populateResourcesMap((JSONArray)result.get("resources"));
-        } else if (response.getStatusLine().getStatusCode() == 404) {
+        } else if (res.getStatusCode() == 404) {
             // package doesn't exist, create it
             createPackage(httpClient);
         } else {
-            logger.error("don't know how to treat response code " + response.getStatusLine().getStatusCode());
+            logger.error("don't know how to treat response code " + res.getStatusCode());
         } // if else
 
     } // init
@@ -104,28 +100,32 @@ public class CKANBackendImpl implements CKANBackend {
                         String attrType, String attrValue) throws Exception {
 
         // look for the resource id associated to the entity in the hashmap
+        String resourceId;
         if (resourceIds.containsKey(entity)) {
             // persist the data in the datastore associated to the resource id (entity)
-            String resourceId = resourceIds.get(entity);
+            resourceId = resourceIds.get(entity);
             logger.info("resolved " + entity + " -> " + resourceId);
-            insert(httpClient, date, resourceId, attrName, attrType, attrValue);
-        } else if (resourceInPackage(entity)) {
-            // if the resource id (entity) is not found in the dataset, look for it in the package.
-            // Although if only one instance of CKAN sink is running and no other out-of-band resource creation
-            // is in place this check will always return false, it is safer to do it.
-            // TBD
         } else {
             // create the resource id and datastore, adding it to the resourceIds map
-            String resourceId = createResource(httpClient, entity);
+
+            // note that we are assuming that the only actor that can create resourceIds matching NGSI entities in
+            // the dataset is this instance of the CKAN sink, i.e. out-of-the-band resourceId creation is not allowed.
+            // Otherwise, we should add an if in order to re-check that the resourceId has not been added to the
+            // package since init() was invoked, doing a similar process to the one in populateResourceMap
+
+            resourceId = createResource(httpClient, entity);
             createDataStore(httpClient, resourceId);
             resourceIds.put(entity, resourceId);
-            insert(httpClient, date, resourceId, attrName, attrType, attrValue);
+            logger.info("added to map " + entity + " -> " + resourceId);
         } // if else
+
+        // persist the entity
+        insert(httpClient, date, resourceId, attrName, attrType, attrValue);
 
     } // persist
 
     /**
-     * Populates the entity-resource map with the package information from the CKAN response
+     * Populates the entity-resource map with the package information from the CKAN response.
      *
      * @param resources JSON vector from the CKAN response containing resource information.
      */
@@ -148,48 +148,36 @@ public class CKANBackendImpl implements CKANBackend {
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
      * @param resourceId the resource in which datastore the record is going to be inserted.
-     * @param attrName attribute name
-     * @param attrType attribute type
-     * @param attrValue attribute value
+     * @param attrName attribute name.
+     * @param attrType attribute type.
+     * @param attrValue attribute value.
+     * @throws Exception
      *
      */
     private void insert(DefaultHttpClient httpClient, Date date, String resourceId, String attrName,
                         String attrType, String attrValue) throws Exception {
-        // build URL
-        String url = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
 
-        // do the post
-        HttpPost request = new HttpPost(url);
-        request.addHeader("Authorization", apiKey);
-        // FIXME: maybe timestamp is more appropiated for ts/iso8601 (see
-        // http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types)
+        // do CKAN request
+        // FIXME: undhardwire ts, iso8601date, to contstant
         String jsonString = "{ \"resource_id\": \"" + resourceId +
                 "\", \"records\": [ " +
-                   "{ \"ts\": \"" + date.getTime() / 1000 + "\", " +
-                   "\"iso8601date\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", " +
-                   "\"attrName\": \"" + attrName + "\", " +
-                   "\"attrType\": \"" + attrType + "\", " +
-                   "\"attrValue\": \"" + attrValue + "\" " +
-                   "}" +
+                "{ \"ts\": \"" + date.getTime() / 1000 + "\", " +
+                "\"iso8601date\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", " +
+                "\"attrName\": \"" + attrName + "\", " +
+                "\"attrType\": \"" + attrType + "\", " +
+                "\"attrValue\": \"" + attrValue + "\" " +
+                "}" +
                 "], " +
                 "\"method\": \"insert\", " +
                 "\"force\": \"true\" }";
-        logger.debug("JSONString: " + jsonString);
-        request.setEntity(new StringEntity(jsonString, ContentType.create("application/json")));
-        logger.info("CKAN operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        String res = reader.readLine();
-        request.releaseConnection();
-        long l = response.getEntity().getContentLength();
-        logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
-        logger.debug("payload: " + res);
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert", jsonString);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (res.getStatusCode() == 200) {
             logger.info("successful insert in resource ID " + resourceId + " datastore");
         } else {
-            logger.error("don't know how to treat response code " + response.getStatusLine().getStatusCode());
+            logger.error("don't know how to treat response code " + res.getStatusCode());
         } // if else
 
     } // insert
@@ -198,102 +186,130 @@ public class CKANBackendImpl implements CKANBackend {
      * Creates the dataset (package) in CKAN.
      *
      * @param httpClient HTTP client for accessing the backend server.
+     * @throws Exception
      */
     private void createPackage(DefaultHttpClient httpClient) throws Exception {
 
-        // build URL
-        String url = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create";
-
-        // do the post
-        HttpPost request = new HttpPost(url);
-        request.addHeader("Authorization", apiKey);
-        request.setEntity(new StringEntity("{ \"name\": \"" + dataset + "\"}", ContentType.create("application/json")));
-        logger.info("CKAN operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        String res = reader.readLine();
-        request.releaseConnection();
-        long l = response.getEntity().getContentLength();
-        logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
-        logger.debug("payload: " + res);
+        // do CKAN request
+        String jsonString = "{ \"name\": \"" + dataset + "\"}";
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create", jsonString);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
-            JSONObject o = responseJsonData(res);
-            packageId = ((JSONObject)o.get("result")).get("id").toString();
+        if (res.getStatusCode() == 200) {
+            packageId = ((JSONObject)res.getJsonObject().get("result")).get("id").toString();
             logger.info("successful package creation - package ID: " + packageId);
         } else {
-            logger.error("don't know how to treat response code " + response.getStatusLine().getStatusCode());
+            logger.error("don't know how to treat response code " + res.getStatusCode());
         } // if else
     } // createPackage
 
     /**
-     * Creates a resource within the dataset
+     * Creates a resource within the dataset.
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceName File to be created.
-     * @return resource ID if the resource was created or "" if it wasn't
+     * @return resource ID if the resource was created or "" if it wasn't.
+     * @throws Exception
      */
     private String createResource(DefaultHttpClient httpClient, String resourceName) throws Exception {
-        // build URL
-        String url = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create";
 
-        // do the post
-        HttpPost request = new HttpPost(url);
-        request.addHeader("Authorization", apiKey);
-        // URL is mandatory in CKAN (we use the name of the resource also in this field)
+        // do CKAN request
         String jsonString = "{ \"name\": \"" + resourceName + "\", " +
                 "\"url\": \"" + resourceName + "\", " +
                 "\"package_id\": \""+ packageId +"\" }";
-        logger.debug("JSONString: " + jsonString);
-        request.setEntity(new StringEntity(jsonString, ContentType.create("application/json")));
-        logger.info("CKAN operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        String res = reader.readLine();
-        request.releaseConnection();
-        long l = response.getEntity().getContentLength();
-        logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
-        logger.debug("payload: " + res);
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create", jsonString);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
-            JSONObject o = responseJsonData(res);
-            String resourceId = ((JSONObject)o.get("result")).get("id").toString();
+        if (res.getStatusCode() == 200) {
+            String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
             logger.info("successful resource creation - resource ID: " + resourceId);
             return resourceId;
         } else {
-            logger.error("don't know how to treat response code " + response.getStatusLine().getStatusCode());
+            logger.error("don't know how to treat response code " + res.getStatusCode());
             return "";
         } // if else
     } // createResource
 
     /**
-     * Creates a datastore for a given resource
+     * Creates a datastore for a given resource.
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceId identifies the resource which datastore is going to be created.
+     * @throws Exception
      */
     private void createDataStore(DefaultHttpClient httpClient, String resourceId) throws Exception {
-        // build URL
-        String url = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create";
 
-        // do the post
-        HttpPost request = new HttpPost(url);
-        request.addHeader("Authorization", apiKey);
-        // FIXME: maybe timestamp is more appropiated for ts/iso8601 (see
+        // do CKAN request
+        // FIXME: undhardwire ts, iso8601date, to contstant
         // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
         String jsonString = "{ \"resource_id\": \"" + resourceId +
                 "\", \"fields\": [ " +
-                   "{ \"id\": \"ts\", \"type\": \"int\"}," +
-                   "{ \"id\": \"iso8601date\", \"type\": \"timestamp\"}," +
-                   "{ \"id\": \"attrName\", \"type\": \"text\"}," +
-                   "{ \"id\": \"attrType\", \"type\": \"text\"}," +
-                   "{ \"id\": \"attrValue\", \"type\": \"json\"}" +
+                "{ \"id\": \"ts\", \"type\": \"int\"}," +
+                "{ \"id\": \"iso8601date\", \"type\": \"timestamp\"}," +
+                "{ \"id\": \"attrName\", \"type\": \"text\"}," +
+                "{ \"id\": \"attrType\", \"type\": \"text\"}," +
+                "{ \"id\": \"attrValue\", \"type\": \"json\"}" +
                 "], " +
                 "\"force\": \"true\" }";
-        logger.debug("JSONString: " + jsonString);
-        request.setEntity(new StringEntity(jsonString, ContentType.create("application/json")));
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create", jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            logger.info("successful datastore creation for resource ID: " + resourceId);
+        } else {
+            logger.error("don't know how to treat response code " + res.getStatusCode());
+        } // if else
+    } // createResource
+
+    /**
+     * Common method to perform HTTP request using the CKAN API without payload.
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param method HTTP method
+     * @param url request URL.
+     * @return CKANResponse associated to the request.
+     * @throws Exception
+     */
+    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url) throws Exception {
+        return doCKANRequest(httpClient, method, url, "");
+    } // doCKANRequest
+
+    /**
+     * Common method to perform HTTP request using the CKAN API with payload.
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param method HTTP method.
+     * @param url request URL.
+     * @param payload request payload.
+     * @return CKANResponse associated to the request.
+     * @throws Exception
+     */
+    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url, String payload)
+            throws Exception {
+
+        // do the post
+        HttpRequestBase request;
+        if (method.equals("GET")) {
+            request = new HttpGet(url);
+        } else if(method.equals("POST")) {
+            HttpPost r = new HttpPost(url);
+            // payload (optional)
+            if (!payload.equals("")) {
+                logger.debug("request payload: " + payload);
+                r.setEntity(new StringEntity(payload, ContentType.create("application/json")));
+            }
+            request = r;
+        } else {
+            throw new Exception("HTTP method not supported: " + method);
+        } // if else
+
+        // headers
+        request.addHeader("Authorization", apiKey);
+
+        // execute the request
         logger.info("CKAN operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -301,32 +317,15 @@ public class CKANBackendImpl implements CKANBackend {
         request.releaseConnection();
         long l = response.getEntity().getContentLength();
         logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
-        logger.debug("payload: " + res);
 
-        // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
-            logger.info("successful datastore creation for resource ID: " + resourceId);
-        } else {
-            logger.error("don't know how to treat response code " + response.getStatusLine().getStatusCode());
-        } // if else
-    } // createResource
+        // get the JSON encapsulated in the response
+        logger.debug("response payload: " + res);
+        JSONParser j = new JSONParser();
+        JSONObject o = (JSONObject)j.parse(res);
 
-    /**
-     *
-     * @return
-     */
-    private boolean resourceInPackage(String entity) {
-        return false;
-    } // resourceInPackage
+        // return result
+        return new CKANResponse(o, response.getStatusLine().getStatusCode());
 
-    /**
-     * Helper method to get the JSON Object encapsulated in a HTTP response
-     *
-     * @param s String containing the HTTP response
-     */
-    private JSONObject responseJsonData(String s) throws Exception {
-       JSONParser j = new JSONParser();
-       return (JSONObject)j.parse(s);
-    }
+    } // doCKANRequest
 
 } // CKANBackendImpl
