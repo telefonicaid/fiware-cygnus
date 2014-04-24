@@ -19,6 +19,7 @@
 
 package es.tid.fiware.orionconnectors.cosmosinjector.containers;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -212,7 +213,7 @@ public class NotifyContextRequest {
         
         private String name;
         private String type;
-        private String value;
+        private JsonElement value;
         
         /**
          * Constructor for Gson, a Json parser.
@@ -247,7 +248,7 @@ public class NotifyContextRequest {
                 throw new Exception("No <value> tag in the XML document");
             } // if
             
-            value = domValues.item(0).getTextContent();
+//            value = domValues.item(0).getTextContent();
         } // ContextAttribute
         
         public String getName() {
@@ -258,8 +259,18 @@ public class NotifyContextRequest {
             return type;
         } // getType
         
+        /**
+         * Gets context value.
+         * @return The context value for this context attribute in String format.
+         */
         public String getContextValue() {
-            return value;
+            if (value.isJsonObject()) {
+                return value.getAsJsonObject().toString();
+            } else if (value.isJsonArray()) {
+                return value.getAsJsonArray().toString();
+            } else {
+                return "\"" + value.getAsString() + "\"";
+            } // else
         } // getContextValue
         
     } // ContextAttribute

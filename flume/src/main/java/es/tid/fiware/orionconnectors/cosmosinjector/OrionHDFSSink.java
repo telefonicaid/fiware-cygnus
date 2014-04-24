@@ -200,6 +200,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
             logger.debug("The content-type was application/json");
             Gson gson = new Gson();
             notification = gson.fromJson(eventData, NotifyContextRequest.class);
+            logger.debug("Json parsed");
         } else if (eventHeaders.get("content-type").contains("application/xml")) {
             logger.debug("The content-type was application/xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -208,6 +209,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
             Document doc = dBuilder.parse(is);
             doc.getDocumentElement().normalize();
             notification = new NotifyContextRequest(doc);
+            logger.debug("XML parsed");
         } else {
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
@@ -241,8 +243,8 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                         + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\",\"entityId\":\""
                         + encode(contextElement.getId()) + "\",\"entityType\":\"" + encode(contextElement.getType())
                         + "\",\"attrName\":\"" + encode(contextAttribute.getName()) + "\",\"attrType\":\""
-                        + encode(contextAttribute.getType()) + "\",\"attrValue\":\""
-                        + contextAttribute.getContextValue() + "\"}";
+                        + encode(contextAttribute.getType()) + "\",\"attrValue\":"
+                        + contextAttribute.getContextValue() + "}";
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
                 // if the file exists, append the line to it; otherwise, create it with initial content and mark as
