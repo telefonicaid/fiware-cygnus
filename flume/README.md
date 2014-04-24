@@ -124,9 +124,9 @@ Apache Flume can be easily installed by downloading its latests version from htt
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
-    $ mkdir -p APACHE_FLUME_HOM/plugins.d/cygnus/
-    $ mkdir APACHE_FLUME_HOM/plugins.d/cygnus/lib
-    $ mkdir APACHE_FLUME_HOM/plugins.d/cygnus/libext
+    $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
+    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
 
 Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/plugins.d/cygnus/lib directory:
 
@@ -137,9 +137,9 @@ Then, the developed classes must be packaged in a Java jar file which must be ad
 
 Please observe the Cygnus code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
 
-In addition, depending on the Cygnus components you are going to use, you may need to install additional .jar files under FLUME_HOME/plugins.d/cygnus/libext.
+In addition, depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext.
 Otherwise, you may get "not class found exception" crashes when you run Flume. Until we can develop an smarter solution, the recommended installation way
-is just copying the .jar file to FLUME_HOME/plugins.d/cygnus/libext using the cp command :). Typically, you can get the .jar file from your Maven
+is just copying the .jar file to APACHE_FLUME_HOME/plugins.d/cygnus/libext using the cp command :). Typically, you can get the .jar file from your Maven
 repository (under .m2 in your user home directory).
 
 ### OrionCKANSink additional dependencies
