@@ -19,3 +19,4 @@ A set of scripts that can be use to simulate Orion NGSI10 notifications. Its mai
 ## Contact
 
 * Francisco Romero Bueno (frb at tid dot es).
+* Fermin Galan Marquez (fermin at tid dot es).

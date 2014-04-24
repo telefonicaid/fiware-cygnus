@@ -30,7 +30,7 @@ import java.util.Date;
 public interface CKANBackend {
 
     /**
-     * This methods prepares the CKAN backend. In particular, it check that the dataset exists (creating
+     * This method prepares the CKAN backend. In particular, it check that the dataset exists (creating
      * it otherwise) and populates the entity to resource id map based on its content.
      *
      * @param httpClient HTTP client for accessing the backend server.

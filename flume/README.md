@@ -117,31 +117,32 @@ Maven is installed by downloading it from http://maven.apache.org/download.cgi. 
     $ tar xzvf apache-maven-3.2.1-bin.tar.gz
     $ mv apache-maven-3.2.1 APACHE_MAVEN_HOME
 
-## Installation
+## Installing Cygnus and its dependencies
 
 Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a folder of your choice (represented by APACHE_FLUME_HOME):
 
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
+    $ mkdir -p APACHE_FLUME_HOM/plugins.d/cygnus/
+    $ mkdir APACHE_FLUME_HOM/plugins.d/cygnus/lib
+    $ mkdir APACHE_FLUME_HOM/plugins.d/cygnus/libext
 
-Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/lib directory:
+Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/plugins.d/cygnus/lib directory:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/lib
+    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 Please observe the Cygnus code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
 
-### Additional packages to install under FLUME_HOME/lib
+In addition, depending on the Cygnus components you are going to use, you may need to install additional .jar files under FLUME_HOME/plugins.d/cygnus/libext.
+Otherwise, you may get "not class found exception" crashes when you run Flume. Until we can develop an smarter solution, the recommended installation way
+is just copying the .jar file to FLUME_HOME/plugins.d/cygnus/libext using the cp command :). Typically, you can get the .jar file from your Maven
+repository (under .m2 in your user home directory).
 
-Depending on the Cygnus components you are going to use, you may need to install additional .jar files under FLUME_HOME/lib.
-Otherwise, you may get "not class found exception" crashes when you run Flume. Until we can develop an smarter solution, the recommended
-installation way is just copying the .jar file to FLUME_HOME/lib using the cp command :). Typically, you can get the .jar file from
-your Maven repository (under .m2 in your user home directory).
-
-For OrionCKANSink you need the following .jar:
+### OrionCKANSink additional dependencies
 
 * json-simple-1.1.jar
 
@@ -151,64 +152,65 @@ The typical configuration when using the HTTP source, the OrionRestHandler, the 
 
 ```Python
 # APACHE_FLUME_HOME/conf/cygnus.conf
-# Sources (current Cygnus version support only 'http-source')
-orionagent.sources = http-source
-# Sources (current Cygnus version support 'hdfs-sink' and 'ckan-sink')
-orionagent.sinks = hdfs-sink
-# Sources (current Cygnus version support only 'notifications')
-orionagent.channels = notifications
+
+# The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
+# ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
+# Regarding sinks, you can use at the same time both 'hdfs-sink' and 'ckan-sink' (configuration example shows only 'hdfs-sink')
+cygnusagent.sources = http-source
+cygnusagent.sinks = hdfs-sink
+cygnusagent.channels = notifications
 
 # Flume source, must not be changed
-orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # channel name where to write the notification events
-orionagent.sources.http-source.channels = notifications
+cygnusagent.sources.http-source.channels = notifications
 # listening port the Flume source will use for receiving incoming notifications
-orionagent.sources.http-source.port = 5050
+cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+cygnusagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
 # regular expression for the orion version the notifications will have in their headers
-orionagent.sources.http-source.handler.orion_version = 0\.10\.*
+cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
-orionagent.sources.http-source.handler.notification_target = /notify
+cygnusagent.sources.http-source.handler.notification_target = /notify
 
 # ============================================
 # OrionHDFSSink configuration
 # channel name from where to read notification events
-orionagent.sinks.hdfs-sink.channel = notifications
+cygnusagent.sinks.hdfs-sink.channel = notifications
 # Flume sink that will process and persist in HDFS the notification events, must not be changed
-orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
 # IP address of the Cosmos deployment where the notification events will be persisted
-orionagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
-orionagent.sinks.hdfs-sink.cosmos_port = 14000
+cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/myusername)
-orionagent.sinks.hdfs-sink.cosmos_username = myusername
+cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
 # dataset where to persist the data (/user/myusername/mydataset)
-orionagent.sinks.hdfs-sink.cosmos_dataset = mydataset
+cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
 # HDFS backend type (webhdfs, httpfs or infinity)
-orionagent.sinks.hdfs-sink.hdfs_api = httpfs
+cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 
 # ============================================
 # OrionCKANSink configuration
 # channel name from where to read notification events
-orionagent.sinks.ckan-sink.channel = notifications
+cygnusagent.sinks.ckan-sink.channel = notifications
 # Flume sink that will process and persist in CKAN the notification events, must not be changed
-orionagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
+cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
 # The CKAN API key to use
-orionagent.sinks.ckan-sink.api_key = <api_key>
+cygnusagent.sinks.ckan-sink.api_key = <api_key>
 # The host for the CKAN API endpoint
-orionagent.sinks.ckan-sink.ckan_host = localhost
+cygnusagent.sinks.ckan-sink.ckan_host = localhost
 # The port for the CKAN API endpoint
-orionagent.sinks.ckan-sink.ckan_port = 80
+cygnusagent.sinks.ckan-sink.ckan_port = 80
 # The dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
-orionagent.sinks.ckan-sink.dataset = mydataset
+cygnusagent.sinks.ckan-sink.dataset = mydataset
 
 # channel name
-orionagent.channels.notifications.type = memory
+cygnusagent.channels.notifications.type = memory
 # capacity of the channel
-orionagent.channels.notifications.capacity = 1000
+cygnusagent.channels.notifications.capacity = 1000
 # amount of bytes that can be sent per transaction
-orionagent.channels.notifications.transactionCapacity = 100
+cygnusagent.channels.notifications.transactionCapacity = 100
 ```
 
 ## log4j configuration
@@ -239,11 +241,11 @@ Once the log4j has been properly configured, you only have to add to the Flume c
 
 In foreground (with logging):
 
-    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,console 
+    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,LOGFILE &
+    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
 
 Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
 
