@@ -56,7 +56,7 @@ import org.xml.sax.InputSource;
  * formats:
  *  - File names format: cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt
  *  - File lines format: {“ts”:”XXX”, “iso8601date”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
- *                       “attrType”:”XXX”, “attrValue:”XXX”}
+ *                       “attrType”:”XXX”, “attrValue":"XXX"|{...}|[...]}
  * 
  * As can be seen, a file is created per each entity, containing all the historical values this entity's attributes
  * have had.
@@ -252,7 +252,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
                 // if the file exists, append the Json document to it; otherwise, create it with initial content and
-                // mark as existing (this avoids checking if the file exists each time a Json docuemnt is going to be
+                // mark as existing (this avoids checking if the file exists each time a Json document is going to be
                 // persisted)
                 if (fileExists) {
                     persistenceBackend.append(httpClientFactory.getHttpClient(false), fileName, line);

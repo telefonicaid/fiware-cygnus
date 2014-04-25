@@ -245,7 +245,7 @@ public class NotifyContextRequest {
             NodeList domValues = domContextAttribute.getElementsByTagName("value");
             
             if (domValues.getLength() == 0) {
-                throw new Exception("No <value> tag in the XML document");
+                throw new Exception("No <contextValue> tag in the XML document");
             } // if
             
             //value = domValues.item(0).getTextContent();
