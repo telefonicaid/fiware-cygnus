@@ -22,7 +22,7 @@ a Flume-based connector for context data coming from Orion Context Broker.
 
 # System folders
 # _sourcedir =${topdir}/SOURCES
-%define _srcdir %{_sourcedir}/../../
+%define _srcdir %{_sourcedir}/../../../
 %define _install_dir /usr
 %define _project_install_dir %{_install_dir}/%{_project_name}
 
@@ -43,28 +43,23 @@ echo "[INFO] Preparing installation"
 rm -Rf $RPM_BUILD_ROOT && mkdir -p $RPM_BUILD_ROOT
 [ -d %{_build_root_project} ] || mkdir -p %{_build_root_project}
 
-# Copy all from src to rpm/BUILDROOT/usr/cygnus
-cp -R %{_srcdir}/src \
+# Copy all from src to rpm/BUILD
+cp -R  %{_srcdir}/src \
        %{_srcdir}/pom.xml \
        %{_srcdir}/README.md \
        %{_builddir}
 
 # Copy "extra files" from rpm/SOURCES to rpm/BUILDROOT
-cp -R %{_sourcedir}/* %{buildroot}
-
-# Create folder to store the PID (used by the Service)
-mkdir -p %{buildroot}/var/run/%{_project_name}
-# Create log folder
-mkdir -p %{buildroot}/var/log/%{_project_name}
+cp -R %{_sourcedir}/* %{_builddir}
 
 # -------------------------------------------------------------------------------------------- #
 # Build section:
 # -------------------------------------------------------------------------------------------- #
 %build
 # Read from BUILD, write into BUILD
-mvn %{_build_root_project}
 
-
+echo "[INFO] Building the ${_project_name} jar"
+mvn package
 
 # -------------------------------------------------------------------------------------------- #
 # pre-install section:
@@ -84,6 +79,28 @@ if [ "$RET_VAL" != "0" ]; then
          exit $RET_VAL
       fi
 fi
+
+# -------------------------------------------------------------------------------------------- #
+# Install section:
+# -------------------------------------------------------------------------------------------- #
+%install
+# Read from BUILD and write into BUILDROOT
+# RPM_BUILD_ROOT = BUILDROOT
+
+echo "[INFO] Installing the %{name}"
+
+echo "[INFO] Creating the directories"
+mkdir -p %{_build_root_project}/init.d
+# Create folder to store the PID (used by the Service)
+mkdir -p %{buildroot}/var/run/%{_project_name}
+# Create log folder
+mkdir -p %{buildroot}/${_log_dir}
+
+
+cp -R %{_builddir}/usr/cygnus/* %{_build_root_project}
+cp %{_builddir}/init.d/%{_service_name}  %{_build_root_project}/init.d/%{_service_name}
+cp %{_builddir}/target/%{_project_name}* %{_build_root_project}/lib
+cp %{_builddir}/config/* %{_build_root_project}/conf/
 
 # -------------------------------------------------------------------------------------------- #
 # post-install section:
@@ -126,6 +143,6 @@ rm -rf $RPM_BUILD_ROOT
 # -------------------------------------------------------------------------------------------- #
 %files
 %defattr(755,%{_project_user},%{_project_user},755)
-%config /etc/init.d/%{_service_name}
+%config %{_project_install_dir}/conf/
 %{_project_install_dir}
 /var/

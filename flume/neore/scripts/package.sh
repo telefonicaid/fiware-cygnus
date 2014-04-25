@@ -26,11 +26,9 @@ function download_flume(){
 		echo "done!"
 	fi
 
-	rm -rf ${RPM_SOURCE_PRODUCT_DIR}/${FLUME_WO_TAR}
-	mkdir -p ${RPM_SOURCE_PRODUCT_DIR}
-	mv ${FLUME_WO_TAR} ${RPM_SOURCE_PRODUCT_DIR}/apache-flume
-	# cd ${RPM_SOURCE_PRODUCT_DIR}
-	# ln -s ${FLUME_WO_TAR}/bin/mvn /usr/bin/
+	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
+	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
+	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
 	popd &> /dev/null
 	rm -rf ${TMP_DIR}
 	return 0
@@ -38,13 +36,17 @@ function download_flume(){
 
 # Setting folders this scrtipt is in neore/scripts BASE_DIR. Note: $0/.. is CWD
 BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../../..)
+echo "BASE_DIR = $BASE_DIR"
 
 # Create output folder
 # [[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
 
 RPM_BASE_DIR="${BASE_DIR}/neore/rpm"
+echo "RPM_BASE_DIR = $RPM_BASE_DIR"
 RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
-RPM_SOURCE_PRODUCT_DIR="$RPM_SOURCE_DIR"
+echo "RPM_SOURCE_DIR = $RPM_SOURCE_DIR"
+RPM_PRODUCT_SOURCE_DIR="${RPM_SOURCE_DIR}/usr/cygnus/"
+echo "RPM_PRODUCT_SOURCE_DIR=$RPM_PRODUCT_SOURCE_DIR"
 
 # Iterate over every SPEC file
 if [[ -d "${RPM_BASE_DIR}" ]]; then
@@ -57,10 +59,10 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	do
 		echo "Packaging using: ${SPEC_FILE}..."
 		# Execute command to create RPM
-		echo "rpmbuild -v --clean -ba ${SPEC_FILE} --define '_topdir ${RPM_BASE_DIR}' --define '_product_version ${PRODUCT_VERSION}'"
-		rpmbuild -v -ba ${SPEC_FILE} --define '_topdir ${RPM_BASE_DIR}' --define '_product_version 0.1'
+		echo "rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version 0.1'"
+		rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version 0.1'
 	done
 
-	# Move to Target
-	# find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
+# Move to Target
+find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
 fi
