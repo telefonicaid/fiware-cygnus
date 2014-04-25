@@ -248,7 +248,11 @@ public class NotifyContextRequest {
                 throw new Exception("No <value> tag in the XML document");
             } // if
             
-//            value = domValues.item(0).getTextContent();
+            //value = domValues.item(0).getTextContent();
+            // FIXME: This class, in the current state, is not valid for XML anymore. All the XML stuff must be moved
+            // to a specific class (XMLNotifyContextRequest), and this class should be renamed as
+            // JsonNotifyContextRequest. In addition, this spliting may suggest the creation of a hierarchy, or an
+            // abstract class, or and interface.
         } // ContextAttribute
         
         public String getName() {

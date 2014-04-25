@@ -55,8 +55,8 @@ import org.xml.sax.InputSource;
  * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
  *  - File names format: cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt
- *  - File lines format: {“ts”:”XXX”, “dateStr”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”, “attrType”:”XXX”,
- *                       “attrVlaue:”XXX”}
+ *  - File lines format: {“ts”:”XXX”, “iso8601date”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
+ *                       “attrType”:”XXX”, “attrValue:”XXX”}
  * 
  * As can be seen, a file is created per each entity, containing all the historical values this entity's attributes
  * have had.
@@ -70,6 +70,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
     private String cosmosHost;
     private String cosmosPort;
     private String cosmosUsername;
+    private String cosmosPassword;
     private String cosmosDataset;
     private String hdfsAPI;
     private HttpClientFactory httpClientFactory;
@@ -84,6 +85,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         logger.debug("Reading cosmos_port=" + cosmosPort);
         cosmosUsername = context.getString("cosmos_username", "opendata");
         logger.debug("Reading cosmos_username=" + cosmosUsername);
+        // FIXME: cosmosPassword should be read as a SHA1 and decoded here
+        cosmosPassword = context.getString("cosmos_password", "unknown");
+        logger.debug("Reading cosmos_password=" + cosmosPassword);
         cosmosDataset = context.getString("cosmos_dataset", "unknown");
         logger.debug("Reading cosmos_dataset=" + cosmosDataset);
         hdfsAPI = context.getString("hdfs_api", "httpfs");
@@ -115,9 +119,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
                 logger.info("Creating Hive external table " + cosmosUsername + "_"
                         + cosmosDataset.replaceAll("/", "_"));
-                HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername);
+                HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername, cosmosPassword);
                 String query = "create external table " + cosmosUsername + "_"
-                        + cosmosDataset.replaceAll("/", "_") + " (ts bigint, dateStr string, entityId string, "
+                        + cosmosDataset.replaceAll("/", "_") + " (ts bigint, iso8601date string, entityId string, "
                         + "entityType string, attrName string, attrType string, attrValue string) row format serde "
                         + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
                         + "'";
@@ -237,9 +241,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
                 Date date = new Date();
                 
-                // create a line to be persisted, the timestamp must be devided by 1000 since it is expressed in terms
-                // of microsenconds and we want miliseconds
-                String line = "{\"timestamp\":\"" + (date.getTime() / 1000) + "\",\"dateStr\":\""
+                // create a Json document to be persisted, the timestamp must be devided by 1000 since it is expressed
+                // in terms of microsenconds and we want miliseconds
+                String line = "{\"ts\":\"" + (date.getTime() / 1000) + "\",\"iso8601date\":\""
                         + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\",\"entityId\":\""
                         + encode(contextElement.getId()) + "\",\"entityType\":\"" + encode(contextElement.getType())
                         + "\",\"attrName\":\"" + encode(contextAttribute.getName()) + "\",\"attrType\":\""
@@ -247,8 +251,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                         + contextAttribute.getContextValue() + "}";
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
-                // if the file exists, append the line to it; otherwise, create it with initial content and mark as
-                // existing (this avoids checking if the file exists each time a line is going to be persisted)
+                // if the file exists, append the Json document to it; otherwise, create it with initial content and
+                // mark as existing (this avoids checking if the file exists each time a Json docuemnt is going to be
+                // persisted)
                 if (fileExists) {
                     persistenceBackend.append(httpClientFactory.getHttpClient(false), fileName, line);
                 } else {

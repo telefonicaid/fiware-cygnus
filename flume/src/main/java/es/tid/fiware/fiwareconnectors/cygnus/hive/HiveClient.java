@@ -22,6 +22,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.hive;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,7 @@ public class HiveClient {
     private String hiveServer;
     private String hivePort;
     private String hadoopUser;
+    private String hadoopPassword;
     
     /**
      * Constructor.
@@ -44,11 +46,12 @@ public class HiveClient {
      * @param hivePort
      * @param hadoopUser
      */
-    public HiveClient(String hiveServer, String hivePort, String hadoopUser) {
+    public HiveClient(String hiveServer, String hivePort, String hadoopUser, String hadoopPassword) {
         logger = Logger.getLogger(HiveClient.class);
         this.hiveServer = hiveServer;
         this.hivePort = hivePort;
         this.hadoopUser = hadoopUser;
+        this.hadoopPassword = hadoopPassword;
     } // HiveClient
     
     /**
@@ -57,25 +60,53 @@ public class HiveClient {
      * @return True if the table could be created, false otherwise.
      */
     public boolean doCreateTable(String query) {
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean res = true;
+        
         try {
             // get a connection to the Hive/Shark server
-            Connection con = getConnection();
+            con = getConnection();
             
             // create a statement
-            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
             
             // execute the query
-            ResultSet res = stmt.executeQuery(query);
-
-            // close everything
-            res.close();
-            stmt.close();
-            con.close();
-            return true;
+            rs = stmt.executeQuery(query);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return false;
-        } // try catch
+            res = false;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            return res;
+        } // try catch finally
     } // doCreateTable
 
     /**
@@ -84,46 +115,71 @@ public class HiveClient {
      * @return True if the query succeded, false otherwise.
      */
     public boolean doQuery(String query) {
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean res = true;
+        
         try {
             // get a connection to the Hive/Shark server
-            Connection con = getConnection();
+            con = getConnection();
             
             // create a statement
-            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
             
             // execute the query
-            ResultSet res = stmt.executeQuery(query);
+            rs = stmt.executeQuery(query);
 
             // iterate on the result
-            while (res.next()) {
+            while (rs.next()) {
                 String s = "";
 
-                for (int i = 1; i < res.getMetaData().getColumnCount(); i++) {
-                    s += res.getString(i) + ",";
+                for (int i = 1; i < rs.getMetaData().getColumnCount(); i++) {
+                    s += rs.getString(i) + ",";
                 } // for
               
-                s += res.getString(res.getMetaData().getColumnCount());
+                s += rs.getString(rs.getMetaData().getColumnCount());
                 System.out.println(s);
             } // while
-
-            // close everything
-            res.close();
-            stmt.close();
-            con.close();
-            return true;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return false;
-        } // try catch
+            res = false;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                    res = false;
+                } // try catch
+            } // if
+            
+            return res;
+        } // try catch finally
     } // doQuery
     
     /**
      * Gets a connection to the Hive server.
-     * @param hiveServer
-     * @param hivePort
-     * @param hadoopUser
-     * @param hadoopPassword
      * @return
+     * @throws Exception
      */
     private Connection getConnection() throws Exception {
         // dynamically load the Hive JDBC driver
@@ -133,7 +189,7 @@ public class HiveClient {
         logger.debug("Connecting to jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
                 + "&password=XXXXXXXXXX");
         return DriverManager.getConnection("jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
-                + "&password=XXXXXXXXXX");
+                + "&password=" + hadoopPassword);
     } // getConnection
     
 } // HiveClient
