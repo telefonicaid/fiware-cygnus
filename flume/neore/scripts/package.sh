@@ -6,7 +6,7 @@ function download_flume(){
 	mkdir -p ${TMP_DIR}
 	pushd ${TMP_DIR} &> /dev/null
 	FLUME_TAR="apache-flume-1.4.0-bin.tar.gz"
-	FLUME_WO_TAR=${FLUME_TAR%.*}
+	FLUME_WO_TAR="apache-flume-1.4.0-bin"
 	ARTIFACTORY_FLUME_URL="http://artifactory.hi.inet/artifactory/simple/common/flume/"
 	echo -n "Downloading apache-flume: ${FLUME_TAR}... "
 	curl -s -o ${FLUME_TAR} ${ARTIFACTORY_FLUME_URL}/${FLUME_TAR}
@@ -28,8 +28,9 @@ function download_flume(){
 
 	rm -rf ${RPM_SOURCE_PRODUCT_DIR}/${FLUME_WO_TAR}
 	mkdir -p ${RPM_SOURCE_PRODUCT_DIR}
-	mv ${VERTX_WO_ZIP} ${RPM_SOURCE_PRODUCT_DIR}
-	cd ${RPM_SOURCE_PRODUCT_DIR}; ln -s ${VERTX_WO_ZIP} vert.x
+	mv ${FLUME_WO_TAR} ${RPM_SOURCE_PRODUCT_DIR}/apache-flume
+	# cd ${RPM_SOURCE_PRODUCT_DIR}
+	# ln -s ${FLUME_WO_TAR}/bin/mvn /usr/bin/
 	popd &> /dev/null
 	rm -rf ${TMP_DIR}
 	return 0
@@ -39,11 +40,11 @@ function download_flume(){
 BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../../..)
 
 # Create output folder
-[[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
+# [[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
 
 RPM_BASE_DIR="${BASE_DIR}/neore/rpm"
 RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
-RPM_SOURCE_PRODUCT_DIR="$RPM_SOURCE_DIR/opt/cygnus"
+RPM_SOURCE_PRODUCT_DIR="$RPM_SOURCE_DIR"
 
 # Iterate over every SPEC file
 if [[ -d "${RPM_BASE_DIR}" ]]; then
@@ -56,6 +57,10 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	do
 		echo "Packaging using: ${SPEC_FILE}..."
 		# Execute command to create RPM
-		echo "rpmbuild -v --clean -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_REALEASE}"
-		rpmbuild -v --clean -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_REALEASE}
+		echo "rpmbuild -v --clean -ba ${SPEC_FILE} --define '_topdir ${RPM_BASE_DIR}' --define '_product_version ${PRODUCT_VERSION}'"
+		rpmbuild -v -ba ${SPEC_FILE} --define '_topdir ${RPM_BASE_DIR}' --define '_product_version 0.1'
 	done
+
+	# Move to Target
+	# find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
+fi
