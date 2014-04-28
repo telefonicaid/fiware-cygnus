@@ -168,7 +168,7 @@ These are the packages you will need to install under APACHE_FLUME_HOME/plugins.
 * hive-common-0.12.0.jar
 * hive-shims-0.12.0.jar
 
-These packages are not necessary to be installed since they are alreaday included in the Flume bundle (they have been listed just for informative purposes):
+These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
 * httpclient-4.2.1.jar
 * httpcore-4.2.2.jar
 
