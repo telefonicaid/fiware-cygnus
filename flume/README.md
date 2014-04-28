@@ -147,8 +147,8 @@ or not:
 If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
 
 In addition:
-* Please observe the Cygnus code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1,jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar
+* Please observe the version of httpcomponents-core and httpcomponents-client in the pom.xml are matching the version of such packages within the Flume bundle (httpclient-4.2.1.jar and httpcore-4.2.1.jar). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
+* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar
 
 ### OrionCKANSink dependencies
 
@@ -167,7 +167,8 @@ These are the packages you will need to install under APACHE_FLUME_HOME/plugins.
 * hive-service-0.12.0.jar
 * hive-common-0.12.0.jar
 * hive-shims-0.12.0.jar
-* httpclient-4.2.1.jar
+* httpclient-4.2.1.jar (should not be necessary since it is already included in the Flume bundle)
+* httpcore-4.2.2.jar (should not be becessary since it is already included in the Flume bundle)
 * libthrift-0.9.1.jar (must be copied to APACHE_FLUME_HOME/lib, as previously said)
 
 ## Cygnus configuration
