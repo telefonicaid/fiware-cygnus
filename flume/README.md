@@ -167,9 +167,13 @@ These are the packages you will need to install under APACHE_FLUME_HOME/plugins.
 * hive-service-0.12.0.jar
 * hive-common-0.12.0.jar
 * hive-shims-0.12.0.jar
-* httpclient-4.2.1.jar (should not be necessary since it is already included in the Flume bundle)
-* httpcore-4.2.2.jar (should not be becessary since it is already included in the Flume bundle)
-* libthrift-0.9.1.jar (must be copied to APACHE_FLUME_HOME/lib, as previously said)
+
+These packages are not necessary to be installed since they are alreaday included in the Flume bundle (they have been listed just for informative purposes):
+* httpclient-4.2.1.jar
+* httpcore-4.2.2.jar
+
+In addition, as already said, please remember to overwrite the APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar package with this one:
+* libthrift-0.9.1.jar
 
 ## Cygnus configuration
 
