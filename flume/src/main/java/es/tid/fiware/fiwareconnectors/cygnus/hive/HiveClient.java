@@ -78,34 +78,7 @@ public class HiveClient {
             logger.error(e.getMessage());
             res = false;
         } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            return res;
+            return res && closeHiveObjects(con, stmt, rs);
         } // try catch finally
     } // doCreateTable
 
@@ -145,36 +118,49 @@ public class HiveClient {
             logger.error(e.getMessage());
             res = false;
         } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    logger.error(e.getMessage());
-                    res = false;
-                } // try catch
-            } // if
-            
-            return res;
+            return res && closeHiveObjects(con, stmt, rs);
         } // try catch finally
     } // doQuery
+    
+    /**
+     * Close all the Hive objects previously opened by doCreateTable and doQuery.
+     * @param con
+     * @param stmt
+     * @param rs
+     * @return True if the Hive objects have been closed, false otherwise.
+     */
+    private boolean closeHiveObjects(Connection con, Statement stmt, ResultSet rs) {
+        boolean res = true;
+        
+        if (con != null) {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                logger.error(e.getMessage());
+                res = false;
+            } // try catch
+        } // if
+
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+                logger.error(e.getMessage());
+                res = false;
+            } // try catch
+        } // if
+
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                logger.error(e.getMessage());
+                res = false;
+            } // try catch
+        } // if
+        
+        return res;
+    } // closeHiveObjects
     
     /**
      * Gets a connection to the Hive server.
