@@ -1,6 +1,6 @@
 # Cygnus connector
 
-This connector is a (conceptual) derivative work of ngsi2cosmos (https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker.
+This connector is a (conceptual) derivative work of ngsi2cosmos (https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS or CKAN.
 
 ## Development
 
@@ -14,7 +14,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionHDFSSink. A custom HDFS sink for persiting Orion context data in the appropriate way. Data from Orion must be persisted in the Cosmos HDFS in the form of files containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. In addition, each file only considers the values for a (entity,attribute) pair. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 * OrionCKANSink. A custom sink that persist Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/)
 
-## Json notification example
+## Functionality explained (Json notification example)
 
 Let's consider the following notification in Json format coming from an Orion Context Broker instance:
 
@@ -60,15 +60,15 @@ Depending on the sink, the context element is persisted in a different way:
 
 ### OrionHDFSSink
 
-This sink persists the data according to the original ngsi2cosmos specification, i.e. for each (entity,attribute) pair, create/append to a file named
+From Cygnus v0.2, this sink does not persist the data according to the original ngsi2cosmos specification anymore (i.e. for each (entity,attribute) pair a file was created). Instead, a unique file is created per entity, following this specification:
 
-    <entity_name>-<entity_type>-<attribute_name>-<attribute_type>.txt
+    cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt
     
-data lines in the form
+Another novelty added by Cygnus v0.2 is related to the data serialization in such above files. Now, instead of persisting CSV-like lines, Json documents are written in the format below. This complies with the new Orion Context Broker functionality allowing for complex Json values for attributes.
 
-    <ts>|<ts_ms>|<entity_name>|<entity_type>|<attribute_name>|<attribute_type>|<value>
+    {"ts":"xxx", "iso8601date":"xxx", "entityId":"xxx", "entityType":"xxx", "attrName":"xxx", "attrType":"xxx", "attrValue":"xxx"|{...}|[...]}
     
-Thus, the file named "Room1-Room-temperature-centigrade.txt" (it is created if not existing) will contain a new line such as "2014-02-27 14_46_21|13453464536|Room1|Room|temperature|centigrade|26.5".
+Thus, the file named `cygnus-mysuer-mydataset-room1-Room.txt` (it is created if not existing) will contain a new line such as `{"ts":"13453464536", "iso8601data":"2014-02-27T14_46_21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}`
 
 ### OrionCKANSink
 
@@ -93,7 +93,7 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 Cygnus also works with XML-based notifications sent to the injector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
 
-    event={body={the_json_part...},headers={{"content-type","application/json"}}}
+    event={body={the_json_part...},headers={{"content-type","application/xml"}}}
 
 The key point is the behaviour remains the same than in the Json example: the same file will be created, and the same data line will be persisted within it.
 
@@ -128,25 +128,54 @@ Apache Flume can be easily installed by downloading its latests version from htt
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
 
-Then, the developed classes must be packaged in a Java jar file which must be added to the APACHE_FLUME_HOME/plugins.d/cygnus/lib directory:
+The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
+
+Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package:
+
+    $ git clone https://github.com/telefonicaid/fiware-connectors.git
+    $ cd fiware-connectors/flume
+    $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
+    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+
+or not:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
-Please observe the Cygnus code has been built using the Flume provided versions of httpcomponents-core and httpcomponents-client (4.2.1). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
+If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
 
-In addition, depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext.
-Otherwise, you may get "not class found exception" crashes when you run Flume. Until we can develop an smarter solution, the recommended installation way
-is just copying the .jar file to APACHE_FLUME_HOME/plugins.d/cygnus/libext using the cp command :). Typically, you can get the .jar file from your Maven
-repository (under .m2 in your user home directory).
+In addition:
+* Please observe the version of httpcomponents-core and httpcomponents-client in the pom.xml are matching the version of such packages within the Flume bundle (httpclient-4.2.1.jar and httpcore-4.2.1.jar). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
+* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar
 
-### OrionCKANSink additional dependencies
+### OrionCKANSink dependencies
+
+These are the packages you will need to install under APACHE_FLUME_HOME/plugins.d/cygnus/libext if you did not included them in the Cygnus package:
 
 * json-simple-1.1.jar
 
-## cosmos-injector configuration
+### OrionHDFSSink dependencies
+
+These are the packages you will need to install under APACHE_FLUME_HOME/plugins.d/cygnus/libext if you did not included them in the Cygnus package:
+
+* hadoop-core-0.20.0.jar (or higher)
+* hive-exec-0.12.0.jar
+* hive-jdbc-0.12.0.jar
+* hive-metastore-0.12.0.jar
+* hive-service-0.12.0.jar
+* hive-common-0.12.0.jar
+* hive-shims-0.12.0.jar
+
+These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
+* httpclient-4.2.1.jar
+* httpcore-4.2.2.jar
+
+In addition, as already said, please remember to overwrite the APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar package with this one:
+* libthrift-0.9.1.jar
+
+## Cygnus configuration
 
 The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the sinks is shown below (the file cygnus.conf must be created from the scratch):
 
@@ -160,10 +189,12 @@ cygnusagent.sources = http-source
 cygnusagent.sinks = hdfs-sink
 cygnusagent.channels = notifications
 
-# Flume source, must not be changed
-cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+#=============================================
+# source configuration
 # channel name where to write the notification events
 cygnusagent.sources.http-source.channels = notifications
+# source class, must not be changed
+cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
@@ -177,7 +208,7 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 # OrionHDFSSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.hdfs-sink.channel = notifications
-# Flume sink that will process and persist in HDFS the notification events, must not be changed
+# sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
 # IP address of the Cosmos deployment where the notification events will be persisted
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
@@ -194,7 +225,7 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # OrionCKANSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.ckan-sink.channel = notifications
-# Flume sink that will process and persist in CKAN the notification events, must not be changed
+# sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
 # The CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = <api_key>
@@ -205,6 +236,8 @@ cygnusagent.sinks.ckan-sink.ckan_port = 80
 # The dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
 cygnusagent.sinks.ckan-sink.dataset = mydataset
 
+#=============================================
+# channel configuration
 # channel name
 cygnusagent.channels.notifications.type = memory
 # capacity of the channel

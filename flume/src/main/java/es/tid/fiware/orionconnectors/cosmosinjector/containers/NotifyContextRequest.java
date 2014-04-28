@@ -1,7 +1,7 @@
 /**
  * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of cosmos-injector (FI-WARE project).
+ * This file is part of fiware-connectors (FI-WARE project).
  *
  * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -10,7 +10,7 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
  * details.
  *
- * You should have received a copy of the GNU Affero General Public License along with [PROJECT NAME]. If not, see
+ * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
@@ -19,6 +19,7 @@
 
 package es.tid.fiware.orionconnectors.cosmosinjector.containers;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -212,7 +213,7 @@ public class NotifyContextRequest {
         
         private String name;
         private String type;
-        private String value;
+        private JsonElement value;
         
         /**
          * Constructor for Gson, a Json parser.
@@ -241,13 +242,17 @@ public class NotifyContextRequest {
             } // if
             
             type = domTypes.item(0).getTextContent();
-            NodeList domValues = domContextAttribute.getElementsByTagName("contextValue");
+            NodeList domValues = domContextAttribute.getElementsByTagName("value");
             
             if (domValues.getLength() == 0) {
                 throw new Exception("No <contextValue> tag in the XML document");
             } // if
             
-            value = domValues.item(0).getTextContent();
+            //value = domValues.item(0).getTextContent();
+            // FIXME: This class, in the current state, is not valid for XML anymore. All the XML stuff must be moved
+            // to a specific class (XMLNotifyContextRequest), and this class should be renamed as
+            // JsonNotifyContextRequest. In addition, this spliting may suggest the creation of a hierarchy, or an
+            // abstract class, or and interface.
         } // ContextAttribute
         
         public String getName() {
@@ -258,8 +263,18 @@ public class NotifyContextRequest {
             return type;
         } // getType
         
+        /**
+         * Gets context value.
+         * @return The context value for this context attribute in String format.
+         */
         public String getContextValue() {
-            return value;
+            if (value.isJsonObject()) {
+                return value.getAsJsonObject().toString();
+            } else if (value.isJsonArray()) {
+                return value.getAsJsonArray().toString();
+            } else {
+                return "\"" + value.getAsString() + "\"";
+            } // else
         } // getContextValue
         
     } // ContextAttribute

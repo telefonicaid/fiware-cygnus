@@ -11,5 +11,5 @@ This repository is structured as follows:
 
 ## Contact
 
-* Fermín Galán Márquez (fgalan at tid dot es).
+* Fermín Galán Márquez (fermin at tid dot es).
 * Francisco Romero Bueno (frb at tid dot es).
