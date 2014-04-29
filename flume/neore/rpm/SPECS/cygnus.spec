@@ -96,7 +96,6 @@ mkdir -p %{buildroot}/var/run/%{_project_name}
 # Create log folder
 mkdir -p %{buildroot}/${_log_dir}
 
-
 cp -R %{_builddir}/usr/cygnus/* %{_build_root_project}
 cp %{_builddir}/init.d/%{_service_name}  %{_build_root_project}/init.d/%{_service_name}
 cp %{_builddir}/target/%{_project_name}* %{_build_root_project}/lib
@@ -106,29 +105,48 @@ cp %{_builddir}/config/* %{_build_root_project}/conf/
 # post-install section:
 # -------------------------------------------------------------------------------------------- #
 %post
-echo "Configuring application... "
 
+echo "[INFO] Configuring application"
+mkdir -p /etc/%{_project_name}
+echo "[INFO] Creating links"
+ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
+ln -s %{_project_install_dir}/conf/flume.conf /etc/%{_project_name}/flume.conf
+ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
 
 #Logs
+echo "[INFO] Creating log directory"
+mkdir -p %{_log_dir}
+chown %{_project_user}:%{_project_user} %{_log_dir}
+chmod g+s %{_log_dir}
+setfacl -d -m g::rwx %{_log_dir}
+setfacl -d -m o::rx %{_log_dir}
+
+echo "[INFO] Configuring application service"
+# FIXME! Not supported
+# chkconfig --add %{_service_name}
 echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
 # pre-uninstall section:
 # -------------------------------------------------------------------------------------------- #
 %preun
-if [ $1 == 0 ]; then
 
+echo "[INFO] Uninstall the %{_project_name}"
+/etc/init.d/%{_service_name} stop
+/sbin/chkconfig --del %{_service_name}
 
-	echo "[INFO] Removing application log files"
-	# Log
-	[ -d %{_log_dir} ] && rm -rfv %{_log_dir}
+echo "[INFO] Deleting links"
+rm /etc/init.d/%{_service_name} \
+/etc/%{_project_name}/flume.conf \
+/usr/bin/flume-ng
 
-	echo "[INFO] Removing application files"
-	# Installed files
-	[ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir}
+echo "[INFO] Removing application log files"
+[ -d %{_log_dir} ] && rm -rfv %{_log_dir} &> /dev/null
 
-   echo "Done"
-fi
+echo "[INFO] Deleting the %{_project_name} folder"
+[ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir} &> /dev/null
+
+echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
 # post-uninstall section:
@@ -143,6 +161,5 @@ rm -rf $RPM_BUILD_ROOT
 # -------------------------------------------------------------------------------------------- #
 %files
 %defattr(755,%{_project_user},%{_project_user},755)
-%config %{_project_install_dir}/conf/
 %{_project_install_dir}
 /var/
