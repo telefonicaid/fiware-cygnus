@@ -17,7 +17,7 @@
  * frb@tid.es
  */
 
-package es.tid.fiware.orionconnectors.cosmosinjector.ckan;
+package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;

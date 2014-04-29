@@ -17,7 +17,7 @@
  * frb@tid.es
  */
 
-package es.tid.fiware.orionconnectors.cosmosinjector.hdfs;
+package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;

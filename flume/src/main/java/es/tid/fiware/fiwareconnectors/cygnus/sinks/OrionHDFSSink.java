@@ -17,18 +17,18 @@
  * frb@tid.es
  */
  
-package es.tid.fiware.orionconnectors.cosmosinjector;
+package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextAttribute;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextElement;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HDFSBackend;
-import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.HttpFSBackend;
-import es.tid.fiware.orionconnectors.cosmosinjector.hdfs.WebHDFSBackend;
-import es.tid.fiware.orionconnectors.cosmosinjector.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import java.io.StringReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;

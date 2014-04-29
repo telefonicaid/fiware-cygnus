@@ -17,7 +17,7 @@
  * frb@tid.es
  */
 
-package es.tid.fiware.orionconnectors.cosmosinjector.http;
+package es.tid.fiware.fiwareconnectors.cygnus.http;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

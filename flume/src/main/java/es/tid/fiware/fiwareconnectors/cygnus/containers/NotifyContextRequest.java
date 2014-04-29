@@ -17,7 +17,7 @@
  * frb@tid.es
  */
 
-package es.tid.fiware.orionconnectors.cosmosinjector.containers;
+package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import com.google.gson.JsonElement;
 import java.util.ArrayList;

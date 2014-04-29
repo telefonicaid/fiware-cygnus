@@ -17,16 +17,16 @@
  * frb@tid.es
  */
  
-package es.tid.fiware.orionconnectors.cosmosinjector;
+package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
-import es.tid.fiware.orionconnectors.cosmosinjector.ckan.CKANBackendImpl;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextAttribute;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextElement;
-import es.tid.fiware.orionconnectors.cosmosinjector.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.orionconnectors.cosmosinjector.ckan.CKANBackend;
-import es.tid.fiware.orionconnectors.cosmosinjector.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackendImpl;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;

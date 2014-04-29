@@ -17,7 +17,7 @@
  * frb@tid.es
  */
 
-package es.tid.fiware.orionconnectors.cosmosinjector;
+package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
