@@ -11,7 +11,7 @@
 PARAM=$1
 NAME=cygnus
 EXECUTABLE=/usr/cygnus/bin/flume-ng
-
+CYGNUS_PID=/var/run/cygnus/cygnus.pid
 
 # Load the environment
  if [[ -f /etc/${NAME}/flume.conf ]]; then
@@ -33,7 +33,6 @@ cygnus_start()
         #  -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,console
 
         # Save the PID of the cygnus process
-        CYGNUS_PID=/var/run/cygnus/cygnus.pid
         ps -ef | grep flume | grep -v grep | awk '{ print $2 }' > ${CYGNUS_PID}
         PID="`cat /var/run/cygnus/cygnus.pid`"
         sleep 2 # wait some time to leave iotAgent start
@@ -70,10 +69,12 @@ cygnus_status()
 case ${PARAM} in
 
     'start')
+		status -p ${BROKER_PID_FILE} ${EXECUTABLE} && exit 0
         cygnus_start
         ;;
 
     'stop')
+		status -p ${BROKER_PID_FILE} ${EXECUTABLE} && exit 0
         cygnus_stop
         ;;
 
