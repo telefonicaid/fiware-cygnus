@@ -4,10 +4,10 @@
 
   <groupId>es.tid.fiware.orionconnectors</groupId>
   <artifactId>cygnus</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <packaging>jar</packaging>
 
-  <name>cosmos-injector</name>
+  <name>cygnus</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -61,6 +61,14 @@
             <source>1.6</source>
             <target>1.6</target>
             <compilerArgument></compilerArgument>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
           </configuration>
         </plugin>
       </plugins>
