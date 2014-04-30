@@ -58,8 +58,7 @@ cp -R %{_sourcedir}/* %{_builddir}
 %build
 # Read from BUILD, write into BUILD
 
-echo "[INFO] Building the ${_project_name} jar"
-mvn package
+echo "[INFO] Building..."
 
 # -------------------------------------------------------------------------------------------- #
 # pre-install section:
@@ -98,7 +97,6 @@ mkdir -p %{buildroot}/${_log_dir}
 
 cp -R %{_builddir}/usr/cygnus/* %{_build_root_project}
 cp %{_builddir}/init.d/%{_service_name}  %{_build_root_project}/init.d/%{_service_name}
-cp %{_builddir}/target/%{_project_name}* %{_build_root_project}/lib
 cp %{_builddir}/config/* %{_build_root_project}/conf/
 
 # -------------------------------------------------------------------------------------------- #

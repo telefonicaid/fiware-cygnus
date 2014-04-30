@@ -46,6 +46,11 @@ function download_flume(){
 	_logStage "######## The apache-flume is ready for use! ... ########"
 }
 
+function copy_cygnus_to_flume(){
+	_logStage "######## Copying the cygnus jar into the apache-flume... ########"
+	cp $BASE_DIR/target/*.jar ${RPM_PRODUCT_SOURCE_DIR}/lib/
+}
+
 # Import the colors for deployment script
 source ./colors_shell.sh
 
@@ -73,7 +78,9 @@ _log "#### Iterate over every SPEC file ####"
 if [[ -d "${RPM_BASE_DIR}" ]]; then
 
 	download_flume
-	
+	[[ $? -ne 0 ]] && exit 1
+
+	copy_cygnus_to_flume
 	[[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
@@ -86,8 +93,8 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 		_logStage "######## rpmbuild finished! ... ########"
 	done
 
-_logStage "######## Moving to target folder... ########"
-find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
+# _logStage "######## Moving to target folder... ########"
+# find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
 fi
 
 _logStage "######## RPM Stage Finished! ... ########"
