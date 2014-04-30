@@ -6,7 +6,7 @@
 
 # Define the color log
 
-source ${WORKSPACE}/flume/scripts/colors_shell.sh
+source ${WORKSPACE}/flume/neore/scripts/colors_shell.sh
 
 _logStage "######## Executing the Check RPM Stage ... ########"
 echo ""
