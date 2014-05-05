@@ -20,14 +20,14 @@
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
-import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import java.io.StringReader;
 import java.sql.Timestamp;
@@ -219,10 +219,11 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         } // if else if
 
         // process the event data
-        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponse();
+        ArrayList contextResponses = notification.getContextResponses();
+        logger.debug("num context responses "  + contextResponses.size());
 
         for (int i = 0; i < contextResponses.size(); i++) {
-            ContextElementResponse contextElementResponse = contextResponses.get(i);
+            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             String fileName = "cygnus-" + cosmosUsername + "-" + cosmosDataset.replaceAll("/", "_") + "-"
                     + encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + ".txt";
