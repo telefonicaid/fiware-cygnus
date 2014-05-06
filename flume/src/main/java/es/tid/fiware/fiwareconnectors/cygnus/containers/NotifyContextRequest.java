@@ -291,12 +291,11 @@ public class NotifyContextRequest {
          * @throws exception
          */
         private JsonElement xml2json(Node xmlNode) throws Exception {
+            // if the XML node has not attributes, it is either an object either a string
             if (!xmlNode.hasAttributes()) {
-                String contentChild = xmlNode.getFirstChild().getTextContent();
-                String contentNode = xmlNode.getTextContent();
+                Node child = xmlNode.getFirstChild();
                 
-                // FIXME: not sure if this is the best "heuristic"...
-                if (!contentChild.equals(contentNode)) {
+                if (child.getFirstChild() != null) {
                     NodeList domObjects = ((Element) xmlNode).getChildNodes();
                     JsonObject jsonObject = new JsonObject();
 
@@ -307,10 +306,11 @@ public class NotifyContextRequest {
 
                     return jsonObject;
                 } else {
-                    return new JsonPrimitive(contentNode);
+                    return new JsonPrimitive(xmlNode.getTextContent());
                 } // if else
             } // if
             
+            // if the "type" attribute is not among the existing ones then return error
             if (xmlNode.getAttributes().getNamedItem("type") == null) {
                 throw new Exception("Attributes different than \"type\" are not allowed withing or any child tag "
                         + "according to Orion notification API");
@@ -318,6 +318,7 @@ public class NotifyContextRequest {
             
             String valueType = xmlNode.getAttributes().getNamedItem("type").getTextContent();
 
+            // if the value of the "type" attribute is "vector", the proceed, return error otherwise
             if (valueType.equals("vector")) {
                 NodeList domItems = ((Element) xmlNode).getElementsByTagName("item");
 
