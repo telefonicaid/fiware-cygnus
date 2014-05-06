@@ -312,7 +312,8 @@ public class NotifyContextRequest {
             } // if
             
             if (xmlNode.getAttributes().getNamedItem("type") == null) {
-                throw new Exception("There are other attributes different than \"type\"");
+                throw new Exception("Attributes different than \"type\" are not allowed withing or any child tag "
+                        + "according to Orion notification API");
             } // if
             
             String valueType = xmlNode.getAttributes().getNamedItem("type").getTextContent();
