@@ -246,9 +246,9 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 // in terms of microsenconds and we want miliseconds
                 String line = "{\"ts\":\"" + (date.getTime() / 1000) + "\",\"iso8601date\":\""
                         + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\",\"entityId\":\""
-                        + encode(contextElement.getId()) + "\",\"entityType\":\"" + encode(contextElement.getType())
-                        + "\",\"attrName\":\"" + encode(contextAttribute.getName()) + "\",\"attrType\":\""
-                        + encode(contextAttribute.getType()) + "\",\"attrValue\":"
+                        + contextElement.getId() + "\",\"entityType\":\"" + contextElement.getType()
+                        + "\",\"attrName\":\"" + contextAttribute.getName() + "\",\"attrType\":\""
+                        + contextAttribute.getType() + "\",\"attrValue\":"
                         + contextAttribute.getContextValue() + "}";
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
@@ -266,13 +266,13 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
     } // persist
     
     /**
-     * Encodes a string replacing ":" by "_".
+     * Encodes a string replacing all the non alphanumeric characters by '_'.
      * 
      * @param in
      * @return The encoded version of the input string.
      */
     private String encode(String in) {
-        return in.replaceAll(":", "_").replaceAll("-", "_");
+        return in.replaceAll("[^a-zA-Z0-9]", "_");
     } // encode
     
 } // OrionHDFSSink
