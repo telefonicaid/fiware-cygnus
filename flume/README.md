@@ -316,5 +316,5 @@ Its equivalent in Json format can be seen at https://forge.fi-ware.eu/plugins/me
 
 ## Contact
 
-* Fermin Galan Marquez (fermin at tid dot es).
+* Fermín Galán Márquez (fermin at tid dot es).
 * Francisco Romero Bueno (frb at tid dot es).
