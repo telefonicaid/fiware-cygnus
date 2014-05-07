@@ -196,14 +196,14 @@ public class OrionCKANSink extends AbstractSink implements Configurable {
     } // persist
     
     /**
-     * Encodes a string replacing ":" by "_".
+     * Encodes a string replacing all the non alphanumeric characters by '_'.
      * 
      * @param in
      * @return The encoded version of the input string.
      */
     // FIXME: factorize in common class
     private String encode(String in) {
-        return in.replaceAll(":", "_").replaceAll("-", "_");
+        return in.replaceAll("[^a-zA-Z0-9]", "_");
     } // encode
     
 } // OrionHDFSSink
