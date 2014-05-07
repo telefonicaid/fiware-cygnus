@@ -1,0 +1,65 @@
+# APACHE_FLUME_HOME/conf/cygnus.conf
+
+# The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
+# ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
+# Regarding sinks, you can use at the same time both 'hdfs-sink' and 'ckan-sink' (configuration example shows only 'hdfs-sink')
+cygnusagent.sources = http-source
+cygnusagent.sinks = hdfs-sink
+cygnusagent.channels = notifications
+
+#=============================================
+# source configuration
+# channel name where to write the notification events
+cygnusagent.sources.http-source.channels = notifications
+# source class, must not be changed
+cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+# listening port the Flume source will use for receiving incoming notifications
+cygnusagent.sources.http-source.port = 5050
+# Flume handler that will parse the notifications, must not be changed
+cygnusagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+# regular expression for the orion version the notifications will have in their headers
+cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
+# URL target
+cygnusagent.sources.http-source.handler.notification_target = /notify
+
+# ============================================
+# OrionHDFSSink configuration
+# channel name from where to read notification events
+cygnusagent.sinks.hdfs-sink.channel = notifications
+# sink class, must not be changed
+cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+# IP address of the Cosmos deployment where the notification events will be persisted
+cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+# port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
+cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
+# username allowed to write in HDFS (/user/myusername)
+cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
+# dataset where to persist the data (/user/myusername/mydataset)
+cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
+# HDFS backend type (webhdfs, httpfs or infinity)
+cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
+
+# ============================================
+# OrionCKANSink configuration
+# channel name from where to read notification events
+cygnusagent.sinks.ckan-sink.channel = notifications
+# sink class, must not be changed
+cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
+# The CKAN API key to use
+cygnusagent.sinks.ckan-sink.api_key = <api_key>
+# The host for the CKAN API endpoint
+cygnusagent.sinks.ckan-sink.ckan_host = localhost
+# The port for the CKAN API endpoint
+cygnusagent.sinks.ckan-sink.ckan_port = 80
+# The dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
+cygnusagent.sinks.ckan-sink.dataset = mydataset
+
+#=============================================
+# channel configuration
+# channel name
+cygnusagent.channels.notifications.type = memory
+# capacity of the channel
+cygnusagent.channels.notifications.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.notifications.transactionCapacity = 100
+
