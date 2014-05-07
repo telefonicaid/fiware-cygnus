@@ -21,13 +21,12 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackendImpl;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
-import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
@@ -40,6 +39,11 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import org.apache.flume.Channel;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.EventDeliveryException;
+import org.apache.flume.Transaction;
 
 /**
  * 
@@ -135,7 +139,7 @@ public class OrionCKANSink extends AbstractSink implements Configurable {
     } // process
     
     /**
-     * Given an event, it is persisted in CKAN using the datastore associated with the entity
+     * Given an event, it is persisted in CKAN using the datastore associated with the entity.
      * 
      * @param event A Flume event containing the data to be persisted and certain metadata (headers).
      * @throws Exception
@@ -163,7 +167,7 @@ public class OrionCKANSink extends AbstractSink implements Configurable {
         } // if else if
 
         // process the event data
-        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponse();
+        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
 
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = contextResponses.get(i);
@@ -178,11 +182,11 @@ public class OrionCKANSink extends AbstractSink implements Configurable {
                 String attrValue = contextAttribute.getContextValue();
                 Date date = new Date();
 
-                logger.info("Persisting data: <" + date + ", " +
-                        entity + ", " +
-                        attrName + ", " +
-                        attrType + ", " +
-                        attrValue + ">");
+                logger.info("Persisting data: <" + date + ", "
+                        + entity + ", "
+                        + attrName + ", "
+                        + attrType + ", "
+                        + attrValue + ">");
 
                 persistenceBackend.persist(httpClientFactory.getHttpClient(false), date, entity,
                         attrName, attrType, attrValue);

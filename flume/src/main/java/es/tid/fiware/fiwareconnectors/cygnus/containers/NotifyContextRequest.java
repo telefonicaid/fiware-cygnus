@@ -1,37 +1,41 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
- *
- * This file is part of fiware-connectors (FI-WARE project).
- *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
- * http://www.gnu.org/licenses/.
- *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
- */
+* Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+*
+* This file is part of fiware-connectors (FI-WARE project).
+*
+* cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+* Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+* later version.
+* cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+* details.
+*
+* You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+* http://www.gnu.org/licenses/.
+*
+* For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+* frb@tid.es
+*/
 
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- *
- * @author frb
- * 
- * Container classes mapping an Orion Context Broker nofifyContextRequest notification. These are necessaries in order
- * Gson (a Json parser) and DOM (a XML parser) can store in memory a notification.
- */
+*
+* @author frb
+*
+* Container classes mapping an Orion Context Broker nofifyContextRequest notification. These are necessaries in order
+* Gson (a Json parser) and DOM (a XML parser) can store in memory a notification.
+*/
 public class NotifyContextRequest {
     
     private String subscriptionId;
@@ -47,7 +51,7 @@ public class NotifyContextRequest {
     
     /**
      * Constructor for DOM, a XML parser.
-     * 
+     *
      * @param doc
      * @throws Exception
      */
@@ -89,7 +93,7 @@ public class NotifyContextRequest {
         return originator;
     } // getOriginator
     
-    public ArrayList<ContextElementResponse> getContextResponse() {
+    public ArrayList<ContextElementResponse> getContextResponses() {
         return contextResponses;
     } // getContextResponses
     
@@ -111,7 +115,7 @@ public class NotifyContextRequest {
         
         /**
          * Constructor for DOM, a XML parser.
-         * 
+         *
          * @param domContextElementResponse
          */
         public ContextElementResponse(Element domContextElementResponse) throws Exception {
@@ -160,7 +164,7 @@ public class NotifyContextRequest {
         
         /**
          * Constructor for DOM, a XML parser.
-         * 
+         *
          * @param domContextElement
          * @throws Exception
          */
@@ -181,10 +185,17 @@ public class NotifyContextRequest {
             
             id = domIds.item(0).getTextContent();
             NodeList domContextAttributeLists = domContextElement.getElementsByTagName("contextAttributeList");
+            
+            if (domContextAttributeLists.getLength() == 0) {
+                throw new Exception("No <contextAttributeList> tag in the XML document");
+            } // if
+
+            NodeList domContextAttributes = ((Element) domContextAttributeLists.item(0)).
+                    getElementsByTagName("contextAttribute");
             attributes = new ArrayList<ContextAttribute>();
             
-            for (int i = 0; i < domContextAttributeLists.getLength(); i++) {
-                attributes.add(new ContextAttribute((Element) domContextAttributeLists.item(i)));
+            for (int i = 0; i < domContextAttributes.getLength(); i++) {
+                attributes.add(new ContextAttribute((Element) domContextAttributes.item(i)));
             } // for
         } // ContextElement
         
@@ -223,7 +234,7 @@ public class NotifyContextRequest {
         
         /**
          * Constructor for DOM, a XML parser.
-         * 
+         *
          * @param domContextAttribute
          * @exception
          */
@@ -248,11 +259,7 @@ public class NotifyContextRequest {
                 throw new Exception("No <contextValue> tag in the XML document");
             } // if
             
-            //value = domValues.item(0).getTextContent();
-            // FIXME: This class, in the current state, is not valid for XML anymore. All the XML stuff must be moved
-            // to a specific class (XMLNotifyContextRequest), and this class should be renamed as
-            // JsonNotifyContextRequest. In addition, this spliting may suggest the creation of a hierarchy, or an
-            // abstract class, or and interface.
+            value = xml2json(domValues.item(0));
         } // ContextAttribute
         
         public String getName() {
@@ -277,6 +284,60 @@ public class NotifyContextRequest {
             } // else
         } // getContextValue
         
+        /**
+         * Converts a XML node into Json.
+         * @param xmlNode
+         * @return
+         * @throws exception
+         */
+        private JsonElement xml2json(Node xmlNode) throws Exception {
+            // if the XML node has not attributes, it is either an object either a string
+            if (!xmlNode.hasAttributes()) {
+                Node child = xmlNode.getFirstChild();
+                
+                if (child.getFirstChild() != null) {
+                    NodeList domObjects = ((Element) xmlNode).getChildNodes();
+                    JsonObject jsonObject = new JsonObject();
+
+                    for (int i = 0; i < domObjects.getLength(); i++) {
+                        Node domObject = domObjects.item(i);
+                        jsonObject.add(domObject.getNodeName(), xml2json(domObject));
+                    } // for
+
+                    return jsonObject;
+                } else {
+                    return new JsonPrimitive(xmlNode.getTextContent());
+                } // if else
+            } // if
+            
+            // if the "type" attribute is not among the existing ones then return error
+            if (xmlNode.getAttributes().getNamedItem("type") == null) {
+                throw new Exception("Attributes different than \"type\" are not allowed withing or any child tag "
+                        + "according to Orion notification API");
+            } // if
+            
+            String valueType = xmlNode.getAttributes().getNamedItem("type").getTextContent();
+
+            // if the value of the "type" attribute is "vector", the proceed, return error otherwise
+            if (valueType.equals("vector")) {
+                NodeList domItems = ((Element) xmlNode).getElementsByTagName("item");
+
+                if (domItems.getLength() == 0) {
+                    throw new Exception("No <item> tag within <contextValue type=\"vector\">");
+                } // if
+
+                JsonArray jsonArray = new JsonArray();
+
+                for (int i = 0; i < domItems.getLength(); i++) {
+                    jsonArray.add(xml2json(domItems.item(i)));
+                } // for
+
+                return jsonArray;
+            } else {
+                throw new Exception("Unknown XML node type: " + valueType);
+            } // if else if else
+        } // xml2json
+        
     } // ContextAttribute
     
     /**
@@ -295,7 +356,7 @@ public class NotifyContextRequest {
         
         /**
          * Constructor for DOM, a SML parser.
-         * 
+         *
          * @param domStatusCode
          * @throws Exception
          */
