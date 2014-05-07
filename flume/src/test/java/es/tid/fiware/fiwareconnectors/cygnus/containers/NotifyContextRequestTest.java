@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -167,27 +168,30 @@ public class NotifyContextRequestTest extends TestCase {
      * Test of getSubscriptionId method, of class NotifyContextRequest.
      */
     public void testGetSubscriptionId() {
-        System.out.println("getSubscriptionId (notify-xml-simple)");
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLSimple));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
         String expResult = "51c0ac9ed714fb3b37d7d5a8";
+        
+        // test case for nofity-xml-simple
+        System.out.println("getSubscriptionId (notify-xml-simple)");
+        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getSubscriptionId();
         assertEquals(expResult, result);
+        
+        // test case for notify-xml-compound
         System.out.println("getSubscriptionId (notify-xml-compound)");
+        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        result = instance.getSubscriptionId();
+        assertEquals(expResult, result);
         
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLCompound));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
+        // test case for nofity-json-simple
+        System.out.println("getSubscriptionId (notify-json-simple)");
+        Gson gson = new Gson();
+        instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        result = instance.getSubscriptionId();
+        assertEquals(expResult, result);
         
-        expResult = "51c0ac9ed714fb3b37d7d5a8";
+        // test case for nofify-json-compound
+        System.out.println("getSubscriptionId (notify-json-compound)");
+        instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
     } // testGetSubscriptionID
@@ -196,27 +200,30 @@ public class NotifyContextRequestTest extends TestCase {
      * Test of getOriginator method, of class NotifyContextRequest.
      */
     public void testGetOriginator() {
-        System.out.println("getOriginator (notify-xml-simple)");
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLSimple));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
         String expResult = "localhost";
+        
+        // test case for nofity-xml-simple
+        System.out.println("getOriginator (notify-xml-simple)");
+        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getOriginator();
         assertEquals(expResult, result);
-        System.out.println("getSubscriptionId (notify-xml-compound)");
         
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLCompound));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
+        // test case for notify-xml-compound
+        System.out.println("getOriginator (notify-xml-compound)");
+        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        result = instance.getOriginator();
+        assertEquals(expResult, result);
         
-        expResult = "localhost";
+        // test case for nofity-json-simple
+        System.out.println("getOriginator (notify-json-simple)");
+        Gson gson = new Gson();
+        instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        result = instance.getOriginator();
+        assertEquals(expResult, result);
+        
+        // test case for nofify-json-compound
+        System.out.println("getOriginator (notify-json-compound)");
+        instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
         result = instance.getOriginator();
         assertEquals(expResult, result);
     } // testGetOriginator
@@ -225,30 +232,38 @@ public class NotifyContextRequestTest extends TestCase {
      * Test of getContextResponses method, of class NotifyContextRequest.
      */
     public void testGetContextResponses() {
-        System.out.println("getContextResponses (notify-xml-simple)");
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLSimple));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
+        // test case for nofity-xml-simple
+        System.out.println("getOriginator (notify-xml-simple)");
+        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
         ArrayList result = instance.getContextResponses();
         assertTrue(result != null);
-        System.out.println("getSubscriptionId (notify-xml-compound)");
         
-        try {
-            instance = new NotifyContextRequest(createXMLDocument(notifyXMLCompound));
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
+        // test case for notify-xml-compound
+        System.out.println("getOriginator (notify-xml-compound)");
+        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        result = instance.getContextResponses();
+        assertTrue(result != null);
         
+        // test case for nofity-json-simple
+        System.out.println("getOriginator (notify-json-simple)");
+        Gson gson = new Gson();
+        instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        result = instance.getContextResponses();
+        assertTrue(result != null);
+        
+        // test case for nofify-json-compound
+        System.out.println("getOriginator (notify-json-compound)");
+        instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
         result = instance.getContextResponses();
         assertTrue(result != null);
     } // testGetContextResponses
     
-    private Document createXMLDocument(String xmlStr) {
+    /**
+     * Create a XML-based notificationContextRequest given the string representation of such XML.
+     * @param xmlStr
+     * @return The XML-based notificationContextRequest
+     */
+    private NotifyContextRequest createXMLNotifyContextRequest(String xmlStr) {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = null;
         
@@ -267,10 +282,18 @@ public class NotifyContextRequestTest extends TestCase {
             logger.fatal(e.getMessage());
         } catch (IOException e) {
             logger.fatal(e.getMessage());
-        }
+        } // try catch
         
         doc.getDocumentElement().normalize();
-        return doc;
-    } // createXMLDocument
+        NotifyContextRequest instance = null;
+        
+        try {
+            instance = new NotifyContextRequest(doc);
+        } catch (Exception e) {
+            logger.fatal(e.getMessage());
+        } // try catch
+        
+        return instance;
+    } // createXMLNotifyContextRequest
 
 } // NotifyContextRequestTest
