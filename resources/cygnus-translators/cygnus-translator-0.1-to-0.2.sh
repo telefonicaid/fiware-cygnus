@@ -21,10 +21,15 @@
 
 # This script is aimed to translate the already persisted context data from
 # ngsi2cosmos and Cygnus 0.1 format (CSV-like) to Cygnus 0.2 format (Json).
+# Translation is done by downloading, file by file, the HDFS source folder
+# content into a local file located at /tmp. Then a new local file is created
+# at /tmp as well with the translated content, which is finally uploaded to the
+# HDFS destination folder. The usage of /tmp instead of the RAM memory is
+# justified due to the expected large size of the HDFS files.
 
 # show the usage
 if [ $# -ne 3 ]; then
-        echo "Usage: cygnus-translator.sh <HDFS_user> <src_HDFS_directory> <dst_HDFS_directory>";
+	echo "Usage: cygnus-translator.sh <HDFS_user> <src_HDFS_directory> <dst_HDFS_directory>";
 	exit 1;
 fi
 
@@ -34,29 +39,53 @@ srcHDFSFolder=$2
 dstHDFSFolder=$3
 
 # create the destination HDFS folder
-sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
+if hadoop fs -test -d $dstHDFSFolder; then
+	length=$(hadoop fs -ls $dstHDFSFolder | wc -l)
 
-# HDFS content is temporarily donwloaded to /tmp/cygnus (we cannot rely on RAM memory
-# since the HDFS files may be very large), check wether it that folder exists or not
-# in the local file system
-if [ -d /tmp/cygnus ]; then
-        rm -rf /tmp/cygnus/*.tmp
-        rm -rf /tmp/cygnus/*.txt
+	if [ $length -gt 0 ]; then
+		echo "hdfs://locahost$dstHDFSFolder already exists and is not empty!"
+		exit 1;
+	else
+		echo "hdfs://localhost$dstHDFSFolder exists but is empty"
+	fi
 else
-        mkdir /tmp/cygnus
+	echo "Creating hdfs://localhost$dstHDFSFolder"
+        sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
 fi
 
-# iterate on the HDFS files within the source HDFS directory
-hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $8 }' | while read -r hdfsFile; do
-        echo "processing $hdfsFile"
+# create a local temporary folder
+tmpDir=$(sudo -u $hdfsUser mktemp -d /tmp/cygnus.XXXX)
+echo "Creating $tmpDir as working directory"
 
-        # copy the content of the source HDFS file into a temporary source file
-        hadoop fs -get $hdfsFile /tmp/cygnus/cygnus-translator-input.tmp
+# iterate on the HDFS files within the source HDFS directory
+hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }' | while read -r lsLine; do
+	# get the HDFS file size and path
+	IFS=' ' read -ra ADDR
+	hdfsFileSize="${ADDR[0]}"
+	hdfsFilePath="${ADDR[1]}"
+
+	# check if the file may be allocated in /tmp
+	available=$(df -k /tmp | grep -v Filesystem | awk '{ print $4 }')
+
+	if [ $available -lt $hdfsFileSize ]; then
+		echo "Not enough local disk space for allocating the HDFS file, it will not be translated!"
+		continue
+	fi
+
+	# copy the content of the HDFS file into the temporary folder
+	echo -n "Reading hdfs://localhost$hdfsFilePath ($hdfsFileSize bytes)"
+	hadoop fs -get $hdfsFilePath $tmpDir/
+	echo " [DONE]"
 
 	# get the file name
-	file=${hdfsFile##*/}
+	hdfsFileName=${hdfsFilePath##*/}
+
+	# create a temporary output file within the temporary working folder
+	tmpOutput=$(sudo -u $hdfsUser mktemp $tmpDir/output.XXXX)
 
 	# translate line by line, each file; use a temporary destination file
+	echo -n "Translating into $tmpOutput"
+
 	while IFS='|' read -ra ADDR; do
 		jsonLine="{\"ts\":\"${ADDR[1]}\", \
 			\"iso8601date\":\"${ADDR[0]}\", \
@@ -65,14 +94,22 @@ hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $8 }' | while read -
 			\"attrName\":\"${ADDR[4]}\", \
 			\"attrType\":\"${ADDR[5]}\", \
 			\"attrValue\":\"${ADDR[6]}\"}"
-                echo $jsonLine >> /tmp/cygnus/cygnus-translator-output.tmp
-        done < /tmp/cygnus/cygnus-translator-input.tmp
+		echo $jsonLine >> $tmpOutput
+	done < $tmpDir/$hdfsFileName
+
+	echo " [DONE]"
 
 	# copy the translated file to HDFS
-	sudo -u $hdfsUser hadoop fs -put /tmp/cygnus/cygnus-translator-output.tmp $dstHDFSFolder/$file
+	translatedFileSize=$(ls -la $tmpOutput | awk '{ print $5 }')
+	echo -n "Writing hdfs://localhost$dstHDFSFolder/$hdfsFileName ($translatedFileSize bytes)"
+	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/$hdfsFileName
+	echo " [DONE]"
 
 	# delete all the temporary files
-        rm /tmp/cygnus/cygnus-translator-input.tmp
-	rm /tmp/cygnus/cygnus-translator-output.tmp
+	rm $tmpDir/$hdfsFileName
+	rm $tmpOutput
 done
 
+# delete the local temporary folder (should not be necessary since the folder
+#seems to be deleted automatically)
+rm -r $tmpDir
