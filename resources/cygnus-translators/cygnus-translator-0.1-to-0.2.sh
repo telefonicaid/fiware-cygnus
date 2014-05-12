@@ -50,7 +50,7 @@ if hadoop fs -test -d $dstHDFSFolder; then
 	fi
 else
 	echo "Creating hdfs://localhost$dstHDFSFolder"
-        sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
+	sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
 fi
 
 # create a local temporary folder
