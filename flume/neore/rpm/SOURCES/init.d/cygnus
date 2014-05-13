@@ -35,7 +35,7 @@ cygnus_start()
         # Save the PID of the cygnus process
         ps -ef | grep flume | grep -v grep | awk '{ print $2 }' > ${CYGNUS_PID}
         PID="`cat /var/run/cygnus/cygnus.pid`"
-        sleep 2 # wait some time to leave iotAgent start
+        sleep 2 # wait some time to leave cygnus start
         if [[ -z "${PID}" ]]; then
             printf "%s\n" "$(failure)"
             exit 1
