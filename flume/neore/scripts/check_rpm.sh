@@ -92,7 +92,7 @@ sudo service cygnus stop
 if [[ $? -eq 0 ]]; then
 	_logOk ".............. cygnus service is stopped .............."
 else
-	_logError ".............. cygnus RPM NOT stopped .............." 
+	_logError ".............. cygnus service is NOT stopped .............." 
 	exit 1
 fi
 echo ""
