@@ -68,10 +68,10 @@ echo ""
 ## Check if the cygnus is listen the specific ports
 _logStage "######## Checking the cygnus service ########"
 if [ "`sudo netstat -putan | grep 5050`" == "" ]; then
-	_logError ".............. cygnus is not LISTEN .............."
+	_logError ".............. cygnus is not LISTENING .............."
 	exit 1
 else
-	_logOk ".............. cygnus is LISTEN the correct ports! .............." 
+	_logOk ".............. cygnus is LISTENING the correct ports! .............." 
 fi
 echo ""
 
