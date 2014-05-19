@@ -34,13 +34,9 @@ import org.apache.log4j.Logger;
  * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implemenatation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
-public class HttpFSBackend implements HDFSBackend {
+public class HttpFSBackend extends HDFSBackend {
     
     private Logger logger;
-    private String cosmosHost;
-    private String cosmosPort;
-    private String cosmosUsername;
-    private String cosmosDataset;
     
     /**
      * 
@@ -50,6 +46,7 @@ public class HttpFSBackend implements HDFSBackend {
      * @param cosmosDataset
      */
     public HttpFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
+        super(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;

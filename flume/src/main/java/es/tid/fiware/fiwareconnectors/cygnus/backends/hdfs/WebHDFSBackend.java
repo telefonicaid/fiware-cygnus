@@ -38,13 +38,9 @@ import org.apache.log4j.Logger;
  * datanoed. The second step occurs when the specific datanode is accessed according the redirection (at TCP/50075 port)
  * in order to perform the final I/O operation.
  */
-public class WebHDFSBackend implements HDFSBackend {
+public class WebHDFSBackend extends HDFSBackend {
     
     private Logger logger;
-    private String cosmosHost;
-    private String cosmosPort;
-    private String cosmosUsername;
-    private String cosmosDataset;
     
     /**
      * 
@@ -54,6 +50,7 @@ public class WebHDFSBackend implements HDFSBackend {
      * @param cosmosDataset
      */
     public WebHDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
+        super(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
