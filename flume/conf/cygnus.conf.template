@@ -2,15 +2,16 @@
 
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
-# Regarding sinks, you can use at the same time both 'hdfs-sink' and 'ckan-sink' (configuration example shows only 'hdfs-sink')
+# Regarding sinks, you can use multiple ones at the same time; the only requirement is to provide a channel for each
+# one of them (this example shows how to configure 3 sinks at the same time).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink
-cygnusagent.channels = notifications
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = notifications
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -25,10 +26,10 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 # ============================================
 # OrionHDFSSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.hdfs-sink.channel = notifications
+cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
-# IP address of the Cosmos deployment where the notification events will be persisted
+# The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
@@ -42,24 +43,56 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # ============================================
 # OrionCKANSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.ckan-sink.channel = notifications
+cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
-# The CKAN API key to use
-cygnusagent.sinks.ckan-sink.api_key = <api_key>
-# The host for the CKAN API endpoint
-cygnusagent.sinks.ckan-sink.ckan_host = localhost
-# The port for the CKAN API endpoint
+# the CKAN API key to use
+cygnusagent.sinks.ckan-sink.api_key = ckanapikey
+# the FQDN/IP address for the CKAN API endpoint
+cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
+# the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# The dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
+# the dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
 cygnusagent.sinks.ckan-sink.dataset = mydataset
 
-#=============================================
-# channel configuration
-# channel name
-cygnusagent.channels.notifications.type = memory
-# capacity of the channel
-cygnusagent.channels.notifications.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.notifications.transactionCapacity = 100
+# ============================================
+# OrionMySQLSink configuration
+# channel name from where to read notification events
+orionagent.sinks.mysql-sink.channel = mysql-channel
+# sink class, must not be changed
+orionagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
+# the FQDN/IP address where the MySQL server runs
+orionagent.sinks.mysql-sink.mysql_host = x.y.z.w
+# the port where the MySQL server listes for incomming connections
+orionagent.sinks.mysql-sink.mysql_port = 3306
+# a valid user in the MySQL server
+orionagent.sinks.mysql-sink.mysql_username = root
+# password for the user above
+orionagent.sinks.mysql-sink.mysql_password = 78yuihj56rtyfg
 
+#=============================================
+# hdfs-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.hdfs-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.hdfs-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.hdfs-channel.transactionCapacity = 100
+
+#=============================================
+# ckan-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.ckan-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.ckan-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.ckan-channel.transactionCapacity = 100
+
+#=============================================
+# mysql-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.mysql-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.mysql-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mysql-channel.transactionCapacity = 100
