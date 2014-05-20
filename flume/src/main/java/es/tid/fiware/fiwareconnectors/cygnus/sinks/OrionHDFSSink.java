@@ -19,33 +19,17 @@
  
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
-import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
-import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
-import java.io.StringReader;
-import java.sql.Timestamp;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.apache.flume.Channel;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
-import org.apache.flume.EventDeliveryException;
-import org.apache.flume.Transaction;
-import org.apache.flume.conf.Configurable;
-import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  * 
@@ -64,7 +48,7 @@ import org.xml.sax.InputSource;
  * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
  * channel, i.e. an event is not removed from the channel until it is not appropriately persisted.
  */
-public class OrionHDFSSink extends AbstractSink implements Configurable {
+public class OrionHDFSSink extends OrionSink {
 
     private Logger logger;
     private String cosmosHost;
@@ -73,8 +57,80 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
     private String cosmosPassword;
     private String cosmosDataset;
     private String hdfsAPI;
-    private HttpClientFactory httpClientFactory;
     private HDFSBackend persistenceBackend;
+    
+    /**
+     * Constructor.
+     */
+    public OrionHDFSSink() {
+        super();
+    } // OrionHDFSSink
+    
+    /**
+     * Gets the Cosmos host.
+     * @return The Cosmos host
+     */
+    public String getCosmosHost() {
+        return cosmosHost;
+    } // getComsosHost
+    
+    /**
+     * Gets the Cosmos port.
+     * @return The Cosmos port
+     */
+    public String getCosmosPort() {
+        return cosmosPort;
+    } // getComsosPort
+
+    /**
+     * Gets the Cosmos username.
+     * @return The Cosmos username
+     */
+    public String getCosmosUsername() {
+        return cosmosUsername;
+    } // getComsosUsername
+
+    /**
+     * Gets the Cosmos passwordt.
+     * @return The Cosmos password
+     */
+    public String getCosmosPassword() {
+        return cosmosPassword;
+    } // getComsosPassword
+
+    /**
+     * Gets the Cosmos dataset.
+     * @return The Cosmos dataset
+     */
+    public String getCosmosDataset() {
+        return cosmosDataset;
+    } // getComsosDataset
+    
+    /**
+     * Gets the HDFS API.
+     * @return The HDFS API
+     */
+    public String getHDFSAPI() {
+        return hdfsAPI;
+    } // getHDFSAPI
+    
+    /**
+     * Sets the persistence backend. This is mainly used by the tests in order to mock it, since the backend is created
+     * in the start() method.
+     * @param persistenceBackend
+     */
+    public void setPersistenceBackend(HDFSBackend persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    } // setPersistenceBackend
+    
+    /**
+     * Sets the time helper. This is mainly used by the tests in order to mock it, since the time helper is created in
+     * the start() method.
+     * @param timeHelper
+     */
+    public void setTimeHelper(TimeHelper timeHelper) {
+        this.timeHelper = timeHelper;
+    } // setTimeHelper
     
     @Override
     public void configure(Context context) {
@@ -96,12 +152,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
 
     @Override
     public void start() {
-        // create a Http clients factory (no SSL)
-        httpClientFactory = new HttpClientFactory(false);
-        
-        // create a persistenceBackend backend
-        persistenceBackend = null;
-        
+        // create the persistence backend
         if (hdfsAPI.equals("httpfs")) {
             persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
             logger.debug("HttpFS persistence backend created");
@@ -113,6 +164,7 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
         } // if else if
         
         try {
+            // FIXME: this could be moved to a "provision" method within the persistence backend, as OrionMySQLSink does
             // create (if not exists) the /user/myuser/mydataset folder and the related HiveQL external table
             if (persistenceBackend != null) {
                 logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
@@ -139,94 +191,17 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
     } // start
 
     @Override
-    public void stop() {
-        httpClientFactory = null;
-        persistenceBackend = null;
-        super.stop();
-    } // stop
-
-    @Override
-    public Status process() throws EventDeliveryException {
-        Status status = null;
-
-        // start transaction
-        Channel ch = getChannel();
-        Transaction txn = ch.getTransaction();
-        txn.begin();
-
-        try {
-            // get an event
-            Event event = ch.take();
-            
-            if (event == null) {
-                txn.commit();
-                return Status.READY;
-            } // if
-            
-            // persist the event
-            logger.info("An event was taken from the channel, it must be persisted");
-            persist(event);
-            
-            // specify the transaction has succeded
-            txn.commit();
-            status = Status.READY;
-        } catch (Throwable t) {
-            txn.rollback();
-            logger.error(t.getMessage());
-            status = Status.BACKOFF;
-
-            // rethrow all errors
-            if (t instanceof Error) {
-                throw (Error) t;
-            } // if
-        } finally {
-            // close the transaction
-            txn.close();
-        } // try catch finally
-
-        return status;
-    } // process
-    
-    /**
-     * Given an event, it is persisted in HDFS by appending a new data line in the apropriate entity-related file.
-     * 
-     * @param event A Flume event containing the data to be persisted and certain metadata (headers).
-     * @throws Exception
-     */
-    private void persist(Event event) throws Exception {
-        String eventData = new String(event.getBody());
-        Map<String, String> eventHeaders = event.getHeaders();
+    void processContextResponses(String username, ArrayList contextResponses) throws Exception {
+        // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
+        // cosmosUsername
         
-        // parse the eventData
-        NotifyContextRequest notification = null;
-        
-        if (eventHeaders.get("content-type").contains("application/json")) {
-            logger.debug("The content-type was application/json");
-            Gson gson = new Gson();
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
-            logger.debug("Json parsed");
-        } else if (eventHeaders.get("content-type").contains("application/xml")) {
-            logger.debug("The content-type was application/xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(eventData));
-            Document doc = dBuilder.parse(is);
-            doc.getDocumentElement().normalize();
-            notification = new NotifyContextRequest(doc);
-            logger.debug("XML parsed");
-        } else {
-            throw new Exception("Unrecognized content type (not Json nor XML)");
-        } // if else if
-
-        // process the event data
-        ArrayList contextResponses = notification.getContextResponses();
-        logger.debug("num context responses "  + contextResponses.size());
-
+        // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
+            // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             String fileName = "cygnus-" + cosmosUsername + "-" + cosmosDataset.replaceAll("/", "_") + "-"
-                    + encode(contextElement.getId()) + "-" + encode(contextElement.getType()) + ".txt";
+                    + Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType()) + ".txt";
             
             // check if the file exists in HDFS right now, i.e. when its name has been got
             boolean fileExists = false;
@@ -235,21 +210,23 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 fileExists = true;
             } // if
             
-            // iterate on all this entity's attributes
+            // iterate on all this entity's attributes and write a line per each updated one
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             for (int j = 0; j < contextAttributes.size(); j++) {
+                // get the j-th contextAttribute
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                Date date = new Date();
                 
-                // create a Json document to be persisted, the timestamp must be devided by 1000 since it is expressed
-                // in terms of microsenconds and we want miliseconds
-                String line = "{\"ts\":\"" + (date.getTime() / 1000) + "\",\"iso8601date\":\""
-                        + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\",\"entityId\":\""
-                        + contextElement.getId() + "\",\"entityType\":\"" + contextElement.getType()
-                        + "\",\"attrName\":\"" + contextAttribute.getName() + "\",\"attrType\":\""
-                        + contextAttribute.getType() + "\",\"attrValue\":"
-                        + contextAttribute.getContextValue() + "}";
+                // create a Json document to be persisted
+                String line = "{"
+                        + "\"ts\":\"" + timeHelper.getTime() + "\","
+                        + "\"iso8601date\":\"" + timeHelper.getTimeString() + "\","
+                        + "\"entityId\":\"" + contextElement.getId() + "\","
+                        + "\"entityType\":\"" + contextElement.getType() + "\","
+                        + "\"attrName\":\"" + contextAttribute.getName() + "\","
+                        + "\"attrType\":\"" + contextAttribute.getType() + "\","
+                        + "\"attrValue\":" + contextAttribute.getContextValue()
+                        + "}";
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
                 // if the file exists, append the Json document to it; otherwise, create it with initial content and
@@ -263,16 +240,6 @@ public class OrionHDFSSink extends AbstractSink implements Configurable {
                 } // if else
             } // for
         } // for
-    } // persist
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    private String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_");
-    } // encode
+    } // processContextResponses
     
 } // OrionHDFSSink

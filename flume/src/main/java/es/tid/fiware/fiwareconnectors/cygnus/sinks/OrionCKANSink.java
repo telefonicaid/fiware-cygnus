@@ -19,31 +19,18 @@
  
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
-import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackendImpl;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
-import org.apache.flume.conf.Configurable;
-import org.apache.flume.sink.AbstractSink;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
-import org.apache.flume.Channel;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
-import org.apache.flume.EventDeliveryException;
-import org.apache.flume.Transaction;
 
 /**
  * 
@@ -52,7 +39,7 @@ import org.apache.flume.Transaction;
  * CKAN sink for Orion Context Broker.
  *
  */
-public class OrionCKANSink extends AbstractSink implements Configurable {
+public class OrionCKANSink extends OrionSink {
 
     private Logger logger;
     private String apiKey;
@@ -86,124 +73,36 @@ public class OrionCKANSink extends AbstractSink implements Configurable {
 
         super.start();
     } // start
-
-    @Override
-    public void stop() {
-        httpClientFactory = null;
-        persistenceBackend = null;
-        super.stop();
-    } // stop
-
-    @Override
-    // FIXME: this code is common with OrionHDFSSInk. Maybe we should define a common parent class
-    // OrionSink and made OrionCKANSink and OrionHDFSSink derivated classes from it
-    public Status process() throws EventDeliveryException {
-        Status status = null;
-
-        // start transaction
-        Channel ch = getChannel();
-        Transaction txn = ch.getTransaction();
-        txn.begin();
-
-        try {
-            // get an event
-            Event event = ch.take();
-            
-            if (event == null) {
-                // prematurely close the transaction
-                txn.close();
-                return Status.BACKOFF;
-            } // if
-            
-            // persist the event
-            persist(event);
-            
-            // specify the transaction has succeed
-            txn.commit();
-            status = Status.READY;
-        } catch (Throwable t) {
-            // specify something went wrong
-            txn.rollback();
-            status = Status.BACKOFF;
-
-            // rethrow all errors
-            if (t instanceof Error) {
-                throw (Error) t;
-            } // if
-        } finally {
-            // close the transaction
-            txn.close();
-        } // try catch finally
-
-        return status;
-    } // process
     
-    /**
-     * Given an event, it is persisted in CKAN using the datastore associated with the entity.
-     * 
-     * @param event A Flume event containing the data to be persisted and certain metadata (headers).
-     * @throws Exception
-     */
-    // FIXME: most of this code could be also factorized in a common sink class
-    private void persist(Event event) throws Exception {
-        String eventData = new String(event.getBody());
-        Map<String, String> eventHeaders = event.getHeaders();
+    @Override
+    void processContextResponses(String username, ArrayList contextResponses) throws Exception {
+        // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
+        // cosmosUsername
         
-        // parse the eventData
-        NotifyContextRequest notification = null;
-        
-        if (eventHeaders.get("content-type").contains("application/json")) {
-            Gson gson = new Gson();
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
-        } else if (eventHeaders.get("content-type").contains("application/xml")) {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(eventData));
-            Document doc = dBuilder.parse(is);
-            doc.getDocumentElement().normalize();
-            notification = new NotifyContextRequest(doc);
-        } else {
-            throw new Exception("Unrecognized content type (not Json nor XML)");
-        } // if else if
-
-        // process the event data
-        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
-
+        // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
-            ContextElementResponse contextElementResponse = contextResponses.get(i);
+            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                String entity = encode(contextElement.getId()) + "-" + encode(contextElement.getType());
+                String entity = Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType());
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue();
                 Date date = new Date();
 
+                // persist the data
                 logger.info("Persisting data: <" + date + ", "
                         + entity + ", "
                         + attrName + ", "
                         + attrType + ", "
                         + attrValue + ">");
-
                 persistenceBackend.persist(httpClientFactory.getHttpClient(false), date, entity,
                         attrName, attrType, attrValue);
-
             } // for
         } // for
-    } // persist
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    // FIXME: factorize in common class
-    private String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_");
-    } // encode
+    } // processContextResponses
     
 } // OrionHDFSSink
