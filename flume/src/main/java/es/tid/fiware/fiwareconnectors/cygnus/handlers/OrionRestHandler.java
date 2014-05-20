@@ -48,13 +48,29 @@ import org.apache.log4j.Logger;
 public class OrionRestHandler implements HTTPSourceHandler {
     
     private Logger logger;
-    private Pattern pattern;
+    private Pattern orionVersionRegexPattern;
     private String notificationsTarget;
+    
+    /**
+     * Gets the Orion version regex pattern.
+     * @return The Orion version regex pattern
+     */
+    public Pattern getOrionVerionRegexPattern() {
+        return orionVersionRegexPattern;
+    } // getOrionVerionRegexPattern
+    
+    /**
+     * Gets the notifications target.
+     * @return The notifications target
+     */
+    public String getNotificationTarget() {
+        return notificationsTarget;
+    } // getNotificationTarget
 
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionRestHandler.class);
-        pattern = Pattern.compile("orion/" + context.getString("orion_version", "*"));
+        orionVersionRegexPattern = Pattern.compile("orion/" + context.getString("orion_version", "*"));
         notificationsTarget = context.getString("notification_target", "notify");
         
         if (notificationsTarget.charAt(0) != '/') {
@@ -87,7 +103,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
             
             if (headerName.equals("user-agent")) {
-                Matcher matcher = pattern.matcher(headerValue);
+                Matcher matcher = orionVersionRegexPattern.matcher(headerValue);
                 
                 if (!matcher.matches()) {
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
