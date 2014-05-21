@@ -66,9 +66,9 @@ index=0
 # iterate on the HDFS files within the source HDFS directory
 while read -r lsLine; do
 	# get the HDFS file size and path
-	IFS=' ' read -ra ADDR
-	hdfsFileSize="${ADDR[0]}"
-	hdfsFilePath="${ADDR[1]}"
+	IFS=' ' read -ra array <<< "${lsLine}"
+	hdfsFileSize="${array[0]}"
+	hdfsFilePath="${array[1]}"
 
 	# check if the file may be allocated in /tmp
 	available=$(df -k /tmp | grep -v Filesystem | awk '{ print $4 }')
@@ -92,14 +92,14 @@ while read -r lsLine; do
 	# translate line by line, each file; use a temporary destination file
 	echo -n "Translating into $tmpOutput"
 
-	while IFS='|' read -ra ADDR; do
-		jsonLine="{\"ts\":\"${ADDR[1]}\", \
-			\"iso8601date\":\"${ADDR[0]}\", \
-			\"entityId\":\"${ADDR[2]}\", \
-			\"entityType\":\"${ADDR[3]}\", \
-			\"attrName\":\"${ADDR[4]}\", \
-			\"attrType\":\"${ADDR[5]}\", \
-			\"attrValue\":\"${ADDR[6]}\"}"
+	while IFS='|' read -ra array; do
+		jsonLine="{\"ts\":\"${array[1]}\", \
+			\"iso8601date\":\"${array[0]}\", \
+			\"entityId\":\"${array[2]}\", \
+			\"entityType\":\"${array[3]}\", \
+			\"attrName\":\"${array[4]}\", \
+			\"attrType\":\"${array[5]}\", \
+			\"attrValue\":\"${array[6]}\"}"
 		echo $jsonLine >> $tmpOutput
 	done < $tmpDir/$hdfsFileName
 
