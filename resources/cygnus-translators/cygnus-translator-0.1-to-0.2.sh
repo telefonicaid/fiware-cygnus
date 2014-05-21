@@ -57,8 +57,14 @@ fi
 tmpDir=$(sudo -u $hdfsUser mktemp -d /tmp/cygnus.XXXX)
 echo "Creating $tmpDir as working directory"
 
+# declare a variable that will be used to store unique final HDFS files
+declare -a dstHDFSFileNames=()
+
+# file counter
+index=0
+
 # iterate on the HDFS files within the source HDFS directory
-hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }' | while read -r lsLine; do
+while read -r lsLine; do
 	# get the HDFS file size and path
 	IFS=' ' read -ra ADDR
 	hdfsFileSize="${ADDR[0]}"
@@ -99,17 +105,34 @@ hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }' | while r
 
 	echo " [DONE]"
 
-	# copy the translated file to HDFS
+	# copy the translated file to HDFS as a temporal file to be merged at the end
 	translatedFileSize=$(ls -la $tmpOutput | awk '{ print $5 }')
-	echo -n "Writing hdfs://localhost$dstHDFSFolder/$hdfsFileName ($translatedFileSize bytes)"
-	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/$hdfsFileName
+	echo -n "Writing hdfs://localhost$dstHDFSFolder/cygnus-$entityId-$entityType.$index.tmp ($translatedFileSize bytes)"
+	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/cygnus-$entityId-$entityType.$index.tmp
 	echo " [DONE]"
 
 	# delete all the temporary files
 	rm $tmpDir/$hdfsFileName
 	rm $tmpOutput
+
+	# store the final HDFS name, if not stored yet
+        if ! [[ $(echo "${dstHDFSFileNames[@]}" | grep cygnus-$entityId-$entityType) ]]; then
+                dstHDFSFileNames[index]=cygnus-$entityId-$entityType
+        fi
+
+        # update the file counter
+        index=$((index+1))
+done < <(hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }')
+
+# iterate on the unique final HDFS files in order to merge all the tmp files related with them
+for i in "${dstHDFSFileNames[@]}"; do
+        echo "Merging $dstHDFSFolder/$i.*.tmp into $dstHDFSFolder/$i.txt"
+        sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i.txt
 done
 
+# delete all the tmp files in the destination HDFS folder
+sudo -u $hdfsUser hadoop fs -rmr $dstHDFSFolder/*.tmp
+
 # delete the local temporary folder (should not be necessary since the folder
-#seems to be deleted automatically)
+# seems to be deleted automatically)
 rm -r $tmpDir
