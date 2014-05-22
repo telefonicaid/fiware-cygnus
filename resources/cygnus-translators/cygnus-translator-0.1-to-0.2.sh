@@ -21,11 +21,13 @@
 
 # This script is aimed to translate the already persisted context data from
 # ngsi2cosmos and Cygnus 0.1 format (CSV-like) to Cygnus 0.2 format (Json).
+# It must be run in the NameNode of the Hadoop cluster where the data is stored.
 # Translation is done by downloading, file by file, the HDFS source folder
 # content into a local file located at /tmp. Then a new local file is created
 # at /tmp as well with the translated content, which is finally uploaded to the
-# HDFS destination folder. The usage of /tmp instead of the RAM memory is
-# justified due to the expected large size of the HDFS files.
+# HDFS destination folder as a temporal file. All the temporal HDFS files
+# regarding a common entity are finally merged. The usage of /tmp instead of
+# the RAM memory is justified due to the expected large size of the HDFS files.
 
 # show the usage
 if [ $# -ne 3 ]; then
@@ -37,6 +39,12 @@ fi
 hdfsUser=$1
 srcHDFSFolder=$2
 dstHDFSFolder=$3
+
+# check if the script is being run in the Hadoop cluster NameNode
+if ! [[ $(ps -ef | grep NameNode | grep -v grep) ]]; then
+        echo "This script has been designed for executing in a Hadoop cluster NameNode!"
+        exit 1;
+fi
 
 # create the destination HDFS folder
 if hadoop fs -test -d $dstHDFSFolder; then

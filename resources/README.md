@@ -18,7 +18,7 @@ A set of scripts that can be use to simulate Orion NGSI10 notifications. Its mai
 
 ## Cygnus translators
 
-These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format.
+These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.
 
 ## Contact
 
