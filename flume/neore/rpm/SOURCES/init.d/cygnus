@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# contextbroker         Start/Stop cygnus
+#
+# chkconfig: 2345 99 60
+# description: cygnus
+
+# Load some fancy functions for init.d
+. /etc/rc.d/init.d/functions
+
+PARAM=$1
+
+COMPONENT_NAME=cygnus
+PREFIX=/usr
+CYGNUS_DIR=${PREFIX}/cygnus
+FLUME_EXECUTABLE=${CYGNUS_DIR}/bin/flume-ng
+CYGNUS_PID_FILE=/var/run/cygnus/cygnus.pid
+
+# Load the environment
+ if [[ -f ${CYGNUS_DIR}/conf/flume.conf ]]; then
+    . ${CYGNUS_DIR}/conf/flume.conf
+else
+   echo "Configuration file ${CYGNUS_DIR}/conf/flume.conf not found"
+   exit 1
+fi
+
+cygnus_start()
+{
+    printf "%-50s" "Starting ${NAME}..."
+    if [[ -x ${FLUME_EXECUTABLE} ]]; then
+        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} &> /dev/null &"
+        su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
+        sleep 2 # wait some time to know if flume is still alive
+        FLUME_PID=$(ps -ef | grep flume | grep -v grep | awk '{ print $2 }')
+        if [[ -z ${FLUME_PID} ]]; then
+            printf "%s\n" "$(failure)"
+            exit 1
+        else
+            echo ${FLUME_PID} > ${CYGNUS_PID_FILE}
+            chown ${CYGNUS_USER}:${CYGNUS_USER} ${CYGNUS_PID_FILE}
+            printf "%s\n" "$(success)"
+        fi
+    else
+        printf "%s\n" "Fail - ${FLUME_EXECUTABLE} not exists or is not executable."
+        exit 1
+    fi
+}
+
+cygnus_stop()
+{
+    printf "%-50s" "Stopping $NAME..."
+    if [[ -f "${CYGNUS_PID_FILE}" ]]; then
+        kill -HUP $(cat ${CYGNUS_PID_FILE})
+        rm -f ${CYGNUS_PID_FILE}
+        printf "%s\n" "$(success)"
+    else
+        printf "%s\n" "$(failure)"
+    fi
+}
+
+cygnus_status()
+{
+    status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE}
+}
+
+
+case ${PARAM} in
+
+    'start')
+        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} && exit 0
+        cygnus_start
+        ;;
+
+    'stop')
+		status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} || exit 0
+        cygnus_stop
+        ;;
+
+    'restart')
+        cygnus_stop
+        cygnus_start
+        ;;
+
+    'status')
+        cygnus_status
+        ;;
+
+esac
+
+
+
