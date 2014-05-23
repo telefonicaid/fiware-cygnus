@@ -28,8 +28,7 @@ cygnus_start()
 {
     printf "%-50s" "Starting ${NAME}..."
     if [[ -x ${FLUME_EXECUTABLE} ]]; then
-        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} -Dflume.root.logger=${FLUME_ROOT_LOGGER} &> /dev/null &"
-        echo " Cygnus start command: ${CYGNUS_COMMAND}"
+        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} &> /dev/null &"
         su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
         sleep 2 # wait some time to know if flume is still alive
         FLUME_PID=$(ps -ef | grep flume | grep -v grep | awk '{ print $2 }')
@@ -37,8 +36,8 @@ cygnus_start()
             printf "%s\n" "$(failure)"
             exit 1
         else
-            echo ${FLUME_PID} > {CYGNUS_PID_FILE}
-            chown ${CYGNUS_USER}:${CYGNUS_USER} {CYGNUS_PID_FILE}
+            echo ${FLUME_PID} > ${CYGNUS_PID_FILE}
+            chown ${CYGNUS_USER}:${CYGNUS_USER} ${CYGNUS_PID_FILE}
             printf "%s\n" "$(success)"
         fi
     else
