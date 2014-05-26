@@ -15,12 +15,12 @@ function download_flume(){
 	FLUME_WO_TAR="apache-flume-1.4.0-bin"
 
 	_log "#### The version of the component is (${FLUME_TAR}) ####"
-	ARTIFACTORY_FLUME_URL="http://artifactory.hi.inet/artifactory/simple/common/flume/"
+	ARTIFACT_FLUME_URL="http://archive.apache.org/dist/flume/1.4.0/"
 	_log "#### BASE_DIR = $BASE_DIR ####"
 	_log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
-	curl -s -o ${FLUME_TAR} ${ARTIFACTORY_FLUME_URL}/${FLUME_TAR}
+	curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
 	if [[ $? -ne 0 ]]; then
-			_logError "cannot download apache-flume.tar.gz (${FLUME_TAR}) from ${ARTIFACTORY_FLUME_URL}"
+			_logError "cannot download apache-flume.tar.gz (${FLUME_TAR}) from ${ARTIFACT_FLUME_URL}"
 			return 1
 		else
 			_logOk ".............. Done! .............."
