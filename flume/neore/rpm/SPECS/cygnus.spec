@@ -85,10 +85,13 @@ mkdir -p %{_build_root_project}/init.d
 mkdir -p %{buildroot}/var/run/%{_project_name}
 # Create log folder
 mkdir -p %{buildroot}/${_log_dir}
+# Create /etc/cron.d directory
+mkdir -p %{buildroot}/etc/cron.d
 
 cp -R %{_builddir}/usr/cygnus/* %{_build_root_project}
 cp %{_builddir}/init.d/%{_service_name}  %{_build_root_project}/init.d/%{_service_name}
 cp %{_builddir}/config/* %{_build_root_project}/conf/
+cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles %{buildroot}/etc/cron.d
 
 # -------------------------------------------------------------------------------------------- #
 # post-install section:
@@ -150,5 +153,7 @@ rm -rf $RPM_BUILD_ROOT
 # -------------------------------------------------------------------------------------------- #
 %files
 %defattr(755,%{_project_user},%{_project_user},755)
+%attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
+
 %{_project_install_dir}
 /var/
