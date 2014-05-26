@@ -61,8 +61,8 @@ usage() {
     printf "Options:\n" >&2
     printf "\n" >&2
     printf "    -h                    show usage\n" >&2
-    printf "    -v VERSION            version for rpm product preferably in format x.y.z \n" >&2
-    printf "    -r RELEASE            release for product. I.E. 0.ge58dffa \n" >&2
+    printf "    -v VERSION            Mandatory parameter. Version for rpm product preferably in format x.y.z \n" >&2
+    printf "    -r RELEASE            Optional parameter. Release for product. I.E. 0.ge58dffa \n" >&2
     printf "\n" >&2
     exit 1
 }
