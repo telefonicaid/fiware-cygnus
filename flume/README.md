@@ -15,7 +15,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionCKANSink. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
 * OrionMySQLSink. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Each entity's attribute update is persisted as a new row.
 
-All these new components are combined with other native ones, with the purpose of implementing the following data flow:
+All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
 1. On behalf of Cygnus, subscribe to Orion for certain context information.
 2. Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
 3. Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
@@ -95,7 +95,19 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 ### OrionMySQLSink
 
+Similarly to OrionHDFSSink, a table is created for each entity in order to store its notified context data, being the name for this tables:
 
+    cygnus_<entity_id>_<entity_type>
+
+These tables are stored in databases, one per user, enabling a private data space, with this name format:
+
+    cygnus_<mysql_user>
+
+Within tables, we can find two options:
+* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. This tables can be created in execution time, dynamically.
+* A column per each entity's attribute. This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter.
 
 ## XML notification example
 
@@ -141,7 +153,7 @@ The creation of the `plugins.d` directory is related to the installation of thir
 Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout release/0.2
+    $ git checkout release/<version>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
     $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
@@ -149,7 +161,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
 or not:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout release/0.2
+    $ git checkout release/<version>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
@@ -263,7 +275,7 @@ orionagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 orionagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-orionagent.sinks.mysql-sink.mysql_password = 78yuihj56rtyfg
+orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 
 #=============================================
 # hdfs-channel configuration
