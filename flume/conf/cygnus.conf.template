@@ -68,7 +68,7 @@ orionagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 orionagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-orionagent.sinks.mysql-sink.mysql_password = 78yuihj56rtyfg
+orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 
 #=============================================
 # hdfs-channel configuration

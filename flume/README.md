@@ -95,7 +95,7 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 ### OrionMySQLSink
 
-Similarly to OrionHDFSSink, a table is created for each entity in order to store its notified context data, being the name for this tables:
+Similarly to OrionHDFSSink, a table is created for each entity in order to store its notified context data, being the name for these tables:
 
     cygnus_<entity_id>_<entity_type>
 
@@ -104,10 +104,10 @@ These tables are stored in databases, one per user, enabling a private data spac
     cygnus_<mysql_user>
 
 Within tables, we can find two options:
-* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. This tables can be created in execution time, dynamically.
+* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables are created at execution time if the table doesn't exist previously to the row insertion.
 * A column per each entity's attribute. This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter.
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter (TBD which is the name for this parameter and how to parameterize it).
 
 ## XML notification example
 
