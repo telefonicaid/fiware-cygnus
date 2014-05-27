@@ -20,17 +20,10 @@
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.io.StringReader;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import java.util.ArrayList;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -172,13 +165,13 @@ public class NotifyContextRequestTest extends TestCase {
         
         // test case for nofity-xml-simple
         System.out.println("getSubscriptionId (notify-xml-simple)");
-        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
         // test case for notify-xml-compound
         System.out.println("getSubscriptionId (notify-xml-compound)");
-        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
@@ -204,13 +197,13 @@ public class NotifyContextRequestTest extends TestCase {
         
         // test case for nofity-xml-simple
         System.out.println("getOriginator (notify-xml-simple)");
-        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getOriginator();
         assertEquals(expResult, result);
         
         // test case for notify-xml-compound
         System.out.println("getOriginator (notify-xml-compound)");
-        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getOriginator();
         assertEquals(expResult, result);
         
@@ -234,13 +227,13 @@ public class NotifyContextRequestTest extends TestCase {
     public void testGetContextResponses() {
         // test case for nofity-xml-simple
         System.out.println("getOriginator (notify-xml-simple)");
-        NotifyContextRequest instance = createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         ArrayList result = instance.getContextResponses();
         assertTrue(result != null);
         
         // test case for notify-xml-compound
         System.out.println("getOriginator (notify-xml-compound)");
-        instance = createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getContextResponses();
         assertTrue(result != null);
         
@@ -257,43 +250,5 @@ public class NotifyContextRequestTest extends TestCase {
         result = instance.getContextResponses();
         assertTrue(result != null);
     } // testGetContextResponses
-    
-    /**
-     * Create a XML-based notificationContextRequest given the string representation of such XML.
-     * @param xmlStr
-     * @return The XML-based notificationContextRequest
-     */
-    private NotifyContextRequest createXMLNotifyContextRequest(String xmlStr) {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
-        
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-
-        InputSource is = new InputSource(new StringReader(xmlStr));
-        Document doc = null;
-        
-        try {
-            doc = dBuilder.parse(is);
-        } catch (SAXException e) {
-            logger.fatal(e.getMessage());
-        } catch (IOException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
-        doc.getDocumentElement().normalize();
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(doc);
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
-        return instance;
-    } // createXMLNotifyContextRequest
 
 } // NotifyContextRequestTest

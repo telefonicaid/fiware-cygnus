@@ -26,7 +26,26 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author frb
  */
-public interface HDFSBackend {
+public abstract class HDFSBackend {
+    
+    protected String cosmosHost;
+    protected String cosmosPort;
+    protected String cosmosUsername;
+    protected String cosmosDataset;
+    
+    /**
+     * 
+     * @param cosmosHost
+     * @param cosmosPort
+     * @param cosmosUsername
+     * @param cosmosDataset
+     */
+    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
+        this.cosmosHost = cosmosHost;
+        this.cosmosPort = cosmosPort;
+        this.cosmosUsername = cosmosUsername;
+        this.cosmosDataset = cosmosDataset;
+    } // HDFSBackend
     
     /**
      * Creates a directory in HDFS.
@@ -34,7 +53,7 @@ public interface HDFSBackend {
      * @param httpClient HTTP client for accessing the backend server.
      * @param dirPath Directory to be created.
      */
-    void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception;
+    public abstract void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception;
     
     /**
      * Creates a file in HDFS with initial content.
@@ -43,7 +62,7 @@ public interface HDFSBackend {
      * @param filePath File to be created.
      * @param data Data to be written in the created file.
      */
-    void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
+    public abstract void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
     
     /**
      * Appends data to an existent file in HDFS.
@@ -52,7 +71,7 @@ public interface HDFSBackend {
      * @param filePath File where to be append the data.
      * @param data Data to be appended in the file.
      */
-    void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
+    public abstract void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
     
     /**
      * Checks if the file exists in HDFS.
@@ -60,6 +79,6 @@ public interface HDFSBackend {
      * @param httpClient HTTP client for accessing the backend server.
      * @param filePath File that must be checked.
      */
-    boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception;
+    public abstract boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception;
     
 } // HDFSBackend
