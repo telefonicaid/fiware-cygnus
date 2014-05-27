@@ -26,6 +26,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
@@ -58,6 +59,7 @@ public class OrionHDFSSink extends OrionSink {
     private String cosmosDataset;
     private String hdfsAPI;
     private HDFSBackend persistenceBackend;
+    private HttpClientFactory httpClientFactory;
     
     /**
      * Constructor.
@@ -67,68 +69,90 @@ public class OrionHDFSSink extends OrionSink {
     } // OrionHDFSSink
     
     /**
-     * Gets the Cosmos host.
+     * Gets the Cosmos host. It is protected due to it is only required for testing purposes.
      * @return The Cosmos host
      */
-    public String getCosmosHost() {
+    protected String getCosmosHost() {
         return cosmosHost;
-    } // getComsosHost
+    } // getCosmosHost
     
     /**
-     * Gets the Cosmos port.
+     * Gets the Cosmos port. It is protected due to it is only required for testing purposes.
      * @return The Cosmos port
      */
-    public String getCosmosPort() {
+    protected String getCosmosPort() {
         return cosmosPort;
-    } // getComsosPort
+    } // getCosmosPort
 
     /**
-     * Gets the Cosmos username.
+     * Gets the Cosmos username. It is protected due to it is only required for testing purposes.
      * @return The Cosmos username
      */
-    public String getCosmosUsername() {
+    protected String getCosmosUsername() {
         return cosmosUsername;
-    } // getComsosUsername
+    } // getCosmosUsername
 
     /**
-     * Gets the Cosmos passwordt.
+     * Gets the Cosmos password. It is protected due to it is only required for testing purposes.
      * @return The Cosmos password
      */
-    public String getCosmosPassword() {
+    protected String getCosmosPassword() {
         return cosmosPassword;
-    } // getComsosPassword
+    } // getCosmosPassword
 
     /**
-     * Gets the Cosmos dataset.
+     * Gets the Cosmos dataset. It is protected due to it is only required for testing purposes.
      * @return The Cosmos dataset
      */
-    public String getCosmosDataset() {
+    protected String getCosmosDataset() {
         return cosmosDataset;
-    } // getComsosDataset
+    } // getCosmosDataset
     
     /**
-     * Gets the HDFS API.
+     * Gets the HDFS API. It is protected due to it is only required for testing purposes.
      * @return The HDFS API
      */
-    public String getHDFSAPI() {
+    protected String getHDFSAPI() {
         return hdfsAPI;
     } // getHDFSAPI
     
     /**
-     * Sets the persistence backend. This is mainly used by the tests in order to mock it, since the backend is created
-     * in the start() method.
+     * Gets the Http client factory. It is protected due to it is only required for testing purposes.
+     * @return The Http client factory
+     */
+    protected HttpClientFactory getHttpClientFactory() {
+        return httpClientFactory;
+    } // getHttpClientFactory
+    
+    /**
+     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     * @return The persistence backend
+     */
+    protected HDFSBackend getPersistenceBackend() {
+        return persistenceBackend;
+    } // getPersistenceBackend
+    
+    /**
+     * Sets the Http client factory. It is protected due to it is only required for testing purposes.
+     * @param httpClientFactory
+     */
+    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
+        this.httpClientFactory = httpClientFactory;
+    } // setHttpClientFactory
+    
+    /**
+     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    public void setPersistenceBackend(HDFSBackend persistenceBackend) {
+    protected void setPersistenceBackend(HDFSBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
     /**
-     * Sets the time helper. This is mainly used by the tests in order to mock it, since the time helper is created in
-     * the start() method.
+     * Sets the time helper. It is protected due to it is only required for testing purposes.
      * @param timeHelper
      */
-    public void setTimeHelper(TimeHelper timeHelper) {
+    protected void setTimeHelper(TimeHelper timeHelper) {
         this.timeHelper = timeHelper;
     } // setTimeHelper
     
@@ -152,6 +176,9 @@ public class OrionHDFSSink extends OrionSink {
 
     @Override
     public void start() {
+        // create a Http clients factory (no SSL)
+        httpClientFactory = new HttpClientFactory(false);
+        
         // create the persistence backend
         if (hdfsAPI.equals("httpfs")) {
             persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
@@ -191,7 +218,7 @@ public class OrionHDFSSink extends OrionSink {
     } // start
 
     @Override
-    void processContextResponses(String username, ArrayList contextResponses) throws Exception {
+    void persist(String username, ArrayList contextResponses) throws Exception {
         // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
         
@@ -240,6 +267,6 @@ public class OrionHDFSSink extends OrionSink {
                 } // if else
             } // for
         } // for
-    } // processContextResponses
+    } // persist
     
 } // OrionHDFSSink

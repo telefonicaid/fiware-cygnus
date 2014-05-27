@@ -52,18 +52,18 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private String notificationsTarget;
     
     /**
-     * Gets the Orion version regex pattern.
+     * Gets the Orion version regex pattern. It is protected due to it is only required for testing purposes.
      * @return The Orion version regex pattern
      */
-    public Pattern getOrionVerionRegexPattern() {
+    protected Pattern getOrionVersionRegexPattern() {
         return orionVersionRegexPattern;
-    } // getOrionVerionRegexPattern
+    } // getOrionVersionRegexPattern
     
     /**
-     * Gets the notifications target.
+     * Gets the notifications target. It is protected due to it is only required for testing purposes.
      * @return The notifications target
      */
-    public String getNotificationTarget() {
+    protected String getNotificationTarget() {
         return notificationsTarget;
     } // getNotificationTarget
 

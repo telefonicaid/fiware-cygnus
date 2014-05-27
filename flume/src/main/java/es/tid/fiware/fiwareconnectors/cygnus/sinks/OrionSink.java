@@ -21,7 +21,6 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
-import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import java.io.StringReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ import org.xml.sax.InputSource;
  * Abstract class containing the common code to all the sinks persisting data comming from Orion Context Broker.
  * 
  * The common attributes are:
- *  - httpClientFactory, a HTTP clients generator
  *  - timeHelper, a wrapper of the Java timestamp methods, in order it can be mocked in the tests
  * The common methods are:
  *  - void stop()
@@ -56,12 +54,11 @@ import org.xml.sax.InputSource;
  * The non common parts, and therefore those that are sink dependant and must be implemented are:
  *  - void configure(Context context)
  *  - void start()
- *  - void processContextResponses(ArrayList contextResponses) throws Exception
+ *  - void persist(ArrayList contextResponses) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
     private Logger logger;
-    protected HttpClientFactory httpClientFactory;
     protected TimeHelper timeHelper;
     
     /**
@@ -74,16 +71,12 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // create a logger
         logger = Logger.getLogger(OrionSink.class);
         
-        // create a Http clients factory (no SSL)
-        httpClientFactory = new HttpClientFactory(false);
-        
         // create the timer
         timeHelper = new TimeHelper();
     } // OrionSink
     
     @Override
     public void stop() {
-        httpClientFactory = null;
         timeHelper = null;
         super.stop();
     } // stop
@@ -167,7 +160,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         logger.debug("num context responses "  + contextResponses.size());
         // FIXME: when dealing with multi-tenancy, the user's username owning the context data will be be given in the
         // notification; this username will be used to appropriately store the data in a user's specific space
-        processContextResponses("FIXME", contextResponses);
+        persist("FIXME", contextResponses);
     } // persist
     
     /**
@@ -175,7 +168,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
      * @param contextResponses
      * @throws Exception
      */
-    abstract void processContextResponses(String username, ArrayList contextResponses) throws Exception;
+    abstract void persist(String username, ArrayList contextResponses) throws Exception;
     
     /**
      * Class wrapping the time related operations, allowing that way those operation can be mocked.
@@ -183,8 +176,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public class TimeHelper {
 
         /**
-         * Gets the current time in miliseconds.
-         * @return The current time in miliseconds.
+         * Gets the current time in milliseconds.
+         * @return The current time in milliseconds.
          */
         public long getTime() {
             return new Date().getTime() / 1000;

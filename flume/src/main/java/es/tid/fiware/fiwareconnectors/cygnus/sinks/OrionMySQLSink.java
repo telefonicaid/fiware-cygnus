@@ -23,6 +23,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
@@ -62,52 +63,58 @@ public class OrionMySQLSink extends OrionSink {
     } // OrionMySQLSink
     
     /**
-     * Gets the MySQL host.
+     * Gets the MySQL host. It is protected due to it is only required for testing purposes.
      * @return The MySQL host
      */
-    public String getMySQLHost() {
+    protected String getMySQLHost() {
         return mysqlHost;
     } // getMySQLHost
     
     /**
-     * Gets the MySQL port.
+     * Gets the MySQL port. It is protected due to it is only required for testing purposes.
      * @return The MySQL port
      */
-    public String getMySQLPort() {
+    protected String getMySQLPort() {
         return mysqlPort;
     } // getMySQLPort
     
     /**
-     * Gets the MySQL username.
+     * Gets the MySQL username. It is protected due to it is only required for testing purposes.
      * @return The MySQL username
      */
-    public String getMySQLUsername() {
+    protected String getMySQLUsername() {
         return mysqlUsername;
     } // getMySQLUsername
     
     /**
-     * Gets the MySQL password.
+     * Gets the MySQL password. It is protected due to it is only required for testing purposes.
      * @return The MySQL password
      */
-    public String getMySQLPassword() {
+    protected String getMySQLPassword() {
         return mysqlPassword;
     } // getMySQLPassword
     
     /**
-     * Sets the persistence backend. This is mainly used by the tests in order to mock it, since the backend is created
-     * in the start() method.
+     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     * @return The persistence backend
+     */
+    protected MySQLBackend getPersistenceBackend() {
+        return persistenceBackend;
+    } // getPersistenceBackend
+    
+    /**
+     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    public void setPersistenceBackend(MySQLBackend persistenceBackend) {
+    protected void setPersistenceBackend(MySQLBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
     /**
-     * Sets the time helper. This is mainly used by the tests in order to mock it, since the time helper is created in
-     * the start() method.
+     * Sets the time helper. It is protected due to it is only required for testing purposes.
      * @param timeHelper
      */
-    public void setTimeHelper(TimeHelper timeHelper) {
+    protected void setTimeHelper(TimeHelper timeHelper) {
         this.timeHelper = timeHelper;
     } // setTimeHelper
     
@@ -134,7 +141,7 @@ public class OrionMySQLSink extends OrionSink {
     } // start
 
     @Override
-    void processContextResponses(String username, ArrayList contextResponses) throws Exception {
+    void persist(String username, ArrayList contextResponses) throws Exception {
         // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
             
@@ -148,8 +155,8 @@ public class OrionMySQLSink extends OrionSink {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
-            String id = encode(contextElement.getId());
-            String type = encode(contextElement.getType());
+            String id = Utils.encode(contextElement.getId());
+            String type = Utils.encode(contextElement.getType());
             
             // create the table for this entity if not existing yet... the cost of trying yo create it is the same than
             // checking if it exits and then creating it
@@ -182,16 +189,6 @@ public class OrionMySQLSink extends OrionSink {
                         contextAttribute.getContextValue());
             } // for
         } // for
-    } // processContextResponses
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    private String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_");
-    } // encode
+    } // persist
     
 } // OrionMySQLSink

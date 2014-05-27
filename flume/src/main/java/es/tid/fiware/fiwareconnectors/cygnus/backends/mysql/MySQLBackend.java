@@ -126,10 +126,10 @@ public class MySQLBackend {
      * @throws Exception
      */
     private Connection getConnection(String dbName) throws Exception {
-        // dynamically load the Hive JDBC driver
+        // dynamically load the MySQL JDBC driver
         Class.forName(driverName);
 
-        // return a connection based on the Hive JDBC driver
+        // return a connection based on the MySQL JDBC driver
         logger.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
                 + mysqlUsername + "&password=XXXXXXXXXX");
         return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
@@ -137,10 +137,10 @@ public class MySQLBackend {
     } // getConnection
     
     /**
-     * Close all the Hive objects previously opened by doCreateTable and doQuery.
+     * Close all the MySQL objects previously opened by doCreateTable and doQuery.
      * @param con
      * @param stmt
-     * @return True if the Hive objects have been closed, false otherwise.
+     * @return True if the MySQL objects have been closed, false otherwise.
      */
     private boolean closeMySQLObjects(Connection con, Statement stmt) {
         boolean res = true;
