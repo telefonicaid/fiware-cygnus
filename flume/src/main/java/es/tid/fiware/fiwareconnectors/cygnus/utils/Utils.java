@@ -19,17 +19,6 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.utils;
 
-import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
-import java.io.IOException;
-import java.io.StringReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 /**
  *
  * @author frb
@@ -51,44 +40,5 @@ public final class Utils {
     public static String encode(String in) {
         return in.replaceAll("[^a-zA-Z0-9]", "_");
     } // encode
-    
-    /**
-     * Create a XML-based notificationContextRequest given the string representation of such XML.
-     * @param xmlStr
-     * @return The XML-based notificationContextRequest
-     */
-    public static NotifyContextRequest createXMLNotifyContextRequest(String xmlStr) {
-        Logger logger = Logger.getLogger(Utils.class);
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
         
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-
-        InputSource is = new InputSource(new StringReader(xmlStr));
-        Document doc = null;
-        
-        try {
-            doc = dBuilder.parse(is);
-        } catch (SAXException e) {
-            logger.fatal(e.getMessage());
-        } catch (IOException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
-        doc.getDocumentElement().normalize();
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(doc);
-        } catch (Exception e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
-        return instance;
-    } // createXMLNotifyContextRequest
-    
 } // Utils
