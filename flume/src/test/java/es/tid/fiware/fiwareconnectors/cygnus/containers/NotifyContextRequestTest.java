@@ -20,7 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import com.google.gson.Gson;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import java.util.ArrayList;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -165,13 +165,13 @@ public class NotifyContextRequestTest extends TestCase {
         
         // test case for nofity-xml-simple
         System.out.println("getSubscriptionId (notify-xml-simple)");
-        NotifyContextRequest instance = Utils.createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
         // test case for notify-xml-compound
         System.out.println("getSubscriptionId (notify-xml-compound)");
-        instance = Utils.createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
@@ -197,13 +197,13 @@ public class NotifyContextRequestTest extends TestCase {
         
         // test case for nofity-xml-simple
         System.out.println("getOriginator (notify-xml-simple)");
-        NotifyContextRequest instance = Utils.createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getOriginator();
         assertEquals(expResult, result);
         
         // test case for notify-xml-compound
         System.out.println("getOriginator (notify-xml-compound)");
-        instance = Utils.createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getOriginator();
         assertEquals(expResult, result);
         
@@ -227,13 +227,13 @@ public class NotifyContextRequestTest extends TestCase {
     public void testGetContextResponses() {
         // test case for nofity-xml-simple
         System.out.println("getOriginator (notify-xml-simple)");
-        NotifyContextRequest instance = Utils.createXMLNotifyContextRequest(notifyXMLSimple);
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         ArrayList result = instance.getContextResponses();
         assertTrue(result != null);
         
         // test case for notify-xml-compound
         System.out.println("getOriginator (notify-xml-compound)");
-        instance = Utils.createXMLNotifyContextRequest(notifyXMLCompound);
+        instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getContextResponses();
         assertTrue(result != null);
         

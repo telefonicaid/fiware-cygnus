@@ -98,7 +98,7 @@ public class OrionRestHandlerTest {
     public void testConfigure() {
         System.out.println("configure");
         handler.configure(context);
-        Matcher matcher = handler.getOrionVerionRegexPattern().matcher(orionVersion);
+        Matcher matcher = handler.getOrionVersionRegexPattern().matcher(orionVersion);
         assertTrue(matcher.matches());
         assertEquals(notificationsTarget, handler.getNotificationTarget());
     } // testConfigure

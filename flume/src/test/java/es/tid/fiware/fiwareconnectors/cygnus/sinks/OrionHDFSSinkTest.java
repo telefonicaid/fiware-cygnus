@@ -23,8 +23,9 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink.TimeHelper;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -42,6 +43,8 @@ import org.junit.runner.RunWith;
 public class OrionHDFSSinkTest {
     
     // mocks
+    @Mock
+    private HttpClientFactory mockHttpClientFactory;
     @Mock
     private HDFSBackend mockWebHDFSBackend;
     @Mock
@@ -104,6 +107,7 @@ public class OrionHDFSSinkTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         sink = new OrionHDFSSink();
+        sink.setHttpClientFactory(mockHttpClientFactory);
         sink.setPersistenceBackend(mockWebHDFSBackend);
         sink.setTimeHelper(mockTimeHelper);
         
@@ -115,12 +119,15 @@ public class OrionHDFSSinkTest {
         context.put("cosmos_password", cosmosPassword);
         context.put("cosmos_dataset", cosmosDataset);
         context.put("hdfs_sapi", hdfsAPI);
-        notifyContextRequest = Utils.createXMLNotifyContextRequest(notifyXMLSimple);
+        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
+        when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
+        when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         when(mockTimeHelper.getTime()).thenReturn(ts);
         when(mockTimeHelper.getTimeString()).thenReturn(iso8601date);
-        when(mockWebHDFSBackend.exists(null, attrName)).thenReturn(true);
+        when(mockWebHDFSBackend.exists(null, "cygnus-" + cosmosUsername + "-" + cosmosDataset + "-" + entityId + "-"
+                + entityType + ".txt")).thenReturn(true);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, attrName, attrName);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, attrName, attrName);
@@ -133,7 +140,6 @@ public class OrionHDFSSinkTest {
     public void testHDFSSink() {
         System.out.println("HDFSSink");
         assertTrue(sink.timeHelper != null);
-        assertTrue(sink.httpClientFactory != null);
     } // testMySQLSink
 
     /**
@@ -160,11 +166,13 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
+        assertTrue(sink.getHttpClientFactory() != null);
+        assertTrue(sink.getPersistenceBackend() != null);
         assertEquals(LifecycleState.START, sink.getLifecycleState());
     } // testStart
 
     /**
-     * Test of processContextResponses method, of class OrionHDFSSink.
+     * Test of persist method, of class OrionHDFSSink.
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -173,7 +181,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.processContextResponses("FIXME", notifyContextRequest.getContextResponses());
+            sink.persist("FIXME", notifyContextRequest.getContextResponses());
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

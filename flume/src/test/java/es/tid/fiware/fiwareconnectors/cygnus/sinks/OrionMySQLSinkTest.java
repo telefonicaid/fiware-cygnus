@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
 import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink.TimeHelper;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
@@ -113,7 +113,7 @@ public class OrionMySQLSinkTest {
         context.put("mysql_port", mysqlPort);
         context.put("mysql_username", mysqlUsername);
         context.put("mysql_password", mysqlPassword);
-        notifyContextRequest = Utils.createXMLNotifyContextRequest(notifyXMLSimple);
+        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
         when(mockTimeHelper.getTime()).thenReturn(ts);
@@ -131,7 +131,6 @@ public class OrionMySQLSinkTest {
     public void testMySQLSink() {
         System.out.println("MySQLSink");
         assertTrue(sink.timeHelper != null);
-        assertTrue(sink.httpClientFactory != null);
     } // testMySQLSink
     
     /**
@@ -156,11 +155,12 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
+        assertTrue(sink.getPersistenceBackend() != null);
         assertEquals(LifecycleState.START, sink.getLifecycleState());
     } // testStart
 
     /**
-     * Test of processContextResponses method, of class OrionMySQLSink.
+     * Test of persist method, of class OrionMySQLSink.
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -169,7 +169,7 @@ public class OrionMySQLSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.processContextResponses("FIXME", notifyContextRequest.getContextResponses());
+            sink.persist("FIXME", notifyContextRequest.getContextResponses());
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
