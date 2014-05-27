@@ -153,7 +153,7 @@ The creation of the `plugins.d` directory is related to the installation of thir
 Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout release/<version>
+    $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
     $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
@@ -161,10 +161,12 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
 or not:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout release/<version>
+    $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+
+where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
 
 If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
 
