@@ -141,7 +141,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             logger.debug("The content-type was application/json");
             Gson gson = new Gson();
             notification = gson.fromJson(eventData, NotifyContextRequest.class);
-            logger.debug("Json parsed");
         } else if (eventHeaders.get("content-type").contains("application/xml")) {
             logger.debug("The content-type was application/xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -150,14 +149,12 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             Document doc = dBuilder.parse(is);
             doc.getDocumentElement().normalize();
             notification = new NotifyContextRequest(doc);
-            logger.debug("XML parsed");
         } else {
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        logger.debug("num context responses "  + contextResponses.size());
         // FIXME: when dealing with multi-tenancy, the user's username owning the context data will be be given in the
         // notification; this username will be used to appropriately store the data in a user's specific space
         persist("FIXME", contextResponses);

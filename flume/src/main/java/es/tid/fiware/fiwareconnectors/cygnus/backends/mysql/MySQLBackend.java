@@ -23,13 +23,15 @@ import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author frb
  * 
- * MySQL related operations (database and table creation, row-like context data insertion) when dealing with a MySQL
+ * MySQL related operations (database and table creation, context data insertion) when dealing with a MySQL
  * persistence backend.
  */
 public class MySQLBackend {
@@ -68,8 +70,9 @@ public class MySQLBackend {
         // create the "orion" database
         con = getConnection("");
         stmt = con.createStatement();
-        logger.debug("Executing 'create database if not exists " + dbName + "'");
-        stmt.executeUpdate("create database if not exists " + dbName);
+        String query = "create database if not exists " + dbName;
+        logger.debug("Executing '" + query + "'");
+        stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // createDatabase
     
@@ -86,15 +89,15 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        logger.debug("Executing 'create table if not exists " + tableName + " (ts, iso8601date, entityId, entityType, "
-                + "attrName, attrType, attrValue)'");
-        stmt.executeUpdate("create table if not exists " + tableName + " (ts long, iso8601date text, entityId text, "
-                + "entityType text, attrName text, attrType text, attrValue text)");
+        String query = "create table if not exists " + tableName + " (ts long, iso8601date text, entityId text, "
+                + "entityType text, attrName text, attrType text, attrValue text)";
+        logger.debug("Executing '" + query + "'");
+        stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // createTable
     
     /**
-     * Inserts a new row in the given table within the given database.
+     * Inserts a new row in the given table within the given database representing a unique attribute change.
      * @param dbName
      * @param tableName
      * @param ts
@@ -114,9 +117,45 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        stmt.executeUpdate("insert into " + tableName + " values ('" + ts + "', '" + iso8601date + "', '"
-                + entityId + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue
-                + "')");
+        String query = "insert into " + tableName + " values ('" + ts + "', '" + iso8601date + "', '" + entityId
+                + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "')";
+        logger.debug("Executing '" + query + "'");
+        stmt.executeUpdate(query);
+        closeMySQLObjects(con, stmt);
+    } // insertContextData
+    
+    /**
+     * Inserts a new row in the given table within the given database representing full attribute list changes.
+     * @param dbName
+     * @param tableName
+     * @param attrList
+     * @throws Exception
+     */
+    public void insertContextData(String dbName, String tableName, Map<String, String> attrList) throws Exception {
+        Connection con = null;
+        Statement stmt = null;
+        
+        // check if the given table name existsTable
+        con = getConnection(dbName);
+        stmt = con.createStatement();
+        String attrNames = "";
+        String attrValues = "";
+        
+        // iterate on the array in order to build the query
+        Iterator it = attrList.keySet().iterator();
+        
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            attrNames += attrName + ",";
+            String attrValue = attrList.get(attrName);
+            attrValues += "'" + attrValue + "',";
+        } // while
+        
+        // finish creating the query and execute it
+        String query = "insert into " + tableName + " (" + attrNames.substring(0, attrNames.length() - 1)
+                + ") values (" + attrValues.substring(0, attrValues.length() - 1) + ")";
+        logger.debug("Executing '" + query + "'");
+        stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // insertContextData
     
