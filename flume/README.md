@@ -107,7 +107,7 @@ Within tables, we can find two options:
 * Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables are created at execution time if the table doesn't exist previously to the row insertion.
 * A column per each entity's attribute. This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter (TBD which is the name for this parameter and how to parameterize it).
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, "attr_persistence", whose values can be 'row' or 'column'.
 
 ## XML notification example
 
@@ -278,6 +278,8 @@ orionagent.sinks.mysql-sink.mysql_port = 3306
 orionagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
 orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.mysql-sink.attr_persistence = column
 
 #=============================================
 # hdfs-channel configuration
