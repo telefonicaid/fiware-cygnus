@@ -59,6 +59,7 @@ public class OrionMySQLSinkTest {
     private final String mysqlPort = "3306";
     private final String mysqlUsername = "user1";
     private final String mysqlPassword = "pass1234";
+    private final String attrPersistence = "row";
     private final long ts = 123456789;
     private final String iso8601date = "20140513T16:48:13";
     private final String entityId = "Room1";
@@ -113,6 +114,7 @@ public class OrionMySQLSinkTest {
         context.put("mysql_port", mysqlPort);
         context.put("mysql_username", mysqlUsername);
         context.put("mysql_password", mysqlPassword);
+        context.put("attr_persistence", attrPersistence);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes

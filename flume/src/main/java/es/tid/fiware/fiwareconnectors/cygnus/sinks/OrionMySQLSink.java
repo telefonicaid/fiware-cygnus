@@ -25,6 +25,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -53,6 +54,7 @@ public class OrionMySQLSink extends OrionSink {
     private String mysqlPort;
     private String mysqlUsername;
     private String mysqlPassword;
+    private boolean rowAttrPersistence;
     private MySQLBackend persistenceBackend;
     
     /**
@@ -130,6 +132,8 @@ public class OrionMySQLSink extends OrionSink {
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
         logger.debug("Reading mysql_password=" + mysqlPassword);
+        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        logger.debug("Reading attr_persistence=" + (rowAttrPersistence ? "row" : "column"));
     } // configure
 
     @Override
@@ -144,11 +148,22 @@ public class OrionMySQLSink extends OrionSink {
     void persist(String username, ArrayList contextResponses) throws Exception {
         // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
+        
+        // if the attribute persistence mode is per row, insert a new row in the table, otherwise store the
+        // attribute name and value for later
+        long ts = timeHelper.getTime();
+        String iso8601date = timeHelper.getTimeString();
+
             
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
         String dbName = "cygnus_" + mysqlUsername;
-        persistenceBackend.createDatabase(dbName);
+        
+        // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
+        // create it in the per-column mode because there will not be any table within the database
+        if (rowAttrPersistence) {
+            persistenceBackend.createDatabase(dbName);
+        } // if
         
         // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
@@ -157,37 +172,52 @@ public class OrionMySQLSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String id = Utils.encode(contextElement.getId());
             String type = Utils.encode(contextElement.getType());
-            
-            // create the table for this entity if not existing yet... the cost of trying yo create it is the same than
-            // checking if it exits and then creating it
+
+            // get the name of the table
             String tableName = "cygnus_" + id + "_" + type;
-            persistenceBackend.createTable(dbName, tableName);
             
-            // iterate on all this entity's attributes and insert a row per each updated one
+            // if the attribute persistence is based in rows, create the table where the data will be persisted, since
+            // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
+            // created in execution time, it must be previously provisioned
+            if (rowAttrPersistence) {
+                // create the table for this entity if not existing yet... the cost of trying yo create it is the same
+                // than checking if it exits and then creating it
+                persistenceBackend.createTable(dbName, tableName);
+            } // if
+            
+            // iterate on all this entity's attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+            
+            // this is used for storing the attribute's names and values when dealing with a per column attributes
+            // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
+            // at the same time
+            HashMap<String, String> attrs = new HashMap<String, String>();
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                
-                // insert a new row
-                long ts = timeHelper.getTime();
-                String iso8601date = timeHelper.getTimeString();
-                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
-                        + iso8601date + "," + contextElement.getId() + "," + contextElement.getType() + ","
-                        + contextAttribute.getName() + "," + contextAttribute.getType() + ","
-                        + contextAttribute.getContextValue());
-                persistenceBackend.insertContextData(
-                        dbName,
-                        tableName,
-                        ts,
-                        iso8601date,
-                        contextElement.getId(),
-                        contextElement.getType(),
-                        contextAttribute.getName(),
-                        contextAttribute.getType(),
-                        contextAttribute.getContextValue());
+                                
+                if (rowAttrPersistence) {
+                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
+                            + iso8601date + "," + contextElement.getId() + "," + contextElement.getType() + ","
+                            + contextAttribute.getName() + "," + contextAttribute.getType() + ","
+                            + contextAttribute.getContextValue());
+                    persistenceBackend.insertContextData(dbName, tableName, ts, iso8601date, contextElement.getId(),
+                            contextElement.getType(), contextAttribute.getName(), contextAttribute.getType(),
+                            contextAttribute.getContextValue());
+                } else {
+                    // strings context values are provided with '"', this raises an error in the MySQL sentence
+                    attrs.put(contextAttribute.getName(), contextAttribute.getContextValue().replaceAll("\"", ""));
+                } // if else
             } // for
+            
+            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
+            // attribute list of name-values.
+            if (!rowAttrPersistence) {
+                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: " + ts
+                        + ", Row: " + attrs.toString());
+                persistenceBackend.insertContextData(dbName, tableName, iso8601date, attrs);
+            } // if
         } // for
     } // persist
     
