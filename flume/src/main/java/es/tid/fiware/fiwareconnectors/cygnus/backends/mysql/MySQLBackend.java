@@ -131,15 +131,16 @@ public class MySQLBackend {
      * @param attrList
      * @throws Exception
      */
-    public void insertContextData(String dbName, String tableName, Map<String, String> attrList) throws Exception {
+    public void insertContextData(String dbName, String tableName, String iso8601date,
+            Map<String, String> attrList) throws Exception {
         Connection con = null;
         Statement stmt = null;
         
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String attrNames = "";
-        String attrValues = "";
+        String attrNames = "recv_time,";
+        String attrValues = "'" + iso8601date + "',";
         
         // iterate on the array in order to build the query
         Iterator it = attrList.keySet().iterator();
