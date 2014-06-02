@@ -148,12 +148,19 @@ public class OrionMySQLSink extends OrionSink {
     void persist(String username, ArrayList contextResponses) throws Exception {
         // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
+        
+        // if the attribute persistence mode is per row, insert a new row in the table, otherwise store the
+        // attribute name and value for later
+        long ts = timeHelper.getTime();
+        String iso8601date = timeHelper.getTimeString();
+
             
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
         String dbName = "cygnus_" + mysqlUsername;
         
-        // the table can only be automatically created if the persistence schema is per row
+        // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
+        // create it in the per-column mode because there will not be any table within the database
         if (rowAttrPersistence) {
             persistenceBackend.createDatabase(dbName);
         } // if
@@ -189,12 +196,7 @@ public class OrionMySQLSink extends OrionSink {
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                
-                // if the attribute persistence mode is per row, insert a new row in the table, otherwise store the
-                // attribute name and value for later
-                long ts = timeHelper.getTime();
-                String iso8601date = timeHelper.getTimeString();
-                
+                                
                 if (rowAttrPersistence) {
                     logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
                             + iso8601date + "," + contextElement.getId() + "," + contextElement.getType() + ","
@@ -212,9 +214,9 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: "
-                        + attrs.toString());
-                persistenceBackend.insertContextData(dbName, tableName, attrs);
+                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: " + ts
+                        + ", Row: " + attrs.toString());
+                persistenceBackend.insertContextData(dbName, tableName, iso8601date, attrs);
             } // if
         } // for
     } // persist

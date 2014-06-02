@@ -105,7 +105,7 @@ These tables are stored in databases, one per user, enabling a private data spac
 
 Within tables, we can find two options:
 * Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables are created at execution time if the table doesn't exist previously to the row insertion.
-* A column per each entity's attribute. This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+* A column per each entity's attribute, plus an addition column about the reception time of the data ("recv_time"). This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, "attr_persistence", whose values can be 'row' or 'column'.
 
