@@ -201,13 +201,12 @@ public class OrionMySQLSink extends OrionSink {
                     logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
                             + iso8601date + "," + contextElement.getId() + "," + contextElement.getType() + ","
                             + contextAttribute.getName() + "," + contextAttribute.getType() + ","
-                            + contextAttribute.getContextValue());
+                            + contextAttribute.getContextValue(false));
                     persistenceBackend.insertContextData(dbName, tableName, ts, iso8601date, contextElement.getId(),
                             contextElement.getType(), contextAttribute.getName(), contextAttribute.getType(),
-                            contextAttribute.getContextValue());
+                            contextAttribute.getContextValue(false));
                 } else {
-                    // strings context values are provided with '"', this raises an error in the MySQL sentence
-                    attrs.put(contextAttribute.getName(), contextAttribute.getContextValue().replaceAll("\"", ""));
+                    attrs.put(contextAttribute.getName(), contextAttribute.getContextValue(false));
                 } // if else
             } // for
             

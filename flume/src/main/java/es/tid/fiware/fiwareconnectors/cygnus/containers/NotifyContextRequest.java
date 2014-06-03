@@ -274,14 +274,16 @@ public class NotifyContextRequest {
          * Gets context value.
          * @return The context value for this context attribute in String format.
          */
-        public String getContextValue() {
+        public String getContextValue(boolean asStringRepresentation) {
             if (value.isJsonObject()) {
                 return value.getAsJsonObject().toString();
             } else if (value.isJsonArray()) {
                 return value.getAsJsonArray().toString();
-            } else {
+            } else if (asStringRepresentation) {
                 return "\"" + value.getAsString() + "\"";
-            } // else
+            } else {
+                return value.getAsString();
+            } // if then else if
         } // getContextValue
         
         /**

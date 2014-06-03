@@ -252,7 +252,7 @@ public class OrionHDFSSink extends OrionSink {
                         + "\"entityType\":\"" + contextElement.getType() + "\","
                         + "\"attrName\":\"" + contextAttribute.getName() + "\","
                         + "\"attrType\":\"" + contextAttribute.getType() + "\","
-                        + "\"attrValue\":" + contextAttribute.getContextValue()
+                        + "\"attrValue\":" + contextAttribute.getContextValue(true)
                         + "}";
                 logger.info("Persisting data. File: " + fileName + ", Data: " + line);
                 
