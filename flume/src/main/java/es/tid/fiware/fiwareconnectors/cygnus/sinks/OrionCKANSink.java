@@ -34,7 +34,7 @@ import org.apache.flume.Context;
 
 /**
  * 
- * @author fermin
+ * @author frb
  *
  * CKAN sink for Orion Context Broker.
  *
@@ -48,6 +48,78 @@ public class OrionCKANSink extends OrionSink {
     private String dataset;
     private HttpClientFactory httpClientFactory;
     private CKANBackend persistenceBackend;
+
+    /**
+     * Gets the CKAN host. It is protected due to it is only required for testing purposes.
+     * @return The KCAN host
+     */
+    protected String getCKANHost() {
+        return ckanHost;
+    } // getCKANHost
+
+    /**
+     * Gets the CKAN port. It is protected due to it is only required for testing purposes.
+     * @return The CKAN port
+     */
+    protected String getCKANPort() {
+        return ckanPort;
+    } // getCKANPort
+    
+    /**
+     * Gets the CKAN API key. It is protected due to it is only required for testing purposes.
+     * @return The CKAN API key
+     */
+    protected String getAPIKey() {
+        return apiKey;
+    } // getAPIKey
+    
+    /**
+     * Gets the dataset. It is protected due to it is only required for testing purposes.
+     * @return The CKAN dataset
+     */
+    protected String getDataset() {
+        return dataset;
+    } // getDataset
+    
+    /**
+     * Gets the Http client factory. It is protected due to it is only required for testing purposes.
+     * @return The Http client factory
+     */
+    protected HttpClientFactory getHttpClientFactory() {
+        return httpClientFactory;
+    } // getHttpClientFactory
+    
+    /**
+     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     * @return The persistence backend
+     */
+    protected CKANBackend getPersistenceBackend() {
+        return persistenceBackend;
+    } // getPersistenceBackend
+    
+    /**
+     * Sets the Http client factory. It is protected due to it is only required for testing purposes.
+     * @param httpClientFactory
+     */
+    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
+        this.httpClientFactory = httpClientFactory;
+    } // setHttpClientFactory
+    
+    /**
+     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
+     * @param persistenceBackend
+     */
+    protected void setPersistenceBackend(CKANBackend persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    } // setPersistenceBackend
+    
+    /**
+     * Sets the time helper. It is protected due to it is only required for testing purposes.
+     * @param timeHelper
+     */
+    protected void setTimeHelper(TimeHelper timeHelper) {
+        this.timeHelper = timeHelper;
+    } // setTimeHelper
     
     @Override
     public void configure(Context context) {

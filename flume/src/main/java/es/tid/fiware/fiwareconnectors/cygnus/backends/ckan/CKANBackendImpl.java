@@ -82,10 +82,10 @@ public class CKANBackendImpl implements CKANBackend {
         // check the status
         if (res.getStatusCode() == 200) {
             // package exists, populate resourcesId map
-            JSONObject result = (JSONObject)res.getJsonObject().get("result");
+            JSONObject result = (JSONObject) res.getJsonObject().get("result");
             packageId = result.get("id").toString();
             logger.info("package found - package ID: " + packageId);
-            populateResourcesMap((JSONArray)result.get("resources"));
+            populateResourcesMap((JSONArray) result.get("resources"));
         } else if (res.getStatusCode() == 404) {
             // package doesn't exist, create it
             createPackage(httpClient);
@@ -143,7 +143,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // populateResourcesMap
 
     /**
-     * Insert record in datastore
+     * Insert record in datastore.
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
@@ -159,17 +159,17 @@ public class CKANBackendImpl implements CKANBackend {
 
         // do CKAN request
         // FIXME: undhardwire ts, iso8601date, to contstant
-        String jsonString = "{ \"resource_id\": \"" + resourceId +
-                "\", \"records\": [ " +
-                "{ \"ts\": \"" + date.getTime() / 1000 + "\", " +
-                "\"iso8601date\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", " +
-                "\"attrName\": \"" + attrName + "\", " +
-                "\"attrType\": \"" + attrType + "\", " +
-                "\"attrValue\": \"" + attrValue + "\" " +
-                "}" +
-                "], " +
-                "\"method\": \"insert\", " +
-                "\"force\": \"true\" }";
+        String jsonString = "{ \"resource_id\": \"" + resourceId
+                + "\", \"records\": [ "
+                + "{ \"ts\": \"" + date.getTime() / 1000 + "\", "
+                + "\"iso8601date\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", "
+                + "\"attrName\": \"" + attrName + "\", "
+                + "\"attrType\": \"" + attrType + "\", "
+                + "\"attrValue\": \"" + attrValue + "\" "
+                + "}"
+                + "], "
+                + "\"method\": \"insert\", "
+                + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert", jsonString);
 
@@ -197,7 +197,7 @@ public class CKANBackendImpl implements CKANBackend {
 
         // check the status
         if (res.getStatusCode() == 200) {
-            packageId = ((JSONObject)res.getJsonObject().get("result")).get("id").toString();
+            packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
             logger.info("successful package creation - package ID: " + packageId);
         } else {
             logger.error("don't know how to treat response code " + res.getStatusCode());
@@ -215,9 +215,9 @@ public class CKANBackendImpl implements CKANBackend {
     private String createResource(DefaultHttpClient httpClient, String resourceName) throws Exception {
 
         // do CKAN request
-        String jsonString = "{ \"name\": \"" + resourceName + "\", " +
-                "\"url\": \"" + resourceName + "\", " +
-                "\"package_id\": \""+ packageId +"\" }";
+        String jsonString = "{ \"name\": \"" + resourceName + "\", "
+                + "\"url\": \"" + resourceName + "\", "
+                + "\"package_id\": \"" + packageId + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create", jsonString);
 
@@ -244,15 +244,15 @@ public class CKANBackendImpl implements CKANBackend {
         // do CKAN request
         // FIXME: undhardwire ts, iso8601date, to contstant
         // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
-        String jsonString = "{ \"resource_id\": \"" + resourceId +
-                "\", \"fields\": [ " +
-                "{ \"id\": \"ts\", \"type\": \"int\"}," +
-                "{ \"id\": \"iso8601date\", \"type\": \"timestamp\"}," +
-                "{ \"id\": \"attrName\", \"type\": \"text\"}," +
-                "{ \"id\": \"attrType\", \"type\": \"text\"}," +
-                "{ \"id\": \"attrValue\", \"type\": \"json\"}" +
-                "], " +
-                "\"force\": \"true\" }";
+        String jsonString = "{ \"resource_id\": \"" + resourceId
+                + "\", \"fields\": [ "
+                + "{ \"id\": \"ts\", \"type\": \"int\"},"
+                + "{ \"id\": \"iso8601date\", \"type\": \"timestamp\"},"
+                + "{ \"id\": \"attrName\", \"type\": \"text\"},"
+                + "{ \"id\": \"attrType\", \"type\": \"text\"},"
+                + "{ \"id\": \"attrValue\", \"type\": \"json\"}"
+                + "], "
+                + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create", jsonString);
 
@@ -287,14 +287,13 @@ public class CKANBackendImpl implements CKANBackend {
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url, String payload)
-            throws Exception {
-
+    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url,
+            String payload) throws Exception {
         // do the post
         HttpRequestBase request;
         if (method.equals("GET")) {
             request = new HttpGet(url);
-        } else if(method.equals("POST")) {
+        } else if (method.equals("POST")) {
             HttpPost r = new HttpPost(url);
             // payload (optional)
             if (!payload.equals("")) {
@@ -321,7 +320,7 @@ public class CKANBackendImpl implements CKANBackend {
         // get the JSON encapsulated in the response
         logger.debug("response payload: " + res);
         JSONParser j = new JSONParser();
-        JSONObject o = (JSONObject)j.parse(res);
+        JSONObject o = (JSONObject) j.parse(res);
 
         // return result
         return new CKANResponse(o, response.getStatusLine().getStatusCode());
