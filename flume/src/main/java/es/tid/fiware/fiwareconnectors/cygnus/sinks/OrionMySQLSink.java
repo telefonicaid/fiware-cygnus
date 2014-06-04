@@ -157,7 +157,7 @@ public class OrionMySQLSink extends OrionSink {
             
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
-        String dbName = "cygnus_" + mysqlUsername;
+        String dbName = mysqlUsername;
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
         // create it in the per-column mode because there will not be any table within the database
@@ -174,7 +174,7 @@ public class OrionMySQLSink extends OrionSink {
             String type = Utils.encode(contextElement.getType());
 
             // get the name of the table
-            String tableName = "cygnus_" + id + "_" + type;
+            String tableName = id + "_" + type;
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
