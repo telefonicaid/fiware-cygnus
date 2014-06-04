@@ -16,6 +16,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionMySQLSink. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Each entity's attribute update is persisted as a new row.
 
 All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
+
 1.  On behalf of Cygnus, subscribe to Orion for certain context information.
 2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
 3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
