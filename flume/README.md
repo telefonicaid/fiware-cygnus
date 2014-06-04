@@ -97,11 +97,13 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables:
 
-    <entity_id>_<entity_type>
+    <naming_prefix><entity_id>_<entity_type>
 
 These tables are stored in databases, one per user, enabling a private data space, with this name format:
 
-    <mysql_user>
+    <naming_prefix><mysql_user>
+
+Observe "naming_prefix" is a configuration parameter of the sink.
 
 Within tables, we can find two options:
 * Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
