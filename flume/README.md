@@ -158,7 +158,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.1-jar-with-dependecies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
 
@@ -166,7 +166,7 @@ or not:
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
 
@@ -269,19 +269,21 @@ cygnusagent.sinks.ckan-sink.dataset = mydataset
 # ============================================
 # OrionMySQLSink configuration
 # channel name from where to read notification events
-orionagent.sinks.mysql-sink.channel = mysql-channel
+cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-orionagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
+cygnusagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
 # the FQDN/IP address where the MySQL server runs 
-orionagent.sinks.mysql-sink.mysql_host = x.y.z.w
+cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listes for incomming connections
-orionagent.sinks.mysql-sink.mysql_port = 3306
+cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
-orionagent.sinks.mysql-sink.mysql_username = root
+cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
+cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+# prefix for the database and table names
+cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration
