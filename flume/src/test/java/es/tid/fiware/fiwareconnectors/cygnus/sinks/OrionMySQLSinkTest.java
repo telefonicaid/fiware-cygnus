@@ -60,6 +60,7 @@ public class OrionMySQLSinkTest {
     private final String mysqlUsername = "user1";
     private final String mysqlPassword = "pass1234";
     private final String attrPersistence = "row";
+    private final String namingPrefix = "cygnus_";
     private final long ts = 123456789;
     private final String iso8601date = "20140513T16:48:13";
     private final String entityId = "Room1";
@@ -115,6 +116,7 @@ public class OrionMySQLSinkTest {
         context.put("mysql_username", mysqlUsername);
         context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
+        context.put("naming_prefix", namingPrefix);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
@@ -146,6 +148,8 @@ public class OrionMySQLSinkTest {
         assertEquals(mysqlPort, sink.getMySQLPort());
         assertEquals(mysqlUsername, sink.getMySQLUsername());
         assertEquals(mysqlPassword, sink.getMySQLPassword());
+        assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
+        assertEquals(namingPrefix, sink.getNamingPrefix());
     } // testConfigure
 
     /**
