@@ -226,7 +226,7 @@ cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-cygnusagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
 # regular expression for the orion version the notifications will have in their headers
 cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
@@ -237,7 +237,7 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 # channel name from where to read notification events
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
@@ -254,7 +254,7 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # channel name from where to read notification events
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
-cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
+cygnusagent.sinks.ckan-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionCKANSink
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -267,17 +267,17 @@ cygnusagent.sinks.ckan-sink.dataset = mydataset
 # ============================================
 # OrionMySQLSink configuration
 # channel name from where to read notification events
-orionagent.sinks.mysql-sink.channel = mysql-channel
+cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-orionagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
+cygnusagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
 # the FQDN/IP address where the MySQL server runs 
-orionagent.sinks.mysql-sink.mysql_host = x.y.z.w
+cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listes for incomming connections
-orionagent.sinks.mysql-sink.mysql_port = 3306
+cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
-orionagent.sinks.mysql-sink.mysql_username = root
+cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
+cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 
