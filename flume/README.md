@@ -16,10 +16,11 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionMySQLSink. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Each entity's attribute update is persisted as a new row.
 
 All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
-1. On behalf of Cygnus, subscribe to Orion for certain context information.
-2. Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
-3. Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
-4. For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the notifications from the sink channel and persist the data in the appropriate format.
+
+1.  On behalf of Cygnus, subscribe to Orion for certain context information.
+2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
+3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
+4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the notifications from the sink channel and persist the data in the appropriate format.
 
 ## Functionality explained (Json notification example)
 
@@ -95,17 +96,19 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 ### OrionMySQLSink
 
-Similarly to OrionHDFSSink, a table is created for each entity in order to store its notified context data, being the name for these tables:
+Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables:
 
-    cygnus_<entity_id>_<entity_type>
+    <naming_prefix><entity_id>_<entity_type>
 
 These tables are stored in databases, one per user, enabling a private data space, with this name format:
 
-    cygnus_<mysql_user>
+    <naming_prefix><mysql_user>
+
+Observe "naming_prefix" is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
 Within tables, we can find two options:
-* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables are created at execution time if the table doesn't exist previously to the row insertion.
-* A column per each entity's attribute, plus an addition column about the reception time of the data ("recv_time"). This kind of tables must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
+* A column per each entity's attribute, plus an addition column about the reception time of the data ("recv_time"). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, "attr_persistence", whose values can be 'row' or 'column'.
 
@@ -156,7 +159,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.1-jar-with-dependecies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
 
@@ -164,7 +167,7 @@ or not:
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
 
@@ -267,19 +270,21 @@ cygnusagent.sinks.ckan-sink.dataset = mydataset
 # ============================================
 # OrionMySQLSink configuration
 # channel name from where to read notification events
-orionagent.sinks.mysql-sink.channel = mysql-channel
+cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-orionagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
+cygnusagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
 # the FQDN/IP address where the MySQL server runs 
-orionagent.sinks.mysql-sink.mysql_host = x.y.z.w
+cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listes for incomming connections
-orionagent.sinks.mysql-sink.mysql_port = 3306
+cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
-orionagent.sinks.mysql-sink.mysql_username = root
+cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-orionagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
+cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+# prefix for the database and table names, empty if no prefix is desired
+cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration
@@ -338,11 +343,11 @@ Once the log4j has been properly configured, you only have to add to the Flume c
 
 In foreground (with logging):
 
-    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
+    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
+    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
 
 Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
 

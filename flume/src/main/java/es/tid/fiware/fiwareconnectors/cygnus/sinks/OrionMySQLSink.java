@@ -55,6 +55,7 @@ public class OrionMySQLSink extends OrionSink {
     private String mysqlUsername;
     private String mysqlPassword;
     private boolean rowAttrPersistence;
+    private String namingPrefix;
     private MySQLBackend persistenceBackend;
     
     /**
@@ -97,6 +98,23 @@ public class OrionMySQLSink extends OrionSink {
     } // getMySQLPassword
     
     /**
+     * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
+     * purposes.
+     * @return True if the attribute persistence is row-based, false otherwise
+     */
+    protected boolean getRowAttrPersistence() {
+        return rowAttrPersistence;
+    } // getRowAttrPersistence
+    
+    /**
+     * Returns if the naming prefix. It is protected due to it is only required for testing purposes.
+     * @return The naming prefix
+     */
+    protected String getNamingPrefix() {
+        return namingPrefix;
+    } // getNamingPrefix
+    
+    /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
@@ -134,6 +152,8 @@ public class OrionMySQLSink extends OrionSink {
         logger.debug("Reading mysql_password=" + mysqlPassword);
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("Reading attr_persistence=" + (rowAttrPersistence ? "row" : "column"));
+        namingPrefix = context.getString("naming_prefix", "");
+        logger.debug("Reading naming_prefix=" + namingPrefix);
     } // configure
 
     @Override
@@ -157,7 +177,7 @@ public class OrionMySQLSink extends OrionSink {
             
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
-        String dbName = "cygnus_" + mysqlUsername;
+        String dbName = namingPrefix + mysqlUsername;
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
         // create it in the per-column mode because there will not be any table within the database
@@ -174,7 +194,7 @@ public class OrionMySQLSink extends OrionSink {
             String type = Utils.encode(contextElement.getType());
 
             // get the name of the table
-            String tableName = "cygnus_" + id + "_" + type;
+            String tableName = namingPrefix + id + "_" + type;
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
