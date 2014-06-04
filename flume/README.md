@@ -16,10 +16,10 @@ There exists a wide collection of already developed sources, channels and sinks.
 * OrionMySQLSink. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Each entity's attribute update is persisted as a new row.
 
 All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
-1. On behalf of Cygnus, subscribe to Orion for certain context information.
-2. Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
-3. Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
-4. For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the notifications from the sink channel and persist the data in the appropriate format.
+1.  On behalf of Cygnus, subscribe to Orion for certain context information.
+2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
+3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
+4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the notifications from the sink channel and persist the data in the appropriate format.
 
 ## Functionality explained (Json notification example)
 
@@ -103,7 +103,7 @@ These tables are stored in databases, one per user, enabling a private data spac
 
     <naming_prefix><mysql_user>
 
-Observe "naming_prefix" is a configuration parameter of the sink.
+Observe "naming_prefix" is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
 Within tables, we can find two options:
 * Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
@@ -282,7 +282,7 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names
+# prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
@@ -342,11 +342,11 @@ Once the log4j has been properly configured, you only have to add to the Flume c
 
 In foreground (with logging):
 
-    APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
+    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
 
 In background:
 
-    nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
+    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
 
 Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
 
