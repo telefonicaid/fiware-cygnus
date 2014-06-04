@@ -156,7 +156,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
 
@@ -164,7 +164,7 @@ or not:
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn package
-    $ cp target/cygnus-0.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
 
