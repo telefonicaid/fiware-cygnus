@@ -272,6 +272,7 @@ public class NotifyContextRequest {
         
         /**
          * Gets context value.
+         * @param asStringRepresentation
          * @return The context value for this context attribute in String format.
          */
         public String getContextValue(boolean asStringRepresentation) {
@@ -290,7 +291,7 @@ public class NotifyContextRequest {
          * Converts a XML node into Json.
          * @param xmlNode
          * @return
-         * @throws exception
+         * @throws Exception
          */
         private JsonElement xml2json(Node xmlNode) throws Exception {
             // if the XML node has not attributes, it is either an object either a string

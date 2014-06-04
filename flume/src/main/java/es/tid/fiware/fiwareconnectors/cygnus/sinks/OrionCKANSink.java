@@ -162,7 +162,7 @@ public class OrionCKANSink extends OrionSink {
                 String entity = Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType());
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
+                String attrValue = contextAttribute.getContextValue(false);
                 Date date = new Date();
 
                 // persist the data
