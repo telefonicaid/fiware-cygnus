@@ -71,7 +71,7 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names
+# prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
