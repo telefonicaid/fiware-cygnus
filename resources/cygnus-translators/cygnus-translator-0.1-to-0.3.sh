@@ -30,15 +30,16 @@
 # the RAM memory is justified due to the expected large size of the HDFS files.
 
 # show the usage
-if [ $# -ne 3 ]; then
-	echo "Usage: cygnus-translator.sh <HDFS_user> <src_HDFS_directory> <dst_HDFS_directory>";
+if [ $# -ne 4 ]; then
+	echo "Usage: cygnus-translator.sh <HDFS_user> <prefix_name> <src_HDFS_directory> <dst_HDFS_directory>";
 	exit 1;
 fi
 
 # input parameters
 hdfsUser=$1
-srcHDFSFolder=$2
-dstHDFSFolder=$3
+prefixName=$2
+srcHDFSFolder=$3
+dstHDFSFolder=$4
 
 # check if the script is being run in the Hadoop cluster NameNode
 if ! [[ $(ps -ef | grep NameNode | grep -v grep) ]]; then
@@ -106,8 +107,8 @@ while read -r lsLine; do
 	echo -n "Translating into $tmpOutput"
 
 	while IFS='|' read -ra array; do
-		jsonLine="{\"ts\":\"${array[1]}\", \
-			\"iso8601date\":\"${array[0]}\", \
+		jsonLine="{\"recv_time_ts\":\"${array[1]}\", \
+			\"recv_time\":\"${array[0]}\", \
 			\"entityId\":\"${array[2]}\", \
 			\"entityType\":\"${array[3]}\", \
 			\"attrName\":\"${array[4]}\", \
@@ -120,8 +121,8 @@ while read -r lsLine; do
 
 	# copy the translated file to HDFS as a temporal file to be merged at the end
 	translatedFileSize=$(ls -la $tmpOutput | awk '{ print $5 }')
-	echo -n "Writing hdfs://localhost$dstHDFSFolder/cygnus-$entityId-$entityType.$index.tmp ($translatedFileSize bytes)"
-	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/cygnus-$entityId-$entityType.$index.tmp
+	echo -n "Writing hdfs://localhost$dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp ($translatedFileSize bytes)"
+	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp
 	echo " [DONE]"
 
 	# delete all the temporary files
@@ -129,8 +130,8 @@ while read -r lsLine; do
 	rm $tmpOutput
 
 	# store the final HDFS name, if not stored yet
-        if ! [[ $(echo "${dstHDFSFileNames[@]}" | grep cygnus-$entityId-$entityType) ]]; then
-                dstHDFSFileNames[index]=cygnus-$entityId-$entityType
+        if ! [[ $(echo "${dstHDFSFileNames[@]}" | grep $prefixName$entityId-$entityType) ]]; then
+                dstHDFSFileNames[index]=$prefixName$entityId-$entityType
         fi
 
         # update the file counter
