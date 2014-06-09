@@ -268,8 +268,8 @@ public class OrionHDFSSink extends OrionSink {
                 if (rowAttrPersistence) {
                     // create a Json document to be persisted
                     String rowLine = "{"
-                            + "\"ts\":\"" + timeHelper.getTime() + "\","
-                            + "\"iso8601date\":\"" + timeHelper.getTimeString() + "\","
+                            + "\"recv_time_ts\":\"" + timeHelper.getTime() + "\","
+                            + "\"recv_time\":\"" + timeHelper.getTimeString() + "\","
                             + "\"entityId\":\"" + contextElement.getId() + "\","
                             + "\"entityType\":\"" + contextElement.getType() + "\","
                             + "\"attrName\":\"" + contextAttribute.getName() + "\","

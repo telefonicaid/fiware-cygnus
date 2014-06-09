@@ -76,14 +76,14 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
     
 Within files, Json documents are written following one of these two schemas:
 
-* Fixed 7-field lines: <code>ts</code>, <code>iso8601date</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. 
+* Fixed 7-field lines: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. 
 *  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recv_time</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
 
-    {"ts":"13453464536", "iso8601data":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
+    {"recv_time_ts":"13453464536", "recv_time":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
 
 On the contrary, being the persistence mode 'column', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
 
@@ -119,16 +119,16 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 
 Within tables, we can find two options:
 
-* Fixed 7-field rows, as usual: <code>ts</code>, <code>iso8601date</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
+* Fixed 7-field rows, as usual: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
 * A column per each entity's attribute, plus an addition column about the reception time of the data (<code>recv_time</code>). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or </code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named <code>room1-Room.txt</code> (it is created if not existing) will contain a new row such as:
 
-    | ts          | iso8601data         | entityId | entityType | attrName    | attrType   | attrValue |
-    |-------------|---------------------|----------|------------|-------------|------------|-----------|
-    | 13453464536 | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      |
+    | recv_time_ts | recv_time           | entityId | entityType | attrName    | attrType   | attrValue |
+    |--------------|---------------------|----------|------------|-------------|------------|-----------|
+    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      |
 
 On the contrary, being the persistence mode 'column', the table named <code>room1-Room.txt</code> (it must be created in advance) will contain a new row such as:
 
