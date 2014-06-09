@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.flume.Channel;
 import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
@@ -155,17 +157,16 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        // FIXME: when dealing with multi-tenancy, the user's username owning the context data will be be given in the
-        // notification; this username will be used to appropriately store the data in a user's specific space
-        persist("FIXME", contextResponses);
+        persist(eventHeaders.get(Constants.ORG_HEADER), contextResponses);
     } // persist
     
     /**
-     * This is the method the classes extending this class must implement when dealing with persistion.
-     * @param contextResponses
+     * This is the method the classes extending this class must implement when dealing with persistence
+     * @param organization the organization/tenant to persist the data
+     * @param contextResponses the context element responses to persist
      * @throws Exception
      */
-    abstract void persist(String username, ArrayList contextResponses) throws Exception;
+    abstract void persist(String organization, ArrayList contextResponses) throws Exception;
     
     /**
      * Class wrapping the time related operations, allowing that way those operation can be mocked.

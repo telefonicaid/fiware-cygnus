@@ -64,6 +64,11 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 
 The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the OrionHDFSSink extracts the events.
 
+Since version 0.3 Cygnus supports multi-tenancy. Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated
+to the notification. The actual processing of such tenant/organization depends on the particular sink. If the notification
+doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the
+cygnusagent.sources.http-source.handler.default_organization configuration property.
+
 Depending on the sink, the context element is persisted in a different way:
 
 ### OrionHDFSSink
@@ -78,9 +83,11 @@ Another novelty added by Cygnus v0.2 is related to the data serialization in suc
     
 Thus, the file named `cygnus-mysuer-mydataset-room1-Room.txt` (it is created if not existing) will contain a new line such as `{"ts":"13453464536", "iso8601data":"2014-02-27T14_46_21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}`
 
+Each organization/tenant is associated to a different user in the HDFS filesystem.
+
 ### OrionCKANSink
 
-This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/latest/maintaining/datastore.html). Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the 'dataset' property in the CKAN sink configuration.
+This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/latest/maintaining/datastore.html). Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the 'default_dataset' property in the CKAN sink configuration.
 
 Each context element in the datastore has the following fields:
 
@@ -93,6 +100,8 @@ Each context element in the datastore has the following fields:
 The information stored in the datastore can be accesses as any other CKAN information, e.g. through the web frontend or using the query API, e.g;
 
     curl -s -S "http://${CKAN_HOST}/api/3/action/datastore_search?resource_id=${RESOURCE_ID}
+
+Each organization/tenant is associated to a CKAN organization.
 
 ### OrionMySQLSink
 
@@ -111,6 +120,8 @@ Within tables, we can find two options:
 * A column per each entity's attribute, plus an addition column about the reception time of the data ("recv_time"). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, "attr_persistence", whose values can be 'row' or 'column'.
+
+Each organization/tenant is associated to a different database.
 
 ## XML notification example
 
@@ -234,6 +245,8 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosin
 cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
+# Default organization (organization semantic depend on the persistence sink)
+cygnusagent.sources.http-source.handler.default_organization = org42
 
 # ============================================
 # OrionHDFSSink configuration
@@ -247,7 +260,7 @@ cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/myusername)
 cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
-# dataset where to persist the data (/user/myusername/mydataset)
+# defaultDataset where to persist the data (/user/myusername/mydataset)
 cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
@@ -264,8 +277,9 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# the dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
-cygnusagent.sinks.ckan-sink.dataset = mydataset
+# the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
+# characters plus "-" and "_" acording to CKAN limitations
+cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 
 # ============================================
 # OrionMySQLSink configuration

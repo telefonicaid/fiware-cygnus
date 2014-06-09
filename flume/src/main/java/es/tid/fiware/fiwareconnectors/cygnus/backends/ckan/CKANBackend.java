@@ -36,21 +36,31 @@ public interface CKANBackend {
      * @param httpClient HTTP client for accessing the backend server.
      * @throws Exception
      */
-    void init(DefaultHttpClient httpClient) throws Exception;
+    //void init(DefaultHttpClient httpClient) throws Exception;
 
     /**
-     * Persist data in the CKAN datastore associated with the entity.
+     * Prepares an organization for use, creating it if it doesn't previously exist
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param organization to check and create
+     * @throws Exception
+     */
+    void initOrg(DefaultHttpClient httpClient, String organization) throws Exception;
+
+    /**
+     * Persist data in the CKAN datastore associated with the entity in a given organization
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
+     * @param organization organiation.
      * @param entity entity string (including ID and type).
      * @param attrName attribute name.
      * @param attrType attribute type.
      * @param attrValue attribute value.
      * @throws Exception
      */
-    void persist(DefaultHttpClient httpClient, Date date, String entity, String attrName, String attrType,
-                 String attrValue) throws Exception;
+    void persist(DefaultHttpClient httpClient, Date date, String organization, String entity, String attrName,
+                 String attrType, String attrValue) throws Exception;
 
     
 } // CKANBackend

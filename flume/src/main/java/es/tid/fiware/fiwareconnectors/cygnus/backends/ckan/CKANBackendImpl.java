@@ -50,34 +50,39 @@ public class CKANBackendImpl implements CKANBackend {
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
-    private String dataset;
-    private String packageId;
+    private String defaultDataset;
+    //private String packageId;
 
-    // this map implements the f(NGSIentity) = CKANresourceId function
-    private HashMap<String, String> resourceIds;
+    // this map implements the f(NGSIentity, Org) = CKANresourceId function
+    private HashMap<EntityKey, String> resourceIds;
+
+    // this map implements the f(Org) = defaultPackageId function
+    private HashMap<String, String> packagesIds;
 
     /**
      * @param apiKey
      * @param ckanHost
      * @param ckanPort
-     * @param dataset
+     * @param defaultDataset
      */
-    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String dataset) {
+    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String defaultDataset) {
         logger = Logger.getLogger(CKANBackendImpl.class);
         this.apiKey = apiKey;
         this.ckanHost = ckanHost;
         this.ckanPort = ckanPort;
-        this.dataset = dataset;
-        resourceIds = new HashMap<String, String>();
+        this.defaultDataset = defaultDataset;
+        resourceIds = new HashMap<EntityKey, String>();
+        packagesIds = new HashMap<String, String>();
 
     } // CKANBackendImpl
 
+/*
     @Override
-    public void init(DefaultHttpClient httpClient) throws Exception {
+    public void initDefaultDataset(DefaultHttpClient httpClient) throws Exception {
 
         // do CKAN request
         CKANResponse res = doCKANRequest(httpClient, "GET",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + dataset);
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + defaultDataset);
 
         // check the status
         if (res.getStatusCode() == 200) {
@@ -88,35 +93,83 @@ public class CKANBackendImpl implements CKANBackend {
             populateResourcesMap((JSONArray) result.get("resources"));
         } else if (res.getStatusCode() == 404) {
             // package doesn't exist, create it
-            createPackage(httpClient);
+            createDefaultPackage(httpClient);
         } else {
             logger.error("don't know how to treat response code " + res.getStatusCode());
         } // if else
 
     } // init
+*/
 
     @Override
-    public void persist(DefaultHttpClient httpClient, Date date, String entity, String attrName,
+    public void initOrg(DefaultHttpClient httpClient, String organization) throws Exception {
+        // do CKAN request
+        CKANResponse res = doCKANRequest(httpClient, "GET",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_show?id=" + organization);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            // organization exists
+            JSONObject result = (JSONObject) res.getJsonObject().get("result");
+            String orgId = result.get("id").toString();
+            logger.info("organization found - organization ID: " + orgId);
+            // check if organization contains the default package
+            JSONArray packages = (JSONArray) result.get("packages");
+            Iterator<JSONObject> iterator = packages.iterator();
+            while (iterator.hasNext()) {
+                JSONObject pkg = (JSONObject) iterator.next();
+                String pkgName = (String) pkg.get("name");
+                if (pkgName.equals(defaultDataset)) {
+                    String packageId = pkg.get("id").toString();
+                    logger.info("default package found - package ID: " + packageId);
+                    populateResourcesMap((JSONArray) pkg.get("resources"), organization);
+                    packagesIds.put(organization, packageId);
+                    logger.info("added to packages maps " + organization + " -> " + packageId);
+                    return;
+                }
+            }
+            // if we have reach this point, then organization doesn't include the default package and we need to create it
+            String packageId = createDefaultPackage(httpClient, orgId);
+            packagesIds.put(organization, packageId);
+            logger.info("added to packages maps " + organization + " -> " + packageId);
+        } else if (res.getStatusCode() == 404) {
+            // organization doesn't exist, create it
+            createOrganization(httpClient, organization);
+        } else {
+            logger.error("don't know how to treat response code " + res.getStatusCode());
+        } // if else
+    } // initOrg
+
+    @Override
+    public void persist(DefaultHttpClient httpClient, Date date, String organization, String entity, String attrName,
                         String attrType, String attrValue) throws Exception {
 
         // look for the resource id associated to the entity in the hashmap
         String resourceId;
-        if (resourceIds.containsKey(entity)) {
+        EntityKey ek = new EntityKey(organization, entity);
+        logger.info("lookup in resources map " + ek);
+        Iterator<EntityKey> i = resourceIds.keySet().iterator();
+        while (i.hasNext()) {
+            EntityKey ekAux = i.next();
+            logger.info("EK: " + ekAux);
+        }
+        if (resourceIds.containsKey(ek)) {
             // persist the data in the datastore associated to the resource id (entity)
-            resourceId = resourceIds.get(entity);
-            logger.info("resolved " + entity + " -> " + resourceId);
+            resourceId = resourceIds.get(ek);
+            logger.info("resolved " + ek + " -> " + resourceId);
         } else {
             // create the resource id and datastore, adding it to the resourceIds map
 
             // note that we are assuming that the only actor that can create resourceIds matching NGSI entities in
-            // the dataset is this instance of the CKAN sink, i.e. out-of-the-band resourceId creation is not allowed.
-            // Otherwise, we should add an if in order to re-check that the resourceId has not been added to the
-            // package since init() was invoked, doing a similar process to the one in populateResourceMap
+            // the organization's defaultDataset is this instance of the CKAN sink, i.e. out-of-the-band resourceId
+            // creation is not allowed. Otherwise, we should add an if in order to re-check that the resourceId has
+            // not been added to the package since init() was invoked, doing a similar process to the one in
+            // populateResourceMap
 
-            resourceId = createResource(httpClient, entity);
+            resourceId = createResource(httpClient, entity, organization);
             createDataStore(httpClient, resourceId);
-            resourceIds.put(entity, resourceId);
-            logger.info("added to map " + entity + " -> " + resourceId);
+            resourceIds.put(ek, resourceId);
+            logger.info("added to resources map " + ek + " -> " + resourceId);
         } // if else
 
         // persist the entity
@@ -125,19 +178,21 @@ public class CKANBackendImpl implements CKANBackend {
     } // persist
 
     /**
-     * Populates the entity-resource map with the package information from the CKAN response.
+     * Populates the entity-resource map of a given organization with the package information from the CKAN response.
      *
      * @param resources JSON vector from the CKAN response containing resource information.
+     * @param organization
      */
-    private void populateResourcesMap(JSONArray resources) {
+    private void populateResourcesMap(JSONArray resources, String organization) {
 
         Iterator<JSONObject> iterator = resources.iterator();
         while (iterator.hasNext()) {
             JSONObject factObj = (JSONObject) iterator.next();
             String id = (String) factObj.get("id");
             String name = (String) factObj.get("name");
-            resourceIds.put(name, id);
-            logger.info("added to map " + name + " -> " + id);
+            EntityKey ek = new EntityKey(organization, name);
+            resourceIds.put(ek, id);
+            logger.info("added to resources map " + ek + " -> " + id);
         }
 
     } // populateResourcesMap
@@ -183,41 +238,72 @@ public class CKANBackendImpl implements CKANBackend {
     } // insert
 
     /**
-     * Creates the dataset (package) in CKAN.
+     * Creates an organization in CKAN.
      *
      * @param httpClient HTTP client for accessing the backend server.
+     * @param organization to create
      * @throws Exception
      */
-    private void createPackage(DefaultHttpClient httpClient) throws Exception {
+    private void createOrganization(DefaultHttpClient httpClient, String organization) throws Exception {
 
         // do CKAN request
-        String jsonString = "{ \"name\": \"" + dataset + "\"}";
+        String jsonString = "{ \"name\": \"" + organization + "\"}";
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_create", jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+            logger.info("successful organization creation - organization ID: " + orgId);
+            String packageId = createDefaultPackage(httpClient, orgId);
+            packagesIds.put(organization, packageId);
+            logger.info("added to packages maps " + organization + " -> " + packageId);
+        } else {
+            logger.error("don't know how to treat response code " + res.getStatusCode());
+        } // if else
+    } // createOrganization
+
+    /**
+     * Creates the default dataset (package) for a given organization in CKAN.
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param orgId the owner organization for the package
+     * @return packageId if the package was created or "" if it wasn't.
+     * @throws Exception
+     */
+    private String createDefaultPackage(DefaultHttpClient httpClient, String orgId) throws Exception {
+
+        // do CKAN request
+        String jsonString = "{ \"name\": \"" + defaultDataset + "\", "
+                + "\"owner_org\": \"" + orgId + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create", jsonString);
 
         // check the status
         if (res.getStatusCode() == 200) {
-            packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+            String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
             logger.info("successful package creation - package ID: " + packageId);
+            return packageId;
         } else {
             logger.error("don't know how to treat response code " + res.getStatusCode());
+            return "";
         } // if else
-    } // createPackage
+    } // createDefaultPackage
 
     /**
-     * Creates a resource within the dataset.
+     * Creates a resource within the defaultDataset of a given organization
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceName File to be created.
      * @return resource ID if the resource was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createResource(DefaultHttpClient httpClient, String resourceName) throws Exception {
+    private String createResource(DefaultHttpClient httpClient, String resourceName, String organization) throws Exception {
 
         // do CKAN request
         String jsonString = "{ \"name\": \"" + resourceName + "\", "
                 + "\"url\": \"" + resourceName + "\", "
-                + "\"package_id\": \"" + packageId + "\" }";
+                + "\"package_id\": \"" + packagesIds.get(organization) + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create", jsonString);
 
