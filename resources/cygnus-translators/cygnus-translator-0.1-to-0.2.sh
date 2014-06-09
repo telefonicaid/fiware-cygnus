@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Copyright 2014 Telefonica Investigacion y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors.
