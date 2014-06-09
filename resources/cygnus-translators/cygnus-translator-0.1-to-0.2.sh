@@ -94,6 +94,11 @@ while read -r lsLine; do
 	# get the file name
 	hdfsFileName=${hdfsFilePath##*/}
 
+        # get the entityId and the entityType
+        IFS='-' read -ra array <<< "${hdfsFileName}"
+        entityId="${array[0]}"
+        entityType="${array[1]}"	
+
 	# create a temporary output file within the temporary working folder
 	tmpOutput=$(sudo -u $hdfsUser mktemp $tmpDir/output.XXXX)
 
