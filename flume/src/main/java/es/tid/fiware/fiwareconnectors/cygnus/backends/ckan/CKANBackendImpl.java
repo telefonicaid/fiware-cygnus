@@ -76,33 +76,11 @@ public class CKANBackendImpl implements CKANBackend {
 
     } // CKANBackendImpl
 
-/*
-    @Override
-    public void initDefaultDataset(DefaultHttpClient httpClient) throws Exception {
-
-        // do CKAN request
-        CKANResponse res = doCKANRequest(httpClient, "GET",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + defaultDataset);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            // package exists, populate resourcesId map
-            JSONObject result = (JSONObject) res.getJsonObject().get("result");
-            packageId = result.get("id").toString();
-            logger.info("package found - package ID: " + packageId);
-            populateResourcesMap((JSONArray) result.get("resources"));
-        } else if (res.getStatusCode() == 404) {
-            // package doesn't exist, create it
-            createDefaultPackage(httpClient);
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-        } // if else
-
-    } // init
-*/
-
     @Override
     public void initOrg(DefaultHttpClient httpClient, String organization) throws Exception {
+        // FIXME: implement a map to store known OrgNames, in order to avoid a CKAN request each time
+        // initOrg is invoked
+
         // do CKAN request
         CKANResponse res = doCKANRequest(httpClient, "GET",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_show?id=" + organization);
@@ -148,11 +126,7 @@ public class CKANBackendImpl implements CKANBackend {
         String resourceId;
         EntityKey ek = new EntityKey(organization, entity);
         logger.info("lookup in resources map " + ek);
-        Iterator<EntityKey> i = resourceIds.keySet().iterator();
-        while (i.hasNext()) {
-            EntityKey ekAux = i.next();
-            logger.info("EK: " + ekAux);
-        }
+
         if (resourceIds.containsKey(ek)) {
             // persist the data in the datastore associated to the resource id (entity)
             resourceId = resourceIds.get(ek);

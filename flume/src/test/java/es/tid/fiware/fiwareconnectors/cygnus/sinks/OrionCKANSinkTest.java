@@ -115,7 +115,7 @@ public class OrionCKANSinkTest {
         context.put("ckan_host", ckanHost);
         context.put("ckan_port", ckanPort);
         context.put("api_key", apiKey);
-        context.put("dataset", dataset);
+        context.put("default_dataset", dataset);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
@@ -123,13 +123,13 @@ public class OrionCKANSinkTest {
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         when(mockTimeHelper.getTime()).thenReturn(ts);
         when(mockTimeHelper.getTimeString()).thenReturn(iso8601date);
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).init(null);
+        //doNothing().doThrow(new Exception()).when(mockCKANBackend).init(null);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                null, null, entityId, attrName, attrType, attrValue);
+                null, null, null, entityId, attrName, attrType, attrValue);
     } // setUp
     
     /**
-     * Test the constructor, of class OrionMySQLSink.
+     * Test the constructor, of class OrionCKANSink.
      */
     @Test
     public void testCKANSink() {
@@ -147,7 +147,7 @@ public class OrionCKANSinkTest {
         assertEquals(ckanHost, sink.getCKANHost());
         assertEquals(ckanPort, sink.getCKANPort());
         assertEquals(apiKey, sink.getAPIKey());
-        assertEquals(dataset, sink.getDataset());
+        assertEquals(dataset, sink.getDefaultDataset());
     } // testConfigure
 
     /**

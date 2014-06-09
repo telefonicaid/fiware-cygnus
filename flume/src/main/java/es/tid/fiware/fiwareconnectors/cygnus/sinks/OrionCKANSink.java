@@ -138,7 +138,6 @@ public class OrionCKANSink extends OrionSink {
         try {
             // create and init persistenceBackend backend
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset);
-            //persistenceBackend.init(httpClientFactory.getHttpClient(false));
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         } // try catch
