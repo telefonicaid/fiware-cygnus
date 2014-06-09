@@ -29,6 +29,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -58,6 +59,8 @@ public class OrionHDFSSink extends OrionSink {
     private String cosmosPassword;
     private String cosmosDataset;
     private String hdfsAPI;
+    private boolean rowAttrPersistence;
+    private String namingPrefix;
     private HDFSBackend persistenceBackend;
     private HttpClientFactory httpClientFactory;
     
@@ -172,6 +175,10 @@ public class OrionHDFSSink extends OrionSink {
         logger.debug("Reading cosmos_dataset=" + cosmosDataset);
         hdfsAPI = context.getString("hdfs_api", "httpfs");
         logger.debug("Reading hdfs_api=" + hdfsAPI);
+        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        logger.debug("Reading attr_persistence=" + (rowAttrPersistence ? "row" : "column"));
+        namingPrefix = context.getString("naming_prefix", "");
+        logger.debug("Reading naming_prefix=" + namingPrefix);
     } // configure
 
     @Override
@@ -222,13 +229,22 @@ public class OrionHDFSSink extends OrionSink {
         // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
         
+        // reception time FIXME: should be moved to the handler
+        long ts = timeHelper.getTime();
+        String iso8601date = timeHelper.getTimeString();
+        
+        // unlike the MySQL sink, the database has not to be created since this concept is represented by the HDFS user,
+        // which userspace is already created under /user/myusername
+        
         // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
-            String fileName = "cygnus-" + cosmosUsername + "-" + cosmosDataset.replaceAll("/", "_") + "-"
-                    + Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType()) + ".txt";
+            
+            // get the name of the file
+            String fileName = this.namingPrefix + Utils.encode(contextElement.getId()) + "-"
+                    + Utils.encode(contextElement.getType()) + ".txt";
             
             // check if the file exists in HDFS right now, i.e. when its name has been got
             boolean fileExists = false;
@@ -237,35 +253,59 @@ public class OrionHDFSSink extends OrionSink {
                 fileExists = true;
             } // if
             
-            // iterate on all this entity's attributes and write a line per each updated one
+            // iterate on all this entity's attributes and write a rowLine per each updated one
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+            
+            // this is used for storing the attribute's names and values when dealing with a per column attributes
+            // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
+            // at the same time
+            String columnLine = "{\"recv_time\":\"" + iso8601date + "\",";
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
                 ContextAttribute contextAttribute = contextAttributes.get(j);
                 
-                // create a Json document to be persisted
-                String line = "{"
-                        + "\"ts\":\"" + timeHelper.getTime() + "\","
-                        + "\"iso8601date\":\"" + timeHelper.getTimeString() + "\","
-                        + "\"entityId\":\"" + contextElement.getId() + "\","
-                        + "\"entityType\":\"" + contextElement.getType() + "\","
-                        + "\"attrName\":\"" + contextAttribute.getName() + "\","
-                        + "\"attrType\":\"" + contextAttribute.getType() + "\","
-                        + "\"attrValue\":" + contextAttribute.getContextValue(true)
-                        + "}";
-                logger.info("Persisting data. File: " + fileName + ", Data: " + line);
-                
-                // if the file exists, append the Json document to it; otherwise, create it with initial content and
-                // mark as existing (this avoids checking if the file exists each time a Json document is going to be
-                // persisted)
-                if (fileExists) {
-                    persistenceBackend.append(httpClientFactory.getHttpClient(false), fileName, line);
+                if (rowAttrPersistence) {
+                    // create a Json document to be persisted
+                    String rowLine = "{"
+                            + "\"ts\":\"" + timeHelper.getTime() + "\","
+                            + "\"iso8601date\":\"" + timeHelper.getTimeString() + "\","
+                            + "\"entityId\":\"" + contextElement.getId() + "\","
+                            + "\"entityType\":\"" + contextElement.getType() + "\","
+                            + "\"attrName\":\"" + contextAttribute.getName() + "\","
+                            + "\"attrType\":\"" + contextAttribute.getType() + "\","
+                            + "\"attrValue\":" + contextAttribute.getContextValue(true)
+                            + "}";
+                    logger.info("Persisting data. File: " + fileName + ", Data: " + rowLine);
+                    
+                    // if the file exists, append the Json document to it; otherwise, create it with initial content and
+                    // mark as existing (this avoids checking if the file exists each time a Json document is going to
+                    // be persisted)
+                    if (fileExists) {
+                        persistenceBackend.append(httpClientFactory.getHttpClient(false), fileName, rowLine);
+                    } else {
+                        persistenceBackend.createFile(httpClientFactory.getHttpClient(false), fileName, rowLine);
+                        fileExists = true;
+                    } // if else
                 } else {
-                    persistenceBackend.createFile(httpClientFactory.getHttpClient(false), fileName, line);
-                    fileExists = true;
+                    columnLine += "\"" + contextAttribute.getName() + "\":" + contextAttribute.getContextValue(true)
+                            + ",";
                 } // if else
             } // for
+                 
+            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
+            // attribute list of name-values.
+            if (!rowAttrPersistence) {
+                columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
+                logger.info("Persisting data. File: " + fileName + ", Data: " + columnLine);
+                
+                if (fileExists) {
+                    persistenceBackend.append(httpClientFactory.getHttpClient(false), fileName, columnLine);
+                } else {
+                    persistenceBackend.createFile(httpClientFactory.getHttpClient(false), fileName, columnLine);
+                    fileExists = true;
+                } // if else
+            } // if
         } // for
     } // persist
     
