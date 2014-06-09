@@ -41,6 +41,10 @@ cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
 cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.hdfs-sink.attr_persistence = column
+# prefix for the database and table names, empty if no prefix is desired
+cygnusagent.sinks.hdfs-sink.naming_prefix =
 
 # ============================================
 # OrionCKANSink configuration

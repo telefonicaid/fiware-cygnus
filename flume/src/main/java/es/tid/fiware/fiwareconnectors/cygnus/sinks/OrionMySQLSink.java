@@ -169,12 +169,10 @@ public class OrionMySQLSink extends OrionSink {
         // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
         
-        // if the attribute persistence mode is per row, insert a new row in the table, otherwise store the
-        // attribute name and value for later
+        // reception time FIXME: should be moved to the handler
         long ts = timeHelper.getTime();
         String iso8601date = timeHelper.getTimeString();
 
-            
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
         String dbName = namingPrefix + mysqlUsername;
