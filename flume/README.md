@@ -66,19 +66,30 @@ The channel is a simple MemoryChannel behaving as a FIFO queue, and from where t
 
 Depending on the sink, the context element is persisted in a different way:
 
-### OrionHDFSSink
+### OrionHDFSSink persistence
 
-From Cygnus v0.2, this sink does not persist the data according to the original ngsi2cosmos specification anymore (i.e. for each (entity,attribute) pair a file was created). Instead, a unique file is created per entity, following this specification:
+This sink persists the data in files, one per each entity, following this specification:
 
-    cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt
+    <naming_prefix><entity_id>-<entity_type>.txt
+
+Observe <code>naming_prefix</code> is a configuration parameter of the sink, which may be empty if no prefix is desired.
     
-Another novelty added by Cygnus v0.2 is related to the data serialization in such above files. Now, instead of persisting CSV-like lines, Json documents are written in the format below. This complies with the new Orion Context Broker functionality allowing for complex Json values for attributes.
+Within files, Json documents are written following one of these two schemas:
 
-    {"ts":"xxx", "iso8601date":"xxx", "entityId":"xxx", "entityType":"xxx", "attrName":"xxx", "attrType":"xxx", "attrValue":"xxx"|{...}|[...]}
-    
-Thus, the file named `cygnus-mysuer-mydataset-room1-Room.txt` (it is created if not existing) will contain a new line such as `{"ts":"13453464536", "iso8601data":"2014-02-27T14_46_21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}`
+* Fixed 7-field lines: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. 
+*  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recv_time</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
-### OrionCKANSink
+In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
+
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
+
+    {"recv_time_ts":"13453464536", "recv_time":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
+
+On the contrary, being the persistence mode 'column', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
+
+    {"recv_time":"2014-02-27T14:46:21", "temperature":"26.5"}
+
+### OrionCKANSink persistence
 
 This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/latest/maintaining/datastore.html). Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the 'dataset' property in the CKAN sink configuration.
 
@@ -94,7 +105,7 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
     curl -s -S "http://${CKAN_HOST}/api/3/action/datastore_search?resource_id=${RESOURCE_ID}
 
-### OrionMySQLSink
+### OrionMySQLSink persistence
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables:
 
@@ -104,21 +115,34 @@ These tables are stored in databases, one per user, enabling a private data spac
 
     <naming_prefix><mysql_user>
 
-Observe "naming_prefix" is a configuration parameter of the sink, which may be empty if no prefix is desired.
+Observe <code>naming_prefix</code> is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
 Within tables, we can find two options:
-* Fixed 7-field rows, as usual: ts, iso8601date, entityId, entityType, attrName, attrType and attrValue. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
-* A column per each entity's attribute, plus an addition column about the reception time of the data ("recv_time"). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, "attr_persistence", whose values can be 'row' or 'column'.
+* Fixed 7-field rows, as usual: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
+* A column per each entity's attribute, plus an addition column about the reception time of the data (<code>recv_time</code>). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or </code>column</code>.
+
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named <code>room1-Room.txt</code> (it is created if not existing) will contain a new row such as:
+
+    | recv_time_ts | recv_time           | entityId | entityType | attrName    | attrType   | attrValue |
+    |--------------|---------------------|----------|------------|-------------|------------|-----------|
+    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      |
+
+On the contrary, being the persistence mode 'column', the table named <code>room1-Room.txt</code> (it must be created in advance) will contain a new row such as:
+
+    | recv_time           | temperature |
+    |---------------------|-------------|
+    | 2014-02-27T14:46:21 | 26.5        |
 
 ## XML notification example
 
-Cygnus also works with XML-based notifications sent to the injector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
 
     event={body={the_json_part...},headers={{"content-type","application/xml"}}}
 
-The key point is the behaviour remains the same than in the Json example: the same file will be created, and the same data line will be persisted within it.
+The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
 ## Prerequisites
 
