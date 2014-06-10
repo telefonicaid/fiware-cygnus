@@ -31,7 +31,8 @@
 
 # show the usage
 if [ $# -ne 4 ]; then
-	echo "Usage: cygnus-translator.sh <HDFS_user> <prefix_name> <src_HDFS_directory> <dst_HDFS_directory>";
+	echo "Usage: cygnus-translator.sh <HDFS_user> <prefix_name> <src_HDFS_directory> <dst_HDFS_directory>"
+	echo "       (If you want an empty <prefix_name>, please use \"\")"
 	exit 1;
 fi
 
@@ -107,8 +108,8 @@ while read -r lsLine; do
 	echo -n "Translating into $tmpOutput"
 
 	while IFS='|' read -ra array; do
-		jsonLine="{\"recv_time_ts\":\"${array[1]}\", \
-			\"recv_time\":\"${array[0]}\", \
+		jsonLine="{\"recvTimeTs\":\"${array[1]}\", \
+			\"recvTime\":\"${array[0]}\", \
 			\"entityId\":\"${array[2]}\", \
 			\"entityType\":\"${array[3]}\", \
 			\"attrName\":\"${array[4]}\", \
