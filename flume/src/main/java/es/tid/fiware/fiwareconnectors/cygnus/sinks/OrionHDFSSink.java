@@ -29,6 +29,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.apache.flume.Context;
@@ -151,15 +152,7 @@ public class OrionHDFSSink extends OrionSink {
     protected void setPersistenceBackend(HDFSBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
-    
-    /**
-     * Sets the time helper. It is protected due to it is only required for testing purposes.
-     * @param timeHelper
-     */
-    protected void setTimeHelper(TimeHelper timeHelper) {
-        this.timeHelper = timeHelper;
-    } // setTimeHelper
-    
+       
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionHDFSSink.class);
@@ -236,13 +229,12 @@ public class OrionHDFSSink extends OrionSink {
     } // start
 
     @Override
-    void persist(String organization, ArrayList contextResponses) throws Exception {
+    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+        // human readable version of the reception time
+        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        
         // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
-        
-        // reception time FIXME: should be moved to the handler
-        long ts = timeHelper.getTime();
-        String recvTime = timeHelper.getTimeString();
         
         // unlike the MySQL sink, the database has not to be created since this concept is represented by the HDFS user,
         // which userspace is already created under /user/myusername
@@ -279,8 +271,8 @@ public class OrionHDFSSink extends OrionSink {
                 if (rowAttrPersistence) {
                     // create a Json document to be persisted
                     String rowLine = "{"
-                            + "\"" + Constants.RECV_TIME_TS + "\":\"" + timeHelper.getTime() + "\","
-                            + "\"" + Constants.RECV_TIME + "\":\"" + timeHelper.getTimeString() + "\","
+                            + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                            + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                             + "\"" + Constants.ENTITY_ID + "\":\"" + contextElement.getId() + "\","
                             + "\"" + Constants.ENTITY_TYPE + "\":\"" + contextElement.getType() + "\","
                             + "\"" + Constants.ATTR_NAME + "\":\"" + contextAttribute.getName() + "\","

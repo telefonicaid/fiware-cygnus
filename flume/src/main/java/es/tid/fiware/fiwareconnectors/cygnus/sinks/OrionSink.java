@@ -22,9 +22,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import java.io.StringReader;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,7 +59,6 @@ import org.xml.sax.InputSource;
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
     private Logger logger;
-    protected TimeHelper timeHelper;
     
     /**
      * Constructor.
@@ -72,14 +69,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
         // create a logger
         logger = Logger.getLogger(OrionSink.class);
-        
-        // create the timer
-        timeHelper = new TimeHelper();
     } // OrionSink
     
     @Override
     public void stop() {
-        timeHelper = null;
         super.stop();
     } // stop
 
@@ -157,38 +150,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER), contextResponses);
+        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get(Constants.RECV_TIME_TS)).longValue(),
+                contextResponses);
     } // persist
     
     /**
-     * This is the method the classes extending this class must implement when dealing with persistence
+     * This is the method the classes extending this class must implement when dealing with persistence.
      * @param organization the organization/tenant to persist the data
+     * @param recvTimeTs the reception time of the context information
      * @param contextResponses the context element responses to persist
      * @throws Exception
      */
-    abstract void persist(String organization, ArrayList contextResponses) throws Exception;
-    
-    /**
-     * Class wrapping the time related operations, allowing that way those operation can be mocked.
-     */
-    public class TimeHelper {
-
-        /**
-         * Gets the current time in milliseconds.
-         * @return The current time in milliseconds.
-         */
-        public long getTime() {
-            return new Date().getTime() / 1000;
-        } // getTime
-
-        /**
-         * Gets the current human readable time.
-         * @return The human readable time.
-         */
-        public String getTimeString() {
-            return new Timestamp(new Date().getTime()).toString().replaceAll(" ", "T");
-        } // getTimeString
-
-    } // TimeHelper
+    abstract void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception;
         
 } // OrionSink

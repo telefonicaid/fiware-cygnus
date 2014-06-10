@@ -24,6 +24,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.flume.Context;
@@ -130,14 +131,6 @@ public class OrionMySQLSink extends OrionSink {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
-    /**
-     * Sets the time helper. It is protected due to it is only required for testing purposes.
-     * @param timeHelper
-     */
-    protected void setTimeHelper(TimeHelper timeHelper) {
-        this.timeHelper = timeHelper;
-    } // setTimeHelper
-    
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionHDFSSink.class);
@@ -165,13 +158,12 @@ public class OrionMySQLSink extends OrionSink {
     } // start
 
     @Override
-    void persist(String organization, ArrayList contextResponses) throws Exception {
+    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+        // human readable version of the reception time
+        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        
         // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
-        
-        // reception time FIXME: should be moved to the handler
-        long ts = timeHelper.getTime();
-        String recvTime = timeHelper.getTimeString();
 
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
@@ -216,13 +208,13 @@ public class OrionMySQLSink extends OrionSink {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
                                 
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
-                            + recvTime + "," + contextElement.getId() + "," + contextElement.getType() + ","
-                            + contextAttribute.getName() + "," + contextAttribute.getType() + ","
-                            + contextAttribute.getContextValue(false));
-                    persistenceBackend.insertContextData(dbName, tableName, ts, recvTime, contextElement.getId(),
-                            contextElement.getType(), contextAttribute.getName(), contextAttribute.getType(),
-                            contextAttribute.getContextValue(false));
+                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: "
+                            + recvTimeTs / 1000 + "," + recvTime + "," + contextElement.getId() + ","
+                            + contextElement.getType() + "," + contextAttribute.getName() + ","
+                            + contextAttribute.getType() + "," + contextAttribute.getContextValue(false));
+                    persistenceBackend.insertContextData(dbName, tableName, recvTimeTs / 1000, recvTime,
+                            contextElement.getId(), contextElement.getType(), contextAttribute.getName(),
+                            contextAttribute.getType(), contextAttribute.getContextValue(false));
                 } else {
                     attrs.put(contextAttribute.getName(), contextAttribute.getContextValue(false));
                 } // if else
@@ -231,8 +223,8 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: " + ts
-                        + ", Row: " + attrs.toString());
+                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
+                        + recvTime + ", Row: " + attrs.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs);
             } // if
         } // for

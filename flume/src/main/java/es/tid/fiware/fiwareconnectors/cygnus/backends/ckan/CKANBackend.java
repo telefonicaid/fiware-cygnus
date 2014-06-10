@@ -42,7 +42,7 @@ public interface CKANBackend {
      * Persist data in the CKAN datastore associated with the entity in a given organization
      * 
      * @param httpClient HTTP client for accessing the backend server.
-     * @param date timestamp.
+     * @param recvTimeTs reception time in milliseconds.
      * @param organization organization.
      * @param entity entity string (including ID and type).
      * @param attrName attribute name.
@@ -50,7 +50,7 @@ public interface CKANBackend {
      * @param attrValue attribute value.
      * @throws Exception
      */
-    void persist(DefaultHttpClient httpClient, Date date, String organization, String entity, String attrName,
+    void persist(DefaultHttpClient httpClient, long recvTimeTs, String organization, String entity, String attrName,
                  String attrType, String attrValue) throws Exception;
 
     

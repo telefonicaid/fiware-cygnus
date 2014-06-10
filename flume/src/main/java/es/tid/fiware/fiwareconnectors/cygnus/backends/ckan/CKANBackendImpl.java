@@ -34,7 +34,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -118,7 +117,8 @@ public class CKANBackendImpl implements CKANBackend {
                 } // if
             } // while
 
-            // if we have reach this point, then organization doesn't include the default package and we need to create it
+            // if we have reach this point, then organization doesn't include the default package and we need to
+            // create it
             String packageId = createDefaultPackage(httpClient, orgId);
             packagesIds.put(organization, packageId);
             logger.info("added to packages map " + organization + " -> " + packageId);
@@ -133,8 +133,8 @@ public class CKANBackendImpl implements CKANBackend {
     } // initOrg
 
     @Override
-    public void persist(DefaultHttpClient httpClient, Date date, String organization, String entity, String attrName,
-                        String attrType, String attrValue) throws Exception {
+    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String organization, String entity,
+            String attrName, String attrType, String attrValue) throws Exception {
 
         // look for the resource id associated to the entity in the hashmap
         String resourceId;
@@ -154,7 +154,7 @@ public class CKANBackendImpl implements CKANBackend {
         } // if else
 
         // persist the entity
-        insert(httpClient, date, resourceId, attrName, attrType, attrValue);
+        insert(httpClient, recvTimeTs, resourceId, attrName, attrType, attrValue);
 
     } // persist
 
@@ -190,15 +190,15 @@ public class CKANBackendImpl implements CKANBackend {
      * @throws Exception
      *
      */
-    private void insert(DefaultHttpClient httpClient, Date date, String resourceId, String attrName,
+    private void insert(DefaultHttpClient httpClient, long recvTimeTs, String resourceId, String attrName,
                         String attrType, String attrValue) throws Exception {
 
         // do CKAN request
         String jsonString = "{ \"resource_id\": \"" + resourceId
                 + "\", \"records\": [ "
-                + "{ \"" + Constants.RECV_TIME_TS + "\": \"" + date.getTime() / 1000 + "\", "
-                + "\"" + Constants.RECV_TIME + "\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", "
-                + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
+                + "{ \"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
+                + "\"" + Constants.RECV_TIME + "\": \"" + new Timestamp(recvTimeTs).toString().replaceAll(" ", "T")
+                + "\", " + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                 + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
                 + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\" "
                 + "}"
@@ -271,7 +271,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // createDefaultPackage
 
     /**
-     * Creates a resource within the default dataset of a given organization
+     * Creates a resource within the default dataset of a given organization.
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceName Resource to be created.
@@ -279,7 +279,8 @@ public class CKANBackendImpl implements CKANBackend {
      * @return resource ID if the resource was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createResource(DefaultHttpClient httpClient, String resourceName, String organization) throws Exception {
+    private String createResource(DefaultHttpClient httpClient, String resourceName, String organization)
+        throws Exception {
 
         // do CKAN request
         String jsonString = "{ \"name\": \"" + resourceName + "\", "
@@ -394,7 +395,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // doCKANRequest
 
     /**
-     * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class
+     * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class.
      */
     class OrgEntityPair {
 
@@ -402,7 +403,7 @@ public class CKANBackendImpl implements CKANBackend {
         private String org;
 
         /**
-         * Class constructor
+         * Class constructor.
          * @param org
          * @param entity
          */
@@ -429,27 +430,30 @@ public class CKANBackendImpl implements CKANBackend {
          * @param obj
          * @return true if obj is equals to the object
          */
+        @Override
         public boolean equals(Object obj) {
             return (obj instanceof OrgEntityPair
-                    && ((OrgEntityPair)obj).entity.equals(this.entity)
-                    && ((OrgEntityPair)obj).org.equals(this.org));
-        }
+                    && ((OrgEntityPair) obj).entity.equals(this.entity)
+                    && ((OrgEntityPair) obj).org.equals(this.org));
+        } // equals
 
         /**
-         *
+         * Gets a hashcode for the object based on the following algorithm:
+         * http://stackoverflow.com/questions/113511/hash-code-implementation.
          * @return hashcode for the object
          */
+        @Override
         public int hashCode() {
-        /* Following the algorithm at http://stackoverflow.com/questions/113511/hash-code-implementation */
             return org.hashCode() + 37 * entity.hashCode();
-        }
+        } // hashCode
 
         /**
-         *
+         * Serializes the object's attributes as a string.
          * @return String
          */
+        @Override
         public String toString() {
-            return "<" + org +"," + entity + ">";
+            return "<" + org + "," + entity + ">";
         } // toString
 
     } // OrgEntityPair

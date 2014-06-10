@@ -109,7 +109,7 @@ public class MySQLBackend {
      * Inserts a new row in the given table within the given database representing a unique attribute change.
      * @param dbName
      * @param tableName
-     * @param ts
+     * @param recvTimeTs
      * @param recvTime
      * @param entityId
      * @param entityType
@@ -118,7 +118,7 @@ public class MySQLBackend {
      * @param attrValue
      * @throws Exception
      */
-    public void insertContextData(String dbName, String tableName, long ts, String recvTime, String entityId,
+    public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId,
             String entityType, String attrName, String attrType, String attrValue) throws Exception {
         Connection con = null;
         Statement stmt = null;
@@ -126,7 +126,7 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String query = "insert into " + tableName + " values ('" + ts + "', '" + recvTime + "', '" + entityId
+        String query = "insert into " + tableName + " values ('" + recvTimeTs + "', '" + recvTime + "', '" + entityId
                 + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "')";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
@@ -149,7 +149,7 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String attrNames = Constants.RECV_TIME;
+        String attrNames = Constants.RECV_TIME + ",";
         String attrValues = "'" + recvTime + "',";
         
         // iterate on the array in order to build the query

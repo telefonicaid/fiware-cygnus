@@ -36,6 +36,7 @@ import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.util.Date;
 
 /**
  *
@@ -83,6 +84,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        // reception time in milliseconds
+        long recvTimeTs = new Date().getTime();
+        
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
@@ -141,6 +145,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
+        eventHeaders.put(Constants.RECV_TIME_TS, new Long(recvTimeTs).toString());
         eventHeaders.put("content-type", contentType);
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
         
@@ -149,4 +154,5 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventList.add(EventBuilder.withBody(data.getBytes(), eventHeaders));
         return eventList;
     } // getEvents
-}
+ 
+} // OrionRestHandler
