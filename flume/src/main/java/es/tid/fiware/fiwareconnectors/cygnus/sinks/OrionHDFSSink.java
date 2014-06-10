@@ -270,7 +270,7 @@ public class OrionHDFSSink extends OrionSink {
             // this is used for storing the attribute's names and values when dealing with a per column attributes
             // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
             // at the same time
-            String columnLine = "{\"" + Constants.RECV_TIME_TS + "\":\"" + recvTime + "\",";
+            String columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
