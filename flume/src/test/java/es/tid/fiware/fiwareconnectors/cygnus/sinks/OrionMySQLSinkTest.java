@@ -62,7 +62,7 @@ public class OrionMySQLSinkTest {
     private final String attrPersistence = "row";
     private final String namingPrefix = "cygnus_";
     private final long ts = 123456789;
-    private final String iso8601date = "20140513T16:48:13";
+    private final String recvTime = "20140513T16:48:13";
     private final String entityId = "Room1";
     private final String entityType = "Room";
     private final String attrName = "temperature";
@@ -121,11 +121,11 @@ public class OrionMySQLSinkTest {
         
         // set up the behaviour of the mocked classes
         when(mockTimeHelper.getTime()).thenReturn(ts);
-        when(mockTimeHelper.getTimeString()).thenReturn(iso8601date);
+        when(mockTimeHelper.getTimeString()).thenReturn(recvTime);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(dbName, tableName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(dbName, tableName, ts,
-                iso8601date, entityId, entityType, attrName, attrType, attrValue);
+                recvTime, entityId, entityType, attrName, attrType, attrValue);
     } // setUp
 
     /**
