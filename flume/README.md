@@ -284,7 +284,7 @@ cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # username allowed to write in HDFS (/user/myusername)
 cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
-# defaultDataset where to persist the data (/user/myusername/mydataset)
+# dataset where to persist the data (/user/myusername/mydataset)
 cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
