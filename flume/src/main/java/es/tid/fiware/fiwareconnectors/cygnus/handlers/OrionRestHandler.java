@@ -110,13 +110,13 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
             String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
             
-            if (headerName.equals("user-agent")) {
+            if (headerName.equals(Constants.USER_AGENT)) {
                 Matcher matcher = orionVersionRegexPattern.matcher(headerValue);
                 
                 if (!matcher.matches()) {
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
-            } else if (headerName.equals("content-type")) {
+            } else if (headerName.equals(Constants.CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
@@ -146,7 +146,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put(Constants.RECV_TIME_TS, new Long(recvTimeTs).toString());
-        eventHeaders.put("content-type", contentType);
+        eventHeaders.put(Constants.CONTENT_TYPE, contentType);
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
         
         // create the event list containing only one event

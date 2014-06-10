@@ -132,11 +132,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // parse the eventData
         NotifyContextRequest notification = null;
         
-        if (eventHeaders.get("content-type").contains("application/json")) {
+        if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/json")) {
             logger.debug("The content-type was application/json");
             Gson gson = new Gson();
             notification = gson.fromJson(eventData, NotifyContextRequest.class);
-        } else if (eventHeaders.get("content-type").contains("application/xml")) {
+        } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
             logger.debug("The content-type was application/xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

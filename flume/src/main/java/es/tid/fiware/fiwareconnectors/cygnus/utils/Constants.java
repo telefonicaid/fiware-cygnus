@@ -37,5 +37,7 @@ public final class Constants {
     public static final String ATTR_TYPE    = "attrType";
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
+    public static final String CONTENT_TYPE = "content-type";
+    public static final String USER_AGENT   = "user-agent";
 
-}
+} // Cosntants
