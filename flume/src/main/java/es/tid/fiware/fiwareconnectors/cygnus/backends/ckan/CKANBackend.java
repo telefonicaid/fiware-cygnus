@@ -33,7 +33,7 @@ public interface CKANBackend {
      * Prepares an organization for use, creating it if it doesn't previously exist
      *
      * @param httpClient HTTP client for accessing the backend server.
-     * @param organization to check and create
+     * @param organization to initialize
      * @throws Exception
      */
     void initOrg(DefaultHttpClient httpClient, String organization) throws Exception;
@@ -43,7 +43,7 @@ public interface CKANBackend {
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
-     * @param organization organiation.
+     * @param organization organization.
      * @param entity entity string (including ID and type).
      * @param attrName attribute name.
      * @param attrType attribute type.
