@@ -50,7 +50,7 @@ sudo service cygnus start
 if [[ $? -eq 0 ]]; then
 	_logOk ".............. cygnus service is started .............."
 else
-	_logError ".............. cygnus RPM NOT started .............." 
+	_logError ".............. cygnus service NOT started .............." 
 	exit 1
 fi
 echo ""
