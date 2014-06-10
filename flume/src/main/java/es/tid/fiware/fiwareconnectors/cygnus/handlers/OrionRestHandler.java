@@ -142,12 +142,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put("content-type", contentType);
-        if (organization == null) {
-            eventHeaders.put(Constants.ORG_HEADER, defaultOrg);
-        }
-        else {
-            eventHeaders.put(Constants.ORG_HEADER, organization);
-        }
+        eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();

@@ -394,4 +394,65 @@ public class CKANBackendImpl implements CKANBackend {
 
     } // doCKANRequest
 
+    /**
+     * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class
+     */
+    class OrgEntityPair {
+
+        private String entity;
+        private String org;
+
+        /**
+         * Class constructor
+         * @param org
+         * @param entity
+         */
+        public OrgEntityPair(String org, String entity) {
+            this.org = org;
+            this.entity = entity;
+        } // OrgEntityPair
+
+        /**
+         * @return entity
+         */
+        public String getEntity() {
+            return entity;
+        } // getEntity
+
+        /**
+         * @return org
+         */
+        public String getOrg() {
+            return org;
+        } // gettOrg
+
+        /**
+         * @param obj
+         * @return true if obj is equals to the object
+         */
+        public boolean equals(Object obj) {
+            return (obj instanceof OrgEntityPair
+                    && ((OrgEntityPair)obj).entity.equals(this.entity)
+                    && ((OrgEntityPair)obj).org.equals(this.org));
+        }
+
+        /**
+         *
+         * @return hashcode for the object
+         */
+        public int hashCode() {
+        /* Following the algorithm at http://stackoverflow.com/questions/113511/hash-code-implementation */
+            return org.hashCode() + 37 * entity.hashCode();
+        }
+
+        /**
+         *
+         * @return String
+         */
+        public String toString() {
+            return "<" + org +"," + entity + ">";
+        } // toString
+
+    } // OrgEntityPair
+
 } // CKANBackendImpl
