@@ -84,7 +84,7 @@ public class CKANBackendImpl implements CKANBackend {
     public void initOrg(DefaultHttpClient httpClient, String organization) throws Exception {
 
         if (packagesIds.containsKey(organization)) {
-            // Organization alredy initialized, nothing to do
+            // Organization already initialized, nothing to do
             logger.info("organiation "  + organization + " already initialized");
             return;
         } // if

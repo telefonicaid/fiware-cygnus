@@ -123,7 +123,7 @@ public class OrionCKANSinkTest {
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         when(mockTimeHelper.getTime()).thenReturn(ts);
         when(mockTimeHelper.getTimeString()).thenReturn(iso8601date);
-        //doNothing().doThrow(new Exception()).when(mockCKANBackend).init(null);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).initOrg(null, "");
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
                 null, null, null, entityId, attrName, attrType, attrValue);
     } // setUp
