@@ -24,8 +24,8 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
-import es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink.TimeHelper;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
+import java.util.Date;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -47,8 +47,6 @@ public class OrionHDFSSinkTest {
     private HttpClientFactory mockHttpClientFactory;
     @Mock
     private HDFSBackend mockWebHDFSBackend;
-    @Mock
-    private TimeHelper mockTimeHelper;
     
     // instance to be tested
     private OrionHDFSSink sink;
@@ -109,7 +107,6 @@ public class OrionHDFSSinkTest {
         sink = new OrionHDFSSink();
         sink.setHttpClientFactory(mockHttpClientFactory);
         sink.setPersistenceBackend(mockWebHDFSBackend);
-        sink.setTimeHelper(mockTimeHelper);
         
         // set up other instances
         context = new Context();
@@ -124,23 +121,12 @@ public class OrionHDFSSinkTest {
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
-        when(mockTimeHelper.getTime()).thenReturn(ts);
-        when(mockTimeHelper.getTimeString()).thenReturn(recvTime);
         when(mockWebHDFSBackend.exists(null, "cygnus-" + cosmosUsername + "-" + cosmosDataset + "-" + entityId + "-"
                 + entityType + ".txt")).thenReturn(true);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, attrName, attrName);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, attrName, attrName);
     } // setUp
-    
-    /**
-     * Test the constructor, of class OrionMySQLSink.
-     */
-    @Test
-    public void testHDFSSink() {
-        System.out.println("HDFSSink");
-        assertTrue(sink.timeHelper != null);
-    } // testMySQLSink
 
     /**
      * Test of configure method, of class OrionHDFSSink.
@@ -181,7 +167,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persist("FIXME", notifyContextRequest.getContextResponses());
+            sink.persist("FIXME", new Date().getTime(), notifyContextRequest.getContextResponses());
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

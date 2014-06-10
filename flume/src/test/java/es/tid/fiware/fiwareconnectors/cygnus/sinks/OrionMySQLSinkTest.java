@@ -23,8 +23,8 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
-import es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink.TimeHelper;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
+import java.util.Date;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
@@ -51,8 +51,6 @@ public class OrionMySQLSinkTest {
     // mocks
     @Mock
     private MySQLBackend mockMySQLBackend;
-    @Mock
-    private TimeHelper mockTimeHelper;
 
     // constants
     private final String mysqlHost = "localhost";
@@ -107,7 +105,6 @@ public class OrionMySQLSinkTest {
         // set up the instance of the tested class
         sink = new OrionMySQLSink();
         sink.setPersistenceBackend(mockMySQLBackend);
-        sink.setTimeHelper(mockTimeHelper);
         
         // set up other instances
         context = new Context();
@@ -120,22 +117,11 @@ public class OrionMySQLSinkTest {
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
-        when(mockTimeHelper.getTime()).thenReturn(ts);
-        when(mockTimeHelper.getTimeString()).thenReturn(recvTime);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(dbName, tableName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(dbName, tableName, ts,
                 recvTime, entityId, entityType, attrName, attrType, attrValue);
     } // setUp
-
-    /**
-     * Test the constructor, of class OrionMySQLSink.
-     */
-    @Test
-    public void testMySQLSink() {
-        System.out.println("MySQLSink");
-        assertTrue(sink.timeHelper != null);
-    } // testMySQLSink
     
     /**
      * Test of configure method, of class OrionMySQLSink.
@@ -175,7 +161,7 @@ public class OrionMySQLSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persist("FIXME", notifyContextRequest.getContextResponses());
+            sink.persist("FIXME", new Date().getTime(), notifyContextRequest.getContextResponses());
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

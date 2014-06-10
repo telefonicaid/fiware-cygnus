@@ -24,8 +24,8 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
-import es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink.TimeHelper;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,8 +48,6 @@ public class OrionCKANSinkTest {
     private HttpClientFactory mockHttpClientFactory;
     @Mock
     private CKANBackend mockCKANBackend;
-    @Mock
-    private TimeHelper mockTimeHelper;
     
     // instance to be tested
     private OrionCKANSink sink;
@@ -108,7 +106,6 @@ public class OrionCKANSinkTest {
         sink = new OrionCKANSink();
         sink.setHttpClientFactory(mockHttpClientFactory);
         sink.setPersistenceBackend(mockCKANBackend);
-        sink.setTimeHelper(mockTimeHelper);
         
         // set up other instances
         context = new Context();
@@ -121,21 +118,10 @@ public class OrionCKANSinkTest {
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
-        when(mockTimeHelper.getTime()).thenReturn(ts);
-        when(mockTimeHelper.getTimeString()).thenReturn(recvTime);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).initOrg(null, "");
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                null, null, null, entityId, attrName, attrType, attrValue);
+                null, 0, null, entityId, attrName, attrType, attrValue);
     } // setUp
-    
-    /**
-     * Test the constructor, of class OrionCKANSink.
-     */
-    @Test
-    public void testCKANSink() {
-        System.out.println("CKANSink");
-        assertTrue(sink.timeHelper != null);
-    } // testCKANSink
 
     /**
      * Test of configure method, of class OrionCKANSink.
@@ -174,7 +160,7 @@ public class OrionCKANSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persist("FIXME", notifyContextRequest.getContextResponses());
+            sink.persist("FIXME", new Date().getTime(), notifyContextRequest.getContextResponses());
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
