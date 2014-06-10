@@ -165,8 +165,8 @@ public class OrionMySQLSink extends OrionSink {
     } // start
 
     @Override
-    void persist(String username, ArrayList contextResponses) throws Exception {
-        // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
+    void persist(String organization, ArrayList contextResponses) throws Exception {
+        // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
         
         // reception time FIXME: should be moved to the handler

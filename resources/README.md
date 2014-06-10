@@ -16,6 +16,19 @@ Demonstration application about plagues tracking (infection focuses, infection f
 
 A set of scripts that can be use to simulate Orion NGSI10 notifications. Its main purpose is Cygnus debugging.
 
+* notification-json-compound.sh
+* notification-json-md.sh
+* notification-json-simple.sh  
+* notification-xml-compound.sh
+* notification-xml-md.sh
+* notification-xml-simple.sh
+
+All them use two arguments: firts one is the URL to send the notification, second one (optional) is the default organization (a default value is used if the second argument is missing).
+
+```
+./notification-json-simple.sh 127.0.0.1:5050/notify Org22
+```
+
 ## Cygnus translators
 
 These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.

@@ -22,6 +22,8 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.
 cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
+# Default organization (organization semantic depend on the persistence sink)
+cygnusagent.sources.http-source.handler.default_organization = org42
 
 # ============================================
 # OrionHDFSSink configuration
@@ -56,8 +58,9 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# the dasaset (i.e. package) name to use. It will be created at Flume startup time if it doesn't previously exist
-cygnusagent.sinks.ckan-sink.dataset = mydataset
+# the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
+# characters plus "-" and "_" acording to CKAN limitations
+cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 
 # ============================================
 # OrionMySQLSink configuration

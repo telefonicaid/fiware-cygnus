@@ -35,6 +35,7 @@ import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 
 /**
  *
@@ -50,6 +51,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private Logger logger;
     private Pattern orionVersionRegexPattern;
     private String notificationsTarget;
+    private String defaultOrg;
     
     /**
      * Gets the Orion version regex pattern. It is protected due to it is only required for testing purposes.
@@ -72,6 +74,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger = Logger.getLogger(OrionRestHandler.class);
         orionVersionRegexPattern = Pattern.compile("orion/" + context.getString("orion_version", "*"));
         notificationsTarget = context.getString("notification_target", "notify");
+        defaultOrg = context.getString("default_organization", "default_org");
         
         if (notificationsTarget.charAt(0) != '/') {
             notificationsTarget = "/" + notificationsTarget;
@@ -94,9 +97,10 @@ public class OrionRestHandler implements HTTPSourceHandler {
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
-        // check the headers looking for not supported user agents and content type
+        // check the headers looking for not supported user agents, content type and tenant/organization
         Enumeration headerNames = request.getHeaderNames();
         String contentType = null;
+        String organization = null;
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
@@ -114,6 +118,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     contentType = headerValue;
                 } // if else if
+            } else if (headerName.equals(Constants.ORG_HEADER)) {
+                organization = headerValue;
             } // if else if
         } // for
 
@@ -136,6 +142,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put("content-type", contentType);
+        eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();

@@ -60,8 +60,9 @@ public class OrionRestHandlerTest {
     private final String orionVersion = "orion/0.9.0";
     private final String orionVersionRegexPattern = ".*";
     private final String notificationsTarget = "/notify";
-    private final String[] headerNamesStr = {"user-agent", "content-type"};
+    private final String[] headerNamesStr = {"user-agent", "content-type", "fiware-service"};
     private final String contentType = "application/json";
+    private final String fiwareOrg = "default_org";
     private final String requestMethod = "POST";
     
     /**
@@ -87,6 +88,7 @@ public class OrionRestHandlerTest {
                 Collections.enumeration(new ArrayList(Arrays.asList(headerNamesStr))));
         when(mockRequest.getHeader("user-agent")).thenReturn(orionVersion);
         when(mockRequest.getHeader("content-type")).thenReturn(contentType);
+        when(mockRequest.getHeader("fiware-service")).thenReturn(fiwareOrg);
         when(mockRequest.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream("json-content".getBytes()))));
     } // setUp
@@ -115,10 +117,12 @@ public class OrionRestHandlerTest {
         Event event = (Event) result.get(0);
         Map<String, String> eventHeaders = event.getHeaders();
         byte[] eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 1);
+        assertTrue(eventHeaders.size() == 2);
         assertTrue(eventHeaders.containsKey("content-type"));
         assertTrue(eventHeaders.get("content-type").equals("application/json")
-                || eventHeaders.get("content-type").equals("application/sml"));
+                || eventHeaders.get("content-type").equals("application/xml"));
+        assertTrue(eventHeaders.containsKey("fiware-service"));
+        assertTrue(eventHeaders.get("fiware-service").equals("default_org"));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     

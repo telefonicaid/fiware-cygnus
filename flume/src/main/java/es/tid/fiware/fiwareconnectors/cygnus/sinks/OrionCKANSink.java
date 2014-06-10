@@ -45,7 +45,7 @@ public class OrionCKANSink extends OrionSink {
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
-    private String dataset;
+    private String defaultDataset;
     private HttpClientFactory httpClientFactory;
     private CKANBackend persistenceBackend;
 
@@ -74,12 +74,12 @@ public class OrionCKANSink extends OrionSink {
     } // getAPIKey
     
     /**
-     * Gets the dataset. It is protected due to it is only required for testing purposes.
-     * @return The CKAN dataset
+     * Gets the defaultDataset. It is protected due to it is only required for testing purposes.
+     * @return The CKAN defaultDataset
      */
-    protected String getDataset() {
-        return dataset;
-    } // getDataset
+    protected String getDefaultDataset() {
+        return defaultDataset;
+    } // getDefaultDataset
     
     /**
      * Gets the Http client factory. It is protected due to it is only required for testing purposes.
@@ -127,7 +127,7 @@ public class OrionCKANSink extends OrionSink {
         apiKey = context.getString("api_key", "nokey");
         ckanHost = context.getString("ckan_host", "localhost");
         ckanPort = context.getString("ckan_port", "80");
-        dataset = context.getString("dataset", "cygnus");
+        defaultDataset = context.getString("default_dataset", "cygnus");
     } // configure
 
     @Override
@@ -136,9 +136,8 @@ public class OrionCKANSink extends OrionSink {
         httpClientFactory = new HttpClientFactory(false);
 
         try {
-            // create and init persistenceBackend backend
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, dataset);
-            persistenceBackend.init(httpClientFactory.getHttpClient(false));
+            // create persistenceBackend backend
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         } // try catch
@@ -147,10 +146,11 @@ public class OrionCKANSink extends OrionSink {
     } // start
     
     @Override
-    void persist(String username, ArrayList contextResponses) throws Exception {
-        // FIXME: username is given in order to support multi-tenancy... should be used instead of the current
-        // cosmosUsername
-        
+    void persist(String organization, ArrayList contextResponses) throws Exception {
+
+        // initialize organization
+        persistenceBackend.initOrg(httpClientFactory.getHttpClient(false), organization);
+
         // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
@@ -167,11 +167,12 @@ public class OrionCKANSink extends OrionSink {
 
                 // persist the data
                 logger.info("Persisting data: <" + date + ", "
+                        + organization + ", "
                         + entity + ", "
                         + attrName + ", "
                         + attrType + ", "
                         + attrValue + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), date, entity,
+                persistenceBackend.persist(httpClientFactory.getHttpClient(false), date, organization, entity,
                         attrName, attrType, attrValue);
             } // for
         } // for

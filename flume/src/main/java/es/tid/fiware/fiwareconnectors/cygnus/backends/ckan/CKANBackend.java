@@ -30,27 +30,28 @@ import java.util.Date;
 public interface CKANBackend {
 
     /**
-     * This method prepares the CKAN backend. In particular, it check that the dataset exists (creating
-     * it otherwise) and populates the entity to resource id map based on its content.
+     * Prepares an organization for use, creating it if it doesn't previously exist
      *
      * @param httpClient HTTP client for accessing the backend server.
+     * @param organization to initialize
      * @throws Exception
      */
-    void init(DefaultHttpClient httpClient) throws Exception;
+    void initOrg(DefaultHttpClient httpClient, String organization) throws Exception;
 
     /**
-     * Persist data in the CKAN datastore associated with the entity.
+     * Persist data in the CKAN datastore associated with the entity in a given organization
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param date timestamp.
+     * @param organization organization.
      * @param entity entity string (including ID and type).
      * @param attrName attribute name.
      * @param attrType attribute type.
      * @param attrValue attribute value.
      * @throws Exception
      */
-    void persist(DefaultHttpClient httpClient, Date date, String entity, String attrName, String attrType,
-                 String attrValue) throws Exception;
+    void persist(DefaultHttpClient httpClient, Date date, String organization, String entity, String attrName,
+                 String attrType, String attrValue) throws Exception;
 
     
 } // CKANBackend

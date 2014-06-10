@@ -22,7 +22,14 @@
 # This script is aimed to Cygnus debugging. It uses one argument: the URL to which
 # the notification will be sent
 
-curl $1 -v -s -S --header 'Content-Type: application/xml' --header 'Accept: application/xml' --header 'User-Agent: orion/0.10.0' -d @- <<EOF
+if [ "$2" != "" ]
+then
+   ORG=$2
+else
+   ORG=default_org
+fi
+
+curl $1 -v -s -S --header 'Content-Type: application/xml' --header 'Accept: application/xml' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $ORG" -d @- <<EOF
 <notifyContextRequest>
   <subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>
   <originator>localhost</originator>
