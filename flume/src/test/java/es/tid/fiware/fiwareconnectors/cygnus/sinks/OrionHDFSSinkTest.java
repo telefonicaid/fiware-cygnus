@@ -65,7 +65,7 @@ public class OrionHDFSSinkTest {
     private final String cosmosDataset = "data";
     private final String hdfsAPI = "httpfs";
     private final long ts = 123456789;
-    private final String iso8601date = "20140513T16:48:13";
+    private final String recvTime = "20140513T16:48:13";
     private final String entityId = "room1";
     private final String entityType = "room";
     private final String attrName = "temperature";
@@ -125,7 +125,7 @@ public class OrionHDFSSinkTest {
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         when(mockTimeHelper.getTime()).thenReturn(ts);
-        when(mockTimeHelper.getTimeString()).thenReturn(iso8601date);
+        when(mockTimeHelper.getTimeString()).thenReturn(recvTime);
         when(mockWebHDFSBackend.exists(null, "cygnus-" + cosmosUsername + "-" + cosmosDataset + "-" + entityId + "-"
                 + entityType + ".txt")).thenReturn(true);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);

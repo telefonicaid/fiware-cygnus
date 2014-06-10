@@ -27,9 +27,10 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -40,8 +41,8 @@ import org.apache.log4j.Logger;
  * Custom HDFS sink for Orion Context Broker. There exists a default HDFS sink in Flume which serializes the data in
  * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
- *  - File names format: cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt
- *  - File lines format: {“ts”:”XXX”, “iso8601date”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
+ *  - File names format: cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt (TO BE FIXED BY @frb)
+ *  - File lines format: {“recvTimeTs”:”XXX”, “recvTime”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
  *                       “attrType”:”XXX”, “attrValue":"XXX"|{...}|[...]}
  * 
  * As can be seen, a file is created per each entity, containing all the historical values this entity's attributes
@@ -206,9 +207,19 @@ public class OrionHDFSSink extends OrionSink {
                 logger.info("Creating Hive external table " + cosmosUsername + "_"
                         + cosmosDataset.replaceAll("/", "_"));
                 HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername, cosmosPassword);
+
+                String fields = "("
+                        + Constants.RECV_TIME_TS + " bigint, "
+                        + Constants.RECV_TIME + " string, "
+                        + Constants.ENTITY_ID + " string, "
+                        + Constants.ENTITY_TYPE + " string, "
+                        + Constants.ATTR_NAME + " string, "
+                        + Constants.ATTR_TYPE + " string, "
+                        + Constants.ATTR_VALUE + " string"
+                        + ")";
+
                 String query = "create external table " + cosmosUsername + "_"
-                        + cosmosDataset.replaceAll("/", "_") + " (ts bigint, iso8601date string, entityId string, "
-                        + "entityType string, attrName string, attrType string, attrValue string) row format serde "
+                        + cosmosDataset.replaceAll("/", "_") + " " + fields + "  row format serde "
                         + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
                         + "'";
                 
@@ -231,7 +242,7 @@ public class OrionHDFSSink extends OrionSink {
         
         // reception time FIXME: should be moved to the handler
         long ts = timeHelper.getTime();
-        String iso8601date = timeHelper.getTimeString();
+        String recvTime = timeHelper.getTimeString();
         
         // unlike the MySQL sink, the database has not to be created since this concept is represented by the HDFS user,
         // which userspace is already created under /user/myusername
@@ -259,7 +270,7 @@ public class OrionHDFSSink extends OrionSink {
             // this is used for storing the attribute's names and values when dealing with a per column attributes
             // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
             // at the same time
-            String columnLine = "{\"recv_time\":\"" + iso8601date + "\",";
+            String columnLine = "{\"" + Constants.RECV_TIME_TS + "\":\"" + recvTime + "\",";
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
@@ -268,13 +279,13 @@ public class OrionHDFSSink extends OrionSink {
                 if (rowAttrPersistence) {
                     // create a Json document to be persisted
                     String rowLine = "{"
-                            + "\"recv_time_ts\":\"" + timeHelper.getTime() + "\","
-                            + "\"recv_time\":\"" + timeHelper.getTimeString() + "\","
-                            + "\"entityId\":\"" + contextElement.getId() + "\","
-                            + "\"entityType\":\"" + contextElement.getType() + "\","
-                            + "\"attrName\":\"" + contextAttribute.getName() + "\","
-                            + "\"attrType\":\"" + contextAttribute.getType() + "\","
-                            + "\"attrValue\":" + contextAttribute.getContextValue(true)
+                            + "\"" + Constants.RECV_TIME_TS + "\":\"" + timeHelper.getTime() + "\","
+                            + "\"" + Constants.RECV_TIME + "\":\"" + timeHelper.getTimeString() + "\","
+                            + "\"" + Constants.ENTITY_ID + "\":\"" + contextElement.getId() + "\","
+                            + "\"" + Constants.ENTITY_TYPE + "\":\"" + contextElement.getType() + "\","
+                            + "\"" + Constants.ATTR_NAME + "\":\"" + contextAttribute.getName() + "\","
+                            + "\"" + Constants.ATTR_TYPE + "\":\"" + contextAttribute.getType() + "\","
+                            + "\"" + Constants.ATTR_VALUE + "\":" + contextAttribute.getContextValue(true)
                             + "}";
                     logger.info("Persisting data. File: " + fileName + ", Data: " + rowLine);
                     

@@ -78,18 +78,18 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
     
 Within files, Json documents are written following one of these two schemas:
 
-* Fixed 7-field lines: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. 
+* Fixed 7-field lines: <code>recvTimeTs</code>, <code>recvTime</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>.
 *  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recv_time</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
 
-    {"recv_time_ts":"13453464536", "recv_time":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
+    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
 
 On the contrary, being the persistence mode 'column', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
 
-    {"recv_time":"2014-02-27T14:46:21", "temperature":"26.5"}
+    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5"}
 
 Each organization/tenant is associated to a different user in the HDFS filesystem.
 
@@ -99,15 +99,15 @@ This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/
 
 Each context element in the datastore has the following fields:
 
-* ts: timestamp since Unix Epoch.
-* iso8601date: the same as ts, but in human readable form
+* recvTimeTs: timestamp since Unix Epoch.
+* recvTime: the same as ts, but in human readable form (ISO8601 format)
 * attrName: the attribute name, coming from the NGSI notification
 * attrType: the attribute type, coming from the NGSI notification
 * attrValue: the attribute value, coming from the NGSI notification. It its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
 
 Thus, by receiving a notification like the one above, the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
 
-    | _id | ts           | iso8601date         | attrName    | attrType   | attrValue |
+    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue |
     |-----|--------------|---------------------|-----.-------|------------|-----------|
     | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      |
 
@@ -133,20 +133,20 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 
 Within tables, we can find two options:
 
-* Fixed 7-field rows, as usual: <code>recv_time_ts</code>, <code>recv_time</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
+* Fixed 7-field rows, as usual: <code>recvTimeTs</code>, <code>recvTime</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
 * A column per each entity's attribute, plus an addition column about the reception time of the data (<code>recv_time</code>). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or </code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named <code>room1-Room</code> (it is created if not existing) will contain a new row such as:
 
-    | recv_time_ts | recv_time           | entityId | entityType | attrName    | attrType   | attrValue |
+    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      |
 
 On the contrary, being the persistence mode 'column', the table named <code>room1-Room</code> (it must be created in advance) will contain a new row such as:
 
-    | recv_time           | temperature |
+    | recvTime            | temperature |
     |---------------------|-------------|
     | 2014-02-27T14:46:21 | 26.5        |
 

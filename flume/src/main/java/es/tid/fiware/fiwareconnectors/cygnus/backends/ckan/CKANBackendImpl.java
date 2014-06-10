@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -193,14 +194,13 @@ public class CKANBackendImpl implements CKANBackend {
                         String attrType, String attrValue) throws Exception {
 
         // do CKAN request
-        // FIXME: undhardwire ts, iso8601date, to contstant
         String jsonString = "{ \"resource_id\": \"" + resourceId
                 + "\", \"records\": [ "
-                + "{ \"ts\": \"" + date.getTime() / 1000 + "\", "
-                + "\"iso8601date\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", "
-                + "\"attrName\": \"" + attrName + "\", "
-                + "\"attrType\": \"" + attrType + "\", "
-                + "\"attrValue\": \"" + attrValue + "\" "
+                + "{ \"" + Constants.RECV_TIME_TS + "\": \"" + date.getTime() / 1000 + "\", "
+                + "\"" + Constants.RECV_TIME + "\": \"" + new Timestamp(date.getTime()).toString().replaceAll(" ", "T") + "\", "
+                + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
+                + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
+                + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\" "
                 + "}"
                 + "], "
                 + "\"method\": \"insert\", "
@@ -309,15 +309,14 @@ public class CKANBackendImpl implements CKANBackend {
     private void createDataStore(DefaultHttpClient httpClient, String resourceId) throws Exception {
 
         // do CKAN request
-        // FIXME: undhardwire ts, iso8601date, to contstant
         // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
         String jsonString = "{ \"resource_id\": \"" + resourceId
                 + "\", \"fields\": [ "
-                + "{ \"id\": \"ts\", \"type\": \"int\"},"
-                + "{ \"id\": \"iso8601date\", \"type\": \"timestamp\"},"
-                + "{ \"id\": \"attrName\", \"type\": \"text\"},"
-                + "{ \"id\": \"attrType\", \"type\": \"text\"},"
-                + "{ \"id\": \"attrValue\", \"type\": \"json\"}"
+                + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
+                + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"}"
                 + "], "
                 + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",

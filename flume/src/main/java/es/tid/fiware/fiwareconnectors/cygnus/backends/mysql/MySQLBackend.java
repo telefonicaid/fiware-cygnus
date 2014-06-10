@@ -25,7 +25,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
+
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 
 /**
  *
@@ -89,8 +92,14 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String query = "create table if not exists " + tableName + " (ts long, iso8601date text, entityId text, "
-                + "entityType text, attrName text, attrType text, attrValue text)";
+        String query = "create table if not exists " + tableName + " ("
+                + Constants.RECV_TIME_TS + " long, "
+                + Constants.RECV_TIME + " text, "
+                + Constants.ENTITY_ID + " text, "
+                + Constants.ENTITY_TYPE + " text, "
+                + Constants.ATTR_NAME + " text, "
+                + Constants.ATTR_TYPE + " text, "
+                + Constants.ATTR_VALUE + " text)";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
@@ -101,7 +110,7 @@ public class MySQLBackend {
      * @param dbName
      * @param tableName
      * @param ts
-     * @param iso8601
+     * @param recvTime
      * @param entityId
      * @param entityType
      * @param attrName
@@ -109,7 +118,7 @@ public class MySQLBackend {
      * @param attrValue
      * @throws Exception
      */
-    public void insertContextData(String dbName, String tableName, long ts, String iso8601date, String entityId,
+    public void insertContextData(String dbName, String tableName, long ts, String recvTime, String entityId,
             String entityType, String attrName, String attrType, String attrValue) throws Exception {
         Connection con = null;
         Statement stmt = null;
@@ -117,7 +126,7 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String query = "insert into " + tableName + " values ('" + ts + "', '" + iso8601date + "', '" + entityId
+        String query = "insert into " + tableName + " values ('" + ts + "', '" + recvTime + "', '" + entityId
                 + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "')";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
@@ -128,10 +137,11 @@ public class MySQLBackend {
      * Inserts a new row in the given table within the given database representing full attribute list changes.
      * @param dbName
      * @param tableName
+     * @param recvTime
      * @param attrList
      * @throws Exception
      */
-    public void insertContextData(String dbName, String tableName, String iso8601date,
+    public void insertContextData(String dbName, String tableName, String recvTime,
             Map<String, String> attrList) throws Exception {
         Connection con = null;
         Statement stmt = null;
@@ -139,8 +149,8 @@ public class MySQLBackend {
         // check if the given table name existsTable
         con = getConnection(dbName);
         stmt = con.createStatement();
-        String attrNames = "recv_time,";
-        String attrValues = "'" + iso8601date + "',";
+        String attrNames = Constants.RECV_TIME;
+        String attrValues = "'" + recvTime + "',";
         
         // iterate on the array in order to build the query
         Iterator it = attrList.keySet().iterator();

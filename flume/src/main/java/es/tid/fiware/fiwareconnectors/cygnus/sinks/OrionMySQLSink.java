@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  *  - Each entity has its data stored in a specific table, being its name:
  *    cygnus_<entity_id>_<entity_type>
  *  - Each event data is stored in the appropriate table as a new row, having each row the following fields:
- *    ts, iso8601date, entityId, entityType, attrName, attrType, attrValue
+ *    recvTimeTs, recvTime, entityId, entityType, attrName, attrType, attrValue
  * 
  * As can be seen, a table is created per each entity, containing all the historical values this entity's attributes
  * have had.
@@ -171,7 +171,7 @@ public class OrionMySQLSink extends OrionSink {
         
         // reception time FIXME: should be moved to the handler
         long ts = timeHelper.getTime();
-        String iso8601date = timeHelper.getTimeString();
+        String recvTime = timeHelper.getTimeString();
 
         // create the database for this user if not existing yet... the cost of trying to create it is the same than
         // checking if it exits and then creating it
@@ -217,10 +217,10 @@ public class OrionMySQLSink extends OrionSink {
                                 
                 if (rowAttrPersistence) {
                     logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: " + ts + ","
-                            + iso8601date + "," + contextElement.getId() + "," + contextElement.getType() + ","
+                            + recvTime + "," + contextElement.getId() + "," + contextElement.getType() + ","
                             + contextAttribute.getName() + "," + contextAttribute.getType() + ","
                             + contextAttribute.getContextValue(false));
-                    persistenceBackend.insertContextData(dbName, tableName, ts, iso8601date, contextElement.getId(),
+                    persistenceBackend.insertContextData(dbName, tableName, ts, recvTime, contextElement.getId(),
                             contextElement.getType(), contextAttribute.getName(), contextAttribute.getType(),
                             contextAttribute.getContextValue(false));
                 } else {
@@ -233,7 +233,7 @@ public class OrionMySQLSink extends OrionSink {
             if (!rowAttrPersistence) {
                 logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: " + ts
                         + ", Row: " + attrs.toString());
-                persistenceBackend.insertContextData(dbName, tableName, iso8601date, attrs);
+                persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs);
             } // if
         } // for
     } // persist

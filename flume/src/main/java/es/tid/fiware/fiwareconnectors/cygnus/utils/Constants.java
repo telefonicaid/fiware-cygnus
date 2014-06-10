@@ -25,6 +25,17 @@ package es.tid.fiware.fiwareconnectors.cygnus.utils;
  */
 public final class Constants {
 
+    // HTTP headers
     public static final String ORG_HEADER = "fiware-service";
+
+    // Common fields for sinks/backends
+    public static final String RECV_TIME_TS = "recvTimeTs";
+    public static final String RECV_TIME    = "recvTime";
+    public static final String ENTITY_ID    = "entityId";
+    public static final String ENTITY_TYPE  = "entityType";
+    public static final String ATTR_NAME    = "attrName";
+    public static final String ATTR_TYPE    = "attrType";
+    public static final String ATTR_VALUE   = "attrValue";
+    public static final String ATTR_MD      = "attrMd";
 
 }
