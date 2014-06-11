@@ -26,10 +26,10 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import java.sql.Timestamp;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Date;
 import org.apache.flume.Context;
 
 /**
@@ -113,14 +113,6 @@ public class OrionCKANSink extends OrionSink {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
-    /**
-     * Sets the time helper. It is protected due to it is only required for testing purposes.
-     * @param timeHelper
-     */
-    protected void setTimeHelper(TimeHelper timeHelper) {
-        this.timeHelper = timeHelper;
-    } // setTimeHelper
-    
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionCKANSink.class);
@@ -146,7 +138,9 @@ public class OrionCKANSink extends OrionSink {
     } // start
     
     @Override
-    void persist(String organization, ArrayList contextResponses) throws Exception {
+    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+        // human readable version of the reception time
+        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
 
         // initialize organization
         persistenceBackend.initOrg(httpClientFactory.getHttpClient(false), organization);
@@ -163,16 +157,15 @@ public class OrionCKANSink extends OrionSink {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
-                Date date = new Date();
 
                 // persist the data
-                logger.info("Persisting data: <" + date + ", "
+                logger.info("Persisting data: <" + recvTimeTs + ", "
                         + organization + ", "
                         + entity + ", "
                         + attrName + ", "
                         + attrType + ", "
                         + attrValue + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), date, organization, entity,
+                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, organization, entity,
                         attrName, attrType, attrValue);
             } // for
         } // for

@@ -24,9 +24,17 @@ package es.tid.fiware.fiwareconnectors.cygnus.utils;
  * @author fermin
  */
 public final class Constants {
+    
+    /**
+     * Constructor.
+     */
+    private Constants() {
+    } // Constants
 
     // HTTP headers
     public static final String ORG_HEADER = "fiware-service";
+    public static final String CONTENT_TYPE = "content-type";
+    public static final String USER_AGENT   = "user-agent";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS = "recvTimeTs";
@@ -38,4 +46,4 @@ public final class Constants {
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
 
-}
+} // Constants

@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -117,12 +118,13 @@ public class OrionRestHandlerTest {
         Event event = (Event) result.get(0);
         Map<String, String> eventHeaders = event.getHeaders();
         byte[] eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 2);
+        assertTrue(eventHeaders.size() == 3);
+        assertTrue(eventHeaders.containsKey(Constants.RECV_TIME_TS));
         assertTrue(eventHeaders.containsKey("content-type"));
         assertTrue(eventHeaders.get("content-type").equals("application/json")
                 || eventHeaders.get("content-type").equals("application/xml"));
-        assertTrue(eventHeaders.containsKey("fiware-service"));
-        assertTrue(eventHeaders.get("fiware-service").equals("default_org"));
+        assertTrue(eventHeaders.containsKey(Constants.ORG_HEADER));
+        assertTrue(eventHeaders.get(Constants.ORG_HEADER).equals("default_org"));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     
