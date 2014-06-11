@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -85,7 +86,7 @@ public class CKANBackendImpl implements CKANBackend {
 
         if (packagesIds.containsKey(organization)) {
             // Organization already initialized, nothing to do
-            logger.info("organiation "  + organization + " already initialized");
+            logger.info("organization "  + organization + " already initialized");
             return;
         } // if
 
@@ -133,9 +134,47 @@ public class CKANBackendImpl implements CKANBackend {
     } // initOrg
 
     @Override
-    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String organization, String entity,
+    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization, String entity,
             String attrName, String attrType, String attrValue) throws Exception {
 
+        // get resource ID
+        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, true);
+
+        // persist the entity
+        insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue);
+
+    } // persist
+
+    @Override
+    public void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
+                 Map<String, String> attrList) throws Exception {
+
+        // get resource ID
+        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, false);
+
+        if (resourceId.equals("")) {
+            logger.error("cannot persist <" + organization + "," + entity + ">");
+        }
+        else {
+            // persist the entity
+            insert(httpClient, recvTime, resourceId, attrList);
+        }
+
+    }
+
+    /**
+     * looks the ID of a resource identified by organization and entity, creating it if not found and the
+     * createResource param is true
+     *
+     * @param httpClient
+     * @param organization
+     * @param entity
+     * @param createResource
+     * @return
+     * @throws Exception
+     */
+    private String resourceLookupAndCreate(DefaultHttpClient httpClient, String organization, String entity,
+                                  boolean createResource) throws Exception {
         // look for the resource id associated to the entity in the hashmap
         String resourceId;
         OrgEntityPair ek = new OrgEntityPair(organization, entity);
@@ -146,17 +185,21 @@ public class CKANBackendImpl implements CKANBackend {
             resourceId = resourceIds.get(ek);
             logger.info("resolved " + ek + " -> " + resourceId);
         } else {
-            // create the resource id and datastore, adding it to the resourceIds map
-            resourceId = createResource(httpClient, entity, organization);
-            createDataStore(httpClient, resourceId);
-            resourceIds.put(ek, resourceId);
-            logger.info("added to resources map " + ek + " -> " + resourceId);
+            if (createResource) {
+                // create the resource id and datastore, adding it to the resourceIds map
+                resourceId = createResource(httpClient, entity, organization);
+                createDataStore(httpClient, resourceId);
+                resourceIds.put(ek, resourceId);
+                logger.info("added to resources map " + ek + " -> " + resourceId);
+            }
+            else {
+                logger.error("resource not found and cannot be created: this means that resource/datastore pre-provision in column mode failed");
+                return "";
+            } // if else
         } // if else
 
-        // persist the entity
-        insert(httpClient, recvTimeTs, resourceId, attrName, attrType, attrValue);
-
-    } // persist
+        return resourceId;
+    }
 
     /**
      * Populates the entity-resource map of a given organization with the package information from the CKAN response.
@@ -179,10 +222,11 @@ public class CKANBackendImpl implements CKANBackend {
     } // populateResourcesMap
 
     /**
-     * Insert record in datastore.
+     * Insert record in datastore (row mode)
      *
      * @param httpClient HTTP client for accessing the backend server.
-     * @param date timestamp.
+     * @param recvTimeTs timestamp.
+     * @param recvTime timestamp (humand readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
      * @param attrName attribute name.
      * @param attrType attribute type.
@@ -190,19 +234,63 @@ public class CKANBackendImpl implements CKANBackend {
      * @throws Exception
      *
      */
-    private void insert(DefaultHttpClient httpClient, long recvTimeTs, String resourceId, String attrName,
-                        String attrType, String attrValue) throws Exception {
+    private void insert(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
+                        String attrName, String attrType, String attrValue) throws Exception {
 
         // do CKAN request
         String jsonString = "{ \"resource_id\": \"" + resourceId
                 + "\", \"records\": [ "
                 + "{ \"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
-                + "\"" + Constants.RECV_TIME + "\": \"" + new Timestamp(recvTimeTs).toString().replaceAll(" ", "T")
-                + "\", " + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
+                + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
+                + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                 + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
                 + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\" "
                 + "}"
                 + "], "
+                + "\"method\": \"insert\", "
+                + "\"force\": \"true\" }";
+        CKANResponse res = doCKANRequest(httpClient, "POST",
+                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert", jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            logger.info("successful insert in resource ID " + resourceId + " datastore");
+        } else {
+            logger.error("don't know how to treat response code " + res.getStatusCode());
+        } // if else
+
+    } // insert
+
+    /**
+     * Insert record in datastore (column mode)
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param recvTime timestamp (human readable)
+     * @param resourceId the resource in which datastore the record is going to be inserted.
+     * @param attrList map with the attributes to persist
+     * @throws Exception
+     *
+     */
+    private void insert(DefaultHttpClient httpClient, String recvTime, String resourceId, Map<String, String> attrList)
+            throws Exception {
+
+        // iterate on the array in order to build the query
+        Iterator it = attrList.keySet().iterator();
+        String attrs = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", ";
+
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            String attrValue = attrList.get(attrName);
+
+            attrs += "\"" + attrName + "\": \"" + attrValue + "\"";
+            if (it.hasNext()) {
+                attrs += ", ";
+            } // if
+        } // while
+
+        // do CKAN request
+        String jsonString = "{ \"resource_id\": \"" + resourceId
+                + "\", \"records\": [ { " + attrs + " } ], "
                 + "\"method\": \"insert\", "
                 + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
