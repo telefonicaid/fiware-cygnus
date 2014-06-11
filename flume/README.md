@@ -109,11 +109,21 @@ Each context element in the datastore has the following fields:
 * attrType: the attribute type, coming from the NGSI notification
 * attrValue: the attribute value, coming from the NGSI notification. It its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
 
-Thus, by receiving a notification like the one above, the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or </code>column</code>.
+
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue |
     |-----|--------------|---------------------|-----.-------|------------|-----------|
     | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      |
+
+where `i` depends on the number of rows previously inserted.
+
+On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as:
+
+    | _id | recvTime           | temperature |
+    |--------------------------|-------------|
+    | i   |2014-02-27T14:46:21 | 26.5        |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -317,6 +327,8 @@ cygnusagent.sinks.ckan-sink.ckan_port = 80
 # the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
 # characters plus "-" and "_" acording to CKAN limitations
 cygnusagent.sinks.ckan-sink.default_dataset = mydataset
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.ckan-sink.attr_persistence = row
 
 # ============================================
 # OrionMySQLSink configuration
