@@ -19,9 +19,11 @@ A set of scripts that can be use to simulate Orion NGSI10 notifications. Its mai
 * notification-json-compound.sh
 * notification-json-md.sh
 * notification-json-simple.sh  
+* notification-json-2simple.sh  
 * notification-xml-compound.sh
 * notification-xml-md.sh
 * notification-xml-simple.sh
+* notification-xml-2simple.sh
 
 All them use two arguments: firts one is the URL to send the notification, second one (optional) is the default organization (a default value is used if the second argument is missing).
 
