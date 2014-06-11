@@ -35,6 +35,10 @@ All them use two arguments: firts one is the URL to send the notification, secon
 
 These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.
 
+## CKAN scripts
+
+Tooling scripts related with CKAN management.
+
 ## Contact
 
 * Francisco Romero Bueno (frb at tid dot es).
