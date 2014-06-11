@@ -19,7 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestConstants;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
+
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Before;
@@ -119,12 +120,12 @@ public class OrionRestHandlerTest {
         Map<String, String> eventHeaders = event.getHeaders();
         byte[] eventMessage = event.getBody();
         assertTrue(eventHeaders.size() == 3);
-        assertTrue(eventHeaders.containsKey(Constants.RECV_TIME_TS));
+        assertTrue(eventHeaders.containsKey(TestConstants.RECV_TIME_TS));
         assertTrue(eventHeaders.containsKey("content-type"));
         assertTrue(eventHeaders.get("content-type").equals("application/json")
                 || eventHeaders.get("content-type").equals("application/xml"));
-        assertTrue(eventHeaders.containsKey(Constants.ORG_HEADER));
-        assertTrue(eventHeaders.get(Constants.ORG_HEADER).equals("default_org"));
+        assertTrue(eventHeaders.containsKey(TestConstants.ORG_HEADER));
+        assertTrue(eventHeaders.get(TestConstants.ORG_HEADER).equals("default_org"));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     
