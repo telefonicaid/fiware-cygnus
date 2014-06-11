@@ -226,7 +226,7 @@ public class CKANBackendImpl implements CKANBackend {
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTimeTs timestamp.
-     * @param recvTime timestamp (humand readable)
+     * @param recvTime timestamp (human readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
      * @param attrName attribute name.
      * @param attrType attribute type.

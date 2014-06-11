@@ -51,7 +51,7 @@ curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: app
         ],
         "type" : "Room",
         "isPattern" : "false",
-        "id" : "Room2"
+        "id" : "Room1"
       },
       "statusCode" : {
         "code" : "200",
