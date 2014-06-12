@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# contextbroker         Start/Stop cygnus
+#
+# chkconfig: 2345 99 60
+# description: cygnus
+
+# Load some fancy functions for init.d
+. /etc/rc.d/init.d/functions
+
+PARAM=$1
+NAME=cygnus
+EXECUTABLE=/usr/cygnus/bin/flume-ng
+CYGNUS_PID=/var/run/cygnus/cygnus.pid
+
+# Load the environment
+ if [[ -f /etc/${NAME}/flume.conf ]]; then
+    . /etc/${NAME}/flume.conf
+else
+   echo "Configuration file /${NAME}/flume.conf not found"
+   exit 1
+fi
+
+cygnus_start()
+{
+    printf "%-50s" "Starting ${NAME}..."
+    if [[ -x ${EXECUTABLE} ]]; then
+    	export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0.x86_64
+    	/usr/cygnus/bin/flume-ng agent --conf /usr/cygnus/conf -f /usr/cygnus/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,console &> /dev/null &
+        # ${EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} -Dflume.root.logger=INFO,console &> /dev/null &
+        
+        # APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf 
+        #  -f APACHE_FLUME_HOME/conf/cygnus.conf -n orionagent -Dflume.root.logger=INFO,console
+
+        # Save the PID of the cygnus process
+        ps -ef | grep flume | grep -v grep | awk '{ print $2 }' > ${CYGNUS_PID}
+        PID="`cat /var/run/cygnus/cygnus.pid`"
+        sleep 2 # wait some time to leave cygnus start
+        if [[ -z "${PID}" ]]; then
+            printf "%s\n" "$(failure)"
+            exit 1
+        else
+            printf "%s\n" "$(success)"
+        fi
+    else
+        printf "%s\n" "Fail - missing ${EXECUTABLE} executable"
+        exit 1
+    fi
+}
+
+cygnus_stop()
+{
+    printf "%-50s" "Stopping $NAME..."
+    if [ -f "${CYGNUS_PID}" ]; then
+    	echo $CYGNUS_PID
+        kill -HUP $(cat ${CYGNUS_PID})
+        rm -f ${CYGNUS_PID}
+        printf "%s\n" "$(success)"
+    else
+        printf "%s\n" "$(failure)"
+    fi
+}
+
+cygnus_status()
+{
+    status -p ${CYGNUS_PID} ${EXECUTABLE}
+}
+
+
+case ${PARAM} in
+
+    'start')
+        status -p ${CYGNUS_PID} ${EXECUTABLE} && exit 0
+        cygnus_start
+        ;;
+
+    'stop')
+		status -p ${CYGNUS_PID} ${EXECUTABLE} || exit 0
+        cygnus_stop
+        ;;
+
+    'restart')
+        cygnus_stop
+        cygnus_start
+        ;;
+
+    'status')
+        cygnus_status
+        ;;
+
+esac
+
+
+
