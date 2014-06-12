@@ -105,8 +105,16 @@ do
 done
 
 
+
 # Import the colors for deployment script
 source colors_shell.sh
+
+# check user
+
+if [[ $(id -u) == "0" ]]; then
+	_logError "${0}: shouldn't be executed as root"
+	exit 1
+fi
 
 describe_tags="$(git describe --tags --long 2>/dev/null)"
 GIT_PRODUCT_RELEASE="${describe_tags#*-}"
