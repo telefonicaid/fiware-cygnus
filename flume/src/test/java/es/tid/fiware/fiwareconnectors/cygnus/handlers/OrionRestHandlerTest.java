@@ -91,7 +91,7 @@ public class OrionRestHandlerTest {
         when(mockRequest.getHeader("content-type")).thenReturn(contentType);
         when(mockRequest.getHeader("fiware-service")).thenReturn(fiwareOrg);
         when(mockRequest.getReader()).thenReturn(
-                new BufferedReader(new InputStreamReader(new ByteArrayInputStream("json-content".getBytes()))));
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream("<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
     } // setUp
     
     /**
