@@ -29,7 +29,7 @@ All them use two arguments: firts one is the URL to send the notification, secon
 ./notification-json-simple.sh 127.0.0.1:5050/notify Org22
 ```
 
-In addition the continous_notifier.sh script do a periodic subscription with a random attribute value, using the same two first arguments and a third one to specify the notification period (in seconds): 
+In addition the continous_notifier.sh script do a periodic notification with a random attribute value, using the same two first arguments and a third one to specify the notification period (in seconds): 
 
 ```
 ./continous_notifier.sh 127.0.0.1:5050/notify Org22 10
