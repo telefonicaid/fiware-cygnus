@@ -19,7 +19,10 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
+import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
 
 /**
  * Interface for those backends implementing the persistence in HDFS.
@@ -31,7 +34,9 @@ public abstract class HDFSBackend {
     protected String cosmosHost;
     protected String cosmosPort;
     protected String cosmosUsername;
+    protected String cosmosPassword;
     protected String cosmosDataset;
+    private Logger logger;
     
     /**
      * 
@@ -40,12 +45,48 @@ public abstract class HDFSBackend {
      * @param cosmosUsername
      * @param cosmosDataset
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
+    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
+            String cosmosDataset) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
         this.cosmosUsername = cosmosUsername;
+        this.cosmosPassword = cosmosPassword;
         this.cosmosDataset = cosmosDataset;
+        logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
+
+    /**
+     * Provision the necessary Hive external tables.
+     * @throws Exception
+     */
+    public void provisionHive() throws Exception {
+        // FIXME: this is only valid for the row-like persistence!!!
+        
+        logger.info("Creating Hive external table " + cosmosUsername + "_"
+                + cosmosDataset.replaceAll("/", "_"));
+        HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername, cosmosPassword);
+
+        String fields = "("
+                + Constants.RECV_TIME_TS + " bigint, "
+                + Constants.RECV_TIME + " string, "
+                + Constants.ENTITY_ID + " string, "
+                + Constants.ENTITY_TYPE + " string, "
+                + Constants.ATTR_NAME + " string, "
+                + Constants.ATTR_TYPE + " string, "
+                + Constants.ATTR_VALUE + " string, "
+                + Constants.ATTR_MD + " string"
+                + ")";
+
+        String query = "create external table " + cosmosUsername + "_"
+                + cosmosDataset.replaceAll("/", "_") + " " + fields + "  row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
+                + "'";
+
+        if (!hiveClient.doCreateTable(query)) {
+            logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
+    } // provisionHive
     
     /**
      * Creates a directory in HDFS.

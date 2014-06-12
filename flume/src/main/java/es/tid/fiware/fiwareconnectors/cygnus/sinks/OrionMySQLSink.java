@@ -202,21 +202,26 @@ public class OrionMySQLSink extends OrionSink {
             // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
             // at the same time
             HashMap<String, String> attrs = new HashMap<String, String>();
+            
+            // this is used for storing the attribute's names (sufixed with "-md") and metadata when dealing with a per
+            // column attributes persistence; in that case the persistence is not done attribute per attribute, but
+            // persisting all of them at the same time
+            HashMap<String, String> mds = new HashMap<String, String>();
 
-            for (int j = 0; j < contextAttributes.size(); j++) {
-                // get the j-th contextAttribute
-                ContextAttribute contextAttribute = contextAttributes.get(j);
-                                
+            for (ContextAttribute contextAttribute : contextAttributes) {
                 if (rowAttrPersistence) {
                     logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: "
                             + recvTimeTs / 1000 + "," + recvTime + "," + contextElement.getId() + ","
                             + contextElement.getType() + "," + contextAttribute.getName() + ","
-                            + contextAttribute.getType() + "," + contextAttribute.getContextValue(false));
+                            + contextAttribute.getType() + "," + contextAttribute.getContextValue(false) + ","
+                            + contextAttribute.getContextMetadata());
                     persistenceBackend.insertContextData(dbName, tableName, recvTimeTs / 1000, recvTime,
                             contextElement.getId(), contextElement.getType(), contextAttribute.getName(),
-                            contextAttribute.getType(), contextAttribute.getContextValue(false));
+                            contextAttribute.getType(), contextAttribute.getContextValue(false),
+                            contextAttribute.getContextMetadata());
                 } else {
                     attrs.put(contextAttribute.getName(), contextAttribute.getContextValue(false));
+                    mds.put(contextAttribute.getName() + "_md", contextAttribute.getContextMetadata());
                 } // if else
             } // for
             
@@ -225,7 +230,7 @@ public class OrionMySQLSink extends OrionSink {
             if (!rowAttrPersistence) {
                 logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
                         + recvTime + ", Row: " + attrs.toString());
-                persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs);
+                persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
             } // if
         } // for
     } // persist

@@ -25,7 +25,6 @@ import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
@@ -42,12 +41,18 @@ import org.apache.log4j.Logger;
  * Custom HDFS sink for Orion Context Broker. There exists a default HDFS sink in Flume which serializes the data in
  * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
- *  - File names format: cygnus-<hdfs_user>-<hdfs_dataset>-<entity_id>-<entity_type>.txt (TO BE FIXED BY @frb)
- *  - File lines format: {“recvTimeTs”:”XXX”, “recvTime”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
- *                       “attrType”:”XXX”, “attrValue":"XXX"|{...}|[...]}
+ *  - Row-like persistence:
+ *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
+ *    -- File lines format: {“recvTimeTs”:”XXX”, “recvTime”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
+ *                          “attrType”:”XXX”, “attrValue":"XXX"|{...}|[...],
+ *                          "attrMd":[{"name":"XXX", "type":"XXX", "value":"XXX"}...]}
+ * - Column-like persistence:
+ *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
+ *    -- File lines format: {“recvTime”:”XXX”, "<attr_name_1>":<attr_value_1>, ..., <attr_name_N>":<attr_value_N>,
+ *                          "<attr_name_1>-md":<attr_md_1>, ..., "<attr_name_N>-md":<attr_md_N>}
  * 
- * As can be seen, a file is created per each entity, containing all the historical values this entity's attributes
- * have had.
+ * As can be seen, in both persistence modes a file is created per each entity, containing all the historical values
+ * this entity's attributes have had.
  * 
  * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
  * channel, i.e. an event is not removed from the channel until it is not appropriately persisted.
@@ -180,46 +185,27 @@ public class OrionHDFSSink extends OrionSink {
         // create a Http clients factory (no SSL)
         httpClientFactory = new HttpClientFactory(false);
         
-        // create the persistence backend
-        if (hdfsAPI.equals("httpfs")) {
-            persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
-            logger.debug("HttpFS persistence backend created");
-        } else if (hdfsAPI.equals("webhdfs")) {
-            persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
-            logger.debug("WebHDFS persistence backend created");
-        } else {
-            logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
-        } // if else if
-        
         try {
-            // FIXME: this could be moved to a "provision" method within the persistence backend, as OrionMySQLSink does
-            // create (if not exists) the /user/myuser/mydataset folder and the related HiveQL external table
+            // create the persistence backend
+            if (hdfsAPI.equals("httpfs")) {
+                persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword,
+                        cosmosDataset);
+                logger.debug("HttpFS persistence backend created");
+            } else if (hdfsAPI.equals("webhdfs")) {
+                persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword,
+                        cosmosDataset);
+                logger.debug("WebHDFS persistence backend created");
+            } else {
+                logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
+            } // if else if
+
             if (persistenceBackend != null) {
+                // create the HDFS dataset
                 logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
                 persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
-                logger.info("Creating Hive external table " + cosmosUsername + "_"
-                        + cosmosDataset.replaceAll("/", "_"));
-                HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername, cosmosPassword);
-
-                String fields = "("
-                        + Constants.RECV_TIME_TS + " bigint, "
-                        + Constants.RECV_TIME + " string, "
-                        + Constants.ENTITY_ID + " string, "
-                        + Constants.ENTITY_TYPE + " string, "
-                        + Constants.ATTR_NAME + " string, "
-                        + Constants.ATTR_TYPE + " string, "
-                        + Constants.ATTR_VALUE + " string"
-                        + ")";
-
-                String query = "create external table " + cosmosUsername + "_"
-                        + cosmosDataset.replaceAll("/", "_") + " " + fields + "  row format serde "
-                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
-                        + "'";
                 
-                if (!hiveClient.doCreateTable(query)) {
-                    logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
-                            + "Check your Hive/Shark installation");
-                } // if
+                // provision the Hive external table for the above dataset
+                persistenceBackend.provisionHive();
             } // if
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -277,7 +263,8 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ENTITY_TYPE + "\":\"" + contextElement.getType() + "\","
                             + "\"" + Constants.ATTR_NAME + "\":\"" + contextAttribute.getName() + "\","
                             + "\"" + Constants.ATTR_TYPE + "\":\"" + contextAttribute.getType() + "\","
-                            + "\"" + Constants.ATTR_VALUE + "\":" + contextAttribute.getContextValue(true)
+                            + "\"" + Constants.ATTR_VALUE + "\":" + contextAttribute.getContextValue(true) + ","
+                            + "\"" + Constants.ATTR_MD + "\":" + contextAttribute.getContextMetadata()
                             + "}";
                     logger.info("Persisting data. File: " + fileName + ", Data: " + rowLine);
                     
@@ -292,6 +279,7 @@ public class OrionHDFSSink extends OrionSink {
                     } // if else
                 } else {
                     columnLine += "\"" + contextAttribute.getName() + "\":" + contextAttribute.getContextValue(true)
+                            + ", \"" + contextAttribute.getName() + "_md\":" + contextAttribute.getContextMetadata()
                             + ",";
                 } // if else
             } // for

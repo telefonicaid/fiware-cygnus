@@ -99,7 +99,8 @@ public class MySQLBackend {
                 + Constants.ENTITY_TYPE + " text, "
                 + Constants.ATTR_NAME + " text, "
                 + Constants.ATTR_TYPE + " text, "
-                + Constants.ATTR_VALUE + " text)";
+                + Constants.ATTR_VALUE + " text, "
+                + Constants.ATTR_MD + " text)";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
@@ -119,7 +120,7 @@ public class MySQLBackend {
      * @throws Exception
      */
     public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId,
-            String entityType, String attrName, String attrType, String attrValue) throws Exception {
+            String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         Connection con = null;
         Statement stmt = null;
         
@@ -127,7 +128,8 @@ public class MySQLBackend {
         con = getConnection(dbName);
         stmt = con.createStatement();
         String query = "insert into " + tableName + " values ('" + recvTimeTs + "', '" + recvTime + "', '" + entityId
-                + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "')";
+                + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "', '" + attrMd
+                + "')";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
@@ -138,33 +140,42 @@ public class MySQLBackend {
      * @param dbName
      * @param tableName
      * @param recvTime
-     * @param attrList
+     * @param attrs
      * @throws Exception
      */
     public void insertContextData(String dbName, String tableName, String recvTime,
-            Map<String, String> attrList) throws Exception {
-        Connection con = null;
-        Statement stmt = null;
+            Map<String, String> attrs, Map<String, String> mds) throws Exception {
+        // get a connection to the MySQL server and get a statement
+        Connection con = getConnection(dbName);
+        Statement stmt = con.createStatement();
         
-        // check if the given table name existsTable
-        con = getConnection(dbName);
-        stmt = con.createStatement();
-        String attrNames = Constants.RECV_TIME + ",";
-        String attrValues = "'" + recvTime + "',";
+        // for query building purposes
+        String columnNames = Constants.RECV_TIME + ",";
+        String columnValues = "'" + recvTime + "',";
         
-        // iterate on the array in order to build the query
-        Iterator it = attrList.keySet().iterator();
+        // iterate on the attrs in order to build the query
+        Iterator it = attrs.keySet().iterator();
         
         while (it.hasNext()) {
             String attrName = (String) it.next();
-            attrNames += attrName + ",";
-            String attrValue = attrList.get(attrName);
-            attrValues += "'" + attrValue + "',";
+            columnNames += attrName + ",";
+            String attrValue = attrs.get(attrName);
+            columnValues += "'" + attrValue + "',";
+        } // while
+        
+        // iterate on the mds in order to build the query
+        it = mds.keySet().iterator();
+        
+        while (it.hasNext()) {
+            String attrMdName = (String) it.next();
+            columnNames += attrMdName + ",";
+            String md = mds.get(attrMdName);
+            columnValues += "'" + md + "',";
         } // while
         
         // finish creating the query and execute it
-        String query = "insert into " + tableName + " (" + attrNames.substring(0, attrNames.length() - 1)
-                + ") values (" + attrValues.substring(0, attrValues.length() - 1) + ")";
+        String query = "insert into " + tableName + " (" + columnNames.substring(0, columnNames.length() - 1)
+                + ") values (" + columnValues.substring(0, columnValues.length() - 1) + ")";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);

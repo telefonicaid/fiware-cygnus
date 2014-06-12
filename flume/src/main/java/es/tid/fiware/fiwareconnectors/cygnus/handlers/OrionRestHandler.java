@@ -141,7 +141,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
 
         // replace all the appearances of "contextValue" with "value" in order Orion versions under 0.10.0 may work
-        data = data.replaceAll("contextValue", "value");
+        data = data.replaceAll("contextValue", "value").replaceAll(">[ ]*<", "><");
+        logger.debug("Received data: " + data);
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
