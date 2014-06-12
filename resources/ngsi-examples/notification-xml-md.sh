@@ -44,13 +44,24 @@ curl $1 -v -s -S --header 'Content-Type: application/xml' --header 'Accept: appl
             <name>temperature</name>
             <type>centigrade</type>
             <contextValue>26.5</contextValue>
+          </contextAttribute>
+          <contextAttribute>
+            <name>pressure</name>
+            <type>mmhg</type>
+            <contextValue>720</contextValue>
             <metadata>
               <contextMetadata>
                 <name>ID</name>
                 <type>string</type>
-                <value>wall</value>
+                <value>ground</value>
               </contextMetadata>
             </metadata>
+          </contextAttribute>
+          <contextAttribute>
+            <name>humidity</name>
+            <type>percentage</type>
+            <contextValue>42</contextValue>
+            <metadata></metadata>
           </contextAttribute>
         </contextAttributeList>
       </contextElement>
