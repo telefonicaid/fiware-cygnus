@@ -29,6 +29,12 @@ All them use two arguments: firts one is the URL to send the notification, secon
 ./notification-json-simple.sh 127.0.0.1:5050/notify Org22
 ```
 
+In addition the continous_notifier.sh script do a periodic subscription with a random attribute value, using the same two first arguments and a third one to specify the notification period (in seconds): 
+
+```
+./continous_notifier.sh 127.0.0.1:5050/notify Org22 10
+```
+
 ## Cygnus translators
 
 These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.
