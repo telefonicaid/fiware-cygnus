@@ -44,7 +44,14 @@ Let's consider the following notification in Json format coming from an Orion Co
               {
                 "name" : "temperature",
                 "type" : "centigrade",
-                "value" : "26.5"
+                "value" : "26.5",
+                "metadatas": [
+                  {
+                     "name": "ID",
+                     "type": "string",
+                     "value": "ground"
+                  }
+                ]
               }
             ],
             "type" : "Room",
@@ -103,24 +110,24 @@ This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/
 
 Each datastore, we can find two options:
 
-* Fixed 7-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType` and `attrValue`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
+* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, serialization is "[]")
 * A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
 
-    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue |
-    |-----|--------------|---------------------|-----.-------|------------|-----------|
-    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      |
+    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                  |
+    |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------|
+    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      | [{name:ID, type:string, value:ground}]  |
 
 where `i` depends on the number of rows previously inserted.
 
-On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as:
+On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with "_md" is added for the metadata.
 
-    | _id | recvTime           | temperature |
-    |--------------------------|-------------|
-    | i   |2014-02-27T14:46:21 | 26.5        |
+    | _id | recvTime           | temperature | temperature_md                         |
+    |--------------------------|-------------|----------------------------------------|
+    | i   |2014-02-27T14:46:21 | 26.5        | [{name:ID, type:string, value:ground}] |
 
 where `i` depends on the number of rows previously inserted.
 
