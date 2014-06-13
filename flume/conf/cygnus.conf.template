@@ -61,6 +61,8 @@ cygnusagent.sinks.ckan-sink.ckan_port = 80
 # the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
 # characters plus "-" and "_" acording to CKAN limitations
 cygnusagent.sinks.ckan-sink.default_dataset = mydataset
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.ckan-sink.attr_persistence = row
 
 # ============================================
 # OrionMySQLSink configuration
