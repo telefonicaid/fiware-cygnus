@@ -152,21 +152,17 @@ public class MySQLBackend {
         Statement stmt = con.createStatement();
         
         // for query building purposes
-        String columnNames = Constants.RECV_TIME + ",";
-        String columnValues = "'" + recvTime + "',";
+        String columnNames = Constants.RECV_TIME;
+        String columnValues = "'" + recvTime + "'";
         
         // iterate on the attrs in order to build the query
         Iterator it = attrs.keySet().iterator();
         
         while (it.hasNext()) {
             String attrName = (String) it.next();
-            columnNames += attrName + ",";
+            columnNames += "," + attrName;
             String attrValue = attrs.get(attrName);
-            columnValues += "'" + attrValue + "'";
-            
-            if (it.hasNext()) {
-                columnValues += ",";
-            } // if
+            columnValues += ",'" + attrValue + "'";
         } // while
         
         // iterate on the mds in order to build the query
@@ -174,18 +170,13 @@ public class MySQLBackend {
         
         while (it.hasNext()) {
             String attrMdName = (String) it.next();
-            columnNames += attrMdName + ",";
+            columnNames += "," + attrMdName;
             String md = mds.get(attrMdName);
-            columnValues += "'" + md + "'";
-            
-            if (it.hasNext()) {
-                columnValues += ",";
-            } // if
+            columnValues += ",'" + md + "'";
         } // while
         
         // finish creating the query and execute it
-        String query = "insert into " + tableName + " (" + columnNames.substring(0, columnNames.length() - 1)
-                + ") values (" + columnValues.substring(0, columnValues.length() - 1) + ")";
+        String query = "insert into " + tableName + " (" + columnNames + ") values (" + columnValues + ")";
         logger.debug("Executing '" + query + "'");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
