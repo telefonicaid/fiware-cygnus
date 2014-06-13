@@ -65,7 +65,7 @@ public abstract class HDFSBackend {
      * @throws Exception
      */
     public void provisionHiveTable() throws Exception {
-        // FIXME: this is only valid for the row-like persistence!!!
+        // FIXME: https://github.com/telefonicaid/fiware-connectors/issues/75
         
         logger.info("Creating Hive external table " + cosmosUsername + "_"
                 + cosmosDataset.replaceAll("/", "_"));
@@ -95,14 +95,12 @@ public abstract class HDFSBackend {
     
     /**
      * Provisions a Hive external table (column mode).
-     * @param tableName
-     * @param attrs
-     * @param mds
+     * @param dummyParameter1
+     * @param dummyParameter2
      * @throws Exception
      */
-    public void provisionHiveTable(String tableName, Map<String, String> attrs,
-            Map<String, String> mds) throws Exception {
-        // TBD
+    public void provisionHiveTable(String dummyParameter1, String dummyParameter2) throws Exception {
+        // TBD: https://github.com/telefonicaid/fiware-connectors/issues/75
     } // provisionHiveTable
     
     /**
