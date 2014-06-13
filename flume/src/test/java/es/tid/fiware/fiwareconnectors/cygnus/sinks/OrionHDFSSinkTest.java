@@ -84,7 +84,7 @@ public class OrionHDFSSinkTest {
             +           "<contextAttribute>"
             +             "<name>temperature</name>"
             +             "<type>centigrade</type>"
-            +             "<value>26.5</value>"
+            +             "<contextValue>26.5</contextValue>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
