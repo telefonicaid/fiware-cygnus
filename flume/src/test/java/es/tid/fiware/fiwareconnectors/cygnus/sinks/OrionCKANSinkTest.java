@@ -68,6 +68,7 @@ public class OrionCKANSinkTest {
     private final String attrName = "temperature";
     private final String attrType = "degrees";
     private final String attrValue = "26.5";
+    private final String attrMd = "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private final String notifyXMLSimple = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -75,14 +76,14 @@ public class OrionCKANSinkTest {
             +   "<contextResponseList>"
             +     "<contextElementResponse>"
             +       "<contextElement>"
-            +         "<entityId type=\"Room\" isPattern=\"false\">"
-            +           "<id>Room1</id>"
+            +         "<entityId type=\"AType\" isPattern=\"false\">"
+            +           "<id>Entity</id>"
             +         "</entityId>"
             +         "<contextAttributeList>"
             +           "<contextAttribute>"
-            +             "<name>temperature</name>"
-            +             "<type>centigrade</type>"
-            +             "<contextValue>26.5</contextValue>"
+            +             "<name>attribute</name>"
+            +             "<type>attributeType</type>"
+            +             "<contextValue>foo</contextValue>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -120,7 +121,7 @@ public class OrionCKANSinkTest {
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).initOrg(null, "");
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                null, 0, null, null, entityId, attrName, attrType, attrValue);
+                null, 0, null, null, entityId, attrName, attrType, attrValue, attrMd);
     } // setUp
 
     /**

@@ -135,19 +135,19 @@ public class CKANBackendImpl implements CKANBackend {
 
     @Override
     public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization, String entity,
-            String attrName, String attrType, String attrValue) throws Exception {
+            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
 
         // get resource ID
         String resourceId = resourceLookupAndCreate(httpClient, organization, entity, true);
 
         // persist the entity
-        insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue);
+        insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
 
     } // persist
 
     @Override
     public void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
-                 Map<String, String> attrList) throws Exception {
+                 Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
 
         // get resource ID
         String resourceId = resourceLookupAndCreate(httpClient, organization, entity, false);
@@ -157,7 +157,7 @@ public class CKANBackendImpl implements CKANBackend {
         }
         else {
             // persist the entity
-            insert(httpClient, recvTime, resourceId, attrList);
+            insert(httpClient, recvTime, resourceId, attrList, attrMdList);
         }
 
     }
@@ -235,7 +235,7 @@ public class CKANBackendImpl implements CKANBackend {
      *
      */
     private void insert(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
-                        String attrName, String attrType, String attrValue) throws Exception {
+                        String attrName, String attrType, String attrValue, String attrMd) throws Exception {
 
         // do CKAN request
         String jsonString = "{ \"resource_id\": \"" + resourceId
@@ -245,6 +245,7 @@ public class CKANBackendImpl implements CKANBackend {
                 + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                 + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
                 + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\" "
+                + "\"" + Constants.ATTR_MD + "\": \"" + attrMd + "\" "
                 + "}"
                 + "], "
                 + "\"method\": \"insert\", "
@@ -271,22 +272,26 @@ public class CKANBackendImpl implements CKANBackend {
      * @throws Exception
      *
      */
-    private void insert(DefaultHttpClient httpClient, String recvTime, String resourceId, Map<String, String> attrList)
-            throws Exception {
+    private void insert(DefaultHttpClient httpClient, String recvTime, String resourceId,
+                        Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
 
-        // iterate on the array in order to build the query
+        // iterate on the attribute and metadata maps in order to build the query
+        String attrs = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
+
         Iterator it = attrList.keySet().iterator();
-        String attrs = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", ";
-
         while (it.hasNext()) {
             String attrName = (String) it.next();
             String attrValue = attrList.get(attrName);
-
-            attrs += "\"" + attrName + "\": \"" + attrValue + "\"";
-            if (it.hasNext()) {
-                attrs += ", ";
-            } // if
+            attrs += ", \"" + attrName + "\": \"" + attrValue + "\"";
         } // while
+
+        it = attrMdList.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            String attrMd = attrMdList.get(attrName);
+            attrs += ", \"" + attrName + "_md\": \"" + attrMd + "\"";
+        } // while
+
 
         // do CKAN request
         String jsonString = "{ \"resource_id\": \"" + resourceId
@@ -406,6 +411,7 @@ public class CKANBackendImpl implements CKANBackend {
                 + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
                 + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
                 + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"}"
+                + "{ \"id\": \"" + Constants.ATTR_MD + "\", \"type\": \"json\"}"
                 + "], "
                 + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
