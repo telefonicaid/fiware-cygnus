@@ -178,7 +178,7 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	[[ $? -ne 0 ]] && exit 1
 
 	copy_cygnus_to_flume
-	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean compile assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
