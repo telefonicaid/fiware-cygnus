@@ -203,7 +203,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git checkout <branch>
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
-    $ cp target/cygnus-0.2.1-jar-with-dependecies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/cygnus-0.2.1-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
 
@@ -219,7 +219,7 @@ If the dependencies are included in the built Cygnus package, then nothing has t
 
 In addition:
 * Observe the version of httpcomponents-core and httpcomponents-client in the pom.xml are matching the version of such packages within the Flume bundle (httpclient-4.2.1.jar and httpcore-4.2.1.jar). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar
+* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar (it can be got from the following URL: http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar)
 
 ### OrionCKANSink dependencies
 

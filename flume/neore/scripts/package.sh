@@ -52,6 +52,19 @@ function download_flume(){
 		_logOk ".............. Done! .............."
 	fi
 
+	_log "### Download libthrift patch... ###"
+	ARTIFACT_LIBTHRIFT_URL="http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/"
+	LIBTHRIFT_JAR=libthrift-0.9.1.jar 
+	curl -s -o ${LIBTHRIFT_JAR} ${ARTIFACT_LIBTHRIFT_URL}/${LIBTHRIFT_JAR}
+	if [[ $? -ne 0 ]]; then
+			_logError "cannot download libthrift jar (${LIBTHRIFT_JAR}) from ${ARTIFACT_LIBTHRIFT_URL}"
+			return 1
+		else
+			_logOk ".............. Done! .............."
+		fi
+	rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
+	mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
+
 	_log "#### Cleaning the temporal folders... ####"
 	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
 	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
@@ -66,7 +79,10 @@ function download_flume(){
 
 function copy_cygnus_to_flume(){
 	_logStage "######## Copying the cygnus jar into the apache-flume... ########"
-	cp $BASE_DIR/target/*.jar ${RPM_PRODUCT_SOURCE_DIR}/lib/
+	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
+	mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+	mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+	cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
 }
 
 usage() {
@@ -162,7 +178,7 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	[[ $? -ne 0 ]] && exit 1
 
 	copy_cygnus_to_flume
-	[[ $? -ne 0 ]] && exit 1
+	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
