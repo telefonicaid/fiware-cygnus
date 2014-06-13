@@ -82,7 +82,7 @@ public class OrionCKANSinkTest {
             +           "<contextAttribute>"
             +             "<name>temperature</name>"
             +             "<type>centigrade</type>"
-            +             "<value>26.5</value>"
+            +             "<contextValue>26.5</contextValue>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -120,7 +120,7 @@ public class OrionCKANSinkTest {
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).initOrg(null, "");
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                null, 0, null, entityId, attrName, attrType, attrValue);
+                null, 0, null, null, entityId, attrName, attrType, attrValue);
     } // setUp
 
     /**

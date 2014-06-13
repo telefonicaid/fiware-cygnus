@@ -45,21 +45,9 @@ curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: app
           {
             "name" : "pressure",
             "type" : "mmhg",
-            "value" : "720",
-            "metadatas": [
-              {
-                "name": "ID",
-                "type": "string",
-                "value": "ground"
-              }
-            ]
-          },
-          {
-            "name" : "humidity",
-            "type" : "percentage",
-            "value" : "42",
-            "metadatas": [  ]
+            "value" : "720"
           }
+
         ],
         "type" : "Room",
         "isPattern" : "false",

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2014 Telefonica Investigacion y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors.
@@ -22,14 +22,23 @@
 # This script is aimed to Cygnus debugging. It uses one argument: the URL to which
 # the notification will be sent
 
+URL=$1
 if [ "$2" != "" ]
 then
    ORG=$2
 else
    ORG=default_org
 fi
+WAIT=$3
 
-curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $ORG" -d @- <<EOF
+while true
+do
+
+# Generate a random temperature value between 10 and 30
+TEMP=$((RANDOM%20+10))
+
+echo "---> notification"
+curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $ORG" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
   "originator" : "localhost",
@@ -40,25 +49,7 @@ curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: app
           {
             "name" : "temperature",
             "type" : "centigrade",
-            "value" : "26.5"
-          },
-          {
-            "name" : "pressure",
-            "type" : "mmhg",
-            "value" : "720",
-            "metadatas": [
-              {
-                "name": "ID",
-                "type": "string",
-                "value": "ground"
-              }
-            ]
-          },
-          {
-            "name" : "humidity",
-            "type" : "percentage",
-            "value" : "42",
-            "metadatas": [  ]
+            "value" : "$TEMP"
           }
         ],
         "type" : "Room",
@@ -73,3 +64,9 @@ curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: app
   ]
 }
 EOF
+
+sleep $WAIT
+
+
+done
+

@@ -83,7 +83,7 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 Within files, Json documents are written following one of these two schemas:
 
 * Fixed 7-field lines: <code>recvTimeTs</code>, <code>recvTime</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>.
-*  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recv_time</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
+*  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recvTime</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
 
@@ -101,19 +101,26 @@ Each organization/tenant is associated to a different user in the HDFS filesyste
 
 This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/latest/maintaining/datastore.html). Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the 'default_dataset' property in the CKAN sink configuration.
 
-Each context element in the datastore has the following fields:
+Each datastore, we can find two options:
 
-* recvTimeTs: timestamp since Unix Epoch.
-* recvTime: the same as ts, but in human readable form (ISO8601 format)
-* attrName: the attribute name, coming from the NGSI notification
-* attrType: the attribute type, coming from the NGSI notification
-* attrValue: the attribute value, coming from the NGSI notification. It its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
+* Fixed 7-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType` and `attrValue`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
+* A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
-Thus, by receiving a notification like the one above, the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
+
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue |
     |-----|--------------|---------------------|-----.-------|------------|-----------|
     | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      |
+
+where `i` depends on the number of rows previously inserted.
+
+On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as:
+
+    | _id | recvTime           | temperature |
+    |--------------------------|-------------|
+    | i   |2014-02-27T14:46:21 | 26.5        |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -301,6 +308,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.hdfs-sink.naming_prefix =
+# Hive port for Hive external table provisioning
+cygnusagent.sinks.hdfs-sink.hive_port = 10000
 
 # ============================================
 # OrionCKANSink configuration
@@ -317,6 +326,8 @@ cygnusagent.sinks.ckan-sink.ckan_port = 80
 # the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
 # characters plus "-" and "_" acording to CKAN limitations
 cygnusagent.sinks.ckan-sink.default_dataset = mydataset
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.ckan-sink.attr_persistence = row
 
 # ============================================
 # OrionMySQLSink configuration

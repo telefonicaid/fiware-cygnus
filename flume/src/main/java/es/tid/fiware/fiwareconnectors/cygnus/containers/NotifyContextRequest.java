@@ -19,14 +19,11 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -225,11 +222,13 @@ public class NotifyContextRequest {
         private String name;
         private String type;
         private JsonElement value;
+        private ArrayList<ContextMetadata> metadatas;
         
         /**
          * Constructor for Gson, a Json parser.
          */
         public ContextAttribute() {
+            metadatas = new ArrayList<ContextMetadata>();
         } // ContextAttribute
         
         /**
@@ -253,13 +252,31 @@ public class NotifyContextRequest {
             } // if
             
             type = domTypes.item(0).getTextContent();
-            NodeList domValues = domContextAttribute.getElementsByTagName("value");
+            NodeList domValues = domContextAttribute.getElementsByTagName("contextValue");
             
             if (domValues.getLength() == 0) {
                 throw new Exception("No <contextValue> tag in the XML document");
             } // if
+
+            value = Utils.basicXml2Json(domValues.item(0));
+            metadatas = new ArrayList<ContextMetadata>();
+
+            NodeList domMetadata = domContextAttribute.getElementsByTagName("metadata");
             
-            value = xml2json(domValues.item(0));
+            if (domMetadata.getLength() == 0) {
+                return;
+            } // if
+
+            NodeList domContextMetadata = ((Element) domMetadata.item(0)).
+                    getElementsByTagName("contextMetadata");
+            
+            if (domMetadata.getLength() == 0) {
+                return;
+            } // if
+            
+            for (int i = 0; i < domContextMetadata.getLength(); i++) {
+                metadatas.add(new ContextMetadata((Element) domContextMetadata.item(i)));
+            } // for
         } // ContextAttribute
         
         public String getName() {
@@ -288,60 +305,105 @@ public class NotifyContextRequest {
         } // getContextValue
         
         /**
-         * Converts a XML node into Json.
-         * @param xmlNode
-         * @return
-         * @throws Exception
+         * Gets the context metadata.
+         * @param asStringRepresentation
+         * @return The context metadata for this context attribute in String format.
          */
-        private JsonElement xml2json(Node xmlNode) throws Exception {
-            // if the XML node has not attributes, it is either an object either a string
-            if (!xmlNode.hasAttributes()) {
-                Node child = xmlNode.getFirstChild();
-                
-                if (child.getFirstChild() != null) {
-                    NodeList domObjects = ((Element) xmlNode).getChildNodes();
-                    JsonObject jsonObject = new JsonObject();
-
-                    for (int i = 0; i < domObjects.getLength(); i++) {
-                        Node domObject = domObjects.item(i);
-                        jsonObject.add(domObject.getNodeName(), xml2json(domObject));
-                    } // for
-
-                    return jsonObject;
-                } else {
-                    return new JsonPrimitive(xmlNode.getTextContent());
-                } // if else
+        public String getContextMetadata() {
+            if (metadatas == null) {
+                return "[]";
             } // if
             
-            // if the "type" attribute is not among the existing ones then return error
-            if (xmlNode.getAttributes().getNamedItem("type") == null) {
-                throw new Exception("Attributes different than \"type\" are not allowed withing or any child tag "
-                        + "according to Orion notification API");
+            if (metadatas.isEmpty()) {
+                return "[]";
             } // if
             
-            String valueType = xmlNode.getAttributes().getNamedItem("type").getTextContent();
-
-            // if the value of the "type" attribute is "vector", the proceed, return error otherwise
-            if (valueType.equals("vector")) {
-                NodeList domItems = ((Element) xmlNode).getElementsByTagName("item");
-
-                if (domItems.getLength() == 0) {
-                    throw new Exception("No <item> tag within <contextValue type=\"vector\">");
+            String res = "[";
+            
+            for (ContextMetadata contextMetadata : metadatas) {
+                if (contextMetadata == null) {
+                    continue;
                 } // if
-
-                JsonArray jsonArray = new JsonArray();
-
-                for (int i = 0; i < domItems.getLength(); i++) {
-                    jsonArray.add(xml2json(domItems.item(i)));
-                } // for
-
-                return jsonArray;
-            } else {
-                throw new Exception("Unknown XML node type: " + valueType);
-            } // if else if else
-        } // xml2json
+                
+                res += "{\"name\":\"" + contextMetadata.getName() + "\","
+                        + "\"type\":\"" + contextMetadata.getType() + "\","
+                        + "\"value\":" + contextMetadata.getValue() + "},";
+            } // for
+            
+            return res.substring(0, res.length() - 1) + "]";
+        } // getContextMetadata
         
     } // ContextAttribute
+    
+    /**
+     * Class for storing contextMetadata information from a contestAttribute.
+     */
+    public class ContextMetadata {
+        
+        private String name;
+        private String type;
+        private JsonElement value;
+        
+        /**
+         * Constructor for Gson, a Json parser.
+         */
+        public ContextMetadata() {
+        } // ContextMetadata
+        
+        /**
+         * Constructor for DOM, a XML parser.
+         *
+         * @param domContextAttribute
+         * @exception
+         */
+        public ContextMetadata(Element domContextMetadata) throws Exception {
+            NodeList domNames = domContextMetadata.getElementsByTagName("name");
+            
+            if (domNames.getLength() == 0) {
+                throw new Exception("No <name> tag in the XML document");
+            } // if
+            
+            name = domNames.item(0).getTextContent();
+            NodeList domTypes = domContextMetadata.getElementsByTagName("type");
+            
+            if (domTypes.getLength() == 0) {
+                throw new Exception("No <type> tag in the XML document");
+            } // if
+            
+            type = domTypes.item(0).getTextContent();
+            NodeList domValues = domContextMetadata.getElementsByTagName("value");
+            
+            if (domValues.getLength() == 0) {
+                throw new Exception("No <value> tag in the XML document");
+            } // if
+            
+            value = Utils.basicXml2Json(domValues.item(0));
+        } // ContextAttribute
+        
+        public String getName() {
+            return name;
+        } // getName
+        
+        public String getType() {
+            return type;
+        } // getType
+        
+        /**
+         * Gets metadata value.
+         * @param asStringRepresentation
+         * @return The metadata value for this metadata attribute in String format.
+         */
+        public String getValue() {
+            if (value.isJsonObject()) {
+                return value.getAsJsonObject().toString();
+            } else if (value.isJsonArray()) {
+                return value.getAsJsonArray().toString();
+            } else {
+                return "\"" + value.getAsString() + "\"";
+            } // if else if
+        } // getValue
+        
+    } // ContextMetadata
     
     /**
      * Class for storing statusCode information from a notifyContextRequest.
