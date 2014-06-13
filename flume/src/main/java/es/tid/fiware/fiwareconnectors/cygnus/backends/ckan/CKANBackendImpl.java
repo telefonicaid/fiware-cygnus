@@ -33,7 +33,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
 
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -238,16 +237,20 @@ public class CKANBackendImpl implements CKANBackend {
                         String attrName, String attrType, String attrValue, String attrMd) throws Exception {
 
         // do CKAN request
-        String jsonString = "{ \"resource_id\": \"" + resourceId
-                + "\", \"records\": [ "
-                + "{ \"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
+        String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                 + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
                 + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                 + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
-                + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\", "
-                + "\"" + Constants.ATTR_MD + "\": " + attrMd + " "
-                + "}"
-                + "], "
+                + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\"";
+
+        // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+        // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+        if (!attrMd.equals(Constants.EMPTY_MD)) {
+            records += ", \"" + Constants.ATTR_MD + "\": " + attrMd;
+        } // if
+
+        String jsonString = "{ \"resource_id\": \"" + resourceId
+                + "\", \"records\": [ { " + records + " } ], "
                 + "\"method\": \"insert\", "
                 + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
@@ -276,26 +279,31 @@ public class CKANBackendImpl implements CKANBackend {
                         Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
 
         // iterate on the attribute and metadata maps in order to build the query
-        String attrs = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
+        String records = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
 
         Iterator it = attrList.keySet().iterator();
         while (it.hasNext()) {
             String attrName = (String) it.next();
             String attrValue = attrList.get(attrName);
-            attrs += ", \"" + attrName + "\": \"" + attrValue + "\"";
+            records += ", \"" + attrName + "\": \"" + attrValue + "\"";
         } // while
 
         it = attrMdList.keySet().iterator();
         while (it.hasNext()) {
             String attrName = (String) it.next();
             String attrMd = attrMdList.get(attrName);
-            attrs += ", \"" + attrName + "_md\": \"" + attrMd + "\"";
+
+            // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+            // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+            if (!attrMd.equals(Constants.EMPTY_MD)) {
+                records += ", \"" + attrName + "_md\": " + attrMd;
+            } // if
         } // while
 
 
         // do CKAN request
         String jsonString = "{ \"resource_id\": \"" + resourceId
-                + "\", \"records\": [ { " + attrs + " } ], "
+                + "\", \"records\": [ { " + records + " } ], "
                 + "\"method\": \"insert\", "
                 + "\"force\": \"true\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",

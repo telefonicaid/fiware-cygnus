@@ -46,4 +46,7 @@ public final class Constants {
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
 
+    // Others
+    public static final String EMPTY_MD = "[]";
+
 } // Constants

@@ -20,6 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import com.google.gson.JsonElement;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
@@ -306,16 +307,15 @@ public class NotifyContextRequest {
         
         /**
          * Gets the context metadata.
-         * @param asStringRepresentation
          * @return The context metadata for this context attribute in String format.
          */
         public String getContextMetadata() {
             if (metadatas == null) {
-                return "[]";
+                return Constants.EMPTY_MD;
             } // if
             
             if (metadatas.isEmpty()) {
-                return "[]";
+                return Constants.EMPTY_MD;
             } // if
             
             String res = "[";
