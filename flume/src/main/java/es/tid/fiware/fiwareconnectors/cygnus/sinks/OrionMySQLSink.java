@@ -210,7 +210,7 @@ public class OrionMySQLSink extends OrionSink {
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Row: "
+                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Data: "
                             + recvTimeTs / 1000 + "," + recvTime + "," + contextElement.getId() + ","
                             + contextElement.getType() + "," + contextAttribute.getName() + ","
                             + contextAttribute.getType() + "," + contextAttribute.getContextValue(false) + ","
@@ -229,7 +229,7 @@ public class OrionMySQLSink extends OrionSink {
             // attribute list of name-values.
             if (!rowAttrPersistence) {
                 logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
-                        + recvTime + ", Row: " + attrs.toString());
+                        + recvTime + ", Data (attrs): " + attrs.toString() + ", (metadata): " + mds.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
             } // if
         } // for

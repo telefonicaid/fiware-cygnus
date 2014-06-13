@@ -43,12 +43,12 @@ import org.apache.log4j.Logger;
  * formats:
  *  - Row-like persistence:
  *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
- *    -- File lines format: {“recvTimeTs”:”XXX”, “recvTime”:”XXX”, “entityId”:”XXX”, “entityType”:”XXX”, “attrName”:”XXX”,
- *                          “attrType”:”XXX”, “attrValue":"XXX"|{...}|[...],
+ *    -- File lines format: {"recvTimeTs":"XXX", "recvTime":"XXX", "entityId":"XXX", "entityType":"XXX",
+ *                          "attrName":"XXX", "attrType":"XXX", "attrValue":"XXX"|{...}|[...],
  *                          "attrMd":[{"name":"XXX", "type":"XXX", "value":"XXX"}...]}
  * - Column-like persistence:
  *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
- *    -- File lines format: {“recvTime”:”XXX”, "<attr_name_1>":<attr_value_1>, ..., <attr_name_N>":<attr_value_N>,
+ *    -- File lines format: {"recvTime":"XXX", "<attr_name_1>":<attr_value_1>, ..., <attr_name_N>":<attr_value_N>,
  *                          "<attr_name_1>-md":<attr_md_1>, ..., "<attr_name_N>-md":<attr_md_N>}
  * 
  * As can be seen, in both persistence modes a file is created per each entity, containing all the historical values
@@ -68,6 +68,7 @@ public class OrionHDFSSink extends OrionSink {
     private String hdfsAPI;
     private boolean rowAttrPersistence;
     private String namingPrefix;
+    private String hivePort;
     private HDFSBackend persistenceBackend;
     private HttpClientFactory httpClientFactory;
     
@@ -127,6 +128,14 @@ public class OrionHDFSSink extends OrionSink {
     } // getHDFSAPI
     
     /**
+     * Gets the Hive port. It is protected due to it is only required for testing purposes.
+     * @return The Hive port
+     */
+    protected String getHivePort() {
+        return hivePort;
+    } // getHivePort
+    
+    /**
      * Gets the Http client factory. It is protected due to it is only required for testing purposes.
      * @return The Http client factory
      */
@@ -178,6 +187,8 @@ public class OrionHDFSSink extends OrionSink {
         logger.debug("Reading attr_persistence=" + (rowAttrPersistence ? "row" : "column"));
         namingPrefix = context.getString("naming_prefix", "");
         logger.debug("Reading naming_prefix=" + namingPrefix);
+        hivePort = context.getString("hive_port", "10000");
+        logger.debug("Reading hive_port=" + hivePort);
     } // configure
 
     @Override
@@ -189,11 +200,11 @@ public class OrionHDFSSink extends OrionSink {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
                 persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword,
-                        cosmosDataset);
+                        cosmosDataset, hivePort);
                 logger.debug("HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword,
-                        cosmosDataset);
+                        cosmosDataset, hivePort);
                 logger.debug("WebHDFS persistence backend created");
             } else {
                 logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
@@ -204,8 +215,11 @@ public class OrionHDFSSink extends OrionSink {
                 logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
                 persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
                 
-                // provision the Hive external table for the above dataset
-                persistenceBackend.provisionHive();
+                // provision the Hive external table for the above dataset if running in the "row" mode; otherwise, the
+                // table creation must be delayed until the sink knows the structure of the table
+                if (rowAttrPersistence) {
+                    persistenceBackend.provisionHiveTable();
+                } // if
             } // if
         } catch (Exception e) {
             logger.error(e.getMessage());

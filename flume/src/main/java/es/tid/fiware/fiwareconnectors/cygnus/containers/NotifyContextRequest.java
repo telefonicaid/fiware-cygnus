@@ -252,10 +252,10 @@ public class NotifyContextRequest {
             } // if
             
             type = domTypes.item(0).getTextContent();
-            NodeList domValues = domContextAttribute.getElementsByTagName("value");
+            NodeList domValues = domContextAttribute.getElementsByTagName("contextValue");
             
             if (domValues.getLength() == 0) {
-                throw new Exception("No <contextValue> or <value> tag in the XML document");
+                throw new Exception("No <contextValue> tag in the XML document");
             } // if
 
             value = Utils.basicXml2Json(domValues.item(0));
@@ -382,7 +382,7 @@ public class NotifyContextRequest {
         
         public String getName() {
             return name;
-        } // gertName
+        } // getName
         
         public String getType() {
             return type;

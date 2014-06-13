@@ -21,6 +21,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.util.Map;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
@@ -36,6 +37,7 @@ public abstract class HDFSBackend {
     protected String cosmosUsername;
     protected String cosmosPassword;
     protected String cosmosDataset;
+    protected String hivePort;
     private Logger logger;
     
     /**
@@ -43,28 +45,31 @@ public abstract class HDFSBackend {
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
+     * @param cosmosPassword
      * @param cosmosDataset
+     * @param hivePort
      */
     public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
-            String cosmosDataset) {
+            String cosmosDataset, String hivePort) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
         this.cosmosUsername = cosmosUsername;
         this.cosmosPassword = cosmosPassword;
         this.cosmosDataset = cosmosDataset;
+        this.hivePort = hivePort;
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
 
     /**
-     * Provision the necessary Hive external tables.
+     * Provisions a Hive external table (row mode).
      * @throws Exception
      */
-    public void provisionHive() throws Exception {
+    public void provisionHiveTable() throws Exception {
         // FIXME: this is only valid for the row-like persistence!!!
         
         logger.info("Creating Hive external table " + cosmosUsername + "_"
                 + cosmosDataset.replaceAll("/", "_"));
-        HiveClient hiveClient = new HiveClient(cosmosHost, "10000", cosmosUsername, cosmosPassword);
+        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosUsername, cosmosPassword);
 
         String fields = "("
                 + Constants.RECV_TIME_TS + " bigint, "
@@ -86,7 +91,19 @@ public abstract class HDFSBackend {
             logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
-    } // provisionHive
+    } // provisionHiveTable
+    
+    /**
+     * Provisions a Hive external table (column mode).
+     * @param tableName
+     * @param attrs
+     * @param mds
+     * @throws Exception
+     */
+    public void provisionHiveTable(String tableName, Map<String, String> attrs,
+            Map<String, String> mds) throws Exception {
+        // TBD
+    } // provisionHiveTable
     
     /**
      * Creates a directory in HDFS.

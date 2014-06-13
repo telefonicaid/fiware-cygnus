@@ -117,6 +117,7 @@ public class MySQLBackend {
      * @param attrName
      * @param attrType
      * @param attrValue
+     * @param attrMd
      * @throws Exception
      */
     public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId,
@@ -141,6 +142,7 @@ public class MySQLBackend {
      * @param tableName
      * @param recvTime
      * @param attrs
+     * @param mds
      * @throws Exception
      */
     public void insertContextData(String dbName, String tableName, String recvTime,
@@ -160,7 +162,11 @@ public class MySQLBackend {
             String attrName = (String) it.next();
             columnNames += attrName + ",";
             String attrValue = attrs.get(attrName);
-            columnValues += "'" + attrValue + "',";
+            columnValues += "'" + attrValue + "'";
+            
+            if (it.hasNext()) {
+                columnValues += ",";
+            } // if
         } // while
         
         // iterate on the mds in order to build the query
@@ -170,7 +176,11 @@ public class MySQLBackend {
             String attrMdName = (String) it.next();
             columnNames += attrMdName + ",";
             String md = mds.get(attrMdName);
-            columnValues += "'" + md + "',";
+            columnValues += "'" + md + "'";
+            
+            if (it.hasNext()) {
+                columnValues += ",";
+            } // if
         } // while
         
         // finish creating the query and execute it
