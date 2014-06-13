@@ -45,6 +45,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.hdfs-sink.naming_prefix =
+# Hive port for Hive external table provisioning
+cygnusagent.sinks.hdfs-sink.hive_port = 10000
 
 # ============================================
 # OrionCKANSink configuration
