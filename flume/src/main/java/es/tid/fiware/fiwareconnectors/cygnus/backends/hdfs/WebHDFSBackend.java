@@ -47,10 +47,12 @@ public class WebHDFSBackend extends HDFSBackend {
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
+     * @param cosmosPassword 
      * @param cosmosDataset
      */
-    public WebHDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
-        super(cosmosHost, cosmosPort, cosmosUsername, cosmosDataset);
+    public WebHDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
+            String cosmosDataset, String hivePort) {
+        super(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword, cosmosDataset, hivePort);
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
