@@ -296,7 +296,7 @@ public class CKANBackendImpl implements CKANBackend {
             // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
             // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
             if (!attrMd.equals(Constants.EMPTY_MD)) {
-                records += ", \"" + attrName + "_md\": " + attrMd;
+                records += ", \"" + attrName + "\": " + attrMd;
             } // if
         } // while
 
