@@ -163,6 +163,11 @@ public class OrionCKANSink extends OrionSink {
         // at the same time
         HashMap<String, String> attrs = new HashMap<String, String>();
 
+        // this is used for storing the attribute's names (sufixed with "-md") and metadata when dealing with a per
+        // column attributes persistence; in that case the persistence is not done attribute per attribute, but
+        // persisting all of them at the same time
+        HashMap<String, String> mds = new HashMap<String, String>();
+
         // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
@@ -176,6 +181,7 @@ public class OrionCKANSink extends OrionSink {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
+                String attrMd = contextAttribute.getContextMetadata();
 
                 if (rowAttrPersistence) {
                     // persist the data
@@ -185,12 +191,14 @@ public class OrionCKANSink extends OrionSink {
                             + entity + ", "
                             + attrName + ", "
                             + attrType + ", "
-                            + attrValue + ">");
+                            + attrValue + ", "
+                            + attrMd + ">");
                     persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
-                            organization, entity, attrName, attrType, attrValue);
+                            organization, entity, attrName, attrType, attrValue, attrMd);
                 }
                 else {
-                    attrs.put(contextAttribute.getName(), contextAttribute.getContextValue(false));
+                    attrs.put(attrName, attrValue);
+                    mds.put(attrName + "_md", attrMd);
                 } // if else
             } // for
 
@@ -200,8 +208,9 @@ public class OrionCKANSink extends OrionSink {
                 logger.info("Persisting data: <" + recvTime + ", "
                         + organization + ", "
                         + entity + ", "
-                        + attrs.toString() + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity, attrs);
+                        + attrs.toString() + ", "
+                        + mds.toString() + ">");
+                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity, attrs, mds);
             } // if
 
         } // for

@@ -23,13 +23,13 @@ package es.tid.fiware.fiwareconnectors.cygnus.utils;
  *
  * @author fermin
  */
-public final class Constants {
-    
+public final class TestConstants {
+
     /**
      * Constructor.
      */
-    private Constants() {
-    } // Constants
+    private TestConstants() {
+    } // TestConstants
 
     // HTTP headers
     public static final String ORG_HEADER = "fiware-service";
@@ -46,7 +46,5 @@ public final class Constants {
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
 
-    // Others
-    public static final String EMPTY_MD = "[]";
+} // TestConstants
 
-} // Constants

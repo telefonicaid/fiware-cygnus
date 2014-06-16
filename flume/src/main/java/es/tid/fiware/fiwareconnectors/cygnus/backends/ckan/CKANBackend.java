@@ -49,10 +49,11 @@ public interface CKANBackend {
      * @param attrName attribute name.
      * @param attrType attribute type.
      * @param attrValue attribute value.
+     * @param attrMd attribute metadata string serialization
      * @throws Exception
      */
     void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization, String entity,
-                 String attrName, String attrType, String attrValue) throws Exception;
+                 String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
     /**
      * Persist data in the CKAN datastore associated with the entity in a given organization (column mode)
@@ -61,11 +62,12 @@ public interface CKANBackend {
      * @param recvTime reception time (human readable)
      * @param organization organization.
      * @param entity entity string (including ID and type).
-     * @param attrList hashmap containing the attributes to persits
+     * @param attrList hashmap containing the attributes to persist
+     * @param attrMdList hashmap containing the metadata string serialization to persist
      * @throws Exception
      */
-    void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity, Map<String,
-            String> attrList) throws Exception;
+    void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
+                 Map<String, String> attrList, Map<String, String> attrMdList) throws Exception;
 
     
 } // CKANBackend

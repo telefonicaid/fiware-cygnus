@@ -32,8 +32,12 @@ echo "# Create the datastore associated to the resource"
    "resource_id": "${RES_ID}",
    "fields": [ 
                 { "id": "recvTime", "type": "timestamp" }, 
-                { "id": "temperature", "type": "text" }, 
-                { "id": "pressure", "type": "text" }
+                { "id": "temperature", "type": "json" }, 
+                { "id": "temperature_md", "type": "json" }, 
+                { "id": "pressure", "type": "json" },
+                { "id": "pressure_md", "type": "json" },
+                { "id": "humidity", "type": "json" },
+                { "id": "humidity_md", "type": "json" }
              ],
    "force": "true"
 }
