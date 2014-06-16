@@ -9,7 +9,7 @@ All the details about Flume can be found at http://flume.apache.org/ but, as a r
 * A Flume channel is a passive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
 * A Flume sink connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
 
-There exists a wide collection of already developed sources, channels and sinks. The Flume-based cosmos-injector, also called Cygnus, development extends that collection by adding:
+There exists a wide collection of already developed sources, channels and sinks. The Flume-based connector, also called Cygnus, development extends that collection by adding:
 * OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
 * OrionHDFSSink. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 * OrionCKANSink. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
@@ -165,9 +165,9 @@ Each organization/tenant is associated to a different database.
 
 ## XML notification example
 
-Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
-    event={body={the_json_part...},headers={{"content-type","application/xml"}}}
+    event={body={the_xml_part...},headers={{"content-type","application/xml"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
 
 The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
@@ -193,7 +193,7 @@ Maven is installed by downloading it from http://maven.apache.org/download.cgi. 
 
 ## Installing Cygnus and its dependencies
 
-Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a folder of your choice (represented by APACHE_FLUME_HOME):
+Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
@@ -204,7 +204,7 @@ Apache Flume can be easily installed by downloading its latests version from htt
 
 The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
 
-Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package:
+Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package (**recommended**):
 
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ git checkout <branch>
@@ -220,23 +220,24 @@ or not:
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
-where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
+where `<branch>` is `develop` if you are trying to install the latest features or `release/x.y` if you are trying to install a stable release.
 
-If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under APACHE_FLUME_HOME/plugins.d/cygnus/libext. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
+If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/`. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
 
 In addition:
-* Observe the version of httpcomponents-core and httpcomponents-client in the pom.xml are matching the version of such packages within the Flume bundle (httpclient-4.2.1.jar and httpcore-4.2.1.jar). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar
+
+* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar` and `httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
+* `libthrift-0.9.1.jar` must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar`
 
 ### OrionCKANSink dependencies
 
-These are the packages you will need to install under APACHE_FLUME_HOME/plugins.d/cygnus/libext if you did not included them in the Cygnus package:
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
 * json-simple-1.1.jar
 
 ### OrionHDFSSink dependencies
 
-These are the packages you will need to install under APACHE_FLUME_HOME/plugins.d/cygnus/libext if you did not included them in the Cygnus package:
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
 * hadoop-core-0.20.0.jar (or higher)
 * hive-exec-0.12.0.jar
@@ -250,11 +251,14 @@ These packages are not necessary to be installed since they are already included
 * httpclient-4.2.1.jar
 * httpcore-4.2.2.jar
 
-In addition, as already said, remember to overwrite the APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar package with this one:
+In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
 * libthrift-0.9.1.jar
 
-Finally, if you are planning to use the OrionMySQLSink, include the latest MySQL connector in APACHE_FLUME_HOME/plugins.d/cygnus/libext:
-* mysql-connector-java-5.1.26-bin.jar
+### OrionMysQLSink dependencies
+
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+* mysql-connector-java-5.1.31-bin.jar
 
 ## Cygnus configuration
 
@@ -379,27 +383,27 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## log4j configuration
 
-The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of the cosmos-injector running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
+The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
 
 ```Python
 log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
 log4j.appender.cosmosinjector1028.MaxFileSize=100MB
 log4j.appender.cosmosinjector1028.MaxBackupIndex=10
-log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cosmos-injector.1028.log
+log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cygnus.1028.log
 log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 
 log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
 log4j.appender.cosmosinjector1029.MaxFileSize=100MB
 log4j.appender.cosmosinjector1029.MaxBackupIndex=10
-log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
+log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cygnus.1029.log
 log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 ```
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
 
-    -Dflume.root.logger=<loggin_level>,cosmos-injector.<TCP_port>.log
+    -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
 
 ## Running
 
@@ -428,8 +432,8 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
       <attributeList>
         <attribute>temperature</attribute>
       </attributeList>
-      <!-- This is the part where the cosmos-injector is specified -->
-      <reference>http://host_running_the_cosmos-injector:5050/notify</reference>
+      <!-- This is the part where Cygnus endpoint is specified -->
+      <reference>http://host_running_cygnus:5050/notify</reference>
       <duration>P1M</duration>
       <notifyConditions>
         <notifyCondition>
