@@ -9,7 +9,7 @@ All the details about Flume can be found at http://flume.apache.org/ but, as a r
 * A Flume channel is a passive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
 * A Flume sink connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
 
-There exists a wide collection of already developed sources, channels and sinks. The Flume-based cosmos-injector, also called Cygnus, development extends that collection by adding:
+There exists a wide collection of already developed sources, channels and sinks. The Flume-based connector, also called Cygnus, development extends that collection by adding:
 * OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
 * OrionHDFSSink. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 * OrionCKANSink. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
@@ -226,7 +226,7 @@ If the dependencies are included in the built Cygnus package, then nothing has t
 
 In addition:
 
-* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar` and `httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build the cosmos-injector with such newest libraries has shown incompatibilities with Flume's ones.
+* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar` and `httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
 * `libthrift-0.9.1.jar` must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar`
 
 ### OrionCKANSink dependencies
@@ -383,27 +383,27 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## log4j configuration
 
-The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of the cosmos-injector running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
+The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
 
 ```Python
 log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
 log4j.appender.cosmosinjector1028.MaxFileSize=100MB
 log4j.appender.cosmosinjector1028.MaxBackupIndex=10
-log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cosmos-injector.1028.log
+log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cygnus.1028.log
 log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 
 log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
 log4j.appender.cosmosinjector1029.MaxFileSize=100MB
 log4j.appender.cosmosinjector1029.MaxBackupIndex=10
-log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cosmos-injector.1029.log
+log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cygnus.1029.log
 log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 ```
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
 
-    -Dflume.root.logger=<loggin_level>,cosmos-injector.<TCP_port>.log
+    -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
 
 ## Running
 
@@ -432,8 +432,8 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
       <attributeList>
         <attribute>temperature</attribute>
       </attributeList>
-      <!-- This is the part where the cosmos-injector is specified -->
-      <reference>http://host_running_the_cosmos-injector:5050/notify</reference>
+      <!-- This is the part where Cygnus endpoint is specified -->
+      <reference>http://host_running_cygnus:5050/notify</reference>
       <duration>P1M</duration>
       <notifyConditions>
         <notifyCondition>
