@@ -165,9 +165,9 @@ Each organization/tenant is associated to a different database.
 
 ## XML notification example
 
-Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type is XML, and the notification parsing is done in a different way:
+Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
-    event={body={the_json_part...},headers={{"content-type","application/xml"}}}
+    event={body={the_xml_part...},headers={{"content-type","application/xml"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
 
 The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
@@ -220,7 +220,7 @@ or not:
     $ APACHE_MAVEN_HOME/bin/mvn package
     $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
-where <branch> is "develop" if you are trying to install the latest features or "release/x.y" if you are trying to install a stable release.
+where `<branch>` is `develop` if you are trying to install the latest features or `release/x.y` if you are trying to install a stable release.
 
 If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/`. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
 
