@@ -35,10 +35,10 @@ cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.O
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
-# username allowed to write in HDFS (/user/myusername)
-cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
-# dataset where to persist the data (/user/myusername/mydataset)
-cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
+# default username allowed to write in HDFS
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+# default password for the default username
+cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
