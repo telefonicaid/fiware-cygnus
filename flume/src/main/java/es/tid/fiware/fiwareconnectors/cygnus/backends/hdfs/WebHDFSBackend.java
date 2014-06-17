@@ -47,24 +47,23 @@ public class WebHDFSBackend extends HDFSBackend {
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
-     * @param cosmosPassword 
-     * @param cosmosDataset
+     * @param cosmosPassword
+     * @param cosmosDefaultUsername
      */
-    public WebHDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
-            String cosmosDataset, String hivePort) {
-        super(cosmosHost, cosmosPort, cosmosUsername, cosmosPassword, cosmosDataset, hivePort);
+    public WebHDFSBackend(String cosmosHost, String cosmosPort, String cosmosPassword, String cosmosDataset,
+            String hivePort) {
+        super(cosmosHost, cosmosPort, cosmosPassword, cosmosDataset, hivePort);
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
-        this.cosmosUsername = cosmosUsername;
-        this.cosmosDataset = cosmosDataset;
+        this.cosmosDefaultUsername = cosmosDataset;
     } // WebHDFSBackend
     
     @Override
-    public void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception {
+    public void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception {
         // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + dirPath + "?op=mkdirs&user.name=" + cosmosUsername;
+        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + dirPath
+                + "?op=mkdirs&user.name=" + username;
         
         // do the put
         HttpPut request = new HttpPut(url);
@@ -81,10 +80,11 @@ public class WebHDFSBackend extends HDFSBackend {
     } // createDir
     
     @Override
-    public void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
+    public void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
+            throws Exception {
         // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + filePath + "?op=create&user.name=" + cosmosUsername;
+        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                + "?op=create&user.name=" + username;
         
         // do the put (first step)
         HttpPut request = new HttpPut(url);
@@ -120,10 +120,10 @@ public class WebHDFSBackend extends HDFSBackend {
     } // createFile
     
     @Override
-    public void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception {
+    public void append(DefaultHttpClient httpClient, String username, String filePath, String data) throws Exception {
         // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + filePath + "?op=append&user.name=" + cosmosUsername;
+        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                + "?op=append&user.name=" + username;
         
         // do the post (first step)
         HttpPost request = new HttpPost(url);
@@ -159,10 +159,10 @@ public class WebHDFSBackend extends HDFSBackend {
     } // append
     
     @Override
-    public boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception {
+    public boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception {
         // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + cosmosUsername + "/"
-                + cosmosDataset + "/" + filePath + "?op=getfilestatus&user.name=" + cosmosUsername;
+        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                + "?op=getfilestatus&user.name=" + username;
         
         // do the get
         HttpGet request = new HttpGet(url);

@@ -34,9 +34,8 @@ public abstract class HDFSBackend {
     
     protected String cosmosHost;
     protected String cosmosPort;
-    protected String cosmosUsername;
-    protected String cosmosPassword;
-    protected String cosmosDataset;
+    protected String cosmosDefaultUsername;
+    protected String cosmosDefaultPassword;
     protected String hivePort;
     private Logger logger;
     
@@ -45,17 +44,16 @@ public abstract class HDFSBackend {
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
-     * @param cosmosPassword
-     * @param cosmosDataset
+     * @param cosmosDefaultUsername
+     * @param cosmosDefaultPassword
      * @param hivePort
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
-            String cosmosDataset, String hivePort) {
+    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword, 
+            String hivePort) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
-        this.cosmosUsername = cosmosUsername;
-        this.cosmosPassword = cosmosPassword;
-        this.cosmosDataset = cosmosDataset;
+        this.cosmosDefaultPassword = cosmosDefaultPassword;
+        this.cosmosDefaultUsername = cosmosDefaultUsername;
         this.hivePort = hivePort;
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
@@ -65,10 +63,11 @@ public abstract class HDFSBackend {
      * @throws Exception
      */
     public void provisionHiveTable() throws Exception {
+/*        
         // FIXME: https://github.com/telefonicaid/fiware-connectors/issues/75
         
         logger.info("Creating Hive external table " + cosmosUsername + "_"
-                + cosmosDataset.replaceAll("/", "_"));
+                + cosmosDefaultUsername.replaceAll("/", "_"));
         HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosUsername, cosmosPassword);
 
         String fields = "("
@@ -83,14 +82,15 @@ public abstract class HDFSBackend {
                 + ")";
 
         String query = "create external table " + cosmosUsername + "_"
-                + cosmosDataset.replaceAll("/", "_") + " " + fields + "  row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
+                + cosmosDefaultUsername.replaceAll("/", "_") + " " + fields + "  row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDefaultUsername
                 + "'";
 
         if (!hiveClient.doCreateTable(query)) {
             logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
+*/
     } // provisionHiveTable
     
     /**
@@ -104,37 +104,43 @@ public abstract class HDFSBackend {
     } // provisionHiveTable
     
     /**
-     * Creates a directory in HDFS.
+     * Creates a directory in HDFS such as hdfs:///user/<username>/<organization>/<dirPath>/. If username is null, the
+     * default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server.
-     * @param dirPath Directory to be created.
+     * @param httpClient HTTP client for accessing the backend server
+     * @param username Cosmos username
+     * @param dirPath Directory to be created
      */
-    public abstract void createDir(DefaultHttpClient httpClient, String dirPath) throws Exception;
+    public abstract void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception;
     
     /**
-     * Creates a file in HDFS with initial content.
+     * Creates a file in HDFS with initial content such as hdfs:///user/<username>/<organization>/<filePath>. If
+     * username is null, the default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server.
-     * @param filePath File to be created.
-     * @param data Data to be written in the created file.
+     * @param httpClient HTTP client for accessing the backend server
+     * @param username Cosmos username
+     * @param filePath File to be created
+     * @param data Data to be written in the created file
      */
-    public abstract void createFile(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
-    
+    public abstract void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
+            throws Exception;
     /**
      * Appends data to an existent file in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server.
-     * @param filePath File where to be append the data.
-     * @param data Data to be appended in the file.
+     * @param httpClient HTTP client for accessing the backend server
+     * @param username Cosmos username
+     * @param filePath File to be created
+     * @param data Data to be appended in the file
      */
-    public abstract void append(DefaultHttpClient httpClient, String filePath, String data) throws Exception;
-    
+    public abstract void append(DefaultHttpClient httpClient, String username, String filePath, String data)
+            throws Exception;
     /**
      * Checks if the file exists in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server.
-     * @param filePath File that must be checked.
+     * @param httpClient HTTP client for accessing the backend server
+     * @param username Cosmos username
+     * @param filePath File that must be checked
      */
-    public abstract boolean exists(DefaultHttpClient httpClient, String filePath) throws Exception;
+    public abstract boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception;
     
 } // HDFSBackend
