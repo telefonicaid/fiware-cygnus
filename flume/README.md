@@ -1,19 +1,21 @@
 # Cygnus connector
 
-This connector is a (conceptual) derivative work of ngsi2cosmos (https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS, CKAN or MySQL.
+This connector is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS, CKAN or MySQL.
 
 ## Development
 
-All the details about Flume can be found at http://flume.apache.org/ but, as a reminder, some concepts will be explained here:
+All the details about Flume can be found at [flume.apache.org](http://flume.apache.org/), but, as a reminder, some concepts will be explained here:
+
 * A Flume source is an agent gathering event data from the real source (Twitter stream, a notification system, etc.), either by polling the source or listening for incoming pushes of data. Gathered data is sent to a Flume channel.
 * A Flume channel is a passive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
 * A Flume sink connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
 
 There exists a wide collection of already developed sources, channels and sinks. The Flume-based connector, also called Cygnus, development extends that collection by adding:
-* OrionRestHandler. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected request format (https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
-* OrionHDFSSink. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing multiple lines, each line storing the value an entity's attribute has had in a certain timestamp. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
-* OrionCKANSink. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
-* OrionMySQLSink. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Each entity's attribute update is persisted as a new row.
+
+* **OrionRestHandler**. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected [request format](https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
+* **OrionHDFSSink**. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing Json-like lines about the values such entity's attributes have had along time. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
+* **OrionCKANSink**. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
+* **OrionMySQLSink**. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Tables contain rows about the values such entity's attributes have had along time.
 
 All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
 
@@ -76,7 +78,7 @@ Let's have a look on the Flume event headers:
 * Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the "default_organization" configuration property.
 * The notification reception time is included in the list of headers (as `recvTimeTs`) for timestamping purposes in the different sinks. 
 
-The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the OrionHDFSSink extracts the events.
+The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
 
 ### OrionHDFSSink persistence
@@ -89,28 +91,28 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
     
 Within files, Json documents are written following one of these two schemas:
 
-* Fixed 7-field lines: <code>recvTimeTs</code>, <code>recvTime</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>.
-*  A field per each entity's attribute, plus an additional field about the reception time of the data (<code>recvTime</code>). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
+* Fixed 8-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted).
+*  A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
-In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
+In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named `room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5"}
+    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
-On the contrary, being the persistence mode 'column', the file named <code>room1-Room.txt</code> (it is created if not existing) will contain a new line such as:
+On the contrary, being the persistence mode 'column', the file named `room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5"}
+    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{name:ID, type:string, value:ground}]}
 
 Each organization/tenant is associated to a different user in the HDFS filesystem.
 
 ### OrionCKANSink persistence
 
-This sink persists the data in a datastore in CKAN (see http://docs.ckan.org/en/latest/maintaining/datastore.html). Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the 'default_dataset' property in the CKAN sink configuration.
+This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the `default_dataset` property in the CKAN sink configuration.
 
 Each datastore, we can find two options:
 
-* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted)
+* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
 * A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
@@ -151,28 +153,28 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 
 Within tables, we can find two options:
 
-* Fixed 7-field rows, as usual: <code>recvTimeTs</code>, <code>recvTime</code>, <code>entityId</code>, <code>entityType</code>, <code>attrName</code>, <code>attrType</code> and <code>attrValue</code>. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion.
-* A column per each entity's attribute, plus an addition column about the reception time of the data (<code>recv_time</code>). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+* Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted),
+* A column per each entity's attribute, plus an addition column about the reception time of the data (`recv_time`). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or </code>column</code>.
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named <code>room1-Room</code> (it is created if not existing) will contain a new row such as:
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named `room1-Room` (it is created if not existing) will contain a new row such as:
 
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      |
+    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                 |
+    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------|
+    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{name:ID, type:string, value:ground}] |
 
-On the contrary, being the persistence mode 'column', the table named <code>room1-Room</code> (it must be created in advance) will contain a new row such as:
+On the contrary, being the persistence mode 'column', the table named `room1-Room` (it must be created in advance) will contain a new row such as:
 
-    | recvTime            | temperature |
-    |---------------------|-------------|
-    | 2014-02-27T14:46:21 | 26.5        |
+    | recvTime            | temperature | temperature_md                         | 
+    |---------------------|-------------|----------------------------------------|
+    | 2014-02-27T14:46:21 | 26.5        | [{name:ID, type:string, value:ground}] |
 
 Each organization/tenant is associated to a different database.
 
 ## XML notification example
 
-Cygnus also works with XML-based notifications sent to the connector (it can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
+Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
     event={body={the_xml_part...},headers={{"content-type","application/xml"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
 
@@ -186,13 +188,13 @@ In order to install Java SDK (not JRE), just type (CentOS machines):
 
     $ yum install java-1.6.0-openjdk-devel
 
-Remember to export the JAVA_HOME environment variable. In the case of using yum install as shown above, it would be:
+Remember to export the JAVA_HOME environment variable. In the case of using `yum install` as shown above, it would be:
 
     $ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
 
-In order to do it permanently, edit /root/.bash_profile (root user) or /etc/profile (other users).
+In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc/profile` (other users).
 
-Maven is installed by downloading it from http://maven.apache.org/download.cgi. Install it in a folder of your choice (represented by APACHE_MAVEN_HOME):
+Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
 
     $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
     $ tar xzvf apache-maven-3.2.1-bin.tar.gz
@@ -200,7 +202,7 @@ Maven is installed by downloading it from http://maven.apache.org/download.cgi. 
 
 ## Installing Cygnus and its dependencies
 
-Apache Flume can be easily installed by downloading its latests version from http://flume.apache.org/download.html. Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
+Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
@@ -255,10 +257,12 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 * hive-shims-0.12.0.jar
 
 These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
+
 * httpclient-4.2.1.jar
 * httpcore-4.2.2.jar
 
 In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
+
 * libthrift-0.9.1.jar
 
 ### OrionMysQLSink dependencies
@@ -269,7 +273,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 
 ## Cygnus configuration
 
-The typical configuration when using the HTTP source, the OrionRestHandler, the MemoryChannel and the sinks is shown below (the file cygnus.conf can be instantiated from a template given in the clone Cygnus repository, conf/cygnus.conf.template):
+The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
 # APACHE_FLUME_HOME/conf/cygnus.conf
@@ -390,7 +394,7 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## log4j configuration
 
-The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default APACHE_FLUME_HOME/conf/log4j.properties file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the log4j.properties file:
+The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
 ```Python
 log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
@@ -408,7 +412,7 @@ log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
 log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 ```
 
-Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (flume.root.logger=INFO,LOGFILE):
+Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (`flume.root.logger=INFO,LOGFILE`):
 
     -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
 
@@ -422,7 +426,7 @@ In background:
 
     $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
 
-Remember you can change the logging level and the logging appender by changing the -Dflume.root.logger parameter.
+Remember you can change the logging level and the logging appender by changing the `-Dflume.root.logger` parameter.
 
 ## Orion subscription
 
@@ -454,7 +458,7 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
     </subscribeContextRequest>
     EOF
 
-Its equivalent in Json format can be seen at https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE
+Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
 
 ## Contact
 
