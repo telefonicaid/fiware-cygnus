@@ -92,7 +92,7 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 Within files, Json documents are written following one of these two schemas:
 
 * Fixed 8-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted).
-*  A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
+*  Two fields per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
@@ -102,7 +102,7 @@ Thus, by receiving a notification like the one above, and being the persistence 
 
 On the contrary, being the persistence mode 'column', the file named `room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{name:ID, type:string, value:ground}]}
+    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
 Each organization/tenant is associated to a different user in the HDFS filesystem.
 
@@ -113,23 +113,23 @@ This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/
 Each datastore, we can find two options:
 
 * Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
-* A field per each entity's attribute, plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
+* Two columns per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
 
-    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                  |
-    |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------|
-    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      | [{name:ID, type:string, value:ground}]  |
+    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
+    |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
+    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
 
 where `i` depends on the number of rows previously inserted.
 
 On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with "_md" is added for the metadata.
 
-    | _id | recvTime           | temperature | temperature_md                         |
-    |--------------------------|-------------|----------------------------------------|
-    | i   |2014-02-27T14:46:21 | 26.5        | [{name:ID, type:string, value:ground}] |
+    | _id | recvTime           | temperature | temperature_md                                     |
+    |--------------------------|-------------|----------------------------------------------------|
+    | i   |2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -154,21 +154,21 @@ Observe <code>naming_prefix</code> is a configuration parameter of the sink, whi
 Within tables, we can find two options:
 
 * Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted),
-* A column per each entity's attribute, plus an addition column about the reception time of the data (`recv_time`). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+* Two columns per each entity's attribute (one for the value and other for the metadata), plus an addition column about the reception time of the data (`recv_time`). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
 Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named `room1-Room` (it is created if not existing) will contain a new row such as:
 
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                 |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{name:ID, type:string, value:ground}] |
+    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
+    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
+    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 On the contrary, being the persistence mode 'column', the table named `room1-Room` (it must be created in advance) will contain a new row such as:
 
-    | recvTime            | temperature | temperature_md                         | 
-    |---------------------|-------------|----------------------------------------|
-    | 2014-02-27T14:46:21 | 26.5        | [{name:ID, type:string, value:ground}] |
+    | recvTime            | temperature | temperature_md                                     | 
+    |---------------------|-------------|----------------------------------------------------|
+    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 Each organization/tenant is associated to a different database.
 
@@ -182,7 +182,7 @@ The key point is the behaviour remains the same than in the Json example: the sa
 
 ## Prerequisites
 
-Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install and run the injector.
+Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install and run Cygnus.
 
 In order to install Java SDK (not JRE), just type (CentOS machines):
 
@@ -295,7 +295,7 @@ cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-cygnusagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
 # regular expression for the orion version the notifications will have in their headers
 cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
@@ -308,7 +308,7 @@ cygnusagent.sources.http-source.handler.default_organization = org42
 # channel name from where to read notification events
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
@@ -331,7 +331,7 @@ cygnusagent.sinks.hdfs-sink.hive_port = 10000
 # channel name from where to read notification events
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
-cygnusagent.sinks.ckan-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionCKANSink
+cygnusagent.sinks.ckan-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionCKANSink
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -394,22 +394,22 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## log4j configuration
 
-The injector uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
+Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
 ```Python
-log4j.appender.cosmosinjector1028=org.apache.log4j.RollingFileAppender
-log4j.appender.cosmosinjector1028.MaxFileSize=100MB
-log4j.appender.cosmosinjector1028.MaxBackupIndex=10
-log4j.appender.cosmosinjector1028.File=${flume.log.dir}/cygnus.1028.log
-log4j.appender.cosmosinjector1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cosmosinjector1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+log4j.appender.cygnus1028.MaxFileSize=100MB
+log4j.appender.cygnus1028.MaxBackupIndex=10
+log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
+log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 
-log4j.appender.cosmosinjector1029=org.apache.log4j.RollingFileAppender
-log4j.appender.cosmosinjector1029.MaxFileSize=100MB
-log4j.appender.cosmosinjector1029.MaxBackupIndex=10
-log4j.appender.cosmosinjector1029.File=${flume.log.dir}/cygnus.1029.log
-log4j.appender.cosmosinjector1029.layout=org.apache.log4j.PatternLayout
-log4j.appender.cosmosinjector1029.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+log4j.appender.cygnus1028.MaxFileSize=100MB
+log4j.appender.cygnus1028.MaxBackupIndex=10
+log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
+log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
 ```
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (`flume.root.logger=INFO,LOGFILE`):
