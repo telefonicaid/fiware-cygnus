@@ -93,7 +93,7 @@ These files are stored under this HDFS path:
 
     hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
 
-The username, in the current version, is the `cosmos_default_username` parameter that can be found in the configuration (but in future releases it is expected to be given by Orion in the notifications). The `organization` is given by Orion as a header in the notification.
+The username, in the current version, is the `cosmos_default_username` parameter that can be found in the configuration (but in future releases it is expected to be given by Orion in the notifications). The organization is given by Orion as a header in the notification and sent to the sinks through the Flume event headers (`fiware-service`),
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -151,9 +151,9 @@ Similarly to OrionHDFSSink, a table is considered for each entity in order to st
 
     <naming_prefix><entity_id>_<entity_type>
 
-These tables are stored in databases, one per user, enabling a private data space, with this name format:
+These tables are stored in databases, one per organization (sent to the sinks through a Flume event header, `fiware-service`), enabling a private data space, with this name format:
 
-    <naming_prefix><mysql_user>
+    <naming_prefix><organization>
 
 Observe <code>naming_prefix</code> is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
