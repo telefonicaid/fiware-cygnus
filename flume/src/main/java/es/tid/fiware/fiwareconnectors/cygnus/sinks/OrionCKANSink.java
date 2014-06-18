@@ -30,6 +30,8 @@ import java.sql.Timestamp;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.apache.flume.Context;
 
 /**
@@ -46,6 +48,7 @@ public class OrionCKANSink extends OrionSink {
     private String ckanHost;
     private String ckanPort;
     private String defaultDataset;
+    private boolean rowAttrPersistence;
     private HttpClientFactory httpClientFactory;
     private CKANBackend persistenceBackend;
 
@@ -80,6 +83,15 @@ public class OrionCKANSink extends OrionSink {
     protected String getDefaultDataset() {
         return defaultDataset;
     } // getDefaultDataset
+
+    /**
+     * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
+     * purposes.
+     * @return True if the attribute persistence is row-based, false otherwise
+     */
+    protected boolean getRowAttrPersistence() {
+        return rowAttrPersistence;
+    } // getRowAttrPersistence
     
     /**
      * Gets the Http client factory. It is protected due to it is only required for testing purposes.
@@ -120,6 +132,7 @@ public class OrionCKANSink extends OrionSink {
         ckanHost = context.getString("ckan_host", "localhost");
         ckanPort = context.getString("ckan_port", "80");
         defaultDataset = context.getString("default_dataset", "cygnus");
+        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
     } // configure
 
     @Override
@@ -145,30 +158,63 @@ public class OrionCKANSink extends OrionSink {
         // initialize organization
         persistenceBackend.initOrg(httpClientFactory.getHttpClient(false), organization);
 
+        // this is used for storing the attribute's names and values when dealing with a per column attributes
+        // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
+        // at the same time
+        HashMap<String, String> attrs = new HashMap<String, String>();
+
+        // this is used for storing the attribute's names (sufixed with "-md") and metadata when dealing with a per
+        // column attributes persistence; in that case the persistence is not done attribute per attribute, but
+        // persisting all of them at the same time
+        HashMap<String, String> mds = new HashMap<String, String>();
+
         // iterate in the contextResponses
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
+            String entity = Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType());
+
             for (int j = 0; j < contextAttributes.size(); j++) {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
-                String entity = Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType());
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
+                String attrMd = contextAttribute.getContextMetadata();
 
-                // persist the data
-                logger.info("Persisting data: <" + recvTimeTs + ", "
+                if (rowAttrPersistence) {
+                    // persist the data
+                    logger.info("Persisting data: <" + recvTimeTs + ", "
+                            + recvTime + ", "
+                            + organization + ", "
+                            + entity + ", "
+                            + attrName + ", "
+                            + attrType + ", "
+                            + attrValue + ", "
+                            + attrMd + ">");
+                    persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
+                            organization, entity, attrName, attrType, attrValue, attrMd);
+                }
+                else {
+                    attrs.put(attrName, attrValue);
+                    mds.put(attrName + "_md", attrMd);
+                } // if else
+            } // for
+
+            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
+            // attribute list of name-values.
+            if (!rowAttrPersistence) {
+                logger.info("Persisting data: <" + recvTime + ", "
                         + organization + ", "
                         + entity + ", "
-                        + attrName + ", "
-                        + attrType + ", "
-                        + attrValue + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, organization, entity,
-                        attrName, attrType, attrValue);
-            } // for
+                        + attrs.toString() + ", "
+                        + mds.toString() + ">");
+                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity, attrs, mds);
+            } // if
+
         } // for
+
     } // persist
     
 } // OrionHDFSSink

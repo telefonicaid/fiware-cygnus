@@ -19,7 +19,11 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
+import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.util.Map;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
 
 /**
  * Interface for those backends implementing the persistence in HDFS.
@@ -31,21 +35,73 @@ public abstract class HDFSBackend {
     protected String cosmosHost;
     protected String cosmosPort;
     protected String cosmosUsername;
+    protected String cosmosPassword;
     protected String cosmosDataset;
+    protected String hivePort;
+    private Logger logger;
     
     /**
      * 
      * @param cosmosHost
      * @param cosmosPort
      * @param cosmosUsername
+     * @param cosmosPassword
      * @param cosmosDataset
+     * @param hivePort
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosDataset) {
+    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosUsername, String cosmosPassword,
+            String cosmosDataset, String hivePort) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
         this.cosmosUsername = cosmosUsername;
+        this.cosmosPassword = cosmosPassword;
         this.cosmosDataset = cosmosDataset;
+        this.hivePort = hivePort;
+        logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
+
+    /**
+     * Provisions a Hive external table (row mode).
+     * @throws Exception
+     */
+    public void provisionHiveTable() throws Exception {
+        // FIXME: https://github.com/telefonicaid/fiware-connectors/issues/75
+        
+        logger.info("Creating Hive external table " + cosmosUsername + "_"
+                + cosmosDataset.replaceAll("/", "_"));
+        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosUsername, cosmosPassword);
+
+        String fields = "("
+                + Constants.RECV_TIME_TS + " bigint, "
+                + Constants.RECV_TIME + " string, "
+                + Constants.ENTITY_ID + " string, "
+                + Constants.ENTITY_TYPE + " string, "
+                + Constants.ATTR_NAME + " string, "
+                + Constants.ATTR_TYPE + " string, "
+                + Constants.ATTR_VALUE + " string, "
+                + Constants.ATTR_MD + " string"
+                + ")";
+
+        String query = "create external table " + cosmosUsername + "_"
+                + cosmosDataset.replaceAll("/", "_") + " " + fields + "  row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDataset
+                + "'";
+
+        if (!hiveClient.doCreateTable(query)) {
+            logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
+    } // provisionHiveTable
+    
+    /**
+     * Provisions a Hive external table (column mode).
+     * @param dummyParameter1
+     * @param dummyParameter2
+     * @throws Exception
+     */
+    public void provisionHiveTable(String dummyParameter1, String dummyParameter2) throws Exception {
+        // TBD: https://github.com/telefonicaid/fiware-connectors/issues/75
+    } // provisionHiveTable
     
     /**
      * Creates a directory in HDFS.

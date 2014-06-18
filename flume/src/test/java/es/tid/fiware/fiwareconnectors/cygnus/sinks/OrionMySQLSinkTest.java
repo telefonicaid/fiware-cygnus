@@ -66,6 +66,7 @@ public class OrionMySQLSinkTest {
     private final String attrName = "temperature";
     private final String attrType = "degrees";
     private final String attrValue = "26.5";
+    private final String attrMd = "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private final String notifyXMLSimple = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -73,14 +74,14 @@ public class OrionMySQLSinkTest {
             +   "<contextResponseList>"
             +     "<contextElementResponse>"
             +       "<contextElement>"
-            +         "<entityId type=\"Room\" isPattern=\"false\">"
-            +           "<id>Room1</id>"
+            +         "<entityId type=\"AType\" isPattern=\"false\">"
+            +           "<id>Entity</id>"
             +         "</entityId>"
             +         "<contextAttributeList>"
             +           "<contextAttribute>"
-            +             "<name>temperature</name>"
-            +             "<type>centigrade</type>"
-            +             "<value>26.5</value>"
+            +             "<name>attribute</name>"
+            +             "<type>attributeType</type>"
+            +             "<contextValue>foo</contextValue>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -120,7 +121,7 @@ public class OrionMySQLSinkTest {
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(dbName, tableName);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(dbName, tableName, ts,
-                recvTime, entityId, entityType, attrName, attrType, attrValue);
+                recvTime, entityId, entityType, attrName, attrType, attrValue, attrMd);
     } // setUp
     
     /**

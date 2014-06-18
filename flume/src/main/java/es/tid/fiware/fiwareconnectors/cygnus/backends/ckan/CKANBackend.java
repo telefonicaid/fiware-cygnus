@@ -20,7 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
 import org.apache.http.impl.client.DefaultHttpClient;
-import java.util.Date;
+import java.util.Map;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -39,19 +39,35 @@ public interface CKANBackend {
     void initOrg(DefaultHttpClient httpClient, String organization) throws Exception;
 
     /**
-     * Persist data in the CKAN datastore associated with the entity in a given organization
+     * Persist data in the CKAN datastore associated with the entity in a given organization (row mode)
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTimeTs reception time in milliseconds.
+     * @param recvTime reception time (human readable)
      * @param organization organization.
      * @param entity entity string (including ID and type).
      * @param attrName attribute name.
      * @param attrType attribute type.
      * @param attrValue attribute value.
+     * @param attrMd attribute metadata string serialization
      * @throws Exception
      */
-    void persist(DefaultHttpClient httpClient, long recvTimeTs, String organization, String entity, String attrName,
-                 String attrType, String attrValue) throws Exception;
+    void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization, String entity,
+                 String attrName, String attrType, String attrValue, String attrMd) throws Exception;
+
+    /**
+     * Persist data in the CKAN datastore associated with the entity in a given organization (column mode)
+     *
+     * @param httpClient HTTP client for accessing the backend server.
+     * @param recvTime reception time (human readable)
+     * @param organization organization.
+     * @param entity entity string (including ID and type).
+     * @param attrList hashmap containing the attributes to persist
+     * @param attrMdList hashmap containing the metadata string serialization to persist
+     * @throws Exception
+     */
+    void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
+                 Map<String, String> attrList, Map<String, String> attrMdList) throws Exception;
 
     
 } // CKANBackend

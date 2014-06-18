@@ -62,6 +62,7 @@ public class OrionHDFSSinkTest {
     private final String cosmosPassword = "pass1234";
     private final String cosmosDataset = "data";
     private final String hdfsAPI = "httpfs";
+    private final String hivePort = "10000";
     private final long ts = 123456789;
     private final String recvTime = "20140513T16:48:13";
     private final String entityId = "room1";
@@ -76,14 +77,14 @@ public class OrionHDFSSinkTest {
             +   "<contextResponseList>"
             +     "<contextElementResponse>"
             +       "<contextElement>"
-            +         "<entityId type=\"Room\" isPattern=\"false\">"
-            +           "<id>Room1</id>"
+            +         "<entityId type=\"AType\" isPattern=\"false\">"
+            +           "<id>Entity</id>"
             +         "</entityId>"
             +         "<contextAttributeList>"
             +           "<contextAttribute>"
-            +             "<name>temperature</name>"
-            +             "<type>centigrade</type>"
-            +             "<value>26.5</value>"
+            +             "<name>attribute</name>"
+            +             "<type>attributeType</type>"
+            +             "<contextValue>foo</contextValue>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -115,7 +116,8 @@ public class OrionHDFSSinkTest {
         context.put("cosmos_username", cosmosUsername);
         context.put("cosmos_password", cosmosPassword);
         context.put("cosmos_dataset", cosmosDataset);
-        context.put("hdfs_sapi", hdfsAPI);
+        context.put("hdfs_api", hdfsAPI);
+        context.put("hive_port", hivePort);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
@@ -141,6 +143,7 @@ public class OrionHDFSSinkTest {
         assertEquals(cosmosPassword, sink.getCosmosPassword());
         assertEquals(cosmosDataset, sink.getCosmosDataset());
         assertEquals(hdfsAPI, sink.getHDFSAPI());
+        assertEquals(hivePort, sink.getHivePort());
     } // testConfigure
 
     /**
