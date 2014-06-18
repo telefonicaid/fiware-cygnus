@@ -201,9 +201,9 @@ public class OrionHDFSSink extends OrionSink {
             } // if else if
 
             if (persistenceBackend != null) {
-                // create the HDFS dataset
-//                logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
-//                persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
+                // FIXME: create the HDFS dataset
+                // logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
+                // persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
                 
                 // provision the Hive external table for the above dataset if running in the "row" mode; otherwise, the
                 // table creation must be delayed until the sink knows the structure of the table
