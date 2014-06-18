@@ -85,6 +85,11 @@ function copy_cygnus_to_flume(){
 	cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
 }
 
+function copy_cygnus_conf() {
+    _logStage "######## Copying cygnus template as conf file... ########"
+    cp $BASE_DIR/conf/cygnus.conf.template ${RPM_SOURCE_DIR}/config/cygnus.conf
+}
+
 usage() {
     SCRIPT=$(basename $0)
 
@@ -179,6 +184,9 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 
 	copy_cygnus_to_flume
 	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+
+    copy_cygnus_conf
+    [[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
