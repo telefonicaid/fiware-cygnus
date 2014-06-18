@@ -91,9 +91,9 @@ Observe `naming_prefix` is a configuration parameter of the sink, which may be e
 
 These files are stored under this HDFS path:
 
-    hdfs:///user/<organization>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
+    hdfs:///user/<username>/<dataset>/<entityDescriptor>/<entityDescriptor>.txt
 
-Organizations are mapped to HDFS usernames, allowing specific private data spaces. The organization, in the current version, is the one given by the `cosmos_default_username` parameter that can be found in the configuration; in the future it is expected Orion notifications provide a real organization identifier. The service path is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
+Usernames allow for specific private HDFS data spaces, and are mapped to clients/tenants. A single user may have multiple datasets. In the current version, the username is always the one given by the `cosmos_default_username` parameter that can be found in the configuration; in this sense the HDFS sink may be considered **mono-tenant**. The dataset is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`); in this sense, the HDFS sink may be considered **multi-tenant** (multi-dataset, properly).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -110,8 +110,6 @@ On the contrary, being the persistence mode 'column', the file named `hdfs:///us
 
     {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
-Each organization/tenant is associated to a different user in the HDFS filesystem.
-
 ### OrionCKANSink persistence
 
 This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the `default_dataset` property in the CKAN sink configuration.
@@ -121,9 +119,9 @@ Each datastore, we can find two options:
 * Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
 * Two columns per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
@@ -151,11 +149,13 @@ Similarly to OrionHDFSSink, a table is considered for each entity in order to st
 
     <naming_prefix><entity_id>_<entity_type>
 
-These tables are stored in databases, one per service path (sent by Orion as a `Fiware-Service` header and sent to the sinks through an internal Flume event header, `fiware-service`), enabling a private data space, with this name format:
+Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
-    <naming_prefix><servicePath>
+These tables are stored in databases, one per service, enabling a private data space, with this name format:
 
-Observe, contrary to OrionHDFSSink, that any organization identifier is used at all; in the current version this can be avoided, but future releases of Cygnus will have to deal with it. Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    <naming_prefix><dataset>
+
+Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of dataset. This dataset, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`); this allows for **multi-tenancy** (multi-dataset, properly). 
 
 Within tables, we can find two options:
 
