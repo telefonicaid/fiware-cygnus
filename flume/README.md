@@ -93,7 +93,7 @@ These files are stored under this HDFS path:
 
     hdfs:///user/<organization>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
 
-Organizations are mapped to HDFS usernames, allowing specific private data spaces. The organization, in the current version, is the one given by the `cosmos_default_username` parameter that can be found in the configuration; in the future it is expected Orion notifications provide a real organization identifier. The service path is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`),
+Organizations are mapped to HDFS usernames, allowing specific private data spaces. The organization, in the current version, is the one given by the `cosmos_default_username` parameter that can be found in the configuration; in the future it is expected Orion notifications provide a real organization identifier. The service path is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
     
 Within files, Json documents are written following one of these two schemas:
 
