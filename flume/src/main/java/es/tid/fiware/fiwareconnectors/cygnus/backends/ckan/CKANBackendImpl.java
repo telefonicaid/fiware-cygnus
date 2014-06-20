@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -51,6 +52,7 @@ public class CKANBackendImpl implements CKANBackend {
     private String ckanHost;
     private String ckanPort;
     private String defaultDataset;
+    private String orionUrl;
 
     // this map implements the f(NGSIentity, Org) = CKANresourceId function
     private HashMap<OrgEntityPair, String> resourceIds;
@@ -68,13 +70,15 @@ public class CKANBackendImpl implements CKANBackend {
      * @param ckanHost
      * @param ckanPort
      * @param defaultDataset
+     * @param orionUrl
      */
-    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String defaultDataset) {
+    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String defaultDataset, String orionUrl) {
         logger = Logger.getLogger(CKANBackendImpl.class);
         this.apiKey = apiKey;
         this.ckanHost = ckanHost;
         this.ckanPort = ckanPort;
         this.defaultDataset = defaultDataset;
+        this.orionUrl = orionUrl;
         resourceIds = new HashMap<OrgEntityPair, String>();
         packagesIds = new HashMap<String, String>();
 
@@ -82,6 +86,8 @@ public class CKANBackendImpl implements CKANBackend {
 
     @Override
     public void initOrg(DefaultHttpClient httpClient, String organization) throws Exception {
+
+        String effectiveDefaultDataset = organization + "_" + defaultDataset;
 
         if (packagesIds.containsKey(organization)) {
             // Organization already initialized, nothing to do
@@ -107,7 +113,7 @@ public class CKANBackendImpl implements CKANBackend {
             while (iterator.hasNext()) {
                 JSONObject pkg = (JSONObject) iterator.next();
                 String pkgName = (String) pkg.get("name");
-                if (pkgName.equals(defaultDataset)) {
+                if (pkgName.equals(effectiveDefaultDataset)) {
                     String packageId = pkg.get("id").toString();
                     logger.info("default package found - package ID: " + packageId);
                     populateResourcesMap((JSONArray) pkg.get("resources"), organization);
@@ -119,7 +125,7 @@ public class CKANBackendImpl implements CKANBackend {
 
             // if we have reach this point, then organization doesn't include the default package and we need to
             // create it
-            String packageId = createDefaultPackage(httpClient, orgId);
+            String packageId = createPackage(httpClient, effectiveDefaultDataset, orgId);
             packagesIds.put(organization, packageId);
             logger.info("added to packages map " + organization + " -> " + packageId);
 
@@ -336,7 +342,7 @@ public class CKANBackendImpl implements CKANBackend {
         if (res.getStatusCode() == 200) {
             String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
             logger.info("successful organization creation - organization ID: " + orgId);
-            String packageId = createDefaultPackage(httpClient, orgId);
+            String packageId = createPackage(httpClient, organization + "_" + defaultDataset, orgId);
             packagesIds.put(organization, packageId);
             logger.info("added to packages map " + organization + " -> " + packageId);
         } else {
@@ -345,17 +351,18 @@ public class CKANBackendImpl implements CKANBackend {
     } // createOrganization
 
     /**
-     * Creates the default dataset (package) for a given organization in CKAN.
+     * Creates a dataset (package) within a given organization in CKAN.
      *
      * @param httpClient HTTP client for accessing the backend server.
+     * @param pkg package to create
      * @param orgId the owner organization for the package
      * @return packageId if the package was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createDefaultPackage(DefaultHttpClient httpClient, String orgId) throws Exception {
+    private String createPackage(DefaultHttpClient httpClient, String pkg, String orgId) throws Exception {
 
         // do CKAN request
-        String jsonString = "{ \"name\": \"" + defaultDataset + "\", "
+        String jsonString = "{ \"name\": \"" + pkg + "\", "
                 + "\"owner_org\": \"" + orgId + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create", jsonString);
@@ -383,9 +390,14 @@ public class CKANBackendImpl implements CKANBackend {
     private String createResource(DefaultHttpClient httpClient, String resourceName, String organization)
         throws Exception {
 
+        // compose resource URL with the one corresponding to the NGSI10 convenience operation to get
+        // entity information in Orion
+        StringTokenizer st = new StringTokenizer(resourceName, "-");
+        String url = orionUrl + "/ngsi10/contextEntitites/" + st.nextElement();
+
         // do CKAN request
         String jsonString = "{ \"name\": \"" + resourceName + "\", "
-                + "\"url\": \"" + resourceName + "\", "
+                + "\"url\": \"" + url + "\", "
                 + "\"package_id\": \"" + packagesIds.get(organization) + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create", jsonString);
