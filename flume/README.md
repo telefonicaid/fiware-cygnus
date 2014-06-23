@@ -91,9 +91,9 @@ Observe `naming_prefix` is a configuration parameter of the sink, which may be e
 
 These files are stored under this HDFS path:
 
-    hdfs:///user/<username>/<dataset>/<entityDescriptor>/<entityDescriptor>.txt
+    hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
 
-Usernames allow for specific private HDFS data spaces, and are mapped to clients/tenants. A single user may have multiple datasets. In the current version, the username is always the one given by the `cosmos_default_username` parameter that can be found in the configuration; in this sense the HDFS sink may be considered **mono-tenant**. The dataset is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`); in this sense, the HDFS sink may be considered **multi-tenant** (multi-dataset, properly).
+Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The "organization" directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -145,17 +145,17 @@ Each organization/tenant is associated to a CKAN organization.
 
 ### OrionMySQLSink persistence
 
-Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables:
+Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
-    <naming_prefix><entity_id>_<entity_type>
+    <entity_descriptor>=<naming_prefix><entity_id>_<entity_type>
 
 Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
-These tables are stored in databases, one per service, enabling a private data space, with this name format:
+These tables are stored in databases, one per service, enabling a private data space such as:
 
-    <naming_prefix><dataset>
+    jdbc:mysql:///<naming_prefix><organization>
 
-Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of dataset. This dataset, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`); this allows for **multi-tenancy** (multi-dataset, properly). 
+Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of the organization. This organization, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`). 
 
 Within tables, we can find two options:
 
