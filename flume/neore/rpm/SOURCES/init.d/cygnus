@@ -1,0 +1,105 @@
+#!/bin/bash
+# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# 
+# This file is part of fiware-connectors (FI-WARE project).
+# 
+# cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+# 
+# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# http://www.gnu.org/licenses/.
+# 
+# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+# frb@tid.es
+#
+# cygnus         Start/Stop cygnus
+#
+# chkconfig: 2345 99 60
+# description: cygnus
+
+# Load some fancy functions for init.d
+. /etc/rc.d/init.d/functions
+
+PARAM=$1
+
+COMPONENT_NAME=cygnus
+PREFIX=/usr
+CYGNUS_DIR=${PREFIX}/cygnus
+FLUME_EXECUTABLE=${CYGNUS_DIR}/bin/flume-ng
+CYGNUS_PID_FILE=/var/run/cygnus/cygnus.pid
+
+# Load the environment
+ if [[ -f ${CYGNUS_DIR}/conf/flume.conf ]]; then
+    . ${CYGNUS_DIR}/conf/flume.conf
+else
+   echo "Configuration file ${CYGNUS_DIR}/conf/flume.conf not found"
+   exit 1
+fi
+
+cygnus_start()
+{
+    printf "%-50s" "Starting ${NAME}..."
+    if [[ -x ${FLUME_EXECUTABLE} ]]; then
+        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} &> /dev/null &"
+        su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
+        sleep 2 # wait some time to know if flume is still alive
+        FLUME_PID=$(ps -ef | grep flume | grep -v grep | awk '{ print $2 }')
+        if [[ -z ${FLUME_PID} ]]; then
+            printf "%s\n" "$(failure)"
+            exit 1
+        else
+            echo ${FLUME_PID} > ${CYGNUS_PID_FILE}
+            chown ${CYGNUS_USER}:${CYGNUS_USER} ${CYGNUS_PID_FILE}
+            printf "%s\n" "$(success)"
+        fi
+    else
+        printf "%s\n" "Fail - ${FLUME_EXECUTABLE} not exists or is not executable."
+        exit 1
+    fi
+}
+
+cygnus_stop()
+{
+    printf "%-50s" "Stopping $NAME..."
+    if [[ -f "${CYGNUS_PID_FILE}" ]]; then
+        kill -HUP $(cat ${CYGNUS_PID_FILE})
+        rm -f ${CYGNUS_PID_FILE}
+        printf "%s\n" "$(success)"
+    else
+        printf "%s\n" "$(failure)"
+    fi
+}
+
+cygnus_status()
+{
+    status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE}
+}
+
+
+case ${PARAM} in
+
+    'start')
+        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} && exit 0
+        cygnus_start
+        ;;
+
+    'stop')
+        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} || exit 0
+        cygnus_stop
+        ;;
+
+    'restart')
+        cygnus_stop
+        cygnus_start
+        ;;
+
+    'status')
+        cygnus_status
+        ;;
+
+esac
+
