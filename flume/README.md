@@ -83,11 +83,17 @@ The channel is a simple MemoryChannel behaving as a FIFO queue, and from where t
 
 ### OrionHDFSSink persistence
 
-This sink persists the data in files, one per each entity, following this specification:
+This sink persists the data in files, one per each entity, following this entity descriptor format:
 
-    <naming_prefix><entity_id>-<entity_type>.txt
+    <entityDescriptor>=<naming_prefix><entity_id>-<entity_type>.txt
 
-Observe <code>naming_prefix</code> is a configuration parameter of the sink, which may be empty if no prefix is desired.
+Observe `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+
+These files are stored under this HDFS path:
+
+    hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
+
+Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The "organization" directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -96,15 +102,13 @@ Within files, Json documents are written following one of these two schemas:
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the file named `room1-Room.txt` (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, being the persistence mode 'row', an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
-On the contrary, being the persistence mode 'column', the file named `room1-Room.txt` (it is created if not existing) will contain a new line such as:
+On the contrary, being the persistence mode 'column', the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
-
-Each organization/tenant is associated to a different user in the HDFS filesystem.
 
 ### OrionCKANSink persistence
 
@@ -115,9 +119,9 @@ Each datastore, we can find two options:
 * Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
 * Two columns per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, <code>attr_persistence</code>, whose values can be <code>row</code> or <code>column</code>.
+The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource <code>room1-Room</code> (it is created if not existing) will containt the following row in its datastore:
+Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
@@ -141,15 +145,17 @@ Each organization/tenant is associated to a CKAN organization.
 
 ### OrionMySQLSink persistence
 
-Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables:
+Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
-    <naming_prefix><entity_id>_<entity_type>
+    <entity_descriptor>=<naming_prefix><entity_id>_<entity_type>
 
-These tables are stored in databases, one per user, enabling a private data space, with this name format:
+Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
-    <naming_prefix><mysql_user>
+These tables are stored in databases, one per service, enabling a private data space such as:
 
-Observe <code>naming_prefix</code> is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    jdbc:mysql:///<naming_prefix><organization>
+
+Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of the organization. This organization, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`). 
 
 Within tables, we can find two options:
 
@@ -312,10 +318,10 @@ cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.O
 cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
-# username allowed to write in HDFS (/user/myusername)
-cygnusagent.sinks.hdfs-sink.cosmos_username = myusername
-# dataset where to persist the data (/user/myusername/mydataset)
-cygnusagent.sinks.hdfs-sink.cosmos_dataset = mydataset
+# default username allowed to write in HDFS
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+# default password for the default username
+cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)

@@ -141,8 +141,9 @@ done < <(hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }')
 
 # iterate on the unique final HDFS files in order to merge all the tmp files related with them
 for i in "${dstHDFSFileNames[@]}"; do
-        echo "Merging $dstHDFSFolder/$i.*.tmp into $dstHDFSFolder/$i.txt"
-        sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i.txt
+        echo "Merging $dstHDFSFolder/$i.*.tmp into $dstHDFSFolder/$i/$i.txt"
+	sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder/$i
+        sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i/$i.txt
 done
 
 # delete all the tmp files in the destination HDFS folder

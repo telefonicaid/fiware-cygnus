@@ -165,9 +165,9 @@ public class OrionMySQLSink extends OrionSink {
         // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
         // cosmosUsername
 
-        // create the database for this user if not existing yet... the cost of trying to create it is the same than
-        // checking if it exits and then creating it
-        String dbName = namingPrefix + mysqlUsername;
+        // create the database for this organization if not yet existing... the cost of trying to create it is the same
+        // than checking if it exits and then creating it
+        String dbName = namingPrefix + organization;
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
         // create it in the per-column mode because there will not be any table within the database

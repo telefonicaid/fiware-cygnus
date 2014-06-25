@@ -58,9 +58,8 @@ public class OrionHDFSSinkTest {
     // constants
     private final String cosmosHost = "localhost";
     private final String cosmosPort = "3306";
-    private final String cosmosUsername = "user1";
-    private final String cosmosPassword = "pass1234";
-    private final String cosmosDataset = "data";
+    private final String cosmosDefaultUsername = "user1";
+    private final String cosmosDefaultPassword = "pass1234";
     private final String hdfsAPI = "httpfs";
     private final String hivePort = "10000";
     private final long ts = 123456789;
@@ -113,9 +112,8 @@ public class OrionHDFSSinkTest {
         context = new Context();
         context.put("cosmos_host", cosmosHost);
         context.put("cosmos_port", cosmosPort);
-        context.put("cosmos_username", cosmosUsername);
-        context.put("cosmos_password", cosmosPassword);
-        context.put("cosmos_dataset", cosmosDataset);
+        context.put("cosmos_default_username", cosmosDefaultUsername);
+        context.put("cosmos_default_password", cosmosDefaultPassword);
         context.put("hdfs_api", hdfsAPI);
         context.put("hive_port", hivePort);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
@@ -123,11 +121,10 @@ public class OrionHDFSSinkTest {
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
-        when(mockWebHDFSBackend.exists(null, "cygnus-" + cosmosUsername + "-" + cosmosDataset + "-" + entityId + "-"
-                + entityType + ".txt")).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, attrName, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, attrName, attrName);
+        when(mockWebHDFSBackend.exists(null, null, null)).thenReturn(true);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, null, attrName);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, null, attrName, attrName);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, null, attrName, attrName);
     } // setUp
 
     /**
@@ -139,9 +136,8 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         assertEquals(cosmosHost, sink.getCosmosHost());
         assertEquals(cosmosPort, sink.getCosmosPort());
-        assertEquals(cosmosUsername, sink.getCosmosUsername());
-        assertEquals(cosmosPassword, sink.getCosmosPassword());
-        assertEquals(cosmosDataset, sink.getCosmosDataset());
+        assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
+        assertEquals(cosmosDefaultPassword, sink.getCosmosDefaultPassword());
         assertEquals(hdfsAPI, sink.getHDFSAPI());
         assertEquals(hivePort, sink.getHivePort());
     } // testConfigure
