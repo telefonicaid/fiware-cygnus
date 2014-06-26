@@ -50,17 +50,8 @@ import java.util.Date;
 public class OrionRestHandler implements HTTPSourceHandler {
     
     private Logger logger;
-    private Pattern orionVersionRegexPattern;
     private String notificationsTarget;
     private String defaultOrg;
-    
-    /**
-     * Gets the Orion version regex pattern. It is protected due to it is only required for testing purposes.
-     * @return The Orion version regex pattern
-     */
-    protected Pattern getOrionVersionRegexPattern() {
-        return orionVersionRegexPattern;
-    } // getOrionVersionRegexPattern
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
@@ -73,7 +64,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionRestHandler.class);
-        orionVersionRegexPattern = Pattern.compile("orion/" + context.getString("orion_version", "*"));
         notificationsTarget = context.getString("notification_target", "notify");
         defaultOrg = context.getString("default_organization", "default_org");
         
@@ -111,9 +101,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
             
             if (headerName.equals(Constants.USER_AGENT)) {
-                Matcher matcher = orionVersionRegexPattern.matcher(headerValue);
-                
-                if (!matcher.matches()) {
+                if (!headerValue.startsWith("orion")) {
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
             } else if (headerName.equals(Constants.CONTENT_TYPE)) {
