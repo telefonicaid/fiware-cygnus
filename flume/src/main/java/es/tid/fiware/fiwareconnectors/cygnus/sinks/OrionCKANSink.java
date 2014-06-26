@@ -48,6 +48,7 @@ public class OrionCKANSink extends OrionSink {
     private String ckanHost;
     private String ckanPort;
     private String defaultDataset;
+    private String orionUrl;
     private boolean rowAttrPersistence;
     private HttpClientFactory httpClientFactory;
     private CKANBackend persistenceBackend;
@@ -132,7 +133,9 @@ public class OrionCKANSink extends OrionSink {
         ckanHost = context.getString("ckan_host", "localhost");
         ckanPort = context.getString("ckan_port", "80");
         defaultDataset = context.getString("default_dataset", "cygnus");
+        orionUrl = context.getString("orion_url", "http://localhost:1026");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+
     } // configure
 
     @Override
@@ -142,7 +145,7 @@ public class OrionCKANSink extends OrionSink {
 
         try {
             // create persistenceBackend backend
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset);
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset, orionUrl);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         } // try catch

@@ -112,7 +112,7 @@ On the contrary, being the persistence mode 'column', the file named `hdfs:///us
 
 ### OrionCKANSink persistence
 
-This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same datastore (also referred as package in CKAN terms), which name is specified with the `default_dataset` property in the CKAN sink configuration.
+This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), which name is specified with the `default_dataset` property (prefixed by organization name) in the CKAN sink configuration.
 
 Each datastore, we can find two options:
 
@@ -344,8 +344,11 @@ cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
 # the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
-# characters plus "-" and "_" acording to CKAN limitations
+# characters plus "-" and "_" acording to CKAN limitations. The default_dataset is prefixed by organization name
+# to ensure uniqueness (see http://stackoverflow.com/questions/24203808/is-it-possible-to-create-packages-with-the-same-name-in-different-organizations)
 cygnusagent.sinks.ckan-sink.default_dataset = mydataset
+# Orion URL used to compose the resource URL with the convenience operation URL to query it
+cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 
