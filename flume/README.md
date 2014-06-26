@@ -301,8 +301,6 @@ cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
 cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
-# regular expression for the orion version the notifications will have in their headers
-cygnusagent.sources.http-source.handler.orion_version = 0\.10\.*
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
