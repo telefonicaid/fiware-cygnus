@@ -1,4 +1,4 @@
-# Resources for Cosmos connectors
+# Resources for fiware-connectors
 
 ## SFTP basic client
 
