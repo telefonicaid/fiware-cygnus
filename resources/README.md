@@ -45,6 +45,10 @@ These scritps are aimed to convert persisted context data from one format to ano
 
 Tooling scripts related with CKAN management.
 
+## MySQL scripts
+
+Tooling scripts related with MySQL management.
+
 ## Contact
 
 * Francisco Romero Bueno (frb at tid dot es).
