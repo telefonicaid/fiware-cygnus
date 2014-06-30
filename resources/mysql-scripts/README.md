@@ -22,24 +22,24 @@ Use this command to manually run the script:
 ### Cron scheduling
 More interesting than running the script by hand is to schedule regular executions. This is achieved by using Cron.
 
-First of all, install (simply copy) the `mysql-cleaner.sh` script somewhere only a privileged user has access, e.g. `/etc/cygnus/` (must be created inf not yet existing). Do not forget to give the privileged user execution permissions:
+First of all, install (simply copy) the `mysql-cleaner.sh` script somewhere only a privileged user has access, e.g. `/usr/share/cygnus/` (must be created inf not yet existing). Do not forget to give the privileged user execution permissions:
 
-    $ sudo mkdir /etc/cygnus
-    $ sudo cp mysql-clener.sh /etc/cygnus 
-    $ sudo chmod u+x /etc/cygnus/mysql-cleaner.sh
+    $ sudo mkdir /usr/share/cygnus/
+    $ sudo cp mysql-clener.sh /usr/share/cygnus 
+    $ sudo chmod u+x /usr/share/cygnus/mysql-cleaner.sh
 
 In order to program the scheduling, create a `cygnus_crontab.txt` file. Put the following line within that file, if wanting to execute the script every hour:
 
-    0 */1 * * * /etc/cygnus/mysql-cleaner.sh
+    0 */1 * * * /usr/share/cygnus/mysql-cleaner.sh
 
 Now, invoke the crontab to set your cron job:
 
     $ sudo crontab cygnus_crontab.txt
 
-You can check is has been successfully set by typing:
+You can check it has been successfully set by typing:
 
     $ sudo crontab -l
-    0 */1 * * * /etc/cygnus/mysql-cleaner.sh <MySQL_host> <MySQL_user> <MySQL_password> <data_lifetime_days>      
+    0 */1 * * * /usr/share/cygnus/mysql-cleaner.sh <MySQL_host> <MySQL_user> <MySQL_password> <data_lifetime_days>      
 
 # Contact
 Francisco Romero Bueno (frb at tid dot es)

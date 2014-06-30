@@ -48,7 +48,8 @@ LIFETIME=$4
 
 # show the databases and iterate on them; each one belogs to a different tenant/service
 while read -r database; do
-        # check if the database must be ignored
+        # check if the database must be ignored; as part of the output of "show databases" a
+	# "Database" token is generated
         if [ "$database" == "Database" ]; then
                 continue
         fi
@@ -56,7 +57,8 @@ while read -r database; do
         # use the database, show the tables and iterate on them; each one belongs to a different
 	# NGSI entity
         while read -r table; do
-                # check if the table must be ignored
+                # check if the table must be ignored; as part of the output of "show tables" a
+		# "Tables_in_<database>" token is generated
                 if [[ "$table" == *Tables_in_* ]]; then
                         continue
                 fi
