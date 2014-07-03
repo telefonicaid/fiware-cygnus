@@ -21,7 +21,6 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
-import java.util.Map;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
@@ -48,7 +47,7 @@ public abstract class HDFSBackend {
      * @param cosmosDefaultPassword
      * @param hivePort
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword, 
+    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword,
             String hivePort) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
@@ -60,16 +59,21 @@ public abstract class HDFSBackend {
 
     /**
      * Provisions a Hive external table (row mode).
+     * @param organization
+     * @param entityDescriptor
      * @throws Exception
      */
-    public void provisionHiveTable() throws Exception {
-/*        
-        // FIXME: https://github.com/telefonicaid/fiware-connectors/issues/75
+    public void provisionHiveTable(String organization, String entityDescriptor) throws Exception {
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
+                + "_row";
+        logger.info("Creating Hive external table " + tableName);
         
-        logger.info("Creating Hive external table " + cosmosUsername + "_"
-                + cosmosDefaultUsername.replaceAll("/", "_"));
-        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosUsername, cosmosPassword);
+        // get a Hive client
+        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
 
+        // create the standard 8-fields
         String fields = "("
                 + Constants.RECV_TIME_TS + " bigint, "
                 + Constants.RECV_TIME + " string, "
@@ -78,29 +82,51 @@ public abstract class HDFSBackend {
                 + Constants.ATTR_NAME + " string, "
                 + Constants.ATTR_TYPE + " string, "
                 + Constants.ATTR_VALUE + " string, "
-                + Constants.ATTR_MD + " string"
+                + Constants.ATTR_MD + " array<string>"
                 + ")";
 
-        String query = "create external table " + cosmosUsername + "_"
-                + cosmosDefaultUsername.replaceAll("/", "_") + " " + fields + "  row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosUsername + "/" + cosmosDefaultUsername
-                + "'";
+        // create the query
+        
+        String query = "create external table " + tableName + " " + fields + " row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
+                + organization + "/" + entityDescriptor + "'";
+        logger.debug("Executing: '" + query + "'");
 
+        // execute the query
         if (!hiveClient.doCreateTable(query)) {
             logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
-*/
     } // provisionHiveTable
     
     /**
      * Provisions a Hive external table (column mode).
-     * @param dummyParameter1
-     * @param dummyParameter2
+     * @param organization
+     * @param entitydescriptor
+     * @param fields
      * @throws Exception
      */
-    public void provisionHiveTable(String dummyParameter1, String dummyParameter2) throws Exception {
-        // TBD: https://github.com/telefonicaid/fiware-connectors/issues/75
+    public void provisionHiveTable(String organization, String entityDescriptor, String fields) throws Exception {
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
+                + "_column";
+        logger.info("Creating Hive external table " + tableName);
+        
+        // get a Hive client
+        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        
+        // create the query
+        String query = "create external table " + tableName + " (" + fields + ") row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
+                + organization + "/" + entityDescriptor + "'";
+        logger.debug("Executing: '" + query + "'");
+
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
     } // provisionHiveTable
     
     /**

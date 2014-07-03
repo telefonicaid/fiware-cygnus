@@ -42,20 +42,37 @@ import org.apache.log4j.Logger;
  * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
  *  - Row-like persistence:
- *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
+ *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
  *    -- File lines format: {"recvTimeTs":"XXX", "recvTime":"XXX", "entityId":"XXX", "entityType":"XXX",
  *                          "attrName":"XXX", "attrType":"XXX", "attrValue":"XXX"|{...}|[...],
  *                          "attrMd":[{"name":"XXX", "type":"XXX", "value":"XXX"}...]}
  * - Column-like persistence:
- *    -- File names format: <prefix_name><entity_id>-<entity_type>.txt
- *    -- File lines format: {"recvTime":"XXX", "<attr_name_1>":<attr_value_1>, ..., <attr_name_N>":<attr_value_N>,
- *                          "<attr_name_1>-md":<attr_md_1>, ..., "<attr_name_N>-md":<attr_md_N>}
+ *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
+ *    -- File lines format: {"recvTime":"XXX", "<attr_name_1>":<attr_value_1>, "<attr_name_1>_md":<attr_md_1>,...,
+ *                          <attr_name_N>":<attr_value_N>, "<attr_name_N>_md":<attr_md_N>}
+ * 
+ * Being <entityDescriptor>=<prefix_name><entity_id>-<entity_type>
  * 
  * As can be seen, in both persistence modes a file is created per each entity, containing all the historical values
  * this entity's attributes have had.
  * 
  * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
  * channel, i.e. an event is not removed from the channel until it is not appropriately persisted.
+ * 
+ * In addition, Hive tables are created for each entity taking the data from:
+ * 
+ * hdfs:///user/<default_username>/<organization>/<entityDescriptor>/
+ * 
+ * The Hive tables have the following name:
+ *  - Row-like persistence:
+ *    -- Table names format: <default_username>_<organization>_<entitydescriptor>_row
+ *    -- Column types: recvTimeTs string, recvType string, entityId string, entityType string, attrName string,
+ *                     attrType string, attrValue string, attrMd array<string>
+ * - Column-like persistence:
+ *    -- Table names format: <default_username>_<organization>_<entitydescriptor>_column
+ *    -- Column types: recvTime string, <attr_name_1> string, <attr_name_1>_md array<string>,...,
+ *                     <attr_name_N> string, <attr_name_N>_md array<string>
+ * 
  */
 public class OrionHDFSSink extends OrionSink {
 
@@ -199,18 +216,6 @@ public class OrionHDFSSink extends OrionSink {
             } else {
                 logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
             } // if else if
-
-            if (persistenceBackend != null) {
-                // FIXME: create the HDFS dataset
-                // logger.info("Creating /user/" + cosmosUsername + "/" + cosmosDataset);
-                // persistenceBackend.createDir(httpClientFactory.getHttpClient(false), "");
-                
-                // provision the Hive external table for the above dataset if running in the "row" mode; otherwise, the
-                // table creation must be delayed until the sink knows the structure of the table
-                if (rowAttrPersistence) {
-                    persistenceBackend.provisionHiveTable();
-                } // if
-            } // if
         } catch (Exception e) {
             logger.error(e.getMessage());
         } // try catch
@@ -233,13 +238,6 @@ public class OrionHDFSSink extends OrionSink {
             String entityDescriptor = this.namingPrefix + Utils.encode(contextElement.getId()) + "-"
                     + Utils.encode(contextElement.getType());
             
-            // having in mind the HDFS structure (hdfs:///user/<username>/<organization>/<entity>/<entity>.txt), create
-            // the entity folder if not yet existing; this will create the username and the organization if not yet
-            // existing as well
-            // FIXME: current version of the notification only provides the organization, being null the username
-            persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                    + entityDescriptor);
-            
             // check if the file exists in HDFS right now, i.e. when its name has been got
             boolean fileExists = false;
             
@@ -252,10 +250,15 @@ public class OrionHDFSSink extends OrionSink {
             // iterate on all this entity's attributes and write a rowLine per each updated one
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
-            // this is used for storing the attribute's names and values when dealing with a per column attributes
-            // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
-            // at the same time
+            // this is used for storing the attribute's names and values in a Json-like way when dealing with a per
+            // column attributes persistence; in that case the persistence is not done attribute per attribute, but
+            // persisting all of them at the same time
             String columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
+            
+            // this is used for storing the attribute's names needed by Hive in order to create the table when dealing
+            // with a per column attributes persistence; in that case the Hive table creation is not done using
+            // standard 8-fields but a variable number of them
+            String hiveFields = Constants.RECV_TIME + " string";
 
             for (int j = 0; j < contextAttributes.size(); j++) {
                 // get the j-th contextAttribute
@@ -284,22 +287,36 @@ public class OrionHDFSSink extends OrionSink {
                         persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
                                 + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
                     } else {
+                        // having in mind the HDFS structure:
+                        // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
+                        //
+                        // 1. create the entity folder if not yet existing
+                        // FIXME: current version of the notification only provides the organization, being null the
+                        // username
+                        persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
+                                + entityDescriptor);
+                        // 2. create the entity file
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
                                 + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                        // 3. create the 8-fields standard Hive table
+                        persistenceBackend.provisionHiveTable(organization, entityDescriptor);
                         fileExists = true;
                     } // if else
                 } else {
                     columnLine += "\"" + contextAttribute.getName() + "\":" + contextAttribute.getContextValue(true)
                             + ", \"" + contextAttribute.getName() + "_md\":" + contextAttribute.getContextMetadata()
                             + ",";
+                    hiveFields += "," + contextAttribute.getName() + " string," + contextAttribute.getName()
+                            + "_md array<string>";
                 } // if else
             } // for
                  
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
-            // attribute list of name-values.
+            // attribute list
             if (!rowAttrPersistence) {
+                // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
                 logger.info("Persisting data. File: " + entityDescriptor + ", Data: " + columnLine);
                 
@@ -309,10 +326,21 @@ public class OrionHDFSSink extends OrionSink {
                     persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
                             + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
                 } else {
+                    // having in mind the HDFS structure:
+                    // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
+                    //
+                    // 1. create the entity folder if not yet existing
+                    // FIXME: current version of the notification only provides the organization, being null the
+                    // username
+                    persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
+                            + entityDescriptor);
+                    // 2. create the entity file
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
                             + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                    // 3. create the Hive table with a variable number of fields
+                    persistenceBackend.provisionHiveTable(organization, entityDescriptor, hiveFields);
                     fileExists = true;
                 } // if else
             } // if
