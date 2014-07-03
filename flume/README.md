@@ -145,7 +145,7 @@ Thus, by receiving a notification like the one above, and being the persistence 
 
 where `i` depends on the number of rows previously inserted.
 
-On the contrary, being the persistence mode `column`, the resource `room1-Room` (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with `_md` is added for the metadata.
+On the contrary, being the persistence mode `column`, the resource `Room1-Room` (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with `_md` is added for the metadata.
 
     | _id | recvTime           | temperature | temperature_md                                     |
     |--------------------------|-------------|----------------------------------------------------|
