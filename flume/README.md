@@ -68,14 +68,14 @@ Let's consider the following notification in Json format coming from an Orion Co
       ]
     }
 
-Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (it is a POST request, the target is "notify" and the headers are OK), detecting the content type (it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
+Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (it is a POST request, the target is `notify` and the headers are OK), detecting the content type (it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
 
     event={body={the_json_part...},headers={{"content-type","application/json"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
 
 Let's have a look on the Flume event headers:
 
 * The `content-type` header is a replica of the Http one in order the different sinks know how to parse the event body, in this case it is Json.
-* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the "default_organization" configuration property.
+* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the `Fiware-Service` header, then Cygnus will use the default organization specified in the `default_organization` configuration property.
 * The notification reception time is included in the list of headers (as `recvTimeTs`) for timestamping purposes in the different sinks. 
 
 The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
@@ -93,22 +93,38 @@ These files are stored under this HDFS path:
 
     hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
 
-Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The "organization" directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
+Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The `organization` directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
     
 Within files, Json documents are written following one of these two schemas:
 
-* Fixed 8-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted).
+* Fixed 8-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
 *  Two fields per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, being the persistence mode 'row', an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, being the persistence mode `row`, an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
-On the contrary, being the persistence mode 'column', the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
+
+A special particularity regarding HDFS persisted data is the posssibility to exploit such data through Hive, a SQL-like querying system. OrionHDFSSink automatically creates a Hive table (similar to a SQL table) for each persisted entity in the default database, being the name for such tables:
+
+    <username>_<organization>_<entity_descriptor>_[row|column]
+
+Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_Org42_room1_Room_row` will contain a new row such as:
+
+    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
+    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
+    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
+
+On the contrary, being the persistence mode `column`, the table named `default_user_Org42_room1_Room_column` will contain a new row such as:
+
+    | recvTime            | temperature | temperature_md                                     | 
+    |---------------------|-------------|----------------------------------------------------|
+    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
 
 ### OrionCKANSink persistence
 
@@ -116,12 +132,12 @@ This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/
 
 Each datastore, we can find two options:
 
-* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
+* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
 * Two columns per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
@@ -129,7 +145,7 @@ Thus, by receiving a notification like the one above, and being the persistence 
 
 where `i` depends on the number of rows previously inserted.
 
-On the contrary, being the persistence mode 'column', the resource <code>room1-Room</code> (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with "_md" is added for the metadata.
+On the contrary, being the persistence mode `column`, the resource `room1-Room` (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with `_md` is added for the metadata.
 
     | _id | recvTime           | temperature | temperature_md                                     |
     |--------------------------|-------------|----------------------------------------------------|
@@ -159,18 +175,18 @@ Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at
 
 Within tables, we can find two options:
 
-* Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, in contains a string serialization of the metadata for the attribute in Json (if the attribute hasn't metadata, `[]` is inserted),
+* Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted),
 * Two columns per each entity's attribute (one for the value and other for the metadata), plus an addition column about the reception time of the data (`recv_time`). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode 'row', the table named `room1-Room` (it is created if not existing) will contain a new row such as:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `room1-Room` (it is created if not existing) will contain a new row such as:
 
     | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
-On the contrary, being the persistence mode 'column', the table named `room1-Room` (it must be created in advance) will contain a new row such as:
+On the contrary, being the persistence mode `column`, the table named `room1-Room` (it must be created in advance) will contain a new row such as:
 
     | recvTime            | temperature | temperature_md                                     | 
     |---------------------|-------------|----------------------------------------------------|
