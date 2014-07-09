@@ -8,7 +8,7 @@ The way the data is deleted is by comparing the current date with the stored `re
 The script iterates on all the databases (since each database belogs to a tenant/service) and all the tables within databases (since each table belongs to a NGSI entity). This is based on the assumption all the databases and tables are Cygnus related; be careful if you host any non Cygnus database on the same MySQL server: do not use a `recvTime` column or your data risks to be deleted!
 
 ### Usage
-The scripts has for parameters:
+The script has four parameters:
 
 * Host where the MySQL server is running. This parameter allows the remote deletion of context information.
 * MySQL user allowed to delete the data.
@@ -22,7 +22,7 @@ Use this command to manually run the script:
 ### Cron scheduling
 More interesting than running the script by hand is to schedule regular executions. This is achieved by using Cron.
 
-First of all, install (simply copy) the `mysql-cleaner.sh` script somewhere only a privileged user has access, e.g. `/usr/share/cygnus/` (must be created inf not yet existing). Do not forget to give the privileged user execution permissions:
+First of all, install (simply copy) the `mysql-cleaner.sh` script somewhere only a privileged user has access, e.g. `/usr/share/cygnus/` (must be created if not yet existing). Do not forget to give the privileged user execution permissions:
 
     $ sudo mkdir /usr/share/cygnus/
     $ sudo cp mysql-clener.sh /usr/share/cygnus 
