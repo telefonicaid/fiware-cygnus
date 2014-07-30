@@ -46,6 +46,9 @@ public final class Constants {
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
 
+    // Logging
+    public static final String TRANSACTION_ID = "transactionId";
+    
     // Others
     public static final String EMPTY_MD = "[]";
 

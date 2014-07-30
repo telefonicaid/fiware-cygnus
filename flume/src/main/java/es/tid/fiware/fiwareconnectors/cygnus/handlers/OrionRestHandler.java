@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.event.EventBuilder;
@@ -37,6 +35,7 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.util.Date;
+import org.slf4j.MDC;
 
 /**
  *
@@ -52,6 +51,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private Logger logger;
     private String notificationsTarget;
     private String defaultOrg;
+    private long transactionCount;
+    private long bootTime;
+    
+    /**
+     * Constructor.
+     */
+    public OrionRestHandler() {
+        logger = Logger.getLogger(OrionRestHandler.class);
+        transactionCount = 0;
+        bootTime = new Date().getTime();
+    } // OrionRestHandler
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
@@ -63,7 +73,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
 
     @Override
     public void configure(Context context) {
-        logger = Logger.getLogger(OrionRestHandler.class);
         notificationsTarget = context.getString("notification_target", "notify");
         defaultOrg = context.getString("default_organization", "default_org");
         
@@ -76,6 +85,13 @@ public class OrionRestHandler implements HTTPSourceHandler {
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // reception time in milliseconds
         long recvTimeTs = new Date().getTime();
+        
+        // get a transaction id
+        String transId = generateTransId();
+        
+        // store the transaction id in the log4j Mapped Diagnostic Context (MDC); this way it will be accessible by the
+        // whole source code
+        MDC.put(Constants.TRANSACTION_ID, transId);
         
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
@@ -146,11 +162,24 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventHeaders.put(Constants.RECV_TIME_TS, new Long(recvTimeTs).toString());
         eventHeaders.put(Constants.CONTENT_TYPE, contentType);
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
+        eventHeaders.put(Constants.TRANSACTION_ID, transId);
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         eventList.add(EventBuilder.withBody(data.getBytes(), eventHeaders));
         return eventList;
     } // getEvents
+    
+    /**
+     * Generates a new unique transaction identifier. The format for this id is:
+     * <bootTime/1000>-<bootTime%1000>-<transactionCount%10000000000>
+     * @return A new unique transaction identifier
+     */
+    private String generateTransId() {
+        String transId = (bootTime / 1000) + "-" + (bootTime % 1000) + "-"
+                + String.format("%010d", transactionCount % 10000000000L);
+        transactionCount++;
+        return transId;
+    } // generateTransId
  
 } // OrionRestHandler
