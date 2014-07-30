@@ -183,7 +183,7 @@ public class OrionCKANSink extends OrionSink {
                 ContextAttribute contextAttribute = contextAttributes.get(j);
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
+                String attrValue = contextAttribute.getContextValue(true);
                 String attrMd = contextAttribute.getContextMetadata();
 
                 if (rowAttrPersistence) {
