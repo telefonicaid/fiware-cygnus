@@ -246,17 +246,8 @@ public class CKANBackendImpl implements CKANBackend {
         String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                 + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
                 + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
-                + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", ";
-
-
-         // attrValue can be either a literal such as '26' or 'foo', a vector such '[ "1", "2" ]' or an
-         // object such as '{ "x": "1" }'. We have to print the quotes only in the first case
-         if (attrValue.startsWith("[") || attrValue.startsWith("{")) {
-             records +=  "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
-         }
-         else {
-             records +=  "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\"";
-         }
+                + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
+                + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\"";
 
         // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
         // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
