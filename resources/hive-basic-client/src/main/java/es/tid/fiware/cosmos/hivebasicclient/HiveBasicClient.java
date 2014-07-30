@@ -83,7 +83,6 @@ public final class HiveBasicClient {
             // close everything
             res.close();
             stmt.close();
-//            con.close();
         } catch (SQLException ex) {
             System.exit(0);
         } // try catch
