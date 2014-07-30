@@ -83,7 +83,7 @@ public final class HiveBasicClient {
             // close everything
             res.close();
             stmt.close();
-            con.close();
+//            con.close();
         } catch (SQLException ex) {
             System.exit(0);
         } // try catch
@@ -103,6 +103,8 @@ public final class HiveBasicClient {
         // get a connection to the Hive server running on the specified IP address, listening on 10000/TCP port
         // authenticate using my credentials
         con = getConnection(hiveServer, hivePort, cosmosUser, cosmosPassword);
+        
+        doQuery("add JAR /usr/local/hive-0.9.0-shark-0.8.0-bin/lib/json-serde-1.1.9.3-SNAPSHOT.jar");
         
         if (con == null) {
             System.out.println("Could not connect to the Hive server!");
