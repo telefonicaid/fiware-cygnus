@@ -23,7 +23,7 @@ Pay attention to the "id" field in the response, you may need it to use create-r
 
 This script creates a resource within a given package/dataset.
 
-* The host/IP where teh CKAN API is running
+* The host/IP where the CKAN API is running
 * The CKAN API key
 * The package/dataset ID in which the resource will be created
 * The resource name
@@ -35,6 +35,6 @@ This scripts shows an example for datastore creation, useful when Cygnus runs CK
 
 The script has three parameters:
 
-* The host/IP where teh CKAN API is running
+* The host/IP where the CKAN API is running
 * The CKAN API key
 * The resource ID which datastore is going to be created
