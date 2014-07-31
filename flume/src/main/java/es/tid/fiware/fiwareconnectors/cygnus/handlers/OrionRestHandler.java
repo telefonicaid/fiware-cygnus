@@ -52,7 +52,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private String notificationsTarget;
     private String defaultOrg;
     private long transactionCount;
-    private long bootTime;
+    private long bootTimeSeconds;
+    private long bootTimeMilliseconds;
     
     /**
      * Constructor.
@@ -60,7 +61,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
     public OrionRestHandler() {
         logger = Logger.getLogger(OrionRestHandler.class);
         transactionCount = 0;
-        bootTime = new Date().getTime();
+        long bootTime = new Date().getTime();
+        bootTimeSeconds = bootTime / 1000;
+        bootTimeMilliseconds = bootTime % 1000;
     } // OrionRestHandler
     
     /**
@@ -172,13 +175,21 @@ public class OrionRestHandler implements HTTPSourceHandler {
     
     /**
      * Generates a new unique transaction identifier. The format for this id is:
-     * <bootTime/1000>-<bootTime%1000>-<transactionCount%10000000000>
+     * <bootTimeSeconds>-<bootTimeMilliseconds>-<transactionCount%10000000000>
      * @return A new unique transaction identifier
      */
     private String generateTransId() {
-        String transId = (bootTime / 1000) + "-" + (bootTime % 1000) + "-"
-                + String.format("%010d", transactionCount % 10000000000L);
-        transactionCount++;
+        long transCountTrunked = transactionCount % 10000000000L;
+        String transId = bootTimeSeconds + "-" + bootTimeMilliseconds + "-" + String.format("%010d", transCountTrunked);
+        
+        // check if the transactionCount must be restarted
+        if (transCountTrunked == 9999999999L) {
+            transactionCount = 0;
+            bootTimeMilliseconds = (bootTimeMilliseconds + 1) % 1000; // this could also overflow!
+        } else {
+            transactionCount++;
+        } // if else
+        
         return transId;
     } // generateTransId
  

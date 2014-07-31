@@ -438,7 +438,7 @@ Regarding the log4j Conversion Pattern:
 
 * `time` makes reference to a timestamp following the [RFC3339](http://tools.ietf.org/html/rfc3339).
 * `lvl`means logging level, and matches the traditional log4j levels: `INFO`, `WARN`, `ERROR`, `FATAL` and `DEBUG`.
-* `trans` is a transaction identifier, i.e. an identifier that is printed in all the traces related to the same Orion notification. The format is `<cygnus_boot_time/1000>-<cygnus_boot_time%1000>-<10_digits_transaction_count>`.
+* `trans` is a transaction identifier, i.e. an identifier that is printed in all the traces related to the same Orion notification. The format is `<cygnus_boot_time/1000>-<cygnus_boot_time%1000>-<10_digits_transaction_count>`. Its generation logic ensures that every transaction identifier is unique, also for Cygnus instances running in different VMs, except if they are started in the exactly same millisecond (highly unprobable).
 * `function` identifies the function/method within the class printing the log.
 * `comp` is always `Cygnus`.
 * `msg` is a custom message that has always the same format: `<class>[<line>] : <message>`.
