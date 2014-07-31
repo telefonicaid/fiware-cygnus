@@ -10,7 +10,7 @@ The script has three parameters:
 
 ## `create-package.sh`
 
-This script creates a package/dataset within a given organization.
+This script creates a package/dataset within a given organization. It has four parameters:
 
 * The host/IP where the CKAN API is running
 * The CKAN API key
@@ -21,7 +21,7 @@ Pay attention to the "id" field in the response, you may need it to use create-r
 
 ## `create-resource.sh`
 
-This script creates a resource within a given package/dataset.
+This script creates a resource within a given package/dataset. It has four parameters:
 
 * The host/IP where the CKAN API is running
 * The CKAN API key
