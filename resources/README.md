@@ -39,7 +39,7 @@ In addition the continous_notifier.sh script do a periodic JSON-based notificati
 
 ## Cygnus translators
 
-These scritps are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.
+These scripts are aimed to convert persisted context data from one format to another, e.g. the translator cygnus-translator-0.1-to-0.2.sh converts from CSV to Json format when executed in a Hadoop cluster NameNode.
 
 ## CKAN scripts
 
