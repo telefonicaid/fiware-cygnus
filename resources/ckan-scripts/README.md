@@ -4,7 +4,7 @@ This script creates an organization, which name is passed as argument.
 
 The script has three parameters:
 
-* The host/IP where teh CKAN API is running
+* The host/IP where the CKAN API is running
 * The CKAN API key
 * The organization name
 
