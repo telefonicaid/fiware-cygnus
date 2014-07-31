@@ -297,7 +297,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
-# APACHE_FLUME_HOME/conf/cygnus.conf
+# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
@@ -416,7 +416,7 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## log4j configuration
 
-Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
+Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appender are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
 ```Python
 log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
@@ -424,19 +424,30 @@ log4j.appender.cygnus1028.MaxFileSize=100MB
 log4j.appender.cygnus1028.MaxBackupIndex=10
 log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
 log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
 log4j.appender.cygnus1028.MaxFileSize=100MB
 log4j.appender.cygnus1028.MaxBackupIndex=10
 log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
 log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 ```
+
+Regarding the log4j Conversion Pattern:
+
+* `time` makes reference to a timestamp following the [RFC3339](http://tools.ietf.org/html/rfc3339).
+* `lvl`means logging level, and matches the traditional log4j levels: `INFO`, `WARN`, `ERROR`, `FATAL` and `DEBUG`.
+* `trans` is a transaction identifier, i.e. an identifier that is printed in all the traces related to the same Orion notification. The format is `<cygnus_boot_time/1000>-<cygnus_boot_time%1000>-<10_digits_transaction_count>`. Its generation logic ensures that every transaction identifier is unique, also for Cygnus instances running in different VMs, except if they are started in the exactly same millisecond (highly unprobable).
+* `function` identifies the function/method within the class printing the log.
+* `comp` is always `Cygnus`.
+* `msg` is a custom message that has always the same format: `<class>[<line>] : <message>`.
 
 Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (`flume.root.logger=INFO,LOGFILE`):
 
     -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
+
+In addition, you have a complete `log4j.properties` template in `conf/log4j.properties.template`, once you clone the Cygnus repository.
 
 ## Running
 

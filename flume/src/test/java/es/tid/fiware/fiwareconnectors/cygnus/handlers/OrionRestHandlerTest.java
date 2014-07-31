@@ -117,7 +117,7 @@ public class OrionRestHandlerTest {
         Event event = (Event) result.get(0);
         Map<String, String> eventHeaders = event.getHeaders();
         byte[] eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 3);
+        assertTrue(eventHeaders.size() == 4);
         assertTrue(eventHeaders.containsKey(TestConstants.RECV_TIME_TS));
         assertTrue(eventHeaders.containsKey("content-type"));
         assertTrue(eventHeaders.get("content-type").equals("application/json")

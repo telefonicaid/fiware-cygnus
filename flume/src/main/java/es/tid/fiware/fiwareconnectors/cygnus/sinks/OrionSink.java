@@ -36,6 +36,7 @@ import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -93,6 +94,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 txn.commit();
                 return Status.READY;
             } // if
+            
+            // set the transactionId in MDC
+            MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
             
             // persist the event
             logger.info("An event was taken from the channel, it must be persisted");
