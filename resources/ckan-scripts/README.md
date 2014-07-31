@@ -12,7 +12,7 @@ The script has three parameters:
 
 This script creates a package/dataset within a given organization.
 
-* The host/IP where teh CKAN API is running
+* The host/IP where the CKAN API is running
 * The CKAN API key
 * The organization name in which the package/dataset will be created
 * The package/dataset name
