@@ -30,7 +30,7 @@ First of all, install (simply copy) the `mysql-cleaner.sh` script somewhere only
 
 In order to program the scheduling, create a `cygnus_crontab.txt` file. Put the following line within that file, if wanting to execute the script every hour:
 
-    0 */1 * * * /usr/share/cygnus/mysql-cleaner.sh
+    0 */1 * * * /usr/share/cygnus/mysql-cleaner.sh <MySQL_host> <MySQL_user> <MySQL_password> <data_lifetime_days>
 
 Now, invoke the crontab to set your cron job:
 
