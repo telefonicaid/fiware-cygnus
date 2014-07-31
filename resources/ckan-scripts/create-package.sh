@@ -24,21 +24,12 @@
 
 API_HOST=$1
 API_KEY=$2
-RES_ID=$3
+ORG_NAME=$3
+PKG_NAME=$4
 
-echo "# Create the datastore associated to the resource"
-(curl -s -S -X POST http://${API_HOST}/api/3/action/datastore_create -H "Authorization: ${API_KEY}" -d @- | python -mjson.tool) <<EOF 
-{
-   "resource_id": "${RES_ID}",
-   "fields": [ 
-                { "id": "recvTime", "type": "timestamp" }, 
-                { "id": "temperature", "type": "json" }, 
-                { "id": "temperature_md", "type": "json" }, 
-                { "id": "pressure", "type": "json" },
-                { "id": "pressure_md", "type": "json" },
-                { "id": "humidity", "type": "json" },
-                { "id": "humidity_md", "type": "json" }
-             ],
-   "force": "true"
-}
+(curl -s -S -X POST http://${API_HOST}/api/3/action/package_create -H "Authorization: ${API_KEY}" -d @- | python -mjson.tool) <<EOF
+{ 
+   "name": "$PKG_NAME",
+   "owner_org": "$ORG_NAME" 
+} 
 EOF
