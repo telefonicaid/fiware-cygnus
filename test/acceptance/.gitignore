@@ -1,0 +1,6 @@
+# test
+#------
+*.out
+*.pyc
+properties.json
+testreport/
