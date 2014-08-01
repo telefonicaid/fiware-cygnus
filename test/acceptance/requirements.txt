@@ -1,0 +1,2 @@
+lettuce==0.2.19
+git+https://visitor:visitor@pdihub.hi.inet/TDAF/tdaf-lettuce-tools.git@develop#egg=tdaf_lettuce_tools

@@ -1,0 +1,33 @@
+{
+    "environment": {
+        "name": "cygnus",
+        "logs_path": "logs"
+    },
+
+    "cygnus": {
+        "cygnus_url": "http://host:port",
+        "cygnus_user_agent": "notification user agent",
+        "cygnus_organization_default": "org_default",
+        "cygnus_resource_default": "resource-default",
+        "cygnus_attributesNumber_default": 2,
+        "cygnus_metadatasNumber_default": 2,
+        "cygnus_compoundNumber_default": 0,
+        "ckan_dataset_default": "string",
+        "mysql_prefix": "string"
+    },
+
+    "ckan": {
+        "ckan_version": "X.Y",
+        "ckan_url": "http://host:port",
+        "ckan_authorization": "CKAN API key"
+
+    },
+
+    "mysql": {
+        "mysql_version": "X.Y.z",
+        "mysql_host": "hostname or IP",
+        "mysql_port": "port",
+        "mysql_user": "user",
+        "mysql_pass": "pass"
+    }
+}
