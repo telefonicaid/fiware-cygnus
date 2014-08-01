@@ -28,14 +28,13 @@
 # ENTITY_SERVICE Service Name like FIWARE-Service in Orion headers
 # ENTITY_TYPE Type of entity (for this example is type "room")
 # ENTITY_ID ID or name of the entity that is sync (for this example is type "room99")
+# (Optional) CYGNUS_PREFIX 
 
-
-
-# USAGES
-# USING PREFIX 
-# $ ./create-dbsinkplace.sh ipmysql dbuser dbpass service1 room room99 pre_
+# USAGES:
 # WITHOUT PREFIX 
-# $ ./create-dbsinkplace.sh ipmysql dbuser dbpass service2 room room99
+# $ ./create-dbsinkplace.sh ipmysql dbuser dbpass service1 room room99
+# USING PREFIX 
+# $ ./create-dbsinkplace.sh ipmysql dbuser dbpass service2 room room99 pre_
 
 # It should create a table to store TIMESTAMP TEMPERATURE and TEMPERATURE_METADATA if you need order fields, just customize it
 MYSQL_HOST=$1
@@ -65,6 +64,6 @@ echo "DROP DATABASE IF EXISTS ${MYSQL_DBNAME};
 	temperature_md varchar(50) DEFAULT NULL
 	);" | mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASS}
 
-echo "TASK DONE!!
+echo "TASK COMPLETED!!
 CREATED TABLE: ${MYSQL_DBNAME}
 CREATED DATABASE: ${MYSQL_TABLE}"
