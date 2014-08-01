@@ -27,7 +27,8 @@ Folder for acceptance tests of Cygnus.
 ## Requeriments for selenium
 
 - pip install -U selenium (before, activate the virtualent)
-- java -jar selenium-server-standalone-2.42.2.jar (required Java and firefox installed)
+- download selenium-server-standalone from http://docs.seleniumhq.org/download/
+- java -jar selenium-server-standalone-x.y.z.jar (required Java and firefox installed)
 
 ## Requeriments for mysql
 
