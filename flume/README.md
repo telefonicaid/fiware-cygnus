@@ -414,25 +414,25 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ```
 
-## log4j configuration
+## Logs
+
+###log4j configuration
 
 Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appender are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
-```Python
-log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-log4j.appender.cygnus1028.MaxFileSize=100MB
-log4j.appender.cygnus1028.MaxBackupIndex=10
-log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
-log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-
-log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-log4j.appender.cygnus1028.MaxFileSize=100MB
-log4j.appender.cygnus1028.MaxBackupIndex=10
-log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
-log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-```
+    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1028.MaxFileSize=100MB
+    log4j.appender.cygnus1028.MaxBackupIndex=10
+    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
+    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+    
+    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1028.MaxFileSize=100MB
+    log4j.appender.cygnus1028.MaxBackupIndex=10
+    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
+    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 Regarding the log4j Conversion Pattern:
 
@@ -448,6 +448,34 @@ Once the log4j has been properly configured, you only have to add to the Flume c
     -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
 
 In addition, you have a complete `log4j.properties` template in `conf/log4j.properties.template`, once you clone the Cygnus repository.
+
+### Message types
+
+Logs are categorized under six message types, each one identified by a tag in the custom message part of the trace. These are the tags:
+
+* <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
+
+    Example: `Fatal error (SSL cannot be used, no such algorithm. Details=...)`
+* <i>Runtime error</i> (`ERROR` level). These kind of errors may cause Cygnus to fail, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
+
+    Example: `Runtime error (The Hive table cannot be created. Hive query=.... Details="...)`
+* <i>Bad configuration</i> (`ERROR` level). These kind of errors regard to a bad configuration parameter, and eventually may lead to a Cygnus fail.
+
+    Example: `Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!)`
+* <i>Bad HTTP notification</i> (`WARN` level). These kind of errors are related to malformed notifications regarding the HTTP message: not supported REST method, target, user agent or content type, and empty body as well. They are exclusively thrown by the `OrionRestHandler` component.  
+
+    Example: `Bad HTTP notification (aggregation target not supported)`
+* <i>Bad context data</i> (`WARN` level). These kind of errors are related to semantic inconsistences within the notified context data: anomalous number of attributes or not existent attribute (even when the number of attributes matches) for an already known instance. They are exclusively thrown by the sinks.
+
+    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
+* <i>Channel error</i> (`ERROR` level). These kind of errors tell about problems with the internal channel of the agent. This channel is used as part of the failover mechanisms of Flume, storing those events that cannot be processed by the sinks. Nevertheless, the channel may fail itself, either because the HTTP source is not able to put the event (channel error, or simply it is full), either because the sink cannot get a new event.
+
+    Example: `Channel error (The event could not be got. Details=...)`
+* <i>Persistence error</i> (`ERROR` level). These kind of errors tell about problems with the persistence backend: unable to connect or not existent entity (when the backend needs to have provisioned a container for that entity, e.g. entity-related tables in MySQL or CKAN). They are exclusively thrown by the sinks. Please observe Cygnus itself may solve the problem thanks to the channel-based failover mechanism of Flume, and the Flume Failover Sink Processor which switchs to a passive sink (if configured).
+
+    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
+
+Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Informational messages such as Cygnus version and other are labeled as <i>Informational</i>, being `INFO` the logging level.  
 
 ## Running
 
