@@ -188,10 +188,24 @@ public class OrionHDFSSink extends OrionSink {
         cosmosDefaultPassword = context.getString("cosmos_default_password", "");
         logger.debug("Reading configuration (cosmos_default_password=" + cosmosDefaultPassword + ")");
         hdfsAPI = context.getString("hdfs_api", "httpfs");
-        logger.debug("Reading configuration (hdfs_api=" + hdfsAPI + ")");
+        
+        if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
+            logger.error("Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not "
+                        + "going to be persisted!)");
+        } else {
+            logger.debug("Reading configuration (hdfs_api=" + hdfsAPI + ")");
+        } // if else
+        
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
+        
+        if (namingPrefix.length() > Constants.NAMING_PREFIX_LEN) {
+            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_LEN
+                    + " and will be trunked to " + Constants.NAMING_PREFIX_LEN + " chatacters)");
+            namingPrefix = namingPrefix.substring(0, Constants.NAMING_PREFIX_LEN);
+        } // if
+        
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
         hivePort = context.getString("hive_port", "10000");
         logger.debug("Reading configuration (hive_port=" + hivePort + ")");
@@ -213,6 +227,7 @@ public class OrionHDFSSink extends OrionSink {
                         cosmosDefaultPassword, hivePort);
                 logger.debug("WebHDFS persistence backend created");
             } else {
+                // this point should never be reached since the HDFS API has been checked while configuring the sink
                 logger.error("Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not "
                         + "going to be persisted!)");
             } // if else if
@@ -282,7 +297,8 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
-                    logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data (" + rowLine + ")");
+                    logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
+                            + rowLine + ")");
                     
                     // if the file exists, append the Json document to it; otherwise, create it with initial content and
                     // mark as existing (this avoids checking if the file exists each time a Json document is going to
@@ -322,7 +338,8 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data (" + columnLine + ")");
+                logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
+                        + columnLine + ")");
                 
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the

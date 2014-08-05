@@ -146,9 +146,15 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
-                } // if else if
+                } // if else
             } else if (headerName.equals(Constants.ORG_HEADER)) {
-                organization = headerValue;
+                if (headerValue.length() > Constants.ORG_HEADER_LEN) {
+                    logger.warn("Bad HTTP notification (organization header length greater than "
+                            + Constants.ORG_HEADER_LEN + ")");
+                    throw new HTTPBadRequestException(headerValue + " content type not supported");
+                } else {
+                    organization = headerValue;
+                } // if else
             } // if else if
         } // for
 
