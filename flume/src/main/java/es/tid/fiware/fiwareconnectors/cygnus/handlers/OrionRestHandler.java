@@ -95,6 +95,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         if (notificationsTarget.charAt(0) != '/') {
             notificationsTarget = "/" + notificationsTarget;
         } // if
+        
+        logger.info("Startup completed");
     } // configure
             
     @Override
@@ -193,7 +195,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
-        eventList.add(EventBuilder.withBody(data.getBytes(), eventHeaders));
+        Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
+        eventList.add(event);
+        logger.info("Event put in the channel (" + event.hashCode() + ")");
         return eventList;
     } // getEvents
     
