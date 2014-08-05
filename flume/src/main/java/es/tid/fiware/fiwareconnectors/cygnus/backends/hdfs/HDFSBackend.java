@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
@@ -68,7 +68,7 @@ public abstract class HDFSBackend {
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
                 + "_row";
-        logger.info("Creating Hive external table " + tableName);
+        logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
         HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
@@ -90,7 +90,6 @@ public abstract class HDFSBackend {
         String query = "create external table " + tableName + " " + fields + " row format serde "
                 + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
                 + organization + "/" + entityDescriptor + "'";
-        logger.debug("Executing: '" + query + "'");
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -111,7 +110,7 @@ public abstract class HDFSBackend {
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
                 + "_column";
-        logger.info("Creating Hive external table " + tableName);
+        logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
         HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
@@ -120,7 +119,6 @@ public abstract class HDFSBackend {
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
                 + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
                 + organization + "/" + entityDescriptor + "'";
-        logger.debug("Executing: '" + query + "'");
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {

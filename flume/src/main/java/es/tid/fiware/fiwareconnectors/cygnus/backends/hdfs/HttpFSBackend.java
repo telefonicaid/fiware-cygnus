@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
@@ -68,10 +68,10 @@ public class HttpFSBackend extends HDFSBackend {
         
         // do the put
         HttpPut request = new HttpPut(url);
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -94,10 +94,10 @@ public class HttpFSBackend extends HDFSBackend {
         
         // do the put (first step)
         HttpPut request = new HttpPut(url);
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -109,10 +109,10 @@ public class HttpFSBackend extends HDFSBackend {
         request = new HttpPut(url + "&data=true");
         request.setHeader("Content-Type", "application/octet-stream");
         request.setEntity(new StringEntity(data + "\n"));
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -134,10 +134,10 @@ public class HttpFSBackend extends HDFSBackend {
         
         // do the post (first step)
         HttpPost request = new HttpPost(url);
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -149,10 +149,10 @@ public class HttpFSBackend extends HDFSBackend {
         request = new HttpPost(url + "&data=true");
         request.setHeader("Content-Type", "application/octet-stream");
         request.setEntity(new StringEntity(data + "\n"));
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -174,10 +174,10 @@ public class HttpFSBackend extends HDFSBackend {
         
         // do the get
         HttpGet request = new HttpGet(url);
-        logger.info("HttpFS operation: " + request.toString());
+        logger.debug("HttpFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("HttpFS response: " + response.getStatusLine().toString());
+        logger.debug("HttpFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() == 200) {

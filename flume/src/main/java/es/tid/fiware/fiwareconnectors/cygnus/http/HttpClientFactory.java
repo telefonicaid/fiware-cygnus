@@ -3,22 +3,23 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero Bueno
- * frb@tid.es
+ * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.http;
 
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -57,16 +58,16 @@ public class HttpClientFactory {
         
         if (ssl) {
             sslConnectionsManager = new PoolingClientConnectionManager(getSchemeRegistry());
-            sslConnectionsManager.setMaxTotal(500);
-            sslConnectionsManager.setDefaultMaxPerRoute(100);
+            sslConnectionsManager.setMaxTotal(Constants.MAX_CONNS);
+            sslConnectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } else {
             connectionsManager = new PoolingClientConnectionManager();
-            connectionsManager.setMaxTotal(500);
-            connectionsManager.setDefaultMaxPerRoute(100);
+            connectionsManager.setMaxTotal(Constants.MAX_CONNS);
+            connectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } // if else
         
-        logger.info("Setting max total connections to 500 and default"
-                + " max connections per route to 100");
+        logger.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
+        logger.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
@@ -94,8 +95,7 @@ public class HttpClientFactory {
         try {
             sslContext = SSLContext.getInstance("SSL");
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("SSL cannot be used. Reason: NoSuchAlgorithmException");
-            logger.fatal(e.getMessage());
+            logger.fatal("Fatal error (SSL cannot be used, no such algorithm. Details=" + e.getMessage() + ")");
             return null;
         } // try catch
         
@@ -118,13 +118,12 @@ public class HttpClientFactory {
                 }
             }, new SecureRandom());
         } catch (KeyManagementException e) {
-            logger.fatal("Cannot ignore SSL certificates. Reason: KeyManagementException");
-            logger.fatal(e.getMessage());
+            logger.fatal("Fatal error (Cannot ignore SSL certificates. Details=" + e.getMessage() + ")");
             return null;
         } // try catch
 
         if (sslContext == null) {
-            logger.fatal("Cannot ignore SSL certificates. Reason: sslContext == null");
+            logger.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
             return null;
         } // if
         

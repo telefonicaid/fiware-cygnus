@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
@@ -34,7 +34,10 @@ import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 import org.slf4j.MDC;
 
 /**
@@ -56,14 +59,24 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private long bootTimeMilliseconds;
     
     /**
-     * Constructor.
+     * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
+     * "initialization" class, which is unreachable by our code. As long as this class is instantiated almost at boot
+     * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
+        // init the logger
         logger = Logger.getLogger(OrionRestHandler.class);
+        
+        // init the transaction id
         transactionCount = 0;
+        
+        // store the boot time (not the exact boot time, but very accurate one)
         long bootTime = new Date().getTime();
         bootTimeSeconds = bootTime / 1000;
         bootTimeMilliseconds = bootTime % 1000;
+        
+        // print Cygnus version
+        logger.info("Cygnus version (" + getCygnusVersion() + ")");
     } // OrionRestHandler
     
     /**
@@ -89,17 +102,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // reception time in milliseconds
         long recvTimeTs = new Date().getTime();
         
-        // get a transaction id
+        // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
+        // accessible by the whole source code
         String transId = generateTransId();
-        
-        // store the transaction id in the log4j Mapped Diagnostic Context (MDC); this way it will be accessible by the
-        // whole source code
         MDC.put(Constants.TRANSACTION_ID, transId);
+        logger.info("Starting transaction (" + transId + ")");
         
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
         if (!method.equals("POST")) {
+            logger.warn("Bad HTTP notification (" + method + " method not supported)");
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
 
@@ -107,6 +120,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         String target = request.getRequestURI();
         
         if (!target.equals(notificationsTarget)) {
+            logger.warn("Bad HTTP notification (" + target + " target not supported)");
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
@@ -121,10 +135,12 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
             if (headerName.equals(Constants.USER_AGENT)) {
                 if (!headerValue.startsWith("orion")) {
+                    logger.warn("Bad HTTP notification (" + headerValue + " user agent not supported)");
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
             } else if (headerName.equals(Constants.CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
+                    logger.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
@@ -144,6 +160,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // while
                 
         if (data.length() == 0) {
+            logger.warn("Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
         } // if
 
@@ -158,14 +175,21 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
 
         data = data.replaceAll(">[ ]*<", "><");
-        logger.debug("Received data: " + data);
+        logger.info("Received data (" + data + ")");
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put(Constants.RECV_TIME_TS, new Long(recvTimeTs).toString());
+        logger.debug("Adding flume event header (name=" + Constants.RECV_TIME_TS
+                + ", value=" + new Long(recvTimeTs).toString() + ")");
         eventHeaders.put(Constants.CONTENT_TYPE, contentType);
+        logger.debug("Adding flume event header (name=" + Constants.CONTENT_TYPE + ", value=" + contentType + ")");
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
+        logger.debug("Adding flume event header (name=" + Constants.ORG_HEADER
+                + ", value=" + organization == null ? defaultOrg : organization + ")");
         eventHeaders.put(Constants.TRANSACTION_ID, transId);
+        logger.debug("Adding flume event header (name=" + Constants.TRANSACTION_ID
+                + ", value=" + transId + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
@@ -192,5 +216,30 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         return transId;
     } // generateTransId
+    
+    /**
+     * Gets the Cygnus version from the pom.xml.
+     * @return The Cygnus version
+     */
+    private String getCygnusVersion() {
+        String path = "/pom.properties";
+        InputStream stream = getClass().getResourceAsStream(path);
+        
+        if (stream == null) {
+            logger.warn("The stream regarding pom.properties is NULL");
+            return "UNKNOWN";
+        } // if
+        
+        Properties props = new Properties();
+        
+        try {
+            props.load(stream);
+            stream.close();
+            return (String) props.get("version");
+        } catch (IOException e) {
+            logger.warn("Cannot get the version from pom.properties stream (Details=" + e.getMessage() + ")");
+            return "UNKNOWN";
+        } // try catch
+    } // getCygnusVersion
  
 } // OrionRestHandler

@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
  
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
@@ -28,15 +28,13 @@ import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import org.apache.log4j.Logger;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.flume.Context;
 
 /**
  * 
- * @author frb
+ * @author fermin
  *
  * CKAN sink for Orion Context Broker.
  *
@@ -130,12 +128,17 @@ public class OrionCKANSink extends OrionSink {
     public void configure(Context context) {
         logger = Logger.getLogger(OrionCKANSink.class);
         apiKey = context.getString("api_key", "nokey");
+        logger.debug("Reading configuration (api_key=" + apiKey + ")");
         ckanHost = context.getString("ckan_host", "localhost");
+        logger.debug("Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
+        logger.debug("Reading configuration (ckan_port=" + ckanPort + ")");
         defaultDataset = context.getString("default_dataset", "cygnus");
+        logger.debug("Reading configuration (default_dataset=" + defaultDataset + ")");
         orionUrl = context.getString("orion_url", "http://localhost:1026");
+        logger.debug("Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-
+        logger.debug("Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
     } // configure
 
     @Override
@@ -175,31 +178,29 @@ public class OrionCKANSink extends OrionSink {
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
+            String entityId = Utils.encode(contextElement.getId());
+            String entityType = Utils.encode(contextElement.getType());
+            logger.debug("Processing context element (id= + " + entityId + ", type= " + entityType + ")");
+            
+            // get the entity descriptor
+            String entity = entityId + "-" + entityType;
+
+            // iterate on all this entity's attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
-            String entity = Utils.encode(contextElement.getId()) + "-" + Utils.encode(contextElement.getType());
-
-            for (int j = 0; j < contextAttributes.size(); j++) {
-                ContextAttribute contextAttribute = contextAttributes.get(j);
+            for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMd = contextAttribute.getContextMetadata();
+                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
 
                 if (rowAttrPersistence) {
-                    // persist the data
-                    logger.info("Persisting data: <" + recvTimeTs + ", "
-                            + recvTime + ", "
-                            + organization + ", "
-                            + entity + ", "
-                            + attrName + ", "
-                            + attrType + ", "
-                            + attrValue + ", "
-                            + attrMd + ">");
+                    logger.info("Persisting data: <" + recvTimeTs + ", " + recvTime + ", " + organization + ", "
+                            + entity + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ">");
                     persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
                             organization, entity, attrName, attrType, attrValue, attrMd);
-                }
-                else {
+                } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMd);
                 } // if else
@@ -208,16 +209,12 @@ public class OrionCKANSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data: <" + recvTime + ", "
-                        + organization + ", "
-                        + entity + ", "
-                        + attrs.toString() + ", "
-                        + mds.toString() + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity, attrs, mds);
+                logger.info("Persisting data: <" + recvTime + ", " + organization + ", " + entity + ", "
+                        + attrs.toString() + ", " + mds.toString() + ">");
+                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity,
+                        attrs, mds);
             } // if
-
         } // for
-
     } // persist
     
 } // OrionHDFSSink
