@@ -108,6 +108,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 txn.commit();
                 return Status.READY;
             } // if
+            
+            logger.info("Event got from the channel (" + event.hashCode() + ")");
         } catch (Exception e) {
             logger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);

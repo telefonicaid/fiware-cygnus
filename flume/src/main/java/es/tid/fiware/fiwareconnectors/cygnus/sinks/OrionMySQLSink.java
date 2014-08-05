@@ -155,6 +155,7 @@ public class OrionMySQLSink extends OrionSink {
         logger.debug("MySQL persistence backend created");
         persistenceBackend = new MySQLBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
         super.start();
+        logger.info("Startup completed");
     } // start
 
     @Override

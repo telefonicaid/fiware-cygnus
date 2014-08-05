@@ -154,6 +154,7 @@ public class OrionCKANSink extends OrionSink {
         } // try catch
 
         super.start();
+        logger.info("Startup completed");
     } // start
     
     @Override
