@@ -495,7 +495,7 @@ In addition, you have a complete `log4j.properties` template in `conf/log4j.prop
 
 ### Message types
 
-Logs are categorized under six message types, each one identified by a tag in the custom message part of the trace. These are the tags:
+Cygnus logs are categorized under seven message types, each one identified by a tag in the custom message part of the trace. These are the tags:
 
 * <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
 
