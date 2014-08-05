@@ -495,31 +495,7 @@ In addition, you have a complete `log4j.properties` template in `conf/log4j.prop
 
 ### Message types
 
-Cygnus logs are categorized under seven message types, each one identified by a tag in the custom message part of the trace. These are the tags:
-
-* <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
-
-    Example: `Fatal error (SSL cannot be used, no such algorithm. Details=...)`
-* <i>Runtime error</i> (`ERROR` level). These kind of errors may cause Cygnus to fail, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
-
-    Example: `Runtime error (The Hive table cannot be created. Hive query=.... Details="...)`
-* <i>Bad configuration</i> (`ERROR` level). These kind of errors regard to a bad configuration parameter, and eventually may lead to a Cygnus fail.
-
-    Example: `Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!)`
-* <i>Bad HTTP notification</i> (`WARN` level). These kind of errors are related to malformed notifications regarding the HTTP message: not supported REST method, target, user agent or content type, and empty body as well. They are exclusively thrown by the `OrionRestHandler` component.  
-
-    Example: `Bad HTTP notification (aggregation target not supported)`
-* <i>Bad context data</i> (`WARN` level). These kind of errors are related to semantic inconsistences within the notified context data: anomalous number of attributes or not existent attribute (even when the number of attributes matches) for an already known instance. They are exclusively thrown by the sinks.
-
-    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
-* <i>Channel error</i> (`ERROR` level). These kind of errors tell about problems with the internal channel of the agent. This channel is used as part of the failover mechanisms of Flume, storing those events that cannot be processed by the sinks. Nevertheless, the channel may fail itself, either because the HTTP source is not able to put the event (channel error, or simply it is full), either because the sink cannot get a new event.
-
-    Example: `Channel error (The event could not be got. Details=...)`
-* <i>Persistence error</i> (`ERROR` level). These kind of errors tell about problems with the persistence backend: unable to connect or not existent entity (when the backend needs to have provisioned a container for that entity, e.g. entity-related tables in MySQL or CKAN). They are exclusively thrown by the sinks. Please observe Cygnus itself may solve the problem thanks to the channel-based failover mechanism of Flume, and the Flume Failover Sink Processor which switchs to a passive sink (if configured).
-
-    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
-
-Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Informational messages such as Cygnus version, transaction start/end and other are labeled as <i>Informational</i>, being `INFO` the logging level.  
+Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
 
 ## Contact
 
