@@ -154,6 +154,7 @@ public class OrionCKANSink extends OrionSink {
         } // try catch
 
         super.start();
+        logger.info("Startup completed");
     } // start
     
     @Override
@@ -196,7 +197,7 @@ public class OrionCKANSink extends OrionSink {
                 logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
 
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data: <" + recvTimeTs + ", " + recvTime + ", " + organization + ", "
+                    logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", " + organization + ", "
                             + entity + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ">");
                     persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
                             organization, entity, attrName, attrType, attrValue, attrMd);
@@ -209,7 +210,7 @@ public class OrionCKANSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data: <" + recvTime + ", " + organization + ", " + entity + ", "
+                logger.info("Persisting data at OrionCKANSink. <" + recvTime + ", " + organization + ", " + entity + ", "
                         + attrs.toString() + ", " + mds.toString() + ">");
                 persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, entity,
                         attrs, mds);
