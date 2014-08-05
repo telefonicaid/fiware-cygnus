@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.mysql;
@@ -25,9 +25,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
-
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 
 /**
@@ -74,7 +72,7 @@ public class MySQLBackend {
         con = getConnection("");
         stmt = con.createStatement();
         String query = "create database if not exists " + dbName;
-        logger.debug("Executing '" + query + "'");
+        logger.debug("Executing MySQL query (" + query + ")");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // createDatabase
@@ -101,7 +99,7 @@ public class MySQLBackend {
                 + Constants.ATTR_TYPE + " text, "
                 + Constants.ATTR_VALUE + " text, "
                 + Constants.ATTR_MD + " text)";
-        logger.debug("Executing '" + query + "'");
+        logger.debug("Executing MySQL query (" + query + ")");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // createTable
@@ -131,7 +129,7 @@ public class MySQLBackend {
         String query = "insert into " + tableName + " values ('" + recvTimeTs + "', '" + recvTime + "', '" + entityId
                 + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue + "', '" + attrMd
                 + "')";
-        logger.debug("Executing '" + query + "'");
+        logger.debug("Executing MySQL query (" + query + ")");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // insertContextData
@@ -177,7 +175,7 @@ public class MySQLBackend {
         
         // finish creating the query and execute it
         String query = "insert into " + tableName + " (" + columnNames + ") values (" + columnValues + ")";
-        logger.debug("Executing '" + query + "'");
+        logger.debug("Executing MySQL query (" + query + ")");
         stmt.executeUpdate(query);
         closeMySQLObjects(con, stmt);
     } // insertContextData
@@ -211,7 +209,7 @@ public class MySQLBackend {
             try {
                 con.close();
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error("Runtime error (The Hive connection could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch
         } // if
@@ -220,7 +218,7 @@ public class MySQLBackend {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error("Runtime error (The Hive statement could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch
         } // if

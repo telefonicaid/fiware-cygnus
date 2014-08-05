@@ -80,6 +80,13 @@
   </dependencies>
 
   <build>
+    <!-- reference: http://stackoverflow.com/questions/3697449/retrieve-version-from-maven-pom-xml-in-code -->
+    <resources>
+      <resource>
+	<directory>src/main/resources</directory>
+	<filtering>true</filtering>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <!-- Explicit Java version declaration in needed in some systems in which Maven seems not

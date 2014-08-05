@@ -3,18 +3,18 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
@@ -61,16 +61,21 @@ public class WebHDFSBackend extends HDFSBackend {
     
     @Override
     public void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception {
+        // check the username
+        if (username == null) {
+            username = this.cosmosDefaultUsername;
+        } // if
+        
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + dirPath
                 + "?op=mkdirs&user.name=" + username;
         
         // do the put
         HttpPut request = new HttpPut(url);
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -81,17 +86,22 @@ public class WebHDFSBackend extends HDFSBackend {
     
     @Override
     public void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
-            throws Exception {
+        throws Exception {
+        // check the username
+        if (username == null) {
+            username = this.cosmosDefaultUsername;
+        } // if
+        
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
                 + "?op=create&user.name=" + username;
         
         // do the put (first step)
         HttpPut request = new HttpPut(url);
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -107,10 +117,10 @@ public class WebHDFSBackend extends HDFSBackend {
         request = new HttpPut(location);
         request.setHeader("Content-Type", "application/octet-stream");
         request.setEntity(new StringEntity(data + "\n"));
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -121,16 +131,21 @@ public class WebHDFSBackend extends HDFSBackend {
     
     @Override
     public void append(DefaultHttpClient httpClient, String username, String filePath, String data) throws Exception {
+        // check the username
+        if (username == null) {
+            username = this.cosmosDefaultUsername;
+        } // if
+        
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
                 + "?op=append&user.name=" + username;
         
         // do the post (first step)
         HttpPost request = new HttpPost(url);
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -146,10 +161,10 @@ public class WebHDFSBackend extends HDFSBackend {
         request = new HttpPost(location);
         request.setHeader("Content-Type", "application/octet-stream");
         request.setEntity(new StringEntity(data + "\n"));
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -160,16 +175,21 @@ public class WebHDFSBackend extends HDFSBackend {
     
     @Override
     public boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception {
+        // check the username
+        if (username == null) {
+            username = this.cosmosDefaultUsername;
+        } // if
+        
         // create the HttpFS URL
         String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
                 + "?op=getfilestatus&user.name=" + username;
         
         // do the get
         HttpGet request = new HttpGet(url);
-        logger.info("WebHDFS operation: " + request.toString());
+        logger.debug("WebHDFS operation: " + request.toString());
         HttpResponse response = httpClient.execute(request);
         request.releaseConnection();
-        logger.info("WebHDFS response: " + response.getStatusLine().toString());
+        logger.debug("WebHDFS response: " + response.getStatusLine().toString());
         
         // check the status
         if (response.getStatusLine().getStatusCode() == 200) {
