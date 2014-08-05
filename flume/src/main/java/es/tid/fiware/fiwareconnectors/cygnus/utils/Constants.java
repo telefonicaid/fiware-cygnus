@@ -49,6 +49,10 @@ public final class Constants {
     // Logging
     public static final String TRANSACTION_ID = "transactionId";
     
+    // HTTP client factory
+    public static final int MAX_CONNS = 500;
+    public static final int MAX_CONNS_PER_ROUTE = 100;
+    
     // Others
     public static final String EMPTY_MD = "[]";
 

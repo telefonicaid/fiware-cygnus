@@ -414,6 +414,50 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ```
 
+## Running
+
+In foreground (with logging):
+
+    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
+
+In background:
+
+    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
+
+Remember you can change the logging level and the logging appender by changing the `-Dflume.root.logger` parameter.
+
+## Orion subscription
+
+Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
+
+    $ (curl localhost:1026/NGSI10/subscribeContext -s -S --header 'Content-Type: application/xml' -d @- | xmllint --format -) <<EOF
+    <?xml version="1.0"?>
+    <subscribeContextRequest>
+      <entityIdList>
+        <entityId type="Room" isPattern="false">
+          <id>Room1</id>
+        </entityId>
+      <entityIdList>
+      <attributeList>
+        <attribute>temperature</attribute>
+      </attributeList>
+      <!-- This is the part where Cygnus endpoint is specified -->
+      <reference>http://host_running_cygnus:5050/notify</reference>
+      <duration>P1M</duration>
+      <notifyConditions>
+        <notifyCondition>
+          <type>ONCHANGE</type>
+          <condValueList>
+            <condValue>pressure</condValue>
+          </condValueList>
+        </notifyCondition>
+      </notifyConditions>
+      <throttling>PT5S</throttling>
+    </subscribeContextRequest>
+    EOF
+
+Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
+
 ## Logs
 
 ###log4j configuration
@@ -475,51 +519,7 @@ Logs are categorized under six message types, each one identified by a tag in th
 
     Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
 
-Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Informational messages such as Cygnus version and other are labeled as <i>Informational</i>, being `INFO` the logging level.  
-
-## Running
-
-In foreground (with logging):
-
-    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
-
-In background:
-
-    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
-
-Remember you can change the logging level and the logging appender by changing the `-Dflume.root.logger` parameter.
-
-## Orion subscription
-
-Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
-
-    $ (curl localhost:1026/NGSI10/subscribeContext -s -S --header 'Content-Type: application/xml' -d @- | xmllint --format -) <<EOF
-    <?xml version="1.0"?>
-    <subscribeContextRequest>
-      <entityIdList>
-        <entityId type="Room" isPattern="false">
-          <id>Room1</id>
-        </entityId>
-      <entityIdList>
-      <attributeList>
-        <attribute>temperature</attribute>
-      </attributeList>
-      <!-- This is the part where Cygnus endpoint is specified -->
-      <reference>http://host_running_cygnus:5050/notify</reference>
-      <duration>P1M</duration>
-      <notifyConditions>
-        <notifyCondition>
-          <type>ONCHANGE</type>
-          <condValueList>
-            <condValue>pressure</condValue>
-          </condValueList>
-        </notifyCondition>
-      </notifyConditions>
-      <throttling>PT5S</throttling>
-    </subscribeContextRequest>
-    EOF
-
-Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
+Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Informational messages such as Cygnus version, transaction start/end and other are labeled as <i>Informational</i>, being `INFO` the logging level.  
 
 ## Contact
 

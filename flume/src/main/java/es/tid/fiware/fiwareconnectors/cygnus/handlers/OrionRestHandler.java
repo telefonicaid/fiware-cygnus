@@ -226,7 +226,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         InputStream stream = getClass().getResourceAsStream(path);
         
         if (stream == null) {
-            logger.debug("The stream regarding pom.properties is NULL");
+            logger.warn("The stream regarding pom.properties is NULL");
             return "UNKNOWN";
         } // if
         
@@ -237,7 +237,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             stream.close();
             return (String) props.get("version");
         } catch (IOException e) {
-            logger.debug("Cannot get the version from pom.properties stream (Details=" + e.getMessage() + ")");
+            logger.warn("Cannot get the version from pom.properties stream (Details=" + e.getMessage() + ")");
             return "UNKNOWN";
         } // try catch
     } // getCygnusVersion

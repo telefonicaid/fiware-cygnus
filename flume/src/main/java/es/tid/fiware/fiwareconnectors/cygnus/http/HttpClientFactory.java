@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.http;
 
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -57,16 +58,16 @@ public class HttpClientFactory {
         
         if (ssl) {
             sslConnectionsManager = new PoolingClientConnectionManager(getSchemeRegistry());
-            sslConnectionsManager.setMaxTotal(500);
-            sslConnectionsManager.setDefaultMaxPerRoute(100);
+            sslConnectionsManager.setMaxTotal(Constants.MAX_CONNS);
+            sslConnectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } else {
             connectionsManager = new PoolingClientConnectionManager();
-            connectionsManager.setMaxTotal(500);
-            connectionsManager.setDefaultMaxPerRoute(100);
+            connectionsManager.setMaxTotal(Constants.MAX_CONNS);
+            connectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } // if else
         
-        logger.info("Setting max total connections (500)");
-        logger.info("Settubg default max connections per route (100)");
+        logger.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
+        logger.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
