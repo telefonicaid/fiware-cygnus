@@ -282,7 +282,7 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
-                    logger.info("Persisting data. HDFS file (" + entityDescriptor + "), Data (" + rowLine + ")");
+                    logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data (" + rowLine + ")");
                     
                     // if the file exists, append the Json document to it; otherwise, create it with initial content and
                     // mark as existing (this avoids checking if the file exists each time a Json document is going to
@@ -322,7 +322,7 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("Persisting data. HDFS file (" + entityDescriptor + "), Data (" + columnLine + ")");
+                logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the

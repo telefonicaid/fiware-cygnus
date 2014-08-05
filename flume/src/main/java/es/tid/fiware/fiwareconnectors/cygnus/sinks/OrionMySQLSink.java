@@ -218,7 +218,7 @@ public class OrionMySQLSink extends OrionSink {
                 logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
                 
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Data: "
+                    logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName + ", Data: "
                             + recvTimeTs / 1000 + "," + recvTime + "," + entityId + "," + entityType + "," + attrName
                             + "," + entityType + "," + attrValue + "," + attrMetadata);
                     persistenceBackend.insertContextData(dbName, tableName, recvTimeTs / 1000, recvTime,
@@ -232,7 +232,7 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of attrName-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
+                logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
                         + recvTime + ", Data (attrs): " + attrs.toString() + ", (metadata): " + mds.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
             } // if
