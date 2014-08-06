@@ -190,8 +190,9 @@ public class OrionHDFSSink extends OrionSink {
         hdfsAPI = context.getString("hdfs_api", "httpfs");
         
         if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
-            logger.error("Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not "
-                        + "going to be persisted!)");
+            logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
         } else {
             logger.debug("Reading configuration (hdfs_api=" + hdfsAPI + ")");
         } // if else
@@ -200,10 +201,11 @@ public class OrionHDFSSink extends OrionSink {
         logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
         
-        if (namingPrefix.length() > Constants.NAMING_PREFIX_LEN) {
-            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_LEN
-                    + " and will be trunked to " + Constants.NAMING_PREFIX_LEN + " chatacters)");
-            namingPrefix = namingPrefix.substring(0, Constants.NAMING_PREFIX_LEN);
+        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
+            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_MAX_LEN
+                    + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
         } // if
         
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
@@ -228,8 +230,9 @@ public class OrionHDFSSink extends OrionSink {
                 logger.debug("WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
-                logger.error("Bad configuration (Unrecognized HDFS API. The sink can start, but the data is not "
-                        + "going to be persisted!)");
+                logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+                logger.info("Exiting Cygnus");
+                System.exit(-1);
             } // if else if
         } catch (Exception e) {
             logger.error(e.getMessage());

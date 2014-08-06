@@ -135,25 +135,25 @@ public class CKANBackendImpl implements CKANBackend {
     } // initOrg
 
     @Override
-    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization,
-            String entity, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
+            String resourceName, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         // get resource ID
-        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, true);
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true);
 
-        // persist the entity
+        // persist the resourceName
         insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
     } // persist
 
     @Override
-    public void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
+    public void persist(DefaultHttpClient httpClient, String recvTime, String orgName, String resourceName,
                  Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
         // get resource ID
-        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, false);
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false);
 
-        if (resourceId.equals("")) {
-            logger.error("cannot persist <" + organization + "," + entity + ">");
+        if (resourceId == null) {
+            logger.error("Runtime error (Cannot persist <" + orgName + "," + resourceName + ">)");
         } else {
-            // persist the entity
+            // persist the resourceName
             insert(httpClient, recvTime, resourceId, attrList, attrMdList);
         } // if else
     } // persist
@@ -189,7 +189,7 @@ public class CKANBackendImpl implements CKANBackend {
             } else {
                 logger.error("resource not found and cannot be created: "
                         + "this means that resource/datastore pre-provision in column mode failed");
-                return "";
+                return null;
             } // if else
         } // if else
 
@@ -320,17 +320,36 @@ public class CKANBackendImpl implements CKANBackend {
         // check the status
         if (res.getStatusCode() == 200) {
             String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-            logger.debug("successful organization creation - organization ID: " + orgId);
-            String packageId = createPackage(httpClient, organization + "_" + defaultDataset, orgId);
+            logger.debug("Successful organization creation (" + orgId + ")");
+            
+            // create the package/dataset
+            String packageName = organization + "_" + defaultDataset;
+            
+            if (packageName.length() > Constants.CKAN_PKG_MAX_LEN) {
+                logger.error("Bad configuration (A CKAN package/dataset name '" + packageName + "' has been built and "
+                        + "its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package name generation "
+                        + "is based on the concatenation of the notified '" + Constants.ORG_HEADER + "' organization "
+                        + "header, the character '_' and the 'default_dataset' configuration parameter, thus adjust "
+                        + "them)");
+                throw new Exception("The lenght of the CKAN package/dataset '" + packageName + "' is greater than "
+                        + Constants.CKAN_PKG_MAX_LEN);
+            } // if
+
+            String packageId = createPackage(httpClient, packageName, orgId);
+            
+            if (packageId == null) {
+                throw new Exception("Could not obtain a package/dataset identifier (Package name=" + packageName + ")");
+            } // if
+            
             packagesIds.put(organization, packageId);
-            logger.debug("added to packages map " + organization + " -> " + packageId);
+            logger.debug("Package added to map (" + organization + " -> " + packageId + ")");
         } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
+            logger.error("Runtime error (Don't know how to treat response code " + res.getStatusCode() + ")");
         } // if else
     } // createOrganization
 
     /**
-     * Creates a dataset (package) within a given organization in CKAN.
+     * Creates a dataset/package within a given organization in CKAN.
      * @param httpClient HTTP client for accessing the backend server.
      * @param pkg package to create
      * @param orgId the owner organization for the package
@@ -339,19 +358,18 @@ public class CKANBackendImpl implements CKANBackend {
      */
     private String createPackage(DefaultHttpClient httpClient, String pkg, String orgId) throws Exception {
         // do CKAN request
-        String jsonString = "{ \"name\": \"" + pkg + "\", "
-                + "\"owner_org\": \"" + orgId + "\" }";
+        String jsonString = "{ \"name\": \"" + pkg + "\", " + "\"owner_org\": \"" + orgId + "\" }";
         CKANResponse res = doCKANRequest(httpClient, "POST",
                 "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create", jsonString);
 
         // check the status
         if (res.getStatusCode() == 200) {
             String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-            logger.debug("successful package creation - package ID: " + packageId);
+            logger.debug("Successful package creation (" + packageId + ")");
             return packageId;
         } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-            return "";
+            logger.error("Runtime error (Don't know how to treat response code " + res.getStatusCode() + ")");
+            return null;
         } // if else
     } // createDefaultPackage
 

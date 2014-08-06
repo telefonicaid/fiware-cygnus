@@ -148,10 +148,11 @@ public class OrionMySQLSink extends OrionSink {
         logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
         
-        if (namingPrefix.length() > Constants.NAMING_PREFIX_LEN) {
-            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_LEN
-                    + " and will be trunked to " + Constants.NAMING_PREFIX_LEN + " chatacters)");
-            namingPrefix = namingPrefix.substring(0, Constants.NAMING_PREFIX_LEN);
+        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
+            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_MAX_LEN
+                    + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
         } // if
         
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
@@ -178,13 +179,13 @@ public class OrionMySQLSink extends OrionSink {
         // than checking if it exits and then creating it
         String dbName = namingPrefix + organization;
         
-        if (dbName.length() > Constants.DB_NAME_LEN) {
+        if (dbName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
             logger.error("Bad configuration (A MySQL database name '" + dbName + "' has been built and its length is "
-                    + "greater than" + Constants.DB_NAME_LEN + ". This database name generation is based on the "
-                    + "concatenation of the 'naming_prefix' configuration parameter and the notified '"
+                    + "greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ". This database name generation is based on "
+                    + "the concatenation of the 'naming_prefix' configuration parameter and the notified '"
                     + Constants.ORG_HEADER + "' organization header, thus adjust them)");
             throw new Exception("The lenght of the MySQL database '" + dbName + "' is greater than "
-                    + Constants.DB_NAME_LEN);
+                    + Constants.MYSQL_DB_NAME_MAX_LEN);
         } // if
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
@@ -205,13 +206,13 @@ public class OrionMySQLSink extends OrionSink {
             // get the attrName of the table
             String tableName = namingPrefix + entityId + "_" + entityType;
             
-            if (dbName.length() > Constants.DB_NAME_LEN) {
+            if (tableName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
                 logger.error("Bad configuration (A MySQL table name '" + tableName + "' has been built and its length "
-                        + "is greater than" + Constants.TABLE_NAME_LEN + ". This table name generation is based on the "
-                        + "concatenation of the 'naming_prefix' configuration parameter, the notified entity "
-                        + "identifier, a '_' character and the notified entity type, thus adjust them");
+                        + "is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ". This table name generation is "
+                        + "based on the concatenation of the 'naming_prefix' configuration parameter, the notified "
+                        + "entity identifier, a '_' character and the notified entity type, thus adjust them");
                 throw new Exception("The length of the MySQL table '" + tableName + "' is greater than "
-                        + Constants.DB_NAME_LEN);
+                        + Constants.MYSQL_DB_NAME_MAX_LEN);
             } // if
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
