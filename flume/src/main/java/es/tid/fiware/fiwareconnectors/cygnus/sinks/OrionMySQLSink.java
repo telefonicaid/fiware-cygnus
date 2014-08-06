@@ -23,6 +23,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -146,6 +147,14 @@ public class OrionMySQLSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
+        
+        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
+            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_MAX_LEN
+                    + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
+        } // if
+        
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
     } // configure
 
@@ -170,6 +179,15 @@ public class OrionMySQLSink extends OrionSink {
         // than checking if it exits and then creating it
         String dbName = namingPrefix + organization;
         
+        if (dbName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
+            logger.error("Bad configuration (A MySQL database name '" + dbName + "' has been built and its length is "
+                    + "greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ". This database name generation is based on "
+                    + "the concatenation of the 'naming_prefix' configuration parameter and the notified '"
+                    + Constants.ORG_HEADER + "' organization header, thus adjust them)");
+            throw new Exception("The lenght of the MySQL database '" + dbName + "' is greater than "
+                    + Constants.MYSQL_DB_NAME_MAX_LEN);
+        } // if
+        
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
         // create it in the per-column mode because there will not be any table within the database
         if (rowAttrPersistence) {
@@ -187,6 +205,15 @@ public class OrionMySQLSink extends OrionSink {
 
             // get the attrName of the table
             String tableName = namingPrefix + entityId + "_" + entityType;
+            
+            if (tableName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
+                logger.error("Bad configuration (A MySQL table name '" + tableName + "' has been built and its length "
+                        + "is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ". This table name generation is "
+                        + "based on the concatenation of the 'naming_prefix' configuration parameter, the notified "
+                        + "entity identifier, a '_' character and the notified entity type, thus adjust them");
+                throw new Exception("The length of the MySQL table '" + tableName + "' is greater than "
+                        + Constants.MYSQL_DB_NAME_MAX_LEN);
+            } // if
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
@@ -218,9 +245,9 @@ public class OrionMySQLSink extends OrionSink {
                 logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
                 
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName + ", Data: "
-                            + recvTimeTs / 1000 + "," + recvTime + "," + entityId + "," + entityType + "," + attrName
-                            + "," + entityType + "," + attrValue + "," + attrMetadata);
+                    logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName
+                            + ", Data: " + recvTimeTs / 1000 + "," + recvTime + "," + entityId + "," + entityType
+                            + "," + attrName + "," + entityType + "," + attrValue + "," + attrMetadata);
                     persistenceBackend.insertContextData(dbName, tableName, recvTimeTs / 1000, recvTime,
                             entityId, entityType, attrName, attrType, attrValue, attrMetadata);
                 } else {
@@ -232,8 +259,9 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of attrName-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName + ", Timestamp: "
-                        + recvTime + ", Data (attrs): " + attrs.toString() + ", (metadata): " + mds.toString());
+                logger.info("Persisting data at OrionMySQLSink. Database: " + dbName + ", Table: " + tableName
+                        + ", Timestamp: " + recvTime + ", Data (attrs): " + attrs.toString() + ", (metadata): "
+                        + mds.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
             } // if
         } // for
