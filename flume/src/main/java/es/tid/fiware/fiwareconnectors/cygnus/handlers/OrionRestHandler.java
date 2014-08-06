@@ -90,10 +90,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
     @Override
     public void configure(Context context) {
         notificationsTarget = context.getString("notification_target", "notify");
-        defaultOrg = context.getString("default_organization", "default_org");
-        
+
         if (notificationsTarget.charAt(0) != '/') {
             notificationsTarget = "/" + notificationsTarget;
+        } // if
+        
+        defaultOrg = context.getString("default_organization", "default_org");
+        
+        if (defaultOrg.length() > Constants.ORG_MAX_LEN) {
+            logger.error("Bad configuration (Default organization length greater than " + Constants.ORG_MAX_LEN + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
         } // if
         
         logger.info("Startup completed");
@@ -146,9 +153,16 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
-                } // if else if
+                } // if else
             } else if (headerName.equals(Constants.ORG_HEADER)) {
-                organization = headerValue;
+                if (headerValue.length() > Constants.ORG_MAX_LEN) {
+                    logger.warn("Bad HTTP notification (organization length greater than " + Constants.ORG_MAX_LEN
+                            + ")");
+                    throw new HTTPBadRequestException("organization length greater than " + Constants.ORG_MAX_LEN
+                            + ")");
+                } else {
+                    organization = headerValue;
+                } // if else
             } // if else if
         } // for
 
