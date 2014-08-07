@@ -19,6 +19,10 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -57,134 +61,242 @@ public class HttpFSBackend extends HDFSBackend {
    
     @Override
     public void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
+        HttpPut request = null;
+        HttpResponse response = null;
         
-        // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + dirPath
-                + "?op=mkdirs&user.name=" + username;
+        try {
+            // check the username
+            if (username == null) {
+                username = this.cosmosDefaultUsername;
+            } // if
+
+            // create the HttpFS URL
+            String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + dirPath
+                    + "?op=mkdirs&user.name=" + username;
+
+            // do the put
+            request = new HttpPut(url);
+            logger.debug("HttpFS operation: " + request.toString());
+            response = null;
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
         
-        // do the put
-        HttpPut request = new HttpPut(url);
-        logger.debug("HttpFS operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
         
-        // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new Exception("The " + dirPath + " directory could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-        } // if
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new CygnusPersistenceError("The " + dirPath + " directory could not be created in HDFS. "
+                        + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
+                        + response.getStatusLine().getReasonPhrase());
+            } // if
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
     } // createDir
     
     @Override
     public void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
         throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
+        HttpPut request = null;
+        HttpResponse response = null;
+        String url = null;
         
-        // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
-                + "?op=create&user.name=" + username;
-        
-        // do the put (first step)
-        HttpPut request = new HttpPut(url);
-        logger.debug("HttpFS operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
-        
-        // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
-            throw new Exception("The " + filePath + " file could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-        } // if
+        try {
+            // check the username
+            if (username == null) {
+                username = this.cosmosDefaultUsername;
+            } // if
 
-        // do the put (second step); the URL remains the same
-        request = new HttpPut(url + "&data=true");
-        request.setHeader("Content-Type", "application/octet-stream");
-        request.setEntity(new StringEntity(data + "\n"));
-        logger.debug("HttpFS operation: " + request.toString());
-        response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
+            // create the HttpFS URL
+            url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                    + "?op=create&user.name=" + username;
+
+            // do the put (first step)
+            request = new HttpPut(url);
+            logger.debug("HttpFS operation: " + request.toString());
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
         
-        // check the status
-        if (response.getStatusLine().getStatusCode() != 201) {
-            throw new Exception(filePath + " file created in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-        } // if
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() != 307) {
+                throw new CygnusPersistenceError("The " + filePath + " file could not be created in HDFS. "
+                        + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
+                        + response.getStatusLine().getReasonPhrase());
+            } // if
+
+            // do the put (second step); the URL remains the same
+            request = new HttpPut(url + "&data=true");
+            request.setHeader("Content-Type", "application/octet-stream");
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
+        
+        try {
+            request.setEntity(new StringEntity(data + "\n"));
+        } catch (UnsupportedEncodingException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+            
+        logger.debug("HttpFS operation: " + request.toString());
+            
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+            
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() != 201) {
+                throw new CygnusPersistenceError(filePath + " file created in HDFS, but could not write the "
+                        + "data. HttpFS response: " + response.getStatusLine().getStatusCode() + " "
+                        + response.getStatusLine().getReasonPhrase());
+            } // if
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // catch
     } // createFile
     
     @Override
     public void append(DefaultHttpClient httpClient, String username, String filePath, String data) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-       
-        // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
-                + "?op=append&user.name=" + username;
+        HttpPost request = null;
+        HttpResponse response = null;
+        String url = null;
         
-        // do the post (first step)
-        HttpPost request = new HttpPost(url);
-        logger.debug("HttpFS operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
+        try {
+            // check the username
+            if (username == null) {
+                username = this.cosmosDefaultUsername;
+            } // if
 
-        // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
-            throw new Exception("The " + filePath + " file seems to not exist in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-        } // if
-                
-        // do the post (second step); the URL remains the same
-        request = new HttpPost(url + "&data=true");
-        request.setHeader("Content-Type", "application/octet-stream");
-        request.setEntity(new StringEntity(data + "\n"));
-        logger.debug("HttpFS operation: " + request.toString());
-        response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
+            // create the HttpFS URL
+            url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                    + "?op=append&user.name=" + username;
 
-        // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new Exception(filePath + " file exists in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-        } // if
+            // do the post (first step)
+            request = new HttpPost(url);
+            logger.debug("HttpFS operation: " + request.toString());
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
+                    
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+        
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() != 307) {
+                throw new CygnusPersistenceError("The " + filePath + " file seems to not exist in HDFS. "
+                        + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
+                        + response.getStatusLine().getReasonPhrase());
+            } // if
+
+            // do the post (second step); the URL remains the same
+            request = new HttpPost(url + "&data=true");
+            request.setHeader("Content-Type", "application/octet-stream");
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
+        
+        try {
+            request.setEntity(new StringEntity(data + "\n"));
+        } catch (UnsupportedEncodingException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+        
+        logger.debug("HttpFS operation: " + request.toString());
+    
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+        
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new CygnusPersistenceError(filePath + " file exists in HDFS, but could not write the "
+                        + "data. HttpFS response: " + response.getStatusLine().getStatusCode() + " "
+                        + response.getStatusLine().getReasonPhrase());
+            } // if
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // catch
     } // append
     
     @Override
     public boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
+        HttpResponse response = null;
+        HttpGet request = null;
         
-        // create the HttpFS URL
-        String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
-                + "?op=getfilestatus&user.name=" + username;
+        try {
+            // check the username
+            if (username == null) {
+                username = this.cosmosDefaultUsername;
+            } // if
+
+            // create the HttpFS URL
+            String url = "http://" + cosmosHost + ":" + cosmosPort + "/webhdfs/v1/user/" + username + "/" + filePath
+                    + "?op=getfilestatus&user.name=" + username;
+
+            // do the get
+            request = new HttpGet(url);
+            logger.debug("HttpFS operation: " + request.toString());
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // try catch
         
-        // do the get
-        HttpGet request = new HttpGet(url);
-        logger.debug("HttpFS operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        request.releaseConnection();
-        logger.debug("HttpFS response: " + response.getStatusLine().toString());
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
         
-        // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return true;
-        } else {
-            return false;
-        } // if else
+        try {
+            request.releaseConnection();
+            logger.debug("HttpFS response: " + response.getStatusLine().toString());
+
+            // check the status
+            if (response.getStatusLine().getStatusCode() == 200) {
+                return true;
+            } else {
+                return false;
+            } // if else
+        } catch (Exception e) {
+            throw new CygnusRuntimeError(e.getMessage());
+        } // catch
     } // exists
     
 } // HttpFSBackend
