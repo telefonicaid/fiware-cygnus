@@ -1,0 +1,9 @@
+{
+ 	"run_list": [
+		"recipe[cygnus::dependencies]",
+ 		"recipe[cygnus::jdk]",
+		"recipe[cygnus::maven]",
+		"recipe[cygnus::flume]",
+		"recipe[cygnus::cygnus]"
+ 	]	
+ }
