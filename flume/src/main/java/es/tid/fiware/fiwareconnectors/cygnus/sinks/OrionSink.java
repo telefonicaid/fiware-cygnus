@@ -124,7 +124,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             logger.error("Runtime error (" + e.getMessage() + ")");
         } // catch
 
-        logger.info("Event got from the channel (" + event.hashCode() + ")");
+        logger.info("Event got from the channel (id=" + event.hashCode() + ")");
         logger.debug("Event details=" + event.toString());
         
         try {
@@ -139,9 +139,23 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 logger.error(e.getMessage());
-                txn.rollback();
-                status = Status.BACKOFF;
-                logger.info("An event was put again in the channel (" + event.hashCode() + ")");
+                
+                // check the event TTL
+                int ttl = new Integer(event.getHeaders().get(Constants.TTL)).intValue();
+                
+                if (ttl > 0) {
+                    String newTTL = new Integer(ttl - 1).toString();
+                    event.getHeaders().put(Constants.TTL, newTTL);
+                    txn.rollback();
+                    status = Status.BACKOFF;
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
+                            + ")");
+                } else {
+                    logger.info("The event TTL has expired, it is no more re-injected in the channel (id="
+                            + event.hashCode() + ", ttl=0)");
+                    txn.commit();
+                    status = Status.READY;
+                } // if else
             } else {
                 if (e instanceof CygnusRuntimeError) {
                     logger.error(e.getMessage());

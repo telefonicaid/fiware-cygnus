@@ -65,5 +65,6 @@ public final class Constants {
     
     // Others
     public static final String EMPTY_MD = "[]";
+    public static final String TTL = "ttl";
 
 } // Constants
