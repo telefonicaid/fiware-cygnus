@@ -21,6 +21,9 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Map;
@@ -106,39 +109,49 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
             if (event == null) {
                 txn.commit();
+                txn.close();
                 return Status.READY;
             } // if
-            
-            logger.info("Event got from the channel (" + event.hashCode() + ")");
         } catch (Exception e) {
             logger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch
-
-        // set the transactionId in MDC
-        MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
             
         try {
+            // set the transactionId in MDC
+            MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
+        } catch (Exception e) {
+            logger.error("Runtime error (" + e.getMessage() + ")");
+        } // catch
+
+        logger.info("Event got from the channel (" + event.hashCode() + ")");
+        logger.debug("Event details=" + event.toString());
+        
+        try {
             // persist the event
-            logger.debug("An event was taken from the channel (" + event.toString() + ")");
             persist(event);
             
             // the transaction has succeded
             txn.commit();
             status = Status.READY;
             logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
-        } catch (Throwable t) {
-            txn.rollback();
-            // FIXME: We should be able to distinguish among both types of error... Bad context data errors should not
-            // be re-injected/rollbacked into the channel!
-            // issue --> https://github.com/telefonicaid/fiware-connectors/issues/52
-            logger.warn("Bad context data/Persistence error (" + t.getMessage() + ")");
-            status = Status.BACKOFF;
-
-            // rethrow all errors
-            if (t instanceof Error) {
-                throw (Error) t;
-            } // if
+        } catch (Exception e) {
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                logger.error(e.getMessage());
+                txn.rollback();
+                status = Status.BACKOFF;
+                logger.info("An event was put again in the channel (" + event.hashCode() + ")");
+            } else {
+                if (e instanceof CygnusRuntimeError) {
+                    logger.error(e.getMessage());
+                } else if (e instanceof CygnusBadConfiguration) {
+                    logger.warn(e.getMessage());
+                } // if else if
+                
+                txn.commit();
+                status = Status.READY;
+            } // if else
         } finally {
             // close the transaction
             txn.close();
