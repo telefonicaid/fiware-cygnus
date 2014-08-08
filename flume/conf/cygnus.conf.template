@@ -39,6 +39,7 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
 cygnusagent.sources.http-source.handler.default_organization = org42
+cygnusagent.sources.http-source.handler.event_ttl = 10
 
 # ============================================
 # OrionHDFSSink configuration

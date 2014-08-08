@@ -321,6 +321,8 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
 cygnusagent.sources.http-source.handler.default_organization = org42
+# Number of channel re-injection retries before a Flume event is definetely discarded 
+cygnusagent.sources.http-source.handler.events_ttl = 10
 
 # ============================================
 # OrionHDFSSink configuration
