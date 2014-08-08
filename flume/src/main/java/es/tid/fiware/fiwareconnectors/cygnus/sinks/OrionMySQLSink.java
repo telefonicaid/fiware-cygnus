@@ -23,6 +23,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
@@ -184,8 +185,8 @@ public class OrionMySQLSink extends OrionSink {
                     + "greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ". This database name generation is based on "
                     + "the concatenation of the 'naming_prefix' configuration parameter and the notified '"
                     + Constants.ORG_HEADER + "' organization header, thus adjust them)");
-            throw new Exception("The lenght of the MySQL database '" + dbName + "' is greater than "
-                    + Constants.MYSQL_DB_NAME_MAX_LEN);
+            throw new CygnusBadConfiguration("The lenght of the MySQL database '" + dbName + "' is greater "
+                    + "than " + Constants.MYSQL_DB_NAME_MAX_LEN);
         } // if
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
@@ -211,8 +212,8 @@ public class OrionMySQLSink extends OrionSink {
                         + "is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ". This table name generation is "
                         + "based on the concatenation of the 'naming_prefix' configuration parameter, the notified "
                         + "entity identifier, a '_' character and the notified entity type, thus adjust them");
-                throw new Exception("The length of the MySQL table '" + tableName + "' is greater than "
-                        + Constants.MYSQL_DB_NAME_MAX_LEN);
+                throw new CygnusBadConfiguration("The length of the MySQL table '" + tableName + "' is "
+                        + "greater than " + Constants.MYSQL_DB_NAME_MAX_LEN);
             } // if
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
