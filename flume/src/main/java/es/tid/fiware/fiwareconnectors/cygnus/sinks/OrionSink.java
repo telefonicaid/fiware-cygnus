@@ -153,6 +153,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 } else {
                     logger.info("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
+                    logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
                     txn.commit();
                     status = Status.READY;
                 } // if else
