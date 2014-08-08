@@ -54,6 +54,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private Logger logger;
     private String notificationsTarget;
     private String defaultOrg;
+    private String eventsTTL;
     private long transactionCount;
     private long bootTimeSeconds;
     private long bootTimeMilliseconds;
@@ -90,6 +91,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     @Override
     public void configure(Context context) {
         notificationsTarget = context.getString("notification_target", "notify");
+        logger.debug("Reading configuration (notification_target=" + notificationsTarget + ")");
 
         if (notificationsTarget.charAt(0) != '/') {
             notificationsTarget = "/" + notificationsTarget;
@@ -102,6 +104,10 @@ public class OrionRestHandler implements HTTPSourceHandler {
             logger.info("Exiting Cygnus");
             System.exit(-1);
         } // if
+        
+        logger.debug("Reading configuration (default_organization=" + defaultOrg + ")");
+        eventsTTL = context.getString("events_ttl", "10");
+        logger.debug("Reading configuration (events_ttl=" + eventsTTL + ")");
         
         logger.info("Startup completed");
     } // configure
@@ -204,14 +210,15 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger.debug("Adding flume event header (name=" + Constants.ORG_HEADER
                 + ", value=" + organization == null ? defaultOrg : organization + ")");
         eventHeaders.put(Constants.TRANSACTION_ID, transId);
-        logger.debug("Adding flume event header (name=" + Constants.TRANSACTION_ID
-                + ", value=" + transId + ")");
+        logger.debug("Adding flume event header (name=" + Constants.TRANSACTION_ID + ", value=" + transId + ")");
+        eventHeaders.put(Constants.TTL, eventsTTL);
+        logger.debug("Adding flume event header (name=" + Constants.TTL + ", value=" + eventsTTL + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        logger.info("Event put in the channel (" + event.hashCode() + ")");
+        logger.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL +")");
         return eventList;
     } // getEvents
     
