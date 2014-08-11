@@ -52,18 +52,18 @@ First of all, install Cygnus 0.2 (in fact, install 0.2.1 which has an important 
 
 Follow the `flume/README.md` in order to get an instance.
 
-Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after installing Cygnus 0.2.1 you will need to translate the data within your HDFS space. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.2.sh`.
+Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after installing Cygnus 0.2.1 you will need to translate the data within your HDFS space. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.2.sh` (TBD: more details will be provided in an additional document, which link will be linked from here).
 
 ## Moving to Cygnus 0.3 or higher
 
 First of all, install Cygnus 0.3 (or higher, if available). Take it from https://github.com/telefonicaid/fiware-connectors/releases/tag/release-3, or `git checkout` to `release/0.3` after cloning the source code:
 
     $ git clone https://github.com/telefonicaid/fiware-connectors
-    $ git checkout release/0.3
+    $ git checkout release/0.3 # or release/0.4 etc
 
 Follow the `flume/README.md` in order to get an instance.
 
-Then, due to from Cygnus 0.2 the data is persisted in Json format, after installing Cygnus 0.3 you will need to translate the data. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.3.sh`.
+Then, due to from Cygnus 0.2 the data is persisted in Json format, after installing Cygnus 0.3 you will need to translate the data. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.3.sh` (TBD: more details will be provided in an additional document, which link will be linked from here).
 
 ## Contact information
 
