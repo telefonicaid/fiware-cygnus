@@ -45,7 +45,7 @@ You can check it has been successfully set by typing:
 ## `mysql-columnsync.sh`
 This script aims to create the needed MySQL table used in the documentation for cygnus column sync.
 It adds a database and a table to store the entity name ande the entity values. 
-It also adds the possibility to configure the cygnus prefix.
+It also adds the possibility to configure the cygnus prefix if needed.
 
 ### Usage
 The script has 6 mandatory parameters and 1 optional:
@@ -70,4 +70,5 @@ Use this command to manually run the script:
 
 
 # Contact
-Francisco Romero Bueno (frb at tid dot es)
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
+Xavier Val (e.fiware2.tid@telefonica.com) 
