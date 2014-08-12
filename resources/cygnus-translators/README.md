@@ -28,6 +28,8 @@ The 0.2-like result will be:
 
 I.e. a single file per enity, as specified by Cygnus 0.2 and higher.
 
+A complete translation guide can be found in `doc/operation/cygnus_0.1_to_0.2_migration.md`
+
 ## `cygnus-translator-0.1-to-0.3.sh`
 
 Input parameters:
@@ -56,3 +58,5 @@ The 0.3-like result will be:
     /user/johndoe/new_dataset/Room2-Room/Room2-Room.txt
 
 Observe the entity data, represented by its entity descriptor file, is preceded by a folder having the same name than the entity descriptor. This is a requirement for Hive tables creation, which needs folders instead of files.
+
+A complete translation guide can be found in `doc/operation/cygnus_0.1_to_0.3_(or_higher)_migration.md`

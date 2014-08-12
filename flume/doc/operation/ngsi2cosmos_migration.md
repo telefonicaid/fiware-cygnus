@@ -14,6 +14,7 @@ CKAN persistence | no | no | yes | yes | yes
 Complex attributes | no | no | yes | yes | yes
 Metadata support | no | no | no | yes
 Persistence mode | row | row | row | row or column
+Files organization | per attribute | per attribute | per-entity | per-entity 
 
 As can be seen, ngs2cosmos is functionally equivalent to Cygnus 0.1, i.e. simple context data with no metadata is stored as CSV-like data in HDFS files, following an attribute-value or row-like schema:
 
@@ -52,7 +53,7 @@ First of all, install Cygnus 0.2 (in fact, install 0.2.1 which has an important 
 
 Follow the `flume/README.md` in order to get an instance.
 
-Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after installing Cygnus 0.2.1 you will need to translate the data within your HDFS space. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.2.sh` (TBD: more details will be provided in an additional document, which link will be linked from here).
+Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after installing Cygnus 0.2.1 you will need to translate the data within your HDFS space. In order to do so, please follow the guidelines within `doc/operation/cygnus_0.1_to_0.2_migration.md`.
 
 ## Moving to Cygnus 0.3 or higher
 
@@ -63,7 +64,7 @@ First of all, install Cygnus 0.3 (or higher, if available). Take it from https:/
 
 Follow the `flume/README.md` in order to get an instance.
 
-Then, due to from Cygnus 0.2 the data is persisted in Json format, after installing Cygnus 0.3 you will need to translate the data. Please log into Cosmos and run the script available at `resources/cygnus_translators/cygnus-translator-0.1-to-0.3.sh` (TBD: more details will be provided in an additional document, which link will be linked from here).
+Then, due to from Cygnus 0.2 the data is persisted in Json format, after installing Cygnus 0.3 you will need to translate the data. In order to do so, please follow the guidelines within `doc/operation/cygnus_0.1_to_0.3_migration.md`.
 
 ## Contact information
 
