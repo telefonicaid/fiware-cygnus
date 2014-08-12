@@ -48,7 +48,7 @@ It adds a database and a table to store the entity name ande the entity values.
 It also adds the possibility to configure the cygnus prefix if needed.
 
 ### Usage
-The script has 6 mandatory parameters and 1 optional:
+The script has seven mandatory parameters plus and additional one:
 
 * Host where the MySQL server is running. 
 * MySQL user allowed to create the data.
@@ -56,16 +56,17 @@ The script has 6 mandatory parameters and 1 optional:
 * Name of the service (FIWARE-Service header used in ContextBroker).
 * Type of entity that will be updated (Following the examples it uses the type "room")
 * Name of entity that will be updated (Following the examples it uses the type "room99")
+* Name of attribute that will be updated (Following the examples it uses the attribute type "temperature")
 * Optional - Cygnus prefix, in case it is set in Cygnus configuration
 
 
 
 Use this command to manually run the script:
 
-    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> <dbpass> <service1> <room> <room99>
+    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> <dbpass> <service1> <room> <room99> <temperature>
     
     Or using prefix
-    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> dbpass> <service2> <room> <room99> <pre_>
+    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> dbpass> <service2> <room> <room99> <temperature> <pre_>
 
 
 
