@@ -41,5 +41,34 @@ You can check it has been successfully set by typing:
     $ sudo crontab -l
     0 */1 * * * /usr/share/cygnus/mysql-cleaner.sh <MySQL_host> <MySQL_user> <MySQL_password> <data_lifetime_days>      
 
+
+## `mysql-columnsync.sh`
+This script aims to create the needed MySQL table used in the documentation for cygnus column sync.
+It adds a database and a table to store the entity name and the entity values. 
+It also adds the possibility to configure the cygnus prefix if needed.
+
+### Usage
+The script has seven mandatory parameters plus and additional one:
+
+* Host where the MySQL server is running. 
+* MySQL user allowed to create the data.
+* Password for the above user.
+* Name of the service (FIWARE-Service header used in ContextBroker).
+* Type of entity that will be updated (Following the examples it uses the type "room")
+* Name of entity that will be updated (Following the examples it uses the type "room99")
+* Name of attribute that will be updated (Following the examples it uses the attribute type "temperature")
+* Optional - Cygnus prefix, in case it is set in Cygnus configuration
+
+
+
+Use this command to manually run the script:
+
+    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> <dbpass> <service1> <room> <room99> <temperature>
+    
+    Or using prefix
+    $ ./create-dbsinkplace.sh <ipmysql> <dbuser> dbpass> <service2> <room> <room99> <temperature> <pre_>
+
+
+
 # Contact
-Francisco Romero Bueno (frb at tid dot es)
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
