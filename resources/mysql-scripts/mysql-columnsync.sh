@@ -22,7 +22,7 @@
 
 # This script is aimed to Cygnus debugging. It creates the needed database and table in MySQL 
 # when the sync between CYGNUS and MySQL is set to COLUMN
-# It uses seven arguments (plus and additional one):
+# It uses seven arguments (plus an additional one):
 # 1 MYSQL_HOST
 # 2 MYSQL_USER It has to be allowed to create dbs and tables
 # 3 MYSQL_PASS User pass

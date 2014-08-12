@@ -44,7 +44,7 @@ You can check it has been successfully set by typing:
 
 ## `mysql-columnsync.sh`
 This script aims to create the needed MySQL table used in the documentation for cygnus column sync.
-It adds a database and a table to store the entity name ande the entity values. 
+It adds a database and a table to store the entity name and the entity values. 
 It also adds the possibility to configure the cygnus prefix if needed.
 
 ### Usage
