@@ -72,4 +72,3 @@ Use this command to manually run the script:
 
 # Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
-Xavier Val (e.fiware2.tid@telefonica.com) 

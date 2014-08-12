@@ -18,7 +18,6 @@
 #
 # For those usages not covered by this license please contact with
 # francisco.romerobueno@telefonica.com
-# Author xval
 
 # This script is aimed to Cygnus debugging. It creates the needed database and table in MySQL 
 # when the sync between CYGNUS and MySQL is set to COLUMN
