@@ -42,12 +42,13 @@ prefixName=$2
 srcHDFSFolder=$3
 dstHDFSFolder=$4
 
-# check if the current user matches the given one; if matches, no superuser provileges are need
+# check if the current user matches the given one; if matches, no superuser privileges are need
 superuser=0
 
 if [ "$USER" != "$hdfsUser" ]; then
         echo "You ($USER) are trying to impersonate another user ($hdfsUser)"
 
+	# check if the current user is sudoer
         if [[ $(sudo -v | grep 'Sorry') == 0 ]]; then
                 superuser=1
         else
@@ -181,7 +182,7 @@ for i in "${dstHDFSFileNames[@]}"; do
         	sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i/$i.txt
 	else
 		hadoop fs -mkdir $dstHDFSFolder/$i
-                hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i/$i.txt
+                hadoop fs -cat $dstHDFSFolder/$i.*.tmp | hadoop fs -put - $dstHDFSFolder/$i/$i.txt
 	fi
 done
 

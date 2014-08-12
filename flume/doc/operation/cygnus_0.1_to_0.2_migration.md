@@ -44,7 +44,7 @@ Your data within Cosmos is very important: it cannot be lost nor modified. There
 
 1. Log into your Cosmos account within the Head Node.
 2. Get an executable copy of the translation script:<br>
-`$ wget --no-check-certificate https://raw.githubusercontent.com/telefonicaid/fiware-connectors/develop/resources/cygnus-translators/cygnus-translator-0.1-to-0.2.sh`
+`$ wget --no-check-certificate hhttps://raw.githubusercontent.com/telefonicaid/fiware-connectors/release/iotplatform-v1/resources/cygnus-translators/cygnus-translator-0.1-to-0.2.sh`
 `$ chmod +x cygnus-translator-0.1-to-0.2.sh`
 3. Run the script by giving your HDFS username, the input HDFS path and the output HDFS path:<br>
 `$ ./cygnus-translator-0.1-to-0.2 myuser /user/myuser/mydata/ /user/myuser/mydata2/`

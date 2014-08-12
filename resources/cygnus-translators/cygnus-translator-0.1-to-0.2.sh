@@ -40,12 +40,13 @@ hdfsUser=$1
 srcHDFSFolder=$2
 dstHDFSFolder=$3
 
-# check if the current user matches the given one; if matches, no superuser provileges are need
+# check if the current user matches the given one; if matches, no superuser privileges are need
 superuser=0
 
 if [ "$USER" != "$hdfsUser" ]; then
         echo "You ($USER) are trying to impersonate another user ($hdfsUser)"
 
+	# check if the current user is sudoer
 	if [[ $(sudo -v | grep 'Sorry') == 0 ]]; then
 		superuser=1
         else
