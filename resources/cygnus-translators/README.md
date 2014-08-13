@@ -60,3 +60,13 @@ The 0.3-like result will be:
 Observe the entity data, represented by its entity descriptor file, is preceded by a folder having the same name than the entity descriptor. This is a requirement for Hive tables creation, which needs folders instead of files.
 
 A complete translation guide can be found in `doc/operation/cygnus_0.1_to_0.3_(or_higher)_migration.md`
+
+## `cygnus-translator-0.2-to-0.3.sh`
+
+As you may observe, this script has not been developed given it is not a relevant migration path so far. In the case you have installed Cygnus 0.2 and wanting to upgrade to 0.3 (or higher) please contact us.
+
+## Contact information
+
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
+<br>
+Fermín Galán Márquez (fermin.galanmarquez@telefonica.com)
