@@ -1,6 +1,6 @@
 # Adding new sinks development guide
 
-Cygnus allows for Orion context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks may be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official Cygnus contributor!
+Cygnus allows for Orion context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks could be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official Cygnus contributor!
 
 This document tries to guide you on the development of such alternative sinks, by giving you guidelines about how to write the sink code, but also how the different classes must be called, the accepted coding style, etc. 
 
@@ -27,7 +27,7 @@ We will not merge new code in the Cygnus repository if such coding style is not 
 ### `OrionSink` class
 `Orionsink` is the base class all the Cygnus sinks extend. This class governs the consumption of the Flume events put by `OrionRestHandler` in the sink channel, taking them from the channel and calls to the persistence abstract method which in final term is the unique method that must be implemented by the extending class. All the logic about starting and stopping the sink, beginning, committing and closing Flume transactions and many other features is already there, thus you will not have to deal with it.
 
-You find this class at the pollwing path:
+You find this class at the following path:
 
     fiware-connectors/flume/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks/OrionSink.java
 
