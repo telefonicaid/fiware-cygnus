@@ -68,6 +68,7 @@ function download_flume(){
 	_log "#### Cleaning the temporal folders... ####"
 	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
 	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
+	rm -rf ${RPM_PRODUCT_SOURCE_DIR}
 	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
 	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
 	popd &> /dev/null
