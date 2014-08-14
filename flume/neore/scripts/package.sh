@@ -68,6 +68,7 @@ function download_flume(){
 	_log "#### Cleaning the temporal folders... ####"
 	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
 	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
+	rm -rf ${RPM_PRODUCT_SOURCE_DIR}
 	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
 	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
 	popd &> /dev/null
@@ -189,6 +190,8 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	[[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
+	rm -rf ${RPM_BASE_DIR}/BUILD
+	rm -rf ${RPM_BASE_DIR}/BUILDROOT
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
 	do
 		_log "#### Packaging using: ${SPEC_FILE}... ####"
