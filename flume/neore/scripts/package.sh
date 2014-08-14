@@ -190,6 +190,8 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	[[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
+	rm -rf ${RPM_BASE_DIR}/BUILD
+	rm -rf ${RPM_BASE_DIR}/BUILDROOT
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
 	do
 		_log "#### Packaging using: ${SPEC_FILE}... ####"
