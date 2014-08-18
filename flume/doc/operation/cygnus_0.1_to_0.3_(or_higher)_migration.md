@@ -12,7 +12,7 @@ Thus, having a line such as the following one in Cygnus 0.1:
 
     2014-02-27T14:46:21|13453464536|Room1|Room|temperature|centigrade|26.5
 
-becames the following line in Cygnus 0.3:
+becomes the following line in Cygnus 0.3:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[]}
 
@@ -48,7 +48,7 @@ Nevertheless, this does not affect the migration since the per-row mode used in 
 Your data within Cosmos is very important: it cannot be lost nor modified. Therefore the data translation must be prepared in advance:
 
 1. First of all, identify the HDFS path where your CSV-like data is. Let's say it is `/user/myuser/mydata/`. 
-2. Then, identify the HDFS path where you want to put your data in the new Json format. Let's say it is `/user/myuser/mydata2/`. <b>It is mandatory you use a path different than the one containing the current data</b>. There would not be problem with choosing the same path, since the translated files have different file names, but please observe the script does not automatically remove the original data files, thus in the end you would have files from two different formats living at the same time in the same location; this would avoids Hive working well (see the <i>Rollbacking</i> section). In addition, if a rollback is necessary (due to a VM reboot, network fail, etc), you would have a mesh of CSV and Json data files together.
+2. Then, identify the HDFS path where you want to put your data in the new Json format. Let's say it is `/user/myuser/mydata2/`. <b>It is mandatory you use a path different than the one containing the current data</b>. There would not be problem with choosing the same path, since the translated files have different file names, but please observe the script does not automatically remove the original data files, thus in the end you would have files from two different formats living at the same time in the same location; this would avoids Hive working well (see the <i>Hive tables</i> section). In addition, if a rollback is necessary (due to a VM reboot, network fail, etc), you would have a mesh of CSV and Json data files together.
 3. Check if you have enough disk space in your user account within the Head Node of Cosmos. The HDFS files are temporarilly downloaded to `/tmp`, where they are translated before being uploaded to HDFS. The reason is, due to the <i>big</i> nature of the data, the translation is not recommended to be done in memory. You can check the ammount of disk space required by performing the following command:<br>
 `S hadoop fs -dus /user/myuser/mydata/`  
 
@@ -58,9 +58,9 @@ Your data within Cosmos is very important: it cannot be lost nor modified. There
 2. Get an executable copy of the translation script:<br>
 `$ wget --no-check-certificate https://raw.githubusercontent.com/telefonicaid/fiware-connectors/release/iotplatform-v1/resources/cygnus-translators/cygnus-translator-0.1-to-0.3.sh`
 `$ chmod +x cygnus-translator-0.1-to-0.3.sh`
-3. Run the script by giving your HDFS username, a custom prefex to be added to the putput files (optional), the input HDFS path and the output HDFS path:<br>
+3. Run the script by giving your HDFS username, a custom prefix to be added to the output files (optional), the input HDFS path and the output HDFS path:<br>
 `$ ./cygnus-translator-0.1-to-0.3 myuser "" /user/myuser/mydata/ /user/myuser/mydata2/`
-4. You can check the new translated files have been created by listing the destination folder:
+4. You can check the new translated files have been created by listing the destination folder:<br>
 `$ hadoop fs -ls /user/myser/mydata2/`
 <br>
 
@@ -78,7 +78,7 @@ As you can see, first of all the destinarion HDFS folder is checked; it may not 
 
 ## Hive tables
 
-Hive allows for querying data within HDFS using a SQL-like language. These queries are executed against logical tables pointing to the real data; the path of the data is a table creation parameter.
+Hive allows for querying data within HDFS using a SQL-like language. These queries are executed against logical tables pointing to the real data; the path of the data is a parameter of table creation command.
 
 Since a data translation has been performed and the data location has changed, it is necessary to destroy the unique table pointing to the original HDFS path and create new ones (<b>one per each entity</b>). Step by step:
 
@@ -102,6 +102,13 @@ Tip: The new table name is advisable to be composed as:
 
     <new_table_name>=<cosmos_user>_<path>_<to>_<the>_<data>_<entity_descriptor>
     <entity_despriptor>=<entityId>_<entityType>
+
+## Cygnus configuration tips
+
+In terms of configuration, there is almost no changes between Cygnus 0.1 and 0.3 (or higher). Nevertheless, there are a couple of things you should know for a complete compatibility among versions:
+
+* From Cygnus 0.3 there is no `cygnusagent.sinks.hdfs-sink.cosmos_dataset` in `OrionHDFSSink`. Now, there is a default organization parameter (`cygnusagent.sources.http-source.handler.default_organization`) which is used to build the HDFS path if no other organization information is given by Orion in the notifications. Unless you are able to configure Orion to behave as described, you will have to define the default destination through this parameter. Thus, if you had a `cygnusagent.sinks.hdfs-sink.cosmos_dataset = path/to/my/folder` you can now have `cygnusagent.sources.http-source.handler.default_organization = path/to/my/folder`.
+* Remember Cygnus 0.1 worked in the currently called "row-like" mode, thus configure Cygnus 0.3 properly: `cygnusagent.sinks.hdfs-sink.attr_persistence = row`
 
 ## Rollbacking (if something goes wrong)
 
