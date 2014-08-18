@@ -68,18 +68,30 @@ Let's consider the following notification in Json format coming from an Orion Co
       ]
     }
 
-Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (it is a POST request, the target is `notify` and the headers are OK), detecting the content type (it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
+Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (that it is a POST request, that the target is 'notify' and that the headers are OK), detecting the content type (that it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
 
-    event={body={the_json_part...},headers={{"content-type","application/json"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
+    event={
+		body=json_data,
+		headers={
+			content-type=application/json,
+			fiware-service=Org42,
+			recvTimeTs=1402409899391,
+			transactionId=asdfasdfsdfa,
+			ttl=10
+		}
+	}
+
+<b>NOTE: The above is an <i>object representation</i>, not Json data nor any other data format.</b>
 
 Let's have a look on the Flume event headers:
 
-* The `content-type` header is a replica of the Http one in order the different sinks know how to parse the event body, in this case it is Json.
-* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the `Fiware-Service` header, then Cygnus will use the default organization specified in the `default_organization` configuration property.
-* The notification reception time is included in the list of headers (as `recvTimeTs`) for timestamping purposes in the different sinks. 
+* The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
+* Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
+* The notification reception time is included in the list of headers (as <b>recvTimeTs</b>) for timestamping purposes in the different sinks.
+* The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. 
 
-The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
-
+Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
 ### OrionHDFSSink persistence
 
