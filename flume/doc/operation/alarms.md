@@ -31,13 +31,13 @@ Cygnus logs are categorized under seven message types, each one identified by a 
     Example: `Bad HTTP notification (aggregation target not supported)`
 * <i>Bad context data</i> (`WARN` level). These kind of errors are related to semantic inconsistences within the notified context data: anomalous number of attributes or not existent attribute (even when the number of attributes matches) for an already known instance. They are exclusively thrown by the sinks.
 
-    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
+    Example: `Bad context data (The markup in the document following the root element must be well-formed)`
 * <i>Channel error</i> (`ERROR` level). These kind of errors tell about problems with the internal channel of the agent. This channel is used as part of the failover mechanisms of Flume, storing those events that cannot be processed by the sinks. Nevertheless, the channel may fail itself, either because the HTTP source is not able to put the event (channel error, or simply it is full), either because the sink cannot get a new event.
 
     Example: `Channel error (The event could not be got. Details=...)`
 * <i>Persistence error</i> (`ERROR` level). These kind of errors tell about problems with the persistence backend: unable to connect or not existent entity (when the backend needs to have provisioned a container for that entity, e.g. entity-related tables in MySQL or CKAN). They are exclusively thrown by the sinks. Please observe Cygnus itself may solve the problem thanks to the channel-based failover mechanism of Flume, and the Flume Failover Sink Processor which switchs to a passive sink (if configured).
 
-    Example: <b>TBD when https://github.com/telefonicaid/fiware-connectors/issues/52 is done</b>
+    Example: `Persistence error (Could not connect to the MySQL server)`
 
 Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Informational messages such as Cygnus version, transaction start/end and other are labeled as <i>Informational</i>, being `INFO` the logging level.
 
