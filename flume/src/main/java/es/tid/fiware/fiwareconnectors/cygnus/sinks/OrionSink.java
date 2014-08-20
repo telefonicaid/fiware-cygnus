@@ -22,6 +22,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.io.StringReader;
@@ -153,7 +154,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 } else {
                     logger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
-                    logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
                     txn.commit();
                     status = Status.READY;
                 } // if else
@@ -162,14 +162,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     logger.error(e.getMessage());
                 } else if (e instanceof CygnusBadConfiguration) {
                     logger.warn(e.getMessage());
-                } // if else if
-                
+                } else if (e instanceof CygnusBadContextData) {
+                    logger.warn(e.getMessage());
+                } // if else if else if
+
                 txn.commit();
                 status = Status.READY;
             } // if else
         } finally {
             // close the transaction
             txn.close();
+            logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;
@@ -185,19 +188,31 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     private void persist(Event event) throws Exception {
         String eventData = new String(event.getBody());
         Map<String, String> eventHeaders = event.getHeaders();
-        
+
         // parse the eventData
         NotifyContextRequest notification = null;
-        
+
         if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
+
+            try {
+                notification = gson.fromJson(eventData, NotifyContextRequest.class);
+            } catch (Exception e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } // try catch
         } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(eventData));
-            Document doc = dBuilder.parse(is);
-            doc.getDocumentElement().normalize();
+            Document doc = null;
+
+            try {
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                InputSource is = new InputSource(new StringReader(eventData));
+                doc = dBuilder.parse(is);
+                doc.getDocumentElement().normalize();
+            } catch (Exception e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } // try catch
+
             notification = new NotifyContextRequest(doc);
         } else {
             // this point should never be reached since the content type has been checked when receiving the
@@ -207,8 +222,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get(Constants.RECV_TIME_TS)).longValue(),
-                contextResponses);
+        persist(eventHeaders.get(Constants.ORG_HEADER),
+                new Long(eventHeaders.get(Constants.RECV_TIME_TS)).longValue(), contextResponses);
     } // persist
     
     /**
