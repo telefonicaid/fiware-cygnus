@@ -104,11 +104,14 @@ mkdir -p %{buildroot}/var/run/%{_project_name}
 mkdir -p %{buildroot}/${_log_dir}
 # Create /etc/cron.d directory
 mkdir -p %{buildroot}/etc/cron.d
+# Create /etc/logrotate.d directory
+mkdir -p %{buildroot}/etc/logrotate.d
 
-cp -R %{_builddir}/usr/cygnus/* %{_build_root_project}
-cp %{_builddir}/init.d/%{_service_name}  %{_build_root_project}/init.d/%{_service_name}
-cp %{_builddir}/config/* %{_build_root_project}/conf/
-cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles %{buildroot}/etc/cron.d
+cp -R %{_builddir}/usr/cygnus/*                       %{_build_root_project}
+cp %{_builddir}/init.d/%{_service_name}               %{_build_root_project}/init.d/%{_service_name}
+cp %{_builddir}/config/*                              %{_build_root_project}/conf/
+cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles    %{buildroot}/etc/cron.d
+cp %{_builddir}/logrotate.d/logrotate-cygnus-daily    %{buildroot}/etc/logrotate.d
 
 # -------------------------------------------------------------------------------------------- #
 # post-install section:
@@ -171,6 +174,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(755,%{_project_user},%{_project_user},755)
 %attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
+%attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
 
 %{_project_install_dir}
 /var/
