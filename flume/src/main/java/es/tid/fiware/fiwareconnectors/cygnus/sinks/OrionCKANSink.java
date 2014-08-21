@@ -172,7 +172,7 @@ public class OrionCKANSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = Utils.encode(contextElement.getId());
             String entityType = Utils.encode(contextElement.getType());
-            logger.debug("Processing context element (id= + " + entityId + ", type= " + entityType + ")");
+            logger.debug("Processing context element (id=" + entityId + ", type=" + entityType + ")");
             
             // get the resourceName descriptor
             String resourceName = entityId + "-" + entityType;
