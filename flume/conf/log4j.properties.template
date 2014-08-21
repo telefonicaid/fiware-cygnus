@@ -21,7 +21,9 @@
 # These can be overridden by system properties, e.g. the following logs in the standard output, which is very useful
 # for testing purposes:
 # -Dflume.root.logger=DEBUG,console
-flume.root.logger=INFO,LOGFILE,DAILY
+#flume.root.logger=DEBUG,console
+
+flume.root.logger=INFO,LOGFILE
 flume.log.dir=/var/log/cygnus/
 flume.log.file=flume.log
 
