@@ -129,13 +129,26 @@ public class CKANBackendImpl implements CKANBackend {
                 String pkgName = (String) pkg.get("name");
                 
                 if (pkgName.equals(effectiveDefaultDataset)) {
-                    String packageId = pkg.get("id").toString();
+                    String pkgId = pkg.get("id").toString();
                     logger.debug("Default package found (orgName=" + orgName + ", defaultPkgName="
-                            + effectiveDefaultDataset + ", defaultPkgId= " + packageId + ")");
-                    populateResourcesMap((JSONArray) pkg.get("resources"), orgName);
-                    packagesIds.put(orgName, packageId);
+                            + effectiveDefaultDataset + ", defaultPkgId= " + pkgId + ")");
+                    JSONArray resources = (JSONArray) pkg.get("resources");
+                    
+                    // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
+                    // method returns empty resource lists for its packages! (not in CKAN 2.2)
+                    // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+                    // if the resources list is empty we must try to get it package by package... this will add certain
+                    // overhead in the case the resources list is really empty or the CKAN version is 2.2 :)
+                    if (resources.size() == 0) {
+                        logger.debug("The resources list for a certain package is empty, thus try to discover them "
+                                + "in order to achieve compatibility with CKAN 2.0 (pkgName=" + pkgName + ")");
+                        resources = discoverResources(httpClient, pkgName);
+                    } // if
+                    
+                    populateResourcesMap(resources, orgName);
+                    packagesIds.put(orgName, pkgId);
                     logger.debug("Default package added to pckages map (orgName=" + orgName + " -> defaultPkgId="
-                            + packageId + ")");
+                            + pkgId + ")");
                     return;
                 } // if
             } // while
@@ -151,9 +164,36 @@ public class CKANBackendImpl implements CKANBackend {
             // orgName doesn't exist in CKAN, create it
             createOrganization(httpClient, orgName);
         } else {
-            logger.error("Runtime error (Don't know how to treat response code " + res.getStatusCode() + ")");
+            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
         } // if else
     } // initOrg
+    
+    /**
+     * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
+     * empty resource lists for its packages! (not in CKAN 2.2)
+     * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+     * If the resources list is empty we must try to get it package by package... this will add certain overhead in the
+     * case the resources list is really empty or the CKAN version is 2.2 :)
+     * @param httpClient
+     * @param pkgName
+     * @return The discovered resources for the given package.
+     * @throws Exception
+     */
+    private JSONArray discoverResources(DefaultHttpClient httpClient, String pkgName) throws Exception {
+        // query CKAN for the resources within the given package
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + pkgName;
+        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        
+        if (res.getStatusCode() == 200) {
+            JSONObject result = (JSONObject) res.getJsonObject().get("result");
+            JSONArray resources = (JSONArray) result.get("resources");
+            logger.debug("Resources successfully discovered (pkgName=" + pkgName + ", numResources="
+                    + resources.size() + ")");
+            return resources;
+        } else {
+            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
+        } // if else
+    } // discoverResources
     
     /**
      * Populates the entity-resource map of a given orgName with the package information from the CKAN response.
@@ -161,6 +201,11 @@ public class CKANBackendImpl implements CKANBackend {
      * @param orgName
      */
     private void populateResourcesMap(JSONArray resources, String orgName) {
+        if (resources.size() == 0) {
+            logger.debug("The resources list is empty, nothing to cache");
+            return;
+        } // if
+        
         Iterator<JSONObject> iterator = resources.iterator();
         
         while (iterator.hasNext()) {
@@ -456,7 +501,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param httpClient HTTP client for accessing the backend server.
      * @param pkgName package to create
      * @param orgId the owner organization for the package
-     * @return packageId if the package was created or "" if it wasn't.
+     * @return pkgId if the package was created or "" if it wasn't.
      * @throws Exception
      */
     private String createPackage(DefaultHttpClient httpClient, String pkgName, String orgId) throws Exception {
