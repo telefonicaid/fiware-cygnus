@@ -135,7 +135,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // the transaction has succeded
             txn.commit();
             status = Status.READY;
-            logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
         } catch (Exception e) {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
@@ -164,7 +163,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     logger.warn(e.getMessage());
                 } else if (e instanceof CygnusBadContextData) {
                     logger.warn(e.getMessage());
-                } // if else if else if
+                } else {
+                    logger.warn(e.getMessage());
+                } // if else if
 
                 txn.commit();
                 status = Status.READY;
