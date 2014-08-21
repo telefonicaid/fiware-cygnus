@@ -137,8 +137,8 @@ public class CKANBackendImpl implements CKANBackend {
                     // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
                     // method returns empty resource lists for its packages! (not in CKAN 2.2)
                     // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
-                    // if the resources list is empty we must try to get it package by package... this will add
-                    // certain overhead in the case the resources list was really empty or the CKAN version is 2.2 :)
+                    // if the resources list is empty we must try to get it package by package... this will add certain
+                    // overhead in the case the resources list is really empty or the CKAN version is 2.2 :)
                     if (resources.size() == 0) {
                         logger.debug("The resources list for a certain package is empty, thus try to discover them "
                                 + "in order to achieve compatibility with CKAN 2.0 (pkgName=" + pkgName + ")");
@@ -173,7 +173,7 @@ public class CKANBackendImpl implements CKANBackend {
      * empty resource lists for its packages! (not in CKAN 2.2)
      * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
      * If the resources list is empty we must try to get it package by package... this will add certain overhead in the
-     * case the resources list was really empty or the CKAN version is 2.2 :)
+     * case the resources list is really empty or the CKAN version is 2.2 :)
      * @param httpClient
      * @param pkgName
      * @return The discovered resources for the given package.
