@@ -208,7 +208,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger.debug("Adding flume event header (name=" + Constants.CONTENT_TYPE + ", value=" + contentType + ")");
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
         logger.debug("Adding flume event header (name=" + Constants.ORG_HEADER
-                + ", value=" + organization == null ? defaultOrg : organization + ")");
+                + ", value=" + (organization == null ? defaultOrg : organization) + ")");
         eventHeaders.put(Constants.TRANSACTION_ID, transId);
         logger.debug("Adding flume event header (name=" + Constants.TRANSACTION_ID + ", value=" + transId + ")");
         eventHeaders.put(Constants.TTL, eventsTTL);
