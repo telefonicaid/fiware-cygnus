@@ -132,19 +132,26 @@ public class CKANBackendImpl implements CKANBackend {
                     String pkgId = pkg.get("id").toString();
                     logger.debug("Default package found (orgName=" + orgName + ", defaultPkgName="
                             + effectiveDefaultDataset + ", defaultPkgId= " + pkgId + ")");
-                    JSONArray resources = (JSONArray) pkg.get("resources");
+                    JSONArray resources = null;
                     
                     // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
-                    // method returns empty resource lists for its packages! (not in CKAN 2.2)
+                    // method returns no resource lists for its packages! (not in CKAN 2.2)
                     // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
-                    // if the resources list is empty we must try to get it package by package... this will add certain
-                    // overhead in the case the resources list is really empty or the CKAN version is 2.2 :)
-                    if (resources.size() == 0) {
-                        logger.debug("The resources list for a certain package is empty, thus try to discover them "
-                                + "in order to achieve compatibility with CKAN 2.0 (pkgName=" + pkgName + ")");
-                        resources = discoverResources(httpClient, pkgName);
-                    } // if
+                    // if the resources list is null we must try to get it package by package
+                    logger.debug("Going to get the CKAN version");
+                    String ckanVersion = getCKANVersion(httpClient);
                     
+                    if (ckanVersion.equals("2.0")) {
+                        logger.debug("CKAN version is 2.0, try to discover the resources for this package (pkgName="
+                                + pkgName + ")");
+                        resources = discoverResources(httpClient, pkgName);
+                    } else { // 2.2 or higher
+                        logger.debug("CKAN version is 2.2 (or higher), the resources list can be obtained from the "
+                                + "organization information (pkgName=" + pkgName + ")");
+                        resources = (JSONArray) pkg.get("resources");
+                    } // if else
+                    
+                    logger.debug("Going to populate the resources cache (orgName=" + orgName + ")");
                     populateResourcesMap(resources, orgName);
                     packagesIds.put(orgName, pkgId);
                     logger.debug("Default package added to pckages map (orgName=" + orgName + " -> defaultPkgId="
@@ -170,10 +177,8 @@ public class CKANBackendImpl implements CKANBackend {
     
     /**
      * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
-     * empty resource lists for its packages! (not in CKAN 2.2)
+     * no resource lists for its packages! (not in CKAN 2.2)
      * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
-     * If the resources list is empty we must try to get it package by package... this will add certain overhead in the
-     * case the resources list is really empty or the CKAN version is 2.2 :)
      * @param httpClient
      * @param pkgName
      * @return The discovered resources for the given package.
@@ -662,6 +667,17 @@ public class CKANBackendImpl implements CKANBackend {
             return null;
         } // if else
     } // activateElementState
+    
+    private String getCKANVersion(DefaultHttpClient httpClient) throws Exception {
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/util/status";
+        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        
+        if (res.getStatusCode() == 200) {
+            return res.getJsonObject().get("ckan_version").toString();
+        } else {
+            return null;
+        } // if else
+    } // getCKANVersion
 
     /**
      * Common method to perform HTTP request using the CKAN API without payload.
