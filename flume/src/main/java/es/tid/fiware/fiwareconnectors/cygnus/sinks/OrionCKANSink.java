@@ -202,7 +202,7 @@ public class OrionCKANSink extends OrionSink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
+                String attrValue = contextAttribute.getContextValue(false);
                 String attrMd = contextAttribute.getContextMetadata();
                 logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
 
