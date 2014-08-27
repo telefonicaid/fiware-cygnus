@@ -75,7 +75,7 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 		headers={
 			content-type=application/json,
 			fiware-service=Org42,
-			recvTimeTs=1402409899391,
+			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10
 		}
@@ -87,7 +87,7 @@ Let's have a look on the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
-* The notification reception time is included in the list of headers (as <b>recvTimeTs</b>) for timestamping purposes in the different sinks.
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
 * The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. 
 
@@ -335,6 +335,10 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_organization = org42
 # Number of channel re-injection retries before a Flume event is definetely discarded 
 cygnusagent.sources.http-source.handler.events_ttl = 10
+# Source interceptors, do not change
+cygnusagent.sources.http-source.interceptors = ts-interceptor
+# Interceptor type, do not change
+cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
 
 # ============================================
 # OrionHDFSSink configuration
