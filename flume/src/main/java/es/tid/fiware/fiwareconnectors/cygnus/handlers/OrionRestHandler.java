@@ -114,9 +114,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
-        // reception time in milliseconds
-        long recvTimeTs = new Date().getTime();
-        
         // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
         // accessible by the whole source code
         String transId = generateTransId();
@@ -201,9 +198,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(Constants.RECV_TIME_TS, new Long(recvTimeTs).toString());
-        logger.debug("Adding flume event header (name=" + Constants.RECV_TIME_TS
-                + ", value=" + new Long(recvTimeTs).toString() + ")");
         eventHeaders.put(Constants.CONTENT_TYPE, contentType);
         logger.debug("Adding flume event header (name=" + Constants.CONTENT_TYPE + ", value=" + contentType + ")");
         eventHeaders.put(Constants.ORG_HEADER, organization == null ? defaultOrg : organization);
@@ -218,7 +212,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        logger.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL +")");
+        logger.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
         return eventList;
     } // getEvents
     
