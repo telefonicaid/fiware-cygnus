@@ -228,7 +228,7 @@ public class CKANBackendImpl implements CKANBackend {
     public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
             String resourceName, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         // try to get the resource identifier from the cache
-        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true);
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true, true);
 
         if (resourceId == null) {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
@@ -243,7 +243,7 @@ public class CKANBackendImpl implements CKANBackend {
     public void persist(DefaultHttpClient httpClient, String recvTime, String orgName, String resourceName,
                  Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
         // try to get the resource identifier from the cache
-        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false);
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false, true);
 
         if (resourceId == null) {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
@@ -260,12 +260,14 @@ public class CKANBackendImpl implements CKANBackend {
      * @param httpClient
      * @param orgName
      * @param resourceName
-     * @param createResource
+     * @param createResource True if running in row-like mode (where resources can be created on the fly), false if
+     * running in column-like mode (where the resources must be preprovisioned).
+     * @param purgeCache True if the cache has to be purgeCache when an error is found, false otherwise.
      * @return
      * @throws Exception
      */
     private String resourceLookupAndCreate(DefaultHttpClient httpClient, String orgName, String resourceName,
-            boolean createResource) throws Exception {
+            boolean createResource, boolean purge) throws Exception {
         try {
             // look for the resource resourceId associated to the resourceName in the hashmap
             String resourceId;
@@ -276,28 +278,34 @@ public class CKANBackendImpl implements CKANBackend {
                 resourceId = resourceIds.get(orgResourcePair);
                 logger.debug("Resource id found in the map (<orgName,resourceName>=" + orgResourcePair
                         + " -> resourceId=" + resourceId + ")");
-            } else {
-                if (createResource) {
-                    logger.debug("Resource id not found in the map, going to create it (orgName=" + orgName
-                            + ", resourceName=" + resourceName + ")");
-                    
-                    // create the resource resourceId and datastore, adding it to the resourceIds map
-                    resourceId = createResource(httpClient, resourceName, orgName);
+            } else if (createResource) {
+                logger.debug("Resource id not found in the map, going to create it (orgName=" + orgName
+                        + ", resourceName=" + resourceName + ")");
 
-                    if (resourceId == null) {
-                        throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
-                                + "resource/datastore pre-provision in column mode failed");
-                    } // if
+                // create the resource resourceId and datastore, adding it to the resourceIds map
+                resourceId = createResource(httpClient, resourceName, orgName);
 
-                    createDataStore(httpClient, resourceId);
-                    resourceIds.put(orgResourcePair, resourceId);
-                    logger.debug("Resource id added to resources map (<orgName,resourceName>=" + orgResourcePair
-                            + " -> resourceId=" + resourceId + ")");
-                } else {
-                    logger.error("Configuration error (The resource id did not exist and could not be created. The "
+                if (resourceId == null) {
+                    throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
                             + "resource/datastore pre-provision in column mode failed");
-                    return null;
-                } // if else
+                } // if
+
+                createDataStore(httpClient, resourceId);
+                resourceIds.put(orgResourcePair, resourceId);
+                logger.debug("Resource id added to resources map (<orgName,resourceName>=" + orgResourcePair
+                        + " -> resourceId=" + resourceId + ")");
+            } else if (purge) {
+                // reached this point, it could be the resource was created after the organization was cached
+                // purge this cache entry and reload the organization again (observe purge=false, i.e. after reloading
+                // the organization the same behaviour is definitely considered an error).
+                logger.debug("Going to purge the cache (orgName=" + orgName + ")");
+                purgeCache(orgName);
+                initOrg(httpClient, orgName);
+                return resourceLookupAndCreate(httpClient, orgName, resourceName, createResource, false);
+            } else {
+                logger.error("Configuration error (The resource id did not exist and could not be created. The "
+                        + "resource/datastore pre-provision in column mode failed");
+                return null;
             } // if else
 
             return resourceId;
@@ -311,6 +319,25 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // try catch
     } // resourceLookupAndCreate
+    
+    /**
+     * Purges the cache regarding an organization, given its name.
+     * @param orgName
+     * @throws Exception
+     */
+    private void purgeCache(String orgName) throws Exception {
+        packagesIds.remove(orgName);
+        
+        Iterator it = resourceIds.keySet().iterator();
+        
+        while (it.hasNext()) {
+            OrgResourcePair pair = (OrgResourcePair) it.next();
+            
+            if (pair.getOrg().equals("orgName")) {
+                it.remove(); // Map.remove(objectKey) cannot be used inside a loop!
+            } // if
+        } // while
+    } // purgeCache
 
     /**
      * Insert record in datastore (row mode).
