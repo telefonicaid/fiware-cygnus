@@ -125,8 +125,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             logger.error("Runtime error (" + e.getMessage() + ")");
         } // catch
 
-        logger.info("Event got from the channel (id=" + event.hashCode() + ")");
-        logger.debug("Event details=" + event.toString());
+        logger.info("Event got from the channel (id=" + event.hashCode() + ", headers=" + event.getHeaders().toString()
+                + ", bodyLength=" + event.getBody().length + ")");
         
         try {
             // persist the event
@@ -223,8 +223,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER),
-                new Long(eventHeaders.get(Constants.RECV_TIME_TS)).longValue(), contextResponses);
+        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get("timestamp")).longValue(),
+                contextResponses);
     } // persist
     
     /**
