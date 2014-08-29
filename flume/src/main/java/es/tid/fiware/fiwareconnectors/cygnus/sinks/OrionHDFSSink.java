@@ -83,6 +83,7 @@ public class OrionHDFSSink extends OrionSink {
     private String hdfsAPI;
     private boolean rowAttrPersistence;
     private String namingPrefix;
+    private String hiveHost;
     private String hivePort;
     private HDFSBackend persistenceBackend;
     private HttpClientFactory httpClientFactory;
@@ -209,6 +210,8 @@ public class OrionHDFSSink extends OrionSink {
         } // if
         
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
+        hiveHost = context.getString("hive_host", "localhost");
+        logger.debug("Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
         logger.debug("Reading configuration (hive_port=" + hivePort + ")");
     } // configure
@@ -222,11 +225,11 @@ public class OrionHDFSSink extends OrionSink {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
                 persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hivePort);
+                        cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hivePort);
+                        cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
