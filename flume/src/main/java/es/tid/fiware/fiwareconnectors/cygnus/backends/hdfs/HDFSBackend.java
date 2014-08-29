@@ -35,6 +35,7 @@ public abstract class HDFSBackend {
     protected String cosmosPort;
     protected String cosmosDefaultUsername;
     protected String cosmosDefaultPassword;
+    protected String hiveHost;
     protected String hivePort;
     private Logger logger;
     
@@ -48,11 +49,12 @@ public abstract class HDFSBackend {
      * @param hivePort
      */
     public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword,
-            String hivePort) {
+            String hiveHost, String hivePort) {
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
         this.cosmosDefaultPassword = cosmosDefaultPassword;
         this.cosmosDefaultUsername = cosmosDefaultUsername;
+        this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
@@ -71,7 +73,7 @@ public abstract class HDFSBackend {
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
 
         // create the standard 8-fields
         String fields = "("
@@ -113,7 +115,7 @@ public abstract class HDFSBackend {
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
@@ -147,7 +149,7 @@ public abstract class HDFSBackend {
      * @param data Data to be written in the created file
      */
     public abstract void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
-            throws Exception;
+        throws Exception;
     /**
      * Appends data to an existent file in HDFS.
      * 
@@ -157,7 +159,7 @@ public abstract class HDFSBackend {
      * @param data Data to be appended in the file
      */
     public abstract void append(DefaultHttpClient httpClient, String username, String filePath, String data)
-            throws Exception;
+        throws Exception;
     /**
      * Checks if the file exists in HDFS.
      * 

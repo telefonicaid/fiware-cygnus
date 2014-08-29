@@ -50,8 +50,8 @@ public class HttpFSBackend extends HDFSBackend {
      * @param cosmosDefaultPassword
      */
     public HttpFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword,  String hivePort) {
-        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hivePort);
+            String cosmosDefaultPassword,  String hiveHost, String hivePort) {
+        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort);
         logger = Logger.getLogger(HttpFSBackend.class);
         this.cosmosHost = cosmosHost;
         this.cosmosPort = cosmosPort;
