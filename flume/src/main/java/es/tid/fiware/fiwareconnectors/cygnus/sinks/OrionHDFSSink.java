@@ -210,7 +210,7 @@ public class OrionHDFSSink extends OrionSink {
         } // if
         
         logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
-        hivePort = context.getString("hive_host", "localhost");
+        hiveHost = context.getString("hive_host", "localhost");
         logger.debug("Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
         logger.debug("Reading configuration (hive_port=" + hivePort + ")");
