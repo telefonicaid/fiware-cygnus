@@ -262,7 +262,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param resourceName
      * @param createResource True if running in row-like mode (where resources can be created on the fly), false if
      * running in column-like mode (where the resources must be preprovisioned).
-     * @param purgeCache True if the cache has to be purgeCache when an error is found, false otherwise.
+     * @param purgeCache True if the cache has to be purged when an error is found, false otherwise.
      * @return
      * @throws Exception
      */
@@ -295,8 +295,8 @@ public class CKANBackendImpl implements CKANBackend {
                 logger.debug("Resource id added to resources map (<orgName,resourceName>=" + orgResourcePair
                         + " -> resourceId=" + resourceId + ")");
             } else if (purge) {
-                // reached this point, it could be the resource was created after the organization was cached
-                // purge this cache entry and reload the organization again (observe purge=false, i.e. after reloading
+                // Reached this point, it could be that the resource was created after the organization was cached.
+                // Purge this cache entry and reload the organization again (observe purge=false, i.e. after reloading
                 // the organization the same behaviour is definitely considered an error).
                 logger.debug("Going to purge the cache (orgName=" + orgName + ")");
                 purgeCache(orgName);
