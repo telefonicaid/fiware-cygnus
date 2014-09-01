@@ -20,8 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -30,6 +29,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -76,7 +76,7 @@ import org.apache.log4j.Logger;
 public class OrionHDFSSink extends OrionSink {
 
     private Logger logger;
-    private String cosmosHost;
+    private String[] cosmosHost;
     private String cosmosPort;
     private String cosmosDefaultUsername;
     private String cosmosDefaultPassword;
@@ -99,7 +99,7 @@ public class OrionHDFSSink extends OrionSink {
      * Gets the Cosmos host. It is protected due to it is only required for testing purposes.
      * @return The Cosmos host
      */
-    protected String getCosmosHost() {
+    protected String[] getCosmosHost() {
         return cosmosHost;
     } // getCosmosHost
     
@@ -179,8 +179,8 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionHDFSSink.class);
-        cosmosHost = context.getString("cosmos_host", "localhost");
-        logger.debug("Reading configuration (cosmos_host=" + cosmosHost + ")");
+        cosmosHost = context.getString("cosmos_host", "localhost").split(",");
+        logger.debug("Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost) + ")");
         cosmosPort = context.getString("cosmos_port", "14000");
         logger.debug("Reading configuration (cosmos_port=" + cosmosPort + ")");
         cosmosDefaultUsername = context.getString("cosmos_default_username", "defaultCygnus");
@@ -224,11 +224,11 @@ public class OrionHDFSSink extends OrionSink {
         try {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
-                persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
+                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
-                persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
+                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("WebHDFS persistence backend created");
             } else {

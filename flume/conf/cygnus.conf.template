@@ -52,8 +52,8 @@ cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
-# The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
-cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+# Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
