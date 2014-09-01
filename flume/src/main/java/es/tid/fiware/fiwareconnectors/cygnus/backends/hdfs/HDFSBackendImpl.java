@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  *
  * @author frb
  * 
- * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implemenatation of the WebHDFS
+ * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implementation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
 public class HDFSBackendImpl extends HDFSBackend {
@@ -103,7 +103,6 @@ public class HDFSBackendImpl extends HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-//        relativeURL += "&data=true";
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doHDFSRequest(httpClient, "PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
@@ -138,7 +137,6 @@ public class HDFSBackendImpl extends HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-//        relativeURL += "&data=true";
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doHDFSRequest(httpClient, "POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
@@ -202,7 +200,7 @@ public class HDFSBackendImpl extends HDFSBackend {
                 if (status != 200 && status != 307 && status != 404 && status != 201) {
                     logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
-                } // try catch
+                } // if
                 
                 // place the current host in the first place (if not yet placed), since it is currently working
                 if (!cosmosHost.getFirst().equals(host)) {
