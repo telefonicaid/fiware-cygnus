@@ -21,6 +21,8 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.util.Arrays;
+import java.util.LinkedList;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
@@ -31,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class HDFSBackend {
     
-    protected String cosmosHost;
+    protected LinkedList<String> cosmosHost; // a linked list is used because the order is important
     protected String cosmosPort;
     protected String cosmosDefaultUsername;
     protected String cosmosDefaultPassword;
@@ -48,9 +50,9 @@ public abstract class HDFSBackend {
      * @param cosmosDefaultPassword
      * @param hivePort
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword,
-            String hiveHost, String hivePort) {
-        this.cosmosHost = cosmosHost;
+    public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
+            String cosmosDefaultPassword, String hiveHost, String hivePort) {
+        this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
         this.cosmosDefaultPassword = cosmosDefaultPassword;
         this.cosmosDefaultUsername = cosmosDefaultUsername;
