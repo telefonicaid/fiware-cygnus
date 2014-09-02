@@ -42,6 +42,20 @@ prefixName=$2
 srcHDFSFolder=$3
 dstHDFSFolder=$4
 
+# check if the current user matches the given one; if matches, no superuser privileges are need
+superuser=0
+
+if [ "$USER" != "$hdfsUser" ]; then
+        echo "You ($USER) are trying to impersonate another user ($hdfsUser)"
+
+	# check if the current user is sudoer
+        if [[ $(sudo -v | grep 'Sorry') == 0 ]]; then
+                superuser=1
+        else
+                exit 1;
+        fi
+fi
+
 # check if the script is being run in the Hadoop cluster NameNode
 if ! [[ $(ps -ef | grep NameNode | grep -v grep) ]]; then
         echo "This script has been designed for executing in a Hadoop cluster NameNode!"
@@ -60,11 +74,21 @@ if hadoop fs -test -d $dstHDFSFolder; then
 	fi
 else
 	echo "Creating hdfs://localhost$dstHDFSFolder"
-	sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
+
+	if [ $superuser -eq 1 ]; then
+		sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder
+	else
+		hadoop fs -mkdir $dstHDFSFolder
+	fi
 fi
 
 # create a local temporary folder
-tmpDir=$(sudo -u $hdfsUser mktemp -d /tmp/cygnus.XXXX)
+if [ $superuser -eq 1 ]; then
+	tmpDir=$(sudo -u $hdfsUser mktemp -d /tmp/cygnus.XXXX)
+else
+	tmpDir=$(mktemp -d /tmp/cygnus.XXXX)
+fi
+
 echo "Creating $tmpDir as working directory"
 
 # declare a variable that will be used to store unique final HDFS files
@@ -102,7 +126,11 @@ while read -r lsLine; do
         entityType="${array[1]}"
 
 	# create a temporary output file within the temporary working folder
-	tmpOutput=$(sudo -u $hdfsUser mktemp $tmpDir/output.XXXX)
+	if [ $superuser -eq 1 ]; then
+		tmpOutput=$(sudo -u $hdfsUser mktemp $tmpDir/output.XXXX)
+	else
+		tmpOutput=$(mktemp $tmpDir/output.XXXX)
+	fi
 
 	# translate line by line, each file; use a temporary destination file
 	echo -n "Translating into $tmpOutput"
@@ -123,7 +151,13 @@ while read -r lsLine; do
 	# copy the translated file to HDFS as a temporal file to be merged at the end
 	translatedFileSize=$(ls -la $tmpOutput | awk '{ print $5 }')
 	echo -n "Writing hdfs://localhost$dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp ($translatedFileSize bytes)"
-	sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp
+
+	if [ $superuser -eq 1 ]; then
+		sudo -u $hdfsUser hadoop fs -put $tmpOutput $dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp
+	else
+		hadoop fs -put $tmpOutput $dstHDFSFolder/$prefixName$entityId-$entityType.$index.tmp
+	fi
+
 	echo " [DONE]"
 
 	# delete all the temporary files
@@ -142,12 +176,22 @@ done < <(hadoop fs -ls $srcHDFSFolder | grep -v Found | awk '{ print $5" "$8 }')
 # iterate on the unique final HDFS files in order to merge all the tmp files related with them
 for i in "${dstHDFSFileNames[@]}"; do
         echo "Merging $dstHDFSFolder/$i.*.tmp into $dstHDFSFolder/$i/$i.txt"
-	sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder/$i
-        sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i/$i.txt
+
+	if [ $superuser -eq 1 ]; then
+		sudo -u $hdfsUser hadoop fs -mkdir $dstHDFSFolder/$i
+        	sudo -u $hdfsUser hadoop fs -cat $dstHDFSFolder/$i.*.tmp | sudo -u $hdfsUser hadoop fs -put - $dstHDFSFolder/$i/$i.txt
+	else
+		hadoop fs -mkdir $dstHDFSFolder/$i
+                hadoop fs -cat $dstHDFSFolder/$i.*.tmp | hadoop fs -put - $dstHDFSFolder/$i/$i.txt
+	fi
 done
 
 # delete all the tmp files in the destination HDFS folder
-sudo -u $hdfsUser hadoop fs -rmr $dstHDFSFolder/*.tmp
+if [ $superuser -eq 1 ]; then
+	sudo -u $hdfsUser hadoop fs -rmr $dstHDFSFolder/*.tmp
+else
+	hadoop fs -rmr $dstHDFSFolder/*.tmp
+fi
 
 # delete the local temporary folder (should not be necessary since the folder
 # seems to be deleted automatically)

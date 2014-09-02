@@ -3,22 +3,25 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -28,11 +31,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
-
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
-
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -55,7 +56,7 @@ public class CKANBackendImpl implements CKANBackend {
     private String orionUrl;
 
     // this map implements the f(NGSIentity, Org) = CKANresourceId function
-    private HashMap<OrgEntityPair, String> resourceIds;
+    private HashMap<OrgResourcePair, String> resourceIds;
 
     // this map implements the f(Org) = defaultPackageId function
     private HashMap<String, String> packagesIds;
@@ -66,6 +67,7 @@ public class CKANBackendImpl implements CKANBackend {
     // to manage "cache fails" and cache updates in that case
 
     /**
+     * Constructor.
      * @param apiKey
      * @param ckanHost
      * @param ckanPort
@@ -79,378 +81,636 @@ public class CKANBackendImpl implements CKANBackend {
         this.ckanPort = ckanPort;
         this.defaultDataset = defaultDataset;
         this.orionUrl = orionUrl;
-        resourceIds = new HashMap<OrgEntityPair, String>();
+        resourceIds = new HashMap<OrgResourcePair, String>();
         packagesIds = new HashMap<String, String>();
-
     } // CKANBackendImpl
 
     @Override
-    public void initOrg(DefaultHttpClient httpClient, String organization) throws Exception {
-
-        String effectiveDefaultDataset = organization + "_" + defaultDataset;
-
-        if (packagesIds.containsKey(organization)) {
-            // Organization already initialized, nothing to do
-            logger.info("organization "  + organization + " already initialized");
+    public void initOrg(DefaultHttpClient httpClient, String orgName) throws Exception {
+        // check if the organization has already been initialized
+        if (packagesIds.containsKey(orgName)) {
+            logger.debug("Organization found in the cache, thus it is already initialized (orgName=" + orgName + ")");
             return;
-        } // if
+        } else {
+            logger.debug("Organization not found in the cache, querying CKAN for it (orgName=" + orgName + ")");
+        } // if else
 
-        // do CKAN request
-        CKANResponse res = doCKANRequest(httpClient, "GET",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_show?id=" + organization);
+        // query CKAN for the organization information
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_show?id=" + orgName;
+        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
 
-        // check the status
         if (res.getStatusCode() == 200) {
-
-            // organization exists
+            // orgName exists within CKAN
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
             String orgId = result.get("id").toString();
-            logger.info("organization found - organization ID: " + orgId);
+            logger.debug("Organization found (orgName=" + orgName + ", orgId=" + orgId + ")");
 
-            // check if organization contains the default package
+            // create the effective default package and check its validity
+            String effectiveDefaultDataset = orgName + "_" + defaultDataset;
+            
+            if (effectiveDefaultDataset.length() > Constants.CKAN_PKG_MAX_LEN) {
+                logger.error("Bad configuration (A CKAN package/dataset name '" + effectiveDefaultDataset + "' has "
+                        + "been built and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package "
+                        + "name generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                        + "' organization header, the character '_' and the 'default_dataset' configuration parameter, "
+                        + "thus adjust them)");
+                throw new Exception("The lenght of the CKAN package/dataset '" + effectiveDefaultDataset
+                        + "' is greater than " + Constants.CKAN_PKG_MAX_LEN);
+            } // if
+            
+            // check if orgName contains the default package
             JSONArray packages = (JSONArray) result.get("packages");
+            logger.debug("Going to iterate on the packages looking for the default one (orgName=" + orgName
+                    + ", defaultPkgName=" + effectiveDefaultDataset + ")");
             Iterator<JSONObject> iterator = packages.iterator();
+            
             while (iterator.hasNext()) {
                 JSONObject pkg = (JSONObject) iterator.next();
                 String pkgName = (String) pkg.get("name");
+                
                 if (pkgName.equals(effectiveDefaultDataset)) {
-                    String packageId = pkg.get("id").toString();
-                    logger.info("default package found - package ID: " + packageId);
-                    populateResourcesMap((JSONArray) pkg.get("resources"), organization);
-                    packagesIds.put(organization, packageId);
-                    logger.info("added to packages map " + organization + " -> " + packageId);
+                    String pkgId = pkg.get("id").toString();
+                    logger.debug("Default package found (orgName=" + orgName + ", defaultPkgName="
+                            + effectiveDefaultDataset + ", defaultPkgId= " + pkgId + ")");
+                    JSONArray resources = null;
+                    
+                    // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
+                    // method returns no resource lists for its packages! (not in CKAN 2.2)
+                    // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+                    // if the resources list is null we must try to get it package by package
+                    logger.debug("Going to get the CKAN version");
+                    String ckanVersion = getCKANVersion(httpClient);
+                    
+                    if (ckanVersion.equals("2.0")) {
+                        logger.debug("CKAN version is 2.0, try to discover the resources for this package (pkgName="
+                                + pkgName + ")");
+                        resources = discoverResources(httpClient, pkgName);
+                    } else { // 2.2 or higher
+                        logger.debug("CKAN version is 2.2 (or higher), the resources list can be obtained from the "
+                                + "organization information (pkgName=" + pkgName + ")");
+                        resources = (JSONArray) pkg.get("resources");
+                    } // if else
+                    
+                    logger.debug("Going to populate the resources cache (orgName=" + orgName + ")");
+                    populateResourcesMap(resources, orgName);
+                    packagesIds.put(orgName, pkgId);
+                    logger.debug("Default package added to pckages map (orgName=" + orgName + " -> defaultPkgId="
+                            + pkgId + ")");
                     return;
                 } // if
             } // while
 
-            // if we have reach this point, then organization doesn't include the default package and we need to
-            // create it
+            // if we have reach this point, then orgName doesn't include the default package; thus create is
+            logger.debug("Default package not found, going to create it (orgName=" + orgName + ", defaultPkgName="
+                    + effectiveDefaultDataset + ")");
             String packageId = createPackage(httpClient, effectiveDefaultDataset, orgId);
-            packagesIds.put(organization, packageId);
-            logger.info("added to packages map " + organization + " -> " + packageId);
-
+            packagesIds.put(orgName, packageId);
+            logger.debug("Default package added to pckages map (orgName=" + orgName + " -> defaultPkgId="
+                            + packageId + ")");
         } else if (res.getStatusCode() == 404) {
-            // organization doesn't exist, create it
-            createOrganization(httpClient, organization);
+            // orgName doesn't exist in CKAN, create it
+            createOrganization(httpClient, orgName);
         } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
+            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
         } // if else
-
     } // initOrg
+    
+    /**
+     * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
+     * no resource lists for its packages! (not in CKAN 2.2)
+     * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+     * @param httpClient
+     * @param pkgName
+     * @return The discovered resources for the given package.
+     * @throws Exception
+     */
+    private JSONArray discoverResources(DefaultHttpClient httpClient, String pkgName) throws Exception {
+        // query CKAN for the resources within the given package
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + pkgName;
+        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        
+        if (res.getStatusCode() == 200) {
+            JSONObject result = (JSONObject) res.getJsonObject().get("result");
+            JSONArray resources = (JSONArray) result.get("resources");
+            logger.debug("Resources successfully discovered (pkgName=" + pkgName + ", numResources="
+                    + resources.size() + ")");
+            return resources;
+        } else {
+            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
+        } // if else
+    } // discoverResources
+    
+    /**
+     * Populates the entity-resource map of a given orgName with the package information from the CKAN response.
+     * @param resources JSON vector from the CKAN response containing resource information.
+     * @param orgName
+     */
+    private void populateResourcesMap(JSONArray resources, String orgName) {
+        if (resources.size() == 0) {
+            logger.debug("The resources list is empty, nothing to cache");
+            return;
+        } // if
+        
+        Iterator<JSONObject> iterator = resources.iterator();
+        
+        while (iterator.hasNext()) {
+            JSONObject factObj = (JSONObject) iterator.next();
+            String resourceId = (String) factObj.get("id");
+            String resourceName = (String) factObj.get("name");
+            OrgResourcePair orgResourcePair = new OrgResourcePair(orgName, resourceName);
+            resourceIds.put(orgResourcePair, resourceId);
+            logger.debug("Resource added to resources map (<orgName,resourceName>=" + orgResourcePair
+                    + " -> resourceId=" + resourceId + ")");
+        } // while
+    } // populateResourcesMap
 
     @Override
-    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String organization, String entity,
-            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
+            String resourceName, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+        // try to get the resource identifier from the cache
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true, true);
 
-        // get resource ID
-        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, true);
-
-        // persist the entity
-        insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
-
+        if (resourceId == null) {
+            throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
+                    + resourceName + ")");
+        } else {
+            // persist the resourceName
+            insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
+        } // if else
     } // persist
 
     @Override
-    public void persist(DefaultHttpClient httpClient, String recvTime, String organization, String entity,
+    public void persist(DefaultHttpClient httpClient, String recvTime, String orgName, String resourceName,
                  Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
+        // try to get the resource identifier from the cache
+        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false, true);
 
-        // get resource ID
-        String resourceId = resourceLookupAndCreate(httpClient, organization, entity, false);
-
-        if (resourceId.equals("")) {
-            logger.error("cannot persist <" + organization + "," + entity + ">");
-        }
-        else {
-            // persist the entity
+        if (resourceId == null) {
+            throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
+                    + resourceName + ")");
+        } else {
+            // persist the resourceName
             insert(httpClient, recvTime, resourceId, attrList, attrMdList);
-        }
-
-    }
+        } // if else
+    } // persist
 
     /**
-     * looks the ID of a resource identified by organization and entity, creating it if not found and the
-     * createResource param is true
-     *
+     * looks the ID of a resource identified by orgName and resourceName, creating it if not found and the
+     * createResource param is true.
      * @param httpClient
-     * @param organization
-     * @param entity
-     * @param createResource
+     * @param orgName
+     * @param resourceName
+     * @param createResource True if running in row-like mode (where resources can be created on the fly), false if
+     * running in column-like mode (where the resources must be preprovisioned).
+     * @param purgeCache True if the cache has to be purged when an error is found, false otherwise.
      * @return
      * @throws Exception
      */
-    private String resourceLookupAndCreate(DefaultHttpClient httpClient, String organization, String entity,
-                                  boolean createResource) throws Exception {
-        // look for the resource id associated to the entity in the hashmap
-        String resourceId;
-        OrgEntityPair ek = new OrgEntityPair(organization, entity);
-        logger.info("lookup in resources map " + ek);
+    private String resourceLookupAndCreate(DefaultHttpClient httpClient, String orgName, String resourceName,
+            boolean createResource, boolean purge) throws Exception {
+        try {
+            // look for the resource resourceId associated to the resourceName in the hashmap
+            String resourceId;
+            OrgResourcePair orgResourcePair = new OrgResourcePair(orgName, resourceName);
 
-        if (resourceIds.containsKey(ek)) {
-            // persist the data in the datastore associated to the resource id (entity)
-            resourceId = resourceIds.get(ek);
-            logger.info("resolved " + ek + " -> " + resourceId);
-        } else {
-            if (createResource) {
-                // create the resource id and datastore, adding it to the resourceIds map
-                resourceId = createResource(httpClient, entity, organization);
+            // check if the resource resourceId can be got from the map
+            if (resourceIds.containsKey(orgResourcePair)) {
+                resourceId = resourceIds.get(orgResourcePair);
+                logger.debug("Resource id found in the map (<orgName,resourceName>=" + orgResourcePair
+                        + " -> resourceId=" + resourceId + ")");
+            } else if (createResource) {
+                logger.debug("Resource id not found in the map, going to create it (orgName=" + orgName
+                        + ", resourceName=" + resourceName + ")");
+
+                // create the resource resourceId and datastore, adding it to the resourceIds map
+                resourceId = createResource(httpClient, resourceName, orgName);
+
+                if (resourceId == null) {
+                    throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
+                            + "resource/datastore pre-provision in column mode failed");
+                } // if
+
                 createDataStore(httpClient, resourceId);
-                resourceIds.put(ek, resourceId);
-                logger.info("added to resources map " + ek + " -> " + resourceId);
-            }
-            else {
-                logger.error("resource not found and cannot be created: this means that resource/datastore pre-provision in column mode failed");
-                return "";
+                resourceIds.put(orgResourcePair, resourceId);
+                logger.debug("Resource id added to resources map (<orgName,resourceName>=" + orgResourcePair
+                        + " -> resourceId=" + resourceId + ")");
+            } else if (purge) {
+                // Reached this point, it could be that the resource was created after the organization was cached.
+                // Purge this cache entry and reload the organization again (observe purge=false, i.e. after reloading
+                // the organization the same behaviour is definitely considered an error).
+                logger.debug("Going to purge the cache (orgName=" + orgName + ")");
+                purgeCache(orgName);
+                initOrg(httpClient, orgName);
+                return resourceLookupAndCreate(httpClient, orgName, resourceName, createResource, false);
+            } else {
+                logger.error("Configuration error (The resource id did not exist and could not be created. The "
+                        + "resource/datastore pre-provision in column mode failed");
+                return null;
             } // if else
-        } // if else
 
-        return resourceId;
-    }
-
+            return resourceId;
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // resourceLookupAndCreate
+    
     /**
-     * Populates the entity-resource map of a given organization with the package information from the CKAN response.
-     *
-     * @param resources JSON vector from the CKAN response containing resource information.
-     * @param organization
+     * Purges the cache regarding an organization, given its name.
+     * @param orgName
+     * @throws Exception
      */
-    private void populateResourcesMap(JSONArray resources, String organization) {
-
-        Iterator<JSONObject> iterator = resources.iterator();
-        while (iterator.hasNext()) {
-            JSONObject factObj = (JSONObject) iterator.next();
-            String id = (String) factObj.get("id");
-            String name = (String) factObj.get("name");
-            OrgEntityPair ek = new OrgEntityPair(organization, name);
-            resourceIds.put(ek, id);
-            logger.info("added to resources map " + ek + " -> " + id);
-        }
-
-    } // populateResourcesMap
+    private void purgeCache(String orgName) throws Exception {
+        packagesIds.remove(orgName);
+        
+        Iterator it = resourceIds.keySet().iterator();
+        
+        while (it.hasNext()) {
+            OrgResourcePair pair = (OrgResourcePair) it.next();
+            
+            if (pair.getOrg().equals("orgName")) {
+                it.remove(); // Map.remove(objectKey) cannot be used inside a loop!
+            } // if
+        } // while
+    } // purgeCache
 
     /**
-     * Insert record in datastore (row mode)
-     *
+     * Insert record in datastore (row mode).
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTimeTs timestamp.
      * @param recvTime timestamp (human readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
-     * @param attrName attribute name.
+     * @param attrName attribute resourceName.
      * @param attrType attribute type.
      * @param attrValue attribute value.
      * @throws Exception
-     *
      */
     private void insert(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
-                        String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+        String ckanURL = null;
+        String jsonString = null;
+        
+        try {
+            // create the CKAN request JSON
+            String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
+                    + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
+                    + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
+                    + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
+                    + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
 
-        // do CKAN request
-        String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
-                + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
-                + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
-                + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
-                + "\"" + Constants.ATTR_VALUE + "\": \"" + attrValue + "\"";
+            // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+            // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+            if (!attrMd.equals(Constants.EMPTY_MD)) {
+                records += ", \"" + Constants.ATTR_MD + "\": " + attrMd;
+            } // if
 
-        // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-        // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-        if (!attrMd.equals(Constants.EMPTY_MD)) {
-            records += ", \"" + Constants.ATTR_MD + "\": " + attrMd;
-        } // if
+            jsonString = "{ \"resource_id\": \"" + resourceId
+                    + "\", \"records\": [ { " + records + " } ], "
+                    + "\"method\": \"insert\", "
+                    + "\"force\": \"true\" }";
+            
+            // create the CKAN request URL
+            ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
+        
+            // do the CKAN request
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        String jsonString = "{ \"resource_id\": \"" + resourceId
-                + "\", \"records\": [ { " + records + " } ], "
-                + "\"method\": \"insert\", "
-                + "\"force\": \"true\" }";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert", jsonString);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            logger.info("successful insert in resource ID " + resourceId + " datastore");
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-        } // if else
-
+            // check the status
+            if (res.getStatusCode() == 200) {
+                logger.debug("Successful insert (resource/datastore id=" + resourceId + ")");
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // insert
 
     /**
-     * Insert record in datastore (column mode)
-     *
+     * Insert record in datastore (column mode).
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTime timestamp (human readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
      * @param attrList map with the attributes to persist
      * @throws Exception
-     *
      */
     private void insert(DefaultHttpClient httpClient, String recvTime, String resourceId,
                         Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
+        String ckanURL = null;
+        String jsonString = null;
+        
+        try {
+            // create the CKAN request JSON
+            String records = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
 
-        // iterate on the attribute and metadata maps in order to build the query
-        String records = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
+            // iterate on the attribute and metadata maps in order to build the query
+            Iterator it = attrList.keySet().iterator();
 
-        Iterator it = attrList.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            String attrValue = attrList.get(attrName);
-            records += ", \"" + attrName + "\": \"" + attrValue + "\"";
-        } // while
+            while (it.hasNext()) {
+                String attrName = (String) it.next();
+                String attrValue = attrList.get(attrName);
+                records += ", \"" + attrName + "\": " + attrValue;
+            } // while
 
-        it = attrMdList.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            String attrMd = attrMdList.get(attrName);
+            it = attrMdList.keySet().iterator();
 
-            // Metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-            // (see http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-            if (!attrMd.equals(Constants.EMPTY_MD)) {
-                records += ", \"" + attrName + "\": " + attrMd;
-            } // if
-        } // while
+            while (it.hasNext()) {
+                String attrName = (String) it.next();
+                String attrMd = attrMdList.get(attrName);
 
+                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+                if (!attrMd.equals(Constants.EMPTY_MD)) {
+                    records += ", \"" + attrName + "\": " + attrMd;
+                } // if
+            } // while
 
-        // do CKAN request
-        String jsonString = "{ \"resource_id\": \"" + resourceId
-                + "\", \"records\": [ { " + records + " } ], "
-                + "\"method\": \"insert\", "
-                + "\"force\": \"true\" }";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert", jsonString);
+            jsonString = "{ \"resource_id\": \"" + resourceId
+                    + "\", \"records\": [ { " + records + " } ], "
+                    + "\"method\": \"insert\", "
+                    + "\"force\": \"true\" }";
+            
+            // create the CKAN request URL
+            ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
+        
+            // do the CKAN request
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        // check the status
-        if (res.getStatusCode() == 200) {
-            logger.info("successful insert in resource ID " + resourceId + " datastore");
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-        } // if else
-
+            // check the status
+            if (res.getStatusCode() == 200) {
+                logger.debug("Successful insert (resource/datastore id=" + resourceId + ")");
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // insert
 
     /**
-     * Creates an organization in CKAN.
-     *
+     * Creates an orgName in CKAN.
      * @param httpClient HTTP client for accessing the backend server.
-     * @param organization to create
+     * @param orgName to create
      * @throws Exception
      */
-    private void createOrganization(DefaultHttpClient httpClient, String organization) throws Exception {
+    private void createOrganization(DefaultHttpClient httpClient, String orgName) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{ \"name\": \"" + orgName + "\"}";
+            
+            // create the CKAN request URL
+            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_create";
+            
+            // do the CKAN request
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        // do CKAN request
-        String jsonString = "{ \"name\": \"" + organization + "\"}";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_create", jsonString);
+            // check the status
+            if (res.getStatusCode() == 200) {
+                String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+                logger.debug("Successful organization creation (orgName=" + orgName + ", orgId=" + orgId + ")");
 
-        // check the status
-        if (res.getStatusCode() == 200) {
-            String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-            logger.info("successful organization creation - organization ID: " + orgId);
-            String packageId = createPackage(httpClient, organization + "_" + defaultDataset, orgId);
-            packagesIds.put(organization, packageId);
-            logger.info("added to packages map " + organization + " -> " + packageId);
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-        } // if else
+                // create the package/dataset
+                String packageName = orgName + "_" + defaultDataset;
+
+                if (packageName.length() > Constants.CKAN_PKG_MAX_LEN) {
+                    logger.error("Bad configuration (A CKAN package/dataset name '" + packageName + "' has been built "
+                            + "and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package name "
+                            + "generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                            + "' organization header, the character '_' and the 'default_dataset' configuration "
+                            + "parameter, thus adjust them)");
+                    throw new CygnusBadConfiguration("The lenght of the CKAN package/dataset '" + packageName
+                            + "' is greater than " + Constants.CKAN_PKG_MAX_LEN);
+                } // if
+
+                String packageId = createPackage(httpClient, packageName, orgId);
+                packagesIds.put(orgName, packageId);
+                logger.debug("Package added to packages map (orgName=" + orgName + " -> packageId=" + packageId + ")");
+/*
+            } else if (res.getStatusCode() == 409) {
+                logger.debug("The organization exists but its state is \"deleted\", activating it (orgName="
+                        + orgName + ")");
+                String orgId = activateElementState(httpClient, orgName, "organization");
+                
+                if (orgId != null) {
+                    logger.debug("Successful organization activation (orgId=" + orgId + ")");
+                } else {
+                    throw new CygnusRuntimeError("Could not activate the organization (orgName=" + orgName + ")");
+                } // if else
+*/
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // createOrganization
 
     /**
-     * Creates a dataset (package) within a given organization in CKAN.
-     *
+     * Creates a dataset/package within a given organization in CKAN.
      * @param httpClient HTTP client for accessing the backend server.
-     * @param pkg package to create
+     * @param pkgName package to create
      * @param orgId the owner organization for the package
-     * @return packageId if the package was created or "" if it wasn't.
+     * @return pkgId if the package was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createPackage(DefaultHttpClient httpClient, String pkg, String orgId) throws Exception {
+    private String createPackage(DefaultHttpClient httpClient, String pkgName, String orgId) throws Exception {
+        try {
+            String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
+            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create";
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        // do CKAN request
-        String jsonString = "{ \"name\": \"" + pkg + "\", "
-                + "\"owner_org\": \"" + orgId + "\" }";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create", jsonString);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-            logger.info("successful package creation - package ID: " + packageId);
-            return packageId;
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-            return "";
-        } // if else
+            // check the status
+            if (res.getStatusCode() == 200) {
+                String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+                logger.debug("Successful package creation (pkgId=" + packageId + ")");
+                return packageId;
+            } else if (res.getStatusCode() == 409) {
+                logger.debug("The package exists but its state is \"deleted\", activating it (pkgName="
+                        + pkgName + ")");
+                String packageId = activateElementState(httpClient, pkgName, "dataset");
+                
+                if (packageId != null) {
+                    logger.debug("Successful package activation (pkgId=" + packageId + ")");
+                    return packageId;
+                } else {
+                    throw new CygnusRuntimeError("Could not activate the package (pkgId=" + pkgName + ")");
+                } // if else
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // createDefaultPackage
 
     /**
-     * Creates a resource within the default dataset of a given organization.
-     *
+     * Creates a resource within the default dataset of a given orgName.
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceName Resource to be created.
-     * @param organization organization to which the default dataset belongs
+     * @param orgName orgName to which the default dataset belongs
      * @return resource ID if the resource was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createResource(DefaultHttpClient httpClient, String resourceName, String organization)
+    private String createResource(DefaultHttpClient httpClient, String resourceName, String orgName)
         throws Exception {
+        try {
+            // create the CKAN request JSON; compose the resource URL with the one corresponding to the NGSI10
+            // convenience operation to get entity information in Orion
+            StringTokenizer st = new StringTokenizer(resourceName, "-");
+            String jsonURL = orionUrl + "/ngsi10/contextEntitites/" + st.nextElement();
+            String jsonString = "{ \"name\": \"" + resourceName + "\", "
+                    + "\"url\": \"" + jsonURL + "\", "
+                    + "\"package_id\": \"" + packagesIds.get(orgName) + "\" }";
+            
+            // create the CKAN request URL
+            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create";
+            
+            // do the CKAN request
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        // compose resource URL with the one corresponding to the NGSI10 convenience operation to get
-        // entity information in Orion
-        StringTokenizer st = new StringTokenizer(resourceName, "-");
-        String url = orionUrl + "/ngsi10/contextEntitites/" + st.nextElement();
-
-        // do CKAN request
-        String jsonString = "{ \"name\": \"" + resourceName + "\", "
-                + "\"url\": \"" + url + "\", "
-                + "\"package_id\": \"" + packagesIds.get(organization) + "\" }";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create", jsonString);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-            logger.info("successful resource creation - resource ID: " + resourceId);
-            return resourceId;
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-            return "";
-        } // if else
+            // check the status
+            if (res.getStatusCode() == 200) {
+                String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+                logger.debug("Successful resource creation (resource id=" + resourceId + ")");
+                return resourceId;
+/*
+            } else if (res.getStatusCode() == 409) {
+                logger.debug("The resource exists but its state is \"deleted\", activating it (resourceName="
+                        + resourceName + ")");
+                String resourceId = activateElementState(httpClient, resourceName, "resource");
+                
+                if (resourceId != null) {
+                    logger.debug("Successful resource activation (resourceName=" + resourceId + ")");
+                    return resourceId;
+                } else {
+                    throw new CygnusRuntimeError("Could not activate the resource (resourceId=" + resourceId + ")");
+                } // if else
+*/
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // createResource
 
     /**
      * Creates a datastore for a given resource.
-     *
      * @param httpClient HTTP client for accessing the backend server.
      * @param resourceId identifies the resource which datastore is going to be created.
      * @throws Exception
      */
     private void createDataStore(DefaultHttpClient httpClient, String resourceId) throws Exception {
+        try {
+            // create the CKAN request JSON
+            // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
+            String jsonString = "{ \"resource_id\": \"" + resourceId
+                    + "\", \"fields\": [ "
+                    + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
+                    + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                    + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"},"
+                    + "{ \"id\": \"" + Constants.ATTR_MD + "\", \"type\": \"json\"}"
+                    + "], "
+                    + "\"force\": \"true\" }";
+            
+            // create the CKAN request URL
+            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create";
+            
+            // do the CKAN request
+            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
 
-        // do CKAN request
-        // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
-        String jsonString = "{ \"resource_id\": \"" + resourceId
-                + "\", \"fields\": [ "
-                + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
-                + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
-                + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
-                + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
-                + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"},"
-                + "{ \"id\": \"" + Constants.ATTR_MD + "\", \"type\": \"json\"}"
-                + "], "
-                + "\"force\": \"true\" }";
-        CKANResponse res = doCKANRequest(httpClient, "POST",
-                "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create", jsonString);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            logger.info("successful datastore creation for resource ID: " + resourceId);
-        } else {
-            logger.error("don't know how to treat response code " + res.getStatusCode());
-        } // if else
+            // check the status
+            if (res.getStatusCode() == 200) {
+                logger.debug("Successful datastore creation (resourceId=" + resourceId + ")");
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // createResource
+    
+    /**
+     * Activates an element given its resourceName and type, by changing its status from "deleted" to "activate".
+     * Its resourceId is returned.
+     * @param httpClient
+     * @param elementName
+     * @param elementType
+     * @return The element resourceId if it could be activated, otherwise null.
+     * @throws Exception
+     */
+    private String activateElementState(DefaultHttpClient httpClient, String elementName, String elementType)
+        throws Exception {
+        String jsonString = "{\"state\":\"active\"}";
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/rest/" + elementType + "/" + elementName;
+        CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+                
+        if (res.getStatusCode() == 200) {
+            return res.getJsonObject().get("id").toString();
+        } else {
+            return null;
+        } // if else
+    } // activateElementState
+    
+    private String getCKANVersion(DefaultHttpClient httpClient) throws Exception {
+        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/util/status";
+        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        
+        if (res.getStatusCode() == 200) {
+            return res.getJsonObject().get("ckan_version").toString();
+        } else {
+            return null;
+        } // if else
+    } // getCKANVersion
 
     /**
      * Common method to perform HTTP request using the CKAN API without payload.
-     *
      * @param httpClient HTTP client for accessing the backend server.
      * @param method HTTP method
-     * @param url request URL.
+     * @param jsonURL request URL.
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
@@ -460,58 +720,86 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Common method to perform HTTP request using the CKAN API with payload.
-     *
      * @param httpClient HTTP client for accessing the backend server.
      * @param method HTTP method.
-     * @param url request URL.
+     * @param jsonURL request URL.
      * @param payload request payload.
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url,
-            String payload) throws Exception {
-        // do the post
-        HttpRequestBase request;
-        if (method.equals("GET")) {
-            request = new HttpGet(url);
-        } else if (method.equals("POST")) {
-            HttpPost r = new HttpPost(url);
-            // payload (optional)
-            if (!payload.equals("")) {
-                logger.debug("request payload: " + payload);
-                r.setEntity(new StringEntity(payload, ContentType.create("application/json")));
-            }
-            request = r;
-        } else {
-            throw new Exception("HTTP method not supported: " + method);
-        } // if else
+    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url, String payload)
+        throws Exception {
+        HttpRequestBase request = null;
+        HttpResponse response = null;
+        
+        try {
+            // do the post
+            if (method.equals("GET")) {
+                request = new HttpGet(url);
+            } else if (method.equals("POST")) {
+                HttpPost r = new HttpPost(url);
 
-        // headers
-        request.addHeader("Authorization", apiKey);
+                // payload (optional)
+                if (!payload.equals("")) {
+                    logger.debug("request payload: " + payload);
+                    r.setEntity(new StringEntity(payload, ContentType.create("application/json")));
+                } // if
+                
+                request = r;
+            } else {
+                throw new CygnusRuntimeError("HTTP method not supported: " + method);
+            } // if else
 
-        // execute the request
-        logger.info("CKAN operation: " + request.toString());
-        HttpResponse response = httpClient.execute(request);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        String res = reader.readLine();
-        request.releaseConnection();
-        long l = response.getEntity().getContentLength();
-        logger.info("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
+            // headers
+            request.addHeader("Authorization", apiKey);
 
-        // get the JSON encapsulated in the response
-        logger.debug("response payload: " + res);
-        JSONParser j = new JSONParser();
-        JSONObject o = (JSONObject) j.parse(res);
+            // execute the request
+            logger.debug("CKAN operation: " + request.toString());
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+        
+        try {
+            response = httpClient.execute(request);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch
+        
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String res = reader.readLine();
+            request.releaseConnection();
+            long l = response.getEntity().getContentLength();
+            logger.debug("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
 
-        // return result
-        return new CKANResponse(o, response.getStatusLine().getStatusCode());
+            // get the JSON encapsulated in the response
+            logger.debug("response payload: " + res);
+            JSONParser j = new JSONParser();
+            JSONObject o = (JSONObject) j.parse(res);
 
+            // return result
+            return new CKANResponse(o, response.getStatusLine().getStatusCode());
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
     } // doCKANRequest
 
     /**
      * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class.
      */
-    class OrgEntityPair {
+    class OrgResourcePair {
 
         private String entity;
         private String org;
@@ -521,10 +809,10 @@ public class CKANBackendImpl implements CKANBackend {
          * @param org
          * @param entity
          */
-        public OrgEntityPair(String org, String entity) {
+        public OrgResourcePair(String org, String entity) {
             this.org = org;
             this.entity = entity;
-        } // OrgEntityPair
+        } // OrgResourcePair
 
         /**
          * @return entity
@@ -546,9 +834,9 @@ public class CKANBackendImpl implements CKANBackend {
          */
         @Override
         public boolean equals(Object obj) {
-            return (obj instanceof OrgEntityPair
-                    && ((OrgEntityPair) obj).entity.equals(this.entity)
-                    && ((OrgEntityPair) obj).org.equals(this.org));
+            return (obj instanceof OrgResourcePair
+                    && ((OrgResourcePair) obj).entity.equals(this.entity)
+                    && ((OrgResourcePair) obj).org.equals(this.org));
         } // equals
 
         /**
@@ -570,6 +858,6 @@ public class CKANBackendImpl implements CKANBackend {
             return "<" + org + "," + entity + ">";
         } // toString
 
-    } // OrgEntityPair
+    } // OrgResourcePair
 
 } // CKANBackendImpl

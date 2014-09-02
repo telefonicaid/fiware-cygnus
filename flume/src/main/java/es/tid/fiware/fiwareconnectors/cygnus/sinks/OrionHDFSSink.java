@@ -3,25 +3,24 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
  
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HttpFSBackend;
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.WebHDFSBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -30,7 +29,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-
+import java.util.Arrays;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -45,7 +44,7 @@ import org.apache.log4j.Logger;
  *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
  *    -- File lines format: {"recvTimeTs":"XXX", "recvTime":"XXX", "entityId":"XXX", "entityType":"XXX",
  *                          "attrName":"XXX", "attrType":"XXX", "attrValue":"XXX"|{...}|[...],
- *                          "attrMd":[{"name":"XXX", "type":"XXX", "value":"XXX"}...]}
+ *                          "attrMd":[{"attrName":"XXX", "entityType":"XXX", "value":"XXX"}...]}
  * - Column-like persistence:
  *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
  *    -- File lines format: {"recvTime":"XXX", "<attr_name_1>":<attr_value_1>, "<attr_name_1>_md":<attr_md_1>,...,
@@ -63,7 +62,7 @@ import org.apache.log4j.Logger;
  * 
  * hdfs:///user/<default_username>/<organization>/<entityDescriptor>/
  * 
- * The Hive tables have the following name:
+ * The Hive tables have the following attrName:
  *  - Row-like persistence:
  *    -- Table names format: <default_username>_<organization>_<entitydescriptor>_row
  *    -- Column types: recvTimeTs string, recvType string, entityId string, entityType string, attrName string,
@@ -77,13 +76,14 @@ import org.apache.log4j.Logger;
 public class OrionHDFSSink extends OrionSink {
 
     private Logger logger;
-    private String cosmosHost;
+    private String[] cosmosHost;
     private String cosmosPort;
     private String cosmosDefaultUsername;
     private String cosmosDefaultPassword;
     private String hdfsAPI;
     private boolean rowAttrPersistence;
     private String namingPrefix;
+    private String hiveHost;
     private String hivePort;
     private HDFSBackend persistenceBackend;
     private HttpClientFactory httpClientFactory;
@@ -99,7 +99,7 @@ public class OrionHDFSSink extends OrionSink {
      * Gets the Cosmos host. It is protected due to it is only required for testing purposes.
      * @return The Cosmos host
      */
-    protected String getCosmosHost() {
+    protected String[] getCosmosHost() {
         return cosmosHost;
     } // getCosmosHost
     
@@ -179,23 +179,41 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     public void configure(Context context) {
         logger = Logger.getLogger(OrionHDFSSink.class);
-        cosmosHost = context.getString("cosmos_host", "localhost");
-        logger.debug("Reading cosmos_host=" + cosmosHost);
+        cosmosHost = context.getString("cosmos_host", "localhost").split(",");
+        logger.debug("Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost) + ")");
         cosmosPort = context.getString("cosmos_port", "14000");
-        logger.debug("Reading cosmos_port=" + cosmosPort);
+        logger.debug("Reading configuration (cosmos_port=" + cosmosPort + ")");
         cosmosDefaultUsername = context.getString("cosmos_default_username", "defaultCygnus");
-        logger.debug("Reading cosmos_default_username=" + cosmosDefaultUsername);
+        logger.debug("Reading configuration (cosmos_default_username=" + cosmosDefaultUsername + ")");
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         cosmosDefaultPassword = context.getString("cosmos_default_password", "");
-        logger.debug("Reading cosmos_default_password=" + cosmosDefaultPassword);
+        logger.debug("Reading configuration (cosmos_default_password=" + cosmosDefaultPassword + ")");
         hdfsAPI = context.getString("hdfs_api", "httpfs");
-        logger.debug("Reading hdfs_api=" + hdfsAPI);
+        
+        if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
+            logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
+        } else {
+            logger.debug("Reading configuration (hdfs_api=" + hdfsAPI + ")");
+        } // if else
+        
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("Reading attr_persistence=" + (rowAttrPersistence ? "row" : "column"));
+        logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
-        logger.debug("Reading naming_prefix=" + namingPrefix);
+        
+        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
+            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_MAX_LEN
+                    + ")");
+            logger.info("Exiting Cygnus");
+            System.exit(-1);
+        } // if
+        
+        logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
+        hiveHost = context.getString("hive_host", "localhost");
+        logger.debug("Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
-        logger.debug("Reading hive_port=" + hivePort);
+        logger.debug("Reading configuration (hive_port=" + hivePort + ")");
     } // configure
 
     @Override
@@ -206,21 +224,25 @@ public class OrionHDFSSink extends OrionSink {
         try {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
-                persistenceBackend = new HttpFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hivePort);
+                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
+                        cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
-                persistenceBackend = new WebHDFSBackend(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hivePort);
+                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
+                        cosmosDefaultPassword, hiveHost, hivePort);
                 logger.debug("WebHDFS persistence backend created");
             } else {
-                logger.error("Unrecognized HDFS API. The sink can start, but the data is not going to be persisted!");
+                // this point should never be reached since the HDFS API has been checked while configuring the sink
+                logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+                logger.info("Exiting Cygnus");
+                System.exit(-1);
             } // if else if
         } catch (Exception e) {
             logger.error(e.getMessage());
         } // try catch
         
         super.start();
+        logger.info("Startup completed");
     } // start
 
     @Override
@@ -233,12 +255,14 @@ public class OrionHDFSSink extends OrionSink {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
+            String entityId = Utils.encode(contextElement.getId());
+            String entityType = Utils.encode(contextElement.getType());
+            logger.debug("Processing context element (id=" + entityId + ", type=" + entityType + ")");
             
-            // get the name of the file
-            String entityDescriptor = this.namingPrefix + Utils.encode(contextElement.getId()) + "-"
-                    + Utils.encode(contextElement.getType());
+            // get the attrName of the file
+            String entityDescriptor = this.namingPrefix + entityId + "-" + entityType;
             
-            // check if the file exists in HDFS right now, i.e. when its name has been got
+            // check if the file exists in HDFS right now, i.e. when its attrName has been got
             boolean fileExists = false;
             
             // FIXME: current version of the notification only provides the organization, being null the username
@@ -260,23 +284,27 @@ public class OrionHDFSSink extends OrionSink {
             // standard 8-fields but a variable number of them
             String hiveFields = Constants.RECV_TIME + " string";
 
-            for (int j = 0; j < contextAttributes.size(); j++) {
-                // get the j-th contextAttribute
-                ContextAttribute contextAttribute = contextAttributes.get(j);
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
                 
                 if (rowAttrPersistence) {
                     // create a Json document to be persisted
                     String rowLine = "{"
                             + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                             + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                            + "\"" + Constants.ENTITY_ID + "\":\"" + contextElement.getId() + "\","
-                            + "\"" + Constants.ENTITY_TYPE + "\":\"" + contextElement.getType() + "\","
-                            + "\"" + Constants.ATTR_NAME + "\":\"" + contextAttribute.getName() + "\","
-                            + "\"" + Constants.ATTR_TYPE + "\":\"" + contextAttribute.getType() + "\","
-                            + "\"" + Constants.ATTR_VALUE + "\":" + contextAttribute.getContextValue(true) + ","
-                            + "\"" + Constants.ATTR_MD + "\":" + contextAttribute.getContextMetadata()
+                            + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                            + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                            + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                            + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                            + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                            + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
-                    logger.info("Persisting data. File: " + entityDescriptor + ", Data: " + rowLine);
+                    logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
+                            + rowLine + ")");
                     
                     // if the file exists, append the Json document to it; otherwise, create it with initial content and
                     // mark as existing (this avoids checking if the file exists each time a Json document is going to
@@ -305,11 +333,9 @@ public class OrionHDFSSink extends OrionSink {
                         fileExists = true;
                     } // if else
                 } else {
-                    columnLine += "\"" + contextAttribute.getName() + "\":" + contextAttribute.getContextValue(true)
-                            + ", \"" + contextAttribute.getName() + "_md\":" + contextAttribute.getContextMetadata()
+                    columnLine += "\"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata
                             + ",";
-                    hiveFields += "," + contextAttribute.getName() + " string," + contextAttribute.getName()
-                            + "_md array<string>";
+                    hiveFields += "," + attrName + " string," + attrName + "_md array<string>";
                 } // if else
             } // for
                  
@@ -318,7 +344,8 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("Persisting data. File: " + entityDescriptor + ", Data: " + columnLine);
+                logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
+                        + columnLine + ")");
                 
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the

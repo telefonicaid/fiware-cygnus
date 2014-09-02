@@ -1,4 +1,21 @@
-# APACHE_FLUME_HOME/conf/cygnus.conf
+# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
+# 
+# This file is part of fiware-connectors (FI-WARE project).
+# 
+# fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+# 
+# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# http://www.gnu.org/licenses/.
+# 
+# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
+# frb@tid.es
+
+# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
@@ -22,6 +39,12 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
 cygnusagent.sources.http-source.handler.default_organization = org42
+# Number of channel re-injection retries before a Flume event is definitely discarded
+cygnusagent.sources.http-source.handler.event_ttl = 10
+# Source interceptors, do not change
+cygnusagent.sources.http-source.interceptors = ts-interceptor
+# Interceptor type, do not change
+cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
 
 # ============================================
 # OrionHDFSSink configuration
@@ -29,8 +52,8 @@ cygnusagent.sources.http-source.handler.default_organization = org42
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
-# The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
-cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+# Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
@@ -43,6 +66,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.hdfs-sink.naming_prefix =
+# Hive FQDN/IP address of the Hive server
+cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
 

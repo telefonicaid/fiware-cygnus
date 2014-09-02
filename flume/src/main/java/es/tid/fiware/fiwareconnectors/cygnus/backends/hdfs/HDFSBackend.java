@@ -3,24 +3,26 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.util.Arrays;
+import java.util.LinkedList;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
@@ -31,10 +33,11 @@ import org.apache.log4j.Logger;
  */
 public abstract class HDFSBackend {
     
-    protected String cosmosHost;
+    protected LinkedList<String> cosmosHost; // a linked list is used because the order is important
     protected String cosmosPort;
     protected String cosmosDefaultUsername;
     protected String cosmosDefaultPassword;
+    protected String hiveHost;
     protected String hivePort;
     private Logger logger;
     
@@ -47,12 +50,13 @@ public abstract class HDFSBackend {
      * @param cosmosDefaultPassword
      * @param hivePort
      */
-    public HDFSBackend(String cosmosHost, String cosmosPort, String cosmosDefaultUsername, String cosmosDefaultPassword,
-            String hivePort) {
-        this.cosmosHost = cosmosHost;
+    public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
+            String cosmosDefaultPassword, String hiveHost, String hivePort) {
+        this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
         this.cosmosDefaultPassword = cosmosDefaultPassword;
         this.cosmosDefaultUsername = cosmosDefaultUsername;
+        this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
@@ -68,10 +72,10 @@ public abstract class HDFSBackend {
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
                 + "_row";
-        logger.info("Creating Hive external table " + tableName);
+        logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
 
         // create the standard 8-fields
         String fields = "("
@@ -90,7 +94,6 @@ public abstract class HDFSBackend {
         String query = "create external table " + tableName + " " + fields + " row format serde "
                 + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
                 + organization + "/" + entityDescriptor + "'";
-        logger.debug("Executing: '" + query + "'");
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -111,16 +114,15 @@ public abstract class HDFSBackend {
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
                 + "_column";
-        logger.info("Creating Hive external table " + tableName);
+        logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(cosmosHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
                 + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
                 + organization + "/" + entityDescriptor + "'";
-        logger.debug("Executing: '" + query + "'");
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -149,7 +151,7 @@ public abstract class HDFSBackend {
      * @param data Data to be written in the created file
      */
     public abstract void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
-            throws Exception;
+        throws Exception;
     /**
      * Appends data to an existent file in HDFS.
      * 
@@ -159,7 +161,7 @@ public abstract class HDFSBackend {
      * @param data Data to be appended in the file
      */
     public abstract void append(DefaultHttpClient httpClient, String username, String filePath, String data)
-            throws Exception;
+        throws Exception;
     /**
      * Checks if the file exists in HDFS.
      * 
