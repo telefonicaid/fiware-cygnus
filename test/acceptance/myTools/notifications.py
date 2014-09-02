@@ -27,9 +27,9 @@ from myTools.constants import *
 
 
 class Notifications:
-    world.attrs = []
+    world.attrs = None
 
-    def __init__(self, cygnus_url, userAgent, organization, resource, attrNumber, metadataNumber, compoundNumber, dataset_default, mysql_prefix):
+    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default, mysql_prefix):
         """
         constructor
         :param cygnus_url:
@@ -42,7 +42,7 @@ class Notifications:
         """
         world.cygnus_url            = cygnus_url
         world.userAgent             = userAgent
-        world.organization          = organization
+        world.organization          = {ROW_TYPE: organization_row, COL_TYPE: organization_col}
         world.resource              = resource
         world.attrsNumber           = attrNumber
         world.metadatasNumber       = metadataNumber
@@ -68,10 +68,10 @@ class Notifications:
         :return:
         """
         if operation == NOTIFY:
-            return {ACCEPT: APPLICATION_CONTENT + content, CONTENT_TYPE  : APPLICATION_CONTENT + content, FIWARE_SERVICE: world.organization, USER_AGENT: world.userAgent}
+            return {ACCEPT: APPLICATION_CONTENT + content, CONTENT_TYPE  : APPLICATION_CONTENT + content, FIWARE_SERVICE: world.organization[world.cygnus_type], USER_AGENT: world.userAgent}
         if operation == NOTIFY_ERROR:
             return {ACCEPT: APPLICATION_CONTENT + content, CONTENT_TYPE  : APPLICATION_CONTENT + content, USER_AGENT: world.userAgent}
-    #-----------------
+    #---------------- Request -------------------------
     def __newMetadata(self, content):
         """
         Create a new Metadata
@@ -114,17 +114,15 @@ class Notifications:
 
     def __newAttribute(self, compound, metadatasNumber,content):
         """
-        Create a new Attribute with n metadatas
+        Create a new Attribute with n metadatas per row
         :return: attribute dict
         """
-        values = []
         randomStr = utils.stringGenerator(6)
         randomInt = utils.numberGenerator(3)
         name = 'name_' + randomStr
         type = 'type_' + randomStr
-        # for compound
-
         contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
+        # for compound
         if compound > 0:
             value = self.__newCompound (compound)
         else:
@@ -134,7 +132,29 @@ class Notifications:
         else:
             return  {NAME: name, TYPE: type, VALUE_JSON: value, METADATAS_JSON: contextMetadatasList}
 
-    def __appendAttributes (self, attributesNumber, compound, metadatasNumber, content):
+    def __newAttribute_column(self, attrValue, MDValue, position, content):
+        """
+        Create a new Attribute  per column
+        :param attrValue: attribute value
+        :param MDValue: if it has metadata or not (boolean)
+        :param position: attribute position
+        :param content: XML or json
+        :return: attribute dict
+        """
+        name = ATTR_NAME+"_"+str(position)
+        type = ATTR_TYPE+"_"+str(position)
+        #name = ATTRIBUTE_FIELD_LIST[position]
+        #type = ATTR_TYPE+"_"+str(position)
+        value= attrValue
+        if MDValue == TRUE: metadatasNumber = 1
+        else: metadatasNumber = 0
+        contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
+        if utils.isXML(content):
+            return  {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
+        else:
+            return  {NAME: name, TYPE: type, VALUE_JSON: value, METADATAS_JSON: contextMetadatasList}
+
+    def __appendAttributes (self, payloadData):
         """
         appends all attributes
         :param attributesNumber:
@@ -142,9 +162,18 @@ class Notifications:
         :param content:
         :return:
         """
+        attributesNumber = payloadData[ATTRIBUTE_NUMBER]
+        compoundsNumber  = payloadData[COMPOUND_NUMBER]
+        metadatasNumber  = payloadData[METADATA_NUMBER]
+        attrValue        = payloadData[ATTR_VALUE]
+        MDValue          = payloadData[METADATA_VALUE]
+        content          = payloadData[CONTENT]
         self.attrs = []
         for i in range(int(attributesNumber)):
-            t = self.__newAttribute(compound, metadatasNumber, content)
+            if world.cygnus_type == ROW_TYPE:
+                t = self.__newAttribute(compoundsNumber, metadatasNumber, content)
+            else:
+                t = self.__newAttribute_column(attrValue, MDValue, i, content)
             self.attrs.append(t)
         return self.attrs
 
@@ -163,25 +192,51 @@ class Notifications:
             NOTIFICATION[content][CONTEXT_RESPONSE_JSON][0][CONTEXT_ELEMENT][TYPE] = res [1]
             NOTIFICATION[content][CONTEXT_RESPONSE_JSON][0][CONTEXT_ELEMENT][ID] = res [0]
 
-    def __createPayload (self, attributesNumber, compound, metadatasNumber, content):
+    def __setPayloadData (self, attributesNumber, attrValue, compoundNumber, metadatasNumber,  MDValue, content):
         """
-        create payload to Notifications
+        Define payload data, in row and column types
+        :param attributesNumber: quantity of attribute used in row
+        :param attrValue: attribute value used in column
+        :param compoundNumber: quantity compound attribute used in row
+        :param metadatasNumber: quantity of metadatas used in row
+        :param MDValue: metadata value used in column
+        :param content: xml o json used in both
+        """
+        payloadData = {ATTRIBUTE_NUMBER: None,
+                         ATTR_VALUE      : None,
+                         COMPOUND_NUMBER : None,
+                         METADATA_NUMBER : None,
+                         METADATA_VALUE  : None,
+                         CONTENT         : None}
+        payloadData[ATTRIBUTE_NUMBER] = attributesNumber
+        payloadData[ATTR_VALUE] = attrValue
+        payloadData[COMPOUND_NUMBER] = compoundNumber
+        payloadData[METADATA_NUMBER] = metadatasNumber
+        payloadData[METADATA_VALUE] = MDValue
+        payloadData[CONTENT] = content
+        return payloadData
+
+    def __createPayload (self, payloadData):
+        """
+        create payload to Notifications per row
         :param content:
         :param attributesNumber:
         :param metadatasNumber:
         """
+        world.attrs = None
+        content = payloadData[CONTENT]
         self.__splitResource(content)
-        world.attrs = self.__appendAttributes(attributesNumber, compound, metadatasNumber, content)
+        world.attrs = self.__appendAttributes(payloadData)
         if content == XML:
             NOTIFICATION[content][NOTIFY_CONTEXT_REQUEST][CONTEXT_RESPONSE_LIST] [CONTEXT_ELEMENT_RESPONSE][CONTEXT_ELEMENT][CONTEXT_ATTRIBUTE_LIST][CONTEXT_ATTRIBUTE] = world.attrs
         else:
             NOTIFICATION[content][CONTEXT_RESPONSE_JSON][0][CONTEXT_ELEMENT][ATTRIBUTE_JSON] = world.attrs
         return utils.convertDictToStr(NOTIFICATION[content], content)
 
-    #-----------------
-    def notification (self, organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, error):
+    #----------------- Notifications --------------------------
+    def notification_row (self, organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, error):
         """
-        Create or update a dataset/resource in ckan and wait for 3 secs until is stored in ckan
+        Create or update a org/dataset/resource per row and wait for 4 secs until it is stored in ckan
         :param attributesNumber:
         :param metadatasNumber:
         :param organization:
@@ -189,24 +244,43 @@ class Notifications:
         :param content:
         :param error:
         """
-        delayTimeForCKAN = 4
+
+        delayTimeForCKAN = 5
         notify = NOTIFY
         if organization == WITHOUT_ORGANIZATION: notify = NOTIFY_ERROR
-        elif organization == WITH_100: world.organization = WITH_100_VALUE [:-len (world.dataset_default)]
-        elif organization == WITH_64: world.organization = WITH_64_VALUE_ORG [:-len (world.mysql_prefix)]
-        elif organization == LARGE_THAN_100: world.organization = utils.stringGenerator(101)                       # used in ckan
-        elif organization == LARGE_THAN_64 : world.organization = utils.stringGenerator(65)                        # used in mysql
-        elif resource == WITH_100: world.resource = WITH_100_VALUE                                                 # used in ckan
-        elif resource == WITH_64 : world.resource = WITH_64_VALUE_RESOURCE [:-len (world.mysql_prefix)]            # used in mysql
-        elif resource == LARGE_THAN_64 : world.resource = utils.stringGenerator(35) +"-"+utils.stringGenerator(31) # used in mysql
+        elif organization == WITH_100: world.organization[world.cygnus_type] = WITH_100_VALUE [:-len (world.dataset_default)]            # used in ckan
+        elif organization == WITH_32: world.organization[world.cygnus_type] = WITH_32_VALUE_ORG [:-len (world.mysql_prefix)]             # used in mysql
+        elif organization == LARGE_THAN_100: world.organization[world.cygnus_type] = utils.stringGenerator(101)                          # used in ckan
+        elif organization == LARGE_THAN_32 : world.organization[world.cygnus_type] = utils.stringGenerator(33)                           # used in mysql
+        elif resource == WITH_100: world.resource = WITH_100_VALUE                                                    # used in ckan
+        elif resource == WITH_64 : world.resource = WITH_64_VALUE_RESOURCE [:-len (world.mysql_prefix)]               # used in mysql
+        elif resource == LARGE_THAN_32 : world.resource = utils.stringGenerator(20) + "-" + utils.stringGenerator(12) # used in mysql
         else:
-             if organization != DEFAULT : world.organization = organization
-             if resource != DEFAULT : world.resource = resource
+            if organization != DEFAULT : world.organization[world.cygnus_type] = organization
+            if resource != DEFAULT : world.resource = resource
         if attributesNumber != DEFAULT: world.attrsNumber = int(attributesNumber)
         if compoundNumber != DEFAULT: world.compoundNumber = int(compoundNumber)
         if metadatasNumber != DEFAULT: world.metadatasNumber = int(metadatasNumber)
-        payload = self.__createPayload(world.attrsNumber, world.compoundNumber, world.metadatasNumber, content)
+
+        payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, None, world.compoundNumber, world.metadatasNumber,  None, content))
         world.response, world.body = http.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(notify, content), payload, TRUE, error)
+        time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan
+
+    def notification_col (self, attrValue, MDValue, content, error):
+        """
+        Create or update a org/dataset/resource per column and wait for 4 secs until it is stored in ckan
+        :param organization:
+        :param resource:
+        :param content:
+        :param attrValue:
+        :param MDValue:
+        :param error:
+        """
+        delayTimeForCKAN = 5
+        if attrValue != DEFAULT: world.attrsValue = attrValue
+        if MDValue != DEFAULT: world.metadataValue = MDValue
+        payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, world.attrsValue, None, None, world.metadataValue, content))
+        world.response, world.body = http.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(NOTIFY, content), payload, TRUE, error)
         time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan
 
 

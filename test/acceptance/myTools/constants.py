@@ -73,8 +73,12 @@ NOTIFY_ERROR         = u'notify_error'
 WITHOUT_ORGANIZATION = u'without organization'
 WITH_100             = u'with 100 characters'
 WITH_64              = u'with 64 characters'
+WITH_32              = u'with 32 characters'
 LARGE_THAN_100       = u'large than 100 characters'
 LARGE_THAN_64        = u'large than 64 characters'
+LARGE_THAN_32        = u'large than 32 characters'
+ROW_TYPE             =u'row'
+COL_TYPE             =u'column'
 
 #CKAN API
 VERSION                = u'ckan_version'
@@ -88,6 +92,26 @@ PATH_VERSION_CKAN      = u'api/util/status'
 PATH_DATASET_SEARCH    = u'api/action/datastore_search?resource_id='
 PATH_API_REST_DATASET  = u'api/rest/dataset'
 OFFSET                 = u'&offset='
+ORGANIZATION_CREATE    = u'organization_create'
+ORGANIZATION_LIST      = u'organization_list'
+PACKAGE_CREATE         = u'package_create'
+PACKAGE_SHOW           = u'package_show?id='
+RESOURCE_CREATE        = u'resource_create'
+DATASTORE_CREATE       = u'datastore_create'
+PATH_API_CREATE        = u'api/3/action'
+OWNER_ORG              = u'owner_org'
+URL                    = u'url'
+URL_EXAMPLE            = u'http://foo.bar/newresource'
+PACKAGE_ID             = u'package_id'
+RESOURCE_ID            = u'resource_id'
+NUM_RESOURCE           = u'num_resources'
+FIELD                  = u'fields'
+RECVTIME               ='recvTime'
+TIMESTAMP              = u'timestamp'
+FORCE                  = u'force'
+WITHOUT_METADATA_FIELD = u'without metadata field'
+
+#ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
 
 #REQUEST constants
 #Notification
@@ -117,6 +141,12 @@ STATUS_CODE              = u'statusCode'
 CODE                     = u'code'
 REASON_PHRASE            = u'reasonPhrase'
 ITEM                     = u'item'
+ATTRIBUTE_NUMBER         = u'attributesNumber'
+ATTR_VALUE               = u'attrValue'
+COMPOUND_NUMBER          = u'compoundNumber'
+METADATA_NUMBER          = u'metadatasNumber'
+METADATA_VALUE           = u'MDValue'
+CONTENT                  = u'content'
 
 #Happy path constants
 SUBS_ID_VALUE =  "51c0ac9ed714fb3b37d7d5a8"
@@ -135,6 +165,7 @@ REASON_PHRASE_VALUE = "OK"
 #WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-1234567891234567890123456789'
 WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-12345678912345678901234567890abcdefghij'
 WITH_64_VALUE_ORG = u'a234567890abcdefghij1234567890jklmnopqrst1234567890uvwxyzzzz01'
+WITH_32_VALUE_ORG = u'a234567890abcdefghij1234567890j'
 WITH_64_VALUE_RESOURCE = u'a234567890abcdefghij1234567890-klmnopqrst1234567890uvwxyzzzz01'
                  #1234567890abcdefghij1234567890klmnopqrst1234567890uv
 
@@ -192,6 +223,7 @@ VALIDATE_DATA_MSG     = u'...Wrong data stored in ckan: '
 VALIDATE_DATASET_MSG  = u'...Dataset does not exist, is possible it was has deleted: '
 VALIDATE_DATASET_MSG  = u'...Dataset does exist: '
 VALIDATE_RESOURCE_MSG = u'resource is missing...'
+VALIDATE_RESOURCE_IS_NOT_EMPTY_MSG = u'...Resource is not empty: '
 
 #MySQL
 SELECT_VERSION       = u'SELECT version ()'

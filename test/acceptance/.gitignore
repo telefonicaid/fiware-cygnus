@@ -4,3 +4,5 @@
 *.pyc
 properties.json
 testreport/
+settings/
+selenium-server-standalone

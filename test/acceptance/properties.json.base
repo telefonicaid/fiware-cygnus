@@ -28,6 +28,8 @@
         "mysql_host": "hostname or IP",
         "mysql_port": "port",
         "mysql_user": "user",
-        "mysql_pass": "pass"
+        "mysql_pass": "pass",
+        "mysql_attrValueType_default": "text",
+        "mysql_metadataType_default": "text"
     }
 }
