@@ -68,18 +68,30 @@ Let's consider the following notification in Json format coming from an Orion Co
       ]
     }
 
-Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (it is a POST request, the target is `notify` and the headers are OK), detecting the content type (it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
+Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (that it is a POST request, that the target is 'notify' and that the headers are OK), detecting the content type (that it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
 
-    event={body={the_json_part...},headers={{"content-type","application/json"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
+    event={
+		body=json_data,
+		headers={
+			content-type=application/json,
+			fiware-service=Org42,
+			timestamp=1402409899391,
+			transactionId=asdfasdfsdfa,
+			ttl=10
+		}
+	}
+
+<b>NOTE: The above is an <i>object representation</i>, not Json data nor any other data format.</b>
 
 Let's have a look on the Flume event headers:
 
-* The `content-type` header is a replica of the Http one in order the different sinks know how to parse the event body, in this case it is Json.
-* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the `Fiware-Service` header, then Cygnus will use the default organization specified in the `default_organization` configuration property.
-* The notification reception time is included in the list of headers (as `recvTimeTs`) for timestamping purposes in the different sinks. 
+* The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
+* Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks.
+* The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. 
 
-The channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
-
+Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
 ### OrionHDFSSink persistence
 
@@ -297,7 +309,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
-# APACHE_FLUME_HOME/conf/cygnus.conf
+# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
@@ -321,6 +333,12 @@ cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
 cygnusagent.sources.http-source.handler.default_organization = org42
+# Number of channel re-injection retries before a Flume event is definitely discarded 
+cygnusagent.sources.http-source.handler.events_ttl = 10
+# Source interceptors, do not change
+cygnusagent.sources.http-source.interceptors = ts-interceptor
+# Interceptor type, do not change
+cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
 
 # ============================================
 # OrionHDFSSink configuration
@@ -328,8 +346,8 @@ cygnusagent.sources.http-source.handler.default_organization = org42
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
-# The FQDN/IP address of the Cosmos deployment where the notification events will be persisted
-cygnusagent.sinks.hdfs-sink.cosmos_host = x.y.z.w
+# Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
@@ -342,6 +360,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # prefix for the database and table names, empty if no prefix is desired
 cygnusagent.sinks.hdfs-sink.naming_prefix =
+# Hive FQDN/IP address of the Hive server
+cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
 
@@ -414,30 +434,6 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ```
 
-## log4j configuration
-
-Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appernder are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
-
-```Python
-log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-log4j.appender.cygnus1028.MaxFileSize=100MB
-log4j.appender.cygnus1028.MaxBackupIndex=10
-log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
-log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
-
-log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-log4j.appender.cygnus1028.MaxFileSize=100MB
-log4j.appender.cygnus1028.MaxBackupIndex=10
-log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
-log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-log4j.appender.cygnus1028.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
-```
-
-Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (`flume.root.logger=INFO,LOGFILE`):
-
-    -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
-
 ## Running
 
 In foreground (with logging):
@@ -481,6 +477,45 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
     EOF
 
 Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
+
+## Logs
+
+###log4j configuration
+
+Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appender are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
+
+    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1028.MaxFileSize=100MB
+    log4j.appender.cygnus1028.MaxBackupIndex=10
+    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1028.log
+    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+    
+    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1028.MaxFileSize=100MB
+    log4j.appender.cygnus1028.MaxBackupIndex=10
+    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
+    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+
+Regarding the log4j Conversion Pattern:
+
+* `time` makes reference to a timestamp following the [RFC3339](http://tools.ietf.org/html/rfc3339).
+* `lvl`means logging level, and matches the traditional log4j levels: `INFO`, `WARN`, `ERROR`, `FATAL` and `DEBUG`.
+* `trans` is a transaction identifier, i.e. an identifier that is printed in all the traces related to the same Orion notification. The format is `<cygnus_boot_time/1000>-<cygnus_boot_time%1000>-<10_digits_transaction_count>`. Its generation logic ensures that every transaction identifier is unique, also for Cygnus instances running in different VMs, except if they are started in the exactly same millisecond (highly unprobable).
+* `function` identifies the function/method within the class printing the log.
+* `comp` is always `Cygnus`.
+* `msg` is a custom message that has always the same format: `<class>[<line>] : <message>`.
+
+Once the log4j has been properly configured, you only have to add to the Flume command line the following parameter, which overwrites the default configutation (`flume.root.logger=INFO,LOGFILE`):
+
+    -Dflume.root.logger=<loggin_level>,cygnus.<TCP_port>.log
+
+In addition, you have a complete `log4j.properties` template in `conf/log4j.properties.template`, once you clone the Cygnus repository.
+
+### Message types
+
+Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
 
 ## Contact
 

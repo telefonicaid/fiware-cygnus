@@ -3,30 +3,33 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.flume.Channel;
 import org.apache.flume.Event;
@@ -36,6 +39,7 @@ import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -46,7 +50,7 @@ import org.xml.sax.InputSource;
  * Abstract class containing the common code to all the sinks persisting data comming from Orion Context Broker.
  * 
  * The common attributes are:
- *  - timeHelper, a wrapper of the Java timestamp methods, in order it can be mocked in the tests
+ *  - there is no common attributes
  * The common methods are:
  *  - void stop()
  *  - Status process() throws EventDeliveryException
@@ -79,40 +83,97 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     @Override
     public Status process() throws EventDeliveryException {
         Status status = null;
-
-        // start transaction
-        Channel ch = getChannel();
-        Transaction txn = ch.getTransaction();
-        txn.begin();
+        Channel ch = null;
+        Transaction txn = null;
+        Event event = null;
 
         try {
-            // get an event
-            Event event = ch.take();
+            // get the channel
+            ch = getChannel();
+        } catch (Exception e) {
+            logger.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
+
+        try {
+            // start a Flume transaction (it is not the same than a Cygnus transaction!)
+            txn = ch.getTransaction();
+            txn.begin();
+        } catch (Exception e) {
+            logger.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
+
+        try {
+            // get the event
+            event = ch.take();
             
             if (event == null) {
                 txn.commit();
+                txn.close();
                 return Status.READY;
             } // if
+        } catch (Exception e) {
+            logger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
             
+        try {
+            // set the transactionId in MDC
+            MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
+        } catch (Exception e) {
+            logger.error("Runtime error (" + e.getMessage() + ")");
+        } // catch
+
+        logger.info("Event got from the channel (id=" + event.hashCode() + ", headers=" + event.getHeaders().toString()
+                + ", bodyLength=" + event.getBody().length + ")");
+        
+        try {
             // persist the event
-            logger.info("An event was taken from the channel, it must be persisted");
             persist(event);
             
-            // specify the transaction has succeded
+            // the transaction has succeded
             txn.commit();
             status = Status.READY;
-        } catch (Throwable t) {
-            txn.rollback();
-            logger.error(t.getMessage());
-            status = Status.BACKOFF;
+        } catch (Exception e) {
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                logger.error(e.getMessage());
+                
+                // check the event TTL
+                int ttl = new Integer(event.getHeaders().get(Constants.TTL)).intValue();
+                
+                if (ttl > 0) {
+                    String newTTL = new Integer(ttl - 1).toString();
+                    event.getHeaders().put(Constants.TTL, newTTL);
+                    txn.rollback();
+                    status = Status.BACKOFF;
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
+                            + ")");
+                } else {
+                    logger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
+                            + event.hashCode() + ", ttl=0)");
+                    txn.commit();
+                    status = Status.READY;
+                } // if else
+            } else {
+                if (e instanceof CygnusRuntimeError) {
+                    logger.error(e.getMessage());
+                } else if (e instanceof CygnusBadConfiguration) {
+                    logger.warn(e.getMessage());
+                } else if (e instanceof CygnusBadContextData) {
+                    logger.warn(e.getMessage());
+                } else {
+                    logger.warn(e.getMessage());
+                } // if else if
 
-            // rethrow all errors
-            if (t instanceof Error) {
-                throw (Error) t;
-            } // if
+                txn.commit();
+                status = Status.READY;
+            } // if else
         } finally {
             // close the transaction
             txn.close();
+            logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;
@@ -128,29 +189,41 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     private void persist(Event event) throws Exception {
         String eventData = new String(event.getBody());
         Map<String, String> eventHeaders = event.getHeaders();
-        
+
         // parse the eventData
         NotifyContextRequest notification = null;
-        
+
         if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/json")) {
-            logger.debug("The content-type was application/json");
             Gson gson = new Gson();
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
+
+            try {
+                notification = gson.fromJson(eventData, NotifyContextRequest.class);
+            } catch (Exception e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } // try catch
         } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
-            logger.debug("The content-type was application/xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(eventData));
-            Document doc = dBuilder.parse(is);
-            doc.getDocumentElement().normalize();
+            Document doc = null;
+
+            try {
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                InputSource is = new InputSource(new StringReader(eventData));
+                doc = dBuilder.parse(is);
+                doc.getDocumentElement().normalize();
+            } catch (Exception e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } // try catch
+
             notification = new NotifyContextRequest(doc);
         } else {
+            // this point should never be reached since the content type has been checked when receiving the
+            // notification
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
 
         // process the event data
         ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get(Constants.RECV_TIME_TS)).longValue(),
+        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get("timestamp")).longValue(),
                 contextResponses);
     } // persist
     

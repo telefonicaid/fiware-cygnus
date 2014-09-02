@@ -14,7 +14,7 @@
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.hive;
@@ -75,7 +75,8 @@ public class HiveClient {
             // execute the query
             rs = stmt.executeQuery(query);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Runtime error (The Hive table cannot be created. Hive query='" + query + "'. Details="
+                    + e.getMessage() + ")");
             res = false;
         } finally {
             return res && closeHiveObjects(con, stmt, rs);
@@ -112,10 +113,10 @@ public class HiveClient {
                 } // for
               
                 s += rs.getString(rs.getMetaData().getColumnCount());
-                System.out.println(s);
             } // while
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Runtime error (The Hive query cannot be executed. Hive query='" + query + "'. Details="
+                    + e.getMessage() + ")");
             res = false;
         } finally {
             return res && closeHiveObjects(con, stmt, rs);
@@ -136,7 +137,7 @@ public class HiveClient {
             try {
                 con.close();
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error("Runtime error (The Hive connection could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch
         } // if
@@ -145,7 +146,7 @@ public class HiveClient {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error("Runtime error (The Hive statement could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch
         } // if
@@ -154,7 +155,7 @@ public class HiveClient {
             try {
                 rs.close();
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error("Runtime error (The Hive result set could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch
         } // if

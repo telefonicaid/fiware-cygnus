@@ -56,8 +56,8 @@ public class OrionHDFSSinkTest {
     private NotifyContextRequest notifyContextRequest;
     
     // constants
-    private final String cosmosHost = "localhost";
-    private final String cosmosPort = "3306";
+    private final String[] cosmosHost = {"localhost"};
+    private final String cosmosPort = "14000";
     private final String cosmosDefaultUsername = "user1";
     private final String cosmosDefaultPassword = "pass1234";
     private final String hdfsAPI = "httpfs";
@@ -110,7 +110,7 @@ public class OrionHDFSSinkTest {
         
         // set up other instances
         context = new Context();
-        context.put("cosmos_host", cosmosHost);
+        context.put("cosmos_host", cosmosHost[0]);
         context.put("cosmos_port", cosmosPort);
         context.put("cosmos_default_username", cosmosDefaultUsername);
         context.put("cosmos_default_password", cosmosDefaultPassword);
@@ -134,7 +134,7 @@ public class OrionHDFSSinkTest {
     public void testConfigure() {
         System.out.println("configure");
         sink.configure(context);
-        assertEquals(cosmosHost, sink.getCosmosHost());
+        assertEquals(cosmosHost[0], sink.getCosmosHost()[0]);
         assertEquals(cosmosPort, sink.getCosmosPort());
         assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
         assertEquals(cosmosDefaultPassword, sink.getCosmosDefaultPassword());

@@ -3,12 +3,12 @@
 #
 # This file is part of fiware-connectors.
 #
-# Orion Context Broker is free software: you can redistribute it and/or
+# fiware-connectors  is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# Orion Context Broker is distributed in the hope that it will be useful,
+# fiware-connectors is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
 # General Public License for more details.
@@ -24,21 +24,12 @@
 
 API_HOST=$1
 API_KEY=$2
-RES_ID=$3
+ORG_NAME=$3
+PKG_NAME=$4
 
-echo "# Create the datastore associated to the resource"
-(curl -s -S -X POST http://${API_HOST}/api/3/action/datastore_create -H "Authorization: ${API_KEY}" -d @- | python -mjson.tool) <<EOF 
-{
-   "resource_id": "${RES_ID}",
-   "fields": [ 
-                { "id": "recvTime", "type": "timestamp" }, 
-                { "id": "temperature", "type": "json" }, 
-                { "id": "temperature_md", "type": "json" }, 
-                { "id": "pressure", "type": "json" },
-                { "id": "pressure_md", "type": "json" },
-                { "id": "humidity", "type": "json" },
-                { "id": "humidity_md", "type": "json" }
-             ],
-   "force": "true"
-}
+(curl -s -S -X POST http://${API_HOST}/api/3/action/package_create -H "Authorization: ${API_KEY}" -d @- | python -mjson.tool) <<EOF
+{ 
+   "name": "$PKG_NAME",
+   "owner_org": "$ORG_NAME" 
+} 
 EOF

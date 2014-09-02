@@ -33,7 +33,6 @@ function download_flume(){
 
 	_log "#### The version of the component is (${FLUME_TAR}) ####"
 	ARTIFACT_FLUME_URL="http://archive.apache.org/dist/flume/1.4.0/"
-	_log "#### BASE_DIR = $BASE_DIR ####"
 	_log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
 	curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
 	if [[ $? -ne 0 ]]; then
@@ -68,6 +67,7 @@ function download_flume(){
 	_log "#### Cleaning the temporal folders... ####"
 	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
 	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
+	rm -rf ${RPM_PRODUCT_SOURCE_DIR}
 	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
 	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
 	popd &> /dev/null
@@ -86,11 +86,18 @@ function copy_cygnus_to_flume(){
 }
 
 function copy_cygnus_conf() {
-	_logStage "######## Copying cygnus template as conf file... ########"
-	cp $BASE_DIR/conf/cygnus.conf.template ${RPM_SOURCE_DIR}/config/cygnus.conf
+	_logStage "######## Copying cygnus template config files to destination config directory... ########"
+	rm -rf {RPM_SOURCE_DIR}/config 
+	mkdir -p ${RPM_SOURCE_DIR}/config
+	for file in $(ls ${BASE_DIR}/conf)
+	do
+		file=$(basename ${file})
+		renamed_file=${file%.template}
+		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
+	done
 }
 
-usage() {
+function usage() {
     SCRIPT=$(basename $0)
 
     printf "\n" >&2
@@ -125,10 +132,22 @@ do
     esac
 done
 
-
+# Setting folders this scrtipt is in neore/scripts BASE_DIR. Note: $0/.. is CWD
+BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../../..)
+RPM_BASE_DIR="${BASE_DIR}/neore/rpm"
+RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
+RPM_PRODUCT_SOURCE_DIR="${RPM_SOURCE_DIR}/usr/cygnus/"
 
 # Import the colors for deployment script
-source colors_shell.sh
+source ${BASE_DIR}/neore/scripts/colors_shell.sh
+
+_log "#### BASE_DIR = $BASE_DIR ####"
+_log "#### RPM_BASE_DIR = $RPM_BASE_DIR ####"
+_log "#### RPM_SOURCE_DIR = $RPM_SOURCE_DIR ####"
+_log "#### RPM_PRODUCT_SOURCE_DIR=$RPM_PRODUCT_SOURCE_DIR ####"
+
+_log "#### Creating output folder ####"
+[[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
 
 # check user
 
@@ -160,21 +179,6 @@ fi
 
 _logStage "######## Setting the environment... ########"
 
-# Setting folders this scrtipt is in neore/scripts BASE_DIR. Note: $0/.. is CWD
-BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../../..)
-_log "#### BASE_DIR = $BASE_DIR ####"
-
-RPM_BASE_DIR="${BASE_DIR}/neore/rpm"
-_log "#### RPM_BASE_DIR = $RPM_BASE_DIR ####"
-
-RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
-_log "#### RPM_SOURCE_DIR = $RPM_SOURCE_DIR ####"
-
- RPM_PRODUCT_SOURCE_DIR="${RPM_SOURCE_DIR}/usr/cygnus/"
-_log "#### RPM_PRODUCT_SOURCE_DIR=$RPM_PRODUCT_SOURCE_DIR ####"
-
-_log "#### Creating output folder ####"
-[[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
 
 _log "#### Iterate over every SPEC file ####"
 if [[ -d "${RPM_BASE_DIR}" ]]; then
@@ -189,6 +193,8 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	[[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
+	rm -rf ${RPM_BASE_DIR}/BUILD
+	rm -rf ${RPM_BASE_DIR}/BUILDROOT
 	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
 	do
 		_log "#### Packaging using: ${SPEC_FILE}... ####"
