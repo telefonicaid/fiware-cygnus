@@ -75,11 +75,13 @@ def request(method, url, headers, body, error):
     """
     parsed_url = urlparse(url)
     con = httplib.HTTPConnection(parsed_url.netloc)
+
     con.request(method, parsed_url.path, body, headers)
     response = con.getresponse()
 
     #printRequest(method, url, headers, body)
     #printResponse(response)
+
     return response
 
 def request2(method, url, headers, body, redirect, error):
@@ -102,7 +104,8 @@ def request2(method, url, headers, body, redirect, error):
     (response, body) = h.request(url, method, body, headers)
 
     #printRequest(method, url, headers, body)
-    #printResponse2(response, body)
+   # printResponse2(response, body)
+
     return response, body
 #--------------------------------------------------------------------------------------------------------
 

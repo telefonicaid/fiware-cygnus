@@ -104,6 +104,7 @@ def validateHTTPCode(expectedStatusCode, receivedStatus, receivedBody):
     validate http status code
     :param expected_status_code: Http code expected
     """
+
     assert receivedStatus == status_codes[expectedStatusCode], \
         "Wrong status code received: %d. Expected: %d. \n\nBody content: %s" \
         % (str(receivedStatus), status_codes[expectedStatusCode], str(receivedBody))

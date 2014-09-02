@@ -34,7 +34,8 @@ def before_each_scenario(scenario):
     world.cygnus        = Notifications(
                              world.config['cygnus']['cygnus_url'],
                              world.config['cygnus']['cygnus_user_agent'],
-                             world.config['cygnus']['cygnus_organization_default'],
+                             world.config['cygnus']['cygnus_organization_per_row_default'],
+                             world.config['cygnus']['cygnus_organization_per_col_default'],
                              world.config['cygnus']['cygnus_resource_default'],
                              world.config['cygnus']['cygnus_attributesNumber_default'],
                              world.config['cygnus']['cygnus_metadatasNumber_default'],
