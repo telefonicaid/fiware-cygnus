@@ -175,7 +175,7 @@ public class CKANBackendImpl implements CKANBackend {
                             + pkgId + ")");
                     return;
                 } // if
-                // it seems the other packeges are not of interest for Cygnus
+                // it seems the other packages are not of interest for Cygnus
             } // while
 
             // if we have reach this point, then orgName doesn't include the default package; thus create is
@@ -291,7 +291,7 @@ public class CKANBackendImpl implements CKANBackend {
             String resourceId;
             OrgResourcePair orgResourcePair = new OrgResourcePair(orgName, resourceName);
 
-            // check if the resource can be got from the map
+            // check if the resource can be obtained from the map
             if (resourceIds.containsKey(orgResourcePair)) {
                 resourceId = resourceIds.get(orgResourcePair);
                 logger.debug("Resource id found in the map (<orgName,resourceName>=" + orgResourcePair
