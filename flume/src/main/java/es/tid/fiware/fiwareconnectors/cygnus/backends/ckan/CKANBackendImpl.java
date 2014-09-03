@@ -102,6 +102,15 @@ public class CKANBackendImpl implements CKANBackend {
         if (res.getStatusCode() == 200) {
             // orgName exists within CKAN
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
+            
+            // check if the organization is in "deleted" state
+            String orgState = result.get("state").toString();
+            
+            if (orgState.equals("deleted")) {
+                throw new CygnusBadConfiguration("The organization exists but it is in a deleted state (orgName="
+                        + orgName + ")");
+            } // if
+            
             String orgId = result.get("id").toString();
             logger.debug("Organization found (orgName=" + orgName + ", orgId=" + orgId + ")");
 
@@ -129,6 +138,14 @@ public class CKANBackendImpl implements CKANBackend {
                 String pkgName = (String) pkg.get("name");
                 
                 if (pkgName.equals(effectiveDefaultDataset)) {
+                    // check if the organization is in "deleted" state
+                    String pkgState = pkg.get("state").toString();
+
+                    if (pkgState.equals("deleted")) {
+                        throw new CygnusBadConfiguration("The package exists but it is in a deleted state (orgName="
+                                + orgName + ", pkgName=" + pkgName + ")");
+                    } // if
+                    
                     String pkgId = pkg.get("id").toString();
                     logger.debug("Default package found (orgName=" + orgName + ", defaultPkgName="
                             + effectiveDefaultDataset + ", defaultPkgId= " + pkgId + ")");
@@ -158,6 +175,7 @@ public class CKANBackendImpl implements CKANBackend {
                             + pkgId + ")");
                     return;
                 } // if
+                // it seems the other packages are not of interest for Cygnus
             } // while
 
             // if we have reach this point, then orgName doesn't include the default package; thus create is
@@ -273,7 +291,7 @@ public class CKANBackendImpl implements CKANBackend {
             String resourceId;
             OrgResourcePair orgResourcePair = new OrgResourcePair(orgName, resourceName);
 
-            // check if the resource resourceId can be got from the map
+            // check if the resource can be obtained from the map
             if (resourceIds.containsKey(orgResourcePair)) {
                 resourceId = resourceIds.get(orgResourcePair);
                 logger.debug("Resource id found in the map (<orgName,resourceName>=" + orgResourcePair
@@ -303,9 +321,8 @@ public class CKANBackendImpl implements CKANBackend {
                 initOrg(httpClient, orgName);
                 return resourceLookupAndCreate(httpClient, orgName, resourceName, createResource, false);
             } else {
-                logger.error("Configuration error (The resource id did not exist and could not be created. The "
+                throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
                         + "resource/datastore pre-provision in column mode failed");
-                return null;
             } // if else
 
             return resourceId;
@@ -502,20 +519,10 @@ public class CKANBackendImpl implements CKANBackend {
                 String packageId = createPackage(httpClient, packageName, orgId);
                 packagesIds.put(orgName, packageId);
                 logger.debug("Package added to packages map (orgName=" + orgName + " -> packageId=" + packageId + ")");
-/*
-            } else if (res.getStatusCode() == 409) {
-                logger.debug("The organization exists but its state is \"deleted\", activating it (orgName="
-                        + orgName + ")");
-                String orgId = activateElementState(httpClient, orgName, "organization");
-                
-                if (orgId != null) {
-                    logger.debug("Successful organization activation (orgId=" + orgId + ")");
-                } else {
-                    throw new CygnusRuntimeError("Could not activate the organization (orgName=" + orgName + ")");
-                } // if else
-*/
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the organization "
+                        + "already exists in a deleted state (respCode=" + res.getStatusCode() + ", orgName="
+                        + orgName + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -547,6 +554,9 @@ public class CKANBackendImpl implements CKANBackend {
                 String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
                 logger.debug("Successful package creation (pkgId=" + packageId + ")");
                 return packageId;
+            /*
+            This is not deleted if in the future we try to activate deleted elements again
+
             } else if (res.getStatusCode() == 409) {
                 logger.debug("The package exists but its state is \"deleted\", activating it (pkgName="
                         + pkgName + ")");
@@ -558,8 +568,11 @@ public class CKANBackendImpl implements CKANBackend {
                 } else {
                     throw new CygnusRuntimeError("Could not activate the package (pkgId=" + pkgName + ")");
                 } // if else
+            */
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the package "
+                        + "already exists in a deleted state (respCode=" + res.getStatusCode() + ", pkgName="
+                        + pkgName + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -602,21 +615,9 @@ public class CKANBackendImpl implements CKANBackend {
                 String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
                 logger.debug("Successful resource creation (resource id=" + resourceId + ")");
                 return resourceId;
-/*
-            } else if (res.getStatusCode() == 409) {
-                logger.debug("The resource exists but its state is \"deleted\", activating it (resourceName="
-                        + resourceName + ")");
-                String resourceId = activateElementState(httpClient, resourceName, "resource");
-                
-                if (resourceId != null) {
-                    logger.debug("Successful resource activation (resourceName=" + resourceId + ")");
-                    return resourceId;
-                } else {
-                    throw new CygnusRuntimeError("Could not activate the resource (resourceId=" + resourceId + ")");
-                } // if else
-*/
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the resource "
+                        + "already exists (respCode=" + res.getStatusCode() + ", resourceName=" + resourceName + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -660,7 +661,8 @@ public class CKANBackendImpl implements CKANBackend {
             if (res.getStatusCode() == 200) {
                 logger.debug("Successful datastore creation (resourceId=" + resourceId + ")");
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
+                        + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
