@@ -74,7 +74,7 @@ public class MySQLBackend {
         // get a connection to an empty database
         Connection con = getConnection("");
         
-        try {            
+        try {
             stmt = con.createStatement();
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
