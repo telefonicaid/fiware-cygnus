@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.mysql;
 
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.sql.Statement;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.sql.SQLTimeoutException;
 
 /**
  *
@@ -83,7 +85,7 @@ public class MySQLBackend {
             logger.debug("Executing MySQL query (" + query + ")");
             stmt.executeUpdate(query);
         } catch (Exception e) {
-            throw new CygnusPersistenceError(e.getMessage());
+            throw new CygnusRuntimeError(e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -120,7 +122,7 @@ public class MySQLBackend {
             logger.debug("Executing MySQL query (" + query + ")");
             stmt.executeUpdate(query);
         } catch (Exception e) {
-            throw new CygnusPersistenceError(e.getMessage());
+            throw new CygnusRuntimeError(e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -159,8 +161,10 @@ public class MySQLBackend {
                     + "', '" + attrMd + "')";
             logger.debug("Executing MySQL query (" + query + ")");
             stmt.executeUpdate(query);
-        } catch (Exception e) {
+        } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData(e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -214,14 +218,16 @@ public class MySQLBackend {
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
         } // try catch
-        
+                
         try {
             // finish creating the query and execute it
             String query = "insert into " + tableName + " (" + columnNames + ") values (" + columnValues + ")";
             logger.debug("Executing MySQL query (" + query + ")");
             stmt.executeUpdate(query);
-        } catch (Exception e) {
+        } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData(e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
