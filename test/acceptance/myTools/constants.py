@@ -111,6 +111,12 @@ TIMESTAMP              = u'timestamp'
 FORCE                  = u'force'
 WITHOUT_METADATA_FIELD = u'without metadata field'
 
+#mySQL
+MYSQL_ERROR_MESSAGE   = u'DB exception: '
+MYSQL_CREATE_DATABASE = u'CREATE DATABASE IF NOT EXISTS '
+MYSQL_CREATE_TABLE    = u'CREATE TABLE IF NOT EXISTS '
+
+
 #ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
 
 #REQUEST constants

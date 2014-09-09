@@ -22,7 +22,7 @@
 
 from lettuce import world, after, before
 from myTools.notifications import Notifications
-from myTools.mysql import MySQL
+from myTools.mysql_utils import MySQL
 
 
 @before.each_scenario
@@ -34,7 +34,8 @@ def before_each_scenario(scenario):
     world.cygnus        = Notifications(
                              world.config['cygnus']['cygnus_url'],
                              world.config['cygnus']['cygnus_user_agent'],
-                             world.config['cygnus']['cygnus_organization_default'],
+                             world.config['cygnus']['cygnus_organization_per_row_default'],
+                             world.config['cygnus']['cygnus_organization_per_col_default'],
                              world.config['cygnus']['cygnus_resource_default'],
                              world.config['cygnus']['cygnus_attributesNumber_default'],
                              world.config['cygnus']['cygnus_metadatasNumber_default'],
@@ -49,6 +50,8 @@ def before_each_scenario(scenario):
                              world.config['mysql']['mysql_port'],
                              world.config['mysql']['mysql_user'],
                              world.config['mysql']['mysql_pass'],
+                             world.config['mysql']['mysql_attrValueType_default'],
+                             world.config['mysql']['mysql_metadataType_default']
 
     )
 

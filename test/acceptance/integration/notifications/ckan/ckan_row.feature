@@ -47,13 +47,13 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan
     Examples:
-      |organization|content|
-      |org60       |json|
-      |org60       |xml|
-      |ORGA60      |json|
-      |ORGA60      |xml|
-      |ORGA_6      |json|
-      |ORGA_6      |xml|
+      |organization |content|
+      |org601       |json|
+      |org601       |xml|
+      |ORGA601      |json|
+      |ORGA601      |xml|
+      |Orga_61      |json|
+      |Orga_61      |xml|
       #|without organization|json|
       #|without organization|xml|
       |with 32 characters|json|
@@ -82,7 +82,7 @@ Feature: Stored in ckan new notifications per row from context broker
     Scenario Outline:  store in ckan new notifications with different quantities of attributes
        Given cygnus is installed with type "row"
          And "ckan" is installed correctly
-        When store in ckan with a organization "default", resource "default" and the attribute number "<attrNumber>", the compound number "default", the metadata number "default" and content "<content>"
+        When store in ckan with a organization "attributes_multiples_3", resource "default" and the attribute number "<attrNumber>", the compound number "default", the metadata number "default" and content "<content>"
         Then I receive an "OK" http code
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan
@@ -99,7 +99,7 @@ Feature: Stored in ckan new notifications per row from context broker
     Scenario Outline:  store in ckan new notifications with different quantities of metadata attributes
        Given cygnus is installed with type "row"
          And "ckan" is installed correctly
-        When store in ckan with a organization "default", resource "default" and the attribute number "default", the compound number "default", the metadata number "<metadatas>" and content "<content>"
+        When store in ckan with a organization "metadata_1", resource "default" and the attribute number "default", the compound number "default", the metadata number "<metadatas>" and content "<content>"
         Then I receive an "OK" http code
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan
@@ -116,7 +116,7 @@ Feature: Stored in ckan new notifications per row from context broker
     Scenario Outline:  store in ckan new notifications with different quantities of values ​​of compounds attributes
        Given cygnus is installed with type "row"
          And "ckan" is installed correctly
-        When store in ckan with a organization "pepe01", resource "default" and the attribute number "default", the compound number "<compound>", the metadata number "default" and content "<content>"
+        When store in ckan with a organization "compound_1", resource "default" and the attribute number "default", the compound number "<compound>", the metadata number "default" and content "<content>"
         Then I receive an "OK" http code
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan

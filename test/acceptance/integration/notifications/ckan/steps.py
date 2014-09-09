@@ -20,7 +20,7 @@
 #
 
 from lettuce import step
-from myTools.ckan import *
+from myTools.ckan_utils import *
 
 
 #----------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ def cygnus_is_installed_with_type(step, type):
     :param step:
     :param type: type of persistent (ROW or COLUMN)
     """
-    world.cygnus_type = type
+    world.cygnus.verifyCygnus (type)
 
 @step(u'create a new organization "([^"]*)"')
 def create_a_new_organization (step, orgName):
@@ -103,7 +103,7 @@ def i_receive_an_http_code (step, httpCode):
     """
     status = world.response.status
     body = world.body
-    utils.validateHTTPCode(httpCode, status, body)
+    general_utils.validateHTTPCode(httpCode, status, body)
 
 @step (u'Validate that the attribute value and type are stored in ckan')
 def validate_that_the_attribute_value_and_type_are_stored_in_ckan(step):
