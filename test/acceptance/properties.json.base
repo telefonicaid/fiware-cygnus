@@ -7,20 +7,19 @@
     "cygnus": {
         "cygnus_url": "http://host:port",
         "cygnus_user_agent": "notification user agent",
-        "cygnus_organization_default": "org_default",
+        "cygnus_organization_per_row_default": "org_default_per_row",
+        "cygnus_organization_per_col_default": "org_default_per_col",
         "cygnus_resource_default": "resource-default",
         "cygnus_attributesNumber_default": 2,
         "cygnus_metadatasNumber_default": 2,
         "cygnus_compoundNumber_default": 0,
-        "ckan_dataset_default": "string",
-        "mysql_prefix": "string"
+        "ckan_dataset_default": "package_default"
     },
 
     "ckan": {
         "ckan_version": "X.Y",
         "ckan_url": "http://host:port",
         "ckan_authorization": "CKAN API key"
-
     },
 
     "mysql": {
@@ -29,7 +28,8 @@
         "mysql_port": "port",
         "mysql_user": "user",
         "mysql_pass": "pass",
-        "mysql_attrValueType_default": "text",
-        "mysql_metadataType_default": "text"
+        "mysql_prefix": "optional_prefix",
     }
 }
+
+

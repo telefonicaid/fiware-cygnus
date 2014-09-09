@@ -107,7 +107,7 @@ Feature: Stored in ckan new notifications per column from context broker
     Examples:
       |organization    |attributesQuantity|attrValueType|attrValue        |content|
       |org_col_json_50 |50                |json         |45.41            |json   |
-      |org_col_json_50 |50                |json         |45.41           |xml    |
+      |org_col_json_50 |50                |json         |45.41            |xml    |
       |org_col_text_50 |50                |text         |45.41            |json   |
       |org_col_text_50 |50                |text         |45.41            |xml    |
       |org_col_float_50|50                |float        |45.41            |json   |
@@ -163,7 +163,7 @@ Feature: Stored in ckan new notifications per column from context broker
     Scenario Outline: try to store new notification in ckan without metadata field and with metadata value
        Given cygnus is installed with type "column"
          And "ckan" is installed correctly
-         And create a new organization "pepe004"
+         And create a new organization "without_meta_col"
          And create a new resource "default" with "1" attributes, attrValue data type "json" and metadata data type "without metadata field"
         When append a new attribute values "45", the metadata value "True" and content "<content>"
         Then I receive an "OK" http code

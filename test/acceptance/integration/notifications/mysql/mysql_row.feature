@@ -28,6 +28,7 @@ Feature: Store in mysql new notifications per row from context broker
     @happy_path
     Scenario Outline:  store in mysql new notifications from context broker
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "default", resource "default" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the attribute value and type are stored in mysql
          And Validate that the attribute metadatas are stored in mysql
@@ -40,6 +41,7 @@ Feature: Store in mysql new notifications per row from context broker
     @organizations
     Scenario Outline:  store in mysql new notifications with different organizations behavior
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "<organization>", resource "default" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the attribute value and type are stored in mysql
          And Validate that the attribute metadatas are stored in mysql
@@ -48,14 +50,19 @@ Feature: Store in mysql new notifications per row from context broker
       |organization|content|
       |org60|json|
       |org60|xml|
+      |ORGA60      |json|
+      |ORGA60      |xml|
+      |Orga_6      |json|
+      |Orga_6      |xml|
       #|without organization|json|
       #|without organization|xml|
-      |with 64 characters|json|
-      |with 64 characters|xml|
+      |with 32 characters|json|
+      |with 32 characters|xml|
 
     @resources
     Scenario Outline:  store in ckan new notifications with different resources behavior
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "default", resource "<resource>" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the attribute value and type are stored in mysql
          And Validate that the attribute metadatas are stored in mysql
@@ -74,6 +81,7 @@ Feature: Store in mysql new notifications per row from context broker
     @attrNumbers
     Scenario Outline:  store in mysql new notifications with different quantities of attributes
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "default", resource "default" and the attribute number "<attrNumber>", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the attribute value and type are stored in mysql
          And Validate that the attribute metadatas are stored in mysql
@@ -90,6 +98,7 @@ Feature: Store in mysql new notifications per row from context broker
     @metadatas
     Scenario Outline:  store in mysql new notifications with different quantities of metadata attributes
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "default", resource "default" and the attribute number "default", the compound number "default", the metadata number "<metadatas>" and content "<content>"
         Then Validate that the attribute value and type are stored in mysql
          And Validate that the attribute metadatas are stored in mysql
@@ -103,13 +112,14 @@ Feature: Store in mysql new notifications per row from context broker
       |50|json|
       |50|xml|
 
-    @compounds @skip @BUG-102
-    Scenario Outline:  store in ckan new notifications with different quantities of values ​​of compounds attributes
-       Given "ckan" is installed correctly
-        When store in ckan with a organization "default", resource "default" and the attribute number "default", the compound number "<compound>", the metadata number "default" and content "<content>"
-        Then I receive an "OK" http code
-         And Validate that the attribute value and type are stored in ckan
-         And Validate that the attribute metadatas are stored in ckan
+    @compounds   @BUG-102
+    Scenario Outline:  store in mysql new notifications with different quantities of values of compounds attributes
+       Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
+        When store in mysql with a organization "default", resource "default" and the attribute number "default", the compound number "<compound>", the metadata number "default" and content "<content>"
+        Then Validate that the attribute value and type are stored in mysql
+         And Validate that the attribute metadatas are stored in mysql
+         And Close mysql connection
     Examples:
       |compound|content|
       |1|json|
@@ -122,11 +132,12 @@ Feature: Store in mysql new notifications per row from context broker
     @errors
     Scenario Outline:  controlled error if the database parameters are wrong
        Given "mysql" is installed correctly
+         And cygnus is installed with type "row"
         When store in mysql with a organization "<organization>", resource "<resource>" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the database is not created in mysql
     Examples:
       |organization|resource|content|
-      |large than 64 characters|default|json|
-      |large than 64 characters|default|xml|
-      |default|large than 64 characters|json|
-      |default|large than 64 characters|xml|
+     |large than 32 characters|default|json|
+      |large than 32 characters|default|xml|
+      |default|large than 32 characters|json|
+      |default|large than 32 characters|xml|

@@ -22,7 +22,7 @@
 
 from lettuce import world, after, before
 from myTools.notifications import Notifications
-from myTools.ckan import Ckan
+from myTools.ckan_utils import Ckan
 
 
 @before.each_scenario

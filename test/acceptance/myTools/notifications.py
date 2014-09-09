@@ -21,8 +21,8 @@
 #
 from lettuce import world
 import time
-import http
-import utils
+import http_utils
+import general_utils
 from myTools.constants import *
 
 
@@ -60,6 +60,10 @@ class Notifications:
            value = "%s/%s" % (world.cygnus_url, NOTIFY)
         return value
 
+    def verifyCygnus (step, cygnusType):
+        world.cygnus_type = cygnusType
+
+
     def __createHeaders(self, operation, content="xml"):
         """
         create the header for different requests
@@ -77,12 +81,12 @@ class Notifications:
         Create a new Metadata
         :return: metadata dictionary
         """
-        randomStr = utils.stringGenerator(4)
-        randomInt = utils.numberGenerator(3)
+        randomStr = general_utils.stringGenerator(4)
+        randomInt = general_utils.numberGenerator(3)
         name = 'name_' + randomStr
         type = 'type_' + randomStr
         value = randomInt
-        if utils.isXML(content):
+        if general_utils.isXML(content):
             return {CONTEXT_METADATA: {NAME: name, TYPE: type, VALUE_JSON: value}}
         else:
             return {NAME: name, TYPE: type, VALUE_JSON: value}
@@ -108,7 +112,7 @@ class Notifications:
         """
         value = {}
         for i in range(compound):
-            randomInt = utils.numberGenerator(3)
+            randomInt = general_utils.numberGenerator(3)
             value[ITEM+str(i)] = randomInt
         return value
 
@@ -117,8 +121,8 @@ class Notifications:
         Create a new Attribute with n metadatas per row
         :return: attribute dict
         """
-        randomStr = utils.stringGenerator(6)
-        randomInt = utils.numberGenerator(3)
+        randomStr = general_utils.stringGenerator(6)
+        randomInt = general_utils.numberGenerator(3)
         name = 'name_' + randomStr
         type = 'type_' + randomStr
         contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
@@ -127,7 +131,7 @@ class Notifications:
             value = self.__newCompound (compound)
         else:
             value = randomInt
-        if utils.isXML(content):
+        if general_utils.isXML(content):
             return  {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
         else:
             return  {NAME: name, TYPE: type, VALUE_JSON: value, METADATAS_JSON: contextMetadatasList}
@@ -149,7 +153,7 @@ class Notifications:
         if MDValue == TRUE: metadatasNumber = 1
         else: metadatasNumber = 0
         contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
-        if utils.isXML(content):
+        if general_utils.isXML(content):
             return  {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
         else:
             return  {NAME: name, TYPE: type, VALUE_JSON: value, METADATAS_JSON: contextMetadatasList}
@@ -231,7 +235,15 @@ class Notifications:
             NOTIFICATION[content][NOTIFY_CONTEXT_REQUEST][CONTEXT_RESPONSE_LIST] [CONTEXT_ELEMENT_RESPONSE][CONTEXT_ELEMENT][CONTEXT_ATTRIBUTE_LIST][CONTEXT_ATTRIBUTE] = world.attrs
         else:
             NOTIFICATION[content][CONTEXT_RESPONSE_JSON][0][CONTEXT_ELEMENT][ATTRIBUTE_JSON] = world.attrs
-        return utils.convertDictToStr(NOTIFICATION[content], content)
+        return general_utils.convertDictToStr(NOTIFICATION[content], content)
+
+    def __mappingQuotes (self, attrValue):
+        temp = ""
+        for i in range (len(attrValue)):
+            if attrValue[i] == "'":  temp = temp + "\""
+            else:temp = temp + attrValue[i]
+        return temp
+
 
     #----------------- Notifications --------------------------
     def notification_row (self, organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, error):
@@ -250,11 +262,11 @@ class Notifications:
         if organization == WITHOUT_ORGANIZATION: notify = NOTIFY_ERROR
         elif organization == WITH_100: world.organization[world.cygnus_type] = WITH_100_VALUE [:-len (world.dataset_default)]            # used in ckan
         elif organization == WITH_32: world.organization[world.cygnus_type] = WITH_32_VALUE_ORG [:-len (world.mysql_prefix)]             # used in mysql
-        elif organization == LARGE_THAN_100: world.organization[world.cygnus_type] = utils.stringGenerator(101)                          # used in ckan
-        elif organization == LARGE_THAN_32 : world.organization[world.cygnus_type] = utils.stringGenerator(33)                           # used in mysql
+        elif organization == LARGE_THAN_100: world.organization[world.cygnus_type] = general_utils.stringGenerator(101)                          # used in ckan
+        elif organization == LARGE_THAN_32 : world.organization[world.cygnus_type] = general_utils.stringGenerator(33)                           # used in mysql
         elif resource == WITH_100: world.resource = WITH_100_VALUE                                                    # used in ckan
         elif resource == WITH_64 : world.resource = WITH_64_VALUE_RESOURCE [:-len (world.mysql_prefix)]               # used in mysql
-        elif resource == LARGE_THAN_32 : world.resource = utils.stringGenerator(20) + "-" + utils.stringGenerator(12) # used in mysql
+        elif resource == LARGE_THAN_32 : world.resource = general_utils.stringGenerator(20) + "-" + general_utils.stringGenerator(12) # used in mysql
         else:
             if organization != DEFAULT : world.organization[world.cygnus_type] = organization
             if resource != DEFAULT : world.resource = resource
@@ -263,7 +275,7 @@ class Notifications:
         if metadatasNumber != DEFAULT: world.metadatasNumber = int(metadatasNumber)
 
         payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, None, world.compoundNumber, world.metadatasNumber,  None, content))
-        world.response, world.body = http.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(notify, content), payload, TRUE, error)
+        world.response, world.body = http_utils.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(notify, content), payload, TRUE, error)
         time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan
 
     def notification_col (self, attrValue, MDValue, content, error):
@@ -276,11 +288,12 @@ class Notifications:
         :param MDValue:
         :param error:
         """
+        attrValue = self.__mappingQuotes (attrValue)
         delayTimeForCKAN = 5
         if attrValue != DEFAULT: world.attrsValue = attrValue
         if MDValue != DEFAULT: world.metadataValue = MDValue
         payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, world.attrsValue, None, None, world.metadataValue, content))
-        world.response, world.body = http.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(NOTIFY, content), payload, TRUE, error)
+        world.response, world.body = http_utils.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(NOTIFY, content), payload, TRUE, error)
         time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan
 
 
