@@ -146,8 +146,8 @@ Feature: Stored in ckan new notifications per column from context broker
       |org_col_bool_10 |bool         |df_xml           |xml    |
       |org_col_bool_10 |bool         |{'a':'1','b':'2'}|json   |
       |org_col_bool_10 |bool         |<a>1</a><b>2</b> |xml    |
-      |org_col_bool_10 |bool         |45.56            |json   |
-      |org_col_bool_10 |bool         |45.57            |xml    |
+      |org_col_bool_10 |bool         |45,56            |json   |
+      |org_col_bool_10 |bool         |45,57            |xml    |
       |org_col_date_12 |date         |df_json          |json   |
       |org_col_date_12 |date         |df_xml           |xml    |
       |org_col_date_12 |date         |{'a':'1','b':'2'}|json   |
