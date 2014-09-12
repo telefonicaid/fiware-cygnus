@@ -5,4 +5,4 @@
 properties.json
 testreport/
 settings/
-selenium-server-standalone
+selenium-server-standalone*.jar

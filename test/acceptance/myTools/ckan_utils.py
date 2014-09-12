@@ -122,7 +122,7 @@ class Ckan:
             valueTemp = CONTENT_VALUE
         else:
              valueTemp = VALUE_JSON
-        #time.sleep(3)
+
         resp, self.body = http_utils.request2(GET, self.__createUrl(RESOURCE_SEARCH, resourceId), self.__createHeaders(CKAN_HEADER, JSON), EMPTY, TRUE, ERROR[NOT])
         world.dictTemp = general_utils.convertStrToDict(self.body, JSON)
         self.offset = (world.dictTemp[RESULT][TOTAL]/100)*100

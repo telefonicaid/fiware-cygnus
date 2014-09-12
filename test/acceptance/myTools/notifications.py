@@ -29,7 +29,7 @@ from myTools.constants import *
 class Notifications:
     world.attrs = None
 
-    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default, mysql_prefix):
+    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default, mysql_prefix, hadoop_prefix):
         """
         constructor
         :param cygnus_url:
@@ -49,6 +49,7 @@ class Notifications:
         world.compoundNumber        = compoundNumber
         world.dataset_default       = dataset_default
         world.mysql_prefix          = mysql_prefix
+        world.hadoop_prefix         = hadoop_prefix
 
     def __createUrl(self, operation, resourceId = None):
         """
@@ -150,9 +151,9 @@ class Notifications:
         #name = ATTRIBUTE_FIELD_LIST[position]
         #type = ATTR_TYPE+"_"+str(position)
         value= attrValue
-        if MDValue == TRUE: metadatasNumber = 1
-        else: metadatasNumber = 0
-        contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
+        if MDValue == TRUE: world.metadatasNumber = 1
+        else: world.metadatasNumber = 0
+        contextMetadatasList = self.__appendMetadatas(world.metadatasNumber, content)
         if general_utils.isXML(content):
             return  {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
         else:
@@ -235,6 +236,7 @@ class Notifications:
             NOTIFICATION[content][NOTIFY_CONTEXT_REQUEST][CONTEXT_RESPONSE_LIST] [CONTEXT_ELEMENT_RESPONSE][CONTEXT_ELEMENT][CONTEXT_ATTRIBUTE_LIST][CONTEXT_ATTRIBUTE] = world.attrs
         else:
             NOTIFICATION[content][CONTEXT_RESPONSE_JSON][0][CONTEXT_ELEMENT][ATTRIBUTE_JSON] = world.attrs
+
         return general_utils.convertDictToStr(NOTIFICATION[content], content)
 
     def __mappingQuotes (self, attrValue):
@@ -288,7 +290,8 @@ class Notifications:
         :param MDValue:
         :param error:
         """
-        attrValue = self.__mappingQuotes (attrValue)
+
+        if world.operation == "mysql": attrValue = self.__mappingQuotes (attrValue)
         delayTimeForCKAN = 5
         if attrValue != DEFAULT: world.attrsValue = attrValue
         if MDValue != DEFAULT: world.metadataValue = MDValue

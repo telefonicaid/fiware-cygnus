@@ -180,7 +180,7 @@ class MySQL:
                 if attrType != world.attrs[i][TYPE]:                                                               # verify the type
                     return "The "+world.attrs[i][NAME]+" type does not match..."
                 outMsg = "OK"
-                break
+                #break
         return outMsg
 
     def verifyDatasetSearch_metadatas (self, content):

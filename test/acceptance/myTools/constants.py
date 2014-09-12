@@ -116,6 +116,13 @@ MYSQL_ERROR_MESSAGE   = u'DB exception: '
 MYSQL_CREATE_DATABASE = u'CREATE DATABASE IF NOT EXISTS '
 MYSQL_CREATE_TABLE    = u'CREATE TABLE IF NOT EXISTS '
 
+#hadoop
+OPEN_FILE                 = 'OPEN'
+DELETE_FILE               = 'DELETE'
+PATH_HADOOP               = u'webhdfs/v1/user'
+QUERY_PARAM_HADOOP        = u'txt?op'
+QUERY_PARAM_HADOOP_DELETE = u'recursive=true&user.name'
+
 
 #ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
 
@@ -173,7 +180,8 @@ WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-1
 WITH_64_VALUE_ORG = u'a234567890abcdefghij1234567890jklmnopqrst1234567890uvwxyzzzz01'
 WITH_32_VALUE_ORG = u'a234567890abcdefghij1234567890j'
 WITH_64_VALUE_RESOURCE = u'a234567890abcdefghij1234567890-klmnopqrst1234567890uvwxyzzzz01'
-                 #1234567890abcdefghij1234567890klmnopqrst1234567890uv
+NAME_IS_MISSING   = u'Name is missing'
+
 
 NOTIFICATION = {
     XML: {
