@@ -164,6 +164,7 @@ class Hadoop:
         """
         http_utils.request2(DELETE, self.__createUrl(DELETE_FILE), self.__createHeaders(JSON), EMPTY, TRUE, ERROR[NOT])
 
+
     def parametersToNotification_col (self, organization, resource, attributesQuantity, metadataValue, content):
         """
         Add global parameters to notification

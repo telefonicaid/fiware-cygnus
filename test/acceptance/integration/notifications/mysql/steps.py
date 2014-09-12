@@ -48,7 +48,6 @@ def close_mysql_connection(step):
     Close mysql connection
     :param step:
     """
-
     world.mysql.closeConnection()
 
 @step (u'create a new database "([^"]*)"')

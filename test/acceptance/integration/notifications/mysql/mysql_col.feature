@@ -123,7 +123,7 @@ Feature: Stored in mysql new notifications per column from context broker
       |org_col_double_50|50                |double       |45.47            |json   |
       |org_col_double_50|50                |double       |45.48            |xml    |
       |org_col_real_50  |50                |real         |45.49            |json   |
-      |org_col_real_50  |50                |real         |45.40            |xml    |
+      |org_col_real_50  |50                |real         |45.51            |xml    |
       |org_col_int_50   |50                |int          |47               |json   |
       |org_col_int_50   |50                |int          |48               |xml    |
       |org_col_bool_50  |50                |boolean      |0                |json   |
@@ -170,8 +170,8 @@ Feature: Stored in mysql new notifications per column from context broker
       |org_col_bool_10  |boolean      |df_xml           |xml    |
       |org_col_bool_10  |boolean      |{'a':'1','b':'2'}|json   |
       |org_col_bool_10  |boolean      |<a>1</a><b>2</b> |xml    |
-      |org_col_bool_10  |boolean      |45.56            |json   |
-      |org_col_bool_10  |boolean      |45.57            |xml    |
+      |org_col_bool_10  |boolean      |45,56            |json   |
+      |org_col_bool_10  |boolean      |45,57            |xml    |
       |org_col_date_10  |date         |df_json          |json   |
       |org_col_date_10  |date         |df_xml           |xml    |
       |org_col_date_10  |date         |{'a':'1','b':'2'}|json   |
