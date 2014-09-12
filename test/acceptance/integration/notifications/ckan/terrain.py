@@ -42,6 +42,7 @@ def before_each_scenario(scenario):
                              world.config['cygnus']['cygnus_compoundNumber_default'],
                              world.config['cygnus']['ckan_dataset_default'],
                              world.config['cygnus']['mysql_prefix'],
+                             world.config['cygnus']['hadoop_prefix']
     )
 
     world.ckan          = Ckan(

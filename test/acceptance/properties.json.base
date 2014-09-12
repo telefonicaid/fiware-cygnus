@@ -3,7 +3,6 @@
         "name": "cygnus",
         "logs_path": "logs"
     },
-
     "cygnus": {
         "cygnus_url": "http://host:port",
         "cygnus_user_agent": "notification user agent",
@@ -13,23 +12,26 @@
         "cygnus_attributesNumber_default": 2,
         "cygnus_metadatasNumber_default": 2,
         "cygnus_compoundNumber_default": 0,
-        "ckan_dataset_default": "package_default"
+        "ckan_dataset_default": "package_default",
+        "mysql_prefix": "prefix",
+        "hadoop_prefix": "prefix"
     },
-
     "ckan": {
         "ckan_version": "X.Y",
         "ckan_url": "http://host:port",
         "ckan_authorization": "CKAN API key"
     },
-
     "mysql": {
         "mysql_version": "X.Y.z",
         "mysql_host": "hostname or IP",
         "mysql_port": "port",
         "mysql_user": "user",
         "mysql_pass": "pass",
-        "mysql_prefix": "optional_prefix",
-    }
+        "mysql_attrValueType_default": "text",
+        "mysql_metadataType_default": "text"
+    },
+     "hadoop": {
+        "hadoop_url": "http://host:port",
+        "hadoop_user": "user"
+     }
 }
-
-

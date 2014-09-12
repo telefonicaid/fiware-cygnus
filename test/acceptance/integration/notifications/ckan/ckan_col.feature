@@ -36,11 +36,11 @@ Feature: Stored in ckan new notifications per column from context broker
          And Verify that the attribute value is stored in ckan
          And Verify the metadatas are stored in ckan
     Examples:
-      |organization |attributesQuantity|attrValue         |metadataValue|content|
-      |cygnus_col_011|1                 |45.0             |True         |json   |
-      |cygnus_col_021|2                 |dfgdfgdg         |True         |xml    |
-      |cygnus_col_031|3                 |{'a':'1','b':'2'}|False        |json   |
-      |cygnus_col_041|4                 |-45.2344         |False        |xml    |
+      |organization  |attributesQuantity|attrValue        |metadataValue|content|
+      |cygnus_col_012|1                 |45.0             |True         |json   |
+      |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
+      |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
+      |cygnus_col_042|4                 |-45.2344         |False        |xml    |
 
     @types
     Scenario Outline: stored new notifications in ckan with different data types

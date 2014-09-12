@@ -22,7 +22,7 @@
 
 from lettuce import world, after, before
 from myTools.notifications import Notifications
-from myTools.mysql_utils import MySQL
+from myTools.hadoop_utils import Hadoop
 
 
 @before.each_scenario
@@ -45,16 +45,14 @@ def before_each_scenario(scenario):
                              world.config['cygnus']['hadoop_prefix']
     )
 
-    world.mysql          = MySQL(
-                             world.config['mysql']['mysql_version'],
-                             world.config['mysql']['mysql_host'],
-                             world.config['mysql']['mysql_port'],
-                             world.config['mysql']['mysql_user'],
-                             world.config['mysql']['mysql_pass'],
-                             world.config['mysql']['mysql_attrValueType_default'],
-                             world.config['mysql']['mysql_metadataType_default']
-
+    world.hadoop        = Hadoop (
+                             world.config['hadoop']['hadoop_url'],
+                             world.config['hadoop']['hadoop_user']
     )
+
+
+
+
 
 
 @after.each_scenario
@@ -63,4 +61,4 @@ def after_each_scenario(scenario):
     actions after each scenario
     :param scenario:
     """
-    pass
+    world.hadoop.deleteFile()
