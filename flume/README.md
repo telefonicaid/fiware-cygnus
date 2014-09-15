@@ -309,12 +309,16 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
+#=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+#
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
+#=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
-# Regarding sinks, you can use multiple ones at the same time; the only requirement is to provide a channel for each
-# one of them (this example shows how to configure 3 sinks at the same time).
+# Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
+# one of them (this example shows how to configure 3 sink types at the same time).
 cygnusagent.sources = http-source
 cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
 cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
