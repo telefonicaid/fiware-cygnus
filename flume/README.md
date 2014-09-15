@@ -252,7 +252,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ git checkout <branch>
     $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
+    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-0.2.1-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
@@ -260,7 +260,7 @@ or not:
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ git checkout <branch>
     $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn package
+    $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 where `<branch>` is `develop` if you are trying to install the latest features or `release/x.y` if you are trying to install a stable release.
@@ -335,6 +335,8 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_organization = org42
 # Number of channel re-injection retries before a Flume event is definitely discarded 
 cygnusagent.sources.http-source.handler.events_ttl = 10
+# Management interface port (temporal location for this parameter)
+cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts-interceptor
 # Interceptor type, do not change
@@ -516,6 +518,16 @@ In addition, you have a complete `log4j.properties` template in `conf/log4j.prop
 ### Message types
 
 Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
+
+## Management interface
+
+From Cygnus 0.5 there is a REST-based management interface for administration purposes. Current available operations are:
+
+<b>Get the version of the running software, including the last Git commit</b>:
+
+    GET http://host:management_port/version
+
+    {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
 
 ## Contact
 
