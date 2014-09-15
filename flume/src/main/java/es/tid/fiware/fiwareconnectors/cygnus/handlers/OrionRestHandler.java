@@ -58,7 +58,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private long transactionCount;
     private long bootTimeSeconds;
     private long bootTimeMilliseconds;
-    private int jettyPort; // FIXME: temporal
     
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
