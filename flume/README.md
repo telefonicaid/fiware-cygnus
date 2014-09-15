@@ -309,24 +309,19 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
+#=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+#
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
+#=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
 # Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
-# one of them (this example shows how to configure 3 sink types at the same time, having 2 instances of the HDFS sink
-# type).
+# one of them (this example shows how to configure 3 sink types at the same time).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink1 hdfs-sink2 mysql-sink ckan-sink
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
 cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
-
-# This sink group example is addressed for a round robin-based load balancing between hdfs-sink1 and hdfs-sink2 (which
-# are already declared sinks, see above). Feel free to add as many HDFS sinks as you may need.
-cygnusagent.sinkgroups = hdfs-group
-cygnusagent.sinkgroups.hdfs-group.sinks = hdfs-sink1 hdfs-sink2
-cygnusagent.sinkgroups.hdfs-group.processor.type = load_balance
-cygnusagent.sinkgroups.hdfs-group.processor.backoff = true
-cygnusagent.sinkgroups.hdfs-group.processor.selector = round_robin
 
 #=============================================
 # source configuration
@@ -352,54 +347,29 @@ cygnusagent.sources.http-source.interceptors = ts-interceptor
 cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
 
 # ============================================
-# OrionHDFSSink configuration (sink 1)
+# OrionHDFSSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.hdfs-sink1.channel = hdfs-channel
+cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink1.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
-cygnusagent.sinks.hdfs-sink1.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
+cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
-cygnusagent.sinks.hdfs-sink1.cosmos_port = 14000
+cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink1.cosmos_default_username = default
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
 # default password for the default username
-cygnusagent.sinks.hdfs-sink1.cosmos_default_password = xxxxxxxxxxxxx
+cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
-cygnusagent.sinks.hdfs-sink1.hdfs_api = httpfs
+cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink1.attr_persistence = column
+cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink1.naming_prefix =
+cygnusagent.sinks.hdfs-sink.naming_prefix =
 # Hive FQDN/IP address of the Hive server
-cygnusagent.sinks.hdfs-sink1.hive_host = x.y.z.w
+cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
-cygnusagent.sinks.hdfs-sink1.hive_port = 10000
-
-# ============================================
-# OrionHDFSSink configuration (sink 2, which is a twin of sink 1 except for the name)
-# channel name from where to read notification events
-cygnusagent.sinks.hdfs-sink2.channel = hdfs-channel
-# sink class, must not be changed
-cygnusagent.sinks.hdfs-sink2.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
-# Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
-cygnusagent.sinks.hdfs-sink2.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
-# port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
-cygnusagent.sinks.hdfs-sink2.cosmos_port = 14000
-# default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink2.cosmos_default_username = default
-# default password for the default username
-cygnusagent.sinks.hdfs-sink2.cosmos_default_password = xxxxxxxxxxxxx
-# HDFS backend type (webhdfs, httpfs or infinity)
-cygnusagent.sinks.hdfs-sink2.hdfs_api = httpfs
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink2.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink2.naming_prefix =
-# Hive FQDN/IP address of the Hive server
-cygnusagent.sinks.hdfs-sink2.hive_host = x.y.z.w
-# Hive port for Hive external table provisioning
-cygnusagent.sinks.hdfs-sink2.hive_port = 10000
+cygnusagent.sinks.hdfs-sink.hive_port = 10000
 
 # ============================================
 # OrionCKANSink configuration
