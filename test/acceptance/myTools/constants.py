@@ -67,7 +67,7 @@ ERROR = { NOT: None}
 #cygnus
 CKAN                 =  u'ckan'
 MYSQL                =  u'mysql'
-COSMOS               =  u'cosmos'
+HADDOP               =  u'hadoop'
 NOTIFY               = u'notify'
 NOTIFY_ERROR         = u'notify_error'
 WITHOUT_ORGANIZATION = u'without organization'
@@ -122,6 +122,11 @@ DELETE_FILE               = 'DELETE'
 PATH_HADOOP               = u'webhdfs/v1/user'
 QUERY_PARAM_HADOOP        = u'txt?op'
 QUERY_PARAM_HADOOP_DELETE = u'recursive=true&user.name'
+HADDOP_VERSION_PATH       = u'ws/v1/cluster/info'
+CLUSTER_INFO              = u'clusterInfo'
+HADOOP_VERSION            = u'hadoopVersion'
+STARTED                   = u'STARTED'
+HADOOP_STATE              = u'state'
 
 
 #ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]

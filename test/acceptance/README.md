@@ -46,10 +46,10 @@ Folder for acceptance tests of Cygnus.
 
 - Cygnus-CKAN per row
 - Cygnus-MYSQL per row
-- Cygnus-COSMOS per row (pending)
-- Cygnus-MYSQL per column (pending)
-- Cygnus-CKAN per column (pending)
-- Cygnus-COSMOS per column(pending)
+- Cygnus-HADOOP per row
+- Cygnus-MYSQL per column
+- Cygnus-CKAN per column
+- Cygnus-HADOOP per column(pending)
 
 
 

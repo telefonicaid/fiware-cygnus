@@ -28,15 +28,19 @@ import general_utils
 from myTools.constants import *
 
 class Hadoop:
-    def __init__(self, hadoop_url, hadoop_user):
+    def __init__(self,  hadoop_version, hadoop_namenode_url, hadoop_conputenode_url, hadoop_user):
         """
         constructor
-        :param hadoop_ip:
+        :param hadoop_version:
+        :param hadoop_namenode_url:
+        :param hadoop_conputenode_url:
         :param hadoop_user:
-        :param hadoop_pass:
         """
-        world.hadoop_url  = hadoop_url
-        world.hadoop_user = hadoop_user
+        world.hadoop_version         = hadoop_version
+        world.hadoop_namenode_url    = hadoop_namenode_url
+        world.hadoop_conputenode_url = hadoop_conputenode_url
+        world.hadoop_user            = hadoop_user
+
 
     def __createUrl(self, operation):
         """
@@ -49,10 +53,27 @@ class Hadoop:
         resource = world.hadoop_prefix + world.resource
         world.organization[world.cygnus_type] = world.organization[world.cygnus_type].lower()
         if operation == OPEN_FILE:
-           value = "%s/%s/%s/%s/%s/%s.%s=%s" % (world.hadoop_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation )
+           value = "%s/%s/%s/%s/%s/%s.%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation )
         if operation == DELETE_FILE:
-           value = "%s/%s/%s/%s/%s/%s.%s=%s&%s=%s" % (world.hadoop_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation, QUERY_PARAM_HADOOP_DELETE, world.hadoop_user)
+           value = "%s/%s/%s/%s/%s/%s.%s=%s&%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation, QUERY_PARAM_HADOOP_DELETE, world.hadoop_user)
+        if operation == VERSION:
+            value = "%s/%s"  % (world.hadoop_conputenode_url, HADDOP_VERSION_PATH)
         return value
+
+    def version (self):
+        """
+        Verify if hadoop is installed and that version is the expected
+        """
+        resp, body = http_utils.request2(GET, self.__createUrl(VERSION), self.__createHeaders(), EMPTY, TRUE, ERROR[NOT])
+        bodyDict = general_utils.convertStrToDict(body, JSON)
+
+        assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \
+        "hadoop is not started...\nverified: %s. Expected: %s. \n\nBody content: %s" \
+        % (str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), STARTED, str(body))
+
+        assert  str(world.hadoop_version) == str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), \
+        "Wrong hadoop version \nverified: %s. Expected: %s. \n\nBody content: %s" \
+        % (str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), str(world.hadoop_version), str(body))
 
     def __createHeaders(self, content="xml"):
         """
@@ -148,8 +169,6 @@ class Hadoop:
                     outMsg = "OK"
         return outMsg
 
-
-
     def validateResponse (self, response):
         """
         assert the response obtained after content verifications
@@ -163,7 +182,6 @@ class Hadoop:
         delete the file in use (used in terrain.py, after.each_scenario method)
         """
         http_utils.request2(DELETE, self.__createUrl(DELETE_FILE), self.__createHeaders(JSON), EMPTY, TRUE, ERROR[NOT])
-
 
     def parametersToNotification_col (self, organization, resource, attributesQuantity, metadataValue, content):
         """

@@ -41,8 +41,7 @@ def is_installed_correctly(step, operation):
     :param step:
     """
     world.operation = operation
-    pass
-
+    world.hadoop.version()
 
 #----------------------------------------------------------------------------------
 @step (u'store in hadoop with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')
