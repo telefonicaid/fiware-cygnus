@@ -30,8 +30,11 @@
         "mysql_attrValueType_default": "text",
         "mysql_metadataType_default": "text"
     },
-     "hadoop": {
-        "hadoop_url": "http://host:port",
+    "hadoop": {
+        "hadoop_version": "X.Y.z",
+        "hadoop_namenode_url": "http://host:port",
+        "hadoop_conputenode_url": "http://host:port",
         "hadoop_user": "user"
      }
+    
 }
