@@ -48,9 +48,13 @@ cygnusagent.sources.http-source.handler.event_ttl = 10
 # Management interface port (FIXME: temporal location for this parameter)
 cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts-interceptor
-# Interceptor type, do not change
-cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
+cygnusagent.sources.http-source.interceptors = ts de
+# Timestamp interceptor, do not change
+cygnusagent.sources.http-source.interceptors.ts.type = timestamp
+# Destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
+# Matching table for the destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration
