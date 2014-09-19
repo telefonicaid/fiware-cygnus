@@ -213,6 +213,21 @@ public class NotifyContextRequest {
             return id;
         } // getId
         
+        /**
+         * Gets a field of the contextElement given its name.
+         * @param fieldName
+         * @return
+         */
+        public String getString(String fieldName) {
+            if (fieldName.equals("entityId")) {
+                return getId();
+            } else if (fieldName.equals("entityType")) {
+                return getType();
+            } else {
+                return null;
+            } // if else
+        } // getString
+        
     } // ContextElement
     
     /**
