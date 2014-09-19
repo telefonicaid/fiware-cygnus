@@ -1,7 +1,7 @@
 /**
  * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-connectors (FI-WARE project).
+ * This fileName is part of fiware-connectors (FI-WARE project).
  *
  * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -21,6 +21,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -31,6 +32,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -39,7 +41,7 @@ import org.apache.log4j.Logger;
  * @author frb
  * 
  * Custom HDFS sink for Orion Context Broker. There exists a default HDFS sink in Flume which serializes the data in
- * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
+ * files, a fileName per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
  *  - Row-like persistence:
  *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -53,7 +55,7 @@ import org.apache.log4j.Logger;
  * 
  * Being <entityDescriptor>=<prefix_name><entity_id>-<entity_type>
  * 
- * As can be seen, in both persistence modes a file is created per each entity, containing all the historical values
+ * As can be seen, in both persistence modes a fileName is created per each entity, containing all the historical values
  * this entity's attributes have had.
  * 
  * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
@@ -252,11 +254,18 @@ public class OrionHDFSSink extends OrionSink {
     } // start
 
     @Override
-    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        // get some header values
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        String organization = eventHeaders.get(Constants.ORG_HEADER);
+        String fileName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION);
+        
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
         
         // iterate in the contextResponses
+        ArrayList contextResponses = notification.getContextResponses();
+        
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
@@ -266,15 +275,12 @@ public class OrionHDFSSink extends OrionSink {
             logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // get the attrName of the file
-            String entityDescriptor = this.namingPrefix + entityId + "-" + entityType;
-            
-            // check if the file exists in HDFS right now, i.e. when its attrName has been got
+            // check if the fileName exists in HDFS right now, i.e. when its attrName has been got
             boolean fileExists = false;
             
             // FIXME: current version of the notification only provides the organization, being null the username
             if (persistenceBackend.exists(httpClientFactory.getHttpClient(false), null, organization + "/"
-                    + entityDescriptor + "/" + entityDescriptor + ".txt")) {
+                    + fileName + "/" + fileName + ".txt")) {
                 fileExists = true;
             } // if
             
@@ -312,16 +318,16 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
                     logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
-                            + entityDescriptor + "), Data (" + rowLine + ")");
+                            + fileName + "), Data (" + rowLine + ")");
                     
-                    // if the file exists, append the Json document to it; otherwise, create it with initial content and
-                    // mark as existing (this avoids checking if the file exists each time a Json document is going to
+                    // if the fileName exists, append the Json document to it; otherwise, create it with initial content and
+                    // mark as existing (this avoids checking if the fileName exists each time a Json document is going to
                     // be persisted)
                     if (fileExists) {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                                + fileName + "/" + fileName + ".txt", rowLine);
                     } else {
                         // having in mind the HDFS structure:
                         // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -330,14 +336,14 @@ public class OrionHDFSSink extends OrionSink {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor);
-                        // 2. create the entity file
+                                + fileName);
+                        // 2. create the entity fileName
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                                + fileName + "/" + fileName + ".txt", rowLine);
                         // 3. create the 8-fields standard Hive table
-                        persistenceBackend.provisionHiveTable(organization, entityDescriptor);
+                        persistenceBackend.provisionHiveTable(organization, fileName);
                         fileExists = true;
                     } // if else
                 } else {
@@ -352,14 +358,14 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor
+                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + fileName
                         + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                            + fileName + "/" + fileName + ".txt", columnLine);
                 } else {
                     // having in mind the HDFS structure:
                     // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -368,14 +374,14 @@ public class OrionHDFSSink extends OrionSink {
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor);
-                    // 2. create the entity file
+                            + fileName);
+                    // 2. create the entity fileName
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                            + fileName + "/" + fileName + ".txt", columnLine);
                     // 3. create the Hive table with a variable number of fields
-                    persistenceBackend.provisionHiveTable(organization, entityDescriptor, hiveFields);
+                    persistenceBackend.provisionHiveTable(organization, fileName, hiveFields);
                     fileExists = true;
                 } // if else
             } // if

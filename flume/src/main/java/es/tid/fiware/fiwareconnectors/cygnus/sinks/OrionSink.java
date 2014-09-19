@@ -21,16 +21,18 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Map;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
+import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.flume.Channel;
 import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
@@ -58,7 +60,7 @@ import org.xml.sax.InputSource;
  * The non common parts, and therefore those that are sink dependant and must be implemented are:
  *  - void configure(Context context)
  *  - void start()
- *  - void persist(ArrayList contextResponses) throws Exception
+ *  - void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
@@ -221,19 +223,15 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
 
-        // process the event data
-        ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get("timestamp")).longValue(),
-                contextResponses);
+        persist(eventHeaders, notification);
     } // persist
     
     /**
      * This is the method the classes extending this class must implement when dealing with persistence.
-     * @param organization the organization/tenant to persist the data
-     * @param recvTimeTs the reception time of the context information
-     * @param contextResponses the context element responses to persist
+     * @param eventHeaders Event headers
+     * @param notification Notification object (already parsed) regarding an event body
      * @throws Exception
      */
-    abstract void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception;
-        
+    abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
+    
 } // OrionSink

@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
-import org.apache.flume.event.EventBuilder;
 import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
@@ -38,6 +37,7 @@ import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.Date;
+import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
 
 /**
