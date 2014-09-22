@@ -37,9 +37,14 @@ public class ManagementInterface extends AbstractHandler {
     @Override
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException {
-        Request baseRequest = (request instanceof Request) ? (Request) request
-                : HttpConnection.getCurrentConnection().getRequest();
-        baseRequest.setHandled(true);
+        
+        HttpConnection connection = HttpConnection.getCurrentConnection();
+        
+        if (connection != null) {
+            Request baseRequest = (request instanceof Request) ? (Request) request : connection.getRequest();
+            baseRequest.setHandled(true);
+        } // if
+        
         response.setContentType("text/html;charset=utf-8");
         String uri = request.getRequestURI();
         
