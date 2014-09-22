@@ -23,7 +23,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.util.Arrays;
 import java.util.LinkedList;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
 
 /**
@@ -139,7 +139,7 @@ public abstract class HDFSBackend {
      * @param username Cosmos username
      * @param dirPath Directory to be created
      */
-    public abstract void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception;
+    public abstract void createDir(HttpClient httpClient, String username, String dirPath) throws Exception;
     
     /**
      * Creates a file in HDFS with initial content such as hdfs:///user/<username>/<organization>/<filePath>. If
@@ -150,7 +150,7 @@ public abstract class HDFSBackend {
      * @param filePath File to be created
      * @param data Data to be written in the created file
      */
-    public abstract void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
+    public abstract void createFile(HttpClient httpClient, String username, String filePath, String data)
         throws Exception;
     /**
      * Appends data to an existent file in HDFS.
@@ -160,7 +160,7 @@ public abstract class HDFSBackend {
      * @param filePath File to be created
      * @param data Data to be appended in the file
      */
-    public abstract void append(DefaultHttpClient httpClient, String username, String filePath, String data)
+    public abstract void append(HttpClient httpClient, String username, String filePath, String data)
         throws Exception;
     /**
      * Checks if the file exists in HDFS.
@@ -169,6 +169,6 @@ public abstract class HDFSBackend {
      * @param username Cosmos username
      * @param filePath File that must be checked
      */
-    public abstract boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception;
+    public abstract boolean exists(HttpClient httpClient, String username, String filePath) throws Exception;
     
 } // HDFSBackend
