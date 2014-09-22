@@ -32,6 +32,7 @@ public class JettyServer extends Thread {
     private Logger logger;
     private int port;
     private AbstractHandler handler;
+    private Server server;
     
     /**
      * Constructor.
@@ -42,22 +43,23 @@ public class JettyServer extends Thread {
         logger = Logger.getLogger(JettyServer.class);
         this.port = port;
         this.handler = handler;
+        server = new Server(port);
+        server.setHandler(handler);
     } // JettyServer
     
     /**
-     * Starts the Jetty server.
+     * Gets the server. It is protected because it is only going to be used in the tests.
+     * @return
      */
-    public void startServer() throws Exception {
-        Server server = new Server(port);
-        server.setHandler(handler);
-        server.start();
-        server.join();
-    } // startServer
+    protected Server getServer() {
+        return server;
+    } // getServer
     
     @Override
     public void run() {
         try {
-            startServer();
+            server.start();
+            server.join();
         } catch (Exception ex) {
             logger.fatal("Fatal error running the Management Interface. Details=" + ex.getMessage());
         }
