@@ -142,23 +142,26 @@ public class OrionRestHandler implements HTTPSourceHandler {
         String organization = null;
         
         while (headerNames.hasMoreElements()) {
-            String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
-            String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
+            String headerName = (String) headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            String homogenizedHeaderName = headerName.toLowerCase(Locale.ENGLISH);
+            String homegenizedHeaderValue = headerValue.toLowerCase(Locale.ENGLISH);
             
-            if (headerName.equals(Constants.USER_AGENT)) {
-                if (!headerValue.startsWith("orion")) {
-                    logger.warn("Bad HTTP notification (" + headerValue + " user agent not supported)");
-                    throw new HTTPBadRequestException(headerValue + " user agent not supported");
+            if (homogenizedHeaderName.equals(Constants.USER_AGENT)) {
+                if (!homegenizedHeaderValue.startsWith("orion")) {
+                    logger.warn("Bad HTTP notification (" + homegenizedHeaderValue + " user agent not supported)");
+                    throw new HTTPBadRequestException(homegenizedHeaderValue + " user agent not supported");
                 } // if
-            } else if (headerName.equals(Constants.CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
-                    logger.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
-                    throw new HTTPBadRequestException(headerValue + " content type not supported");
+            } else if (homogenizedHeaderName.equals(Constants.CONTENT_TYPE)) {
+                if (!homegenizedHeaderValue.contains("application/json")
+                        && !homegenizedHeaderValue.contains("application/xml")) {
+                    logger.warn("Bad HTTP notification (" + homegenizedHeaderValue + " content type not supported)");
+                    throw new HTTPBadRequestException(homegenizedHeaderValue + " content type not supported");
                 } else {
-                    contentType = headerValue;
+                    contentType = homegenizedHeaderValue;
                 } // if else
-            } else if (headerName.equals(Constants.ORG_HEADER)) {
-                if (headerValue.length() > Constants.ORG_MAX_LEN) {
+            } else if (homogenizedHeaderName.equals(Constants.ORG_HEADER)) {
+                if (homegenizedHeaderValue.length() > Constants.ORG_MAX_LEN) {
                     logger.warn("Bad HTTP notification (organization length greater than " + Constants.ORG_MAX_LEN
                             + ")");
                     throw new HTTPBadRequestException("organization length greater than " + Constants.ORG_MAX_LEN
