@@ -177,4 +177,4 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
 
 %{_project_install_dir}
-/var/
+/var/run/%{_project_name}
