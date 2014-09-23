@@ -1,7 +1,7 @@
 /**
  * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This fileName is part of fiware-connectors (FI-WARE project).
+ * This file is part of fiware-connectors (FI-WARE project).
  *
  * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  * @author frb
  * 
  * Custom HDFS sink for Orion Context Broker. There exists a default HDFS sink in Flume which serializes the data in
- * files, a fileName per event. This is not suitable for Orion, where the persisted files and its content must have specific
+ * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
  * formats:
  *  - Row-like persistence:
  *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
