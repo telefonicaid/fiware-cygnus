@@ -20,6 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -30,6 +31,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -171,7 +173,12 @@ public class OrionMySQLSink extends OrionSink {
     } // start
 
     @Override
-    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        // get some header values
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        String organization = eventHeaders.get(Constants.ORG_HEADER);
+        String tableName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION).replaceAll("-", "_");
+        
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
         
@@ -198,6 +205,8 @@ public class OrionMySQLSink extends OrionSink {
         } // if
         
         // iterate in the contextResponses
+        ArrayList contextResponses = notification.getContextResponses();
+        
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
@@ -206,9 +215,6 @@ public class OrionMySQLSink extends OrionSink {
             String entityType = Utils.encode(contextElement.getType());
             logger.debug("[" + this.getName() + "] Processing context element (id= + " + entityId + ", type= "
                     + entityType + ")");
-
-            // get the attrName of the table
-            String tableName = namingPrefix + entityId + "_" + entityType;
             
             if (tableName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
                 logger.error("[" + this.getName() + "] Bad configuration (A MySQL table name '" + tableName + "' has "

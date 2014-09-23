@@ -77,7 +77,8 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 			fiware-service=Org42,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
-			ttl=10
+			ttl=10,
+			destination=Room1-Room
 		}
 	}
 
@@ -87,9 +88,10 @@ Let's have a look on the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
-* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks.
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the <i>doc/design/interceptors</i> document for more details.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
-* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. 
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume.
+* The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
 
 Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
@@ -342,9 +344,13 @@ cygnusagent.sources.http-source.handler.events_ttl = 10
 # Management interface port (temporal location for this parameter)
 cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts-interceptor
+cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
-cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
+cygnusagent.sources.http-source.interceptors.ts.type = timestamp
+# Destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
+# Matching table for the destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration
