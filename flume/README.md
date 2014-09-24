@@ -320,7 +320,9 @@ The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, t
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
 # Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
-# one of them (this example shows how to configure 3 sink types at the same time).
+# one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
+# sink of the same type and sharing the channel in order to improve the performance (this is like having
+# multi-threading).
 cygnusagent.sources = http-source
 cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
 cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
