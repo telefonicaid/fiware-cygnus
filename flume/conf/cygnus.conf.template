@@ -19,8 +19,10 @@
 
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
-# Regarding sinks, you can use multiple ones at the same time; the only requirement is to provide a channel for each
-# one of them (this example shows how to configure 3 sinks at the same time).
+# Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
+# one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
+# sink of the same type and sharing the channel in order to improve the performance (this is like having
+# multi-threading).
 cygnusagent.sources = http-source
 cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
 cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
@@ -40,7 +42,9 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default organization (organization semantic depend on the persistence sink)
 cygnusagent.sources.http-source.handler.default_organization = org42
 # Number of channel re-injection retries before a Flume event is definitely discarded
-cygnusagent.sources.http-source.handler.event_ttl = 10
+cygnusagent.sources.http-source.handler.events_ttl = 10
+# Management interface port (FIXME: temporal location for this parameter)
+cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts-interceptor
 # Interceptor type, do not change
