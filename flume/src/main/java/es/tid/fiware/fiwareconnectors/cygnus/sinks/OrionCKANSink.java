@@ -186,8 +186,20 @@ public class OrionCKANSink extends OrionSink {
                         + Constants.CKAN_RESOURCE_MAX_LEN);
             } // if
 
-            // iterate on all this resourceName's attributes
+            // iterate on all this resourceName's attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+            
+            if (contextAttributes == null) {
+                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
+                        + entityType + ")");
+                continue;
+            } // if
+            
+            if (contextAttributes.isEmpty()) {
+                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
+                        + entityType + ")");
+                continue;
+            } // return;
             
             // this is used for storing the attribute's names and values when dealing with a per column attributes
             // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
@@ -199,24 +211,26 @@ public class OrionCKANSink extends OrionSink {
             // persisting all of them at the same time
             HashMap<String, String> mds = new HashMap<String, String>();
 
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
-                String attrMd = contextAttribute.getContextMetadata();
-                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
+            if (contextAttributes != null) {
+                for (ContextAttribute contextAttribute : contextAttributes) {
+                    String attrName = contextAttribute.getName();
+                    String attrType = contextAttribute.getType();
+                    String attrValue = contextAttribute.getContextValue(true);
+                    String attrMd = contextAttribute.getContextMetadata();
+                    logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
 
-                if (rowAttrPersistence) {
-                    logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", "
-                            + organization + ", " + resourceName + ", " + attrName + ", " + attrType + ", " + attrValue
-                            + ", " + attrMd + ">");
-                    persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
-                            organization, resourceName, attrName, attrType, attrValue, attrMd);
-                } else {
-                    attrs.put(attrName, attrValue);
-                    mds.put(attrName + "_md", attrMd);
-                } // if else
-            } // for
+                    if (rowAttrPersistence) {
+                        logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", "
+                                + organization + ", " + resourceName + ", " + attrName + ", " + attrType + ", "
+                                + attrValue + ", " + attrMd + ">");
+                        persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
+                                organization, resourceName, attrName, attrType, attrValue, attrMd);
+                    } else {
+                        attrs.put(attrName, attrValue);
+                        mds.put(attrName + "_md", attrMd);
+                    } // if else
+                } // for
+            } // if
 
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
