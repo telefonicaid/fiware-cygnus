@@ -185,7 +185,6 @@ public class NotifyContextRequest {
             NodeList domContextAttributeLists = domContextElement.getElementsByTagName("contextAttributeList");
             
             if (domContextAttributeLists.getLength() == 0) {
-                //throw new Exception("No <contextAttributeList> tag in the XML document");
                 attributes = null;
                 return;
             } // if
