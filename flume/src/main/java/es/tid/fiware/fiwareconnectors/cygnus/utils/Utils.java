@@ -23,6 +23,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Properties;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -102,5 +107,46 @@ public final class Utils {
             throw new Exception("Unknown XML node type: " + valueType);
         } // if else if else
     } // basicXml2Json
+    
+    /**
+     * Gets the Cygnus version from the pom.xml.
+     * @return The Cygnus version
+     */
+    public static String getCygnusVersion() {
+        InputStream stream = Utils.class.getClassLoader().getResourceAsStream("pom.properties");
+        
+        if (stream == null) {
+            return "UNKNOWN";
+        } // if
+        
+        Properties props = new Properties();
+        
+        try {
+            props.load(stream);
+            stream.close();
+            return (String) props.get("version");
+        } catch (IOException e) {
+            return "UNKNOWN";
+        } // try catch
+    } // getCygnusVersion
+    
+    /**
+     * Gets the hash regarding the last Git commit.
+     * @return The hash regarding the last Git commit.
+     */
+    public static String getLastCommit() {
+        InputStream stream = Utils.class.getClassLoader().getResourceAsStream("last_git_commit.txt");
+        
+        if (stream == null) {
+            return "UNKNOWN";
+        } // if
+        
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            return reader.readLine();
+        } catch (Exception e) {
+            return "UNKNOWN";
+        } // catch
+    } // getLastCommit
         
 } // Utils

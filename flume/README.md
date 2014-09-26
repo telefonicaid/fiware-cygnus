@@ -77,7 +77,8 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 			fiware-service=Org42,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
-			ttl=10
+			ttl=10,
+			destination=Room1-Room
 		}
 	}
 
@@ -87,9 +88,10 @@ Let's have a look on the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
-* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks.
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the <i>doc/design/interceptors</i> document for more details.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
-* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. 
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume.
+* The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
 
 Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
@@ -252,7 +254,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ git checkout <branch>
     $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn clean compile assembly:single
+    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-0.2.1-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 or not:
@@ -260,7 +262,7 @@ or not:
     $ git clone https://github.com/telefonicaid/fiware-connectors.git
     $ git checkout <branch>
     $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn package
+    $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
 where `<branch>` is `develop` if you are trying to install the latest features or `release/x.y` if you are trying to install a stable release.
@@ -309,8 +311,12 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
 
 ```Python
+#=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+#
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
+#=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
 # Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
@@ -337,10 +343,16 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_organization = org42
 # Number of channel re-injection retries before a Flume event is definitely discarded 
 cygnusagent.sources.http-source.handler.events_ttl = 10
+# Management interface port (temporal location for this parameter)
+cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts-interceptor
+cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
-cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
+cygnusagent.sources.http-source.interceptors.ts.type = timestamp
+# Destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
+# Matching table for the destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration
@@ -518,6 +530,16 @@ In addition, you have a complete `log4j.properties` template in `conf/log4j.prop
 ### Message types
 
 Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
+
+## Management interface
+
+From Cygnus 0.5 there is a REST-based management interface for administration purposes. Current available operations are:
+
+<b>Get the version of the running software, including the last Git commit</b>:
+
+    GET http://host:management_port/version
+
+    {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
 
 ## Contact
 

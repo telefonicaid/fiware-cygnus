@@ -21,15 +21,18 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.log4j.Logger;
 
@@ -52,7 +55,7 @@ import org.apache.log4j.Logger;
  * 
  * Being <entityDescriptor>=<prefix_name><entity_id>-<entity_type>
  * 
- * As can be seen, in both persistence modes a file is created per each entity, containing all the historical values
+ * As can be seen, in both persistence modes a fileName is created per each entity, containing all the historical values
  * this entity's attributes have had.
  * 
  * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
@@ -93,6 +96,7 @@ public class OrionHDFSSink extends OrionSink {
      */
     public OrionHDFSSink() {
         super();
+        logger = CygnusLogger.getLogger(OrionHDFSSink.class);
     } // OrionHDFSSink
     
     /**
@@ -178,42 +182,46 @@ public class OrionHDFSSink extends OrionSink {
        
     @Override
     public void configure(Context context) {
-        logger = Logger.getLogger(OrionHDFSSink.class);
         cosmosHost = context.getString("cosmos_host", "localhost").split(",");
-        logger.debug("Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost) + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost)
+                + ")");
         cosmosPort = context.getString("cosmos_port", "14000");
-        logger.debug("Reading configuration (cosmos_port=" + cosmosPort + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + cosmosPort + ")");
         cosmosDefaultUsername = context.getString("cosmos_default_username", "defaultCygnus");
-        logger.debug("Reading configuration (cosmos_default_username=" + cosmosDefaultUsername + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + cosmosDefaultUsername
+                + ")");
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         cosmosDefaultPassword = context.getString("cosmos_default_password", "");
-        logger.debug("Reading configuration (cosmos_default_password=" + cosmosDefaultPassword + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + cosmosDefaultPassword
+                + ")");
         hdfsAPI = context.getString("hdfs_api", "httpfs");
         
         if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
-            logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
-            logger.info("Exiting Cygnus");
+            logger.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+            logger.info("[" + this.getName() + "] Exiting Cygnus");
             System.exit(-1);
         } else {
-            logger.debug("Reading configuration (hdfs_api=" + hdfsAPI + ")");
+            logger.debug("[" + this.getName() + "] Reading configuration (hdfs_api=" + hdfsAPI + ")");
         } // if else
         
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("Reading configuration (attr_persistence=" + (rowAttrPersistence ? "row" : "column") + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (rowAttrPersistence ? "row" : "column") + ")");
         namingPrefix = context.getString("naming_prefix", "");
         
         if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
-            logger.error("Bad configuration (Naming prefix length is greater than " + Constants.NAMING_PREFIX_MAX_LEN
+            logger.error("[" + this.getName() + "] Bad configuration (Naming prefix length is greater than "
+                    + Constants.NAMING_PREFIX_MAX_LEN
                     + ")");
-            logger.info("Exiting Cygnus");
+            logger.info("[" + this.getName() + "] Exiting Cygnus");
             System.exit(-1);
         } // if
         
-        logger.debug("Reading configuration (naming_prefix=" + namingPrefix + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (naming_prefix=" + namingPrefix + ")");
         hiveHost = context.getString("hive_host", "localhost");
-        logger.debug("Reading configuration (hive_host=" + hiveHost + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
-        logger.debug("Reading configuration (hive_port=" + hivePort + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")");
     } // configure
 
     @Override
@@ -226,15 +234,15 @@ public class OrionHDFSSink extends OrionSink {
             if (hdfsAPI.equals("httpfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort);
-                logger.debug("HttpFS persistence backend created");
+                logger.debug("[" + this.getName() + "] HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort);
-                logger.debug("WebHDFS persistence backend created");
+                logger.debug("[" + this.getName() + "] WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
-                logger.error("Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
-                logger.info("Exiting Cygnus");
+                logger.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+                logger.info("[" + this.getName() + "] Exiting Cygnus");
                 System.exit(-1);
             } // if else if
         } catch (Exception e) {
@@ -242,32 +250,37 @@ public class OrionHDFSSink extends OrionSink {
         } // try catch
         
         super.start();
-        logger.info("Startup completed");
+        logger.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
-    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        // get some header values
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        String organization = eventHeaders.get(Constants.ORG_HEADER);
+        String fileName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION);
+        
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
         
         // iterate in the contextResponses
+        ArrayList contextResponses = notification.getContextResponses();
+        
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = Utils.encode(contextElement.getId());
             String entityType = Utils.encode(contextElement.getType());
-            logger.debug("Processing context element (id=" + entityId + ", type=" + entityType + ")");
+            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
-            // get the attrName of the file
-            String entityDescriptor = this.namingPrefix + entityId + "-" + entityType;
-            
-            // check if the file exists in HDFS right now, i.e. when its attrName has been got
+            // check if the fileName exists in HDFS right now, i.e. when its attrName has been got
             boolean fileExists = false;
             
             // FIXME: current version of the notification only provides the organization, being null the username
             if (persistenceBackend.exists(httpClientFactory.getHttpClient(false), null, organization + "/"
-                    + entityDescriptor + "/" + entityDescriptor + ".txt")) {
+                    + fileName + "/" + fileName + ".txt")) {
                 fileExists = true;
             } // if
             
@@ -289,7 +302,8 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
+                logger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
                 
                 if (rowAttrPersistence) {
                     // create a Json document to be persisted
@@ -303,17 +317,17 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
-                    logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
-                            + rowLine + ")");
+                    logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
+                            + fileName + "), Data (" + rowLine + ")");
                     
-                    // if the file exists, append the Json document to it; otherwise, create it with initial content and
-                    // mark as existing (this avoids checking if the file exists each time a Json document is going to
+                    // if the fileName exists, append the Json document to it; otherwise, create it with initial content and
+                    // mark as existing (this avoids checking if the fileName exists each time a Json document is going to
                     // be persisted)
                     if (fileExists) {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                                + fileName + "/" + fileName + ".txt", rowLine);
                     } else {
                         // having in mind the HDFS structure:
                         // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -322,14 +336,14 @@ public class OrionHDFSSink extends OrionSink {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor);
-                        // 2. create the entity file
+                                + fileName);
+                        // 2. create the entity fileName
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
                         persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                                + fileName + "/" + fileName + ".txt", rowLine);
                         // 3. create the 8-fields standard Hive table
-                        persistenceBackend.provisionHiveTable(organization, entityDescriptor);
+                        persistenceBackend.provisionHiveTable(organization, fileName);
                         fileExists = true;
                     } // if else
                 } else {
@@ -344,14 +358,14 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("Persisting data at OrionHDFSSink. HDFS file (" + entityDescriptor + "), Data ("
-                        + columnLine + ")");
+                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + fileName
+                        + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                            + fileName + "/" + fileName + ".txt", columnLine);
                 } else {
                     // having in mind the HDFS structure:
                     // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -360,14 +374,14 @@ public class OrionHDFSSink extends OrionSink {
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor);
-                    // 2. create the entity file
+                            + fileName);
+                    // 2. create the entity fileName
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
                     persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                            + fileName + "/" + fileName + ".txt", columnLine);
                     // 3. create the Hive table with a variable number of fields
-                    persistenceBackend.provisionHiveTable(organization, entityDescriptor, hiveFields);
+                    persistenceBackend.provisionHiveTable(organization, fileName, hiveFields);
                     fileExists = true;
                 } // if else
             } // if

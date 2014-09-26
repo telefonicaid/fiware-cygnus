@@ -41,6 +41,7 @@ public final class Constants {
     public static final String RECV_TIME_TS = "recvTimeTs";
     public static final String RECV_TIME    = "recvTime";
     public static final String ENTITY_ID    = "entityId";
+    public static final String DESTINATION  = "destination";
     public static final String ENTITY_TYPE  = "entityType";
     public static final String ATTR_NAME    = "attrName";
     public static final String ATTR_TYPE    = "attrType";
