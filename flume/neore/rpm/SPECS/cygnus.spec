@@ -167,6 +167,7 @@ echo "Done"
 %postun
 %clean
 rm -rf $RPM_BUILD_ROOT
+userdel %{_project_user}
 
 # -------------------------------------------------------------------------------------------- #
 # Files to add to the RPM
