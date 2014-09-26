@@ -158,6 +158,9 @@ echo "[INFO] Removing application log files"
 echo "[INFO] Deleting the %{_project_name} folder"
 [ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir} &> /dev/null
 
+echo "[INFO] Deleting the %{_project_user} user"
+sudo userdel %{_project_user}
+
 echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
@@ -167,6 +170,7 @@ echo "Done"
 %postun
 %clean
 rm -rf $RPM_BUILD_ROOT
+
 
 # -------------------------------------------------------------------------------------------- #
 # Files to add to the RPM

@@ -31,6 +31,8 @@ PREFIX=/usr
 CYGNUS_DIR=${PREFIX}/cygnus
 FLUME_EXECUTABLE=${CYGNUS_DIR}/bin/flume-ng
 CYGNUS_PID_FILE=/var/run/cygnus/cygnus.pid
+CYGNUS_USER=cygnus
+CYGNUS_PROCESS=java
 
 # Load the environment
  if [[ -f ${CYGNUS_DIR}/conf/flume.conf ]]; then
@@ -47,7 +49,7 @@ cygnus_start()
         CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} &> /dev/null &"
         su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
         sleep 2 # wait some time to know if flume is still alive
-        FLUME_PID=$(ps -ef | grep flume | grep -v grep | awk '{ print $2 }')
+        FLUME_PID=$(ps -f -u ${CYGNUS_USER} | grep ${CYGNUS_USER} | grep ${CYGNUS_PROCESS} | awk '{ print $2 }')
         if [[ -z ${FLUME_PID} ]]; then
             printf "%s\n" "$(failure)"
             exit 1
@@ -102,4 +104,3 @@ case ${PARAM} in
         ;;
 
 esac
-
