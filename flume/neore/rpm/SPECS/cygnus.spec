@@ -159,7 +159,7 @@ echo "[INFO] Deleting the %{_project_name} folder"
 [ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir} &> /dev/null
 
 echo "[INFO] Deleting the %{_project_user} user"
-userdel %{_project_user}
+sudo userdel %{_project_user}
 
 echo "Done"
 
