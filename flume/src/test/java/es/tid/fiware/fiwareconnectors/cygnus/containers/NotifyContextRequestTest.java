@@ -51,7 +51,7 @@ public class NotifyContextRequestTest {
             +           "<contextAttribute>"
             +             "<name>temperature</name>"
             +             "<type>centigrade</type>"
-            +             "<contextValue>26.5</contextValue>"
+            +             "<value>26.5</value>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -76,18 +76,18 @@ public class NotifyContextRequestTest {
             +           "<contextAttribute>"
             +             "<name>field1</name>"
             +             "<type>type1</type>"
-            +             "<contextValue>"
+            +             "<value>"
             +               "<a>1</a>"
             +               "<b>2</b>"
-            +             "</contextValue>"
+            +             "</value>"
             +           "</contextAttribute>"
             +           "<contextAttribute>"
             +             "<name>field2</name>"
             +             "<type>type2</type>"
-            +             "<contextValue type=\"vector\">"
+            +             "<value type=\"vector\">"
             +               "<item>v1</item>"
             +               "<item>v2</item>"
-            +             "</contextValue>"
+            +             "</value>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -112,7 +112,7 @@ public class NotifyContextRequestTest {
             +           "<contextAttribute>"
             +             "<name>temperature</name>"
             +             "<type>centigrade</type>"
-            +             "<contextValue>26.5</contextValue>"
+            +             "<value>26.5</value>"
             +             "<metadata>"
             +               "<contextMetadata>"
             +                 "<name>ID</name>"
@@ -224,19 +224,19 @@ public class NotifyContextRequestTest {
     @Test
     public void testGetSubscriptionId() {
         String expResult = "51c0ac9ed714fb3b37d7d5a8";
-        
+
         // test case for nofity-xml-simple
         System.out.println("getSubscriptionId (notify-xml-simple)");
         NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         String result = instance.getSubscriptionId();
         assertEquals(expResult, result);
-        
+
         // test case for notify-xml-compound
         System.out.println("getSubscriptionId (notify-xml-compound)");
         instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
-        
+
         // test case for notify-xml-metadata
         System.out.println("getSubscriptionId (notify-xml-metadata)");
         instance = TestUtils.createXMLNotifyContextRequest(notifyXMLMetadata);
