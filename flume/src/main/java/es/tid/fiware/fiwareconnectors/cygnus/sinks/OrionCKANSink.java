@@ -211,26 +211,24 @@ public class OrionCKANSink extends OrionSink {
             // persisting all of them at the same time
             HashMap<String, String> mds = new HashMap<String, String>();
 
-            if (contextAttributes != null) {
-                for (ContextAttribute contextAttribute : contextAttributes) {
-                    String attrName = contextAttribute.getName();
-                    String attrType = contextAttribute.getType();
-                    String attrValue = contextAttribute.getContextValue(true);
-                    String attrMd = contextAttribute.getContextMetadata();
-                    logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMd = contextAttribute.getContextMetadata();
+                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
 
-                    if (rowAttrPersistence) {
-                        logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", "
-                                + organization + ", " + resourceName + ", " + attrName + ", " + attrType + ", "
-                                + attrValue + ", " + attrMd + ">");
-                        persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
-                                organization, resourceName, attrName, attrType, attrValue, attrMd);
-                    } else {
-                        attrs.put(attrName, attrValue);
-                        mds.put(attrName + "_md", attrMd);
-                    } // if else
-                } // for
-            } // if
+                if (rowAttrPersistence) {
+                    logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", "
+                            + organization + ", " + resourceName + ", " + attrName + ", " + attrType + ", "
+                            + attrValue + ", " + attrMd + ">");
+                    persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
+                            organization, resourceName, attrName, attrType, attrValue, attrMd);
+                } else {
+                    attrs.put(attrName, attrValue);
+                    mds.put(attrName + "_md", attrMd);
+                } // if else
+            } // for
 
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
