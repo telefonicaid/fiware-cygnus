@@ -95,6 +95,18 @@ public class NotifyContextRequest {
         return contextResponses;
     } // getContextResponses
     
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    } // setSubscriptionId
+    
+    public void setOriginator(String originator) {
+        this.originator = originator;
+    } // setSubscriptionId
+    
+    public void setContextResponses(ArrayList<ContextElementResponse> contextResponses) {
+        this.contextResponses = contextResponses;
+    } // setContextResponses
+    
     /**
      * Class for storing contextElementResponse information from a notifyContextRequest.
      */
@@ -140,6 +152,14 @@ public class NotifyContextRequest {
         public StatusCode getStatusCode() {
             return statusCode;
         } // getStatusCode
+        
+        public void setContextElement(ContextElement contextElement) {
+            this.contextElement = contextElement;
+        } // getContextElement
+        
+        public void setStatusCode(StatusCode statusCode) {
+            this.statusCode = statusCode;
+        } // setStatusCode
         
     } // ContextElementResponse
     
@@ -228,7 +248,64 @@ public class NotifyContextRequest {
             } // if else
         } // getString
         
+        public void setAttributes(ArrayList<ContextAttribute> attributes) {
+            this.attributes = attributes;
+        } // setAttributes
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setIsPattern(String isPattern) {
+            this.isPattern = isPattern;
+        } // setIsPattern
+        
+        public void setId(String id) {
+            this.id = id;
+        } // setId
+        
     } // ContextElement
+    
+    /**
+     * Class for storing entityId information from a contextElement.
+     */
+    public class EntityId {
+        
+        private String type;
+        private String isPattern;
+        private String id;
+        
+        /**
+         * Constructor for Gson, a Json parser.
+         */
+        public EntityId() {
+        } // EntityId
+        
+        public String getType() {
+            return type;
+        } // getType
+        
+        public String getIsPattern() {
+            return isPattern;
+        } // getIsPattern
+        
+        public String getId() {
+            return id;
+        } // getId
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setIsPattern(String isPattern) {
+            this.isPattern = isPattern;
+        } // setIsPattern
+        
+        public void setId(String id) {
+            this.id = id;
+        } // setId
+        
+    } // EntityId
     
     /**
      * Class for storing contextAttribute information from a notifyContextRequest.
@@ -348,6 +425,22 @@ public class NotifyContextRequest {
             return res.substring(0, res.length() - 1) + "]";
         } // getContextMetadata
         
+        public void setName(String name) {
+            this.name = name;
+        } // setName
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setContextValue(JsonElement value) {
+            this.value = value;
+        } // setContextMetadata
+        
+        public void setContextMetadata(ArrayList<ContextMetadata> metadatas) {
+            this.metadatas = metadatas;
+        } // setContextMetadata
+        
     } // ContextAttribute
     
     /**
@@ -418,6 +511,18 @@ public class NotifyContextRequest {
             } // if else if
         } // getValue
         
+        public void setName(String name) {
+            this.name = name;
+        } // setName
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setContextMetadata(JsonElement value) {
+            this.value = value;
+        } // setContextMetadata
+        
     } // ContextMetadata
     
     /**
@@ -464,6 +569,14 @@ public class NotifyContextRequest {
         public String getReasonPhrase() {
             return reasonPhrase;
         } // getReasonPhrase
+        
+        public void setCode(String code) {
+            this.code = code;
+        } // setCode
+        
+        public void setReasonPhrase(String reasonPhrase) {
+            this.reasonPhrase = reasonPhrase;
+        } // setReasonPhrase
         
     } // StatusCode
     
