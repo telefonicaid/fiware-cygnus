@@ -53,7 +53,7 @@ public final class Utils {
     public static String encode(String in) {
         return in.replaceAll("[^a-zA-Z0-9]", "_");
     } // encode
-           
+    
     /**
      * Converts a XML node into Json.
      * @param xmlNode
