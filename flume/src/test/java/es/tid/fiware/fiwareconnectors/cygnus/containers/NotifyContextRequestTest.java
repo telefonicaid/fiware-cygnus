@@ -217,6 +217,31 @@ public class NotifyContextRequestTest {
             +     "}"
             +   "]"
             + "}";
+    private final String notifyJsonSimpleUnordered = ""
+            + "{"
+            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
+            +   "\"originator\" : \"localhost\","
+            +   "\"contextResponses\" : ["
+            +     "{"
+            +       "\"statusCode\" : {"
+            +         "\"code\" : \"200\","
+            +         "\"reasonPhrase\" : \"OK\""
+            +       "},"
+            +       "\"contextElement\" : {"
+            +         "\"attributes\" : ["
+            +           "{"
+            +             "\"type\" : \"centigrade\","
+            +             "\"name\" : \"temperature\","
+            +             "\"value\" : \"26.5\""
+            +           "}"
+            +         "],"
+            +         "\"type\" : \"Room\","
+            +         "\"isPattern\" : \"false\","
+            +         "\"id\" : \"Room1\""
+            +       "}"
+            +     "}"
+            +   "]"
+            + "}";
 
     /**
      * Test of getSubscriptionId method, of class NotifyContextRequest.
@@ -245,20 +270,19 @@ public class NotifyContextRequestTest {
         
         // test case for nofity-json-simple
         System.out.println("getSubscriptionId (notify-json-simple)");
-        Gson gson = new Gson();
-        instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
         // test case for nofify-json-compound
         System.out.println("getSubscriptionId (notify-json-compound)");
-        instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
         
         // test case for nofify-json-metadata
         System.out.println("getSubscriptionId (notify-json-metadata)");
-        instance = gson.fromJson(notifyJsonMetadata, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
         result = instance.getSubscriptionId();
         assertEquals(expResult, result);
     } // testGetSubscriptionID
@@ -290,20 +314,19 @@ public class NotifyContextRequestTest {
         
         // test case for nofity-json-simple
         System.out.println("getOriginator (notify-json-simple)");
-        Gson gson = new Gson();
-        instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
         result = instance.getOriginator();
         assertEquals(expResult, result);
         
         // test case for nofify-json-compound
         System.out.println("getOriginator (notify-json-compound)");
-        instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
         result = instance.getOriginator();
         assertEquals(expResult, result);
         
         // test case for nofify-json-metadata
         System.out.println("getOriginator (notify-json-metadata)");
-        instance = gson.fromJson(notifyJsonMetadata, NotifyContextRequest.class);
+        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
         result = instance.getOriginator();
         assertEquals(expResult, result);
     } // testGetOriginator
@@ -319,6 +342,7 @@ public class NotifyContextRequestTest {
         testGetCxtResJsonSimple();
         testGetCxtResJsonCompound();
         testGetCxtResJsonMd();
+        testGetCxtResJsonSimpleUnordered();
     } // testGetContextResponses
 
     /**
@@ -417,8 +441,7 @@ public class NotifyContextRequestTest {
     private void testGetCxtResJsonSimple() {
         // test case for nofity-json-simple
         System.out.println("getOriginator (notify-json-simple)");
-        Gson gson = new Gson();
-        NotifyContextRequest instance = gson.fromJson(notifyJsonSimple, NotifyContextRequest.class);
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
         assertTrue(cerList != null);
         
@@ -447,8 +470,7 @@ public class NotifyContextRequestTest {
     private void testGetCxtResJsonCompound() {
         // test case for nofify-json-compound
         System.out.println("getOriginator (notify-json-compound)");
-        Gson gson = new Gson();
-        NotifyContextRequest instance = gson.fromJson(notifyJsonCompound, NotifyContextRequest.class);
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
         assertTrue(cerList != null);
         
@@ -481,8 +503,7 @@ public class NotifyContextRequestTest {
     private void testGetCxtResJsonMd() {
         // test case for nofify-json-compound
         System.out.println("getOriginator (notify-json-metadata)");
-        Gson gson = new Gson();
-        NotifyContextRequest instance = gson.fromJson(notifyJsonMetadata, NotifyContextRequest.class);
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
         assertTrue(cerList != null);
         
@@ -504,5 +525,34 @@ public class NotifyContextRequestTest {
         assertEquals(sc.getCode(), "200");
         assertEquals(sc.getReasonPhrase(), "OK");
     } // testGetCxtResJsonMd
+    
+    /**
+     * Sub-test case for nofity-json-simple-unordered.
+     */
+    private void testGetCxtResJsonSimpleUnordered() {
+        // test case for nofity-json-simple-unordered
+        System.out.println("getOriginator (notify-json-simple-unordered)");
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleUnordered);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals(ce.getId(), "Room1");
+        assertEquals(ce.getIsPattern(), "false");
+        assertEquals(ce.getType(), "Room");
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+
+        ContextAttribute ca = caList.get(0);
+        assertEquals(ca.getName(), "temperature");
+        assertEquals(ca.getType(), "centigrade");
+        assertEquals(ca.getContextValue(true), "\"26.5\"");
+        assertEquals(ca.getContextMetadata(), "[]");
+
+        StatusCode sc = cer.getStatusCode();
+        assertEquals(sc.getCode(), "200");
+        assertEquals(sc.getReasonPhrase(), "OK");
+    } // testGetCxtResJsonSimpleUnordered
 
 } // NotifyContextRequestTest
