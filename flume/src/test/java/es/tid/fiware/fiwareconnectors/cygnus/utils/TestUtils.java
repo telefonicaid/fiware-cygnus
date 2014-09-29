@@ -20,21 +20,24 @@
 package es.tid.fiware.fiwareconnectors.cygnus.utils;
 
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
-import java.io.IOException;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import java.io.StringReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  *
  * @author frb
  */
-public class TestUtils {
+public final class TestUtils {
+    
+    /**
+     * Constructor. It is private because utility classes should not have a public constructor.
+     */
+    private TestUtils() {
+    } // TestUtils
     
     /**
      * Create a XML-based notificationContextRequest given the string representation of such XML.
@@ -43,36 +46,20 @@ public class TestUtils {
      */
     public static NotifyContextRequest createXMLNotifyContextRequest(String xmlStr) {
         Logger logger = Logger.getLogger(Utils.class);
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
-        
+        NotifyContextRequest notification = null;
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            
         try {
-            dBuilder = dbFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-
-        InputSource is = new InputSource(new StringReader(xmlStr));
-        Document doc = null;
-        
-        try {
-            doc = dBuilder.parse(is);
-        } catch (SAXException e) {
-            logger.fatal(e.getMessage());
-        } catch (IOException e) {
-            logger.fatal(e.getMessage());
-        } // try catch
-        
-        doc.getDocumentElement().normalize();
-        NotifyContextRequest instance = null;
-        
-        try {
-            instance = new NotifyContextRequest(doc);
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
+            InputSource is = new InputSource(new StringReader(xmlStr));
+            saxParser.parse(is, handler);
+            notification = handler.getNotifyContextRequest();
         } catch (Exception e) {
-            logger.fatal(e.getMessage());
+            logger.error(e.getMessage());
         } // try catch
         
-        return instance;
+        return notification;
     } // createXMLNotifyContextRequest
     
 } // TestUtils
