@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.utils;
 
+import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import java.io.StringReader;
@@ -52,8 +53,7 @@ public final class TestUtils {
         try {
             SAXParser saxParser = saxParserFactory.newSAXParser();
             NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
-            InputSource is = new InputSource(new StringReader(xmlStr));
-            saxParser.parse(is, handler);
+            saxParser.parse(new InputSource(new StringReader(xmlStr)), handler);
             notification = handler.getNotifyContextRequest();
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -61,5 +61,24 @@ public final class TestUtils {
         
         return notification;
     } // createXMLNotifyContextRequest
+    
+    /**
+     * Create a Json-based notificationContextRequest given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based notificationContextRequest
+     */
+    public static NotifyContextRequest createJsonNotifyContextRequest(String jsonStr) {
+        Logger logger = Logger.getLogger(Utils.class);
+        NotifyContextRequest notification = null;
+        Gson gson = new Gson();
+
+        try {
+            notification = gson.fromJson(jsonStr, NotifyContextRequest.class);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } // try catch
+        
+        return notification;
+    } // createJsonNotifyContextRequest
     
 } // TestUtils
