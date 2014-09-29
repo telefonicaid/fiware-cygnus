@@ -84,7 +84,7 @@ public class OrionCKANSinkTest {
             +           "<contextAttribute>"
             +             "<name>attribute</name>"
             +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
+            +             "<value>foo</value>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
