@@ -139,6 +139,12 @@ public class NotifyContextRequestSAXHandler extends DefaultHandler {
         } else if (qName.equalsIgnoreCase("contextElementResponse")) {
             contextResponseList.add(contextElementResponse);
         } else if (qName.equalsIgnoreCase("contextElement")) {
+            // if contextAttributeList is null means that tag was not seen, and thus the contextElement attributes must
+            // be set to null
+            if (contextAttributeList == null) {
+                contextElement.setAttributes(null);
+            } // if
+            
             contextElementResponse.setContextElement(contextElement);
         } else if (qName.equalsIgnoreCase("entityId")) {
             contextElement.setId(entityId.getId());
