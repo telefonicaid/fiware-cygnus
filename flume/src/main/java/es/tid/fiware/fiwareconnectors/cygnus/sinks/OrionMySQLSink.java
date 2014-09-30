@@ -235,8 +235,14 @@ public class OrionMySQLSink extends OrionSink {
                 persistenceBackend.createTable(dbName, tableName);
             } // if
             
-            // iterate on all this entity's attributes
+            // iterate on all this entity's attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+            
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
+                        + entityType + ")");
+                continue;
+            } // if
             
             // this is used for storing the attribute's names and values when dealing with a per column attributes
             // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them

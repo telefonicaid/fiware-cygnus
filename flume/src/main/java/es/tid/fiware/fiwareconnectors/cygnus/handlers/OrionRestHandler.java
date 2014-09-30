@@ -87,6 +87,14 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getNotificationTarget() {
         return notificationsTarget;
     } // getNotificationTarget
+    
+    /**
+     * Gets the default organization. It is protected due to it is only required for testing purposes.
+     * @return
+     */
+    protected String getDefaultOrganization() {
+        return defaultOrg;
+    } // getDefaultOrganization
 
     @Override
     public void configure(Context context) {
@@ -97,7 +105,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             notificationsTarget = "/" + notificationsTarget;
         } // if
         
-        defaultOrg = context.getString("default_organization", "default_org");
+        defaultOrg = Utils.encode(context.getString("default_organization", "default_org"));
         
         if (defaultOrg.length() > Constants.ORG_MAX_LEN) {
             logger.error("Bad configuration (Default organization length greater than " + Constants.ORG_MAX_LEN + ")");
@@ -169,7 +177,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     throw new HTTPBadRequestException("organization length greater than " + Constants.ORG_MAX_LEN
                             + ")");
                 } else {
-                    organization = headerValue;
+                    organization = Utils.encode(headerValue);
                 } // if else
             } // if else if
         } // for

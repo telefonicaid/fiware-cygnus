@@ -162,11 +162,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         HttpResponse response = doHDFSRequest(httpClient, "GET", relativeURL, true, null, null);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() == 200) {
-            return true;
-        } else {
-            return false;
-        } // if else
+        return (response.getStatusLine().getStatusCode() == 200);
     } // exists
     
     /**
