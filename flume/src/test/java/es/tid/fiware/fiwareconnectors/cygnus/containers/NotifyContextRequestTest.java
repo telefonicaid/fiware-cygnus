@@ -482,7 +482,7 @@ public class NotifyContextRequestTest {
         testGetCxtResXMLCompoundNested();
         testGetCxtResXMLMd();
         testGetCxtResXMLSimpleUnordered();
-//        testGetCxtResXMLSimpleNullAttrs(); FIXME: commented until null attribute lists are supported in this brach
+        testGetCxtResXMLSimpleNullAttrs();
         testGetCxtResJsonSimple();
         testGetCxtResJsonCompound();
         testGetCxtResJsonCompoundNested();
