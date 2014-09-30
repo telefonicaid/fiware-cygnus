@@ -20,7 +20,6 @@
 package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
-import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -98,6 +97,57 @@ public class NotifyContextRequestTest {
             +     "</contextElementResponse>"
             +   "</contextResponseList>"
             + "</notifyContextRequest>";
+    private final String notifyXMLCompoundNested = ""
+            + "<notifyContextRequest>"
+            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
+            +   "<originator>localhost</originator>"
+            +   "<contextResponseList>"
+            +     "<contextElementResponse>"
+            +       "<contextElement>"
+            +         "<entityId type=\"Room\" isPattern=\"false\">"
+            +           "<id>Room2</id>"
+            +         "</entityId>"
+            +         "<contextAttributeList>"
+            +           "<contextAttribute>"
+            +             "<name>field1</name>"
+            +             "<type>type1</type>"
+            +             "<value>"
+            +               "<a>"
+            +                 "<x>"
+            +                   "<y>v1</y>"
+            +                 "</x>"
+            +                 "<z>v2</z>"
+            +               "</a>"
+            +               "<b>v3</b>"
+            +             "</value>"
+            +           "</contextAttribute>"
+            +           "<contextAttribute>"
+            +             "<name>field2</name>"
+            +             "<type>type2</type>"
+            +             "<value type=\"vector\">"
+            +               "<item type=\"vector\">"
+            +                 "<item type=\"vector\">"
+            +                   "<item>v1</item>"
+            +                   "<item>v2</item>"
+            +                 "</item>"
+            +               "</item>"
+            +               "<item>"
+            +                 "<x type=\"vector\">"
+            +                   "<item>v3</item>"
+            +                   "<item>v4</item>"
+            +                 "</x>"
+            +               "</item>"
+            +             "</value>"
+            +           "</contextAttribute>"
+            +         "</contextAttributeList>"
+            +       "</contextElement>"
+            +       "<statusCode>"
+            +         "<code>200</code>"
+            +         "<reasonPhrase>OK</reasonPhrase>"
+            +       "</statusCode>"
+            +     "</contextElementResponse>"
+            +   "</contextResponseList>"
+            + "</notifyContextRequest>";
     private final String notifyXMLMetadata = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -122,6 +172,49 @@ public class NotifyContextRequestTest {
             +             "</metadata>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
+            +       "</contextElement>"
+            +       "<statusCode>"
+            +         "<code>200</code>"
+            +         "<reasonPhrase>OK</reasonPhrase>"
+            +       "</statusCode>"
+            +     "</contextElementResponse>"
+            +   "</contextResponseList>"
+            + "</notifyContextRequest>";
+    private final String notifyXMLSimpleUnordered = ""
+            + "<notifyContextRequest>"
+            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
+            +   "<originator>localhost</originator>"
+            +   "<contextResponseList>"
+            +     "<contextElementResponse>"
+            +       "<statusCode>"
+            +         "<code>200</code>"
+            +         "<reasonPhrase>OK</reasonPhrase>"
+            +       "</statusCode>"
+            +       "<contextElement>"
+            +         "<entityId type=\"Room\" isPattern=\"false\">"
+            +           "<id>Room1</id>"
+            +         "</entityId>"
+            +         "<contextAttributeList>"
+            +           "<contextAttribute>"
+            +             "<name>temperature</name>"
+            +             "<type>centigrade</type>"
+            +             "<value>26.5</value>"
+            +           "</contextAttribute>"
+            +         "</contextAttributeList>"
+            +       "</contextElement>"
+            +     "</contextElementResponse>"
+            +   "</contextResponseList>"
+            + "</notifyContextRequest>";
+    private final String notifyXMLSimpleNullAttrs = ""
+            + "<notifyContextRequest>"
+            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
+            +   "<originator>localhost</originator>"
+            +   "<contextResponseList>"
+            +     "<contextElementResponse>"
+            +       "<contextElement>"
+            +         "<entityId type=\"Room\" isPattern=\"false\">"
+            +           "<id>Room1</id>"
+            +         "</entityId>"
             +       "</contextElement>"
             +       "<statusCode>"
             +         "<code>200</code>"
@@ -185,6 +278,36 @@ public class NotifyContextRequestTest {
             +     "}"
             +   "]"
             + "}";
+    private final String notifyJsonCompoundNested = ""
+            + "{"
+            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
+            +   "\"originator\" : \"localhost\","
+            +   "\"contextResponses\" : ["
+            +     "{"
+            +       "\"contextElement\" : {"
+            +         "\"attributes\" : ["
+            +           "{"
+            +             "\"name\" : \"field1\","
+            +             "\"type\" : \"type1\","
+            +             "\"value\" : {\"a\":{\"x\":{\"y\":\"v1\"},\"z\":\"v2\"},\"b\":\"v3\"}"
+            +           "},"
+            +           "{"
+            +             "\"name\" : \"field2\","
+            +             "\"type\" : \"type2\","
+            +             "\"value\" : [[[\"v1\",\"v2\"]],{\"x\":[\"v3\",\"v4\"]}]"
+            +           "}"
+            +         "],"
+            +         "\"type\" : \"Room\","
+            +         "\"isPattern\" : \"false\","
+            +         "\"id\" : \"Room2\""
+            +       "},"
+            +       "\"statusCode\" : {"
+            +         "\"code\" : \"200\","
+            +         "\"reasonPhrase\" : \"OK\""
+            +       "}"
+            +     "}"
+            +   "]"
+            + "}";
     private final String notifyJsonMetadata = ""
             + "{"
             +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
@@ -235,6 +358,24 @@ public class NotifyContextRequestTest {
             +             "\"value\" : \"26.5\""
             +           "}"
             +         "],"
+            +         "\"type\" : \"Room\","
+            +         "\"isPattern\" : \"false\","
+            +         "\"id\" : \"Room1\""
+            +       "}"
+            +     "}"
+            +   "]"
+            + "}";
+    private final String notifyJsonSimpleNullAttrs = ""
+            + "{"
+            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
+            +   "\"originator\" : \"localhost\","
+            +   "\"contextResponses\" : ["
+            +     "{"
+            +       "\"statusCode\" : {"
+            +         "\"code\" : \"200\","
+            +         "\"reasonPhrase\" : \"OK\""
+            +       "},"
+            +       "\"contextElement\" : {"
             +         "\"type\" : \"Room\","
             +         "\"isPattern\" : \"false\","
             +         "\"id\" : \"Room1\""
@@ -338,11 +479,16 @@ public class NotifyContextRequestTest {
     public void testGetContextResponses() {
         testGetCxtResXMLSimple();
         testGetCxtResXMLCompound();
+        testGetCxtResXMLCompoundNested();
         testGetCxtResXMLMd();
+        testGetCxtResXMLSimpleUnordered();
+//        testGetCxtResXMLSimpleNullAttrs(); FIXME: commented until null attribute lists are supported in this brach
         testGetCxtResJsonSimple();
         testGetCxtResJsonCompound();
+        testGetCxtResJsonCompoundNested();
         testGetCxtResJsonMd();
         testGetCxtResJsonSimpleUnordered();
+        testGetCxtResJsonSimpleNullAttrs();
     } // testGetContextResponses
 
     /**
@@ -376,7 +522,6 @@ public class NotifyContextRequestTest {
      * Sub-test case for nofity-xml-compound.
      */
     private void testGetCxtResXMLCompound() {
-        // test case for notify-xml-compound
         System.out.println("getOriginator (notify-xml-compound)");
         NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompound);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -403,15 +548,44 @@ public class NotifyContextRequestTest {
         StatusCode sc = cer.getStatusCode();
         assertEquals("200", sc.getCode());
         assertEquals("OK", sc.getReasonPhrase());
-        
-        
     } // testGetCxtResXMLCompound
+    
+    /**
+     * Sub-test case for nofity-xml-compound.
+     */
+    private void testGetCxtResXMLCompoundNested() {
+        System.out.println("getOriginator (notify-xml-compound-nested)");
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLCompoundNested);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals("Room2", ce.getId());
+        assertEquals("false", ce.getIsPattern());
+        assertEquals("Room", ce.getType());
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+        ContextAttribute ca = caList.get(0);
+        assertEquals("field1", ca.getName());
+        assertEquals("type1", ca.getType());
+        assertEquals("{\"a\":{\"x\":{\"y\":\"v1\"},\"z\":\"v2\"},\"b\":\"v3\"}", ca.getContextValue(true));
+        assertEquals("[]", ca.getContextMetadata());
+        ca = caList.get(1);
+        assertEquals("field2", ca.getName());
+        assertEquals("type2", ca.getType());
+        assertEquals("[[[\"v1\",\"v2\"]],{\"x\":[\"v3\",\"v4\"]}]", ca.getContextValue(true));
+        assertEquals("[]", ca.getContextMetadata());
+
+        StatusCode sc = cer.getStatusCode();
+        assertEquals("200", sc.getCode());
+        assertEquals("OK", sc.getReasonPhrase());
+    } // testGetCxtResXMLCompoundNested
 
     /**
      * Sub-test case for nofity-xml-metadata.
      */
     private void testGetCxtResXMLMd() {
-        // test case for notify-xml-metadata
         System.out.println("getOriginator (notify-xml-metadata)");
         NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLMetadata);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -434,12 +608,62 @@ public class NotifyContextRequestTest {
         assertEquals(sc.getCode(), "200");
         assertEquals(sc.getReasonPhrase(), "OK");
     } // testGetCxtResXMLMd
+    
+    /**
+     * Sub-test case for nofity-xml-simple.
+     */
+    private void testGetCxtResXMLSimpleUnordered() {
+        System.out.println("getOriginator (notify-xml-simple-unordered)");
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimpleUnordered);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals(ce.getId(), "Room1");
+        assertEquals(ce.getIsPattern(), "false");
+        assertEquals(ce.getType(), "Room");
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+        ContextAttribute ca = caList.get(0);
+        assertEquals(ca.getName(), "temperature");
+        assertEquals(ca.getType(), "centigrade");
+        assertEquals(ca.getContextValue(true), "\"26.5\"");
+        assertEquals(ca.getContextMetadata(), "[]");
+
+        StatusCode sc = cer.getStatusCode();
+        assertEquals(sc.getCode(), "200");
+        assertEquals(sc.getReasonPhrase(), "OK");
+    } // testGetCxtResXMLSimpleUnordered
+    
+        /**
+     * Sub-test case for nofity-xml-simple.
+     */
+    private void testGetCxtResXMLSimpleNullAttrs() {
+        System.out.println("getOriginator (notify-xml-simple-null-attrs)");
+        NotifyContextRequest instance = TestUtils.createXMLNotifyContextRequest(notifyXMLSimpleNullAttrs);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals(ce.getId(), "Room1");
+        assertEquals(ce.getIsPattern(), "false");
+        assertEquals(ce.getType(), "Room");
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+        
+        assertTrue(caList == null);
+        
+        StatusCode sc = cer.getStatusCode();
+        assertEquals(sc.getCode(), "200");
+        assertEquals(sc.getReasonPhrase(), "OK");
+    } // testGetCxtResXMLSimpleNullAttrs
 
     /**
      * Sub-test case for nofity-json-simple.
      */
     private void testGetCxtResJsonSimple() {
-        // test case for nofity-json-simple
         System.out.println("getOriginator (notify-json-simple)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -468,7 +692,6 @@ public class NotifyContextRequestTest {
      * Sub-test case for nofity-json-compound.
      */
     private void testGetCxtResJsonCompound() {
-        // test case for nofify-json-compound
         System.out.println("getOriginator (notify-json-compound)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -496,12 +719,43 @@ public class NotifyContextRequestTest {
         assertEquals("200", sc.getCode());
         assertEquals("OK", sc.getReasonPhrase());
     } // testGetCxtResJsonCompound
+    
+    /**
+     * Sub-test case for nofity-json-compound.
+     */
+    private void testGetCxtResJsonCompoundNested() {
+        System.out.println("getOriginator (notify-json-compound-nested)");
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompoundNested);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals("Room2", ce.getId());
+        assertEquals("false", ce.getIsPattern());
+        assertEquals("Room", ce.getType());
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+        ContextAttribute ca = caList.get(0);
+        assertEquals("field1", ca.getName());
+        assertEquals("type1", ca.getType());
+        assertEquals("{\"a\":{\"x\":{\"y\":\"v1\"},\"z\":\"v2\"},\"b\":\"v3\"}", ca.getContextValue(true));
+        assertEquals("[]", ca.getContextMetadata());
+        ca = caList.get(1);
+        assertEquals("field2", ca.getName());
+        assertEquals("type2", ca.getType());
+        assertEquals("[[[\"v1\",\"v2\"]],{\"x\":[\"v3\",\"v4\"]}]", ca.getContextValue(true));
+        assertEquals("[]", ca.getContextMetadata());
+        
+        StatusCode sc = cer.getStatusCode();
+        assertEquals("200", sc.getCode());
+        assertEquals("OK", sc.getReasonPhrase());
+    } // testGetCxtResJsonCompoundNested
         
     /**
      * Sub-test case for nofity-json-metadata.
      */
     private void testGetCxtResJsonMd() {
-        // test case for nofify-json-compound
         System.out.println("getOriginator (notify-json-metadata)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -530,7 +784,6 @@ public class NotifyContextRequestTest {
      * Sub-test case for nofity-json-simple-unordered.
      */
     private void testGetCxtResJsonSimpleUnordered() {
-        // test case for nofity-json-simple-unordered
         System.out.println("getOriginator (notify-json-simple-unordered)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleUnordered);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -554,5 +807,29 @@ public class NotifyContextRequestTest {
         assertEquals(sc.getCode(), "200");
         assertEquals(sc.getReasonPhrase(), "OK");
     } // testGetCxtResJsonSimpleUnordered
+    
+    /**
+     * Sub-test case for nofity-json-simple-unordered.
+     */
+    private void testGetCxtResJsonSimpleNullAttrs() {
+        System.out.println("getOriginator (notify-json-simple-null-attrs)");
+        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleNullAttrs);
+        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
+        assertTrue(cerList != null);
+        
+        ContextElementResponse cer = cerList.get(0);
+        
+        ContextElement ce = cer.getContextElement();
+        assertEquals(ce.getId(), "Room1");
+        assertEquals(ce.getIsPattern(), "false");
+        assertEquals(ce.getType(), "Room");
+        ArrayList<ContextAttribute> caList = ce.getAttributes();
+
+        assertTrue(caList == null);
+
+        StatusCode sc = cer.getStatusCode();
+        assertEquals(sc.getCode(), "200");
+        assertEquals(sc.getReasonPhrase(), "OK");
+    } // testGetCxtResJsonSimpleNullAttrs
 
 } // NotifyContextRequestTest
