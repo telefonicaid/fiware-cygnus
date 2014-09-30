@@ -106,7 +106,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             notificationsTarget = "/" + notificationsTarget;
         } // if
         
-        defaultOrg = context.getString("default_organization", "default_org");
+        defaultOrg = Utils.encode(context.getString("default_organization", "default_org"));
         
         if (defaultOrg.length() > Constants.ORG_MAX_LEN) {
             logger.error("Bad configuration (Default organization length greater than " + Constants.ORG_MAX_LEN + ")");
