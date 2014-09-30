@@ -30,7 +30,7 @@ import java.util.Map;
 public interface CKANBackend {
 
     /**
-     * Prepares an organization for use, creating it if it doesn't previously exist
+     * Prepares an organization for use, creating it if it doesn't previously exist.
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param organization to initialize
@@ -39,7 +39,7 @@ public interface CKANBackend {
     void initOrg(DefaultHttpClient httpClient, String organization) throws Exception;
 
     /**
-     * Persist data in the CKAN datastore associated with the entity in a given organization (row mode)
+     * Persist data in the CKAN datastore associated with the entity in a given organization (row mode).
      * 
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTimeTs reception time in milliseconds.
@@ -56,7 +56,7 @@ public interface CKANBackend {
                  String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
     /**
-     * Persist data in the CKAN datastore associated with the entity in a given organization (column mode)
+     * Persist data in the CKAN datastore associated with the entity in a given organization (column mode).
      *
      * @param httpClient HTTP client for accessing the backend server.
      * @param recvTime reception time (human readable)
