@@ -23,8 +23,9 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import es.tid.fiware.fiwareconnectors.cygnus.backends.mysql.MySQLBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
-import java.util.Date;
+import java.util.HashMap;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
@@ -81,7 +82,7 @@ public class OrionMySQLSinkTest {
             +           "<contextAttribute>"
             +             "<name>attribute</name>"
             +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
+            +             "<value>foo</value>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"
@@ -160,9 +161,13 @@ public class OrionMySQLSinkTest {
         System.out.println("processContextResponses");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("timestamp", "123456789");
+        headers.put(Constants.ORG_HEADER, "any_org");
+        headers.put(Constants.DESTINATION, "any_dest");
         
         try {
-            sink.persist("FIXME", new Date().getTime(), notifyContextRequest.getContextResponses());
+            sink.persist(headers, notifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

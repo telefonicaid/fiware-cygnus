@@ -27,6 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -62,7 +63,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // HDFSBackendImpl
    
     @Override
-    public void createDir(DefaultHttpClient httpClient, String username, String dirPath) throws Exception {
+    public void createDir(HttpClient httpClient, String username, String dirPath) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
@@ -81,7 +82,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createDir
     
     @Override
-    public void createFile(DefaultHttpClient httpClient, String username, String filePath, String data)
+    public void createFile(HttpClient httpClient, String username, String filePath, String data)
         throws Exception {
         // check the username
         if (username == null) {
@@ -116,7 +117,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createFile
     
     @Override
-    public void append(DefaultHttpClient httpClient, String username, String filePath, String data) throws Exception {
+    public void append(HttpClient httpClient, String username, String filePath, String data) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
@@ -150,7 +151,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // append
     
     @Override
-    public boolean exists(DefaultHttpClient httpClient, String username, String filePath) throws Exception {
+    public boolean exists(HttpClient httpClient, String username, String filePath) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
@@ -173,7 +174,7 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @return
      * @throws Exception
      */
-    private HttpResponse doHDFSRequest(DefaultHttpClient httpClient, String method, String url, boolean relative,
+    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url, boolean relative,
             ArrayList<Header> headers, StringEntity entity) throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_SERVICE_UNAVAILABLE,
                 "Service unavailable");
@@ -214,7 +215,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         return response;
     } // doHDFSRequest
         
-    private HttpResponse doHDFSRequest(DefaultHttpClient httpClient, String method, String url,
+    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url,
             ArrayList<Header> headers, StringEntity entity) throws Exception {
         HttpResponse response = null;
         HttpRequestBase request = null;

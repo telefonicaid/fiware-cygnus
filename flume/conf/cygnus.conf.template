@@ -15,8 +15,12 @@
 # For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
 # frb@tid.es
 
+#=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+#
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
+#=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
 # Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
@@ -46,9 +50,13 @@ cygnusagent.sources.http-source.handler.events_ttl = 10
 # Management interface port (FIXME: temporal location for this parameter)
 cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts-interceptor
-# Interceptor type, do not change
-cygnusagent.sources.http-source.interceptors.ts-interceptor.type = timestamp
+cygnusagent.sources.http-source.interceptors = ts de
+# Timestamp interceptor, do not change
+cygnusagent.sources.http-source.interceptors.ts.type = timestamp
+# Destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
+# Matching table for the destination extractor interceptor, do not change
+cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration

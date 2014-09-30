@@ -19,6 +19,8 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
+import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
+import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -28,17 +30,14 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
-import org.apache.flume.event.EventBuilder;
 import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
-import java.util.Properties;
+import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
 
 /**
@@ -78,7 +77,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         bootTimeMilliseconds = bootTime % 1000;
         
         // print Cygnus version
-        logger.info("Cygnus version (" + getCygnusVersion() + ")");
+        logger.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
     } // OrionRestHandler
     
     /**
@@ -117,6 +116,11 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger.debug("Reading configuration (default_organization=" + defaultOrg + ")");
         eventsTTL = context.getString("events_ttl", "10");
         logger.debug("Reading configuration (events_ttl=" + eventsTTL + ")");
+        
+        // FIXME: temporal location for the Jetty server startup, this should be run at the same time the other Flume
+        // components are initialized, i.e. within the Node Application.
+        JettyServer js = new JettyServer(context.getInteger("management_port", 8081), new ManagementInterface());
+        js.start();
         
         logger.info("Startup completed");
     } // configure
@@ -244,30 +248,5 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         return transId;
     } // generateTransId
-    
-    /**
-     * Gets the Cygnus version from the pom.xml.
-     * @return The Cygnus version
-     */
-    private String getCygnusVersion() {
-        String path = "/pom.properties";
-        InputStream stream = getClass().getResourceAsStream(path);
-        
-        if (stream == null) {
-            logger.warn("The stream regarding pom.properties is NULL");
-            return "UNKNOWN";
-        } // if
-        
-        Properties props = new Properties();
-        
-        try {
-            props.load(stream);
-            stream.close();
-            return (String) props.get("version");
-        } catch (IOException e) {
-            logger.warn("Cannot get the version from pom.properties stream (Details=" + e.getMessage() + ")");
-            return "UNKNOWN";
-        } // try catch
-    } // getCygnusVersion
  
 } // OrionRestHandler

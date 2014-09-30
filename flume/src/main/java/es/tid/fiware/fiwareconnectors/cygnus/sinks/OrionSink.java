@@ -21,16 +21,16 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Map;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.io.StringReader;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Channel;
 import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
@@ -40,7 +40,6 @@ import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 /**
@@ -58,7 +57,7 @@ import org.xml.sax.InputSource;
  * The non common parts, and therefore those that are sink dependant and must be implemented are:
  *  - void configure(Context context)
  *  - void start()
- *  - void persist(ArrayList contextResponses) throws Exception
+ *  - void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
@@ -202,38 +201,31 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
         } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
-            Document doc = null;
-
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            
             try {
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                InputSource is = new InputSource(new StringReader(eventData));
-                doc = dBuilder.parse(is);
-                doc.getDocumentElement().normalize();
+                SAXParser saxParser = saxParserFactory.newSAXParser();
+                NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
+                saxParser.parse(new InputSource(new StringReader(eventData)), handler);
+                notification = handler.getNotifyContextRequest();
             } catch (Exception e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
-
-            notification = new NotifyContextRequest(doc);
         } else {
             // this point should never be reached since the content type has been checked when receiving the
             // notification
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
 
-        // process the event data
-        ArrayList contextResponses = notification.getContextResponses();
-        persist(eventHeaders.get(Constants.ORG_HEADER), new Long(eventHeaders.get("timestamp")).longValue(),
-                contextResponses);
+        persist(eventHeaders, notification);
     } // persist
     
     /**
      * This is the method the classes extending this class must implement when dealing with persistence.
-     * @param organization the organization/tenant to persist the data
-     * @param recvTimeTs the reception time of the context information
-     * @param contextResponses the context element responses to persist
+     * @param eventHeaders Event headers
+     * @param notification Notification object (already parsed) regarding an event body
      * @throws Exception
      */
-    abstract void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception;
-        
+    abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
+    
 } // OrionSink

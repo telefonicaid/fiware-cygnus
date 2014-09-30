@@ -68,12 +68,11 @@ You find this class at the following path:
 
 		/**
 		 * This is the method the classes extending this class must implement when dealing with persistence.
-		 * @param organization the organization/tenant to persist the data
-		 * @param recvTimeTs the reception time of the context information
-		 * @param contextResponses the context element responses to persist
+		 * @param eventHeader Event headers
+		 * @param notification Notification object (already parsed) regarding the event body
 		 * @throws Exception
 		 */
-		abstract void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception;
+		abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
     } // OrionSink   
 
 The `process` method is responsible for getting the channel, initiating a Flume transaction, taking an event and processing it by calling the `persist` method. The abstract version of the `persist` method is the only piece of code a developer must create according to the logic of his/her sink.
@@ -109,7 +108,8 @@ Orion notifications are sent by Orion to the default Flume HTTP source, which re
 			fiware-service=Org42,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
-			ttl=10
+			ttl=10,
+			destination=Room1-Room
 		}
 	}
 
@@ -119,9 +119,10 @@ Let's have a look at the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
-* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks.
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the <i>doc/design/interceptors</i> document for more details.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted. Nothing special has to be done by a new sink developer.
-* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. The ttl is managed by `OrionSink` and you, as a developer of a new sink, will not have to deal with it except for reporting errors. 
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. The ttl is managed by `OrionSink` and you, as a developer of a new sink, will not have to deal with it except for reporting errors.
+* * The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
 
 ### Naming and placing the new sink
 

@@ -29,7 +29,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -40,6 +39,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.apache.http.client.HttpClient;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -86,7 +86,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // CKANBackendImpl
 
     @Override
-    public void initOrg(DefaultHttpClient httpClient, String orgName) throws Exception {
+    public void initOrg(HttpClient httpClient, String orgName) throws Exception {
         // check if the organization has already been initialized
         if (packagesIds.containsKey(orgName)) {
             logger.debug("Organization found in the cache, thus it is already initialized (orgName=" + orgName + ")");
@@ -202,7 +202,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return The discovered resources for the given package.
      * @throws Exception
      */
-    private JSONArray discoverResources(DefaultHttpClient httpClient, String pkgName) throws Exception {
+    private JSONArray discoverResources(HttpClient httpClient, String pkgName) throws Exception {
         // query CKAN for the resources within the given package
         String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + pkgName;
         CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
@@ -243,7 +243,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // populateResourcesMap
 
     @Override
-    public void persist(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
+    public void persist(HttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
             String resourceName, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         // try to get the resource identifier from the cache
         String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true, true);
@@ -258,7 +258,7 @@ public class CKANBackendImpl implements CKANBackend {
     } // persist
 
     @Override
-    public void persist(DefaultHttpClient httpClient, String recvTime, String orgName, String resourceName,
+    public void persist(HttpClient httpClient, String recvTime, String orgName, String resourceName,
                  Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
         // try to get the resource identifier from the cache
         String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false, true);
@@ -284,7 +284,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return
      * @throws Exception
      */
-    private String resourceLookupAndCreate(DefaultHttpClient httpClient, String orgName, String resourceName,
+    private String resourceLookupAndCreate(HttpClient httpClient, String orgName, String resourceName,
             boolean createResource, boolean purge) throws Exception {
         try {
             // look for the resource resourceId associated to the resourceName in the hashmap
@@ -367,7 +367,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param attrValue attribute value.
      * @throws Exception
      */
-    private void insert(DefaultHttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
+    private void insert(HttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
             String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         String ckanURL = null;
         String jsonString = null;
@@ -422,7 +422,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param attrList map with the attributes to persist
      * @throws Exception
      */
-    private void insert(DefaultHttpClient httpClient, String recvTime, String resourceId,
+    private void insert(HttpClient httpClient, String recvTime, String resourceId,
                         Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
         String ckanURL = null;
         String jsonString = null;
@@ -487,7 +487,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param orgName to create
      * @throws Exception
      */
-    private void createOrganization(DefaultHttpClient httpClient, String orgName) throws Exception {
+    private void createOrganization(HttpClient httpClient, String orgName) throws Exception {
         try {
             // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + orgName + "\"}";
@@ -543,7 +543,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return pkgId if the package was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createPackage(DefaultHttpClient httpClient, String pkgName, String orgId) throws Exception {
+    private String createPackage(HttpClient httpClient, String pkgName, String orgId) throws Exception {
         try {
             String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
             String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create";
@@ -593,7 +593,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return resource ID if the resource was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createResource(DefaultHttpClient httpClient, String resourceName, String orgName)
+    private String createResource(HttpClient httpClient, String resourceName, String orgName)
         throws Exception {
         try {
             // create the CKAN request JSON; compose the resource URL with the one corresponding to the NGSI10
@@ -636,7 +636,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @param resourceId identifies the resource which datastore is going to be created.
      * @throws Exception
      */
-    private void createDataStore(DefaultHttpClient httpClient, String resourceId) throws Exception {
+    private void createDataStore(HttpClient httpClient, String resourceId) throws Exception {
         try {
             // create the CKAN request JSON
             // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
@@ -684,7 +684,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return The element resourceId if it could be activated, otherwise null.
      * @throws Exception
      */
-    private String activateElementState(DefaultHttpClient httpClient, String elementName, String elementType)
+    private String activateElementState(HttpClient httpClient, String elementName, String elementType)
         throws Exception {
         String jsonString = "{\"state\":\"active\"}";
         String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/rest/" + elementType + "/" + elementName;
@@ -697,7 +697,7 @@ public class CKANBackendImpl implements CKANBackend {
         } // if else
     } // activateElementState
     
-    private String getCKANVersion(DefaultHttpClient httpClient) throws Exception {
+    private String getCKANVersion(HttpClient httpClient) throws Exception {
         String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/util/status";
         CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
         
@@ -716,7 +716,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url) throws Exception {
+    private CKANResponse doCKANRequest(HttpClient httpClient, String method, String url) throws Exception {
         return doCKANRequest(httpClient, method, url, "");
     } // doCKANRequest
 
@@ -729,7 +729,7 @@ public class CKANBackendImpl implements CKANBackend {
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(DefaultHttpClient httpClient, String method, String url, String payload)
+    private CKANResponse doCKANRequest(HttpClient httpClient, String method, String url, String payload)
         throws Exception {
         HttpRequestBase request = null;
         HttpResponse response = null;
