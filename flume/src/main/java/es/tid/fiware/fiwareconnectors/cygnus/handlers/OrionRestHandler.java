@@ -34,6 +34,7 @@ import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -87,6 +88,14 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getNotificationTarget() {
         return notificationsTarget;
     } // getNotificationTarget
+    
+    /**
+     * Gets the default organization. It is protected due to it is only required for testing purposes.
+     * @return
+     */
+    protected String getDefaultOrganization() {
+        return defaultOrg;
+    } // getDefaultOrganization
 
     @Override
     public void configure(Context context) {
@@ -164,7 +173,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     throw new HTTPBadRequestException("organization length greater than " + Constants.ORG_MAX_LEN
                             + ")");
                 } else {
-                    organization = headerValue;
+                    organization = Utils.encode(headerValue);
                 } // if else
             } // if else if
         } // for

@@ -34,7 +34,13 @@ import org.xml.sax.SAXException;
  *
  * @author frb
  */
-public class TestUtils {
+public final class TestUtils {
+    
+    /**
+     * Constructor. It is private since utility clasess should not have a public or default constructor.
+     */
+    private TestUtils() {
+    } // TestUtils
     
     /**
      * Create a XML-based notificationContextRequest given the string representation of such XML.
@@ -74,5 +80,15 @@ public class TestUtils {
         
         return instance;
     } // createXMLNotifyContextRequest
+    
+    /**
+     * Encodes a string replacing all the non alphanumeric characters by '_'.
+     * 
+     * @param in
+     * @return The encoded version of the input string.
+     */
+    public static String encode(String in) {
+        return in.replaceAll("[^a-zA-Z0-9]", "_");
+    } // encode
     
 } // TestUtils
