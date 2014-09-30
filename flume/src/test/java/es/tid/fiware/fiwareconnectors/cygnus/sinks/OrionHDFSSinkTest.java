@@ -84,7 +84,7 @@ public class OrionHDFSSinkTest {
             +           "<contextAttribute>"
             +             "<name>attribute</name>"
             +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
+            +             "<value>foo</value>"
             +           "</contextAttribute>"
             +         "</contextAttributeList>"
             +       "</contextElement>"

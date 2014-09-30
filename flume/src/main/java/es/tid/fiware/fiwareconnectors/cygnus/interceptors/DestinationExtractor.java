@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -35,13 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 /**
@@ -118,15 +118,13 @@ public class DestinationExtractor implements Interceptor {
                 return null;
             } // try catch
         } else if (headers.get(Constants.CONTENT_TYPE).contains("application/xml")) {
-            Document doc = null;
-
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            
             try {
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                InputSource is = new InputSource(new StringReader(body));
-                doc = dBuilder.parse(is);
-                doc.getDocumentElement().normalize();
-                notification = new NotifyContextRequest(doc);
+                SAXParser saxParser = saxParserFactory.newSAXParser();
+                NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
+                saxParser.parse(new InputSource(new StringReader(body)), handler);
+                notification = handler.getNotifyContextRequest();
             } catch (Exception e) {
                 logger.error("Runtime error (" + e.getMessage() + ")");
                 return null;
