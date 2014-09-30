@@ -20,6 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestConstants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -34,7 +35,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Before;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -64,8 +64,9 @@ public class OrionRestHandlerTest {
     private final String notificationsTarget = "/notify";
     private final String[] headerNamesStr = {"user-agent", "content-type", "fiware-service"};
     private final String contentType = "application/json";
-    private final String fiwareOrg = "default_org";
+    private final String defaultOrg = "default_org";
     private final String requestMethod = "POST";
+    private final String notifiedService = "a.service-with-rare characters%@";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -82,6 +83,7 @@ public class OrionRestHandlerTest {
         context = new Context();
         context.put("orion_version", orionVersionRegexPattern);
         context.put("notification_target", notificationsTarget);
+        context.put("default_organization", defaultOrg);
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getMethod()).thenReturn(requestMethod);
@@ -90,7 +92,7 @@ public class OrionRestHandlerTest {
                 Collections.enumeration(new ArrayList(Arrays.asList(headerNamesStr))));
         when(mockRequest.getHeader("user-agent")).thenReturn(orionVersion);
         when(mockRequest.getHeader("content-type")).thenReturn(contentType);
-        when(mockRequest.getHeader("fiware-service")).thenReturn(fiwareOrg);
+        when(mockRequest.getHeader("fiware-service")).thenReturn(notifiedService);
         when(mockRequest.getReader()).thenReturn(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
                 "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
     } // setUp
@@ -103,6 +105,7 @@ public class OrionRestHandlerTest {
         System.out.println("configure");
         handler.configure(context);
         assertEquals(notificationsTarget, handler.getNotificationTarget());
+        assertEquals(defaultOrg, handler.getDefaultOrganization());
     } // testConfigure
 
     /**
@@ -122,7 +125,7 @@ public class OrionRestHandlerTest {
         assertTrue(eventHeaders.get("content-type").equals("application/json")
                 || eventHeaders.get("content-type").equals("application/xml"));
         assertTrue(eventHeaders.containsKey(TestConstants.ORG_HEADER));
-        assertTrue(eventHeaders.get(TestConstants.ORG_HEADER).equals("default_org"));
+        assertTrue(eventHeaders.get(TestConstants.ORG_HEADER).equals(TestUtils.encode(notifiedService)));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     
