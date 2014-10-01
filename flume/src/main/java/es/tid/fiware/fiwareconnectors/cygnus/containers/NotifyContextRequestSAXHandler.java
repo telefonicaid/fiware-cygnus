@@ -52,15 +52,16 @@ public class NotifyContextRequestSAXHandler extends DefaultHandler {
     private ContextAttribute contextAttribute = null;
     private boolean name = false;
     private boolean type = false;
+    private boolean contextValue = false;
     private boolean value = false;
     private ArrayList<ContextMetadata> contextMetadataList = null;
     private ContextMetadata contextMetadata = null;
     private StatusCode statusCode = null;
     private boolean code = false;
     private boolean reasonPhrase = false;
-    private boolean isMd = false;
     private ArrayList<JsonElement> createdElements = new ArrayList<JsonElement>();
     private ArrayList<String> seenTags = new ArrayList<String>();
+    private boolean isMd = false;
     
     /**
      * Gets the notifyContextRequest parsed object.
@@ -106,6 +107,14 @@ public class NotifyContextRequestSAXHandler extends DefaultHandler {
             } // if else
             
             value = true;
+        } else if (qName.equalsIgnoreCase("contextValue")) {
+            if (isVector(attributes)) {
+                createdElements.add(new JsonArray());
+            } else {
+                createdElements.add(new JsonObject()); // if finally it is not an object, this will be deleted
+            } // if else
+            
+            contextValue = true;
         } else if (qName.equalsIgnoreCase("metadata")) {
             contextMetadataList = new ArrayList<ContextMetadata>();
         } else if (qName.equalsIgnoreCase("contextMetadata")) {
@@ -162,14 +171,13 @@ public class NotifyContextRequestSAXHandler extends DefaultHandler {
         } else if (qName.equalsIgnoreCase("statusCode")) {
             contextElementResponse.setStatusCode(statusCode);
         } else if (qName.equalsIgnoreCase("value")) {
-            if (isMd) {
-                contextMetadata.setContextMetadata(createdElements.get(0));
-            } else {
-                contextAttribute.setContextValue(createdElements.get(0));
-            } // if else
-            
+            contextMetadata.setContextMetadata(createdElements.get(0));
             createdElements.remove(createdElements.size() - 1);
             value = false;
+        } else if (qName.equalsIgnoreCase("contextValue")) {
+            contextAttribute.setContextValue(createdElements.get(0));
+            createdElements.remove(createdElements.size() - 1);
+            contextValue = false;
         } else if (!qName.equalsIgnoreCase("notifyContextRequest") && !qName.equalsIgnoreCase("subscriptionId")
                 && !qName.equalsIgnoreCase("originator") && !qName.equalsIgnoreCase("code")
                 && !qName.equalsIgnoreCase("reasonPhrase") && !qName.equalsIgnoreCase("name")
@@ -220,7 +228,10 @@ public class NotifyContextRequestSAXHandler extends DefaultHandler {
             // the last created element is not an object but a primitive
             createdElements.remove(createdElements.size() - 1);
             createdElements.add(new JsonPrimitive(new String(ch, start, length)));
-            value = false;
+        } else if (contextValue && seenTags.isEmpty()) {
+            // the last created element is not an object but a primitive
+            createdElements.remove(createdElements.size() - 1);
+            createdElements.add(new JsonPrimitive(new String(ch, start, length)));
         } else if (code) {
             statusCode.setCode(new String(ch, start, length));
             code = false;
