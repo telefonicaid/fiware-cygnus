@@ -475,12 +475,12 @@ public class NotifyContextRequestTest {
      */
     @Test
     public void testGetContextResponses() {
-//        testGetCxtResXMLSimple();
-//        testGetCxtResXMLCompound();
-//        testGetCxtResXMLCompoundNested();
+        testGetCxtResXMLSimple();
+        testGetCxtResXMLCompound();
+        testGetCxtResXMLCompoundNested();
         testGetCxtResXMLMd();
-//        testGetCxtResXMLSimpleUnordered();
-//        testGetCxtResXMLSimpleNullAttrs();
+        testGetCxtResXMLSimpleUnordered();
+        testGetCxtResXMLSimpleNullAttrs();
         testGetCxtResJsonSimple();
         testGetCxtResJsonCompound();
         testGetCxtResJsonCompoundNested();
