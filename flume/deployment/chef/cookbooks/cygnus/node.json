@@ -1,0 +1,5 @@
+{
+ 	"run_list": [
+		"recipe[cygnus::0.3_install]"
+ 	]	
+ }

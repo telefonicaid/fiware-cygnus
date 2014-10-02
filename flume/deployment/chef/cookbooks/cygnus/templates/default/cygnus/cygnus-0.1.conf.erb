@@ -1,0 +1,22 @@
+orionagent.sources = http-source
+orionagent.sinks = hdfs-sink
+orionagent.channels = hdfs-channel
+
+orionagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+orionagent.sources.http-source.channels = hdfs-channel
+orionagent.sources.http-source.port = <%= @port %>
+orionagent.sources.http-source.handler = es.tid.fiware.orionconnectors.cosmosinjector.OrionRestHandler
+orionagent.sources.http-source.handler.orion_version = <%= @orion_version %>
+orionagent.sources.http-source.handler.notification_target = /notify
+
+orionagent.sinks.hdfs-sink.channel = hdfs-channel
+orionagent.sinks.hdfs-sink.type = es.tid.fiware.orionconnectors.cosmosinjector.OrionHDFSSink
+orionagent.sinks.hdfs-sink.cosmos_host = <%= @cosmos_host %>
+orionagent.sinks.hdfs-sink.cosmos_port = <%= @cosmos_port %>
+orionagent.sinks.hdfs-sink.cosmos_username = <%= @cosmos_username %>
+orionagent.sinks.hdfs-sink.cosmos_dataset = <%= @cosmos_dataset %>
+orionagent.sinks.hdfs-sink.hdfs_api = <%= @hdfs_api %>
+
+orionagent.channels.hdfs-channel.type = memory
+orionagent.channels.hdfs-channel.capacity = <%= @hdfs_channel_capacity %>
+orionagent.channels.hdfs-channel.transactionCapacity = <%= @hdfs_channel_trans_capacity %>
