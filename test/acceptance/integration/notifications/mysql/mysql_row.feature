@@ -71,18 +71,18 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |resource               |content|
-   #   |Room2-Room             |json   |
-   #   |Room2-Room             |xml    |
-   #   |Room2-HOUSE            |json   |
-   #   |Room2-HOUSE            |xml    |
-   #   |with 64 characters     |json   |
-   #   |with 64 characters     |xml    |
-   #   |Room2-                 |json   |
-   #   |Room2-                 |xml    |
+      |Room2-Room             |json   |
+      |Room2-Room             |xml    |
+      |Room2-HOUSE            |json   |
+      |Room2-HOUSE            |xml    |
+      |with 64 characters     |json   |
+      |with 64 characters     |xml    |
+      |Room2-                 |json   |
+      |Room2-                 |xml    |
       |modelogw.assetgw-device|json   |
-   #   |modelogw.assetgw-device|xml    |
-   #   |ROOM-house             |json   |
-   #   |ROOM-house             |xml    |
+      |modelogw.assetgw-device|xml    |
+      |ROOM-house             |json   |
+      |ROOM-house             |xml    |
 
     @attrNumbers
     Scenario Outline:  store in mysql new notifications with different quantities of attributes
@@ -94,12 +94,12 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |attrNumber|content|
-      |1         |json    |
-      |1         |xml|
-      |3         |json|
-      |3         |xml|
-      |50        |json|
-      |50        |xml|
+      |1         |json   |
+      |1         |xml    |
+      |3         |json   |
+      |3         |xml    |
+      |50        |json   |
+      |50        |xml    |
 
     @metadatas
     Scenario Outline:  store in mysql new notifications with different quantities of metadata attributes
@@ -111,12 +111,12 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |metadatas|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1        |json   |
+      |1        |xml    |
+      |3        |json   |
+      |3        |xml    |
+      |50       |json   |
+      |50       |xml    |
 
     @compounds   @BUG-102
     Scenario Outline:  store in mysql new notifications with different quantities of values of compounds attributes
@@ -128,12 +128,12 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |compound|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1       |json   |
+      |1       |xml    |
+      |3       |json   |
+      |3       |xml    |
+      |50      |json   |
+      |50      |xml    |
 
     @errors
     Scenario Outline:  controlled error if the database parameters are wrong
@@ -142,8 +142,8 @@ Feature: Store in mysql new notifications per row from context broker
         When store in mysql with a organization "<organization>", resource "<resource>" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the database is not created in mysql
     Examples:
-      |organization|resource|content|
-     |large than 32 characters|default|json|
-      |large than 32 characters|default|xml|
-      |default|large than 32 characters|json|
-      |default|large than 32 characters|xml|
+      |organization            |resource                |content|
+      |large than 32 characters|default                 |json   |
+      |large than 32 characters|default                 |xml    |
+      |default                 |large than 32 characters|json   |
+      |default                 |large than 32 characters|xml    |

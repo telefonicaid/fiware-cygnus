@@ -38,9 +38,9 @@ Feature: Stored in ckan new notifications per column from context broker
     Examples:
       |organization  |attributesQuantity|attrValue        |metadataValue|content|
       |cygnus_col_012|1                 |45.0             |True         |json   |
-   #   |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
-   #   |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
-   #   |cygnus_col_042|4                 |-45.2344         |False        |xml    |
+      |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
+      |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
+      |cygnus_col_042|4                 |-45.2344         |False        |xml    |
 
     @types
     Scenario Outline: stored new notifications in ckan with different data types
