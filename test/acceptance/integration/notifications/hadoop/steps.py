@@ -19,7 +19,7 @@
 #      Author: Ivan Arias
 #
 
-from lettuce import step, world
+from lettuce import step
 from myTools.hadoop_utils import *
 
 
@@ -32,7 +32,6 @@ def cygnus_is_installed_with_type(step, type):
     :param type: type of persistent (ROW or COLUMN)
     """
     world.cygnus_type = type
-
 
 @step(u'"([^"]*)" is installed correctly')
 def is_installed_correctly(step, operation):

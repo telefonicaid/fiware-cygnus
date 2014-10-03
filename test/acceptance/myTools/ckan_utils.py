@@ -61,6 +61,8 @@ class Ckan:
             value = "%s/%s/%s" % (world.ckan_url, PATH_API_CREATE, operation)
         if operation ==PACKAGE_SHOW:
              value = "%s/%s/%s%s" % (world.ckan_url, PATH_API_CREATE, PACKAGE_SHOW, element) # datasetName
+        if operation ==ORGANIZATION_SHOW:
+             value = "%s/%s/%s?id=%s" % (world.ckan_url, PATH_API_CREATE, ORGANIZATION_SHOW, element) # organization Name
         return value
 
     def __createHeaders(self, operation, content="xml"):
@@ -78,7 +80,8 @@ class Ckan:
         get Resource Id from ckan by API
         :return: resource_Id
         """
-        world.dataset = world.organization[world.cygnus_type].lower()+"_"+world.dataset_default
+        world.dataset = world.organization[world.cygnus_type]+"_"+world.dataset_default
+        # world.dataset = world.organization[world.cygnus_type].lower()+"_"+world.dataset_default
         resp =  http_utils.request(GET, self.__createUrl(RESOURCE_ID), self.__createHeaders(CKAN_HEADER), EMPTY, ERROR[NOT])
         body = resp.read()
         if error and general_utils.ifSubstrExistsInStr(body, NOT_FOUND):
@@ -171,8 +174,12 @@ class Ckan:
         return outMsg
 
     def verifyIfDatasetExist (self):
+        """
+        verify if
+        """
         resp =  self.__getResourceId(TRUE) # TRUE is for error operation
-        assert resp == NOT_FOUND, VALIDATE_DATASET_MSG+" %s \n" % (world.dataset)
+        assert resp == NOT_FOUND, \
+            VALIDATE_DATASET_MSG+" %s \n" % (world.dataset)
 
     def validateResponse (self, response):
         """
@@ -209,12 +216,12 @@ class Ckan:
         create a new dataset if does not exist
         Name: organization_defaultPackage
         """
-        world.dataset = world.organization[world.cygnus_type]+"_"+world.dataset_default
         dataset = self.__datasetNotExist()
         if dataset == NOT_FOUND:
             payloadDict = {NAME:  world.dataset,
                            OWNER_ORG: world.organization[world.cygnus_type]}
             payload = general_utils.convertDictToStr(payloadDict, JSON)
+
             resp, body = http_utils.request2(POST, self.__createUrl(PACKAGE_CREATE), self.__createHeaders(CKAN_HEADER, JSON), payload, TRUE, ERROR[NOT])
             bodyDict=general_utils.convertStrToDict(body,JSON)
             return bodyDict[RESULT][ID]
@@ -226,11 +233,22 @@ class Ckan:
         Create a new organization and a dataset associated if they do not exist
         :param orgName:
         """
-        if orgName != DEFAULT: world.organization[world.cygnus_type] = orgName
-        if self.__organizationNotExist(world.organization[world.cygnus_type]):
-            payload = general_utils.convertDictToStr({NAME: world.organization[world.cygnus_type]}, JSON)
-            resp, body = http_utils.request2(POST, self.__createUrl(ORGANIZATION_CREATE), self.__createHeaders(CKAN_HEADER, JSON), payload, TRUE, ERROR[NOT])
-        world.datasetId = self.__createDataset()
+        world.datasetId = None
+        if orgName == ORGANIZATION_WITHOUT_DATASET:
+            world.dataset = world.organization[world.cygnus_type]+"_"+world.dataset_default+"error"
+        else:
+            if orgName != DEFAULT: world.organization[world.cygnus_type] = orgName
+            world.dataset = world.organization[world.cygnus_type]+"_"+world.dataset_default
+
+        if orgName != ORGANIZATION_MISSING:
+            if self.__organizationNotExist(world.organization[world.cygnus_type]):
+                payload = general_utils.convertDictToStr({NAME: world.organization[world.cygnus_type]}, JSON)
+
+                resp, body = http_utils.request2(POST, self.__createUrl(ORGANIZATION_CREATE), self.__createHeaders(CKAN_HEADER, JSON), payload, TRUE, ERROR[NOT])
+
+            if orgName != ORGANIZATION_WITHOUT_DATASET:
+
+                world.datasetId = self.__createDataset()
 
     def __resourceNotExist (self):
         """
@@ -288,7 +306,8 @@ class Ckan:
         if resourceName != DEFAULT: world.resource = resourceName
         if attrQuantity != DEFAULT: world.attrsNumber = attrQuantity
         resp = self.__resourceNotExist()
-        if resp == NOT_FOUND:
+        if resp == NOT_FOUND and world.organization[world.cygnus_type] != ORGANIZATION_MISSING and world.datasetId != None and resourceName != RESOURCE_MISSING:
+
             payloadDict = {NAME:  world.resource,
                            URL: URL_EXAMPLE,
                            PACKAGE_ID: world.datasetId}
@@ -328,6 +347,9 @@ class Ckan:
         return "OK"
 
     def verifyIfResourceIsEmpty (self):
+        """
+        verify if the resourse is empty
+        """
         resourceId = self.__getResourceId()
         resp, body = http_utils.request2(GET, self.__createUrl(RESOURCE_SEARCH, resourceId), self.__createHeaders(CKAN_HEADER, JSON), EMPTY, TRUE, ERROR[NOT])
         world.dictTemp = general_utils.convertStrToDict(body, JSON)
@@ -336,6 +358,10 @@ class Ckan:
             " %s %s \n" % (VALIDATE_RESOURCE_IS_NOT_EMPTY_MSG, world.resource)
 
     def verifyDatasetSearch_metadata_column (self, content):
+        """
+        :param content:
+        :return:
+        """
         self.lastElement = None
         delayTimeForMetadataVerify = 0.50
         self.lastElement = world.dictTemp[RESULT][RECORDS][world.totalElement-1]
@@ -350,6 +376,39 @@ class Ckan:
                 time.sleep(delayTimeForMetadataVerify)
         return "OK"
 
+    def verifyOrganizationNotExist (self):
+        """
+        Validate that the organization is  not created in ckan per column
+        """
+        if world.organizationOperation != ORGANIZATION_WITHOUT_DATASET and world.resourceOperation != RESOURCE_MISSING:
+            self.body = None
+            resp, self.body = http_utils.request2(GET, self.__createUrl(ORGANIZATION_SHOW, world.organization[world.cygnus_type]), self.__createHeaders(CKAN_HEADER, JSON), EMPTY, TRUE, ERROR[NOT])
+
+            assert self.body.find(NOT_FOUND)> 0, \
+                '\n...Organization \"%s\", is created by cygnus in ckan: \n\n body: %s' % (world.organization[world.cygnus_type], self.body)
+
+    def verifyDatasetNotExist (self):
+        """
+        Validate that the dataset is not created in ckan per column
+        """
+        if world.resourceOperation != RESOURCE_MISSING:
+            self.body = None
+            resp, self.body = http_utils.request2(GET, self.__createUrl(PACKAGE_SHOW, world.dataset), self.__createHeaders(CKAN_HEADER, JSON), EMPTY, TRUE, ERROR[NOT])
+            assert self.body.find(NOT_FOUND)> 0, \
+                '\n...dataset \"%s\", is created by cygnus in ckan: \n\n body: %s' % (world.dataset, self.body)
+
+    def verifyResourceNotExist (self):
+        """
+        Validate that the resource is not created in ckan per column
+        """
+        if world.organizationOperation != ORGANIZATION_WITHOUT_DATASET:
+            self.body = None
+            self.dictTemp = None
+            resp, self.body = http_utils.request2(GET, self.__createUrl(PACKAGE_SHOW, world.dataset), self.__createHeaders(CKAN_HEADER, JSON), EMPTY, TRUE, ERROR[NOT])
+            self.dictTemp = general_utils.convertStrToDict(self.body, JSON)
+
+            assert self.dictTemp[RESULT][RESOURCE] != None, \
+                '\n...resource \"%s\", is created by cygnus in ckan: \n\n body: %s' % (world.resource, self.body)
     #------------------ Selenium ------------
     def connectionToCKAN (self, operation):
         """

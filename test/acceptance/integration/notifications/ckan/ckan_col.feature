@@ -38,9 +38,9 @@ Feature: Stored in ckan new notifications per column from context broker
     Examples:
       |organization  |attributesQuantity|attrValue        |metadataValue|content|
       |cygnus_col_012|1                 |45.0             |True         |json   |
-      |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
-      |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
-      |cygnus_col_042|4                 |-45.2344         |False        |xml    |
+   #   |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
+   #   |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
+   #   |cygnus_col_042|4                 |-45.2344         |False        |xml    |
 
     @types
     Scenario Outline: stored new notifications in ckan with different data types
@@ -75,7 +75,7 @@ Feature: Stored in ckan new notifications per column from context broker
       |org_col_time_2 |1                 |time         |12:42:00         |json        |True         |json   |
       |org_col_time_2 |1                 |time         |12:43:00         |json        |True         |xml    |
 
-    @resources  @BUG_172
+    @resources  @BUG_172 @skip
     Scenario Outline: stored new notifications in ckan with different resources and the same package
        Given cygnus is installed with type "column"
          And "ckan" is installed correctly
@@ -86,13 +86,15 @@ Feature: Stored in ckan new notifications per column from context broker
          And Verify that the attribute value is stored in ckan
          And Verify the metadatas are stored in ckan
     Examples:
-      |resource   |attributesQuantity|attrValueType|attrValue |metadataType|metadataValue|content|
-      |Room1-Room |1                 |json         |41.41     |json        |True         |json   |
-      |Room1-Room |1                 |json         |42.41     |json        |True         |xml    |
-      |Room2-Room |1                 |json         |43.41     |json        |True         |json   |
-      |Room2-Room |1                 |json         |44.41     |json        |True         |xml    |
-      |Room3-Room |1                 |json         |45.41     |json        |True         |json   |
-      |Room3-Room |1                 |json         |46.41     |json        |True         |xml    |
+      |resource                |attributesQuantity|attrValueType|attrValue |metadataType|metadataValue|content|
+      |Room1-Room              |1                 |json         |41.41     |json        |True         |json   |
+      |Room1-Room              |1                 |json         |42.41     |json        |True         |xml    |
+      |Room2-Room              |1                 |json         |43.41     |json        |True         |json   |
+      |Room2-Room              |1                 |json         |44.41     |json        |True         |xml    |
+      |Room3-Room              |1                 |json         |45.41     |json        |True         |json   |
+      |Room3-Room              |1                 |json         |46.41     |json        |True         |xml    |
+      |modelogw.assetgw-device |1                 |json         |45.41     |json        |True         |json   |
+      |modelogw.assetgw-device |1                 |json         |46.41     |json        |True         |xml    |
 
     @multiples_attributes
     Scenario Outline: stored new notifications in ckan with multiples attributes
@@ -172,3 +174,26 @@ Feature: Stored in ckan new notifications per column from context broker
       |content|
       |json   |
       |xml    |
+
+    @element_not_exist @skip @BUG-181
+    Scenario Outline: try to store new notification in ckan if some element does not exist
+       Given cygnus is installed with type "column"
+         And "ckan" is installed correctly
+         And create a new organization "<organization>"
+         And create a new resource "<resource>" with "1" attributes, attrValue data type "json" and metadata data type "json"
+        When append a new attribute values "45.0", the metadata value "True" and content "<content>"
+        Then I receive an "OK" http code
+         And Verify that the organization does not exist in ckan
+         And Verify that the dataset does not exist in ckan
+         And Verify that the resource does not exist in ckan
+    Examples:
+      |organization                  |resource         |content|
+      |organization_missing          |default          |json   |
+      |organization_missing          |default          |xml    |
+      |organization_without_dataset  |default          |json   |
+      |organization_without_dataset  |default          |xml    |
+      |default                       |resource-missing |json   |
+      |default                       |resource-missing |xml    |
+
+
+

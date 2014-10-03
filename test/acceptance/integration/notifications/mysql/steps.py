@@ -57,6 +57,7 @@ def create_a_new_database (step, organization):
     :param step:
     :param DBname: database name
     """
+    world.organizationOperation = organization
     world.mysql.createDB(organization)
 
 @step (u'create a new table "([^"]*)" with "([^"]*)" attributes, attrValue data type "([^"]*)" and metadata data type "([^"]*)"')
@@ -71,7 +72,7 @@ def create_a_new_table_with_attrValue_data_type_and_metadata_data_type (step, re
     :param metadataType:
     """
     world.metadataType = metadataType
-
+    world.resourceOperation = resource
     world.mysql.createTable(resource, attrQuantity, attrValueType, metadataType)
 
 
@@ -150,8 +151,32 @@ def verify_the_metadatas_are_stored_in_mysql(step):
 
 @step (u'Verify the notification is not stored in mysql')
 def verify_the_notification_is_not_stored_in_mysql (step):
+    """
+    Verify the notification is not stored in mysql
+    :param step:
+    """
     world.mysql.verifyIfTableIsEmpty()
-    pass
+
+
+@step (u'Verify that the database does not exist in mysql')
+def verify_that_the_database_does_not_exist_in_mysql (step):
+    """
+    Verify that the database does not exist in mysql in column mode
+    :param step:
+    """
+    world.mysql.verifyDatabaseNotExist()
+
+
+@step (u'Verify that the table does not exist in mysql')
+def verify_that_the_table_does_not_exist_in_mysql (step):
+    """
+    Verify that the table does not exist in mysql in column mode
+    :param step:
+    """
+    world.mysql.verifyTableNotExist()
+
+
+
 #----------------------------------------------------------------------------------------
 
 

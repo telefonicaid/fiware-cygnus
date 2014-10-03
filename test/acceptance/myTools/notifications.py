@@ -64,7 +64,6 @@ class Notifications:
     def verifyCygnus (step, cygnusType):
         world.cygnus_type = cygnusType
 
-
     def __createHeaders(self, operation, content="xml"):
         """
         create the header for different requests
@@ -245,7 +244,6 @@ class Notifications:
             if attrValue[i] == "'":  temp = temp + "\""
             else:temp = temp + attrValue[i]
         return temp
-
 
     #----------------- Notifications --------------------------
     def notification_row (self, organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, error):

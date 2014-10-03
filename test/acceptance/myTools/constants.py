@@ -71,14 +71,18 @@ HADDOP               =  u'hadoop'
 NOTIFY               = u'notify'
 NOTIFY_ERROR         = u'notify_error'
 WITHOUT_ORGANIZATION = u'without organization'
+ORGANIZATION_MISSING = u'organization_missing'
+ORGANIZATION_WITHOUT_DATASET = u'organization_without_dataset'
+RESOURCE_MISSING     = u'resource-missing'
+DATASTORE_MISSING    = u'datastore-missing'
 WITH_100             = u'with 100 characters'
 WITH_64              = u'with 64 characters'
 WITH_32              = u'with 32 characters'
 LARGE_THAN_100       = u'large than 100 characters'
 LARGE_THAN_64        = u'large than 64 characters'
 LARGE_THAN_32        = u'large than 32 characters'
-ROW_TYPE             =u'row'
-COL_TYPE             =u'column'
+ROW_TYPE             = u'row'
+COL_TYPE             = u'column'
 
 #CKAN API
 VERSION                = u'ckan_version'
@@ -110,11 +114,16 @@ RECVTIME               ='recvTime'
 TIMESTAMP              = u'timestamp'
 FORCE                  = u'force'
 WITHOUT_METADATA_FIELD = u'without metadata field'
+ORGANIZATION_SHOW      = u'organization_show'
 
 #mySQL
 MYSQL_ERROR_MESSAGE   = u'DB exception: '
 MYSQL_CREATE_DATABASE = u'CREATE DATABASE IF NOT EXISTS '
 MYSQL_CREATE_TABLE    = u'CREATE TABLE IF NOT EXISTS '
+MYSQL_DROP_DATABASE   = u'DROP SCHEMA IF EXISTS '
+MYSQL_SHOW_DATABASE   = u'SHOW DATABASES'
+MYSQL_SHOW_TABLES     = u'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \''
+
 
 #hadoop
 OPEN_FILE                 = 'OPEN'

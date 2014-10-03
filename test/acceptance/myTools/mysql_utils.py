@@ -86,7 +86,7 @@ class MySQL:
         """
         Close a mysql connection and drop the database before
         """
-        self.__newQuery("DROP SCHEMA "+world.mysql_database)  # drop database
+        #self.__newQuery(MYSQL_DROP_DATABASE+world.mysql_database)  # drop database
         world.conn.close ()  # close mysql connection
 
     def createDB (self, organization):
@@ -95,8 +95,9 @@ class MySQL:
         :param DBname: database name (organization)
         """
         if organization != DEFAULT: world.organization[world.cygnus_type] = organization
-        world.mysql_database = world.mysql_prefix+world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase
-        self.__newQuery(MYSQL_CREATE_DATABASE+world.mysql_database)
+        world.mysql_database = world.mysql_prefix+world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase per ckan
+        if organization != ORGANIZATION_MISSING:
+            self.__newQuery(MYSQL_CREATE_DATABASE+world.mysql_database)
 
     def __generateField (self, attrQuantity, attrValueType, metadataType):
         """
@@ -112,6 +113,7 @@ class MySQL:
             if metadataType != WITHOUT_METADATA_FIELD:
                field = field + ", " + ATTR_NAME+"_"+str(i)+"_md "+ metadataType
         field = field + ")"
+
         return field
 
     def __splitResource (self, resource):
@@ -135,11 +137,13 @@ class MySQL:
         if resource != DEFAULT : world.resource = resource
         resp=self.__splitResource(world.resource)
         if attrQuantity != DEFAULT: world.attrsNumber = attrQuantity
-        world.mysql_tableName = world.mysql_prefix+resp
-        field = self.__generateField (attrQuantity, attrValueType, metadataType)
-        self.__newQuery(MYSQL_CREATE_TABLE + world.mysql_database + "." + world.mysql_tableName +field);
 
-#--------------------------
+        world.mysql_table = world.mysql_prefix+resp
+        if world.mysql_database != world.mysql_prefix+ORGANIZATION_MISSING and resource != RESOURCE_MISSING:
+            field = self.__generateField (attrQuantity, attrValueType, metadataType)
+            self.__newQuery(MYSQL_CREATE_TABLE + world.mysql_database + "." + world.mysql_table +field);
+
+    #--------------------------
     def verifyMysqlVersion(self):
         """
         Verify if the mysql version is the expected
@@ -180,7 +184,7 @@ class MySQL:
                 if attrType != world.attrs[i][TYPE]:                                                               # verify the type
                     return "The "+world.attrs[i][NAME]+" type does not match..."
                 outMsg = "OK"
-                #break
+
         return outMsg
 
     def verifyDatasetSearch_metadatas (self, content):
@@ -233,12 +237,12 @@ class MySQL:
         """
         world.row = None
         DelayToVerifyValues = 0.5
-        outMsg = "Names are missing"
+        outMsg = NAME_IS_MISSING
         if content == XML:
             valueTemp = CONTENT_VALUE
         else:
              valueTemp = VALUE_JSON
-        cur = self.__newQuery('SELECT * FROM '+world.mysql_database+'.'+world.mysql_tableName+ ' ORDER BY 1 DESC LIMIT 1')
+        cur = self.__newQuery('SELECT * FROM '+world.mysql_database+'.'+world.mysql_table+ ' ORDER BY 1 DESC LIMIT 1')
         world.row  = cur.fetchone ()   # return de last line in the table
         if world.row != None:
             for i in range(int(world.attrsNumber)):
@@ -267,14 +271,41 @@ class MySQL:
         return "OK"
 
     def verifyIfTableIsEmpty (self):
-        cur = self.__newQuery('SELECT COUNT(*) FROM '+world.mysql_database+'.'+world.mysql_tableName)
+        """
+        verify if the table is empty per column mode
+        """
+        cur = self.__newQuery('SELECT COUNT(*) FROM '+world.mysql_database+'.'+world.mysql_table)
         row  = cur.fetchone ()
         assert row[0] == 0,\
             " %s %s \n" % (VALIDATE_RESOURCE_IS_NOT_EMPTY_MSG, world.resource)
-        pass
 
+    def verifyDatabaseNotExist (self):
+        """
+        Verify if database not exists in column mode
+        """
+        if world.resourceOperation != RESOURCE_MISSING:
+            EXIST = False
+            cur = self.__newQuery(MYSQL_SHOW_DATABASE)
+            rows = cur.fetchall()
+            for row in rows:
+                if row[0] == world.mysql_database:
+                    EXIST = True
+                    break
+            assert EXIST == False,\
+                '\n...database \"%s\", is created by cygnus in mysql...' % (world.mysql_database)
 
-
-
+    def verifyTableNotExist (self):
+        """
+        Verify if table not exists in column mode
+        """
+        EXIST = False
+        cur = self.__newQuery(MYSQL_SHOW_TABLES+world.mysql_database+'\';')
+        rows = cur.fetchall()
+        for row in rows:
+            if row[0] == world.mysql_table:
+                EXIST = True
+                break
+        assert EXIST == False,\
+            '\n...table \"%s.%s\", is created by cygnus in mysql ...' % (world.mysql_database, world.mysql_table)
 
 

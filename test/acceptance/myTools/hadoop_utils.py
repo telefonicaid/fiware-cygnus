@@ -64,7 +64,9 @@ class Hadoop:
         """
         Verify if hadoop is installed and that version is the expected
         """
+        print self.__createUrl(VERSION)
         resp, body = http_utils.request2(GET, self.__createUrl(VERSION), self.__createHeaders(), EMPTY, TRUE, ERROR[NOT])
+        print "resp: "+ str(resp)+ "\nbody: "+str(body)
         bodyDict = general_utils.convertStrToDict(body, JSON)
 
         assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \

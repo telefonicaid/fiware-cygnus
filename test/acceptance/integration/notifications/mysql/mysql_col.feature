@@ -54,16 +54,16 @@ Feature: Stored in mysql new notifications per column from context broker
          And Close mysql connection
     Examples:
       |organization        |attrValueType|attrValue        |content|
-      |org_col_varchar_1   |varchar(10)  |45.41            |json   |
-      |org_col_varchar_1   |varchar(10)  |45.41            |xml    |
-      |org_col_varchar_1   |varchar(100) |{'a':'1','b':'2'}|json   |
-      |org_col_varchar_1   |varchar(100) |<a>1</a><b>2</b> |xml    |
+      |org_col_varchar_10  |varchar(10)  |45.41            |json   |
+      |org_col_varchar_10  |varchar(10)  |45.41            |xml    |
+      |org_col_varchar_100 |varchar(100) |{'a':'1','b':'2'}|json   |
+      |org_col_varchar_100 |varchar(100) |<a>1</a><b>2</b> |xml    |
       |org_col_text_1      |text         |45.43            |json   |
       |org_col_text_1      |text         |45.44            |xml    |
       |org_col_float_1     |float        |45.45            |json   |
       |org_col_float_1     |float        |45.46            |xml    |
-      |org_col_float_1     |float(3)     |-45.47           |json   |
-      |org_col_float_1     |float(3)     |-45.48           |xml    |
+      |org_col_float_03    |float(3)     |-45.47           |json   |
+      |org_col_float_03    |float(3)     |-45.48           |xml    |
       |org_col_double_1    |double       |45.45            |json   |
       |org_col_double_1    |double       |45.46            |xml    |
       |org_col_double_1    |double       |-45.47           |json   |
@@ -196,3 +196,20 @@ Feature: Stored in mysql new notifications per column from context broker
       |content|
       |json   |
       |xml    |
+
+    @element_not_exist
+    Scenario Outline: try to store new notification in ckan if some element does not exist
+       Given cygnus is installed with type "column"
+         And "mysql" is installed correctly
+         And create a new database "<organization>"
+         And create a new table "<resource>" with "1" attributes, attrValue data type "text" and metadata data type "text"
+        When append a new attribute values "45.0", the metadata value "True" and content "<content>"
+        Then Verify that the database does not exist in mysql
+         And Verify that the table does not exist in mysql
+         And Close mysql connection
+    Examples:
+      |organization                  |resource         |content|
+      |organization_missing          |default          |json   |
+      |organization_missing          |default          |xml    |
+      |default                       |resource-missing |json   |
+      |default                       |resource-missing |xml    |
