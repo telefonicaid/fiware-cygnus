@@ -35,8 +35,8 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |content|
-      |json|
-      |xml|
+      |json   |
+      |xml    |
 
     @organizations
     Scenario Outline:  store in mysql new notifications with different organizations behavior
@@ -47,17 +47,19 @@ Feature: Store in mysql new notifications per row from context broker
          And Validate that the attribute metadatas are stored in mysql
          And Close mysql connection
     Examples:
-      |organization|content|
-      |org60|json|
-      |org60|xml|
-      |ORGA60      |json|
-      |ORGA60      |xml|
-      |Orga_6      |json|
-      |Orga_6      |xml|
-      #|without organization|json|
-      #|without organization|xml|
-      |with 32 characters|json|
-      |with 32 characters|xml|
+      |organization         |content|
+      |org60                |json   |
+      |org60                |xml    |
+      |ORGA60               |json   |
+      |ORGA60               |xml    |
+      |Orga_6               |json   |
+      |Orga_6               |xml    |
+      #|without organization|json   |
+      #|without organization|xml    |
+      |with 32 characters   |json   |
+      |with 32 characters   |xml    |
+      |org601.test          |json   |
+      |org601.test          |xml    |
 
     @resources
     Scenario Outline:  store in ckan new notifications with different resources behavior
@@ -68,15 +70,19 @@ Feature: Store in mysql new notifications per row from context broker
          And Validate that the attribute metadatas are stored in mysql
          And Close mysql connection
     Examples:
-      |resource|content|
-      |Room2-Room|json|
-      |Room2-Room|xml|
-      |Room2-HOUSE|json|
-      |Room2-HOUSE|xml|
-      |with 64 characters|json|
-      |with 64 characters|xml|
-      |Room2-|json|
-      |Room2-|xml|
+      |resource               |content|
+   #   |Room2-Room             |json   |
+   #   |Room2-Room             |xml    |
+   #   |Room2-HOUSE            |json   |
+   #   |Room2-HOUSE            |xml    |
+   #   |with 64 characters     |json   |
+   #   |with 64 characters     |xml    |
+   #   |Room2-                 |json   |
+   #   |Room2-                 |xml    |
+      |modelogw.assetgw-device|json   |
+   #   |modelogw.assetgw-device|xml    |
+   #   |ROOM-house             |json   |
+   #   |ROOM-house             |xml    |
 
     @attrNumbers
     Scenario Outline:  store in mysql new notifications with different quantities of attributes
@@ -88,12 +94,12 @@ Feature: Store in mysql new notifications per row from context broker
          And Close mysql connection
     Examples:
       |attrNumber|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1         |json    |
+      |1         |xml|
+      |3         |json|
+      |3         |xml|
+      |50        |json|
+      |50        |xml|
 
     @metadatas
     Scenario Outline:  store in mysql new notifications with different quantities of metadata attributes

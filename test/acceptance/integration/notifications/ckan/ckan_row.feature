@@ -47,17 +47,19 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan
     Examples:
-      |organization |content|
-      |org601       |json|
-      |org601       |xml|
-      |ORGA601      |json|
-      |ORGA601      |xml|
-      |Orga_61      |json|
-      |Orga_61      |xml|
-      #|without organization|json|
-      #|without organization|xml|
-      |with 32 characters|json|
-      |with 32 characters|xml|
+      |organization         |content|
+      |org601               |json   |
+      |org601               |xml    |
+      |ORGA601              |json   |
+      |ORGA601              |xml    |
+      |Orga_61              |json   |
+      |Orga_61              |xml    |
+      #|without organization|json   |
+      #|without organization|xml    |
+      |with 32 characters   |json   |
+      |with 32 characters   |xml    |
+      |org601.test          |json   |
+      |org601.test          |xml    |
 
     @resources
     Scenario Outline:  store in ckan new notifications with different resources behavior
@@ -68,15 +70,19 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute value and type are stored in ckan
          And Validate that the attribute metadatas are stored in ckan
     Examples:
-      |resource|content|
-      |Room2-Room|json|
-      |Room2-Room|xml|
-      |Room2-HOUSE|json|
-      |Room2-HOUSE|xml|
-      |with 64 characters|json|
-      |with 64 characters|xml|
-      |Room2-|json|
-      |Room2-|xml|
+      |resource               |content|
+      |Room2-Room             |json   |
+      |Room2-Room             |xml    |
+      |Room2-HOUSE            |json   |
+      |Room2-HOUSE            |xml    |
+      |with 64 characters     |json   |
+      |with 64 characters     |xml    |
+      |Room2-                 |json   |
+      |Room2-                 |xml    |
+      |modelogw.assetgw-device|json   |
+      |modelogw.assetgw-device|xml    |
+      |ROOM-house             |json   |
+      |ROOM-house             |xml    |
 
     @attrNumbers
     Scenario Outline:  store in ckan new notifications with different quantities of attributes
@@ -88,12 +94,12 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute metadatas are stored in ckan
     Examples:
       |attrNumber|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1         |json   |
+      |1         |xml    |
+      |3         |json   |
+      |3         |xml    |
+      |50        |json   |
+      |50        |xml    |
 
     @metadatas
     Scenario Outline:  store in ckan new notifications with different quantities of metadata attributes
@@ -105,12 +111,12 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute metadatas are stored in ckan
     Examples:
       |metadatas|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1        |json   |
+      |1        |xml    |
+      |3        |json   |
+      |3        |xml    |
+      |50       |json   |
+      |50       |xml    |
 
     @compounds @BUG-102
     Scenario Outline:  store in ckan new notifications with different quantities of values ​​of compounds attributes
@@ -122,12 +128,12 @@ Feature: Stored in ckan new notifications per row from context broker
          And Validate that the attribute metadatas are stored in ckan
     Examples:
       |compound|content|
-      |1|json|
-      |1|xml|
-      |3|json|
-      |3|xml|
-      |50|json|
-      |50|xml|
+      |1       |json   |
+      |1       |xml    |
+      |3       |json   |
+      |3       |xml    |
+      |50      |json   |
+      |50      |xml    |
 
     @errors
     Scenario Outline:  controlled error if the dataset name is wrong
@@ -136,9 +142,9 @@ Feature: Stored in ckan new notifications per row from context broker
         When store in ckan with a organization "<organization>", resource "default" and the attribute number "default", the compound number "default", the metadata number "default" and content "<content>"
         Then Validate that the dataset is not created in ckan
     Examples:
-      |organization|content|
-      |large than 32 characters|json|
-      |large than 32 characters|xml|
+      |organization            |content|
+      |large than 32 characters|json   |
+      |large than 32 characters|xml    |
 
 
 

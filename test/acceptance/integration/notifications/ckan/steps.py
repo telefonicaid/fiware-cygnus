@@ -49,6 +49,7 @@ def create_a_new_organization (step, orgName):
     :param step:
     :param orgName: organization name. the dataset name is organizationName_packageDefault
     """
+    world.organizationOperation = orgName
     world.ckan.createOrganization (orgName)
 
 @step (u'create a new resource "([^"]*)" with "([^"]*)" attributes, attrValue data type "([^"]*)" and metadata data type "([^"]*)"')
@@ -61,6 +62,7 @@ def create_a_new_resource_with_attrValue_data_type_and_metadata_data_type (step,
     :param attrValueType: attribute data type
     :param metadataType:  metadata data type
     """
+    world.resourceOperation = resourceName
     world.metadataType = metadataType
     world.ckan.createResource(resourceName, attrQuantity, attrValueType, metadataType)
 
@@ -89,7 +91,6 @@ def append_new_attribute_values_the_metadata_value_and_content(step, attrValue, 
     :param metadataValue:
     :param content: (XML or JSON)
     """
-
     world.content = content
     world.metadataValue = metadataValue
     world.cygnus.notification_col (attrValue, metadataValue, content, ERROR[NOT])
@@ -158,4 +159,26 @@ def verify_that_the_notification_is_not_stored_in_ckan (step):
     """
     world.ckan.verifyIfResourceIsEmpty ()
 
+@step(u'Verify that the organization does not exist in ckan')
+def verify_that_the_organization_does_not_exist_in_ckan(step):
+    """
+    Validate that the organization is  not created in ckan per column
+    :param step:
+    """
+    world.ckan.verifyOrganizationNotExist()
 
+@step(u'Verify that the dataset does not exist in ckan')
+def verify_that_the_dataset_does_not_exist_in_ckan(step):
+    """
+    Validate that the dataset is  not created in ckan per column
+    :param step:
+    """
+    world.ckan.verifyDatasetNotExist ()
+
+@step(u'Verify that the resource does not exist in ckan')
+def verify_that_the_resource_does_not_exist_in_ckan(step):
+    """
+    Validate that the resource is  not created in ckan per column
+    :param step:
+    """
+    world.ckan.verifyResourceNotExist ()
