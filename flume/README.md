@@ -99,9 +99,7 @@ Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and fro
 
 This sink persists the data in files, one per each entity, following this entity descriptor format:
 
-    <entityDescriptor>=<naming_prefix><entity_id>-<entity_type>.txt
-
-Observe `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    <entityDescriptor>=<entity_id>-<entity_type>.txt
 
 These files are stored under this HDFS path:
 
@@ -116,7 +114,7 @@ Within files, Json documents are written following one of these two schemas:
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, being the persistence mode `row`, an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, being the persistence mode `row` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
@@ -177,13 +175,11 @@ Each organization/tenant is associated to a CKAN organization.
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
-    <entity_descriptor>=<naming_prefix><entity_id>_<entity_type>
-
-Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    <entity_descriptor>=<entity_id>_<entity_type>
 
 These tables are stored in databases, one per service, enabling a private data space such as:
 
-    jdbc:mysql:///<naming_prefix><organization>
+    jdbc:mysql:///<organization>
 
 Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of the organization. This organization, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`). 
 
