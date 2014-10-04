@@ -85,7 +85,6 @@ public class OrionHDFSSink extends OrionSink {
     private String cosmosDefaultPassword;
     private String hdfsAPI;
     private boolean rowAttrPersistence;
-    private String namingPrefix;
     private String hiveHost;
     private String hivePort;
     private HDFSBackend persistenceBackend;
@@ -207,17 +206,6 @@ public class OrionHDFSSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
-        namingPrefix = context.getString("naming_prefix", "");
-        
-        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
-            logger.error("[" + this.getName() + "] Bad configuration (Naming prefix length is greater than "
-                    + Constants.NAMING_PREFIX_MAX_LEN
-                    + ")");
-            logger.info("[" + this.getName() + "] Exiting Cygnus");
-            System.exit(-1);
-        } // if
-        
-        logger.debug("[" + this.getName() + "] Reading configuration (naming_prefix=" + namingPrefix + ")");
         hiveHost = context.getString("hive_host", "localhost");
         logger.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
@@ -258,7 +246,7 @@ public class OrionHDFSSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
         String organization = eventHeaders.get(Constants.ORG_HEADER);
-        String fileName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION);
+        String fileName = eventHeaders.get(Constants.DESTINATION);
         
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
@@ -326,9 +314,9 @@ public class OrionHDFSSink extends OrionSink {
                     logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                             + fileName + "), Data (" + rowLine + ")");
                     
-                    // if the fileName exists, append the Json document to it; otherwise, create it with initial content and
-                    // mark as existing (this avoids checking if the fileName exists each time a Json document is going to
-                    // be persisted)
+                    // if the fileName exists, append the Json document to it; otherwise, create it with initial content
+                    // and mark as existing (this avoids checking if the fileName exists each time a Json document is
+                    // going to be persisted)
                     if (fileExists) {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
