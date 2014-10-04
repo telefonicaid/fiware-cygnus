@@ -137,7 +137,6 @@ public class OrionMySQLSinkTest {
         assertEquals(mysqlUsername, sink.getMySQLUsername());
         assertEquals(mysqlPassword, sink.getMySQLPassword());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
-        assertEquals(namingPrefix, sink.getNamingPrefix());
     } // testConfigure
 
     /**
