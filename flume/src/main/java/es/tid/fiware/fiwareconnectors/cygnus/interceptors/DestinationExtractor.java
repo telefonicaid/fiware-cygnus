@@ -108,7 +108,7 @@ public class DestinationExtractor implements Interceptor {
         String body = new String(event.getBody());
         NotifyContextRequest notification = null;
 
-        if (headers.get(Constants.CONTENT_TYPE).contains("application/json")) {
+        if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
 
             try {
@@ -117,7 +117,7 @@ public class DestinationExtractor implements Interceptor {
                 logger.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } // try catch
-        } else if (headers.get(Constants.CONTENT_TYPE).contains("application/xml")) {
+        } else if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             
             try {
@@ -148,7 +148,7 @@ public class DestinationExtractor implements Interceptor {
             
             for (MatchingRule rule : matchingTable) {
                 String concat = concatenateFields(rule.fields, contextElement,
-                        headers.get(Constants.SERVICE_PATH_HEADER));
+                        headers.get(Constants.HEADER_SERVICE_PATH));
                 Matcher matcher = rule.pattern.matcher(concat);
                 
                 if (matcher.matches()) {

@@ -172,7 +172,7 @@ public class OrionCKANSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
-        String organization = eventHeaders.get(Constants.ORG_HEADER);
+        String organization = eventHeaders.get(Constants.HEADER_SERVICE);
         String resourceName = eventHeaders.get(Constants.DESTINATION);
         
         // human readable version of the reception time

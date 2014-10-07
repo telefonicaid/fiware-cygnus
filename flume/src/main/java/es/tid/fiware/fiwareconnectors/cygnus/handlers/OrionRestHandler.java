@@ -106,7 +106,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     } // getDefaultServicePath
     
     /**
-     * Gets the events TTL. It is protected due to it is only required for testing purposes.
+     * Gets the events HEADER_TTL. It is protected due to it is only required for testing purposes.
      * @return
      */
     protected String getEventsTTL() {
@@ -158,7 +158,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
         // accessible by the whole source code
         String transId = generateTransId();
-        MDC.put(Constants.TRANSACTION_ID, transId);
+        MDC.put(Constants.HEADER_TRANSACTION_ID, transId);
         logger.info("Starting transaction (" + transId + ")");
         
         // check the method
@@ -187,19 +187,19 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
             String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
             
-            if (headerName.equals(Constants.USER_AGENT)) {
+            if (headerName.equals(Constants.HEADER_USER_AGENT)) {
                 if (!headerValue.startsWith("orion")) {
                     logger.warn("Bad HTTP notification (" + headerValue + " user agent not supported)");
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
-            } else if (headerName.equals(Constants.CONTENT_TYPE)) {
+            } else if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
                     logger.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
                 } // if else
-            } else if (headerName.equals(Constants.SERVICE_HEADER)) {
+            } else if (headerName.equals(Constants.HEADER_SERVICE)) {
                 if (headerValue.length() > Constants.SERVICE_HEADER_MAX_LEN) {
                     logger.warn("Bad HTTP notification ('fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
@@ -208,7 +208,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     service = Utils.encode(headerValue);
                 } // if else
-            } else if (headerName.equals(Constants.SERVICE_PATH_HEADER)) {
+            } else if (headerName.equals(Constants.HEADER_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
                     logger.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
@@ -249,18 +249,19 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(Constants.CONTENT_TYPE, contentType);
-        logger.debug("Adding flume event header (name=" + Constants.CONTENT_TYPE + ", value=" + contentType + ")");
-        eventHeaders.put(Constants.SERVICE_HEADER, service == null ? defaultService : service);
-        logger.debug("Adding flume event header (name=" + Constants.SERVICE_HEADER
+        eventHeaders.put(Constants.HEADER_CONTENT_TYPE, contentType);
+        logger.debug("Adding flume event header (name=" + Constants.HEADER_CONTENT_TYPE + ", value=" + contentType
+                + ")");
+        eventHeaders.put(Constants.HEADER_SERVICE, service == null ? defaultService : service);
+        logger.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
-        eventHeaders.put(Constants.SERVICE_PATH_HEADER, servicePath == null ? defaultServicePath : servicePath);
-        logger.debug("Adding flume event header (name=" + Constants.SERVICE_PATH_HEADER
+        eventHeaders.put(Constants.HEADER_SERVICE_PATH, servicePath == null ? defaultServicePath : servicePath);
+        logger.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(Constants.TRANSACTION_ID, transId);
-        logger.debug("Adding flume event header (name=" + Constants.TRANSACTION_ID + ", value=" + transId + ")");
-        eventHeaders.put(Constants.TTL, eventsTTL);
-        logger.debug("Adding flume event header (name=" + Constants.TTL + ", value=" + eventsTTL + ")");
+        eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
+        logger.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID + ", value=" + transId + ")");
+        eventHeaders.put(Constants.HEADER_TTL, eventsTTL);
+        logger.debug("Adding flume event header (name=" + Constants.HEADER_TTL + ", value=" + eventsTTL + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();

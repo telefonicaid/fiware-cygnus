@@ -176,7 +176,7 @@ public class OrionMySQLSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
-        String organization = eventHeaders.get(Constants.ORG_HEADER);
+        String organization = eventHeaders.get(Constants.HEADER_SERVICE);
         String tableName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION).replaceAll("-", "_");
         
         // human readable version of the reception time
@@ -193,7 +193,7 @@ public class OrionMySQLSink extends OrionSink {
             logger.error("[" + this.getName() + "] Bad configuration (A MySQL database name '" + dbName + "' has been "
                     + "built and its length is greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ". This database name "
                     + "generation is based on the concatenation of the 'naming_prefix' configuration parameter and the "
-                    + "notified '" + Constants.ORG_HEADER + "' organization header, thus adjust them)");
+                    + "notified '" + Constants.HEADER_SERVICE + "' organization header, thus adjust them)");
             throw new CygnusBadConfiguration("The lenght of the MySQL database '" + dbName + "' is greater "
                     + "than " + Constants.MYSQL_DB_NAME_MAX_LEN);
         } // if
