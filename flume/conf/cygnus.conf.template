@@ -43,8 +43,10 @@ cygnusagent.sources.http-source.port = 5050
 cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
-# Default organization (organization semantic depend on the persistence sink)
-cygnusagent.sources.http-source.handler.default_organization = org42
+# Default service (service semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service = def_serv
+# Default service path (service path semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Management interface port (FIXME: temporal location for this parameter)
