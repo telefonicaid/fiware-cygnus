@@ -147,7 +147,8 @@ public class DestinationExtractor implements Interceptor {
             boolean added = false;
             
             for (MatchingRule rule : matchingTable) {
-                String concat = concatenateFields(rule.fields, contextElement);
+                String concat = concatenateFields(rule.fields, contextElement,
+                        headers.get(Constants.SERVICE_PATH_HEADER));
                 Matcher matcher = rule.pattern.matcher(concat);
                 
                 if (matcher.matches()) {
@@ -202,11 +203,17 @@ public class DestinationExtractor implements Interceptor {
         } // build
     } // Builder
     
-    private String concatenateFields(ArrayList<String> fields, ContextElement contextElement) {
+    private String concatenateFields(ArrayList<String> fields, ContextElement contextElement, String servicePath) {
         String concat = "";
-        
+
         for (String field : fields) {
-            concat += contextElement.getString(field);
+            if (field.equals("entityId")) {
+                concat += contextElement.getString(field);
+            } else if (field.equals("entityType")) {
+                concat += contextElement.getString(field);
+            } else if (field.equals("servicePath")) {
+                concat += servicePath;
+            } // if else
         } // for
         
         return concat;
