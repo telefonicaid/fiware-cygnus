@@ -31,39 +31,44 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         Respond to a POST request.
         """
-        APPEND_FILE_POS = 11
-        s.send_response(mock_responses.OK)
-        print s.path+" == "+mock_responses.HADOOP_APPEND_FILE_PATH
-        if s.path == mock_responses.responseBody [APPEND_FILE_POS][mock_responses.PATH]:
-            s.send_header(mock_responses.CONTENT_LENGTH, 0)
-        else:
-            s.send_header(mock_responses.CONTENT_TYPE, mock_responses.APP_JSON)
+        resp, code = mock_responses.response(s.path)
+        s.send_response(code)
+        if mock_responses.isHadoop(s.path):headers = mock_responses.headersHADOOP.items()
+        else:headers=mock_responses.headersCKAN.items()
+        for h, v in headers:
+            s.send_header(h, v)
+        if code == mock_responses.REDIRECT:
+            s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION_URL)
         s.end_headers()
-        s.wfile.write(mock_responses.response(s.path))
+        s.wfile.write(resp)
+
 
     def do_GET(s):
         """
         Respond to a GET request.
         """
-        s.send_response(mock_responses.OK)
-        s.send_header(mock_responses.CONTENT_TYPE, mock_responses.APP_JSON)
+        resp, code = mock_responses.response(s.path)
+        s.send_response(code)
+        if mock_responses.isHadoop(s.path):headers = mock_responses.headersHADOOP.items()
+        else:headers=mock_responses.headersCKAN.items()
+        for h, v in headers:
+            s.send_header(h, v)
         s.end_headers()
-        s.wfile.write(mock_responses.response(s.path))
+        s.wfile.write(resp)
+
 
     def do_PUT(s):
         """
-        Respond to a POST request.
+        Respond to a PUT request.
         """
-        CREATE_FILE_POS = 10
-        if s.path == mock_responses.responseBody [CREATE_FILE_POS][mock_responses.PATH]:
-            s.send_response(mock_responses.CREATED)
-            s.send_header(mock_responses.LOCATION, mock_responses.HADOOP_CREATE_FILE_LOCATION)
-            s.send_header(mock_responses.CONTENT_LENGTH, 0)
-        else:
-            s.send_response(mock_responses.OK)
-            s.send_header(mock_responses.CONTENT_TYPE, mock_responses.APP_JSON)
+        resp, code = mock_responses.response(s.path)
+        s.send_response(code)
+        for h, v in mock_responses.headersHADOOP.items():
+            s.send_header(h, v)
+        if code == mock_responses.REDIRECT:
+            s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION_URL)
         s.end_headers()
-        s.wfile.write(mock_responses.response(s.path))
+        s.wfile.write(resp)
 
 
 if __name__ == '__main__':
