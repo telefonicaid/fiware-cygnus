@@ -35,7 +35,7 @@ Let's consider the following notification in Json format coming from an Orion Co
     Accept: application/xml, application/json
     Content-Type: application/json
     Fiware-Service: mycompanyname
-    Fiware-ServicePath: workingrooms 
+    Fiware-ServicePath: workingrooms/floor4 
     
     {
       "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
@@ -76,7 +76,7 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 		headers={
 			content-type=application/json,
 			fiware-service=mycompanyname,
-            fiware-servicepath=workingrooms,
+			fiware-servicepath=workingrooms/floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
@@ -110,7 +110,7 @@ These files are stored under this HDFS path:
 
     hdfs:///user/<username>/<service>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
 
-Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The `service` directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
+Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. Both the `service` and `servicePath` directories are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -119,11 +119,11 @@ Within files, Json documents are written following one of these two schemas:
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, being the persistence mode `row`, an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, being the persistence mode `row`, an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
-On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
@@ -131,13 +131,13 @@ A special particularity regarding HDFS persisted data is the posssibility to exp
 
     <username>_<service>_<servicePath>_<entity_descriptor>_[row|column]
 
-Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_mycompanyname_workingrooms_room1_Room_row` will contain a new row such as:
+Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_row` will contain a new row such as:
 
     | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
-On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_room1_Room_column` will contain a new row such as:
+On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_column` will contain a new row such as:
 
     | recvTime            | temperature | temperature_md                                     | 
     |---------------------|-------------|----------------------------------------------------|
@@ -186,9 +186,9 @@ Observe as well `naming_prefix` is a configuration parameter of the sink, which 
 
 These tables are stored in databases, one per service, enabling a private data space such as:
 
-    jdbc:mysql:///<naming_prefix><service>
+    jdbc:mysql:///<naming_prefix><service>_<servicePath>
 
-Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of the service. This service, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`). 
+Both the `service` and `servicePath` names are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively). 
 
 Within tables, we can find two options:
 
@@ -356,7 +356,7 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
 cygnusagent.sources.http-source.handler.default_service = def_serv
 # Default service path (service path semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service = def_servpath
+cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded 
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Management interface port (temporal location for this parameter)
@@ -407,11 +407,6 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# the default dasaset/package name to use within the organization (notified fiware-service or the configured default service)
-# must be purely lowercase alphanumeric (ascii) characters plus "-" and "_" acording to CKAN limitations
-# the default_dataset is prefixed by the organization name to ensure uniqueness
-# (see http://stackoverflow.com/questions/24203808/is-it-possible-to-create-packages-with-the-same-name-in-different-organizations)
-cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
 cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
