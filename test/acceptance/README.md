@@ -1,34 +1,22 @@
 # CYGNUS Acceptance Tests
 
-Folder for acceptance tests of Cygnus.
+Folder for acceptance tests of Cygnus. These Tests are only for Internal Usage (Telefonica Research - Development).
 
 ## How to Run the Acceptance Tests
 
 ### Prerequisites:
 
 - Python 2.6 or newer
-
 - pip installed (http://docs.python-guide.org/en/latest/starting/install/linux/)
-
-- virtualenv installed (pip install virtualenv)
+- virtualenv installed (pip install virtualenv) (optional).
+Note: We recommend the use of virtualenv, because is an isolated working copy of Python which allows you to work on a specific project without worry of affecting other projects.
 
 ### Environment preparation:
 
-- Create a virtual environment somewhere, e.g. in ~/venv (virtualenv ~/venv)
-
-- Activate the virtual environment (source ~/venv/bin/activate)
-
-- Make sure pdihub.hi.inet domain is reachable from your system (some of the requirements come from it) and instruct Git not to validate SSL connections to it (export GIT\_SSL\_NO\_VERIFY=true).
-
+- Create a virtual environment somewhere, e.g. in ~/venv (virtualenv ~/venv) (optional)
+- Activate the virtual environment (source ~/venv/bin/activate) (optional)
 - Change to the test/acceptance folder of the project
-
 - Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
-
-## Requeriments for selenium
-
-- pip install -U selenium (before, activate the virtualent)
-- download selenium-server-standalone from http://docs.seleniumhq.org/download/
-- java -jar selenium-server-standalone-x.y.z.jar (required Java and firefox installed)
 
 ## Requeriments for mysql
 
@@ -37,10 +25,15 @@ Folder for acceptance tests of Cygnus.
 ### Tests execution:
 
 - Change to the test/acceptance folder of the project if not already on it
-
 - Rename properties.json.base to properties.json and replace values
-
 - Run lettucetdaf (see available params with the -h option)
+```
+Some examples:
+   lettucetdaf                                   -- run all features
+   lettucetdaf -ft ckan_row.feature              -- run only one feature
+   lettucetdaf -tg test -ft ckan_row.feature     -- run scenarios tagged with "test" in a feature
+   lettucetdaf -tg=-skip -ft ckan_row.feature    -- run all scenarios except tagged with "skip" in a feature
+```
 
 ### Tests Coverage:
 
