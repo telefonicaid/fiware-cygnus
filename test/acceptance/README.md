@@ -20,7 +20,7 @@ Note: We recommend the use of virtualenv, because is an isolated working copy of
 
 ## Requeriments for mysql
 
-- pip install python-mysqldb
+-  yum install MySQL-python
 
 ### Tests execution:
 
