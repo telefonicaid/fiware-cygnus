@@ -222,7 +222,7 @@ Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugin
 		headers={
 			content-type=application/xml,
 			fiware-service=mycompanyname,
-            fiware-servicepath=workingrooms/floor4,
+			fiware-servicepath=workingrooms/floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
