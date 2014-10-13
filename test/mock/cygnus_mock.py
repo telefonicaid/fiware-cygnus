@@ -22,8 +22,10 @@
 
 import sys
 import time
+import urlparse
 import BaseHTTPServer
 import mock_responses
+
 
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -31,6 +33,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         Respond to a POST request.
         """
+        length = int(s.headers['Content-Length'])
+        request_body = s.rfile.read(length)   # get the request body
+
         resp, code = mock_responses.response(s.path)
         s.send_response(code)
         if mock_responses.isHadoop(s.path):headers = mock_responses.headersHADOOP.items()
@@ -41,7 +46,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION_URL)
         s.end_headers()
         s.wfile.write(resp)
-
 
     def do_GET(s):
         """
@@ -78,6 +82,7 @@ if __name__ == '__main__':
     mock_responses.config_print (responseBody)
 
     server_class = BaseHTTPServer.HTTPServer
+
     httpd = server_class((mock_responses.HOST_NAME, mock_responses.PORT_NUMBER), MyHandler)
     print time.asctime(), "Server Starts - %s:%s" % (mock_responses.HOST_NAME, mock_responses.PORT_NUMBER)
     try:
