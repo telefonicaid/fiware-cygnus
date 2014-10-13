@@ -120,7 +120,7 @@ public class CKANBackendImpl implements CKANBackend {
             if (effectiveDefaultDataset.length() > Constants.CKAN_PKG_MAX_LEN) {
                 logger.error("Bad configuration (A CKAN package/dataset name '" + effectiveDefaultDataset + "' has "
                         + "been built and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package "
-                        + "name generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                        + "name generation is based on the concatenation of the notified '" + Constants.HEADER_SERVICE
                         + "' organization header, the character '_' and the 'default_dataset' configuration parameter, "
                         + "thus adjust them)");
                 throw new Exception("The lenght of the CKAN package/dataset '" + effectiveDefaultDataset
@@ -509,7 +509,7 @@ public class CKANBackendImpl implements CKANBackend {
                 if (packageName.length() > Constants.CKAN_PKG_MAX_LEN) {
                     logger.error("Bad configuration (A CKAN package/dataset name '" + packageName + "' has been built "
                             + "and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package name "
-                            + "generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                            + "generation is based on the concatenation of the notified '" + Constants.HEADER_SERVICE
                             + "' organization header, the character '_' and the 'default_dataset' configuration "
                             + "parameter, thus adjust them)");
                     throw new CygnusBadConfiguration("The lenght of the CKAN package/dataset '" + packageName

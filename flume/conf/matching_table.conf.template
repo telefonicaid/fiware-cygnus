@@ -27,6 +27,8 @@
 # The available "dictionary" of fields is:
 #  - entitydId
 #  - entityType
+#  - servicePath
 
 1|entityId,entityType|Room\.(\d*)Room|rooms
 2|entityId|Car|cars
+3|servicePath|GARDENS|gardens

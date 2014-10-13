@@ -119,7 +119,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
         try {
             // set the transactionId in MDC
-            MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
+            MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
         } catch (Exception e) {
             logger.error("Runtime error (" + e.getMessage() + ")");
         } // catch
@@ -139,12 +139,12 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             if (e instanceof CygnusPersistenceError) {
                 logger.error(e.getMessage());
                 
-                // check the event TTL
-                int ttl = new Integer(event.getHeaders().get(Constants.TTL)).intValue();
+                // check the event HEADER_TTL
+                int ttl = new Integer(event.getHeaders().get(Constants.HEADER_TTL)).intValue();
                 
                 if (ttl > 0) {
                     String newTTL = new Integer(ttl - 1).toString();
-                    event.getHeaders().put(Constants.TTL, newTTL);
+                    event.getHeaders().put(Constants.HEADER_TTL, newTTL);
                     txn.rollback();
                     status = Status.BACKOFF;
                     logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
@@ -172,7 +172,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } finally {
             // close the transaction
             txn.close();
-            logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
+            logger.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;
@@ -192,7 +192,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // parse the eventData
         NotifyContextRequest notification = null;
 
-        if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/json")) {
+        if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
 
             try {
@@ -200,7 +200,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             } catch (Exception e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
-        } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
+        } else if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             
             try {
