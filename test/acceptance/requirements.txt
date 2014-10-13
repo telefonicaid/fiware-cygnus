@@ -1,0 +1,2 @@
+lettuce==0.2.19
+git+https://github.com/telefonicaid/lettuce-tools.git#egg=lettuce_tools
