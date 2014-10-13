@@ -145,7 +145,7 @@ On the contrary, being the persistence mode `column`, the table named `default_u
 
 ### OrionCKANSink persistence
 
-This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), which name is specified with the `default_dataset` property (prefixed by organization name) in the CKAN sink configuration.
+This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), whose name is specified by the notified `Fiware-ServicePath` header (or by the `default_service_path` property -prefixed by organization name- in the CKAN sink configuration, if such a header is not notified). Datasets belong to single organization, whose name is specified by the notified `Fiware-Service` header (or by the `default_service` property if it is not notified). 
 
 Each datastore, we can find two options:
 
@@ -154,7 +154,7 @@ Each datastore, we can find two options:
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing), will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
@@ -170,6 +170,8 @@ On the contrary, being the persistence mode `column`, the resource `Room1-Room` 
 
 where `i` depends on the number of rows previously inserted.
 
+In both cases, `row` or `column`, the CKAN organization will be `mycompanyname` and the dataset containing the resource will be `workingrooms_floor4`.
+
 The information stored in the datastore can be accesses as any other CKAN information, e.g. through the web frontend or using the query API, e.g;
 
     curl -s -S "http://${CKAN_HOST}/api/3/action/datastore_search?resource_id=${RESOURCE_ID}
@@ -180,13 +182,13 @@ Each organization/tenant is associated to a CKAN organization.
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
-    <entity_descriptor>=<naming_prefix><entity_id>_<entity_type>
+    <entity_descriptor>=<naming_prefix><servicePath>_<entity_id>_<entity_type>
 
 Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
 
 These tables are stored in databases, one per service, enabling a private data space such as:
 
-    jdbc:mysql:///<naming_prefix><service>_<servicePath>
+    jdbc:mysql:///<naming_prefix><service>
 
 Both the `service` and `servicePath` names are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively). 
 
@@ -197,13 +199,13 @@ Within tables, we can find two options:
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `room1-Room` (it is created if not existing) will contain a new row such as:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `workingrooms_floor4_room1_Room` (it is created if not existing) will contain a new row such as:
 
     | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
-On the contrary, being the persistence mode `column`, the table named `room1-Room` (it must be created in advance) will contain a new row such as:
+On the contrary, being the persistence mode `column`, the table named `workingrooms_floor4_room1_Room` (it must be created in advance) will contain a new row such as:
 
     | recvTime            | temperature | temperature_md                                     | 
     |---------------------|-------------|----------------------------------------------------|
@@ -220,7 +222,7 @@ Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugin
 		headers={
 			content-type=application/xml,
 			fiware-service=mycompanyname,
-            fiware-servicepath=workingrooms,
+            fiware-servicepath=workingrooms/floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
