@@ -1,6 +1,6 @@
 # CYGNUS Acceptance Tests
 
-Folder for acceptance tests of Cygnus. These Tests are only for Internal Usage (Telefonica Research - Development).
+Folder for acceptance tests of Cygnus.
 
 ## How to Run the Acceptance Tests
 
