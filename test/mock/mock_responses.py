@@ -22,10 +22,12 @@
 
 #constants
 import time
+import socket
+
 
 HOST_NAME            = '0.0.0.0'
 PORT_NUMBER          = 8090
-MOCK_HOST            = u'10.95.20.2'
+MOCK_HOST            = socket.getfqdn() # Return mock hostname
 ORGANIZATION_DEFAULT = u'orga_default'
 DATASET_DEFAULT      = u'fiware-test'
 RESOURCE_DEFAULT     = u'Room1-Room'
@@ -57,7 +59,8 @@ AGE                  = u'Age'
 EXPIRES              = u'Expires'
 TRANSFER_ENCODING    = u'Transfer-Encoding'
 SET_COOKIE           = u'Set_Cookie'
-APP_JSON             = u'application/json'
+APP_JSON_HADOOP      = u'application/json'
+APP_JSON_CKAN        = u'application/json;charset=utf-8 '
 NO_CACHE             = u'no-cache'
 METHODS              = u'POST, PUT, GET, DELETE, OPTIONS'
 ACCESS_ALLOW_HEADERS = u'X-CKAN-API-KEY, Authorization, Content-Type'
@@ -67,7 +70,7 @@ EXPIRES_VALUE        = u'Thu, 01-Jan-1970 00:00:00 GMT'
 CHUNKED              = u'chunked'
 SET_COOKIE_VALUE     = u'hadoop.auth=\"u=cloud-user&p=cloud-user&t=simple&e=1412642504703&s=KKIbNLYXIuBi94sGfNUm1X3A9Dg=\";Path=/'
 
-headersCKAN = {CONTENT_TYPE: APP_JSON,
+headersCKAN = {CONTENT_TYPE: APP_JSON_CKAN,
                CONTENT_LENGTH: 0,
                PRAGMA: NO_CACHE,
                CACHE_CONTROL: NO_CACHE,
@@ -75,7 +78,7 @@ headersCKAN = {CONTENT_TYPE: APP_JSON,
                ACCESS_CONTROL_ALLOW_METHODS: METHODS,
                ACCESS_CONTROL_ALLOW_HEADERS: ACCESS_ALLOW_HEADERS,
                CONNECTION: KEEP_ALIVE,
-               AGE: 1
+               AGE: 0
 }
 
 headersHADOOP = {CACHE_CONTROL: NO_CACHE,
@@ -85,7 +88,7 @@ headersHADOOP = {CACHE_CONTROL: NO_CACHE,
                  DATE: DATE_VALUE,
                  PRAGMA: NO_CACHE,
                  SET_COOKIE: SET_COOKIE_VALUE,
-                 CONTENT_TYPE: APP_JSON,
+                 CONTENT_TYPE: APP_JSON_HADOOP,
                  CONTENT_LENGTH: 0
 }
 
@@ -122,7 +125,7 @@ CKAN_DATASTORE_CREATE_PATH       = u'/api/3/action/datastore_create'
 CKAN_DISCOVER_RESOURCES_PATH     = u'/api/3/action/package_show?id=%s'        # ex: /api/3/action/package_show?id=orga_default_fiware-test
 CKAN_INSERT_ROW_PATH             = u'/api/3/action/datastore_upsert'
 
-CKAN_VERSION_RESPONSE            = u'{"ckan_version": "2.2", "site_url": "", "site_description": "", "site_title": "CKAN Development", "error_emails_to": "you@yourdomain.com", "locale_default": "en", "extensions": ["stats", "text_preview", "recline_preview", "datastore"]}'
+CKAN_VERSION_RESPONSE            = u'{"ckan_version": "2.0", "site_url": "", "site_description": "", "site_title": "CKAN Development", "error_emails_to": "you@yourdomain.com", "locale_default": "en", "extensions": ["stats", "text_preview", "recline_preview", "datastore"]}'
 CKAN_ORGANIZATION_SHOW_RESPONSE  = u'{"help": "Return the details of a organization. ", "success": true, "result": {"users": [{"openid": null, "about": null, "capacity": "admin", "name": "fiware", "created": "2014-02-11T16:32:26.795157", "email_hash": "453124d6f80d05ba8139184a1474cdac", "sysadmin": true, "activity_streams_email_notifications": false, "state": "active", "number_of_edits": 934, "number_administered_packages": 154, "display_name": "FI-WARE Administrator", "fullname": "FI-WARE Administrator", "id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83"}], "display_name": "%s", "description": "", "image_display_url": "", "title": "", "package_count": 1, "created": "2014-09-19T10:05:09.645434", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "", "groups": [], "num_followers": 0, "revision_id": "011b805f-1646-4bb3-a40b-589d4750131a", "packages": [{"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-09-19T08:05:10.081136", "id": "6ecec202-5219-4878-b290-ff5a08154cf6", "metadata_created": "2014-09-19T08:05:10.081136", "metadata_modified": "2014-09-19T11:05:50.655623", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [{"resource_group_id": "67d13406-cce2-4875-9f54-398c7dfff8fc", "cache_last_updated": null, "revision_timestamp": "2014-09-19T11:05:50.654222", "webstore_last_updated": null, "id": "0a31399e-aa24-49ca-abe8-d0f46e1d22ca", "size": null, "state": "active", "hash": "", "description": "", "format": "", "tracking_summary": {"total": 0, "recent": 0}, "last_modified": null, "url_type": null, "mimetype": null, "cache_url": null, "name": "%s", "created": "2014-09-19T13:05:50.669579", "url": "http://foo.bar/newresource", "webstore_url": null, "mimetype_inner": null, "position": 0, "revision_id": "4b1232c4-9785-4239-9ded-db364767bc0c", "resource_type": null}], "num_resources": 1, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": {"description": "", "created": "2014-09-19T10:05:09.645434", "title": "", "name": "%s", "revision_timestamp": "2014-09-19T08:05:09.620151", "is_organization": true, "state": "active", "image_url": "", "revision_id": "011b805f-1646-4bb3-a40b-589d4750131a", "type": "organization", "id": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "approval_status": "approved"}, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "extras": [], "title": "%s", "revision_id": "bf584836-4112-424b-ab4f-307db0ab73c9"}], "type": "organization", "id": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "tags": [], "name": "%s"}}'
 CKAN_ORGANIZATION_CREATE_RESPONSE= u'{"help": "Create a new organization. ", "success": true, "result": {"users": [{"openid": null, "about": null, "capacity": "admin", "name": "fiware", "created": "2014-02-11T16:32:26.795157", "email_hash": "453124d6f80d05ba8139184a1474cdac", "sysadmin": true, "activity_streams_email_notifications": false, "state": "active", "number_of_edits": 940, "number_administered_packages": 154, "display_name": "FI-WARE Administrator", "fullname": "FI-WARE Administrator", "id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83"}], "display_name": "%s", "description": "", "image_display_url": "", "title": "", "package_count": 0, "created": "2014-10-02T15:41:09.676905", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "", "groups": [], "revision_id": "c91218a3-b5a9-47c2-9425-a28cc040b47c", "packages": [], "type": "organization", "id": "09f50f44-a472-481d-b662-88e1e0e72ade", "tags": [], "name": "%s"}}'
 CKAN_PACKAGE_CREATE_RESPONSE     = u'{"help": "Create a new dataset (package).    You must be authorized to create new datasets. ", "success": true, "result": {"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-10-02T13:57:45.116438", "id": "41db4c0c-d3eb-4ba1-958e-5b9db9ca4a3e", "metadata_created": "2014-10-02T13:57:45.116438", "metadata_modified": "2014-10-02T13:57:45.124769", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [], "num_resources": 0, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": null, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "2f240381-88bc-4f0f-81ae-4c148452fea3", "extras": [], "title": "%s", "revision_id": "22fafb07-bdc5-40ce-9dae-c6b7c8a0e5e4"}}'
@@ -174,21 +177,22 @@ responseBody = [{NAME: CKAN_VERSION,                METHOD: GET,  PATH: None, CO
                 {NAME: HADOOP_APPEND_FILE,          METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None}
 ]
 
+
 def usage():
     """
     usage message
     """
-    print " ****************************************************************************************"
-    print " *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> *"
-    print " *      values by default:                                                              *"
-    print " *           port        : 8090                                                         *"
-    print " *           organization: orga_default                                                 *"
-    print " *           dataset     : fiware-test                                                  *"
-    print " *           resource    : room1-room                                                   *"
-    print " *           hdfs user   : username                                                     *"
-    print " *       Note: all values will be defined in lowercase.                                 *"
-    print " *                  ( use <Ctrl-C> to stop )                                            *"
-    print " ****************************************************************************************"
+    print " *****************************************************************************************"
+    print " *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user>  *"
+    print " *      values by default:                                                               *"
+    print " *           port        : 8090                                                          *"
+    print " *           organization: orga_default                                                  *"
+    print " *           dataset     : fiware-test                                                   *"
+    print " *           resource    : room1-room                                                    *"
+    print " *           hdfs user   : username                                                      *"
+    print " *       Note: all values will be defined in lowercase.                                  *"
+    print " *                  ( use <Ctrl-C> to stop )                                             *"
+    print " *****************************************************************************************"
 
 def createPath (type, organization ,dataset, resource):
     """
@@ -266,18 +270,19 @@ def config_print(responseBody):
     :param responseBody:
     """
     print " * Current configuration:"
+    print " *     mock host   : "+ MOCK_HOST
     print " *     port        : "+ str(PORT_NUMBER)
     print " *     organization: "+ ORGANIZATION_DEFAULT
     print " *     dataset     : "+ DATASET
     print " *     resource    : "+ RESOURCE_DEFAULT
     print " *     hdfs user   : "+ HADOOP_USER
-    print " ****************************************************************************"
+    print " *****************************************************************************************"
     print " * Paths mocked:"
     for i in range(len(responseBody)):
         if i < 9: pos = " "+str(i+1)
         else: pos = str (i+1)
         print " *   "+pos+" - "+ responseBody[i][METHOD] + " - " + str(responseBody[i][CODE]) + " -- " + str (responseBody[i][PATH])
-    print " ****************************************************************************"
+    print " *****************************************************************************************"
 
 def response (path):
     """
