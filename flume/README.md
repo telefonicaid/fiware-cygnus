@@ -350,7 +350,7 @@ cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 # Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
 # Matching table for the destination extractor interceptor, do not change
 cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
 
