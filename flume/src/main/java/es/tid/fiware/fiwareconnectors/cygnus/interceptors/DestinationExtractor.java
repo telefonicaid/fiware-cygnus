@@ -82,6 +82,7 @@ public class DestinationExtractor implements Interceptor {
             reader = new BufferedReader(new FileReader(matchingTableFile));
         } catch (FileNotFoundException e) {
             logger.error("Runtime error (File not found. Details=" + e.getMessage() + ")");
+                return;
         } // try catch
         
         String line;

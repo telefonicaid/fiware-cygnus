@@ -351,8 +351,9 @@ cygnusagent.sources.http-source.interceptors = ts de
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 # Destination extractor interceptor, do not change
 cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
-# Matching table for the destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
+# Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+# See the doc/design/interceptors document for more details
+cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration
