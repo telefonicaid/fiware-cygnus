@@ -108,7 +108,7 @@ public class DestinationExtractor implements Interceptor {
         String body = new String(event.getBody());
         NotifyContextRequest notification = null;
 
-        if (headers.get(Constants.CONTENT_TYPE).contains("application/json")) {
+        if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
 
             try {
@@ -117,7 +117,7 @@ public class DestinationExtractor implements Interceptor {
                 logger.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } // try catch
-        } else if (headers.get(Constants.CONTENT_TYPE).contains("application/xml")) {
+        } else if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             
             try {
@@ -147,7 +147,8 @@ public class DestinationExtractor implements Interceptor {
             boolean added = false;
             
             for (MatchingRule rule : matchingTable) {
-                String concat = concatenateFields(rule.fields, contextElement);
+                String concat = concatenateFields(rule.fields, contextElement,
+                        headers.get(Constants.HEADER_SERVICE_PATH));
                 Matcher matcher = rule.pattern.matcher(concat);
                 
                 if (matcher.matches()) {
@@ -202,11 +203,17 @@ public class DestinationExtractor implements Interceptor {
         } // build
     } // Builder
     
-    private String concatenateFields(ArrayList<String> fields, ContextElement contextElement) {
+    private String concatenateFields(ArrayList<String> fields, ContextElement contextElement, String servicePath) {
         String concat = "";
-        
+
         for (String field : fields) {
-            concat += contextElement.getString(field);
+            if (field.equals("entityId")) {
+                concat += contextElement.getString(field);
+            } else if (field.equals("entityType")) {
+                concat += contextElement.getString(field);
+            } else if (field.equals("servicePath")) {
+                concat += servicePath;
+            } // if else
         } // for
         
         return concat;

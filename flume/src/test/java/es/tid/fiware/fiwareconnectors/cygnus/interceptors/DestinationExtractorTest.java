@@ -105,7 +105,7 @@ public class DestinationExtractorTest {
         
         // set up other instances
         eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(Constants.CONTENT_TYPE, "application/xml");
+        eventHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
         event = EventBuilder.withBody(eventData.getBytes(), eventHeaders);
     } // setUp
     
@@ -117,7 +117,7 @@ public class DestinationExtractorTest {
         System.out.println("Testing EntityDescriptorExtractor.initialize");
         destExtractor.initialize();
         ArrayList<MatchingRule> matchingTable = destExtractor.getMatchingTable();
-        assertTrue(matchingTable.size() == 2);
+        assertTrue(matchingTable.size() == 3);
         MatchingRule firstRule = matchingTable.get(0);
         assertEquals(1, firstRule.getId());
         assertTrue(firstRule.getFields().size() == 2);
@@ -128,6 +128,11 @@ public class DestinationExtractorTest {
         assertTrue(secondRule.getFields().size() == 1);
         assertEquals("Car", secondRule.getRegex());
         assertEquals("cars", secondRule.getDestination());
+        MatchingRule thirdRule = matchingTable.get(2);
+        assertEquals(3, thirdRule.getId());
+        assertTrue(thirdRule.getFields().size() == 1);
+        assertEquals("GARDENS", thirdRule.getRegex());
+        assertEquals("gardens", thirdRule.getDestination());
     } // testInitialize
     
     /**

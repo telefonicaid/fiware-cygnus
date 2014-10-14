@@ -51,7 +51,7 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_");
+        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
     } // encode
     
     /**
