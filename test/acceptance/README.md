@@ -29,6 +29,7 @@ Note: We recommend the use of virtualenv, because is an isolated working copy of
 - Change to the test/acceptance folder of the project if not already on it
 - Rename properties.json.base to properties.json and replace values
 - Run lettuce_tools (see available params with the -h option)
+
 ```
 Some examples:
    lettuce_tools                                   -- run all features
@@ -44,7 +45,7 @@ Some examples:
 - Cygnus-HADOOP per row
 - Cygnus-MYSQL per column
 - Cygnus-CKAN per column
-- Cygnus-HADOOP per column(pending)
+- Cygnus-HADOOP per column (pending)
 
 
 
