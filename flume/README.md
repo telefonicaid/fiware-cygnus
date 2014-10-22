@@ -387,6 +387,8 @@ cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.ckan-sink.attr_persistence = row
+# enable SSL for secure Http transportation; 'true' or 'false'
+cygnusagent.sinks.ckan-sink.ssl = false
 
 # ============================================
 # OrionMySQLSink configuration
