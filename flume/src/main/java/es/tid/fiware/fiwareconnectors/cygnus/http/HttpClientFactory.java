@@ -71,7 +71,7 @@ public class HttpClientFactory {
     } // HttpClientFactory
     
     /**
-     * 
+     * Gets a HTTP client.
      * @param ssl True if SSL connections are desired. False otherwise.
      * @return A http client obtained from the (SSL) Connections Manager.
      */
@@ -82,6 +82,19 @@ public class HttpClientFactory {
             return new DefaultHttpClient(connectionsManager);
         } // if else
     } // getHttpClient
+    
+    /**
+     * Gets the number of leased connections for this connections manager.
+     * @param ssl
+     * @return
+     */
+    public int getLeasedConnections(boolean ssl) {
+        if (ssl) {
+            return sslConnectionsManager.getTotalStats().getLeased();
+        } else {
+            return connectionsManager.getTotalStats().getLeased();
+        } // if else
+    } // getLeasedConnections
     
     /**
      * Gets a SchemeRegistry object accepting all the X509 certificates by default.
