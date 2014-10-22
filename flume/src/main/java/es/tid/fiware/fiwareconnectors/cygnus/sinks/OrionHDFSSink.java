@@ -24,7 +24,6 @@ import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
@@ -86,7 +85,6 @@ public class OrionHDFSSink extends OrionSink {
     private String hiveHost;
     private String hivePort;
     private HDFSBackend persistenceBackend;
-    private HttpClientFactory httpClientFactory;
     
     /**
      * Constructor.
@@ -143,15 +141,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getHivePort() {
         return hivePort;
     } // getHivePort
-    
-    /**
-     * Gets the Http client factory. It is protected due to it is only required for testing purposes.
-     * @return The Http client factory
-     */
-    protected HttpClientFactory getHttpClientFactory() {
-        return httpClientFactory;
-    } // getHttpClientFactory
-    
+
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
@@ -159,14 +149,6 @@ public class OrionHDFSSink extends OrionSink {
     protected HDFSBackend getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
-    
-    /**
-     * Sets the Http client factory. It is protected due to it is only required for testing purposes.
-     * @param httpClientFactory
-     */
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClientFactory = httpClientFactory;
-    } // setHttpClientFactory
     
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
@@ -218,9 +200,6 @@ public class OrionHDFSSink extends OrionSink {
 
     @Override
     public void start() {
-        // create a Http clients factory (no SSL)
-        httpClientFactory = new HttpClientFactory(false);
-        
         try {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
@@ -266,8 +245,8 @@ public class OrionHDFSSink extends OrionSink {
             boolean fileExists = false;
             
             // FIXME: current version of the notification only provides the organization, being null the username
-            if (persistenceBackend.exists(httpClientFactory.getHttpClient(false), null, organization + "/"
-                    + entityDescriptor + "/" + entityDescriptor + ".txt")) {
+            if (persistenceBackend.exists(null, organization + "/" + entityDescriptor + "/" + entityDescriptor
+                    + ".txt")) {
                 fileExists = true;
             } // if
             
@@ -318,8 +297,8 @@ public class OrionHDFSSink extends OrionSink {
                     if (fileExists) {
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
-                        persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                        persistenceBackend.append(null, organization + "/" + entityDescriptor + "/" + entityDescriptor
+                                + ".txt", rowLine);
                     } else {
                         // having in mind the HDFS structure:
                         // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -327,13 +306,12 @@ public class OrionHDFSSink extends OrionSink {
                         // 1. create the entity folder if not yet existing
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
-                        persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor);
+                        persistenceBackend.createDir(null, organization + "/" + entityDescriptor);
                         // 2. create the entity file
                         // FIXME: current version of the notification only provides the organization, being null the
                         // username
-                        persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                                + entityDescriptor + "/" + entityDescriptor + ".txt", rowLine);
+                        persistenceBackend.createFile(null, organization + "/" + entityDescriptor + "/"
+                                + entityDescriptor + ".txt", rowLine);
                         // 3. create the 8-fields standard Hive table
                         persistenceBackend.provisionHiveTable(organization, entityDescriptor);
                         fileExists = true;
@@ -356,8 +334,8 @@ public class OrionHDFSSink extends OrionSink {
                 if (fileExists) {
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
-                    persistenceBackend.append(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                    persistenceBackend.append(null, organization + "/" + entityDescriptor + "/" + entityDescriptor
+                            + ".txt", columnLine);
                 } else {
                     // having in mind the HDFS structure:
                     // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
@@ -365,13 +343,12 @@ public class OrionHDFSSink extends OrionSink {
                     // 1. create the entity folder if not yet existing
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
-                    persistenceBackend.createDir(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor);
+                    persistenceBackend.createDir(null, organization + "/" + entityDescriptor);
                     // 2. create the entity file
                     // FIXME: current version of the notification only provides the organization, being null the
                     // username
-                    persistenceBackend.createFile(httpClientFactory.getHttpClient(false), null, organization + "/"
-                            + entityDescriptor + "/" + entityDescriptor + ".txt", columnLine);
+                    persistenceBackend.createFile(null, organization + "/" + entityDescriptor + "/" + entityDescriptor
+                            + ".txt", columnLine);
                     // 3. create the Hive table with a variable number of fields
                     persistenceBackend.provisionHiveTable(organization, entityDescriptor, hiveFields);
                     fileExists = true;
