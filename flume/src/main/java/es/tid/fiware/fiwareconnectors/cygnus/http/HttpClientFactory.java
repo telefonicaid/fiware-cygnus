@@ -84,7 +84,8 @@ public class HttpClientFactory {
     } // getHttpClient
     
     /**
-     * Gets the number of leased connections for this connections manager.
+     * Gets the number of leased connections for this connections manager. This is not really used within the code, but
+     * could be used for debugging purposes.
      * @param ssl
      * @return
      */
