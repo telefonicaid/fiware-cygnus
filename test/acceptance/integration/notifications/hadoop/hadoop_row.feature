@@ -56,7 +56,7 @@ Feature: Stored in hadoop new notifications per row from context broker
       |ORGA601             |xml    |
       |Orga_61             |json   |
       |Orga_61             |xml    |
-      #|without organization|json   |
+     #|without organization|json   |
       #|without organization|xml    |
       |with 32 characters  |json   |
       |with 32 characters  |xml    |
@@ -82,8 +82,10 @@ Feature: Stored in hadoop new notifications per row from context broker
       |with 64 characters     |xml    |
       |Room2-                 |json   |
       |Room2-                 |xml    |
-      |modelogw.assetgw-device|json   |
-      |modelogw.assetgw-device|xml    |
+      |modelogw_assetgw-device|json   |
+      |modelogw_assetgw-device|xml    |
+    #  |modelogw.assetgw-device|json   |
+    #  |modelogw.assetgw-device|xml    |
       |ROOM-house             |json   |
       |ROOM-house             |xml    |
        
