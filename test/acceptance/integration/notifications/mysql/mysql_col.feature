@@ -20,6 +20,11 @@
 #     Author: Ivan Arias
 #
 
+#
+#  Note: the @skip tag is to skip the scenarios that still are not developed or failed
+#        -tg=-skip
+#
+
 Feature: Stored in mysql new notifications per column from context broker
     As a cygnus user
     I want to be able to store in mysql new notifications per column from context broker
@@ -133,7 +138,7 @@ Feature: Stored in mysql new notifications per column from context broker
       |org_col_time_50  |50                |time         |12:41:00         |json   |
       |org_col_time_50  |50                |time         |12:42:00         |xml    |
 
-    @error_data @skip @BUG-184
+    @error_data  @BUG-184
     Scenario Outline: try to store new notifications in mysql with differents errors in data type
        Given cygnus is installed with type "column"
          And "mysql" is installed correctly

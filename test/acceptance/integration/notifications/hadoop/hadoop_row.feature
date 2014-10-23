@@ -20,6 +20,11 @@
 #     Author: Ivan Arias
 #
 
+#
+#  Note: the @skip tag is to skip the scenarios that still are not developed or failed
+#        -tg=-skip
+#
+
 Feature: Stored in hadoop new notifications per row from context broker
     As a cygnus user
     I want to be able to store in hadoop new notifications per row from context broker
@@ -56,14 +61,12 @@ Feature: Stored in hadoop new notifications per row from context broker
       |ORGA601             |xml    |
       |Orga_61             |json   |
       |Orga_61             |xml    |
-     #|without organization|json   |
-      #|without organization|xml    |
       |with 32 characters  |json   |
       |with 32 characters  |xml    |
       |org601.test         |json   |
       |org601.test         |xml    |
       
-     @resources
+    @resources @skip
     Scenario Outline:  store in hadoop new notifications with different resources behavior
        Given cygnus is installed with type "row"
          And "hadoop" is installed correctly
@@ -84,10 +87,10 @@ Feature: Stored in hadoop new notifications per row from context broker
       |Room2-                 |xml    |
       |modelogw_assetgw-device|json   |
       |modelogw_assetgw-device|xml    |
-    #  |modelogw.assetgw-device|json   |
-    #  |modelogw.assetgw-device|xml    |
       |ROOM-house             |json   |
       |ROOM-house             |xml    |
+      |modelogw.assetgw-device|json   |
+      |modelogw.assetgw-device|xml    |
        
     @attrNumbers
     Scenario Outline:  store in hadoop new notifications with different quantities of attributes
