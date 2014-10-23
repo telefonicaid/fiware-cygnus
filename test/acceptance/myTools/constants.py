@@ -131,14 +131,15 @@ DELETE_FILE               = 'DELETE'
 PATH_HADOOP               = u'webhdfs/v1/user'
 QUERY_PARAM_HADOOP        = u'txt?op'
 QUERY_PARAM_HADOOP_DELETE = u'recursive=true&user.name'
-HADDOP_VERSION_PATH       = u'ws/v1/cluster/info'
+QUERY_PARAM_HADOOP_OPEN   = u'user.name'
+HADOOP_VERSION_PATH       = u'ws/v1/cluster/info'
 CLUSTER_INFO              = u'clusterInfo'
 HADOOP_VERSION            = u'hadoopVersion'
 STARTED                   = u'STARTED'
 HADOOP_STATE              = u'state'
 
 
-#ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
+ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
 
 #REQUEST constants
 #Notification
@@ -189,7 +190,6 @@ PRESS_TYPE = u'mmhg'
 PRESS_VALUE = "720"
 CODE_VALUE = "200"
 REASON_PHRASE_VALUE = "OK"
-#WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-1234567891234567890123456789'
 WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-12345678912345678901234567890abcdefghij'
 WITH_64_VALUE_ORG = u'a234567890abcdefghij1234567890jklmnopqrst1234567890uvwxyzzzz01'
 WITH_32_VALUE_ORG = u'a234567890abcdefghij1234567890j'
