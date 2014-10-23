@@ -20,6 +20,11 @@
 #     Author: Ivan Arias
 #
 
+#
+#  Note: the @skip tag is to skip the scenarios that still are not developed or failed
+#        -tg=-skip
+#
+
 Feature: Store in mysql new notifications per row from context broker
     As a cygnus user
     I want to be able to store in mysql new notifications per row from context broker
@@ -54,14 +59,10 @@ Feature: Store in mysql new notifications per row from context broker
       |ORGA60               |xml    |
       |Orga_6               |json   |
       |Orga_6               |xml    |
-      #|without organization|json   |
-      #|without organization|xml    |
       |with 32 characters   |json   |
       |with 32 characters   |xml    |
-    #  |org601.test          |json   |
-    #  |org601.test          |xml    |
 
-    @resources
+    @resources @skip
     Scenario Outline:  store in ckan new notifications with different resources behavior
        Given "mysql" is installed correctly
          And cygnus is installed with type "row"
@@ -81,10 +82,10 @@ Feature: Store in mysql new notifications per row from context broker
       |Room2-                 |xml    |
       |modelogw_assetgw-device|json   |
       |modelogw_assetgw-device|xml    |
-    #  |modelogw.assetgw-device|json   |
-    #  |modelogw.assetgw-device|xml    |
       |ROOM-house             |json   |
       |ROOM-house             |xml    |
+      |modelogw.assetgw-device|json   |
+      |modelogw.assetgw-device|xml    |
 
     @attrNumbers
     Scenario Outline:  store in mysql new notifications with different quantities of attributes

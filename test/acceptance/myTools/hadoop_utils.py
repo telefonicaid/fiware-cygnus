@@ -21,7 +21,6 @@
 #
 
 from lettuce import world
-import time
 import http_utils
 import general_utils
 from myTools.constants import *

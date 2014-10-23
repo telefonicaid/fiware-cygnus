@@ -139,7 +139,7 @@ STARTED                   = u'STARTED'
 HADOOP_STATE              = u'state'
 
 
-#ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
+ATTRIBUTE_FIELD_LIST   = [u'temperature', u'pressure', u'humidity', u'speed', u'volumen', u'time', u'length', u'mass', u'density', u'power', u'acceleration', u'conductivity', u'capacity', u'resistance', u'energy', u'consumption', u'torque', u'area', u'viscosity', u'inductance', u'weight', ]
 
 #REQUEST constants
 #Notification
@@ -190,7 +190,6 @@ PRESS_TYPE = u'mmhg'
 PRESS_VALUE = "720"
 CODE_VALUE = "200"
 REASON_PHRASE_VALUE = "OK"
-#WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-1234567891234567890123456789'
 WITH_100_VALUE = u'1234567890abcdefghij1234567890klmnopqrst1234567890uvwxyzzzz-12345678912345678901234567890abcdefghij'
 WITH_64_VALUE_ORG = u'a234567890abcdefghij1234567890jklmnopqrst1234567890uvwxyzzzz01'
 WITH_32_VALUE_ORG = u'a234567890abcdefghij1234567890j'
