@@ -12,9 +12,7 @@
         "cygnus_attributesNumber_default": 2,
         "cygnus_metadatasNumber_default": 2,
         "cygnus_compoundNumber_default": 0,
-        "ckan_dataset_default": "package_default",
-        "mysql_prefix": "prefix",
-        "hadoop_prefix": "prefix"
+        "ckan_dataset_default": "package_default"
     },
     "ckan": {
         "ckan_version": "X.Y",
