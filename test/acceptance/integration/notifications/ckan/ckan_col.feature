@@ -20,6 +20,11 @@
 #     Author: Ivan Arias
 #
 
+#
+#  Note: the @skip tag is to skip the scenarios that still are not developed or failed
+#        -tg=-skip
+#
+
 Feature: Stored in ckan new notifications per column from context broker
     As a cygnus user
     I want to be able to store in ckan new notifications per column from context broker

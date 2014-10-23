@@ -86,7 +86,7 @@ class MySQL:
         """
         Close a mysql connection and drop the database before
         """
-        #self.__newQuery(MYSQL_DROP_DATABASE+world.mysql_database)  # drop database
+        self.__newQuery(MYSQL_DROP_DATABASE+world.mysql_database)  # drop database
         world.conn.close ()  # close mysql connection
 
     def createDB (self, organization):
@@ -95,7 +95,7 @@ class MySQL:
         :param DBname: database name (organization)
         """
         if organization != DEFAULT: world.organization[world.cygnus_type] = organization
-        world.mysql_database = world.mysql_prefix+world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase per ckan
+        world.mysql_database = world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase per ckan
         if organization != ORGANIZATION_MISSING:
             self.__newQuery(MYSQL_CREATE_DATABASE+world.mysql_database)
 
@@ -135,11 +135,11 @@ class MySQL:
         :param metadataType:
         """
         if resource != DEFAULT : world.resource = resource
-        resp=self.__splitResource(world.resource)
+        world.mysql_table=self.__splitResource(world.resource)
         if attrQuantity != DEFAULT: world.attrsNumber = attrQuantity
 
-        world.mysql_table = world.mysql_prefix+resp
-        if world.mysql_database != world.mysql_prefix+ORGANIZATION_MISSING and resource != RESOURCE_MISSING:
+
+        if world.mysql_database != ORGANIZATION_MISSING and resource != RESOURCE_MISSING:
             field = self.__generateField (attrQuantity, attrValueType, metadataType)
             self.__newQuery(MYSQL_CREATE_TABLE + world.mysql_database + "." + world.mysql_table +field);
 
@@ -164,8 +164,8 @@ class MySQL:
             valueTemp = CONTENT_VALUE
         else:
              valueTemp = VALUE_JSON
-        world.mysql_database = world.mysql_prefix+world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase
-        world.mysql_table    = world.mysql_prefix+world.resource_identityId + "_" + world.resource_identityType
+        world.mysql_database = world.organization[world.cygnus_type].lower()   # converted to lowercase, because cygnus always convert to lowercase
+        world.mysql_table    = world.resource_identityId + "_" + world.resource_identityType
 
         for i in range(world.attrsNumber):                                                                      # loops through all our  attributes
             cur = self.__newQuery('SELECT * from '+world.mysql_database+'.'+world.mysql_table+ ' WHERE attrName = "'+world.attrs[i][NAME]+'"')
@@ -224,8 +224,8 @@ class MySQL:
         """
         Validate that the database parameters are not created in mysql
         """
-        world.mysql_database = world.mysql_prefix+world.organization[world.cygnus_type]
-        world.mysql_table    = world.mysql_prefix+world.resource_identityId + "_" + world.resource_identityType
+        world.mysql_database = world.organization[world.cygnus_type]
+        world.mysql_table    = world.resource_identityId + "_" + world.resource_identityType
         msg = self.__newQuery('SELECT * from '+world.mysql_database+'.'+world.mysql_table,True)
         assert msg.find (VALIDATE_DB_ERROR)  > 0 or  msg.find (VALIDATE_TABLE_ERROR) , "%s: %s.%s" % (ERROR_DB_MSG, world.mysql_database, world.mysql_table)
 

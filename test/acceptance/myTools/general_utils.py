@@ -24,6 +24,7 @@
 import json
 import random
 import string
+import time
 import xmltodict
 from myTools.constants import *
 
@@ -108,3 +109,10 @@ def validateHTTPCode(expectedStatusCode, receivedStatus, receivedBody):
     assert receivedStatus == status_codes[expectedStatusCode], \
         "Wrong status code received: %d. Expected: %d. \n\nBody content: %s" \
         % (str(receivedStatus), status_codes[expectedStatusCode], str(receivedBody))
+
+
+def showTimes (initValue):
+    print "**************************************************************"
+    print "Initial (date & time): " + str(initValue)
+    print "Final   (date & time): " + str(time.strftime("%c"))
+    print "**************************************************************"

@@ -23,6 +23,12 @@
 from lettuce import world, after, before
 from myTools.notifications import Notifications
 from myTools.ckan_utils import Ckan
+import time
+import myTools.general_utils
+
+@before.all
+def before_all_scenarios():
+    world.test_time_init = time.strftime("%c")
 
 
 @before.each_scenario
@@ -40,9 +46,7 @@ def before_each_scenario(scenario):
                              world.config['cygnus']['cygnus_attributesNumber_default'],
                              world.config['cygnus']['cygnus_metadatasNumber_default'],
                              world.config['cygnus']['cygnus_compoundNumber_default'],
-                             world.config['cygnus']['ckan_dataset_default'],
-                             world.config['cygnus']['mysql_prefix'],
-                             world.config['cygnus']['hadoop_prefix']
+                             world.config['cygnus']['ckan_dataset_default']
     )
 
     world.ckan          = Ckan(
@@ -55,7 +59,6 @@ def before_each_scenario(scenario):
     )
 
 
-
 @after.each_scenario
 def after_each_scenario(scenario):
     """
@@ -63,3 +66,7 @@ def after_each_scenario(scenario):
     :param scenario:
     """
     pass
+
+@after.all
+def after_all_scenarios(scenario):
+    myTools.general_utils.showTimes(world.test_time_init)

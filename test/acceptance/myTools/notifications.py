@@ -29,7 +29,7 @@ from myTools.constants import *
 class Notifications:
     world.attrs = None
 
-    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default, mysql_prefix, hadoop_prefix):
+    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default):
         """
         constructor
         :param cygnus_url:
@@ -48,8 +48,6 @@ class Notifications:
         world.metadatasNumber       = metadataNumber
         world.compoundNumber        = compoundNumber
         world.dataset_default       = dataset_default
-        world.mysql_prefix          = mysql_prefix
-        world.hadoop_prefix         = hadoop_prefix
 
     def __createUrl(self, operation, resourceId = None):
         """
@@ -147,8 +145,6 @@ class Notifications:
         """
         name = ATTR_NAME+"_"+str(position)
         type = ATTR_TYPE+"_"+str(position)
-        #name = ATTRIBUTE_FIELD_LIST[position]
-        #type = ATTR_TYPE+"_"+str(position)
         value= attrValue
         if MDValue == TRUE: world.metadatasNumber = 1
         else: world.metadatasNumber = 0
@@ -261,11 +257,11 @@ class Notifications:
         notify = NOTIFY
         if organization == WITHOUT_ORGANIZATION: notify = NOTIFY_ERROR
         elif organization == WITH_100: world.organization[world.cygnus_type] = WITH_100_VALUE [:-len (world.dataset_default)]            # used in ckan
-        elif organization == WITH_32: world.organization[world.cygnus_type] = WITH_32_VALUE_ORG [:-len (world.mysql_prefix)]             # used in mysql
-        elif organization == LARGE_THAN_100: world.organization[world.cygnus_type] = general_utils.stringGenerator(101)                          # used in ckan
-        elif organization == LARGE_THAN_32 : world.organization[world.cygnus_type] = general_utils.stringGenerator(33)                           # used in mysql
-        elif resource == WITH_100: world.resource = WITH_100_VALUE                                                    # used in ckan
-        elif resource == WITH_64 : world.resource = WITH_64_VALUE_RESOURCE [:-len (world.mysql_prefix)]               # used in mysql
+        elif organization == WITH_32: world.organization[world.cygnus_type] = WITH_32_VALUE_ORG                                          # used in mysql and hadoop
+        elif organization == LARGE_THAN_100: world.organization[world.cygnus_type] = general_utils.stringGenerator(101)                  # used in ckan
+        elif organization == LARGE_THAN_32 : world.organization[world.cygnus_type] = general_utils.stringGenerator(33)                   # used in mysql
+        elif resource == WITH_100: world.resource = WITH_100_VALUE                                                                       # used in ckan
+        elif resource == WITH_64 : world.resource = WITH_64_VALUE_RESOURCE                                                               # used in mysql and hadoop
         elif resource == LARGE_THAN_32 : world.resource = general_utils.stringGenerator(20) + "-" + general_utils.stringGenerator(12) # used in mysql
         else:
             if organization != DEFAULT : world.organization[world.cygnus_type] = organization
