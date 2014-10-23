@@ -21,8 +21,6 @@
 #
 
 from lettuce import world
-import time
-import Selenium_utils
 import http_utils
 import general_utils
 from myTools.constants import *
@@ -50,23 +48,22 @@ class Hadoop:
         :param operation: operation type (dataset, etc)
         :return: request url
         """
-        resource = world.hadoop_prefix + world.resource
+
         world.organization[world.cygnus_type] = world.organization[world.cygnus_type].lower()
+
         if operation == OPEN_FILE:
-           value = "%s/%s/%s/%s/%s/%s.%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation )
+           value = "%s/%s/%s/%s/%s/%s.%s=%s&%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], world.resource, world.resource, QUERY_PARAM_HADOOP, operation, "user.name", world.hadoop_user)
         if operation == DELETE_FILE:
-           value = "%s/%s/%s/%s/%s/%s.%s=%s&%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], resource, resource, QUERY_PARAM_HADOOP, operation, QUERY_PARAM_HADOOP_DELETE, world.hadoop_user)
+           value = "%s/%s/%s/%s/%s/%s.%s=%s&%s=%s" % (world.hadoop_namenode_url, PATH_HADOOP, world.hadoop_user, world.organization[world.cygnus_type], world.resource, world.resource, QUERY_PARAM_HADOOP, operation, QUERY_PARAM_HADOOP_DELETE, world.hadoop_user)
         if operation == VERSION:
-            value = "%s/%s"  % (world.hadoop_conputenode_url, HADDOP_VERSION_PATH)
+            value = "%s/%s"  % (world.hadoop_conputenode_url, HADOOP_VERSION_PATH)
         return value
 
     def version (self):
         """
         Verify if hadoop is installed and that version is the expected
         """
-        print self.__createUrl(VERSION)
         resp, body = http_utils.request2(GET, self.__createUrl(VERSION), self.__createHeaders(), EMPTY, TRUE, ERROR[NOT])
-        print "resp: "+ str(resp)+ "\nbody: "+str(body)
         bodyDict = general_utils.convertStrToDict(body, JSON)
 
         assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \
@@ -123,9 +120,11 @@ class Hadoop:
             valueTemp = CONTENT_VALUE
         else:
              valueTemp = VALUE_JSON
-        resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
 
-        for i in range(int(world.attrsNumber)):                                                                      # loops through all our  attributes
+
+        resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
+        if self.body.find(NOT_FOUND) >= 0:return "file: /%s/%s/%s.txt does no exist..." % (world.organization[world.cygnus_type], world.resource, world.resource)
+        for i in range(int(world.attrsNumber)):                                                                     # loops through all our  attributes
             world.element =  self.__splitElement(self.body, world.attrs[i][NAME])
             if world.element == NAME_IS_MISSING:
                 return NAME_IS_MISSING
@@ -138,10 +137,9 @@ class Hadoop:
                 else:
                     for j in range(world.compoundNumber):
                         if self.attrValue[ITEM+str(j)] != world.attrs[i][valueTemp][ITEM+str(j)]:              # verify the compound values
-
                             return "The "+world.attrs[i][NAME][ITEM+str(j)]+" compound values does not match..."
                 if self.attrType != world.attrs[i][TYPE]:                                                               # verify the type
-                    return "The "+world.attrs[i][NAME]+" type does not match..."
+                    return "The "+world.attrs[i][TYPE]+" type does not match..."
                 outMsg = "OK"
         return outMsg
 
@@ -152,22 +150,25 @@ class Hadoop:
 
         """
         world.element = None
+        self.body     = None
         outMsg = NAME_IS_MISSING
         if world.metadatasNumber <= 0: return "OK"
+        resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
+        if self.body.find(NOT_FOUND) >= 0:return "file: /%s/%s/%s.txt does no exist..." % (world.organization[world.cygnus_type], world.resource, world.resource)
+
         for i in range(int(world.attrsNumber)):                                                                                      # loops through all our  attributes
            world.element =  self.__splitElement(self.body, world.attrs[i][NAME])
            if world.element == NAME_IS_MISSING:
                 return NAME_IS_MISSING
            else:
                 meta = world.element [ATTR_MD]                                                                                # verify if it has metadatas
-
                 for j in range(len (meta)):
                     if content == XML:
                         if meta[j][TYPE] != world.attrs[i][METADATA][j][CONTEXT_METADATA][TYPE]:
-                            return "The "+world.attrs[i][NAME]+" metatada type does not match..."
+                            return "The \""+ world.attrs[i][METADATA][j][CONTEXT_METADATA][TYPE]+"\" metatada type does not match..."
                     else:
                         if meta[j][TYPE] != world.attrs[i][METADATAS_JSON][j][TYPE]:
-                            return "The "+world.attrs[i][NAME]+" metatada type does not match..."
+                            return "The \""+world.attrs[i][METADATAS_JSON][j][TYPE]+"\" metatada type does not match..."
                     outMsg = "OK"
         return outMsg
 
