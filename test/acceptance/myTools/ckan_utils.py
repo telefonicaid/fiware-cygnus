@@ -80,8 +80,7 @@ class Ckan:
         get Resource Id from ckan by API
         :return: resource_Id
         """
-        world.dataset = world.organization[world.cygnus_type]+"_"+world.dataset_default
-        # world.dataset = world.organization[world.cygnus_type].lower()+"_"+world.dataset_default
+        world.dataset = world.organization[world.cygnus_type].lower()+"_"+world.dataset_default
         resp =  http_utils.request(GET, self.__createUrl(RESOURCE_ID), self.__createHeaders(CKAN_HEADER), EMPTY, ERROR[NOT])
         body = resp.read()
         if error and general_utils.ifSubstrExistsInStr(body, NOT_FOUND):
@@ -409,17 +408,3 @@ class Ckan:
 
             assert self.dictTemp[RESULT][RESOURCE] != None, \
                 '\n...resource \"%s\", is created by cygnus in ckan: \n\n body: %s' % (world.resource, self.body)
-    #------------------ Selenium ------------
-    def connectionToCKAN (self, operation):
-        """
-        open a connection with the browser
-        :param operation: operation type (dataset, etc)
-        :return: if is connected (boolean)
-        """
-        return Selenium_utils.connect(self.__createUrl(operation))
-
-    def disconnectionToCKAN (self):
-        """
-        close the connection with the browser
-        """
-        Selenium_utils.disconnect()
