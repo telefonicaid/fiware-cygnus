@@ -40,7 +40,7 @@ def is_installed_correctly(step, operation):
     :param step:
     """
     world.operation = operation
-    world.hadoop.version()
+    #world.hadoop.version()
 
 #----------------------------------------------------------------------------------
 @step (u'store in hadoop with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')
@@ -117,6 +117,7 @@ def delete_the_file_created_in_hadoop (step):
     :param step: 
     """
     world.hadoop.deleteFile()
+
 
 
 
