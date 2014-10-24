@@ -84,10 +84,7 @@ class Notifications:
         name = 'name_' + randomStr
         type = 'type_' + randomStr
         value = randomInt
-        if general_utils.isXML(content):
-            return {CONTEXT_METADATA: {NAME: name, TYPE: type, VALUE_JSON: value}}
-        else:
-            return {NAME: name, TYPE: type, VALUE_JSON: value}
+        return {NAME: name, TYPE: type, VALUE_JSON: value}
 
     def __appendMetadatas (self, metadatasNumber, content):
         """
@@ -99,7 +96,10 @@ class Notifications:
         contextMetadatasList = []
         for i in range(int(metadatasNumber)):
             contextMetadatasList.append(self.__newMetadata(content))
-        return contextMetadatasList
+        if general_utils.isXML(content):
+            return {CONTEXT_METADATA:contextMetadatasList}
+        else:
+            return contextMetadatasList
 
     def __newCompound (self, compound):
 
@@ -119,18 +119,20 @@ class Notifications:
         Create a new Attribute with n metadatas per row
         :return: attribute dict
         """
+        contextMetadatasList = []
         randomStr = general_utils.stringGenerator(6)
         randomInt = general_utils.numberGenerator(3)
         name = 'name_' + randomStr
         type = 'type_' + randomStr
         contextMetadatasList = self.__appendMetadatas(metadatasNumber, content)
+
         # for compound
         if compound > 0:
             value = self.__newCompound (compound)
         else:
             value = randomInt
         if general_utils.isXML(content):
-            return  {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
+            return {NAME: name, TYPE: type, CONTENT_VALUE: value, METADATA: contextMetadatasList}
         else:
             return  {NAME: name, TYPE: type, VALUE_JSON: value, METADATAS_JSON: contextMetadatasList}
 
@@ -269,7 +271,6 @@ class Notifications:
         if attributesNumber != DEFAULT: world.attrsNumber = int(attributesNumber)
         if compoundNumber != DEFAULT: world.compoundNumber = int(compoundNumber)
         if metadatasNumber != DEFAULT: world.metadatasNumber = int(metadatasNumber)
-
         payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, None, world.compoundNumber, world.metadatasNumber,  None, content))
         world.response, world.body = http_utils.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(notify, content), payload, TRUE, error)
         time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan

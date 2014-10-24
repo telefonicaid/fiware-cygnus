@@ -37,10 +37,12 @@ def cygnus_is_installed_with_type(step, type):
 def is_installed_correctly(step, operation):
     """
      verify that hadoop is installed correctly
+     see "hadoop_verify_version" property in properties.json file
     :param step:
     """
     world.operation = operation
-    world.hadoop.version()
+    if str(world.hadoop_verify_version).find(TRUE) >= 0:
+        world.hadoop.version()
 
 #----------------------------------------------------------------------------------
 @step (u'store in hadoop with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')

@@ -22,7 +22,6 @@
 
 from lettuce import world
 import time
-import Selenium_utils
 import http_utils
 import general_utils
 from myTools.constants import *

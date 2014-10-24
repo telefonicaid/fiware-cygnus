@@ -51,9 +51,15 @@ def before_each_scenario(scenario):
 
     world.hadoop        = Hadoop (
                              world.config['hadoop']['hadoop_version'],
+                             world.config['hadoop']['hadoop_verify_version'],
                              world.config['hadoop']['hadoop_namenode_url'],
                              world.config['hadoop']['hadoop_conputenode_url'],
-                             world.config['hadoop']['hadoop_user']
+                             world.config['hadoop']['hadoop_user'],
+                             world.config['hadoop']['hadoop_retries_open_file'],
+                             world.config['hadoop']['hadoop_delay_to_retry'],
+
+
+
     )
 
 
