@@ -64,6 +64,5 @@ public interface CKANBackend {
      */
     void persist(String recvTime, String organization, String entity, Map<String, String> attrList,
             Map<String, String> attrMdList) throws Exception;
-
     
 } // CKANBackend

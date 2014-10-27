@@ -21,11 +21,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.containers;
 
 import com.google.gson.JsonElement;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.ArrayList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
 *
@@ -46,42 +42,6 @@ public class NotifyContextRequest {
     public NotifyContextRequest() {
         contextResponses = new ArrayList<ContextElementResponse>();
     } // NotifyContextRequest
-    
-    /**
-     * Constructor for DOM, a XML parser.
-     *
-     * @param doc
-     * @throws Exception
-     */
-    public NotifyContextRequest(Document doc) throws Exception {
-        NodeList domSubscriptionIds = doc.getElementsByTagName("subscriptionId");
-        
-        if (domSubscriptionIds.getLength() == 0) {
-            throw new Exception("No <subscriptionId> tag in the XML document");
-        } // if
-        
-        subscriptionId = domSubscriptionIds.item(0).getTextContent();
-        NodeList domOriginators = doc.getElementsByTagName("originator");
-        
-        if (domOriginators.getLength() == 0) {
-            throw new Exception();
-        } // if
-        
-        originator = domOriginators.item(0).getTextContent();
-        NodeList domContextResponseLists = doc.getElementsByTagName("contextResponseList");
-        
-        if (domContextResponseLists.getLength() == 0) {
-            throw new Exception("No <contextResponseList> tag in the XML document");
-        } // if
-        
-        Element contextResponseList = (Element) domContextResponseLists.item(0);
-        NodeList domContextElementResponses = contextResponseList.getElementsByTagName("contextElementResponse");
-        contextResponses = new ArrayList<ContextElementResponse>();
-        
-        for (int i = 0; i < domContextElementResponses.getLength(); i++) {
-            contextResponses.add(new ContextElementResponse((Element) domContextElementResponses.item(i)));
-        } // for
-    } // NotifyContextRequest
 
     public String getSubscriptionId() {
         return subscriptionId;
@@ -94,6 +54,18 @@ public class NotifyContextRequest {
     public ArrayList<ContextElementResponse> getContextResponses() {
         return contextResponses;
     } // getContextResponses
+    
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    } // setSubscriptionId
+    
+    public void setOriginator(String originator) {
+        this.originator = originator;
+    } // setSubscriptionId
+    
+    public void setContextResponses(ArrayList<ContextElementResponse> contextResponses) {
+        this.contextResponses = contextResponses;
+    } // setContextResponses
     
     /**
      * Class for storing contextElementResponse information from a notifyContextRequest.
@@ -111,28 +83,6 @@ public class NotifyContextRequest {
             statusCode = new StatusCode();
         } // ContextElementResponse
         
-        /**
-         * Constructor for DOM, a XML parser.
-         *
-         * @param domContextElementResponse
-         */
-        public ContextElementResponse(Element domContextElementResponse) throws Exception {
-            NodeList domContextElements = domContextElementResponse.getElementsByTagName("contextElement");
-
-            if (domContextElements.getLength() == 0) {
-                throw new Exception("No <contextElement> tag in the XML document");
-            } // if
-
-            contextElement = new ContextElement((Element) domContextElements.item(0));
-            NodeList domStatusCodes = domContextElementResponse.getElementsByTagName("statusCode");
-
-            if (domStatusCodes.getLength() == 0) {
-                throw new Exception("No <statusCode> tag in the XML document");
-            } // if
-
-            statusCode = new StatusCode((Element) domStatusCodes.item(0));
-        } // ContextElementResponse
-        
         public ContextElement getContextElement() {
             return contextElement;
         } // getContextElement
@@ -140,6 +90,14 @@ public class NotifyContextRequest {
         public StatusCode getStatusCode() {
             return statusCode;
         } // getStatusCode
+        
+        public void setContextElement(ContextElement contextElement) {
+            this.contextElement = contextElement;
+        } // getContextElement
+        
+        public void setStatusCode(StatusCode statusCode) {
+            this.statusCode = statusCode;
+        } // setStatusCode
         
     } // ContextElementResponse
     
@@ -160,44 +118,6 @@ public class NotifyContextRequest {
             attributes = new ArrayList<ContextAttribute>();
         } // ContextElement
         
-        /**
-         * Constructor for DOM, a XML parser.
-         *
-         * @param domContextElement
-         * @throws Exception
-         */
-        public ContextElement(Element domContextElement) throws Exception {
-            NodeList domIdentityIds = domContextElement.getElementsByTagName("entityId");
-            
-            if (domIdentityIds.getLength() == 0) {
-                throw new Exception("No <entityId> tag in the XML document");
-            } // if
-            
-            type = domIdentityIds.item(0).getAttributes().getNamedItem("type").getTextContent();
-            isPattern = domIdentityIds.item(0).getAttributes().getNamedItem("isPattern").getTextContent();
-            NodeList domIds = ((Element) domIdentityIds.item(0)).getElementsByTagName("id");
-            
-            if (domIds.getLength() == 0) {
-                throw new Exception("No <id> tag in the XML document");
-            } // if
-            
-            id = domIds.item(0).getTextContent();
-            NodeList domContextAttributeLists = domContextElement.getElementsByTagName("contextAttributeList");
-            
-            if (domContextAttributeLists.getLength() == 0) {
-                attributes = null;
-                return;
-            } // if
-
-            NodeList domContextAttributes = ((Element) domContextAttributeLists.item(0)).
-                    getElementsByTagName("contextAttribute");
-            attributes = new ArrayList<ContextAttribute>();
-            
-            for (int i = 0; i < domContextAttributes.getLength(); i++) {
-                attributes.add(new ContextAttribute((Element) domContextAttributes.item(i)));
-            } // for
-        } // ContextElement
-        
         public ArrayList<ContextAttribute> getAttributes() {
             return attributes;
         } // getAttributes
@@ -214,7 +134,79 @@ public class NotifyContextRequest {
             return id;
         } // getId
         
+        /**
+         * Gets a field of the contextElement given its name.
+         * @param fieldName
+         * @return
+         */
+        public String getString(String fieldName) {
+            if (fieldName.equals("entityId")) {
+                return getId();
+            } else if (fieldName.equals("entityType")) {
+                return getType();
+            } else {
+                return null;
+            } // if else
+        } // getString
+        
+        public void setAttributes(ArrayList<ContextAttribute> attributes) {
+            this.attributes = attributes;
+        } // setAttributes
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setIsPattern(String isPattern) {
+            this.isPattern = isPattern;
+        } // setIsPattern
+        
+        public void setId(String id) {
+            this.id = id;
+        } // setId
+        
     } // ContextElement
+    
+    /**
+     * Class for storing entityId information from a contextElement.
+     */
+    public class EntityId {
+        
+        private String type;
+        private String isPattern;
+        private String id;
+        
+        /**
+         * Constructor for Gson, a Json parser.
+         */
+        public EntityId() {
+        } // EntityId
+        
+        public String getType() {
+            return type;
+        } // getType
+        
+        public String getIsPattern() {
+            return isPattern;
+        } // getIsPattern
+        
+        public String getId() {
+            return id;
+        } // getId
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setIsPattern(String isPattern) {
+            this.isPattern = isPattern;
+        } // setIsPattern
+        
+        public void setId(String id) {
+            this.id = id;
+        } // setId
+        
+    } // EntityId
     
     /**
      * Class for storing contextAttribute information from a notifyContextRequest.
@@ -231,54 +223,6 @@ public class NotifyContextRequest {
          */
         public ContextAttribute() {
             metadatas = new ArrayList<ContextMetadata>();
-        } // ContextAttribute
-        
-        /**
-         * Constructor for DOM, a XML parser.
-         *
-         * @param domContextAttribute
-         * @exception
-         */
-        public ContextAttribute(Element domContextAttribute) throws Exception {
-            NodeList domNames = domContextAttribute.getElementsByTagName("name");
-            
-            if (domNames.getLength() == 0) {
-                throw new Exception("No <name> tag in the XML document");
-            } // if
-            
-            name = domNames.item(0).getTextContent();
-            NodeList domTypes = domContextAttribute.getElementsByTagName("type");
-            
-            if (domTypes.getLength() == 0) {
-                throw new Exception("No <type> tag in the XML document");
-            } // if
-            
-            type = domTypes.item(0).getTextContent();
-            NodeList domValues = domContextAttribute.getElementsByTagName("contextValue");
-            
-            if (domValues.getLength() == 0) {
-                throw new Exception("No <contextValue> tag in the XML document");
-            } // if
-
-            value = Utils.basicXml2Json(domValues.item(0));
-            metadatas = new ArrayList<ContextMetadata>();
-
-            NodeList domMetadata = domContextAttribute.getElementsByTagName("metadata");
-            
-            if (domMetadata.getLength() == 0) {
-                return;
-            } // if
-
-            NodeList domContextMetadata = ((Element) domMetadata.item(0)).
-                    getElementsByTagName("contextMetadata");
-            
-            if (domMetadata.getLength() == 0) {
-                return;
-            } // if
-            
-            for (int i = 0; i < domContextMetadata.getLength(); i++) {
-                metadatas.add(new ContextMetadata((Element) domContextMetadata.item(i)));
-            } // for
         } // ContextAttribute
         
         public String getName() {
@@ -334,6 +278,22 @@ public class NotifyContextRequest {
             return res.substring(0, res.length() - 1) + "]";
         } // getContextMetadata
         
+        public void setName(String name) {
+            this.name = name;
+        } // setName
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setContextValue(JsonElement value) {
+            this.value = value;
+        } // setContextMetadata
+        
+        public void setContextMetadata(ArrayList<ContextMetadata> metadatas) {
+            this.metadatas = metadatas;
+        } // setContextMetadata
+        
     } // ContextAttribute
     
     /**
@@ -350,36 +310,6 @@ public class NotifyContextRequest {
          */
         public ContextMetadata() {
         } // ContextMetadata
-        
-        /**
-         * Constructor for DOM, a XML parser.
-         *
-         * @param domContextAttribute
-         * @exception
-         */
-        public ContextMetadata(Element domContextMetadata) throws Exception {
-            NodeList domNames = domContextMetadata.getElementsByTagName("name");
-            
-            if (domNames.getLength() == 0) {
-                throw new Exception("No <name> tag in the XML document");
-            } // if
-            
-            name = domNames.item(0).getTextContent();
-            NodeList domTypes = domContextMetadata.getElementsByTagName("type");
-            
-            if (domTypes.getLength() == 0) {
-                throw new Exception("No <type> tag in the XML document");
-            } // if
-            
-            type = domTypes.item(0).getTextContent();
-            NodeList domValues = domContextMetadata.getElementsByTagName("value");
-            
-            if (domValues.getLength() == 0) {
-                throw new Exception("No <value> tag in the XML document");
-            } // if
-            
-            value = Utils.basicXml2Json(domValues.item(0));
-        } // ContextAttribute
         
         public String getName() {
             return name;
@@ -404,6 +334,18 @@ public class NotifyContextRequest {
             } // if else if
         } // getValue
         
+        public void setName(String name) {
+            this.name = name;
+        } // setName
+        
+        public void setType(String type) {
+            this.type = type;
+        } // setType
+        
+        public void setContextMetadata(JsonElement value) {
+            this.value = value;
+        } // setContextMetadata
+        
     } // ContextMetadata
     
     /**
@@ -419,30 +361,7 @@ public class NotifyContextRequest {
          */
         public StatusCode() {
         } // StatusCode
-        
-        /**
-         * Constructor for DOM, a SML parser.
-         *
-         * @param domStatusCode
-         * @throws Exception
-         */
-        public StatusCode(Element domStatusCode) throws Exception {
-            NodeList domCodes = domStatusCode.getElementsByTagName("code");
 
-            if (domCodes.getLength() == 0) {
-                throw new Exception("No <code> tag in the XML document");
-            } // if
-
-            code = domCodes.item(0).getTextContent();
-            NodeList domReasonPhrases = domStatusCode.getElementsByTagName("reasonPhrase");
-
-            if (domReasonPhrases.getLength() == 0) {
-                throw new Exception("No <reasonPhrase> tag in the XML document");
-            } // if
-
-            reasonPhrase = domReasonPhrases.item(0).getTextContent();
-        } // StatusCode
-        
         public String getCode() {
             return code;
         } // getCode
@@ -450,6 +369,14 @@ public class NotifyContextRequest {
         public String getReasonPhrase() {
             return reasonPhrase;
         } // getReasonPhrase
+        
+        public void setCode(String code) {
+            this.code = code;
+        } // setCode
+        
+        public void setReasonPhrase(String reasonPhrase) {
+            this.reasonPhrase = reasonPhrase;
+        } // setReasonPhrase
         
     } // StatusCode
     
