@@ -366,7 +366,7 @@ class Ckan:
         if world.metadataValue == TRUE:
             for i in range(int(world.attrsNumber)):
                 if content == XML:
-                    if self.lastElement[ATTR_NAME+"_"+str(i)+"_md"][0][VALUE_JSON] != world.attrs[i][METADATA][0][CONTEXT_METADATA][VALUE_JSON]:
+                    if self.lastElement[ATTR_NAME+"_"+str(i)+"_md"][0][VALUE_JSON] != world.attrs[i][METADATA][CONTEXT_METADATA][0][VALUE_JSON]:
                         return "The "+world.attrs[i][NAME]+" metatada value does not match..."
                 else:
                     if self.lastElement[ATTR_NAME+"_"+str(i)+"_md"][0][VALUE_JSON] != world.attrs[i][METADATAS_JSON][0][VALUE_JSON]:
