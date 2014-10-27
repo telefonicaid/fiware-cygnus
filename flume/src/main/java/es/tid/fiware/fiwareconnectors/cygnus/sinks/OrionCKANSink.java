@@ -21,16 +21,19 @@ package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackendImpl;
 import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -54,6 +57,14 @@ public class OrionCKANSink extends OrionSink {
     private HttpClientFactory httpClientFactory;
     private DefaultHttpClient httpClient;
     private CKANBackend persistenceBackend;
+    
+    /**
+     * Constructor.
+     */
+    public OrionCKANSink() {
+        super();
+        logger = CygnusLogger.getLogger(OrionCKANSink.class);
+    } // OrionCKANSink
 
     /**
      * Gets the CKAN host. It is protected due to it is only required for testing purposes.
@@ -130,21 +141,20 @@ public class OrionCKANSink extends OrionSink {
     
     @Override
     public void configure(Context context) {
-        logger = Logger.getLogger(OrionCKANSink.class);
         apiKey = context.getString("api_key", "nokey");
-        logger.debug("Reading configuration (api_key=" + apiKey + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
         ckanHost = context.getString("ckan_host", "localhost");
-        logger.debug("Reading configuration (ckan_host=" + ckanHost + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
-        logger.debug("Reading configuration (ckan_port=" + ckanPort + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
         defaultDataset = context.getString("default_dataset", "cygnus");
-        logger.debug("Reading configuration (default_dataset=" + defaultDataset + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (default_dataset=" + defaultDataset + ")");
         orionUrl = context.getString("orion_url", "http://localhost:1026");
-        logger.debug("Reading configuration (orion_url=" + orionUrl + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
         ssl = context.getString("ssl", "false").equals("true") ? true : false;
-        logger.debug("Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
+        logger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
     } // configure
 
     @Override
@@ -157,11 +167,16 @@ public class OrionCKANSink extends OrionSink {
         } // try catch
 
         super.start();
-        logger.info("Startup completed");
+        logger.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
-    void persist(String organization, long recvTimeTs, ArrayList contextResponses) throws Exception {
+    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        // get some header values
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        String organization = eventHeaders.get(Constants.HEADER_SERVICE);
+        String resourceName = eventHeaders.get(Constants.DESTINATION);
+        
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
 
@@ -169,21 +184,21 @@ public class OrionCKANSink extends OrionSink {
         persistenceBackend.initOrg(organization);
 
         // iterate in the contextResponses
+        ArrayList contextResponses = notification.getContextResponses();
+        
         for (int i = 0; i < contextResponses.size(); i++) {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = Utils.encode(contextElement.getId());
             String entityType = Utils.encode(contextElement.getType());
-            logger.debug("Processing context element (id=" + entityId + ", type=" + entityType + ")");
-            
-            // get the resourceName descriptor
-            String resourceName = entityId + "-" + entityType;
+            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type=" + entityType
+                    + ")");
             
             if (resourceName.length() > Constants.CKAN_RESOURCE_MAX_LEN) {
-                logger.error("Bad configuration (A CKAN resource name '" + resourceName + "' has been built and its "
-                        + "length is greater than " + Constants.CKAN_RESOURCE_MAX_LEN + ". This resource name "
-                        + "generation is based on the contatenation of the notified entity identifier, a '-' character "
-                        + "and the notified entity type, thus adjust them)");
+                logger.error("[" + this.getName() + "] Bad configuration (A CKAN resource name '" + resourceName
+                        + "' has been built and its length is greater than " + Constants.CKAN_RESOURCE_MAX_LEN
+                        + ". This resource name generation is based on the contatenation of the notified entity "
+                        + "identifier, a '-' character and the notified entity type, thus adjust them)");
                 throw new Exception("The length of the CKAN resource name '" + resourceName + "' is greater than "
                         + Constants.CKAN_RESOURCE_MAX_LEN);
             } // if
@@ -212,14 +227,15 @@ public class OrionCKANSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMd = contextAttribute.getContextMetadata();
-                logger.debug("Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
+                logger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
 
                 if (rowAttrPersistence) {
-                    logger.info("Persisting data at OrionCKANSink. <" + recvTimeTs + ", " + recvTime + ", "
-                            + organization + ", " + resourceName + ", " + attrName + ", " + attrType + ", "
-                            + attrValue + ", " + attrMd + ">");
+                    logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink. <" + recvTimeTs + ", "
+                            + recvTime + ", " + organization + ", " + resourceName + ", " + attrName + ", " + attrType
+                            + ", " + attrValue + ", " + attrMd + ">");
                     persistenceBackend.persist(recvTimeTs, recvTime, organization, resourceName, attrName, attrType,
-                            attrValue, attrMd);
+		            attrValue, attrMd);
                 } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMd);
@@ -229,8 +245,8 @@ public class OrionCKANSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("Persisting data at OrionCKANSink. <" + recvTime + ", " + organization + ", " + resourceName
-                        + ", " + attrs.toString() + ", " + mds.toString() + ">");
+                logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink. <" + recvTime + ", "
+                        + organization + ", " + resourceName + ", " + attrs.toString() + ", " + mds.toString() + ">");
                 persistenceBackend.persist(recvTime, organization, resourceName, attrs, mds);
             } // if
         } // for

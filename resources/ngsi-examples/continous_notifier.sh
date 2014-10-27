@@ -23,13 +23,22 @@
 # the notification will be sent
 
 URL=$1
+
 if [ "$2" != "" ]
 then
-   ORG=$2
+   SERVICE=$2
 else
-   ORG=default_org
+   SERVICE=def_serv
 fi
-WAIT=$3
+
+if [ "$3" != "" ]
+then
+   SERVICE_PATH=$3
+else
+   SERVICE_PATH=def_serv_path
+fi
+
+WAIT=$4
 
 while true
 do
@@ -38,7 +47,7 @@ do
 TEMP=$((RANDOM%20+10))
 
 echo "---> notification"
-curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $ORG" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
   "originator" : "localhost",

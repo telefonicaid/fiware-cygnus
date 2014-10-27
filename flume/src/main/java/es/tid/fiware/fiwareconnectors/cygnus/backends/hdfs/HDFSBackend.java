@@ -24,7 +24,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.util.Arrays;
 import java.util.LinkedList;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
 
 /**
@@ -41,7 +41,7 @@ public abstract class HDFSBackend {
     protected String hiveHost;
     protected String hivePort;
     protected HttpClientFactory httpClientFactory;
-    protected DefaultHttpClient httpClient;
+    protected HttpClient httpClient;
     private Logger logger;
     
     /**
@@ -70,6 +70,14 @@ public abstract class HDFSBackend {
         // logger
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
+    
+    /**
+     * Sets the http client. This is protected since it is only used by the tests.
+     * @param httpClient
+     */
+    protected void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    } // setHttpClient
 
     /**
      * Provisions a Hive external table (row mode).

@@ -30,7 +30,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -41,6 +40,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.apache.http.client.HttpClient;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -57,7 +57,7 @@ public class CKANBackendImpl implements CKANBackend {
     private String orionUrl;
     private boolean ssl;
     private HttpClientFactory httpClientFactory;
-    private DefaultHttpClient httpClient;
+    private HttpClient httpClient;
 
     // this map implements the f(NGSIentity, Org) = CKANresourceId function
     private HashMap<OrgResourcePair, String> resourceIds;
@@ -135,7 +135,7 @@ public class CKANBackendImpl implements CKANBackend {
             if (effectiveDefaultDataset.length() > Constants.CKAN_PKG_MAX_LEN) {
                 logger.error("Bad configuration (A CKAN package/dataset name '" + effectiveDefaultDataset + "' has "
                         + "been built and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package "
-                        + "name generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                        + "name generation is based on the concatenation of the notified '" + Constants.HEADER_SERVICE
                         + "' organization header, the character '_' and the 'default_dataset' configuration parameter, "
                         + "thus adjust them)");
                 throw new Exception("The lenght of the CKAN package/dataset '" + effectiveDefaultDataset
@@ -521,7 +521,7 @@ public class CKANBackendImpl implements CKANBackend {
                 if (packageName.length() > Constants.CKAN_PKG_MAX_LEN) {
                     logger.error("Bad configuration (A CKAN package/dataset name '" + packageName + "' has been built "
                             + "and its length is greater than " + Constants.CKAN_PKG_MAX_LEN + ". This package name "
-                            + "generation is based on the concatenation of the notified '" + Constants.ORG_HEADER
+                            + "generation is based on the concatenation of the notified '" + Constants.HEADER_SERVICE
                             + "' organization header, the character '_' and the 'default_dataset' configuration "
                             + "parameter, thus adjust them)");
                     throw new CygnusBadConfiguration("The lenght of the CKAN package/dataset '" + packageName
@@ -807,6 +807,14 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // try catch
     } // doCKANRequest
+    
+    /**
+     * Sets the http client. This is protected since it is only used by the tests.
+     * @param httpClient
+     */
+    protected void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    } // setHttpClient
 
     /**
      * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class.
