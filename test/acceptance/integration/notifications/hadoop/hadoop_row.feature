@@ -30,7 +30,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     I want to be able to store in hadoop new notifications per row from context broker
     so that they become more functional and useful
 
-    @happy_path_1
+    @happy_path
     Scenario Outline:  store in hadoop new notifications from context broker
        Given cygnus is installed with type "row"
          And "hadoop" is installed correctly
@@ -64,7 +64,7 @@ Feature: Stored in hadoop new notifications per row from context broker
       |with 32 characters  |json   |
       |with 32 characters  |xml    |
       
-    @resources_1 @skip
+    @resources @skip
     Scenario Outline:  store in hadoop new notifications with different resources behavior
        Given cygnus is installed with type "row"
          And "hadoop" is installed correctly
@@ -174,9 +174,8 @@ Feature: Stored in hadoop new notifications per row from context broker
       |45.41            |json   |
       |45.41            |xml    |
       |{'a':'1','b':'2'}|json   |
-      |<a>1</a><b>2</b> |xml    |
       |-45.47           |json   |
-      |-45.48           |xml    |   
+      |-45.48           |xml    |
       |2014-12-25       |json   |
       |2014-11-25       |xml    |
       |12:42:00         |json   |
