@@ -29,7 +29,7 @@ from myTools.constants import *
 class Ckan:
     world.dictTemp = None
     # --------------- Configuration ------------------------
-    def __init__(self, ckan_version, ckan_url, ckan_authorization):
+    def __init__(self, ckan_version, ckan_url, ckan_authorization, dataset_default):
         """
         constructor
         :param ckan_version:
@@ -39,6 +39,7 @@ class Ckan:
         world.ckan_version    = ckan_version
         world.ckan_url        = ckan_url
         world.authorization   = ckan_authorization
+        world.dataset_default = dataset_default
 
     def __createUrl(self, operation, element = None, offset = None):
         """

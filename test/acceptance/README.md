@@ -13,11 +13,13 @@ Note: We recommend the use of virtualenv, because is an isolated working copy of
 
 ##### Environment preparation:
 
-- Create a virtual environment somewhere, e.g. in ~/venv (virtualenv ~/venv) (optional)
-- Activate the virtual environment (source ~/venv/bin/activate) (optional)
-- Change to the test/acceptance folder of the project.
-- Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
-- Verify if  xmltodict and httplib2 libraries are installed, if not are installed:
+- If you are going to use a virtual environment (optional):
+  * Create a virtual environment somewhere, e.g. in ~/venv (virtualenv ~/venv) (optional)
+  * Activate the virtual environment (source ~/venv/bin/activate) (optional)
+- Both if you are using a virtual environment or not:
+  * Change to the test/acceptance folder of the project.
+  * Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
+  * Verify if  xmltodict and httplib2 libraries are installed, if not are installed:
      pip install xmltodict httplib2
 
 ##### Requeriments for mysql

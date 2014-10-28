@@ -28,8 +28,9 @@ from myTools.constants import *
 
 class Notifications:
     world.attrs = None
+    world.dataset_default = ""
 
-    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber, dataset_default):
+    def __init__(self, cygnus_url, userAgent, organization_row, organization_col, resource, attrNumber, metadataNumber, compoundNumber):
         """
         constructor
         :param cygnus_url:
@@ -47,7 +48,7 @@ class Notifications:
         world.attrsNumber           = attrNumber
         world.metadatasNumber       = metadataNumber
         world.compoundNumber        = compoundNumber
-        world.dataset_default       = dataset_default
+        #world.dataset_default       = dataset_default
 
     def __createUrl(self, operation, resourceId = None):
         """
