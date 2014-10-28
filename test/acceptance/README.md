@@ -65,12 +65,12 @@ Some examples:
     * cygnus_attributesNumber_default: number of attributes used by "default" value.
     * cygnus_metadatasNumber_default: number of attributes metadatas used by "default" value.
     * cygnus_compoundNumber_default: number of attributes compounds used by "default" value.
-    * ckan_dataset_default: dataset name by default, it is the same that used in cygnus.conf in "cygnusagent.sinks.ckan-sink.default_dataset".
-
+    
 - ckan:
     * ckan_version: ckan version installed.
     * ckan_url:  ckan protocol, host and port used to connect ckan server (edpoint).
     * ckan_authorization: the CKAN API key to use, it is the same that used in cygnus.conf in "cygnusagent.sinks.ckan-sink.api_key".
+    * ckan_dataset_default: dataset name by default, it is the same that used in cygnus.conf in "cygnusagent.sinks.ckan-sink.default_dataset".
 
 - mysql:
     * mysql_version: mysql version installed.
