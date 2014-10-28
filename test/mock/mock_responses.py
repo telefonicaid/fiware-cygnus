@@ -20,13 +20,14 @@
 #     Author: Ivan Arias
 #
 
-#constants
 import time
 import socket
 
-
+#constants
 HOST_NAME            = '0.0.0.0'
+PROTOCOL             = u'HTTP'
 PORT_NUMBER          = 8090
+CERTIFICATE_HTTPS    = u''
 MOCK_HOST            = socket.getfqdn() # Return mock hostname
 ORGANIZATION_DEFAULT = u'orga_default'
 DATASET_DEFAULT      = u'fiware-test'
@@ -42,9 +43,11 @@ PUT                  = u'PUT '
 HADOOP               = u'webhdfs'
 
 #headers
+EMPTY                =u''
 OK                   = 200
 CREATED              = 201
 REDIRECT             = 307
+PATH_ERROR          = u'WARN - your path is wrong'
 CONTENT_TYPE         = u'Content-type'
 CONTENT_LENGTH       = u'Content-Length'
 LOCATION             = u'Location'
@@ -91,20 +94,6 @@ headersHADOOP = {CACHE_CONTROL: NO_CACHE,
                  CONTENT_TYPE: APP_JSON_HADOOP,
                  CONTENT_LENGTH: 0
 }
-
-'''
-Cache-Control: no-cache
-Expires: Thu, 01-Jan-1970 00:00:00 GMT
-Date: Tue, 07 Oct 2014 12:37:08 GMT
-Pragma: no-cache
-Date: Tue, 07 Oct 2014 12:37:08 GMT
-Pragma: no-cache
-Content-Type: application/json
-Set-Cookie: hadoop.auth="u=cloud-user&p=cloud-user&t=simple&e=1412721428110&s=hzC3s6hZPZAEmkJQEjDgfmvXpSg=";Path=/
-Transfer-Encoding: chunked
-Server: Jetty(6.1.26)
-
-'''
 
 #CKAN
 CKAN_VERSION                     = u'ckan_version'
@@ -182,19 +171,24 @@ def usage():
     """
     usage message
     """
-    print " *****************************************************************************************"
-    print " *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user>  *"
-    print " *      values by default:                                                               *"
-    print " *           port        : 8090                                                          *"
-    print " *           organization: orga_default                                                  *"
-    print " *           dataset     : fiware-test                                                   *"
-    print " *           resource    : room1-room                                                    *"
-    print " *           hdfs user   : username                                                      *"
-    print " *       Note: all values will be defined in lowercase.                                  *"
-    print " *                  ( use <Ctrl-C> to stop )                                             *"
-    print " *****************************************************************************************"
+    print " ***********************************************************************************************************"
+    print " *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> <certificate file> *"
+    print " *      values by default:                                                                                 *"
+    print " *           protocol    : HTTP (certificate file is not necessary)                                        *"
+    print " *           port        : 8090                                                                            *"
+    print " *           organization: orga_default                                                                    *"
+    print " *           dataset     : fiware-test                                                                     *"
+    print " *           resource    : room1-room                                                                      *"
+    print " *           hdfs user   : username                                                                        *"
+    print " *                                                                                                         *"
+    print " *       Note:   if change the protocol to HTTPS is necessary the certificate file:                        *"
+    print " *               how to create certificate file:                                                           *"
+    print " *                   openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes            *"
+    print " *               all values will be defined in lowercase.                                                  *"
+    print " *                  ( use <Ctrl-C> to stop )                                                               *"
+    print " ***********************************************************************************************************"
 
-def createPath (type, organization ,dataset, resource):
+def createPath (type, organization ,dataset):
     """
     Define all paths dynamically and the locations in redirects only
     :param type:   path type
@@ -251,16 +245,20 @@ def configuration (values):
     Define values for configuration
     :param values: parameters in command line
     """
-    global PORT_NUMBER, ORGANIZATION_DEFAULT, DATASET_DEFAULT, RESOURCE_DEFAULT, responseBody, DATASET, HADOOP_USER, HADOOP_FILE_PATH, HADOOP_LOCATION_URL
+    global PORT_NUMBER, ORGANIZATION_DEFAULT, DATASET_DEFAULT, RESOURCE_DEFAULT, responseBody, DATASET, HADOOP_USER, HADOOP_FILE_PATH, HADOOP_LOCATION_URL, CERTIFICATE_HTTPS, PROTOCOL
     if len (values) > 1: PORT_NUMBER          = int(values[1])
     if len (values) > 2: ORGANIZATION_DEFAULT = values[2]
     if len (values) > 3: DATASET_DEFAULT      = values[3]
     if len (values) > 4: RESOURCE_DEFAULT     = values[4]
     if len (values) > 5: HADOOP_USER          = values[5]
+    if len (values) > 6:
+        CERTIFICATE_HTTPS = values[6]
+        PROTOCOL = u'HTTPS'
+
     DATASET = ORGANIZATION_DEFAULT+"_"+DATASET_DEFAULT
     HADOOP_FILE_PATH = HADOOP_FILE_PATH % (HADOOP_PREFIX, ORGANIZATION_DEFAULT, HADOOP_PREFIX, RESOURCE_DEFAULT, HADOOP_PREFIX, RESOURCE_DEFAULT)
     for i in range(len(responseBody)):
-        responseBody[i][PATH], responseBody[i][LOCATION] = createPath(responseBody[i][NAME], ORGANIZATION_DEFAULT, DATASET , RESOURCE_DEFAULT)
+        responseBody[i][PATH], responseBody[i][LOCATION] = createPath(responseBody[i][NAME], ORGANIZATION_DEFAULT, DATASET)
         responseBody[i][BODY] = createBody(responseBody[i][NAME], ORGANIZATION_DEFAULT, DATASET, RESOURCE_DEFAULT)
     return responseBody
 
@@ -270,12 +268,14 @@ def config_print(responseBody):
     :param responseBody:
     """
     print " * Current configuration:"
-    print " *     mock host   : "+ MOCK_HOST
-    print " *     port        : "+ str(PORT_NUMBER)
-    print " *     organization: "+ ORGANIZATION_DEFAULT
-    print " *     dataset     : "+ DATASET
-    print " *     resource    : "+ RESOURCE_DEFAULT
-    print " *     hdfs user   : "+ HADOOP_USER
+    print " *     protocol     : "+ PROTOCOL
+    print " *     mock host    : "+ MOCK_HOST
+    print " *     port         : "+ str(PORT_NUMBER)
+    if CERTIFICATE_HTTPS != u'': print " *     certificate  : "+ CERTIFICATE_HTTPS
+    print " *     organization : "+ ORGANIZATION_DEFAULT
+    print " *     dataset      : "+ DATASET
+    print " *     resource     : "+ RESOURCE_DEFAULT
+    print " *     hdfs user    : "+ HADOOP_USER
     print " *****************************************************************************************"
     print " * Paths mocked:"
     for i in range(len(responseBody)):
@@ -297,9 +297,10 @@ def response (path):
         for i in range(len(responseBody)):
             if responseBody[i][PATH].lower() == path:
                 headersCKAN[CONTENT_LENGTH] = len(responseBody[i][BODY])
+                headersHADOOP[CONTENT_LENGTH] = headersCKAN[CONTENT_LENGTH]
                 HADOOP_LOCATION_URL = responseBody[i][LOCATION]
                 return responseBody[i][BODY], responseBody[i][CODE]
-        print "WARN - your path is wrong: "+ path
+        return PATH_ERROR, EMPTY
     except Exception, e:
        print "ERROR -  "+ str(e)
 

@@ -1,21 +1,26 @@
 ## Mocks for Cygnus
 
-Mocks are simulated requests that mimic the behavior of real requests in controlled ways.
+Mocks are simulated requests that mimic the behavior of real requests in controlled ways. Used with HTTP as HTTPS protocols.
 
 #### Usage:
 
 ```
- ****************************************************************************************
- *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> *
- *      values by default:                                                              *
- *           port        : 8090                                                         *
- *           organization: orga_default                                                 *
- *           dataset     : fiware-test                                                  *
- *           resource    : room1-room                                                   *
- *           hdfs user   : username                                                     *
- *       Note: all values will be defined in lowercase.                                 *
- *                  ( use <Ctrl-C> to stop )                                            *
- ****************************************************************************************
+ ***********************************************************************************************************
+ *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> <certificate file> *
+ *      values by default:                                                                                 *
+ *           protocol    : HTTP (certificate file is not necessary)                                        *
+ *           port        : 8090                                                                            *
+ *           organization: orga_default                                                                    *
+ *           dataset     : fiware-test                                                                     *
+ *           resource    : room1-room                                                                      *
+ *           hdfs user   : username                                                                        *
+ *                                                                                                         *
+ *       Note:   if change the protocol to HTTPS is necessary the certificate file:                        *
+ *               how to create certificate file:                                                           *
+ *                   openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes            *
+ *               all values will be defined in lowercase.                                                  *
+ *                  ( use <Ctrl-C> to stop )                                                               *
+ ***********************************************************************************************************
 ```
 
 #### Paths mocked:
