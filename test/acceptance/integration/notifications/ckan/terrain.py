@@ -45,17 +45,14 @@ def before_each_scenario(scenario):
                              world.config['cygnus']['cygnus_resource_default'],
                              world.config['cygnus']['cygnus_attributesNumber_default'],
                              world.config['cygnus']['cygnus_metadatasNumber_default'],
-                             world.config['cygnus']['cygnus_compoundNumber_default'],
-                             world.config['cygnus']['ckan_dataset_default']
+                             world.config['cygnus']['cygnus_compoundNumber_default']
     )
 
     world.ckan          = Ckan(
                              world.config['ckan']['ckan_version'],
                              world.config['ckan']['ckan_url'],
                              world.config['ckan']['ckan_authorization'],
-
-
-
+                             world.config['ckan']['ckan_dataset_default']
     )
 
 

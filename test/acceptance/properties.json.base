@@ -11,13 +11,13 @@
         "cygnus_resource_default": "resource-default",
         "cygnus_attributesNumber_default": 2,
         "cygnus_metadatasNumber_default": 2,
-        "cygnus_compoundNumber_default": 0,
-        "ckan_dataset_default": "package_default"
+        "cygnus_compoundNumber_default": 0
     },
     "ckan": {
         "ckan_version": "X.Y",
         "ckan_url": "http://host:port",
-        "ckan_authorization": "CKAN API key"
+        "ckan_authorization": "CKAN API key",
+        "ckan_dataset_default": "package_default"
     },
     "mysql": {
         "mysql_version": "X.Y.z",
