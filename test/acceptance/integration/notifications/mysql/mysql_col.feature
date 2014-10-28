@@ -62,7 +62,6 @@ Feature: Stored in mysql new notifications per column from context broker
       |org_col_varchar_10  |varchar(10)  |45.41            |json   |
       |org_col_varchar_10  |varchar(10)  |45.41            |xml    |
       |org_col_varchar_100 |varchar(100) |{'a':'1','b':'2'}|json   |
-      |org_col_varchar_100 |varchar(100) |<a>1</a><b>2</b> |xml    |
       |org_col_text_1      |text         |45.43            |json   |
       |org_col_text_1      |text         |45.44            |xml    |
       |org_col_float_1     |float        |45.45            |json   |
