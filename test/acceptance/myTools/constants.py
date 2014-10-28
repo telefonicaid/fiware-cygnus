@@ -26,6 +26,7 @@ EMPTY = u''
 FALSE = u'False'
 TRUE  = u'True'
 DEFAULT = u'default'
+FILE_NOT_FOUND = u'file not found'
 
 #Contents
 XML = u'xml'
@@ -62,7 +63,9 @@ USER_AGENT          = u'User-Agent'
 
 
 #ERRORs
-ERROR = { NOT: None}
+ERROR = { NOT: None,
+          FILE_NOT_FOUND: u'FileNotFoundException'}
+
 
 #cygnus
 CKAN                 =  u'ckan'

@@ -84,8 +84,6 @@ Feature: Store in mysql new notifications per row from context broker
       |modelogw_assetgw-device|xml    |
       |ROOM-house             |json   |
       |ROOM-house             |xml    |
-      |modelogw.assetgw-device|json   |
-      |modelogw.assetgw-device|xml    |
 
     @attrNumbers
     Scenario Outline:  store in mysql new notifications with different quantities of attributes

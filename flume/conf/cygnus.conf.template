@@ -79,8 +79,6 @@ cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink.naming_prefix =
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
@@ -121,8 +119,6 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration
