@@ -202,7 +202,7 @@ class MySQL:
                 meta = general_utils.convertStrToDict(world.row [7],JSON)                                                                                 # verify if it has metadatas
                 for j in range(len (meta)):
                     if content == XML:
-                        if meta[j][TYPE] != world.attrs[i][METADATA][j][CONTEXT_METADATA][TYPE]:
+                        if meta[j][TYPE] != world.attrs[i][METADATA][CONTEXT_METADATA][j][TYPE]:
                             return "The "+world.attrs[i][NAME]+" metatada type does not match..."
                     else:
                         if meta[j][TYPE] != world.attrs[i][METADATAS_JSON][j][TYPE]:
@@ -262,7 +262,7 @@ class MySQL:
                 for i in range(int(world.attrsNumber)):
                     self.metadata = general_utils.convertStrToDict(world.row [(i+1)*2], JSON)
                     if content == XML:
-                        if self.metadata[0][VALUE_JSON] != world.attrs[i][METADATA][0][CONTEXT_METADATA][VALUE_JSON]:
+                        if self.metadata[0][VALUE_JSON] != world.attrs[i][METADATA][CONTEXT_METADATA][0][VALUE_JSON]:
                             return "The "+world.attrs[i][NAME]+" metatada value does not match..."
                     else:
                         if self.metadata[0][VALUE_JSON] != world.attrs[i][METADATAS_JSON][0][VALUE_JSON]:
