@@ -107,8 +107,8 @@ def validateHTTPCode(expectedStatusCode, receivedStatus, receivedBody):
     """
 
     assert receivedStatus == status_codes[expectedStatusCode], \
-        "Wrong status code received: %d. Expected: %d. \n\nBody content: %s" \
-        % (str(receivedStatus), status_codes[expectedStatusCode], str(receivedBody))
+        "Wrong status code received: %s. Expected: %s. \n\nBody content: %s" \
+        % (str(receivedStatus), str(status_codes[expectedStatusCode]), str(receivedBody))
 
 
 def showTimes (initValue):

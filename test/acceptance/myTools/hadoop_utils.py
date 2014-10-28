@@ -21,12 +21,13 @@
 #
 
 from lettuce import world
+import time
 import http_utils
 import general_utils
 from myTools.constants import *
 
 class Hadoop:
-    def __init__(self,  hadoop_version, hadoop_namenode_url, hadoop_conputenode_url, hadoop_user):
+    def __init__(self,  hadoop_version, hadoop_verify_version, hadoop_namenode_url, hadoop_conputenode_url, hadoop_user, hadoop_retries_open_file, hadoop_delay_to_retry):
         """
         constructor
         :param hadoop_version:
@@ -34,11 +35,14 @@ class Hadoop:
         :param hadoop_conputenode_url:
         :param hadoop_user:
         """
-        world.hadoop_version         = hadoop_version
-        world.hadoop_namenode_url    = hadoop_namenode_url
-        world.hadoop_conputenode_url = hadoop_conputenode_url
-        world.hadoop_user            = hadoop_user
 
+        world.hadoop_version           = hadoop_version
+        world.hadoop_verify_version    = hadoop_verify_version
+        world.hadoop_namenode_url      = hadoop_namenode_url
+        world.hadoop_conputenode_url   = hadoop_conputenode_url
+        world.hadoop_user              = hadoop_user
+        world.hadoop_retries_open_file = hadoop_retries_open_file
+        world.hadoop_delay_to_retry    = hadoop_delay_to_retry
 
     def __createUrl(self, operation):
         """
@@ -65,7 +69,6 @@ class Hadoop:
         """
         resp, body = http_utils.request2(GET, self.__createUrl(VERSION), self.__createHeaders(), EMPTY, TRUE, ERROR[NOT])
         bodyDict = general_utils.convertStrToDict(body, JSON)
-
         assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \
         "hadoop is not started...\nverified: %s. Expected: %s. \n\nBody content: %s" \
         % (str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), STARTED, str(body))
@@ -97,13 +100,32 @@ class Hadoop:
             if temp[i] == "\n":
                 list.append(temp[:i])
                 temp = temp[i+1:]
-                i = 1
+                i = 0
             i=i+1
-        for i in range(len(list)-1, -1, -1):    #from N element in the list until 0, desc
-            tempDict = general_utils.convertStrToDict(list[i], JSON)
-            if tempDict[ATTR_NAME] == name:
-                return tempDict
+            if i == len(temp): break
+        for i in range(len(list)-1, -1, -1):    #from last element in the list until first, desc
+            dictTemp = general_utils.convertStrToDict(list[i], JSON)
+            if dictTemp [ATTR_NAME] == name:
+                return dictTemp
         return NAME_IS_MISSING
+
+    def __openFile (self, retry, content, name):
+        retries = 0
+        delayToRetry = world.hadoop_delay_to_retry
+        while retry > 0:
+            self.body = None
+            self.element = None
+            resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
+            if self.body.find(ERROR [FILE_NOT_FOUND]) < 0:
+                self.element = self.__splitElement(self.body, name)
+                if str(self.element).find(NAME_IS_MISSING) < 0: # the element is found
+                    return self.element
+            time.sleep(delayToRetry)
+            retry-=1
+            retries+=1
+            print "      ....Retry to open file in hadoop system. No: "+ str (retries)
+        return "file: /%s/%s/%s.txt does no exist... In %s retries..." % (world.organization[world.cygnus_type], world.resource, world.resource, str(retries))
+
 
     def verifyDatasetSearch_valuesAndType (self, content):
         """
@@ -120,15 +142,12 @@ class Hadoop:
             valueTemp = CONTENT_VALUE
         else:
              valueTemp = VALUE_JSON
-
-
-        resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
-        if self.body.find(NOT_FOUND) >= 0:return "file: /%s/%s/%s.txt does no exist..." % (world.organization[world.cygnus_type], world.resource, world.resource)
         for i in range(int(world.attrsNumber)):                                                                     # loops through all our  attributes
-            world.element =  self.__splitElement(self.body, world.attrs[i][NAME])
-            if world.element == NAME_IS_MISSING:
-                return NAME_IS_MISSING
-            else:                                                                                                       # if find the name, begin the verifications
+
+            world.element = self.body = self.__openFile(world.hadoop_retries_open_file, content, world.attrs[i][NAME])
+            if str(world.element).find(NAME_IS_MISSING) >= 0 or str(world.element).find("retries...") >= 0:
+                return str(world.element)
+            else:
                 self.attrType  = world.element [ATTR_TYPE]
                 self.attrValue = world.element [ATTR_VALUE]
                 if world.compoundNumber == 0:
@@ -138,6 +157,7 @@ class Hadoop:
                     for j in range(world.compoundNumber):
                         if self.attrValue[ITEM+str(j)] != world.attrs[i][valueTemp][ITEM+str(j)]:              # verify the compound values
                             return "The "+world.attrs[i][NAME][ITEM+str(j)]+" compound values does not match..."
+
                 if self.attrType != world.attrs[i][TYPE]:                                                               # verify the type
                     return "The "+world.attrs[i][TYPE]+" type does not match..."
                 outMsg = "OK"
@@ -153,19 +173,16 @@ class Hadoop:
         self.body     = None
         outMsg = NAME_IS_MISSING
         if world.metadatasNumber <= 0: return "OK"
-        resp, self.body = http_utils.request2(GET, self.__createUrl(OPEN_FILE), self.__createHeaders(content), EMPTY, TRUE, ERROR[NOT])
-        if self.body.find(NOT_FOUND) >= 0:return "file: /%s/%s/%s.txt does no exist..." % (world.organization[world.cygnus_type], world.resource, world.resource)
-
         for i in range(int(world.attrsNumber)):                                                                                      # loops through all our  attributes
-           world.element =  self.__splitElement(self.body, world.attrs[i][NAME])
-           if world.element == NAME_IS_MISSING:
-                return NAME_IS_MISSING
-           else:
+            world.element = self.body = self.__openFile(world.hadoop_retries_open_file, content, world.attrs[i][NAME])
+            if str(world.element).find(NAME_IS_MISSING) >= 0 or str(world.element).find("retries...") >= 0:
+                return str(world.element)
+            else:
                 meta = world.element [ATTR_MD]                                                                                # verify if it has metadatas
                 for j in range(len (meta)):
                     if content == XML:
-                        if meta[j][TYPE] != world.attrs[i][METADATA][j][CONTEXT_METADATA][TYPE]:
-                            return "The \""+ world.attrs[i][METADATA][j][CONTEXT_METADATA][TYPE]+"\" metatada type does not match..."
+                        if meta[j][TYPE] != world.attrs[i][METADATA][CONTEXT_METADATA][j][TYPE]:
+                            return "The \""+ world.attrs[i][METADATA][CONTEXT_METADATA][j][TYPE]+"\" metatada type does not match..."
                     else:
                         if meta[j][TYPE] != world.attrs[i][METADATAS_JSON][j][TYPE]:
                             return "The \""+world.attrs[i][METADATAS_JSON][j][TYPE]+"\" metatada type does not match..."
@@ -185,6 +202,7 @@ class Hadoop:
         delete the file in use (used in terrain.py, after.each_scenario method)
         """
         http_utils.request2(DELETE, self.__createUrl(DELETE_FILE), self.__createHeaders(JSON), EMPTY, TRUE, ERROR[NOT])
+        pass
 
     def parametersToNotification_col (self, organization, resource, attributesQuantity, metadataValue, content):
         """

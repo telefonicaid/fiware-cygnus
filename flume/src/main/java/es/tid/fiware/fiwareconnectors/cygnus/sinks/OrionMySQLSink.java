@@ -61,7 +61,6 @@ public class OrionMySQLSink extends OrionSink {
     private String mysqlUsername;
     private String mysqlPassword;
     private boolean rowAttrPersistence;
-    private String namingPrefix;
     private MySQLBackend persistenceBackend;
     
     /**
@@ -112,15 +111,7 @@ public class OrionMySQLSink extends OrionSink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
-    
-    /**
-     * Returns if the naming prefix. It is protected due to it is only required for testing purposes.
-     * @return The naming prefix
-     */
-    protected String getNamingPrefix() {
-        return namingPrefix;
-    } // getNamingPrefix
-    
+
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
@@ -151,16 +142,6 @@ public class OrionMySQLSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
-        namingPrefix = context.getString("naming_prefix", "");
-        
-        if (namingPrefix.length() > Constants.NAMING_PREFIX_MAX_LEN) {
-            logger.error("[" + this.getName() + "] Bad configuration (Naming prefix length is greater than "
-                    + Constants.NAMING_PREFIX_MAX_LEN + ")");
-            logger.info("[" + this.getName() + "] Exiting Cygnus");
-            System.exit(-1);
-        } // if
-        
-        logger.debug("[" + this.getName() + "] Reading configuration (naming_prefix=" + namingPrefix + ")");
     } // configure
 
     @Override
@@ -177,7 +158,7 @@ public class OrionMySQLSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
         String organization = eventHeaders.get(Constants.HEADER_SERVICE);
-        String tableName = this.namingPrefix + eventHeaders.get(Constants.DESTINATION).replaceAll("-", "_");
+        String tableName = eventHeaders.get(Constants.DESTINATION).replaceAll("-", "_");
         
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
@@ -187,13 +168,11 @@ public class OrionMySQLSink extends OrionSink {
 
         // create the database for this organization if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
-        String dbName = namingPrefix + organization;
+        String dbName = organization;
         
         if (dbName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
             logger.error("[" + this.getName() + "] Bad configuration (A MySQL database name '" + dbName + "' has been "
-                    + "built and its length is greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ". This database name "
-                    + "generation is based on the concatenation of the 'naming_prefix' configuration parameter and the "
-                    + "notified '" + Constants.HEADER_SERVICE + "' organization header, thus adjust them)");
+                    + "built and its length is greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ")");
             throw new CygnusBadConfiguration("The lenght of the MySQL database '" + dbName + "' is greater "
                     + "than " + Constants.MYSQL_DB_NAME_MAX_LEN);
         } // if
@@ -218,10 +197,7 @@ public class OrionMySQLSink extends OrionSink {
             
             if (tableName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
                 logger.error("[" + this.getName() + "] Bad configuration (A MySQL table name '" + tableName + "' has "
-                        + "been built and its length is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ". This "
-                        + "table name generation is based on the concatenation of the 'naming_prefix' configuration "
-                        + "parameter, the notified entity identifier, a '_' character and the notified entity type, "
-                        + "thus adjust them");
+                        + "been built and its length is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ")");
                 throw new CygnusBadConfiguration("The length of the MySQL table '" + tableName + "' is "
                         + "greater than " + Constants.MYSQL_DB_NAME_MAX_LEN);
             } // if

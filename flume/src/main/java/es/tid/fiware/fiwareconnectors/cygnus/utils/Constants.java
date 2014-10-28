@@ -53,7 +53,6 @@ public final class Constants {
     public static final String ATTR_TYPE    = "attrType";
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
-    public static final int NAMING_PREFIX_MAX_LEN = 32;
 
     // HTTP client factory
     public static final int MAX_CONNS = 500;
