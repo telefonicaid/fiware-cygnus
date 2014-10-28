@@ -48,7 +48,7 @@ class Notifications:
         world.attrsNumber           = attrNumber
         world.metadatasNumber       = metadataNumber
         world.compoundNumber        = compoundNumber
-        #world.dataset_default       = dataset_default
+       
 
     def __createUrl(self, operation, resourceId = None):
         """
