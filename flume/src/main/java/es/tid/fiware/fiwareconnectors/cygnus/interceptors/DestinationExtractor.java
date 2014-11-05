@@ -25,6 +25,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -82,7 +83,7 @@ public class DestinationExtractor implements Interceptor {
             reader = new BufferedReader(new FileReader(matchingTableFile));
         } catch (FileNotFoundException e) {
             logger.error("Runtime error (File not found. Details=" + e.getMessage() + ")");
-                return;
+            return;
         } // try catch
         
         String line;
@@ -96,7 +97,7 @@ public class DestinationExtractor implements Interceptor {
                 String[] tokens = line.split("\\|");
                 int id = new Integer(tokens[0]).intValue();
                 ArrayList<String> fields = new ArrayList<String>(Arrays.asList(tokens[1].split(",")));
-                matchingTable.add(new MatchingRule(id, fields, tokens[2], tokens[3]));
+                matchingTable.add(new MatchingRule(id, fields, tokens[2], tokens[3], tokens[4]));
             } // while
         } catch (IOException e) {
             logger.error("Runtime error (I/O exception. Details=" + e.getMessage() + ")");
@@ -105,8 +106,14 @@ public class DestinationExtractor implements Interceptor {
  
     @Override
     public Event intercept(Event event) {
+        // get the original headers and body
         Map<String, String> headers = event.getHeaders();
         String body = new String(event.getBody());
+        
+        // get some original header values
+        String fiwareServicePath = headers.get(Constants.HEADER_SERVICE_PATH);
+        
+        // parse the original body
         NotifyContextRequest notification = null;
 
         if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
@@ -139,6 +146,7 @@ public class DestinationExtractor implements Interceptor {
         
         // iterate on the contextResponses
         ArrayList<String> destinations = new ArrayList<String>();
+        ArrayList<String> datasets = new ArrayList<String>();
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
         
         for (ContextElementResponse contextElementResponse : contextResponses) {
@@ -154,19 +162,25 @@ public class DestinationExtractor implements Interceptor {
                 
                 if (matcher.matches()) {
                     destinations.add(rule.destination);
+                    datasets.add(rule.dataset);
                     added = true;
                     break;
                 } // if
             } // for
             
-            // check if no matching was found, in that case the default destination ('<entityId>-<entityType>') is used
+            // check if no matching was found, in that case the default destination ('<entityId>_<entityType>') and the
+            // notified fiware-servicePath are used
             if (!added) {
-                destinations.add(contextElement.getId() + "-" + contextElement.getType());
+                destinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+                datasets.add(fiwareServicePath);
             } // if
         } // for
  
+        // set the final header values
         headers.put(Constants.DESTINATION,
                 destinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+        headers.put(Constants.HEADER_SERVICE_PATH,
+                datasets.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
         event.setHeaders(headers);
         return event;
     } // intercept
@@ -229,6 +243,7 @@ public class DestinationExtractor implements Interceptor {
         private ArrayList<String> fields;
         private Pattern pattern;
         private String destination;
+        private String dataset;
         
         /**
          * Constructor.
@@ -236,12 +251,14 @@ public class DestinationExtractor implements Interceptor {
          * @param fields
          * @param regex
          * @param destination
+         * @param dataset
          */
-        public MatchingRule(int id, ArrayList<String> fields, String regex, String destination) {
+        public MatchingRule(int id, ArrayList<String> fields, String regex, String destination, String group) {
             this.id = id;
             this.fields = fields;
             this.pattern = Pattern.compile(regex);
-            this.destination = destination;
+            this.destination = Utils.encode(destination);
+            this.dataset = Utils.encode(group);
         } // MatchingRule
         
         /**
@@ -274,6 +291,14 @@ public class DestinationExtractor implements Interceptor {
         public String getDestination() {
             return destination;
         } // destination
+        
+        /**
+         * Gets the rule's dataset.
+         * @return The rule's dataset.
+         */
+        public String getDataset() {
+            return dataset;
+        } // getDataset
         
     } // MatchingRule
   
