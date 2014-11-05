@@ -122,17 +122,20 @@ public class DestinationExtractorTest {
         assertEquals(1, firstRule.getId());
         assertTrue(firstRule.getFields().size() == 2);
         assertEquals("Room\\.(\\d*)Room", firstRule.getRegex());
-        assertEquals("rooms", firstRule.getDestination());
+        assertEquals("numeric_rooms", firstRule.getDestination());
+        assertEquals("rooms", firstRule.getDataset());
         MatchingRule secondRule = matchingTable.get(1);
         assertEquals(2, secondRule.getId());
         assertTrue(secondRule.getFields().size() == 1);
         assertEquals("Car", secondRule.getRegex());
         assertEquals("cars", secondRule.getDestination());
+        assertEquals("vehicles", secondRule.getDataset());
         MatchingRule thirdRule = matchingTable.get(2);
         assertEquals(3, thirdRule.getId());
         assertTrue(thirdRule.getFields().size() == 1);
         assertEquals("GARDENS", thirdRule.getRegex());
         assertEquals("gardens", thirdRule.getDestination());
+        assertEquals("city_indicators", thirdRule.getDataset());
     } // testInitialize
     
     /**
@@ -142,8 +145,10 @@ public class DestinationExtractorTest {
     public void testIntercept() {
         destExtractor.initialize();
         Event interceptedEvent = destExtractor.intercept(event);
-        String destination = interceptedEvent.getHeaders().get(Constants.DESTINATION);
-        assertEquals(destination, "rooms,rooms");
+        String destinations = interceptedEvent.getHeaders().get(Constants.DESTINATION);
+        assertEquals(destinations, "numeric_rooms,numeric_rooms");
+        String datasets = interceptedEvent.getHeaders().get(Constants.HEADER_SERVICE_PATH);
+        assertEquals(datasets, "rooms,rooms");
     } // testIntercept
 
 } // DestinationExtractorTest

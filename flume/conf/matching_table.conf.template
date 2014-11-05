@@ -22,13 +22,13 @@
 # 
 # Append as many matching rules as you need, following this format:
 #
-# integer id|comma-separated fields|regex to be applied to the fields concatenation|destination
+# integer id|comma-separated fields|regex to be applied to the fields concatenation|destination|dataset
 #
 # The available "dictionary" of fields is:
 #  - entitydId
 #  - entityType
 #  - servicePath
 
-1|entityId,entityType|Room\.(\d*)Room|rooms
-2|entityId|Car|cars
-3|servicePath|GARDENS|gardens
+1|entityId,entityType|Room\.(\d*)Room|numeric_rooms|rooms
+2|entityId|Car|cars|vehicles
+3|servicePath|GARDENS|gardens|city_indicators
