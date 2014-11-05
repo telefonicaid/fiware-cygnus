@@ -165,7 +165,8 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("timestamp", "123456789");
-        headers.put(Constants.HEADER_SERVICE, "any_org");
+        headers.put(Constants.HEADER_SERVICE, "any_service");
+        headers.put(Constants.HEADER_SERVICE_PATH, "any_service_path");
         headers.put(Constants.DESTINATION, "any_dest");
         
         try {
