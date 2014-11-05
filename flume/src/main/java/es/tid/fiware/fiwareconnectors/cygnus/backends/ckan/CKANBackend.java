@@ -29,40 +29,34 @@ import java.util.Map;
 public interface CKANBackend {
 
     /**
-     * Prepares an organization for use, creating it if it doesn't previously exist.
-     *
-     * @param organization to initialize
-     * @throws Exception
-     */
-    void initOrg(String organization) throws Exception;
-
-    /**
      * Persist data in the CKAN datastore associated with the entity in a given organization (row mode).
      * 
-     * @param recvTimeTs reception time in milliseconds.
-     * @param recvTime reception time (human readable)
-     * @param organization organization.
-     * @param entity entity string (including ID and type).
-     * @param attrName attribute name.
-     * @param attrType attribute type.
-     * @param attrValue attribute value.
-     * @param attrMd attribute metadata string serialization
+     * @param recvTimeTs Reception time in milliseconds
+     * @param recvTime Reception time (human readable)
+     * @param orgName Organization name
+     * @param pkgName Package/dataset name
+     * @param resName Resource name
+     * @param attrName Attribute name
+     * @param attrType Attribute type
+     * @param attrValue Attribute value
+     * @param attrMd Attribute metadata string serialization
      * @throws Exception
      */
-    void persist(long recvTimeTs, String recvTime, String organization, String entity, String attrName, String attrType,
-            String attrValue, String attrMd) throws Exception;
+    void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String attrName,
+            String attrType, String attrValue, String attrMd) throws Exception;
 
     /**
      * Persist data in the CKAN datastore associated with the entity in a given organization (column mode).
      *
-     * @param recvTime reception time (human readable)
-     * @param organization organization.
-     * @param entity entity string (including ID and type).
-     * @param attrList hashmap containing the attributes to persist
-     * @param attrMdList hashmap containing the metadata string serialization to persist
+     * @param recvTime Reception time (human readable)
+     * @param orgName Organization name
+     * @param pkgName Package/dataset name
+     * @param resName Resource name
+     * @param attrList Hashmap containing the attributes to persist
+     * @param attrMdList Hashmap containing the metadata string serialization to persist
      * @throws Exception
      */
-    void persist(String recvTime, String organization, String entity, Map<String, String> attrList,
+    void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList,
             Map<String, String> attrMdList) throws Exception;
     
 } // CKANBackend
