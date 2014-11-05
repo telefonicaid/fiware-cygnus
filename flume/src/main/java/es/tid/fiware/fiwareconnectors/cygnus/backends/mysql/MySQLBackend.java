@@ -81,8 +81,8 @@ public class MySQLBackend {
         } // try catch
         
         try {
-            String query = "create database if not exists " + dbName;
-            logger.debug("Executing MySQL query (" + query + ")");
+            String query = "create database if not exists `" + dbName + "`";
+            logger.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
@@ -110,7 +110,7 @@ public class MySQLBackend {
         } // try catch
         
         try {
-            String query = "create table if not exists " + tableName + " ("
+            String query = "create table if not exists `" + tableName + "` ("
                     + Constants.RECV_TIME_TS + " long, "
                     + Constants.RECV_TIME + " text, "
                     + Constants.ENTITY_ID + " text, "
@@ -119,7 +119,7 @@ public class MySQLBackend {
                     + Constants.ATTR_TYPE + " text, "
                     + Constants.ATTR_VALUE + " text, "
                     + Constants.ATTR_MD + " text)";
-            logger.debug("Executing MySQL query (" + query + ")");
+            logger.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
@@ -156,10 +156,10 @@ public class MySQLBackend {
         } // try catch
         
         try {
-            String query = "insert into " + tableName + " values ('" + recvTimeTs + "', '" + recvTime + "', '"
+            String query = "insert into `" + tableName + "` values ('" + recvTimeTs + "', '" + recvTime + "', '"
                     + entityId + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue
                     + "', '" + attrMd + "')";
-            logger.debug("Executing MySQL query (" + query + ")");
+            logger.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());
@@ -221,8 +221,8 @@ public class MySQLBackend {
                 
         try {
             // finish creating the query and execute it
-            String query = "insert into " + tableName + " (" + columnNames + ") values (" + columnValues + ")";
-            logger.debug("Executing MySQL query (" + query + ")");
+            String query = "insert into `" + tableName + "` (" + columnNames + ") values (" + columnValues + ")";
+            logger.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());

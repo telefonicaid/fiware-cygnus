@@ -27,7 +27,6 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.Con
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,25 +156,16 @@ public class OrionMySQLSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
-        String organization = eventHeaders.get(Constants.HEADER_SERVICE);
-        String tableName = eventHeaders.get(Constants.DESTINATION).replaceAll("-", "_");
-        
+        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
+        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
-        
-        // FIXME: organization is given in order to support multi-tenancy... should be used instead of the current
-        // cosmosUsername
 
-        // create the database for this organization if not yet existing... the cost of trying to create it is the same
+        // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
-        String dbName = organization;
-        
-        if (dbName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
-            logger.error("[" + this.getName() + "] Bad configuration (A MySQL database name '" + dbName + "' has been "
-                    + "built and its length is greater than" + Constants.MYSQL_DB_NAME_MAX_LEN + ")");
-            throw new CygnusBadConfiguration("The lenght of the MySQL database '" + dbName + "' is greater "
-                    + "than " + Constants.MYSQL_DB_NAME_MAX_LEN);
-        } // if
+        String dbName = buildDbName(fiwareService);
         
         // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
         // create it in the per-column mode because there will not be any table within the database
@@ -183,24 +173,20 @@ public class OrionMySQLSink extends OrionSink {
             persistenceBackend.createDatabase(dbName);
         } // if
         
-        // iterate in the contextResponses
+        // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
         
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
-            String entityId = Utils.encode(contextElement.getId());
-            String entityType = Utils.encode(contextElement.getType());
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
             logger.debug("[" + this.getName() + "] Processing context element (id= + " + entityId + ", type= "
                     + entityType + ")");
             
-            if (tableName.length() > Constants.MYSQL_DB_NAME_MAX_LEN) {
-                logger.error("[" + this.getName() + "] Bad configuration (A MySQL table name '" + tableName + "' has "
-                        + "been built and its length is greater than" + Constants.MYSQL_TABLE_NAME_MAX_LEN + ")");
-                throw new CygnusBadConfiguration("The length of the MySQL table '" + tableName + "' is "
-                        + "greater than " + Constants.MYSQL_DB_NAME_MAX_LEN);
-            } // if
+            // build the table name
+            String tableName = buildTableName(fiwareServicePath, destinations[i]);
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
@@ -262,4 +248,40 @@ public class OrionMySQLSink extends OrionSink {
         } // for
     } // persist
     
+    /**
+     * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
+     * @param fiwareService
+     * @return
+     * @throws Exception
+     */
+    private String buildDbName(String fiwareService) throws Exception {
+        String dbName = fiwareService;
+        
+        if (dbName.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
+                    + "than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return dbName;
+    } // buildDbName
+    
+    /**
+     * Builds a package name given a fiwareServicePath and a destination. It throws an exception if the naming
+     * conventions are violated.
+     * @param fiwareServicePath
+     * @param destination
+     * @return
+     * @throws Exception
+     */
+    private String buildTableName(String fiwareServicePath, String destination) throws Exception {
+        String tableName = fiwareServicePath + '_' + destination;
+
+        if (tableName.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName
+                    + ") and its length is greater than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return tableName;
+    } // buildTableName
+
 } // OrionMySQLSink
