@@ -20,25 +20,29 @@ The way Cygnus makes use of this Interceptor is the standard one:
     cygnusagent.sources.http-source.interceptors.ts.type = timestamp 
 
 ## `DestinationExtractor` Interceptor
-This is custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination where the data regarding a notified entity is going to be persisted. This destination, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. Such an inference is made by inspecting (but not modifying) certain configured fields of the body part of the event; if the concatenation of such fields matches a configured regular expresion, then the configured destination is added as the value of a `destination` header.
+This is custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a destination dataset containing the destination entity has to be configured.
+
+Such an inference is made by inspecting (but not modifying) certain configured fields of the body part of the event; if the concatenation of such fields matches a configured regular expresion, then the configured destination entity is added as the value of a `destination` header. The destination dataset substitutes the already existing `fiware-servicePath` header.
+
+If a notified entity contains more than one context response, then both the `destination` and the `fiware-servicePath` headers contains a comma-separated list of values.
 
 There exists a <i>matching table</i> file containing the above <i>matching rules</i> definition, following this format line by line:
 
-    <integer id>|<comma-separated fields to be concatenated>|<regex to be applied>|<destination>
+    <integer id>|<comma-separated fields to be concatenated>|<regex to be applied>|<destination_entity>|<destination_dataset>
 
 For instance:
 
-    1|entityId,entityType|Room\.(\d*)Room|numeric_rooms
-    2|entityId,entityType|Room\.(\D*)Room|character_rooms
-    3|entityType|Room|other_roorms
+    1|entityId,entityType|Room\.(\d*)Room|numeric_rooms|rooms
+    2|entityId,entityType|Room\.(\D*)Room|character_rooms|rooms
+    3|entityType|Room|other_roorms|rooms
 
 The above rules set that:
 
-* All the `Room` entities having their ids composed by a `Room.` and an integer will be persisted in a `numeric_rooms` destination.
-* All the `Room` entities having their ids composed by a `Room.` and any number of characters (no digits) will be persisted in a `character_rooms` destination.
-* All other rooms will go to `other_rooms`.
+* All the `Room` entities having their identifiers composed by a `Room.` and an integer will be persisted in a `numeric_rooms` destination entity within a `rooms` destination dataset.
+* All the `Room` entities having their identifiers composed by a `Room.` and any number of characters (no digits) will be persisted in a `character_rooms` destination entity within a `rooms` destination dataset.
+* All other rooms will go to `other_rooms` within a `rooms` destination dataset.
 
-Rules are tryed sequentially, and if any rules matches then the default destination for the notified entity is generated, i.e. the concatenation of the entity id, `_' and the entity type.
+Rules are tryed sequentially, and if any rules matches then the default destination for the notified entity is generated, i.e. the concatenation of the entity id, `_` and the entity type.
 
 The available <i>dictionary</i> of fields for concatenation is:
 
