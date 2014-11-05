@@ -45,14 +45,24 @@ public final class Utils {
     } // Utils
     
     /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
+     * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-' and '.').
      * 
      * @param in
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+        return in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_").toLowerCase();
     } // encode
+    
+    /**
+     * Encodes a string replacing all the non alphanumeric characters by '_'.
+     * 
+     * @param in
+     * @return The encoded version of the input string.
+     */
+    public static String encodeHive(String in) {
+        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+    } // encodeHive
     
     /**
      * Converts a XML node into Json.
