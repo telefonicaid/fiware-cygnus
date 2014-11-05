@@ -62,11 +62,6 @@ public class HDFSBackendImpl extends HDFSBackend {
    
     @Override
     public void createDir(String username, String dirPath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + dirPath + "?op=mkdirs&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
             
@@ -82,11 +77,6 @@ public class HDFSBackendImpl extends HDFSBackend {
     @Override
     public void createFile(String username, String filePath, String data)
         throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=create&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
         
@@ -116,11 +106,6 @@ public class HDFSBackendImpl extends HDFSBackend {
     
     @Override
     public void append(String username, String filePath, String data) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=append&user.name=" + username;
         HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
 
@@ -150,11 +135,6 @@ public class HDFSBackendImpl extends HDFSBackend {
     
     @Override
     public boolean exists(String username, String filePath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=getfilestatus&user.name="
                 + username;
         HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
