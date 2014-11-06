@@ -33,11 +33,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         Respond to a POST request.
         """
-        length = int(s.headers['Content-Length'])
-        request_body = s.rfile.read(length)   # get the request body
-        resp, code = mock_responses.response(s.path)
-        if resp == mock_responses.PATH_ERROR and code == mock_responses.EMPTY:
-            print resp+ ": "+ s.path
+        request_body = None
+        try:
+            length = int(s.headers['Content-Length'])
+            request_body = s.rfile.read(length)   # get the request body
+        except Exception, e:
+            print "WARN - content-length header does not exist and payload is empty... "
+        resp, code = mock_responses.response(s.path,request_body)
+        if (resp.find (mock_responses.WARN)>=0 or resp.find (mock_responses.ERROR)>=0) and code == mock_responses.EMPTY:
+            print resp
         else:
             s.send_response(code)
             if mock_responses.isHadoop(s.path):headers = mock_responses.headersHADOOP.items()
@@ -45,7 +49,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             for h, v in headers:
                 s.send_header(h, v)
             if code == mock_responses.REDIRECT:
-                s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION_URL)
+                s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION)
         s.end_headers()
         s.wfile.write(resp)
 
@@ -55,8 +59,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
 
         resp, code = mock_responses.response(s.path)
-        if resp == mock_responses.PATH_ERROR and code == mock_responses.EMPTY:
-            print resp+ ": "+ s.path
+        if (resp.find (mock_responses.WARN)>=0 or resp.find (mock_responses.ERROR)>=0) and code == mock_responses.EMPTY:
+            print resp
         else:
             s.send_response(code)
             if mock_responses.isHadoop(s.path):headers = mock_responses.headersHADOOP.items()
@@ -72,30 +76,25 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         Respond to a PUT request.
         """
         resp, code = mock_responses.response(s.path)
-        if resp == mock_responses.PATH_ERROR and code == mock_responses.EMPTY:
-            print resp+ ": "+ s.path
+        if (resp.find (mock_responses.WARN)>=0 or resp.find (mock_responses.ERROR)>=0) and code == mock_responses.EMPTY:
+            print resp
         else:
             s.send_response(code)
             for h, v in mock_responses.headersHADOOP.items():
                 s.send_header(h, v)
             if code == mock_responses.REDIRECT:
-                s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION_URL)
+                s.send_header(mock_responses.LOCATION,mock_responses.HADOOP_LOCATION)
         s.end_headers()
         s.wfile.write(resp)
 
 
 if __name__ == '__main__':
-    responseBody = []
-    mock_responses.usage()
-    responseBody = mock_responses.configuration(sys.argv)
-    mock_responses.config_print (responseBody)
+    mock_responses.configuration(sys.argv)
 
     server_class = BaseHTTPServer.HTTPServer
     httpd = server_class((mock_responses.HOST_NAME, mock_responses.PORT_NUMBER), MyHandler)
     if mock_responses.CERTIFICATE_HTTPS != "":
         httpd.socket = ssl.wrap_socket (httpd.socket, certfile=mock_responses.CERTIFICATE_HTTPS, server_side=True)
-
-
 
     print time.asctime(), "Server Starts - %s:%s" % (mock_responses.HOST_NAME, mock_responses.PORT_NUMBER)
     try:
