@@ -6,20 +6,25 @@ Mocks are simulated requests that mimic the behavior of real requests in control
 
 ```
  ***********************************************************************************************************
- *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> <certificate file> *
- *      values by default:                                                                                 *
- *           protocol    : HTTP (certificate file is not necessary)                                        *
- *           port        : 8090                                                                            *
- *           organization: orga_default                                                                    *
- *           dataset     : fiware-test                                                                     *
- *           resource    : room1-room                                                                      *
- *           hdfs user   : username                                                                        *
+ *  usage: python cygnus_mock.py <-u> <-p=port> <-c=certificate file> <-dd= default dataset>               *
+ *           ex: python cygnus_mock.py -p=8092 -c=server.pem  -dd=fiware-test                              *
  *                                                                                                         *
- *       Note:   if change the protocol to HTTPS is necessary the certificate file:                        *
- *               how to create certificate file:                                                           *
- *                   openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes            *
- *               all values will be defined in lowercase.                                                  *
- *                  ( use <Ctrl-C> to stop )                                                               *
+ *  parameters:                                                                                            *
+ *         -u: show this usage.                                                                            *
+ *         -p: change of mock port (by default 8090).                                                      *
+ *         -c: certificate path and file used in https protocol.                                           *
+ *        -dd: default dataset, obligatory in ckan  (by default "fiware-test").                              *
+ *                                                                                                         *
+ *  Comments:                                                                                              *
+ *         Default Dataset is prefixed by organization name to ensure uniqueness ant it.                   *
+ *            Must be purely lowercase alphanumeric (ascii) characters,                                    *
+ *            plus "-" and "_" acording to CKAN limitations.                                               *
+ *         HTTP protocol: the certificate file is not necessary.                                           *
+ *         HTTPS protocol: the certificate file is  necessary.                                             *
+ *            how to create certificate file:                                                              *
+ *                openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes               *
+ *                                                                                                         *
+ *                                     ( use <Ctrl-C> to stop )                                            *
  ***********************************************************************************************************
 ```
 

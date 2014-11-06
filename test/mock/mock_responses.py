@@ -22,17 +22,32 @@
 
 import time
 import socket
+import json
 
 #constants
 HOST_NAME            = '0.0.0.0'
-PROTOCOL             = u'HTTP'
+HTTP                 = u'http'
+HTTPS                = u'https'
+PROTOCOL             = HTTP
 PORT_NUMBER          = 8090
 CERTIFICATE_HTTPS    = u''
 MOCK_HOST            = socket.getfqdn() # Return mock hostname
-ORGANIZATION_DEFAULT = u'orga_default'
+
+# values by default
 DATASET_DEFAULT      = u'fiware-test'
-RESOURCE_DEFAULT     = u'Room1-Room'
+ORGANIZATION         = u'orga_default'
+RESOURCES            = ['Room1-Room', 'Room2-Room', 'Room3-Room', 'modelogw_assetgw-device', 'Room2-HOUSE', 'Room2-', 'ROOM-house', 'modelogw_assetgw-device']
+RESOURCE             = u'room1-room'
+HADOOP               = u'webhdfs'
+HADOOP_USER          = u'username'
+
+DATASET              = ORGANIZATION+"_"+DATASET_DEFAULT
+HADOOP_LOCATION_URL  = PROTOCOL+"://"+MOCK_HOST+":"+str(PORT_NUMBER)
+HADOOP_FILE_PATH     = u'%s/%s/%s.txt' % (ORGANIZATION, RESOURCE,  RESOURCE)
+
 NAME                 = u'name'
+OWNER_ORG            = u'owner_org'
+RESOURCE_ID          = u'resource_id'
 PATH                 = u'path'
 BODY                 = u'body'
 CODE                 = u'code'
@@ -40,14 +55,15 @@ METHOD               = u'method'
 GET                  = u'GET '
 POST                 = u'POST'
 PUT                  = u'PUT '
-HADOOP               = u'webhdfs'
+WARN                 = u'WARN - '
+ERROR                = u'ERROR - '
 
 #headers
-EMPTY                =u''
+EMPTY                = u''
 OK                   = 200
 CREATED              = 201
 REDIRECT             = 307
-PATH_ERROR          = u'WARN - your path is wrong'
+PATH_ERROR           = WARN + u' your path is wrong'
 CONTENT_TYPE         = u'Content-type'
 CONTENT_LENGTH       = u'Content-Length'
 LOCATION             = u'Location'
@@ -71,7 +87,7 @@ KEEP_ALIVE           = u'Keep-Alive'
 DATE_VALUE           = (time.strftime("%a, %d %b %Y %H:%M:%S GMT"))
 EXPIRES_VALUE        = u'Thu, 01-Jan-1970 00:00:00 GMT'
 CHUNKED              = u'chunked'
-SET_COOKIE_VALUE     = u'hadoop.auth=\"u=cloud-user&p=cloud-user&t=simple&e=1412642504703&s=KKIbNLYXIuBi94sGfNUm1X3A9Dg=\";Path=/'
+SET_COOKIE_VALUE     = u'hadoop.auth=\"u=username&p=username&t=simple&e=1412642504703&s=KKIbNLYXIuBi94sGfNUm1X3A9Dg=\";Path=/'
 
 headersCKAN = {CONTENT_TYPE: APP_JSON_CKAN,
                CONTENT_LENGTH: 0,
@@ -96,213 +112,223 @@ headersHADOOP = {CACHE_CONTROL: NO_CACHE,
 }
 
 #CKAN
-CKAN_VERSION                     = u'ckan_version'
-CKAN_ORGANIZATION_SHOW           = u'ckan_organization_show'
-CKAN_ORGANIZATION_CREATE         = u'ckan_organization_create'
-CKAN_PACKAGE_CREATE              = u'ckan_package_create'
-CKAN_RESOURCE_CREATE             = u'ckan_resource_create'
-CKAN_DATASTORE_CREATE            = u'ckan_datastore_create'
-CKAN_DISCOVER_RESOURCES          = u'ckan_discover_resource'
-CKAN_INSERT_ROW                  = u'ckan_insert_row'
-
 CKAN_VERSION_PATH                = u'/api/util/status'
-CKAN_ORGANIZATION_PATH           = u'/api/3/action/organization_show?id=%s'   # ex: /api/3/action/organization_show?id=orga_default
-CKAN_ORGANIZATION_CREATE_PATH    = u'/api/3/action/organization_create'
-CKAN_PACKAGE_CREATE_PATH         = u'/api/3/action/package_create'
-CKAN_RESOURCE_CREATE_PATH        = u'/api/3/action/resource_create'
-CKAN_DATASTORE_CREATE_PATH       = u'/api/3/action/datastore_create'
-CKAN_DISCOVER_RESOURCES_PATH     = u'/api/3/action/package_show?id=%s'        # ex: /api/3/action/package_show?id=orga_default_fiware-test
-CKAN_INSERT_ROW_PATH             = u'/api/3/action/datastore_upsert'
+CKAN_ORGANIZATION_PATH           = u'organization_show'   # ex: /api/3/action/organization_show?id=orga_default
+CKAN_ORGANIZATION_CREATE_PATH    = u'organization_create'
+CKAN_PACKAGE_CREATE_PATH         = u'package_create'
+CKAN_RESOURCE_CREATE_PATH        = u'resource_create'
+CKAN_DATASTORE_CREATE_PATH       = u'datastore_create'
+CKAN_DISCOVER_RESOURCES_PATH     = u'package_show'        # ex: /api/3/action/package_show?id=orga_default_fiware-test
+CKAN_INSERT_ROW_PATH             = u'datastore_upsert'
+CKAN_DATASTORE_SEARCH_PATH       = u'datastore_search'
 
 CKAN_VERSION_RESPONSE            = u'{"ckan_version": "2.0", "site_url": "", "site_description": "", "site_title": "CKAN Development", "error_emails_to": "you@yourdomain.com", "locale_default": "en", "extensions": ["stats", "text_preview", "recline_preview", "datastore"]}'
-CKAN_ORGANIZATION_SHOW_RESPONSE  = u'{"help": "Return the details of a organization. ", "success": true, "result": {"users": [{"openid": null, "about": null, "capacity": "admin", "name": "fiware", "created": "2014-02-11T16:32:26.795157", "email_hash": "453124d6f80d05ba8139184a1474cdac", "sysadmin": true, "activity_streams_email_notifications": false, "state": "active", "number_of_edits": 934, "number_administered_packages": 154, "display_name": "FI-WARE Administrator", "fullname": "FI-WARE Administrator", "id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83"}], "display_name": "%s", "description": "", "image_display_url": "", "title": "", "package_count": 1, "created": "2014-09-19T10:05:09.645434", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "", "groups": [], "num_followers": 0, "revision_id": "011b805f-1646-4bb3-a40b-589d4750131a", "packages": [{"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-09-19T08:05:10.081136", "id": "6ecec202-5219-4878-b290-ff5a08154cf6", "metadata_created": "2014-09-19T08:05:10.081136", "metadata_modified": "2014-09-19T11:05:50.655623", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [{"resource_group_id": "67d13406-cce2-4875-9f54-398c7dfff8fc", "cache_last_updated": null, "revision_timestamp": "2014-09-19T11:05:50.654222", "webstore_last_updated": null, "id": "0a31399e-aa24-49ca-abe8-d0f46e1d22ca", "size": null, "state": "active", "hash": "", "description": "", "format": "", "tracking_summary": {"total": 0, "recent": 0}, "last_modified": null, "url_type": null, "mimetype": null, "cache_url": null, "name": "%s", "created": "2014-09-19T13:05:50.669579", "url": "http://foo.bar/newresource", "webstore_url": null, "mimetype_inner": null, "position": 0, "revision_id": "4b1232c4-9785-4239-9ded-db364767bc0c", "resource_type": null}], "num_resources": 1, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": {"description": "", "created": "2014-09-19T10:05:09.645434", "title": "", "name": "%s", "revision_timestamp": "2014-09-19T08:05:09.620151", "is_organization": true, "state": "active", "image_url": "", "revision_id": "011b805f-1646-4bb3-a40b-589d4750131a", "type": "organization", "id": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "approval_status": "approved"}, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "extras": [], "title": "%s", "revision_id": "bf584836-4112-424b-ab4f-307db0ab73c9"}], "type": "organization", "id": "0b2f31bb-dcca-4771-bf1a-5e554b78e381", "tags": [], "name": "%s"}}'
-CKAN_ORGANIZATION_CREATE_RESPONSE= u'{"help": "Create a new organization. ", "success": true, "result": {"users": [{"openid": null, "about": null, "capacity": "admin", "name": "fiware", "created": "2014-02-11T16:32:26.795157", "email_hash": "453124d6f80d05ba8139184a1474cdac", "sysadmin": true, "activity_streams_email_notifications": false, "state": "active", "number_of_edits": 940, "number_administered_packages": 154, "display_name": "FI-WARE Administrator", "fullname": "FI-WARE Administrator", "id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83"}], "display_name": "%s", "description": "", "image_display_url": "", "title": "", "package_count": 0, "created": "2014-10-02T15:41:09.676905", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "", "groups": [], "revision_id": "c91218a3-b5a9-47c2-9425-a28cc040b47c", "packages": [], "type": "organization", "id": "09f50f44-a472-481d-b662-88e1e0e72ade", "tags": [], "name": "%s"}}'
-CKAN_PACKAGE_CREATE_RESPONSE     = u'{"help": "Create a new dataset (package).    You must be authorized to create new datasets. ", "success": true, "result": {"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-10-02T13:57:45.116438", "id": "41db4c0c-d3eb-4ba1-958e-5b9db9ca4a3e", "metadata_created": "2014-10-02T13:57:45.116438", "metadata_modified": "2014-10-02T13:57:45.124769", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [], "num_resources": 0, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": null, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "2f240381-88bc-4f0f-81ae-4c148452fea3", "extras": [], "title": "%s", "revision_id": "22fafb07-bdc5-40ce-9dae-c6b7c8a0e5e4"}}'
+CKAN_ORGANIZATION_SHOW_RESPONSE  = u'{"help": "Return the details of a organization.", "success": true, "result": {"users": [{"openid": null, "about": null, "apikey": "3d20cdae-44ad-4eeb-a8b7-8de485140133", "capacity": "admin", "name": "admin", "created": "2014-10-09T17:47:49.077113", "reset_key": null, "email": "admin@admim.com", "sysadmin": false, "activity_streams_email_notifications": false, "email_hash": "1643b58b8150973cf5cf2d06d9372d03", "number_of_edits": 49, "number_administered_packages": 6, "display_name": "admin", "fullname": "admin", "id": "ccac7ce8-4159-4467-89f7-6ae9b05e2ee7"}], "display_name": "%s", "description": "", "title": "%s", "package_count": 2, "created": "2014-10-10T10:14:29.041392", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "http://www.mipage.es", "groups": [], "num_followers": 0, "revision_id": "f8d267c4-4f32-4668-b59c-16d9243ff93c", "packages": [{"owner_org": "e5065988-2132-4c6a-9d55-0ad1b2de54b4", "maintainer": null, "name": "%s", "author": null, "url": null, "capacity": "organization", "notes": "", "title": "%s", "private": false, "maintainer_email": null, "author_email": null, "state": "active", "version": null, "license_id": null, "revision_id": "a781ffa2-f99a-4a78-af98-02e17efcccf3", "type": "dataset", "id": "865d12ea-8550-4fbc-a239-f8a52008c5ce"}], "type": "organization", "id": "e5065988-2132-4c6a-9d55-0ad1b2de54b4", "tags": [], "name": "%s"}}'
+CKAN_ORGANIZATION_CREATE_RESPONSE= u'{"help": "Create a new organization.", "success": true, "result": {"users": [{"openid": null, "about": null, "capacity": "admin", "name": "admin", "created": "2014-02-11T16:32:26.795157", "email_hash": "453124d6f80d05ba8139184a1474cdac", "sysadmin": true, "activity_streams_email_notifications": false, "state": "active", "number_of_edits": 1045, "number_administered_packages": 184, "display_name": "FI-WARE Administrator", "fullname": "FI-WARE Administrator", "id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83"}], "display_name": "%s", "description": "", "image_display_url": "", "title": "", "package_count": 0, "created": "2014-11-04T10:47:12.091433", "approval_status": "approved", "is_organization": true, "state": "active", "extras": [], "image_url": "", "groups": [], "revision_id": "387058ab-a12d-47f3-bb98-d65345a0ce82", "packages": [], "type": "organization", "id": "af2db883-72cb-4803-b52a-fa06efd84c05", "tags": [], "name": "%s"}}'
+CKAN_PACKAGE_CREATE_RESPONSE     = u'{"help": "Create a new dataset - package.", "success": true, "result": {"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-11-04T10:14:09.254885", "id": "e9ab2733-0e71-47f5-a159-5cf3669c4c3e", "metadata_created": "2014-11-04T10:14:09.254885", "metadata_modified": "2014-11-04T10:14:09.263657", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [], "num_resources": 0, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": {"description": "", "created": "2014-08-19T09:57:57.217850", "title": "", "name": "%s", "revision_timestamp": "2014-08-19T07:57:57.190205", "is_organization": true, "state": "active", "image_url": "", "revision_id": "23483ac9-73a7-4f78-afed-d93afdd03326", "type": "organization", "id": "6d0f116a-0aa1-4e11-9c0a-94c3fc596e93", "approval_status": "approved"}, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "6d0f116a-0aa1-4e11-9c0a-94c3fc596e93", "extras": [], "title": "%s", "revision_id": "d4ed8f3e-1a08-414f-ac84-0510eb4d1bae"}}'
 CKAN_RESOURCE_CREATE_RESPONSE    = u'{"help": "Appends a new resource to a datasets list of resources. ", "success": true, "result": {"resource_group_id": "a1eda311-2510-4411-92ee-897bd17f4fae", "cache_last_updated": null, "revision_timestamp": "2014-10-02T14:08:56.154981", "webstore_last_updated": null, "id": "b3dd26e9-5660-4950-8f9d-b180e3e8eb59", "size": null, "state": "active", "hash": "", "description": "", "format": "", "tracking_summary": {"total": 0, "recent": 0}, "mimetype_inner": null, "url_type": null, "mimetype": null, "cache_url": null, "name": "%s", "created": "2014-10-02T16:08:56.168481", "url": "http://foo.bar/newresourcecol", "webstore_url": null, "last_modified": null, "position": 0, "revision_id": "a8f9c016-4752-43c8-9e1a-0b4f1e2e764e", "resource_type": null}}'
-CKAN_DATASTORE_CREATE_RESPONSE   = u'{"help": "Adds a new table to the DataStore. ", "success": true, "result": {"fields": [{"type": "timestamp", "id": "recvTime"}, {"type": "json", "id": "temperature"}, {"type": "json", "id": "temperature_md"}, {"type": "json", "id": "pressure"}, {"type": "json", "id": "pressure_md"}, {"type": "json", "id": "humidity"}, {"type": "json", "id": "humidity_md"}], "force": true, "method": "insert", "resource_id": "ec007dae-43ca-4501-b90e-e7d4fe8101c1"}}'
-CKAN_DISCOVER_RESOURCES_RESPONSE = u'{"help": "Return the metadata of a dataset (package) and its resources. ", "success": true, "result": {"license_title": null, "maintainer": null, "relationships_as_object": [], "private": false, "maintainer_email": null, "revision_timestamp": "2014-09-23T12:58:43.074777", "id": "de736543-1b40-46d2-a20a-1bce53ff0a63", "metadata_created": "2014-09-23T12:58:43.074777", "metadata_modified": "2014-09-23T12:58:43.650723", "author": null, "author_email": null, "state": "active", "version": null, "creator_user_id": "54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83", "type": "dataset", "resources": [{"resource_group_id": "93f9737f-cd2b-4fb9-8387-6001e9451e67", "cache_last_updated": null, "revision_timestamp": "2014-09-23T12:58:43.649955", "webstore_last_updated": null, "datastore_active": true, "id": "7f17017a-fba1-41d3-b1f1-8f65c689b6b9", "size": null, "state": "active", "hash": "", "description": "", "format": "", "tracking_summary": {"total": 0, "recent": 0}, "last_modified": null, "url_type": null, "mimetype": null, "cache_url": null, "name": "%s", "created": "2014-09-23T14:58:43.663541", "url": "http://foo.bar/newresource", "webstore_url": null, "mimetype_inner": null, "position": 0, "revision_id": "58fe82ae-939c-4fe8-bc22-b5055b51894b", "resource_type": null}], "num_resources": 1, "tags": [], "tracking_summary": {"total": 0, "recent": 0}, "groups": [], "license_id": null, "relationships_as_subject": [], "num_tags": 0, "organization": {"description": "", "created": "2014-09-23T14:58:42.203538", "title": "", "name": "orga-345", "revision_timestamp": "2014-09-23T12:58:42.178558", "is_organization": true, "state": "active", "image_url": "", "revision_id": "6c538718-2ed2-44b2-b1f2-f0cb258825bb", "type": "organization", "id": "2f169682-e7d9-4ca0-9749-a1ceb4f8bbd6", "approval_status": "approved"}, "name": "%s", "isopen": false, "url": null, "notes": null, "owner_org": "2f169682-e7d9-4ca0-9749-a1ceb4f8bbd6", "extras": [], "title": "%s", "revision_id": "edbdcb09-a1ee-4a08-b319-d06f1d3933db"}}'
-CKAN_INSERT_ROW_RESPONSE          = u'{"help": "Updates or inserts into a table in the DataStore    The datastore_upsert API action allows you to add or edit records to    an existing DataStore resource. ", "success": true, "result": {"records": [{"attrName": "teperature", "attrType": "centigrade", "recvTime": "2014-10-07T10:30:06.305", "recvTimeTs": "1412670606", "attrValue": "720"}], "force": true, "method": "insert", "resource_id": "6b819c69-1494-416f-a44e-3a39d4b9a687"}}'
+CKAN_DATASTORE_CREATE_RESPONSE   = u'{"help": "Adds a new table to the DataStore. ", "success": true, "result": {"fields": [{"type": "timestamp", "id": "recvTime"}, {"type": "json", "id": "temperature"}, {"type": "json", "id": "temperature_md"}, {"type": "json", "id": "pressure"}, {"type": "json", "id": "pressure_md"}, {"type": "json", "id": "humidity"}, {"type": "json", "id": "humidity_md"}], "force": true, "method": "insert", "resource_id": "%s"}}'
+CKAN_RESOURCE_ONE                = u'{"resource_group_id":"b647103b-6dc4-4d08-a508-74dc869434fb","cache_last_updated":null,"revision_timestamp":"2014-11-04T15:14:25.246592","webstore_last_updated":null,"datastore_active":true,"id":"3ee246ab-603d-4896-a152-e21985989a34","size":null,"state":"active","hash":"","description":"","format":"","tracking_summary":{"total":0,"recent":0},"last_modified":null,"url_type":null,"mimetype":null,"cache_url":null,"name":"%s","created":"2014-11-04T16:14:25.261137","url":"http://foo.bar/newresourcecol","webstore_url":null,"mimetype_inner":null,"position":0,"revision_id":"39df1b64-8f9b-471c-b209-98a48d55825f","resource_type":null}'
+CKAN_DISCOVER_RESOURCES_RESPONSE = u'{"help":"Return the metadata of a dataset (package) and its resources","success":true,"result":{"license_title":null,"maintainer":null,"relationships_as_object":[],"private":false,"maintainer_email":null,"revision_timestamp":"2014-11-04T10:14:09.254885","id":"e9ab2733-0e71-47f5-a159-5cf3669c4c3e","metadata_created":"2014-11-04T10:14:09.254885","metadata_modified":"2014-11-04T16:03:52.906351","author":null,"author_email":null,"state":"active","version":null,"creator_user_id":"54b2e1e2-fdda-45e1-ab0c-7e3bfd4ebc83","type":"dataset","resources":[%s],"num_resources":%d,"tags":[],"tracking_summary":{"total":0,"recent":0},"groups":[],"license_id":null,"relationships_as_subject":[],"num_tags":0,"organization":{"description":"","created":"2014-08-19T09:57:57.217850","title":"","name":"%s","revision_timestamp":"2014-08-19T07:57:57.190205","is_organization":true,"state":"active","image_url":"","revision_id":"23483ac9-73a7-4f78-afed-d93afdd03326","type":"organization","id":"6d0f116a-0aa1-4e11-9c0a-94c3fc596e93","approval_status":"approved"},"name":"%s","isopen":false,"url":null,"notes":null,"owner_org":"6d0f116a-0aa1-4e11-9c0a-94c3fc596e93","extras":[],"title":"%s","revision_id":"d4ed8f3e-1a08-414f-ac84-0510eb4d1bae"}}'
+CKAN_INSERT_ROW_RESPONSE         = u'{"help": "Updates or inserts into a table in the DataStore    The datastore_upsert API action allows you to add or edit records to    an existing DataStore resource. ", "success": true, "result": {"records": [{"attrName": "teperature", "attrType": "centigrade", "recvTime": "2014-10-07T10:30:06.305", "recvTimeTs": "1412670606", "attrValue": "720"}], "force": true, "method": "insert", "resource_id": "6b819c69-1494-416f-a44e-3a39d4b9a687"}}'
 
 #HADOOP
-HADOOP_USER                      = u'username'
-HADOOP_PREFIX                    = u''
-HADOOP_LOCATION_URL              = "http://"+MOCK_HOST+":"+str(PORT_NUMBER)
-HADOOP_FILE_PATH                 = u'%s%s/%s%s/%s%s.txt'
-HADOOP_FILE_EXIST                = u'hadoop_file_exist'
-HADOOP_CREATE_DIRECTORY          = u'hadoop_create_directory'
-HADOOP_CREATE_FILE_REDIRECT      = u'hadoop_create_file_redirect'
-HADOOP_CREATE_FILE               = u'hadoop_create_file'
-HADOOP_APPEND_FILE_REDIRECT      = u'hadoop_append_file_redirect'
-HADOOP_APPEND_FILE               = u'haddop_append_file'
+HADOOP_FILE_EXIST_PATH           = u'getfilestatus'
+HADOOP_CREATE_DIRECTORY_PATH     = u'mkdirs'
+HADOOP_CREATE_FILE_REDIRECT_PATH = u'create'
+HADOOP_CREATE_FILE_LOCATION_PATH = u'namenoderpcaddress'
+HADOOP_APPEND_FILE_REDIRECT_PATH = u'append'
+HADOOP_APPEND_FILE_LOCATION_PATH = u'namenoderpcaddress'
 
-HADOOP_FILE_EXIST_PATH           = u'/webhdfs/v1/user/%s/%s?op=getfilestatus&user.name=%s'
-HADOOP_CREATE_DIRECTORY_PATH     = u'/webhdfs/v1/user/%s/%s?op=mkdirs&user.name=%s'
-HADOOP_CREATE_FILE_REDIRECT_PATH = u'/webhdfs/v1/user/%s/%s?op=create&user.name=%s'
-HADOOP_CREATE_FILE_LOCATION_PATH = u'/webhdfs/v1/user/%s/%s?op=create&user.name=%s&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false'
-HADOOP_APPEND_FILE_REDIRECT_PATH = u'/webhdfs/v1/user/%s/%s?op=append&user.name=%s'
-HADOOP_APPEND_FILE_LOCATION_PATH = u'/webhdfs/v1/user/%s/%s?op=append&user.name=%s&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false'
-
-HADOOP_FILE_EXIST_RESPONSE           = u'{"FileStatus":{"accessTime":1411659643100,"blockSize":134217728,"childrenNum":0,"fileId":17379,"group":"hdfs","length":18244,"modificationTime":1411659643193,"owner":"%s","pathSuffix":"","permission":"755","replication":3,"type":"FILE"}}'
+HADOOP_FILE_EXIST_RESPONSE           = u'{"FileStatus":{"accessTime":1411659643100,"blockSize":134217728,"childrenNum":0,"fileId":17379,"group":"hdfs","length":18244,"modificationTime":1411659643193,"owner":"%s","pathSuffix":"","permission":"755","replication":3,"type":"FILE"}}' % (HADOOP_USER)
 HADOOP_CREATE_DIRECTORY_RESPONSE     = u'{boolean: true}'
 HADOOP_CREATE_FILE_REDIRECT_RESPONSE = u''
+HADOOP_CREATE_FILE_REDIRECT_LOCATION = u'/webhdfs/v1/user/username/orga_default/Room1-Room/Room1-Room.txt?op=create&user.name=username&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false'
 HADOOP_CREATE_FILE_RESPONSE          = u''
 HADOOP_APPEND_FILE_REDIRECT_RESPONSE = u''
+HADOOP_APPEND_FILE_REDIRECT_LOCATION = u'/webhdfs/v1/user/username/orga_default/Room1-Room/Room1-Room.txt?op=append&user.name=username&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false'
 HADOOP_APPEND_FILE_RESPONSE          = u''
 
 
-responseBody = [{NAME: CKAN_VERSION,                METHOD: GET,  PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_ORGANIZATION_SHOW,      METHOD: GET,  PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_ORGANIZATION_CREATE,    METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_PACKAGE_CREATE,         METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_RESOURCE_CREATE,        METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_DATASTORE_CREATE,       METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_DISCOVER_RESOURCES,     METHOD: GET,  PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: CKAN_INSERT_ROW,             METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: HADOOP_FILE_EXIST,           METHOD: GET,  PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: HADOOP_CREATE_DIRECTORY,     METHOD: PUT,  PATH: None, CODE: OK,       BODY: None, LOCATION: None},
-                {NAME: HADOOP_CREATE_FILE_REDIRECT, METHOD: PUT,  PATH: None, CODE: REDIRECT, BODY: None, LOCATION: None},
-                {NAME: HADOOP_CREATE_FILE,          METHOD: PUT,  PATH: None, CODE: CREATED,  BODY: None, LOCATION: None},
-                {NAME: HADOOP_APPEND_FILE_REDIRECT, METHOD: POST, PATH: None, CODE: REDIRECT, BODY: None, LOCATION: None},
-                {NAME: HADOOP_APPEND_FILE,          METHOD: POST, PATH: None, CODE: OK,       BODY: None, LOCATION: None}
+responseBody = [{METHOD: GET,  PATH: CKAN_VERSION_PATH,                CODE: OK,       BODY: CKAN_VERSION_RESPONSE,                LOCATION: None},
+                {METHOD: GET,  PATH: CKAN_ORGANIZATION_PATH,           CODE: OK,       BODY: CKAN_ORGANIZATION_SHOW_RESPONSE,      LOCATION: None},
+                {METHOD: POST, PATH: CKAN_ORGANIZATION_CREATE_PATH,    CODE: OK,       BODY: CKAN_ORGANIZATION_CREATE_RESPONSE,    LOCATION: None},
+                {METHOD: POST, PATH: CKAN_PACKAGE_CREATE_PATH,         CODE: OK,       BODY: CKAN_PACKAGE_CREATE_RESPONSE,         LOCATION: None},
+                {METHOD: POST, PATH: CKAN_RESOURCE_CREATE_PATH,        CODE: OK,       BODY: CKAN_RESOURCE_CREATE_RESPONSE,        LOCATION: None},
+                {METHOD: POST, PATH: CKAN_DATASTORE_CREATE_PATH,       CODE: OK,       BODY: CKAN_DATASTORE_CREATE_RESPONSE,       LOCATION: None},
+                {METHOD: GET,  PATH: CKAN_DISCOVER_RESOURCES_PATH,     CODE: OK,       BODY: CKAN_DISCOVER_RESOURCES_RESPONSE,     LOCATION: None},
+                {METHOD: POST, PATH: CKAN_INSERT_ROW_PATH,             CODE: OK,       BODY: CKAN_INSERT_ROW_RESPONSE,             LOCATION: None},
+                {METHOD: GET,  PATH: HADOOP_FILE_EXIST_PATH,           CODE: OK,       BODY: HADOOP_FILE_EXIST_RESPONSE,           LOCATION: None},
+                {METHOD: PUT,  PATH: HADOOP_CREATE_DIRECTORY_PATH,     CODE: OK,       BODY: HADOOP_CREATE_DIRECTORY_RESPONSE,     LOCATION: None},
+                {METHOD: PUT,  PATH: HADOOP_CREATE_FILE_REDIRECT_PATH, CODE: REDIRECT, BODY: HADOOP_CREATE_FILE_REDIRECT_RESPONSE, LOCATION: HADOOP_CREATE_FILE_REDIRECT_LOCATION},
+                {METHOD: PUT,  PATH: HADOOP_CREATE_FILE_LOCATION_PATH, CODE: CREATED,  BODY: HADOOP_CREATE_FILE_RESPONSE,          LOCATION: None},
+                {METHOD: POST, PATH: HADOOP_APPEND_FILE_REDIRECT_PATH, CODE: REDIRECT, BODY: HADOOP_APPEND_FILE_REDIRECT_RESPONSE, LOCATION: HADOOP_APPEND_FILE_REDIRECT_LOCATION},
+                {METHOD: POST, PATH: HADOOP_APPEND_FILE_LOCATION_PATH, CODE: OK,       BODY: HADOOP_APPEND_FILE_RESPONSE,          LOCATION: None}
 ]
 
-
-def usage():
+def __usage():
     """
     usage message
     """
     print " ***********************************************************************************************************"
-    print " *  usage: python cygnus_mock.py <port> <organization> <dataset> <resource> <hdfs user> <certificate file> *"
-    print " *      values by default:                                                                                 *"
-    print " *           protocol    : HTTP (certificate file is not necessary)                                        *"
-    print " *           port        : 8090                                                                            *"
-    print " *           organization: orga_default                                                                    *"
-    print " *           dataset     : fiware-test                                                                     *"
-    print " *           resource    : room1-room                                                                      *"
-    print " *           hdfs user   : username                                                                        *"
+    print " *  usage: python cygnus_mock.py <-u> <-p=port> <-c=certificate file> <-dd= default dataset>               *"
+    print " *           ex: python cygnus_mock.py -p=8092 -c=server.pem  -dd=fiware-test                              *"
     print " *                                                                                                         *"
-    print " *       Note:   if change the protocol to HTTPS is necessary the certificate file:                        *"
-    print " *               how to create certificate file:                                                           *"
-    print " *                   openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes            *"
-    print " *               all values will be defined in lowercase.                                                  *"
-    print " *                  ( use <Ctrl-C> to stop )                                                               *"
+    print " *  parameters:                                                                                            *"
+    print " *         -u: show this usage.                                                                            *"
+    print " *         -p: change of mock port (by default 8090).                                                      *"
+    print " *         -c: certificate path and file used in https protocol.                                           *"
+    print " *        -dd: default dataset, obligatory in ckan  (by default \"fiware-test\").                              *"
+    print " *                                                                                                         *"
+    print " *  Comments:                                                                                              *"
+    print " *         Default Dataset is prefixed by organization name to ensure uniqueness ant it.                   *"
+    print " *            Must be purely lowercase alphanumeric (ascii) characters,                                    *"
+    print " *            plus \"-\" and \"_\" acording to CKAN limitations.                                               *"
+    print " *         HTTP protocol: the certificate file is not necessary.                                           *"
+    print " *         HTTPS protocol: the certificate file is  necessary.                                             *"
+    print " *            how to create certificate file:                                                              *"
+    print " *                openssl req -new -x509 -keyout <file>.pem -out <file>.pem -days 365 -nodes               *"
+    print " *                                                                                                         *"
+    print " *                                     ( use <Ctrl-C> to stop )                                            *"
     print " ***********************************************************************************************************"
+    exit(0)
 
-def createPath (type, organization ,dataset):
-    """
-    Define all paths dynamically and the locations in redirects only
-    :param type:   path type
-    :param organization: organization used
-    :param dataset: dataset used
-    :param resource: resource used
-    :return: path and location in redirect only
-    """
-    locationNone = None
-    if type == CKAN_VERSION: return CKAN_VERSION_PATH, locationNone
-    if type == CKAN_ORGANIZATION_SHOW: return CKAN_ORGANIZATION_PATH % (organization), locationNone
-    if type == CKAN_ORGANIZATION_CREATE: return CKAN_ORGANIZATION_CREATE_PATH, locationNone
-    if type == CKAN_PACKAGE_CREATE: return CKAN_PACKAGE_CREATE_PATH, locationNone
-    if type == CKAN_RESOURCE_CREATE: return CKAN_RESOURCE_CREATE_PATH, locationNone
-    if type == CKAN_DATASTORE_CREATE: return CKAN_DATASTORE_CREATE_PATH, locationNone
-    if type == CKAN_DISCOVER_RESOURCES: return CKAN_DISCOVER_RESOURCES_PATH % (dataset), locationNone
-    if type == CKAN_INSERT_ROW: return CKAN_INSERT_ROW_PATH, locationNone
-
-    if type == HADOOP_FILE_EXIST: return HADOOP_FILE_EXIST_PATH % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER), locationNone
-    if type == HADOOP_CREATE_DIRECTORY: return HADOOP_CREATE_DIRECTORY_PATH % (HADOOP_USER, ORGANIZATION_DEFAULT, HADOOP_USER), locationNone
-    if type == HADOOP_CREATE_FILE_REDIRECT: return HADOOP_CREATE_FILE_REDIRECT_PATH % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER), HADOOP_LOCATION_URL + HADOOP_CREATE_FILE_LOCATION_PATH % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER)
-    if type == HADOOP_CREATE_FILE: return HADOOP_CREATE_FILE_LOCATION_PATH  % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER), locationNone
-    if type == HADOOP_APPEND_FILE_REDIRECT: return HADOOP_APPEND_FILE_REDIRECT_PATH % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER), HADOOP_LOCATION_URL + HADOOP_APPEND_FILE_LOCATION_PATH % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER)
-    if type == HADOOP_APPEND_FILE: return HADOOP_APPEND_FILE_LOCATION_PATH  % (HADOOP_USER, HADOOP_FILE_PATH, HADOOP_USER), locationNone
-
-def createBody (type, organization ,dataset, resource):
-    """
-    Define all payload responses
-    :param type:   path type
-    :param organization: organization used
-    :param dataset: dataset used
-    :param resource: resource used
-    :return:
-    """
-
-    if type == CKAN_VERSION: return CKAN_VERSION_RESPONSE
-    if type == CKAN_ORGANIZATION_SHOW: return CKAN_ORGANIZATION_SHOW_RESPONSE % (organization, resource, dataset, dataset, organization, organization)
-    if type == CKAN_ORGANIZATION_CREATE: return CKAN_ORGANIZATION_CREATE_RESPONSE % (organization, organization)
-    if type == CKAN_PACKAGE_CREATE: return CKAN_PACKAGE_CREATE_RESPONSE % (dataset, dataset)
-    if type == CKAN_RESOURCE_CREATE: return CKAN_RESOURCE_CREATE_RESPONSE % (resource)
-    if type == CKAN_DATASTORE_CREATE: return CKAN_DATASTORE_CREATE_RESPONSE % ()
-    if type == CKAN_DISCOVER_RESOURCES: return CKAN_DISCOVER_RESOURCES_RESPONSE %(resource, dataset, dataset)
-    if type == CKAN_INSERT_ROW: return CKAN_INSERT_ROW_RESPONSE
-
-    if type == HADOOP_FILE_EXIST: return HADOOP_FILE_EXIST_RESPONSE % (HADOOP_USER)
-    if type == HADOOP_CREATE_DIRECTORY: return HADOOP_CREATE_DIRECTORY_RESPONSE
-    if type == HADOOP_CREATE_FILE_REDIRECT:return HADOOP_CREATE_FILE_REDIRECT_RESPONSE
-    if type == HADOOP_CREATE_FILE: return HADOOP_CREATE_FILE_RESPONSE
-    if type == HADOOP_APPEND_FILE_REDIRECT:return HADOOP_APPEND_FILE_REDIRECT_RESPONSE
-    if type == HADOOP_APPEND_FILE: return HADOOP_APPEND_FILE_RESPONSE
-
-def configuration (values):
-    """
-    Define values for configuration
-    :param values: parameters in command line
-    """
-    global PORT_NUMBER, ORGANIZATION_DEFAULT, DATASET_DEFAULT, RESOURCE_DEFAULT, responseBody, DATASET, HADOOP_USER, HADOOP_FILE_PATH, HADOOP_LOCATION_URL, CERTIFICATE_HTTPS, PROTOCOL
-    if len (values) > 1: PORT_NUMBER          = int(values[1])
-    if len (values) > 2: ORGANIZATION_DEFAULT = values[2]
-    if len (values) > 3: DATASET_DEFAULT      = values[3]
-    if len (values) > 4: RESOURCE_DEFAULT     = values[4]
-    if len (values) > 5: HADOOP_USER          = values[5]
-    if len (values) > 6:
-        CERTIFICATE_HTTPS = values[6]
-        PROTOCOL = u'HTTPS'
-
-    DATASET = ORGANIZATION_DEFAULT+"_"+DATASET_DEFAULT
-    HADOOP_FILE_PATH = HADOOP_FILE_PATH % (HADOOP_PREFIX, ORGANIZATION_DEFAULT, HADOOP_PREFIX, RESOURCE_DEFAULT, HADOOP_PREFIX, RESOURCE_DEFAULT)
-    for i in range(len(responseBody)):
-        responseBody[i][PATH], responseBody[i][LOCATION] = createPath(responseBody[i][NAME], ORGANIZATION_DEFAULT, DATASET)
-        responseBody[i][BODY] = createBody(responseBody[i][NAME], ORGANIZATION_DEFAULT, DATASET, RESOURCE_DEFAULT)
-    return responseBody
-
-def config_print(responseBody):
+def __config_print():
     """
     show of the current configuration and te paths mocked
-    :param responseBody:
     """
+    print " ***********************************************************************************************************"
     print " * Current configuration:"
-    print " *     protocol     : "+ PROTOCOL
-    print " *     mock host    : "+ MOCK_HOST
-    print " *     port         : "+ str(PORT_NUMBER)
-    if CERTIFICATE_HTTPS != u'': print " *     certificate  : "+ CERTIFICATE_HTTPS
-    print " *     organization : "+ ORGANIZATION_DEFAULT
-    print " *     dataset      : "+ DATASET
-    print " *     resource     : "+ RESOURCE_DEFAULT
-    print " *     hdfs user    : "+ HADOOP_USER
-    print " *****************************************************************************************"
+    print " *      protocol         : "+ PROTOCOL
+    print " *      mock host        : "+ MOCK_HOST
+    print " *      port             : "+ str(PORT_NUMBER)
+    if CERTIFICATE_HTTPS != u'': print " *    certificate        : "+ CERTIFICATE_HTTPS
+    print " *     organization      : "+ ORGANIZATION
+    print " *     dataset           : "+ DATASET
+    print " *     resources allowed : "+ str(RESOURCES)
+    print " *     hdfs user         : "+ HADOOP_USER
+    print " ***********************************************************************************************************"
     print " * Paths mocked:"
-    for i in range(len(responseBody)):
-        if i < 9: pos = " "+str(i+1)
-        else: pos = str (i+1)
-        print " *   "+pos+" - "+ responseBody[i][METHOD] + " - " + str(responseBody[i][CODE]) + " -- " + str (responseBody[i][PATH])
-    print " *****************************************************************************************"
+    print " *    1 - GET  - 200 -- /api/util/status"
+    print " *    2 - GET  - 200 -- /api/3/action/organization_show?id=orga_default"
+    print " *    3 - POST - 200 -- /api/3/action/organization_create"
+    print " *    4 - POST - 200 -- /api/3/action/package_create"
+    print " *    5 - POST - 200 -- /api/3/action/resource_create"
+    print " *    6 - POST - 200 -- /api/3/action/datastore_create"
+    print " *    7 - GET  - 200 -- /api/3/action/package_show?id=orga_default_fiware-test"
+    print " *    8 - POST - 200 -- /api/3/action/datastore_upsert"
+    print " *    9 - GET  - 200 -- /webhdfs/v1/user/username/orga_default/room1-room/room1-room.txt?op=getfilestatus&user.name=username"
+    print " *   10 - PUT  - 200 -- /webhdfs/v1/user/username/orga_default?op=mkdirs&user.name=username"
+    print " *   11 - PUT  - 307 -- /webhdfs/v1/user/username/orga_default/room1-room/room1-room.txt?op=create&user.name=username"
+    print " *   12 - PUT  - 201 -- /webhdfs/v1/user/username/orga_default/room1-room/room1-room.txt?op=create&user.name=username&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false"
+    print " *   13 - POST - 307 -- /webhdfs/v1/user/username/orga_default/room1-room/room1-room.txt?op=append&user.name=username"
+    print " *   14 - POST - 200 -- /webhdfs/v1/user/username/orga_default/room1-room/room1-room.txt?op=append&user.name=username&namenoderpcaddress=int-iot-hadoop-fe-01.novalocal:8020&overwrite=false"
+    print " *                                                                                                          "
+    print " *                                     ( use <Ctrl-C> to stop )                                             "
+    print " ***********************************************************************************************************"
 
-def response (path):
+def configuration (arguments):
+    """
+    Define values for configuration
+    :param arguments: parameters in command line
+    """
+    global PORT_NUMBER, CERTIFICATE_HTTPS, PROTOCOL, DATASET_DEFAULT, DATASET, HADOOP_LOCATION_URL
+    for i in range(len(arguments)):
+        if arguments[i].find('-u') >= 0: __usage()
+        try:
+            if arguments[i].find('-p') >= 0:
+                 errorMsg = "port parameter"
+                 PORT_NUMBER = int (str(arguments[i]).split("=")[1])
+            if arguments[i].find('-c') >= 0:
+                errorMsg = "certificate parameter"
+                CERTIFICATE_HTTPS = str(arguments[i]).split("=")[1]
+                PROTOCOL = HTTPS
+                HADOOP_LOCATION_URL  = PROTOCOL+"://"+MOCK_HOST+":"+str(PORT_NUMBER)
+
+            if arguments[i].find('-dd') >= 0:
+                errorMsg = "certificate parameter"
+                DATASET_DEFAULT = str(arguments[i]).split("=")[1]
+                DATASET         = ORGANIZATION+"_"+DATASET_DEFAULT
+        except Exception, e:
+            print ERROR+" in "+errorMsg+" see usage below -  "+ str(e)
+            __usage()
+    __config_print()
+
+def __appendResources ():
+    """
+    create a resources list to body response
+    :return: string
+    """
+    resourceList = CKAN_RESOURCE_ONE % (RESOURCE)
+    for i in range (len(RESOURCES)):
+        resourceList = resourceList + ", "+ CKAN_RESOURCE_ONE % (RESOURCES[i])
+    return resourceList, len(RESOURCES)+1
+
+def __updateConfiguration (path, payload):
+    """
+    update values from request to create response body
+    :param path:
+    :param payload:
+    """
+    errorMsg = ""
+    global responseBody #, ORGANIZATION, DATASET, RESOURCE, RESOURCES
+    try:
+        if path.find(responseBody[1][PATH]) > 0:
+            ORGANIZATION = str(path).split("=")[1]
+            DATASET      = ORGANIZATION+"_"+DATASET_DEFAULT
+            responseBody[1][BODY] = CKAN_ORGANIZATION_SHOW_RESPONSE %(ORGANIZATION, ORGANIZATION, DATASET, DATASET, ORGANIZATION)
+        elif path.find(responseBody[2][PATH]) > 0 and payload != None:
+            errorMsg =  "in request payload (Create a new organization)"
+            ORGANIZATION = json.loads(payload)[NAME]         #{"name": "new _org"}
+            responseBody[2][BODY] = CKAN_ORGANIZATION_CREATE_RESPONSE % (ORGANIZATION, ORGANIZATION)
+        elif path.find(responseBody[3][PATH]) > 0 and payload != None:
+            errorMsg = "in request payload (Create a new package to an organization)"
+            dictTemp = json.loads(payload)
+            ORGANIZATION = dictTemp[OWNER_ORG]               #{"name": "new_dataset",   "owner_org": "orga" }
+            DATASET = dictTemp [NAME]
+            responseBody[3][BODY] = CKAN_PACKAGE_CREATE_RESPONSE % (ORGANIZATION, DATASET, DATASET)
+        elif path.find(responseBody[4][PATH]) > 0 and payload != None:
+            errorMsg = "in request payload (Appends a new resource to a datasets)"
+            dictTemp = json.loads(payload)
+            RESOURCE = dictTemp [NAME]                       #{   "name": "newresource",   "url": "http://foo.bar/newresourcecol",   "package_id": "e9ab2733-0e71-47f5-a159-5cf3669c4c3e"}
+            responseBody[4][BODY] = CKAN_RESOURCE_CREATE_RESPONSE % (RESOURCE)
+        elif path.find(responseBody[5][PATH]) > 0 and payload != None:
+            errorMsg = "in request payload (Adds a new table to the DataStore in a resource)"
+            dictTemp = json.loads(payload)
+            resource_id = dictTemp [RESOURCE_ID]                    # {"resource_id": "3ee246ab-603d-4896-a152-e21985989a34", "fields": [{ "id": "recvTime", "type": "timestamp"},{"id": "temperature", "type": "json" },{ "id": "temperature_md", "type": "json" },{ "id": "pressure", "type": "json" },{ "id": "pressure_md", "type": "json" },{ "id": "humidity", "type": "json" },{ "id": "humidity_md", "type": "json" }],   "force": "true"}
+            responseBody[5][BODY] = CKAN_DATASTORE_CREATE_RESPONSE % (resource_id)
+        elif path.find(responseBody[6][PATH]) > 0:
+            DATASET = str(path).split("=")[1]
+            ORGANIZATION = DATASET[:DATASET.find(DATASET_DEFAULT)-1]  # get the organization name from dataset
+            resourceList, resourceNum  = __appendResources ()
+            responseBody[6][BODY] = CKAN_DISCOVER_RESOURCES_RESPONSE % (resourceList, resourceNum, ORGANIZATION, DATASET, DATASET)
+    except Exception, e:
+         return ERROR + errorMsg+" "+ str (e)
+
+def response (path, payload=None):
     """
     return body response associated to a path type
     :param type: (ex: CKAN_VERSION, etc)
     :return: body response associated to a path type
     :except: generic exception
     """
-    global HADOOP_LOCATION_URL
-    path = path.lower()
+    global  HADOOP_LOCATION
     try:
+        error = __updateConfiguration(path, payload)
+        if error != None: return error, EMPTY  # only error is returned,
+        path = path.lower()
         for i in range(len(responseBody)):
-            if responseBody[i][PATH].lower() == path:
+            if path.find(responseBody[i][PATH])>= 0:
                 headersCKAN[CONTENT_LENGTH] = len(responseBody[i][BODY])
                 headersHADOOP[CONTENT_LENGTH] = headersCKAN[CONTENT_LENGTH]
-                HADOOP_LOCATION_URL = responseBody[i][LOCATION]
-                return responseBody[i][BODY], responseBody[i][CODE]
-        return PATH_ERROR, EMPTY
+                HADOOP_LOCATION = HADOOP_LOCATION_URL + str(responseBody[i][LOCATION])
+                if responseBody[i][PATH] == HADOOP_CREATE_FILE_REDIRECT_PATH or responseBody[i][PATH] == HADOOP_CREATE_FILE_REDIRECT_PATH:
+                    if path.find(responseBody[i+1][PATH])> 0:
+                        return responseBody[i+1][BODY], responseBody[i+1][CODE]
+                return  responseBody[i][BODY], responseBody[i][CODE]
+        return PATH_ERROR+ ": "+ path, EMPTY
     except Exception, e:
-       print "ERROR -  "+ str(e)
+       print ERROR+str(e)
 
 def isHadoop (path):
     """
