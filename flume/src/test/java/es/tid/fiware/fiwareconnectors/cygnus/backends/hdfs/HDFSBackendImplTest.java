@@ -94,7 +94,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.createDir");
         
         try {
-            backend.createDir(mockHttpClientExistsCreateDir, user, dirPath);
+            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.createDir(user, dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -110,7 +111,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.createFile");
         
         try {
-            backend.createFile(mockHttpClientCreateFile, user, dirPath, data);
+            backend.setHttpClient(mockHttpClientCreateFile);
+            backend.createFile(user, dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -126,7 +128,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.append");
         
         try {
-            backend.append(mockHttpClientAppend, user, dirPath, data);
+            backend.setHttpClient(mockHttpClientAppend);
+            backend.append(user, dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -142,7 +145,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.exists");
         
         try {
-            backend.exists(mockHttpClientExistsCreateDir, user, dirPath);
+            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.exists(user, dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

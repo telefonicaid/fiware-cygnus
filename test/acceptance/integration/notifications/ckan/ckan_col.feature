@@ -30,7 +30,7 @@ Feature: Stored in ckan new notifications per column from context broker
     I want to be able to store in ckan new notifications per column from context broker
     so that they become more functional and useful
 
-    @happy_path
+    @happy_path_1
     Scenario Outline: stored new notifications in ckan from context broker with or without metadata
        Given cygnus is installed with type "column"
          And "ckan" is installed correctly
@@ -42,10 +42,10 @@ Feature: Stored in ckan new notifications per column from context broker
          And Verify the metadatas are stored in ckan
     Examples:
       |organization  |attributesQuantity|attrValue        |metadataValue|content|
-      |cygnus_col_012|1                 |45.0             |True         |json   |
-      |cygnus_col_022|2                 |dfgdfgdg         |True         |xml    |
-      |cygnus_col_032|3                 |{'a':'1','b':'2'}|False        |json   |
-      |cygnus_col_042|4                 |-45.2344         |False        |xml    |
+      |cygnus_col_016|1                 |45.0             |True         |json   |
+      |cygnus_col_026|2                 |dfgdfgdg         |True         |xml    |
+      |cygnus_col_036|3                 |{'a':'1','b':'2'}|False        |json   |
+      |cygnus_col_046|4                 |-45.2344         |False        |xml    |
 
     @types
     Scenario Outline: stored new notifications in ckan with different data types
@@ -62,7 +62,6 @@ Feature: Stored in ckan new notifications per column from context broker
       |org_col_json_1 |1                 |json         |45.41            |json        |True         |json   |
       |org_col_json_1 |1                 |json         |45.42            |json        |True         |xml    |
       |org_col_json_1 |1                 |json         |{'a':'1','b':'2'}|json        |True         |json   |
-      |org_col_json_1 |1                 |json         |<a>1</a><b>2</b> |json        |True         |xml    |
       |org_col_text_1 |1                 |text         |45.43            |json        |True         |json   |
       |org_col_text_1 |1                 |text         |45.44            |json        |True         |xml    |
       |org_col_float_1|1                 |float        |45.45            |json        |True         |json   |

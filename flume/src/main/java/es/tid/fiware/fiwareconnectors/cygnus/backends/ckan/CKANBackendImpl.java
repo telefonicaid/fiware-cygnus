@@ -22,6 +22,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -54,6 +55,9 @@ public class CKANBackendImpl implements CKANBackend {
     private String ckanPort;
     private String defaultDataset;
     private String orionUrl;
+    private boolean ssl;
+    private HttpClientFactory httpClientFactory;
+    private HttpClient httpClient;
 
     // this map implements the f(NGSIentity, Org) = CKANresourceId function
     private HashMap<OrgResourcePair, String> resourceIds;
@@ -73,20 +77,30 @@ public class CKANBackendImpl implements CKANBackend {
      * @param ckanPort
      * @param defaultDataset
      * @param orionUrl
+     * @param ssl
      */
-    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String defaultDataset, String orionUrl) {
-        logger = Logger.getLogger(CKANBackendImpl.class);
+    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String defaultDataset, String orionUrl,
+            boolean ssl) {
+        // this class attributes
         this.apiKey = apiKey;
         this.ckanHost = ckanHost;
         this.ckanPort = ckanPort;
         this.defaultDataset = defaultDataset;
         this.orionUrl = orionUrl;
+        this.ssl = ssl;
         resourceIds = new HashMap<OrgResourcePair, String>();
         packagesIds = new HashMap<String, String>();
+        
+        // create a Http clients factory and an initial connection
+        httpClientFactory = new HttpClientFactory(ssl);
+        httpClient = httpClientFactory.getHttpClient(ssl);
+        
+        // logger
+        logger = Logger.getLogger(CKANBackendImpl.class);
     } // CKANBackendImpl
 
     @Override
-    public void initOrg(HttpClient httpClient, String orgName) throws Exception {
+    public void initOrg(String orgName) throws Exception {
         // check if the organization has already been initialized
         if (packagesIds.containsKey(orgName)) {
             logger.debug("Organization found in the cache, thus it is already initialized (orgName=" + orgName + ")");
@@ -96,8 +110,9 @@ public class CKANBackendImpl implements CKANBackend {
         } // if else
 
         // query CKAN for the organization information
-        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_show?id=" + orgName;
-        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort
+                + "/api/3/action/organization_show?id=" + orgName;
+        CKANResponse res = doCKANRequest("GET", ckanURL);
 
         if (res.getStatusCode() == 200) {
             // orgName exists within CKAN
@@ -156,12 +171,12 @@ public class CKANBackendImpl implements CKANBackend {
                     // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
                     // if the resources list is null we must try to get it package by package
                     logger.debug("Going to get the CKAN version");
-                    String ckanVersion = getCKANVersion(httpClient);
+                    String ckanVersion = getCKANVersion();
                     
                     if (ckanVersion.equals("2.0")) {
                         logger.debug("CKAN version is 2.0, try to discover the resources for this package (pkgName="
                                 + pkgName + ")");
-                        resources = discoverResources(httpClient, pkgName);
+                        resources = discoverResources(pkgName);
                     } else { // 2.2 or higher
                         logger.debug("CKAN version is 2.2 (or higher), the resources list can be obtained from the "
                                 + "organization information (pkgName=" + pkgName + ")");
@@ -181,13 +196,13 @@ public class CKANBackendImpl implements CKANBackend {
             // if we have reach this point, then orgName doesn't include the default package; thus create is
             logger.debug("Default package not found, going to create it (orgName=" + orgName + ", defaultPkgName="
                     + effectiveDefaultDataset + ")");
-            String packageId = createPackage(httpClient, effectiveDefaultDataset, orgId);
+            String packageId = createPackage(effectiveDefaultDataset, orgId);
             packagesIds.put(orgName, packageId);
             logger.debug("Default package added to pckages map (orgName=" + orgName + " -> defaultPkgId="
                             + packageId + ")");
         } else if (res.getStatusCode() == 404) {
             // orgName doesn't exist in CKAN, create it
-            createOrganization(httpClient, orgName);
+            createOrganization(orgName);
         } else {
             throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
         } // if else
@@ -197,15 +212,15 @@ public class CKANBackendImpl implements CKANBackend {
      * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
      * no resource lists for its packages! (not in CKAN 2.2)
      * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
-     * @param httpClient
      * @param pkgName
      * @return The discovered resources for the given package.
      * @throws Exception
      */
-    private JSONArray discoverResources(HttpClient httpClient, String pkgName) throws Exception {
+    private JSONArray discoverResources(String pkgName) throws Exception {
         // query CKAN for the resources within the given package
-        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id=" + pkgName;
-        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+        String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort + "/api/3/action/package_show?id="
+                + pkgName;
+        CKANResponse res = doCKANRequest("GET", ckanURL);
         
         if (res.getStatusCode() == 200) {
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
@@ -243,39 +258,38 @@ public class CKANBackendImpl implements CKANBackend {
     } // populateResourcesMap
 
     @Override
-    public void persist(HttpClient httpClient, long recvTimeTs, String recvTime, String orgName,
-            String resourceName, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+    public void persist(long recvTimeTs, String recvTime, String orgName, String resourceName, String attrName,
+                String attrType, String attrValue, String attrMd) throws Exception {
         // try to get the resource identifier from the cache
-        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, true, true);
+        String resourceId = resourceLookupAndCreate(orgName, resourceName, true, true);
 
         if (resourceId == null) {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
                     + resourceName + ")");
         } else {
             // persist the resourceName
-            insert(httpClient, recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
+            insert(recvTimeTs, recvTime, resourceId, attrName, attrType, attrValue, attrMd);
         } // if else
     } // persist
 
     @Override
-    public void persist(HttpClient httpClient, String recvTime, String orgName, String resourceName,
-                 Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
+    public void persist(String recvTime, String orgName, String resourceName, Map<String, String> attrList,
+                Map<String, String> attrMdList) throws Exception {
         // try to get the resource identifier from the cache
-        String resourceId = resourceLookupAndCreate(httpClient, orgName, resourceName, false, true);
+        String resourceId = resourceLookupAndCreate(orgName, resourceName, false, true);
 
         if (resourceId == null) {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", resourceName="
                     + resourceName + ")");
         } else {
             // persist the resourceName
-            insert(httpClient, recvTime, resourceId, attrList, attrMdList);
+            insert(recvTime, resourceId, attrList, attrMdList);
         } // if else
     } // persist
 
     /**
      * looks the ID of a resource identified by orgName and resourceName, creating it if not found and the
      * createResource param is true.
-     * @param httpClient
      * @param orgName
      * @param resourceName
      * @param createResource True if running in row-like mode (where resources can be created on the fly), false if
@@ -284,8 +298,8 @@ public class CKANBackendImpl implements CKANBackend {
      * @return
      * @throws Exception
      */
-    private String resourceLookupAndCreate(HttpClient httpClient, String orgName, String resourceName,
-            boolean createResource, boolean purge) throws Exception {
+    private String resourceLookupAndCreate(String orgName, String resourceName, boolean createResource,
+            boolean purge) throws Exception {
         try {
             // look for the resource resourceId associated to the resourceName in the hashmap
             String resourceId;
@@ -301,14 +315,14 @@ public class CKANBackendImpl implements CKANBackend {
                         + ", resourceName=" + resourceName + ")");
 
                 // create the resource resourceId and datastore, adding it to the resourceIds map
-                resourceId = createResource(httpClient, resourceName, orgName);
+                resourceId = createResource(resourceName, orgName);
 
                 if (resourceId == null) {
                     throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
                             + "resource/datastore pre-provision in column mode failed");
                 } // if
 
-                createDataStore(httpClient, resourceId);
+                createDataStore(resourceId);
                 resourceIds.put(orgResourcePair, resourceId);
                 logger.debug("Resource id added to resources map (<orgName,resourceName>=" + orgResourcePair
                         + " -> resourceId=" + resourceId + ")");
@@ -318,8 +332,8 @@ public class CKANBackendImpl implements CKANBackend {
                 // the organization the same behaviour is definitely considered an error).
                 logger.debug("Going to purge the cache (orgName=" + orgName + ")");
                 purgeCache(orgName);
-                initOrg(httpClient, orgName);
-                return resourceLookupAndCreate(httpClient, orgName, resourceName, createResource, false);
+                initOrg(orgName);
+                return resourceLookupAndCreate(orgName, resourceName, createResource, false);
             } else {
                 throw new CygnusBadConfiguration("The resource id did not exist and could not be created. The "
                         + "resource/datastore pre-provision in column mode failed");
@@ -358,7 +372,6 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Insert record in datastore (row mode).
-     * @param httpClient HTTP client for accessing the backend server.
      * @param recvTimeTs timestamp.
      * @param recvTime timestamp (human readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
@@ -367,8 +380,8 @@ public class CKANBackendImpl implements CKANBackend {
      * @param attrValue attribute value.
      * @throws Exception
      */
-    private void insert(HttpClient httpClient, long recvTimeTs, String recvTime, String resourceId,
-            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+    private void insert(long recvTimeTs, String recvTime, String resourceId, String attrName, String attrType,
+            String attrValue, String attrMd) throws Exception {
         String ckanURL = null;
         String jsonString = null;
         
@@ -392,10 +405,10 @@ public class CKANBackendImpl implements CKANBackend {
                     + "\"force\": \"true\" }";
             
             // create the CKAN request URL
-            ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
+            ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -416,14 +429,13 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Insert record in datastore (column mode).
-     * @param httpClient HTTP client for accessing the backend server.
      * @param recvTime timestamp (human readable)
      * @param resourceId the resource in which datastore the record is going to be inserted.
      * @param attrList map with the attributes to persist
      * @throws Exception
      */
-    private void insert(HttpClient httpClient, String recvTime, String resourceId,
-                        Map<String, String> attrList, Map<String, String> attrMdList) throws Exception {
+    private void insert(String recvTime, String resourceId, Map<String, String> attrList,
+            Map<String, String> attrMdList) throws Exception {
         String ckanURL = null;
         String jsonString = null;
         
@@ -459,10 +471,10 @@ public class CKANBackendImpl implements CKANBackend {
                     + "\"force\": \"true\" }";
             
             // create the CKAN request URL
-            ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
+            ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort + "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -483,20 +495,20 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Creates an orgName in CKAN.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param orgName to create
      * @throws Exception
      */
-    private void createOrganization(HttpClient httpClient, String orgName) throws Exception {
+    private void createOrganization(String orgName) throws Exception {
         try {
             // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + orgName + "\"}";
             
             // create the CKAN request URL
-            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/organization_create";
+            String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort
+                    + "/api/3/action/organization_create";
             
             // do the CKAN request
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -516,7 +528,7 @@ public class CKANBackendImpl implements CKANBackend {
                             + "' is greater than " + Constants.CKAN_PKG_MAX_LEN);
                 } // if
 
-                String packageId = createPackage(httpClient, packageName, orgId);
+                String packageId = createPackage(packageName, orgId);
                 packagesIds.put(orgName, packageId);
                 logger.debug("Package added to packages map (orgName=" + orgName + " -> packageId=" + packageId + ")");
             } else {
@@ -537,17 +549,17 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Creates a dataset/package within a given organization in CKAN.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param pkgName package to create
      * @param orgId the owner organization for the package
      * @return pkgId if the package was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createPackage(HttpClient httpClient, String pkgName, String orgId) throws Exception {
+    private String createPackage(String pkgName, String orgId) throws Exception {
         try {
             String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
-            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/package_create";
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort
+                    + "/api/3/action/package_create";
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -587,13 +599,12 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Creates a resource within the default dataset of a given orgName.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param resourceName Resource to be created.
      * @param orgName orgName to which the default dataset belongs
      * @return resource ID if the resource was created or "" if it wasn't.
      * @throws Exception
      */
-    private String createResource(HttpClient httpClient, String resourceName, String orgName)
+    private String createResource(String resourceName, String orgName)
         throws Exception {
         try {
             // create the CKAN request JSON; compose the resource URL with the one corresponding to the NGSI10
@@ -605,10 +616,11 @@ public class CKANBackendImpl implements CKANBackend {
                     + "\"package_id\": \"" + packagesIds.get(orgName) + "\" }";
             
             // create the CKAN request URL
-            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/resource_create";
+            String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort
+                    + "/api/3/action/resource_create";
             
             // do the CKAN request
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -632,11 +644,10 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Creates a datastore for a given resource.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param resourceId identifies the resource which datastore is going to be created.
      * @throws Exception
      */
-    private void createDataStore(HttpClient httpClient, String resourceId) throws Exception {
+    private void createDataStore(String resourceId) throws Exception {
         try {
             // create the CKAN request JSON
             // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
@@ -652,10 +663,11 @@ public class CKANBackendImpl implements CKANBackend {
                     + "\"force\": \"true\" }";
             
             // create the CKAN request URL
-            String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/3/action/datastore_create";
+            String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort
+                    + "/api/3/action/datastore_create";
             
             // do the CKAN request
-            CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+            CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -678,17 +690,17 @@ public class CKANBackendImpl implements CKANBackend {
     /**
      * Activates an element given its resourceName and type, by changing its status from "deleted" to "activate".
      * Its resourceId is returned.
-     * @param httpClient
      * @param elementName
      * @param elementType
      * @return The element resourceId if it could be activated, otherwise null.
      * @throws Exception
      */
-    private String activateElementState(HttpClient httpClient, String elementName, String elementType)
+    private String activateElementState(String elementName, String elementType)
         throws Exception {
         String jsonString = "{\"state\":\"active\"}";
-        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/rest/" + elementType + "/" + elementName;
-        CKANResponse res = doCKANRequest(httpClient, "POST", ckanURL, jsonString);
+        String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort + "/api/rest/" + elementType + "/"
+                + elementName;
+        CKANResponse res = doCKANRequest("POST", ckanURL, jsonString);
                 
         if (res.getStatusCode() == 200) {
             return res.getJsonObject().get("id").toString();
@@ -697,9 +709,9 @@ public class CKANBackendImpl implements CKANBackend {
         } // if else
     } // activateElementState
     
-    private String getCKANVersion(HttpClient httpClient) throws Exception {
-        String ckanURL = "http://" + ckanHost + ":" + ckanPort + "/api/util/status";
-        CKANResponse res = doCKANRequest(httpClient, "GET", ckanURL);
+    private String getCKANVersion() throws Exception {
+        String ckanURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort + "/api/util/status";
+        CKANResponse res = doCKANRequest("GET", ckanURL);
         
         if (res.getStatusCode() == 200) {
             return res.getJsonObject().get("ckan_version").toString();
@@ -710,26 +722,24 @@ public class CKANBackendImpl implements CKANBackend {
 
     /**
      * Common method to perform HTTP request using the CKAN API without payload.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param method HTTP method
      * @param jsonURL request URL.
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(HttpClient httpClient, String method, String url) throws Exception {
-        return doCKANRequest(httpClient, method, url, "");
+    private CKANResponse doCKANRequest(String method, String url) throws Exception {
+        return doCKANRequest(method, url, "");
     } // doCKANRequest
 
     /**
      * Common method to perform HTTP request using the CKAN API with payload.
-     * @param httpClient HTTP client for accessing the backend server.
      * @param method HTTP method.
      * @param jsonURL request URL.
      * @param payload request payload.
      * @return CKANResponse associated to the request.
      * @throws Exception
      */
-    private CKANResponse doCKANRequest(HttpClient httpClient, String method, String url, String payload)
+    private CKANResponse doCKANRequest(String method, String url, String payload)
         throws Exception {
         HttpRequestBase request = null;
         HttpResponse response = null;
@@ -797,6 +807,14 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // try catch
     } // doCKANRequest
+    
+    /**
+     * Sets the http client. This is protected since it is only used by the tests.
+     * @param httpClient
+     */
+    protected void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    } // setHttpClient
 
     /**
      * Class to store the <org, entity> pair, uses as key in the resourceId hashmap in the CKANBackendImpl class.

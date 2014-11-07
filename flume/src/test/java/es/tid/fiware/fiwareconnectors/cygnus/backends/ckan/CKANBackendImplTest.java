@@ -19,6 +19,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
+import org.apache.http.client.HttpClient;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import java.util.HashMap;
 import org.apache.http.entity.StringEntity;
@@ -26,7 +27,6 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.mockito.Mockito;
-import org.apache.http.client.HttpClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,6 +61,7 @@ public class CKANBackendImplTest {
     private final String port = "80";
     private final String defaultPackage = "defaultPackage";
     private final String orionURL = "http://orion-vm:1026/";
+    private final boolean ssl = false;
     private final String orgName = "defaultOrg";
     private final String recvTime = "2014-09-23T11:26:45";
     private final long recvTimeTs = new Long("123456789").longValue();
@@ -81,7 +82,7 @@ public class CKANBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new CKANBackendImpl(apiKey, host, port, defaultPackage, orionURL);
+        backend = new CKANBackendImpl(apiKey, host, port, defaultPackage, orionURL, ssl);
         
         // set up other instances
         BasicHttpResponse respOrganizationShow = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
@@ -110,7 +111,8 @@ public class CKANBackendImplTest {
         System.out.println("Testing MySQLBackend.createDatabase");
         
         try {
-            backend.initOrg(mockHttpClientInitOrg, orgName);
+            backend.setHttpClient(mockHttpClientInitOrg);
+            backend.initOrg(orgName);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -126,8 +128,8 @@ public class CKANBackendImplTest {
         System.out.println("Testing MySQLBackend.persist (row)");
         
         try {
-            backend.persist(mockHttpClientPersistRow, recvTimeTs, recvTime, orgName, resourceName, attrName, attrType,
-                    attrValue, attrMd);
+            backend.setHttpClient(mockHttpClientPersistRow);
+            backend.persist(recvTimeTs, recvTime, orgName, resourceName, attrName, attrType, attrValue, attrMd);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -143,7 +145,8 @@ public class CKANBackendImplTest {
         System.out.println("Testing MySQLBackend.persist (column)");
         
         try {
-            backend.persist(mockHttpClientPersistColumn, recvTime, orgName, resourceName, attrList, attrMdList);
+            backend.setHttpClient(mockHttpClientPersistColumn);
+            backend.persist(recvTime, orgName, resourceName, attrList, attrMdList);
         } catch (Exception e) {
             // Check if the raised exception type is CygnusBadConfiguration. This exception means the resource does not
             // exist in CKAN and, due to we are running in "column" mode, it cannot be created. By checking this
