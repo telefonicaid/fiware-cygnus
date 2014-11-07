@@ -19,8 +19,8 @@ Note: We recommend the use of virtualenv, because is an isolated working copy of
 - Both if you are using a virtual environment or not:
   * Change to the test/acceptance folder of the project.
   * Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
-  * Verify if  xmltodict and httplib2 libraries are installed, if not are installed:
-     pip install xmltodict httplib2
+  * Verify if  xmltodict and httplib2 requests libraries are installed, if not are installed:
+     pip install xmltodict httplib2 requests
 
 ##### Requeriments for mysql
 
