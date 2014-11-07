@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * 
@@ -52,7 +53,9 @@ public class OrionCKANSink extends OrionSink {
     private String defaultDataset;
     private String orionUrl;
     private boolean rowAttrPersistence;
+    private boolean ssl;
     private HttpClientFactory httpClientFactory;
+    private DefaultHttpClient httpClient;
     private CKANBackend persistenceBackend;
     
     /**
@@ -150,16 +153,15 @@ public class OrionCKANSink extends OrionSink {
         logger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
+        ssl = context.getString("ssl", "false").equals("true") ? true : false;
+        logger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
     } // configure
 
     @Override
     public void start() {
-        // create a Http clients factory (no SSL)
-        httpClientFactory = new HttpClientFactory(false);
-
         try {
             // create persistenceBackend backend
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset, orionUrl);
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, defaultDataset, orionUrl, ssl);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         } // try catch
@@ -179,7 +181,7 @@ public class OrionCKANSink extends OrionSink {
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
 
         // initialize organization
-        persistenceBackend.initOrg(httpClientFactory.getHttpClient(false), organization);
+        persistenceBackend.initOrg(organization);
 
         // iterate in the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
@@ -232,8 +234,8 @@ public class OrionCKANSink extends OrionSink {
                     logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink. <" + recvTimeTs + ", "
                             + recvTime + ", " + organization + ", " + resourceName + ", " + attrName + ", " + attrType
                             + ", " + attrValue + ", " + attrMd + ">");
-                    persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTimeTs, recvTime,
-                            organization, resourceName, attrName, attrType, attrValue, attrMd);
+                    persistenceBackend.persist(recvTimeTs, recvTime, organization, resourceName, attrName, attrType,
+		            attrValue, attrMd);
                 } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMd);
@@ -245,8 +247,7 @@ public class OrionCKANSink extends OrionSink {
             if (!rowAttrPersistence) {
                 logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink. <" + recvTime + ", "
                         + organization + ", " + resourceName + ", " + attrs.toString() + ", " + mds.toString() + ">");
-                persistenceBackend.persist(httpClientFactory.getHttpClient(false), recvTime, organization, resourceName,
-                        attrs, mds);
+                persistenceBackend.persist(recvTime, organization, resourceName, attrs, mds);
             } // if
         } // for
     } // persist

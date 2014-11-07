@@ -3,25 +3,25 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * francisco.romerobueno@telefonica.com
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackendImpl;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
-import es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs.HDFSBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
@@ -47,7 +47,7 @@ public class OrionHDFSSinkTest {
     @Mock
     private HttpClientFactory mockHttpClientFactory;
     @Mock
-    private HDFSBackend mockWebHDFSBackend;
+    private HDFSBackendImpl mockWebHDFSBackend;
     
     // instance to be tested
     private OrionHDFSSink sink;
@@ -106,7 +106,6 @@ public class OrionHDFSSinkTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         sink = new OrionHDFSSink();
-        sink.setHttpClientFactory(mockHttpClientFactory);
         sink.setPersistenceBackend(mockWebHDFSBackend);
         
         // set up other instances
@@ -122,10 +121,10 @@ public class OrionHDFSSinkTest {
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
-        when(mockWebHDFSBackend.exists(null, null, null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, null, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, null, attrName, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, null, attrName, attrName);
+        when(mockWebHDFSBackend.exists(null, null)).thenReturn(true);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, attrName, attrName);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, attrName, attrName);
     } // setUp
 
     /**
@@ -152,7 +151,6 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
-        assertTrue(sink.getHttpClientFactory() != null);
         assertTrue(sink.getPersistenceBackend() != null);
         assertEquals(LifecycleState.START, sink.getLifecycleState());
     } // testStart

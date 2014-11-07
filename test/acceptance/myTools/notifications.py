@@ -273,6 +273,7 @@ class Notifications:
         if compoundNumber != DEFAULT: world.compoundNumber = int(compoundNumber)
         if metadatasNumber != DEFAULT: world.metadatasNumber = int(metadatasNumber)
         payload = self.__createPayload(self.__setPayloadData (world.attrsNumber, None, world.compoundNumber, world.metadatasNumber,  None, content))
+
         world.response, world.body = http_utils.request2(POST, self.__createUrl(NOTIFY), self.__createHeaders(notify, content), payload, TRUE, error)
         time.sleep(delayTimeForCKAN)  # delay for N secs while it is storing in ckan
 

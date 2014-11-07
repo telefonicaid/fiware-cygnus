@@ -20,6 +20,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -39,6 +40,8 @@ public abstract class HDFSBackend {
     protected String cosmosDefaultPassword;
     protected String hiveHost;
     protected String hivePort;
+    protected HttpClientFactory httpClientFactory;
+    protected HttpClient httpClient;
     private Logger logger;
     
     /**
@@ -52,14 +55,29 @@ public abstract class HDFSBackend {
      */
     public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
             String cosmosDefaultPassword, String hiveHost, String hivePort) {
+        // this class attributes
         this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
         this.cosmosDefaultPassword = cosmosDefaultPassword;
         this.cosmosDefaultUsername = cosmosDefaultUsername;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
+
+        // create a Http clients factory (no SSL) and an initial connection (no SSL)
+        httpClientFactory = new HttpClientFactory(false);
+        httpClient = httpClientFactory.getHttpClient(false);
+
+        // logger
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
+    
+    /**
+     * Sets the http client. This is protected since it is only used by the tests.
+     * @param httpClient
+     */
+    protected void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    } // setHttpClient
 
     /**
      * Provisions a Hive external table (row mode).
@@ -135,40 +153,36 @@ public abstract class HDFSBackend {
      * Creates a directory in HDFS such as hdfs:///user/<username>/<organization>/<dirPath>/. If username is null, the
      * default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param dirPath Directory to be created
      */
-    public abstract void createDir(HttpClient httpClient, String username, String dirPath) throws Exception;
+    public abstract void createDir(String username, String dirPath) throws Exception;
     
     /**
      * Creates a file in HDFS with initial content such as hdfs:///user/<username>/<organization>/<filePath>. If
      * username is null, the default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be written in the created file
      */
-    public abstract void createFile(HttpClient httpClient, String username, String filePath, String data)
+    public abstract void createFile(String username, String filePath, String data)
         throws Exception;
     /**
      * Appends data to an existent file in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be appended in the file
      */
-    public abstract void append(HttpClient httpClient, String username, String filePath, String data)
+    public abstract void append(String username, String filePath, String data)
         throws Exception;
     /**
      * Checks if the file exists in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File that must be checked
      */
-    public abstract boolean exists(HttpClient httpClient, String username, String filePath) throws Exception;
+    public abstract boolean exists(String username, String filePath) throws Exception;
     
 } // HDFSBackend

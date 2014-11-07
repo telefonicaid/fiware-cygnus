@@ -27,13 +27,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.log4j.Logger;
@@ -63,14 +61,14 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // HDFSBackendImpl
    
     @Override
-    public void createDir(HttpClient httpClient, String username, String dirPath) throws Exception {
+    public void createDir(String username, String dirPath) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
         } // if
 
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + dirPath + "?op=mkdirs&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "PUT", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
             
         
         // check the status
@@ -82,7 +80,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createDir
     
     @Override
-    public void createFile(HttpClient httpClient, String username, String filePath, String data)
+    public void createFile(String username, String filePath, String data)
         throws Exception {
         // check the username
         if (username == null) {
@@ -90,7 +88,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         } // if
 
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=create&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "PUT", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -106,7 +104,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest(httpClient, "PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doHDFSRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
         // check the status
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -117,14 +115,14 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createFile
     
     @Override
-    public void append(HttpClient httpClient, String username, String filePath, String data) throws Exception {
+    public void append(String username, String filePath, String data) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
         } // if
 
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=append&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "POST", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -140,7 +138,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest(httpClient, "POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doHDFSRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -151,7 +149,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // append
     
     @Override
-    public boolean exists(HttpClient httpClient, String username, String filePath) throws Exception {
+    public boolean exists(String username, String filePath) throws Exception {
         // check the username
         if (username == null) {
             username = this.cosmosDefaultUsername;
@@ -159,7 +157,7 @@ public class HDFSBackendImpl extends HDFSBackend {
 
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=getfilestatus&user.name="
                 + username;
-        HttpResponse response = doHDFSRequest(httpClient, "GET", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
 
         // check the status
         return (response.getStatusLine().getStatusCode() == 200);
@@ -168,14 +166,13 @@ public class HDFSBackendImpl extends HDFSBackend {
     /**
      * Does a HDFS request given a HTTP client, a method and a relative URL (the final URL will be composed by using
      * this relative URL and the active HDFS endpoint).
-     * @param httpClient
      * @param method
      * @param relativeURL
      * @return
      * @throws Exception
      */
-    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url, boolean relative,
-            ArrayList<Header> headers, StringEntity entity) throws Exception {
+    private HttpResponse doHDFSRequest(String method, String url, boolean relative, ArrayList<Header> headers,
+            StringEntity entity) throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_SERVICE_UNAVAILABLE,
                 "Service unavailable");
         
@@ -186,7 +183,7 @@ public class HDFSBackendImpl extends HDFSBackend {
                 String effectiveURL = "http://" + host + ":" + cosmosPort + url;
                 
                 try {
-                    response = doHDFSRequest(httpClient, method, effectiveURL, headers, entity);
+                    response = doHDFSRequest(method, effectiveURL, headers, entity);
                 } catch (Exception e) {
                     logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
@@ -209,14 +206,14 @@ public class HDFSBackendImpl extends HDFSBackend {
                 break;
             } // for
         } else {
-            response = doHDFSRequest(httpClient, method, url, headers, entity);
+            response = doHDFSRequest(method, url, headers, entity);
         } // if else
         
         return response;
     } // doHDFSRequest
         
-    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url,
-            ArrayList<Header> headers, StringEntity entity) throws Exception {
+    private HttpResponse doHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
+        throws Exception {
         HttpResponse response = null;
         HttpRequestBase request = null;
 
