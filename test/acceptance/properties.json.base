@@ -34,7 +34,7 @@
         "hadoop_namenode_url": "http://host:port",
         "hadoop_conputenode_url": "http://host:port",
         "hadoop_user": "user",
-        "hadoop_retries_open_file: 0,
+        "hadoop_retries_open_file": 0,
         "hadoop_delay_to_retry": 0
      }
     
