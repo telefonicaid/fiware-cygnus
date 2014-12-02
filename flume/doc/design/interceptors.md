@@ -20,7 +20,7 @@ The way Cygnus makes use of this Interceptor is the standard one:
     cygnusagent.sources.http-source.interceptors.ts.type = timestamp 
 
 ## `DestinationExtractor` Interceptor
-This is custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a destination dataset containing the destination entity has to be configured.
+This is a custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a destination dataset containing the destination entity has to be configured (in case of HDFS, this is a folder; in case of CKAN this is a package; in case of MySQL this is simply a prefix for the table name; please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details).
 
 Such an inference is made by inspecting (but not modifying) certain configured fields of the body part of the event; if the concatenation of such fields matches a configured regular expresion, then the configured destination entity is added as the value of a `destination` header. The destination dataset substitutes the already existing `fiware-servicePath` header.
 
@@ -28,7 +28,15 @@ If a notified entity contains more than one context response, then both the `des
 
 There exists a <i>matching table</i> file containing the above <i>matching rules</i> definition, following this format line by line:
 
-    <integer id>|<comma-separated fields to be concatenated>|<regex to be applied>|<destination_entity>|<destination_dataset>
+    <id>|<comma-separated_fields>|<regex>|<destination_entity>|<destination_dataset>
+
+Being:
+
+* <b>id</b>: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful in the future.
+* <b>comma-separated_fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is <i>entityId</i>, <i>entityType</i> and <i>fiwareService</i>.
+* <b>regex</b>: Java-like regular expression to be applied on the concatenated fields.
+* <b>destination_entity</b>: Name of the HDFS file, MySQL table or CKAN resource where the data will be effectively persisted. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
+* <b>destination_dataset</b>: Name of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, this prefixes the table name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
 
 For instance:
 
@@ -44,13 +52,9 @@ The above rules set that:
 
 Rules are tryed sequentially, and if any rules matches then the default destination for the notified entity is generated, i.e. the concatenation of the entity id, `_` and the entity type.
 
-The available <i>dictionary</i> of fields for concatenation is:
+The matching table file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there exists a template within Cygnus distribution.
 
-* entitydId
-* entityType
-* fiwareService
-
-The matching table file is usually placed at `[FLUME_HOME_DIR]/conf`, and there exists a template within Cygnus distribution. The usage of such an Interceptor is:
+The usage of such an Interceptor is:
 
     cygnusagent.sources.http-source.interceptors = de <other-interceptors>
     cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
@@ -59,6 +63,5 @@ The matching table file is usually placed at `[FLUME_HOME_DIR]/conf`, and there 
 It is <b>very important</b> to configure the <b>absolute path to the matching table file</b>. 
 
 ## Contact
-
 * Fermín Galán Márquez (fermin.galanmarquez@telefonica.com).
 * Francisco Romero Bueno (francisco.romerobueno@telefonica.com).
