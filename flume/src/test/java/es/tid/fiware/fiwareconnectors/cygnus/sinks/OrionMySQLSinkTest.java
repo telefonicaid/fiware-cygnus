@@ -59,15 +59,26 @@ public class OrionMySQLSinkTest {
     private final String mysqlUsername = "user1";
     private final String mysqlPassword = "pass1234";
     private final String attrPersistence = "row";
-    private final String namingPrefix = "cygnus_";
-    private final long ts = 123456789;
+    private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
-    private final String entityId = "Room1";
-    private final String entityType = "Room";
-    private final String attrName = "temperature";
-    private final String attrType = "degrees";
-    private final String attrValue = "26.5";
-    private final String attrMd = "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
+    private final String normalServiceName = "rooms";
+    private final String abnormalServiceName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
+    private final String normalServicePathName = "numeric-rooms";
+    private final String abnormalServicePathName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String normalDestinationName = "room1-room";
+    private final String abnormalDestinationName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
+    private static final String ENTITYNAME = "room1";
+    private static final String ENTITYTYPE = "room";
+    private static final String ATTRNAME = "temperature";
+    private static final String ATTRTYPE = "degrees";
+    private static final String ATTRVALUE = "26.5";
+    private static final String ATTRMD =
+            "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
+    private static final HashMap<String, String> ATTRLIST;
+    private static final HashMap<String, String> ATTRMDLIST;
     private final String notifyXMLSimple = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -93,8 +104,13 @@ public class OrionMySQLSinkTest {
             +     "</contextElementResponse>"
             +   "</contextResponseList>"
             + "</notifyContextRequest>";
-    private final String dbName = "cygnus_user1";
-    private final String tableName = "cygnus_Room1_Room";
+    
+    static {
+        ATTRLIST = new HashMap<String, String>();
+        ATTRLIST.put(ATTRNAME, ATTRVALUE);
+        ATTRMDLIST = new HashMap<String, String>();
+        ATTRMDLIST.put(ATTRNAME + "_md", ATTRMD);
+    } // static
 
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -115,14 +131,15 @@ public class OrionMySQLSinkTest {
         context.put("mysql_username", mysqlUsername);
         context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
-        context.put("naming_prefix", namingPrefix);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(dbName);
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(dbName, tableName);
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(dbName, tableName, ts,
-                recvTime, entityId, entityType, attrName, attrType, attrValue, attrMd);
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(anyString());
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(anyString(), anyString());
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, recvTimeTs, recvTime,
+                ENTITYNAME, ENTITYTYPE, ATTRNAME, ATTRTYPE, ATTRVALUE, ATTRMD);
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, recvTime, ATTRLIST,
+                ATTRMDLIST);
     } // setUp
     
     /**
@@ -157,7 +174,7 @@ public class OrionMySQLSinkTest {
      */
     @Test
     public void testProcessContextResponses() throws Exception {
-        System.out.println("processContextResponses");
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
@@ -172,6 +189,54 @@ public class OrionMySQLSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
+        
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (too long servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (too long destination name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, abnormalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
     } // testProcessContextResponses
     
 } // OrionMySQLSinkTest
