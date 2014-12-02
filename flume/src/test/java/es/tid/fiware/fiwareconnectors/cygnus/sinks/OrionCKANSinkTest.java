@@ -60,9 +60,15 @@ public class OrionCKANSinkTest {
     private final String apiKey = "xyzwxyzwxyzw";
     private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
-    private final String orgName = "rooms";
-    private final String pkgName = "numeric-rooms";
-    private final String resName = "room1-room";
+    private final String normalServiceName = "rooms";
+    private final String abnormalServiceName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
+    private final String normalServicePathName = "numeric-rooms";
+    private final String abnormalServicePathName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String normalDestinationName = "room1-room";
+    private final String abnormalDestinationName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
     private static final String ATTRNAME = "temperature";
     private static final String ATTRTYPE = "degrees";
     private static final String ATTRVALUE = "26.5";
@@ -95,6 +101,7 @@ public class OrionCKANSinkTest {
             +     "</contextElementResponse>"
             +   "</contextResponseList>"
             + "</notifyContextRequest>";
+    
     static {
         ATTRLIST = new HashMap<String, String>();
         ATTRLIST.put(ATTRNAME, ATTRVALUE);
@@ -123,9 +130,10 @@ public class OrionCKANSinkTest {
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                recvTimeTs, recvTime, orgName, pkgName, resName, ATTRNAME, ATTRTYPE, ATTRVALUE, ATTRMD);
+                recvTimeTs, recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRNAME,
+                ATTRTYPE, ATTRVALUE, ATTRMD);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                recvTime, orgName, pkgName, resName, ATTRLIST, ATTRMDLIST);
+                recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRLIST, ATTRMDLIST);
     } // setUp
 
     /**
@@ -145,7 +153,7 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("start");
+        System.out.println("Testing OrionCKANSinkTest.start");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -158,13 +166,14 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testProcessContextResponses() throws Exception {
-        System.out.println("processContextResponses");
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", "123456789");
-        headers.put(Constants.HEADER_SERVICE, "any_org");
-        headers.put(Constants.DESTINATION, "any_dest");
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -173,6 +182,54 @@ public class OrionCKANSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long destination name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, abnormalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
     } // testProcessContextResponses
     
 } // OrionCKANSinkTest

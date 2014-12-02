@@ -63,13 +63,17 @@ public class OrionHDFSSinkTest {
     private final String cosmosDefaultPassword = "pass1234";
     private final String hdfsAPI = "httpfs";
     private final String hivePort = "10000";
-    private final long ts = 123456789;
-    private final String recvTime = "20140513T16:48:13";
-    private final String entityId = "room1";
-    private final String entityType = "room";
-    private final String attrName = "temperature";
-    private final String attrType = "degrees";
-    private final String attrValue = "26.5";
+    private final long recvTimeTs = 123456789;
+    private final String normalServiceName = "rooms";
+    private final String abnormalServiceName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
+    private final String normalServicePathName = "numeric-rooms";
+    private final String abnormalServicePathName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String normalDestinationName = "room1-room";
+    private final String abnormalDestinationName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
+    private static final String ATTRNAME = "temperature";
     private final String notifyXMLSimple = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -122,9 +126,9 @@ public class OrionHDFSSinkTest {
         when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
         when(mockWebHDFSBackend.exists(null, null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, attrName, attrName);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, attrName, attrName);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, ATTRNAME, ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, ATTRNAME, ATTRNAME);
     } // setUp
 
     /**
@@ -160,14 +164,14 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testProcessContextResponses() throws Exception {
-        System.out.println("processContextResponses");
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("timestamp", "123456789");
-        headers.put(Constants.HEADER_SERVICE, "any_service");
-        headers.put(Constants.HEADER_SERVICE_PATH, "any_service_path");
-        headers.put(Constants.DESTINATION, "any_dest");
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -176,6 +180,54 @@ public class OrionHDFSSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
+        
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long destination name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, abnormalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
     } // testProcessContextResponses
     
 } // OrionHDFSSinkTest
