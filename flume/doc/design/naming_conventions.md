@@ -23,12 +23,12 @@ HDFS, like any other file system, organizes the data in files within directories
 MySQL, like any other relational database, organizes the data in tables within databases. Nevertheless, this data organization implies the usage of only two levels, which will match the `fiware-service` (database name) and the `entity_name` (table name). To fix it, the `fiware-servicePath` is prefixed to the table name.
 
     databases:                       tables:
-    --------------------             ------------------------------------------------
+    --------------------         ------------------------------------------------
     | <fiware_service> |---1:N---| <fiware_servicePath>_<extracted_entity_name> |
-    --------------------             ------------------------------------------------
+    --------------------         ------------------------------------------------
 
 ### CKAN data organization
-CKAN perfectly fits the tree-level data organization through the organization, package and resource concepts:
+CKAN perfectly fits the three-level data organization through the organization, package and resource concepts:
 
     organizations:               packages:                        resources:                          datastores:
     --------------------         ------------------------         ---------------------------         -----------------
@@ -48,13 +48,12 @@ Within CKAN, the data is really stored within a <i>datastore</i>, but this is tr
 ## Naming conventions
 
 ### Valid character set
-Each one of the levels of the different data organizations managed by Cygnus must be named with lowercase alphanumeric characters plus the `_` character. Any uppercase characters will be casted to lowercase, and any other character different than an alphanumeric will be scaped to `_`. 
+Each one of the levels of the different data organizations managed by Cygnus (i.e. service, servicePath and entity) must be named with lowercase alphanumeric characters plus the `_` character. Any uppercase characters will be casted to lowercase, and any other character different than an alphanumeric will be scaped to `_`. 
 
-### Maximum element length
+### Maximum element (service, servicePath, entity) length
 It is limited to 64 characters, which is the minimum maximum length among all the storages (64 characters is the maximum length for MySQL).
 
 ## Contact
-
 Fermín Galán Márquez (fermin.galanmarquez@telefonica.com)
 <br>
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
