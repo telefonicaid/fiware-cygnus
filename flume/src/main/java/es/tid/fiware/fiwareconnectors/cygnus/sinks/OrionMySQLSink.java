@@ -273,7 +273,13 @@ public class OrionMySQLSink extends OrionSink {
      * @throws Exception
      */
     private String buildTableName(String fiwareServicePath, String destination) throws Exception {
-        String tableName = fiwareServicePath + '_' + destination;
+        String tableName;
+                
+        if (fiwareServicePath.length() == 0) {
+            tableName = destination;
+        } else {
+            tableName = fiwareServicePath + '_' + destination;
+        } // if else
 
         if (tableName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName

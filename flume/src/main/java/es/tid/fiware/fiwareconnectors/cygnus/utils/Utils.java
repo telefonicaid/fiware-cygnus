@@ -50,7 +50,8 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_").toLowerCase();
+        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_").toLowerCase();
+        return (res.startsWith("_") ? res.substring(1, res.length()) : res);
     } // encode
     
     /**
