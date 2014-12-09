@@ -92,7 +92,7 @@ public class RoundRobinChannelSelectorTest {
     public void testGetOptionalChannels() {
         System.out.println("Testing RoundRobinChannelSelector.getOptionalChannels");
         channelSelector.configure(context);
-        assertEquals(null, channelSelector.getOptionalChannels(event));
+        assertEquals(0, channelSelector.getOptionalChannels(event).size());
     } // testGetOptionalChannels
     
     /**

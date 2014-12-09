@@ -24,6 +24,7 @@ import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.AbstractChannelSelector;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -31,6 +32,7 @@ import org.apache.flume.channel.AbstractChannelSelector;
  */
 public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
+    private Logger logger;
     private int numChannels;
     private int lastUsedChannel;
     
@@ -38,6 +40,7 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
      * Constructor.
      */
     public RoundRobinChannelSelector() {
+        logger = Logger.getLogger(RoundRobinChannelSelector.class);
     } // RoundRobinChannelSelector
     
     @Override
@@ -53,7 +56,8 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
     @Override
     public List<Channel> getOptionalChannels(Event event) {
-        return null;
+        logger.debug("Returning empty optional channels");
+        return new ArrayList<Channel>();
     } // getOptionalChannels
     
     @Override
@@ -62,6 +66,7 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
         lastUsedChannel = (lastUsedChannel + 1) % numChannels;
         Channel channel = getAllChannels().get(lastUsedChannel);
         res.add(channel);
+        logger.debug("Returning " + channel.getName() + " channel");
         return res;
     } // getRequiredChannels
 
