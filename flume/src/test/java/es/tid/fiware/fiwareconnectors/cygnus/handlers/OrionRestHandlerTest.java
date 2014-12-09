@@ -61,6 +61,7 @@ public class OrionRestHandlerTest {
     private final String configuredEventsTTL = "10";
     private final String configuredDefaultService = "a.SERV_with-rare chars%@";
     private final String configuredDefaultServicePath = "a.SERVPATH_with-rare chars%@";
+    private final String rootServicePath = "/";
     private final String[] notificationHeaderNamesStr = {"user-agent", "content-type", "fiware-service",
         "fiware-servicepath"};
     private final String notificationNotificationTarget = "/notify";
@@ -92,13 +93,17 @@ public class OrionRestHandlerTest {
         when(mockRequest.getMethod()).thenReturn(notificationRequestMethod);
         when(mockRequest.getRequestURI()).thenReturn(notificationNotificationTarget);
         when(mockRequest.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))),
                 Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))));
         when(mockRequest.getHeader("user-agent")).thenReturn(notificationUserAgent);
         when(mockRequest.getHeader("content-type")).thenReturn(notificationContentType);
         when(mockRequest.getHeader("fiware-service")).thenReturn(notificationService);
-        when(mockRequest.getHeader("fiware-servicepath")).thenReturn(notificationServicePath);
-        when(mockRequest.getReader()).thenReturn(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
+        when(mockRequest.getHeader("fiware-servicepath")).thenReturn(notificationServicePath, rootServicePath);
+        when(mockRequest.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))),
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
     } // setUp
     
     /**
@@ -119,7 +124,7 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEvents() throws Exception {
-        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler'");
+        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (invalid characters");
         handler.configure(context);
         List result = handler.getEvents(mockRequest);
         assertTrue(result.size() == 1);
@@ -134,6 +139,24 @@ public class OrionRestHandlerTest {
         assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
         assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
         assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(notificationServicePath));
+        assertTrue(eventMessage.length != 0);
+        
+        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (\"root\" servicePath name");
+        context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, rootServicePath);
+        handler.configure(context);
+        result = handler.getEvents(mockRequest);
+        assertTrue(result.size() == 1);
+        event = (Event) result.get(0);
+        eventHeaders = event.getHeaders();
+        eventMessage = event.getBody();
+        assertTrue(eventHeaders.size() == 5);
+        assertTrue(eventHeaders.containsKey("content-type"));
+        assertTrue(eventHeaders.get("content-type").equals("application/json")
+                || eventHeaders.get("content-type").equals("application/xml"));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(rootServicePath));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     

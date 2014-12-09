@@ -69,6 +69,7 @@ public class OrionHDFSSinkTest {
     private final String normalServicePathName = "numeric-rooms";
     private final String abnormalServicePathName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String rootServicePathName = "";
     private final String normalDestinationName = "room1-room";
     private final String abnormalDestinationName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
@@ -227,6 +228,23 @@ public class OrionHDFSSinkTest {
         } catch (Exception e) {
             assertTrue(true);
         } // try catch
+        
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (\"root\" servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
     } // testProcessContextResponses
     
 } // OrionHDFSSinkTest

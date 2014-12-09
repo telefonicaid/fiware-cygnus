@@ -66,6 +66,7 @@ public class OrionMySQLSinkTest {
     private final String normalServicePathName = "numeric-rooms";
     private final String abnormalServicePathName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String rootServicePathName = "";
     private final String normalDestinationName = "room1-room";
     private final String abnormalDestinationName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
@@ -133,8 +134,8 @@ public class OrionMySQLSinkTest {
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(anyString());
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(anyString(), anyString());
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(null);
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(null, null);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, recvTimeTs, recvTime,
                 ENTITYNAME, ENTITYTYPE, ATTRNAME, ATTRTYPE, ATTRVALUE, ATTRMD);
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, recvTime, ATTRLIST,
@@ -177,9 +178,10 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", "123456789");
-        headers.put(Constants.HEADER_SERVICE, "any_org");
-        headers.put(Constants.DESTINATION, "any_dest");
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -236,6 +238,23 @@ public class OrionMySQLSinkTest {
         } catch (Exception e) {
             assertTrue(true);
         } // try catch
+        
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (\"root\" servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
     } // testProcessContextResponses
     
 } // OrionMySQLSinkTest

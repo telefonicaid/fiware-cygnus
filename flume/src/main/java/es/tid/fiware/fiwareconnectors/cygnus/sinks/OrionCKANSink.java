@@ -244,7 +244,13 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
-        String pkgName = fiwareService + "_" + fiwareServicePath;
+        String pkgName;
+        
+        if (fiwareServicePath.length() == 0) {
+            pkgName = fiwareService;
+        } else {
+            pkgName = fiwareService + "_" + fiwareServicePath;
+        } // if else
         
         if (pkgName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
