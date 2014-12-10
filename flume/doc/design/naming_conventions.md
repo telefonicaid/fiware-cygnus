@@ -10,7 +10,7 @@ The way Cygnus organizes the data derives from the way Orion Context Broker does
 * `fiware-service`: in some way, this header identifies the tenant or client the context data belongs to.
 * `fiware-servicePath`: within a tenant, the data may come from different paths or sets, which will be identified by this header.
 
-An example of how these headers are used could be found in a Smart City having different public services such as gardens maintenance or garbage collection. If for instance a sensor measure regarding a park's grass humidity has to be notified, then the city name will be given in the `fiware-service` header, while the `fiware-servicePath` will contain a path such as <i>gardens/parks/south_park</i>.   
+An example of how these headers are used could be found in a Smart City having different public services such as gardens maintenance or garbage collection. If for instance a sensor measure regarding a park's grass humidity has to be notified, then the city name will be given in the `fiware-service` header, while the `fiware-servicePath` will contain a path such as <i>/gardens/parks/south_park</i>.   
 
 As can be seen, this way of organizing the data composes some kind of three-level hierarchical structure, being the first level the service, then being the second level the servicePath and finally the notified entity (which will be named according to the [`DestinationExtractor` interceptor](interceptors.md)). This structure will be translated to all the sinks within Cygnus.
 
@@ -48,7 +48,10 @@ Within CKAN, the data is really stored within a <i>datastore</i>, but this is tr
 ## Naming conventions
 
 ### Valid character set
-Each one of the levels of the different data organizations managed by Cygnus (i.e. service, servicePath and entity) must be named with lowercase alphanumeric characters plus the `_` character. Any uppercase characters will be casted to lowercase, and any other character different than an alphanumeric will be scaped to `_`. 
+Each one of the levels of the different data organizations managed by Cygnus (i.e. service, servicePath and entity) must be named with lowercase alphanumeric characters plus the `_` character. Any uppercase characters will be casted to lowercase, and any other character different than an alphanumeric will be scaped to `_`.
+
+#### Special considerations with `fiware-servicePath`
+This header is constrained by the previous valid character set, of course, but a special consideration has to be commented. Tipically this header values are Unix paths-like, for instance `/gardens/parks/south_park`. According to the above rules the '/' characters should be scaped to '_', resulting into `_gardens_parks_south_park`... but you will see it is really converted to `gardens_parks_south_park`. Please observe the initial '_' associated to the <i>root</i> directory has been deleted. This is in order to avoid converted strings such as `_` when only the root directoy `/` is notified.
 
 ### Maximum element (service, servicePath, entity) length
 It is limited to 64 characters, which is the minimum maximum length among all the storages (64 characters is the maximum length for MySQL).
