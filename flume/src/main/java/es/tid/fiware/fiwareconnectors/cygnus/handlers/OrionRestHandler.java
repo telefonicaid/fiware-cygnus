@@ -19,8 +19,6 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
-import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
-import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -144,12 +142,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
         eventsTTL = context.getString(Constants.PARAM_EVENTS_TTL, "10");
         logger.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
-        
-        // FIXME: temporal location for the Jetty server startup, this should be run at the same time the other Flume
-        // components are initialized, i.e. within the Node Application.
-        JettyServer js = new JettyServer(context.getInteger("management_port", 8081), new ManagementInterface());
-        js.start();
-        
         logger.info("Startup completed");
     } // configure
             
