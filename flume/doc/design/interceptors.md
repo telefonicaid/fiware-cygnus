@@ -33,7 +33,7 @@ There exists a <i>matching table</i> file containing the above <i>matching rules
 Being:
 
 * <b>id</b>: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful in the future.
-* <b>comma-separated_fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is <i>entityId</i>, <i>entityType</i> and <i>fiwareService</i>.
+* <b>comma-separated_fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is <i>entityId</i>, <i>entityType</i> and <i>fiwareService</i>. The order of these fields is important since the concatenation is made from left to right.
 * <b>regex</b>: Java-like regular expression to be applied on the concatenated fields.
 * <b>destination_entity</b>: Name of the HDFS file, MySQL table or CKAN resource where the data will be effectively persisted. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
 * <b>destination_dataset</b>: Name of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, this prefixes the table name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
@@ -42,12 +42,13 @@ For instance:
 
     1|entityId,entityType|Room\.(\d*)Room|numeric_rooms|rooms
     2|entityId,entityType|Room\.(\D*)Room|character_rooms|rooms
-    3|entityType|Room|other_roorms|rooms
+    3|entityType,entityId|RoomRoom\.(\D*)|character_rooms|rooms
+    4|entityType|Room|other_roorms|rooms
 
 The above rules set that:
 
-* All the `Room` entities having their identifiers composed by a `Room.` and an integer will be persisted in a `numeric_rooms` destination entity within a `rooms` destination dataset.
-* All the `Room` entities having their identifiers composed by a `Room.` and any number of characters (no digits) will be persisted in a `character_rooms` destination entity within a `rooms` destination dataset.
+* All the `Room` entities having their identifiers composed by a `Room.` and an integer (e.g. `Room.12`) will be persisted in a `numeric_rooms` destination entity within a `rooms` destination dataset (in the example, the concatenation is equals to `Room.12Room`).
+* All the `Room` entities having their identifiers composed by a `Room.` and any number of characters (no digits) (e.g. `Room.left`) will be persisted in a `character_rooms` destination entity within a `rooms` destination dataset (in the example, the concatenation is equals to `Room.leftRoom` when appliying rule number 2, but `RoomRoom.left` when applying rule number 3; nevertheless, from a semantic point of view they are the same rule).
 * All other rooms will go to `other_rooms` within a `rooms` destination dataset.
 
 Rules are tryed sequentially, and if any rules matches then the default destination for the notified entity is generated, i.e. the concatenation of the entity id, `_` and the entity type.
