@@ -13,19 +13,14 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
-import org.apache.http.client.HttpClient;
+import org.json.simple.JSONObject;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import java.util.HashMap;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHttpResponse;
 import org.mockito.Mockito;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,23 +44,24 @@ public class CKANBackendImplTest {
     // the DefaultHttpClient class cannot be mocked:
     // http://stackoverflow.com/questions/4547852/why-does-my-mockito-mock-object-use-real-the-implementation
     @Mock
-    private HttpClient mockHttpClientInitOrg;
+    private CKANCache mockCache;
     @Mock
-    private HttpClient mockHttpClientPersistRow;
-    @Mock
-    private HttpClient mockHttpClientPersistColumn;
+    private CKANRequester mockRequester;
     
     // constants
     private final String apiKey = "1a2b3c4d5e6f7g8h9i0j";
     private final String host = "localhost";
     private final String port = "80";
-    private final String defaultPackage = "defaultPackage";
     private final String orionURL = "http://orion-vm:1026/";
     private final boolean ssl = false;
-    private final String orgName = "defaultOrg";
+    private final String orgName = "rooms";
+    private final String pkgName = "numeric-rooms";
+    private final String resName = "room1-room";
+    private final String orgId = "org_id";
+    private final String pkgId = "pkg_id";
+    private final String resId = "res_id";
     private final String recvTime = "2014-09-23T11:26:45";
     private final long recvTimeTs = new Long("123456789").longValue();
-    private final String resourceName = "Room1-Room";
     private final String attrName = "temperature";
     private final String attrType = "centigrade";
     private final String attrValue = "26.5";
@@ -82,44 +78,23 @@ public class CKANBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new CKANBackendImpl(apiKey, host, port, defaultPackage, orionURL, ssl);
+        backend = new CKANBackendImpl(apiKey, host, port, orionURL, ssl);
         
         // set up other instances
-        BasicHttpResponse respOrganizationShow = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
-        respOrganizationShow.setEntity(
-                new StringEntity("{\"result\":{\"state\":\"active\",\"id\":\"12345\",\"packages\":[]}}"));
-        BasicHttpResponse respResourceCreate = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
-        respResourceCreate.setEntity(new StringEntity("{\"result\":{\"id\":\"12345\"}}"));
-        BasicHttpResponse respDatastoreCreate = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
-        respDatastoreCreate.setEntity(new StringEntity("{\"result\":{\"whatever\":\"whatever\"}}"));
-        BasicHttpResponse respDatastoreUpsert = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
-        respDatastoreUpsert.setEntity(new StringEntity("{\"result\":{\"whatever\":\"whatever\"}}"));
-        
+        CKANResponse ckanResp = new CKANResponse(new JSONObject(), 200);
+
         // set up the behaviour of the mocked classes
-        when(mockHttpClientInitOrg.execute(Mockito.any(HttpUriRequest.class))).thenReturn(respOrganizationShow);
-        when(mockHttpClientPersistRow.execute(Mockito.any(HttpUriRequest.class))).thenReturn(respResourceCreate,
-                respDatastoreCreate, respDatastoreUpsert);
-        when(mockHttpClientPersistColumn.execute(Mockito.any(HttpUriRequest.class))).thenReturn(respOrganizationShow,
-                respResourceCreate, respDatastoreCreate, respDatastoreUpsert);
+        when(mockCache.isCachedOrg(orgName)).thenReturn(true);
+        when(mockCache.isCachedPkg(orgName, pkgName)).thenReturn(true);
+        when(mockCache.isCachedRes(orgName, pkgName, resName)).thenReturn(true);
+        when(mockCache.getOrgId(orgName)).thenReturn("org_id");
+        when(mockCache.getPkgId(pkgName)).thenReturn("pkg_id");
+        when(mockCache.getResId(resName)).thenReturn("res_id");
+        when(mockRequester.doCKANRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(ckanResp);
+        when(mockRequester.doCKANRequest(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(ckanResp);
     } // setUp
-    
-    /**
-     * Test of initOrg method, of class CKANBackendImpl.
-     */
-    @Test
-    public void testInitOrg() {
-        System.out.println("Testing MySQLBackend.createDatabase");
-        
-        try {
-            backend.setHttpClient(mockHttpClientInitOrg);
-            backend.initOrg(orgName);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testInitOrg
-    
+
     /**
      * Test of persist (row) method, of class CKANBackendImpl.
      */
@@ -128,8 +103,9 @@ public class CKANBackendImplTest {
         System.out.println("Testing MySQLBackend.persist (row)");
         
         try {
-            backend.setHttpClient(mockHttpClientPersistRow);
-            backend.persist(recvTimeTs, recvTime, orgName, resourceName, attrName, attrType, attrValue, attrMd);
+            backend.setCache(mockCache);
+            backend.setRequester(mockRequester);
+            backend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType, attrValue, attrMd);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -145,8 +121,9 @@ public class CKANBackendImplTest {
         System.out.println("Testing MySQLBackend.persist (column)");
         
         try {
-            backend.setHttpClient(mockHttpClientPersistColumn);
-            backend.persist(recvTime, orgName, resourceName, attrList, attrMdList);
+            backend.setCache(mockCache);
+            backend.setRequester(mockRequester);
+            backend.persist(recvTime, orgName, pkgName, resName, attrList, attrMdList);
         } catch (Exception e) {
             // Check if the raised exception type is CygnusBadConfiguration. This exception means the resource does not
             // exist in CKAN and, due to we are running in "column" mode, it cannot be created. By checking this
