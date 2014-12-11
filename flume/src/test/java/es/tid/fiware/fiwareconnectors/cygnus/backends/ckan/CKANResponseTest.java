@@ -16,37 +16,24 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package es.tid.fiware.fiwareconnectors.cygnus.management;
+package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 
-import java.io.PrintWriter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.json.simple.JSONObject;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*; // this is required by "when" like functions
+import org.junit.Test;
+import static org.junit.Assert.*; // this is required by "fail" like assertions
 
 /**
  *
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ManagementInterfaceTest {
+public class CKANResponseTest {
     
     // instance to be tested
-    private ManagementInterface managementInterface;
-    
-    // mocks
-    @Mock
-    private HttpServletRequest mockRequest;
-    @Mock
-    private HttpServletResponse mockResponse;
-    
-    // constants
-    private final String requestURI = "/version";
+    private CKANResponse response;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -57,27 +44,27 @@ public class ManagementInterfaceTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        managementInterface = new ManagementInterface();
-        
-        // set up the behaviour of the mocked classes
-        when(mockRequest.getRequestURI()).thenReturn(requestURI);
-        when(mockResponse.getWriter()).thenReturn(new PrintWriter(System.out));
+        JSONObject obj = new JSONObject();
+        obj.put("test", "test");
+        response = new CKANResponse(obj, 200);
     } // setUp
     
     /**
-     * Test of handle method, of class ManagementInterface.
+     * Test of isCachedRes method, of class CKANCache.
      */
     @Test
-    public void testHandle() {
-        System.out.println("Testing ManagementInterface.handle");
-        
-        try {
-            managementInterface.handle(null, mockRequest, mockResponse, 1);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch
-    } // testHandle
+    public void testGetJsonObject() {
+        System.out.println("Testing CKANResponseTest.getJsonObject");
+        assertTrue(response.getJsonObject().containsKey("test"));
+    } // testIsCachedRes
+
+    /**
+     * Test of isCachedRes method, of class CKANCache.
+     */
+    @Test
+    public void testGetStatusCode() {
+        System.out.println("Testing CKANResponseTest.getStatusCode");
+        assertTrue(response.getJsonObject().containsKey("test"));
+    } // testGetStatusCode
     
-} // ManagementInterfaceTest
+} // CKANResponseTest
