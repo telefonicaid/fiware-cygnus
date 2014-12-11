@@ -34,8 +34,8 @@ Let's consider the following notification in Json format coming from an Orion Co
     Host: localhost:1028
     Accept: application/xml, application/json
     Content-Type: application/json
-    Fiware-Service: mycompanyname
-    Fiware-ServicePath: workingrooms/floor4 
+    Fiware-Service: my-company-name
+    Fiware-ServicePath: /workingrooms/floor4 
     
     {
       "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
@@ -75,8 +75,8 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 		body=json_data,
 		headers={
 			content-type=application/json,
-			fiware-service=mycompanyname,
-			fiware-servicepath=workingrooms/floor4,
+			fiware-service=my_company_name,
+			fiware-servicepath=workingrooms_floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
@@ -89,9 +89,9 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 Let's have a look on the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
-* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well (as `fiware-service`). Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property.
-* Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization, which is added to the event headers as well (as `fiware-servicepath`). Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property.
-* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the <i>doc/design/interceptors</i> document for more details.
+* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well (as `fiware-service`). Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property. Please observe that the notified `fiware-service` is transformed following the rules described at [`doc/design/naming_conventions.md`](doc/design/naming_conventions.md).
+* Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization, which is added to the event headers as well (as `fiware-servicepath`). Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property. Please observe that the notified `fiware-servicePath` is transformed following the rules described at [`doc/design/naming_conventions.md`](doc/design/naming_conventions.md).
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the [doc/design/interceptors.md](doc/design/interceptors.md) document for more details.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
 * The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume.
 * The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
@@ -109,6 +109,8 @@ These files are stored under this HDFS path:
     hdfs:///user/<username>/<service>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
 
 Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. Both the `service` and `servicePath` directories are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively).
+
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -144,6 +146,8 @@ On the contrary, being the persistence mode `column`, the table named `default_u
 ### OrionCKANSink persistence
 
 This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), whose name is specified by the notified `Fiware-ServicePath` header (or by the `default_service_path` property -prefixed by organization name- in the CKAN sink configuration, if such a header is not notified). Datasets belong to single organization, whose name is specified by the notified `Fiware-Service` header (or by the `default_service` property if it is not notified). 
+
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
 
 Each datastore, we can find two options:
 
@@ -188,6 +192,8 @@ These tables are stored in databases, one per service, enabling a private data s
 
 Both the `service` and `servicePath` names are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively). 
 
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
+
 Within tables, we can find two options:
 
 * Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted),
@@ -217,8 +223,8 @@ Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugin
 		body=json_data,
 		headers={
 			content-type=application/xml,
-			fiware-service=mycompanyname,
-			fiware-servicepath=workingrooms/floor4,
+			fiware-service=my_company_name,
+			fiware-servicepath=workingrooms_floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
