@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
  
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
@@ -25,9 +24,9 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
-import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -224,29 +223,36 @@ public class OrionHDFSSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
-        String organization = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fileName = eventHeaders.get(Constants.DESTINATION);
+        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
+        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
         
         // human readable version of the reception time
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
         
-        // iterate in the contextResponses
+        // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
         
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
-            String entityId = Utils.encode(contextElement.getId());
-            String entityType = Utils.encode(contextElement.getType());
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
             logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
+            
+            // build the effective HDFS stuff
+            String firstLevel = buildFirstLevel(fiwareService);
+            String secondLevel = buildSecondLevel(fiwareServicePath);
+            String thirdLevel = buildThirdLevel(destinations[i]);
+            String hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
+            String hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
             
             // check if the fileName exists in HDFS right now, i.e. when its attrName has been got
             boolean fileExists = false;
             
-            // FIXME: current version of the notification only provides the organization, being null the username
-            if (persistenceBackend.exists(null, organization + "/" + fileName + "/" + fileName + ".txt")) {
+            if (persistenceBackend.exists(cosmosDefaultUsername, hdfsFile)) {
                 fileExists = true;
             } // if
             
@@ -290,31 +296,17 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
                     logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
-                            + fileName + "), Data (" + rowLine + ")");
+                            + hdfsFile + "), Data (" + rowLine + ")");
                     
                     // if the fileName exists, append the Json document to it; otherwise, create it with initial content
                     // and mark as existing (this avoids checking if the fileName exists each time a Json document is
                     // going to be persisted)
                     if (fileExists) {
-                        // FIXME: current version of the notification only provides the organization, being null the
-                        // username
-                        persistenceBackend.append(null, organization + "/" + fileName + "/" + fileName + ".txt",
-                                rowLine);
+                        persistenceBackend.append(cosmosDefaultUsername, hdfsFile, rowLine);
                     } else {
-                        // having in mind the HDFS structure:
-                        // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
-                        //
-                        // 1. create the entity folder if not yet existing
-                        // FIXME: current version of the notification only provides the organization, being null the
-                        // username
-                        persistenceBackend.createDir(null, organization + "/" + fileName);
-                        // 2. create the entity file
-                        // FIXME: current version of the notification only provides the organization, being null the
-                        // username
-                        persistenceBackend.createFile(null, organization + "/" + fileName + "/" + fileName + ".txt",
-                                rowLine);
-                        // 3. create the 8-fields standard Hive table
-                        persistenceBackend.provisionHiveTable(organization, fileName);
+                        persistenceBackend.createDir(cosmosDefaultUsername, hdfsFolder);
+                        persistenceBackend.createFile(cosmosDefaultUsername, hdfsFile, rowLine);
+                        persistenceBackend.provisionHiveTable(cosmosDefaultUsername, hdfsFolder);
                         fileExists = true;
                     } // if else
                 } else {
@@ -329,33 +321,74 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + fileName
+                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + hdfsFile
                         + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
-                    // FIXME: current version of the notification only provides the organization, being null the
-                    // username
-                    persistenceBackend.append(null, organization + "/" + fileName + "/" + fileName + ".txt",
-                            columnLine);
+                    persistenceBackend.append(cosmosDefaultUsername, hdfsFile, columnLine);
                 } else {
-                    // having in mind the HDFS structure:
-                    // hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
-                    //
-                    // 1. create the entity folder if not yet existing
-                    // FIXME: current version of the notification only provides the organization, being null the
-                    // username
-                    persistenceBackend.createDir(null, organization + "/" + fileName);
-                    // 2. create the entity file
-                    // FIXME: current version of the notification only provides the organization, being null the
-                    // username
-                    persistenceBackend.createFile(null, organization + "/" + fileName + "/" + fileName + ".txt",
-                            columnLine);
-                    // 3. create the Hive table with a variable number of fields
-                    persistenceBackend.provisionHiveTable(organization, fileName, hiveFields);
+                    persistenceBackend.createDir(cosmosDefaultUsername, hdfsFolder);
+                    persistenceBackend.createFile(cosmosDefaultUsername, hdfsFile, columnLine);
+                    persistenceBackend.provisionHiveTable(cosmosDefaultUsername, hdfsFolder, hiveFields);
                     fileExists = true;
                 } // if else
             } // if
         } // for
     } // persist
+    
+    /**
+     * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
+     * violated.
+     * @param fiwareService
+     * @return
+     * @throws Exception
+     */
+    private String buildFirstLevel(String fiwareService) throws Exception {
+        String firstLevel = fiwareService;
+        
+        if (firstLevel.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
+                    + "and its length is greater than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return firstLevel;
+    } // buildFirstLevel
+    
+    /**
+     * Builds the second level of a HDFS path given given a fiwareService and a destination. It throws an exception if
+     * the naming conventions are violated.
+     * @param fiwareService
+     * @param destination
+     * @return
+     * @throws Exception
+     */
+    private String buildSecondLevel(String fiwareServicePath) throws Exception {
+        String secondLevel = fiwareServicePath;
+        
+        if (secondLevel.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
+                    + "its length is greater than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return secondLevel;
+    } // buildSecondLevel
+
+    /**
+     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
+     * violated.
+     * @param destination
+     * @return
+     * @throws Exception
+     */
+    private String buildThirdLevel(String destination) throws Exception {
+        String thirdLevel = destination;
+        
+        if (thirdLevel.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
+                    + "greater than " + Constants.MAX_NAME_LEN);
+        } // if
+
+        return thirdLevel;
+    } // buildThirdLevel
     
 } // OrionHDFSSink
