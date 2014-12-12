@@ -20,6 +20,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.nodes;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
 import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.File;
@@ -35,6 +36,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.flume.Constants;
 import org.apache.flume.lifecycle.LifecycleAware;
 import org.apache.flume.node.Application;
+import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.apache.log4j.Logger;
@@ -46,13 +48,15 @@ import org.apache.log4j.Logger;
 public class CygnusApplication extends Application {
     
     private static Logger logger;
+    private int mgmtIfPort;
     private JettyServer server;
     
     /**
      * Constructor.
      */
-    public CygnusApplication() {
+    public CygnusApplication(int mgmtIfPort) {
         super();
+        this.mgmtIfPort = mgmtIfPort;
         logger = Logger.getLogger(CygnusApplication.class);
     } // CygnusApplication
     
@@ -60,22 +64,34 @@ public class CygnusApplication extends Application {
      * Constructor.
      * @param components
      */
-    public CygnusApplication(List<LifecycleAware> components) {
+    public CygnusApplication(List<LifecycleAware> components, int mgmtIfPort) {
         super(components);
+        this.mgmtIfPort = mgmtIfPort;
         logger = Logger.getLogger(CygnusApplication.class);
     } // CygnusApplication
-    
+
     @Override
-    public synchronized void start() {
-        super.start();
-        logger.info("Starting a Jetty server listening on port 8081 (Management Interface)");
-        server = new JettyServer(8081, new ManagementInterface());
+    @Subscribe
+    public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        super.handleConfigurationEvent(conf);
+        startManagementInterface(conf);
+    } // handleConfigurationEvent
+    
+    /**
+     * Starts a Management Interface instance based on a Jetty server.
+     * @param conf
+     */
+    private void startManagementInterface(MaterializedConfiguration conf) {
+        logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
+        server = new JettyServer(mgmtIfPort, new ManagementInterface(conf.getSourceRunners(), conf.getChannels(),
+                conf.getSinkRunners()));
         server.start();
-    } // start
+    } // startManagementInterface
    
     /**
-     * Main application to be run when this CygnusApplication is invoked. The only difference with the original one
-     * is the CygnusApplication is used instead of the Application one.
+     * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
+     * are the CygnusApplication is used instead of the Application one, and the Management Interface port option in
+     * the command line.
      * @param args
      */
     public static void main(String[] args) {
@@ -95,6 +111,10 @@ public class CygnusApplication extends Application {
 
             option = new Option("h", "help", false, "display help text");
             options.addOption(option);
+            
+            option = new Option("p", "mgmt-if-port", true, "the management interface port");
+            option.setRequired(false);
+            options.addOption(option);
 
             CommandLineParser parser = new GnuParser();
             CommandLine commandLine = parser.parse(options, args);
@@ -106,6 +126,12 @@ public class CygnusApplication extends Application {
             if (commandLine.hasOption('h')) {
                 new HelpFormatter().printHelp("flume-ng agent", options, true);
                 return;
+            } // if
+            
+            int mgmtIfPort = 8081; // default value
+            
+            if (commandLine.hasOption('p')) {
+                mgmtIfPort = new Integer(commandLine.getOptionValue('p')).intValue();
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -133,12 +159,12 @@ public class CygnusApplication extends Application {
                 PollingPropertiesFileConfigurationProvider configurationProvider =
                         new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
                 components.add(configurationProvider);
-                application = new CygnusApplication(components);
+                application = new CygnusApplication(components, mgmtIfPort);
                 eventBus.register(application);
             } else {
                 PropertiesFileConfigurationProvider configurationProvider =
                         new PropertiesFileConfigurationProvider(agentName, configurationFile);
-                application = new CygnusApplication();
+                application = new CygnusApplication(mgmtIfPort);
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
             
