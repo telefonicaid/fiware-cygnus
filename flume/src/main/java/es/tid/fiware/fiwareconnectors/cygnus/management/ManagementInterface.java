@@ -18,11 +18,15 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.management;
 
+import com.google.common.collect.ImmutableMap;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.flume.Channel;
+import org.apache.flume.SinkRunner;
+import org.apache.flume.SourceRunner;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
@@ -32,6 +36,24 @@ import org.mortbay.jetty.handler.AbstractHandler;
  * @author frb
  */
 public class ManagementInterface extends AbstractHandler {
+    
+    private ImmutableMap<String, SourceRunner> sources;
+    private ImmutableMap<String, Channel> channels;
+    private ImmutableMap<String, SinkRunner> sinks;
+    
+    /**
+     * Constructor.
+     * @param sources
+     * @param channels
+     * @param sinks
+     */
+    public ManagementInterface(ImmutableMap<String, SourceRunner> sources, ImmutableMap<String, Channel> channels,
+            ImmutableMap<String, SinkRunner> sinks) {
+        // FIXME: these references are ready to be used for more advanced Management Interface operations
+        this.sources = sources;
+        this.channels = channels;
+        this.sinks = sinks;
+    } // ManagementInterface
     
     @Override
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
