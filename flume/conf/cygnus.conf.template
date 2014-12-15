@@ -48,8 +48,6 @@ cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded
 cygnusagent.sources.http-source.handler.events_ttl = 10
-# Management interface port (FIXME: temporal location for this parameter)
-cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts de
 # Timestamp interceptor, do not change
