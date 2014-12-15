@@ -365,8 +365,6 @@ cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded 
 cygnusagent.sources.http-source.handler.events_ttl = 10
-# Management interface port (temporal location for this parameter)
-cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
@@ -466,15 +464,24 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 
 ## Running
 
+Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `es.tid.fiware.fiwareconnectors.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
+
 In foreground (with logging):
 
-    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
+    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>]
 
 In background:
 
-    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
+    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] &
 
-Remember you can change the logging level and the logging appender by changing the `-Dflume.root.logger` parameter.
+The parameters used in these commands are:
+
+* `agent`. This is the type of application to be run by the `cygnus-flume-ng` script.
+* `--conf`. Points to the Apache Flume configuration folder.
+* `-f` (or `--conf-file`). This is the Cygnus configuration file within the above configuration folder.
+* `-n` (or `--name`). The name of the Flume agent to be run.
+* `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
+* `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
 
 ## Orion subscription
 
