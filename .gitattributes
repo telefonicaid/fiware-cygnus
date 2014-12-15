@@ -1,2 +1,3 @@
 cygnus-flume-ng	text eol=lf
-package.sh	test eol=lf
+cygnus		text eol=lf
+*.sh		test eol=lf

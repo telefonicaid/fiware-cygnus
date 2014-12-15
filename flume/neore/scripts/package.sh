@@ -78,7 +78,7 @@ function download_flume(){
 
 function copy_cygnus_startup_script(){
         _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
-        mv ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng.disabled
+        rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
         cp $BASE_DIR/target/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
 }
 
