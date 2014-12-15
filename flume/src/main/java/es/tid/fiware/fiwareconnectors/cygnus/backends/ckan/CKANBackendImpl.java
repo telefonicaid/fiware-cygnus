@@ -386,12 +386,9 @@ public class CKANBackendImpl implements CKANBackend {
      */
     private String createResource(String resourceName, String pkgId) throws Exception {
         try {
-            // create the CKAN request JSON; compose the resource URL with the one corresponding to the NGSI10
-            // convenience operation to get resourceName information in Orion
-            StringTokenizer st = new StringTokenizer(resourceName, "-");
-            String jsonURL = orionUrl + "/ngsi10/contextEntitites/" + st.nextElement();
+            // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + resourceName + "\", "
-                    + "\"url\": \"" + jsonURL + "\", "
+                    + "\"url\": \"none\", "
                     + "\"package_id\": \"" + pkgId + "\" }";
             
             // create the CKAN request URL
