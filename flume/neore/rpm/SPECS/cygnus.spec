@@ -181,3 +181,85 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_project_install_dir}
 /var/run/%{_project_name}
+
+%changelog
+* Tue Nov 11 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.4.2
+- Enable https connections in CKAN (#230)
+- Bug fixing: solve a conflict with Monit when running Cygnus as a service (#214)
+- Bug fixing: delete the "cygnus" user when removing the Cygnus RPM (#213)
+- Bug fixing: fix the events TTL parameter in the configuration template (#210)
+- Bug fixing: errors when using '.' in CKAN organization names (#200)
+- Bug fixing: process notifications with no contextAttributeList (#194)
+
+* Sun Oct 19 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.5.1
+- Bug fixing: typo in the configuration template (#238)
+- Bug fixing: wrong path for the matching table (#239)
+
+* Thu Oct 02 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.5
+- Usage of SAX parser for XML-based notifications (#201)
+- Cygnus version and snapshot shown in the logs (#187)
+- Document how a developer may build his/her own sink (#136)
+- Pattern-based grouping into tables (#107)
+- Bug fixig: process notifications with no contextAttributeList (#222)
+- Bug fixing: do the RPM scripts do not change the ownership of the whole /var/run folder (#203)
+- Bug fixing: process the "value" tag in XML notifications instead of "contextValue" (#227)
+
+* Wed Sep 05 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.4.1
+- Only Flume events related to a persistence error are reínjected in the agent channel (#52)
+- A TTL has been added to the re-injected Flume events (#126)
+- Cygnus version is now showed in the logs (#104)
+- Manual build and RPM build both using the same lo4j.properties.template (#111)
+- Usage of Timestamp Interceptor instead of custom timestamping mechanism (#143)
+- Configurable Hive endpoint independent of the HDFS endpoint (#173)
+- Multiple HDFS endpoint setup (#175)
+- Migration from Cygnus 0.1 to 0.2 or higher has been documented (#135)
+- Migration from ngsi2cosmos to Cygnus has been documented (#105)
+- Alarms related to Cygnus have been documented (#112)
+
+* Thu Jul 31 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.4
+- TDAF-like logs (#109)
+- Standardize the default Cygnus logs path (#91)
+- Bug fixing: quotes appearing in CKAN resource values (PR #97)
+- Script for removing old data within CKAN-based short term historic (#62)
+- CKAN basic management script (PR #99)
+- CKAN cleanup script (PR #98)
+
+* Thu Jul 03 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.3
+- Attribute metadata persistence (#41)
+- Multi-tenancy features (#36)
+- Per column attribute persistence (#54 #60 #51)
+- Move reception timestamping from the sink to the source (#53)
+- MySQL connector added as a pom dependency (#78)
+- RPM building framework (#76)
+- Relaxed Orion version checking (#70)
+- MySQL Connector added to pom.xml (#78)
+- Translation scripts from Cygnus 0.1 to Cygnus 0.3 (#65)
+- Script for removing old data within MySQL-based short term historic (#63)
+
+* Wed Jun 04 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.2.1
+- Change the OrionMySQLSink database and table names, by removing the "cygnus_" part (#57)
+- Fixed bug in CKAN insertion mechanism
+
+* Tue Jun 03 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.2
+- Support for complex attribute values, specifically, vectors and objects (#43)
+- Json-like persistency, independently of the notification type (XML or Json) or the backend (#29)
+- Persistence in a MySQL backend (#42)
+- Persistence in a CKAN backend (basic functionality) (#31)
+- HDFS dataset and Hive table creation at startup time (#13)
+- Change package names accordingly to the new repo structure (#30)
+- Unit tests (#18)
+- Add a template for cygnus.conf (#37)
+- README files in UTF-8 (#33)
+- Avoid special characters in HDFS file names, CKAN datastores IDs and MySQL table names (#9)
+- Refactor the sinks and the HDFS backends, getting common code (#34)
+- Per column attribute persistence in MySQL sink (#50)
+- Hive basic client (#26)
+- Plague Tracker application (#27)
+- Translation scripts for moving from Cygnus 0.1 to Cygnus 0.2 (#29)
+- XML and Json simple and compound notifications examples for testing (#39)
+
+* Thu Mar 20 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.1
+- Parsing of simple (string-like values only) Json notifications (#8)
+- Parsing of simple (string-like values only) XML notifications (#3)
+- Persistence in a WebHDFS/HttpFS backend (#20)
+- SFTP basic client
