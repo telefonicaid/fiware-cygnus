@@ -184,6 +184,26 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Dec 17 2014 Daniel Moran <daniel.moranjimenez@telefonica.com> 0.6.0
+- Remove the "resource" prefixing feature from MySQL and HDFS (#224)
+- Add the "fiware-servicePath" header as a valid field of the grouping mechanism (#215)
+- fiware-servicePath header processing (#212)
+- Define and validate a common character set for all service and all resource names (#207)
+- Bug fixing: correctly read the URL in the NGSI testing scripts (#255)
+- Bug fixing: Document the correct Cygnus version in the README (#259)
+- "iot_support at tid dot es" as contact email (#260)
+- Round-Robin-like Flume Channel Selector (#254)
+- Tuning tips for increading the Cygnus performance (#199)
+- Bug fixing: The CKAN organization is not created in column mode anymore (#181)
+- Bug fixing: Correct treatment of a root ("/") fiware-servicePath (#263)
+- Run the Jetty server supporting the management interface from the appropriate place (#232)
+- Do the resource URL in CKAN points to "none" (#246)
+- Include changelog in Cygnus spec (#269)
+- Change the way the PID is determined (#219)
+- Removed execution privileges from configuration files (#264)
+- Document how to install and run Cygnus from RPM (#275)
+- Discard invalid matching rules at DestinationExtractor (#271)
+
 * Tue Nov 11 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.4.2
 - Enable https connections in CKAN (#230)
 - Bug fixing: solve a conflict with Monit when running Cygnus as a service (#214)
