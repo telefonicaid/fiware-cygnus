@@ -327,7 +327,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 ## Installing Cygnus and its dependencies (RPM install)
 Simply configure the FIWARE repository if not yet configured and use your applications manager (CentOS/RedHat example):
 
-    $ cat > /etc/yum.repos.d/fiware.repo2 <<EOL
+    $ cat > /etc/yum.repos.d/fiware.repo <<EOL
     [Fiware]
     name=FIWARE repository
     baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
