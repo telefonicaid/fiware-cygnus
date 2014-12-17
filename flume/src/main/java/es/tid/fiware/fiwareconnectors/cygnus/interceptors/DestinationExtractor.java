@@ -94,6 +94,13 @@ public class DestinationExtractor implements Interceptor {
                 } // if
                 
                 String[] tokens = line.split("\\|");
+                
+                if (tokens.length < 5 || tokens[0].length() == 0 || tokens[1].length() == 0 || tokens[2].length() == 0
+                        || tokens[3].length() == 0 || tokens[4].length() == 0) {
+                    logger.warn("Malformed matching rule, it will be discarded. Details=" + line);
+                    continue;
+                } // if
+                
                 int id = new Integer(tokens[0]).intValue();
                 ArrayList<String> fields = new ArrayList<String>(Arrays.asList(tokens[1].split(",")));
                 matchingTable.add(new MatchingRule(id, fields, tokens[2], tokens[3], tokens[4]));
