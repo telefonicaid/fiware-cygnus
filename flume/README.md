@@ -254,7 +254,7 @@ Maven is installed by downloading it from [maven.apache.org](http://maven.apache
     $ tar xzvf apache-maven-3.2.1-bin.tar.gz
     $ mv apache-maven-3.2.1 APACHE_MAVEN_HOME
 
-## Installing Cygnus and its dependencies
+## Installing Cygnus and its dependencies (from sources)
 
 Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
@@ -323,6 +323,18 @@ In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/l
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
 * mysql-connector-java-5.1.31-bin.jar
+
+## Installing Cygnus and its dependencies (RPM install)
+Simply configure the FIWARE repository if not yet configured and use your applications manager (CentOS/RedHat example):
+
+    $ cat > /etc/yum.repos.d/fiware.repo2 <<EOL
+    [Fiware]
+    name=FIWARE repository
+    baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
+    gpgcheck=0
+    enabled=1
+    EOL
+    $ yum install cygnus
 
 ## Cygnus configuration
 
@@ -462,7 +474,9 @@ cygnusagent.channels.mysql-channel.capacity = 1000
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
 ```
 
-## Running
+## Running (as standalone application)
+
+<i>NOTE: If you installed Cygnus through the RPM, APACHE\_FLUME\_HOME is `/usr/cygnus/`. If not, it is a directory of your choice.</i>
 
 Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `es.tid.fiware.fiwareconnectors.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
 
@@ -482,6 +496,17 @@ The parameters used in these commands are:
 * `-n` (or `--name`). The name of the Flume agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
+
+## Running (as a service)
+<i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
+
+Just use the `service` command to start, stop or get the status (as a sudoer):
+
+    $ sudo service cygnus status
+
+    $ sudo service cygnus start
+
+    $ sudo service cygnus stop
 
 ## Orion subscription
 
