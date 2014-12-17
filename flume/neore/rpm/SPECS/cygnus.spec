@@ -178,6 +178,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(755,%{_project_user},%{_project_user},755)
 %attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
 %attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
+%attr(0644, cygnus, cygnus) /usr/cygnus/conf/*
 
 %{_project_install_dir}
 /var/run/%{_project_name}
