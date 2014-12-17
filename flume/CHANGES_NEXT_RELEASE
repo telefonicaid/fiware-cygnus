@@ -12,3 +12,4 @@
 - Run the Jetty server supporting the management interface from the appropriate place (#232)
 - Do the resource URL in CKAN points to "none" (#246)
 - Include changelog in Cygnus spec (#269)
+- Discard invalid matching rules at DestinationExtractor (#271)
