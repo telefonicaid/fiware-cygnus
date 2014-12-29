@@ -13,113 +13,86 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact:
+#  iot_support at tid.es
 #
-#      Author: Ivan Arias
 #
 
-from lettuce import step
-from myTools.hadoop_utils import *
-
+from lettuce import step, world
 
 #----------------------------------------------------------------------------------
+@step(u'"([^"]*)" is installed correctly')
+def hadoop_is_installed_correctly(step, sink):
+    """
+     verify that Hadoop is installed correctly, version is controlled
+     see "hadoop_verify_version" property in properties.json file
+    :param step:
+    """
+    world.sink = sink
+    if str(world.hadoop.verify_version).find("True") >= 0:
+        world.hadoop.manager_version ()
+
 @step (u'cygnus is installed with type "([^"]*)"')
-def cygnus_is_installed_with_type(step, type):
+def cygnus_is_installed_with_type(step, mode):
     """
     Verify if cygnus is installed and the type of persistent
     :param step:
     :param type: type of persistent (ROW or COLUMN)
     """
-    world.cygnus_type = type
+    world.cygnus.verify_cygnus (mode)
 
-@step(u'"([^"]*)" is installed correctly')
-def is_installed_correctly(step, operation):
+@step (u'a tenant "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
     """
-     verify that hadoop is installed correctly
-     see "hadoop_verify_version" property in properties.json file
-    :param step:
+    hadoop configuration in row mode
     """
-    world.operation = operation
-    if str(world.hadoop_verify_version).find(TRUE) >= 0:
-        world.hadoop.version()
+    world.tenant = tenant
+    world.cygnus.hadoop_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
 
-#----------------------------------------------------------------------------------
-@step (u'store in hadoop with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')
-def new_notifications_in_a_organization_by_default_with_content(step, organization, resource, attributesNumber, compoundNumber, metadatasNumber, content):
-    """
-    Store a notification in hadoop with different scenarios
-    :param step:
-    :param organization:
-    :param resource:
-    :param attributesNumber:
-    :param compoundNumber:
-    :param metadatasNumber:
-    :param content:
-    """
-    world.content = content
-    world.cygnus.notification_row (organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, ERROR[NOT])
 
-@step (u'append in hadoop with a organization "([^"]*)", resource "([^"]*)", with "([^"]*)" new attributes values "([^"]*)", the metadata value "([^"]*)" and content "([^"]*)"')
-def append_in_hadoop_with_a_organization_resource_with_new_attributes_values_the_metadata_value_and_content (step, organization, resource, attributesQuantity, attrValue, metadataValue, content):
+@step (u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_a_notification_with_attributes_value_metadata_value_and_content (step, attribute_value, metadata_value, content):
     """
-    Store a notification in hadoop with different values
-    :param step:
-    :param organization:
-    :param resource:
-    :param attributesQuantity:
-    :param attrValue:
-    :param metadataValue:
-    :param content:
+    store notification values in hadoop
     """
-    world.hadoop.parametersToNotification_col(organization, resource, attributesQuantity, metadataValue, content)
-    world.cygnus.notification_col (attrValue, metadataValue, content, ERROR[NOT])
+    world.resp = world.cygnus.received_notification(attribute_value, metadata_value, content)
 
-#----------------------------------------------------------------------------------
 @step(u'I receive an "([^"]*)" http code')
-def i_receive_an_http_code (step, httpCode):
+def i_receive_an_http_code (step, http_code_expected):
     """
     validate http code in response
-    :param httpCode:  http code for validate
+    :param http_code_expected:  http code for validate
     """
-    status = world.response.status
-    body = world.body
-    general_utils.validateHTTPCode(httpCode, status, body)
+    world.cygnus.verify_response_http_code (http_code_expected, world.resp)
 
 @step (u'Validate that the attribute value and type are stored in hadoop')
 def validate_that_the_attribute_value_and_type_are_stored_in_hadoop(step):
     """
     Validate that the attribute value and type are stored in hadoop
     """
-    resp = world.hadoop.verifyDatasetSearch_valuesAndType(world.content)
-    world.hadoop.validateResponse (resp)
-
+    world.cygnus.verify_file_search_values_and_type()
 
 @step (u'Validate that the attribute metadatas are stored in hadoop')
 def validate_that_the_attribute_metadatas_are_stored_in_hadoop(step):
     """
-    Validate that the attribute value and type are stored in hadoop
+    Validate that the attribute metadata are stored in hadoop
     """
-    resp = world.hadoop.verifyDatasetSearch_metadatas (world.content)
-    world.hadoop.validateResponse (resp)
-
-@step (u'Validate that the file is not created in hadoop')
-def validate_that_the_file_is_not_created_in_hadoop (step):
-    """
-    Validate that dataset is not created in hadoop
-    :param step:
-    """
-    pass
-
+    world.cygnus.verify_file_search_metadata()
 
 @step(u'delete the file created in hadoop')
 def delete_the_file_created_in_hadoop (step):
     """
     delete the file created in hadoop
-    :param step: 
+    :param step:
     """
-    world.hadoop.deleteFile()
+    world.hadoop.delete_directory(world.tenant)
 
 
 
+@step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+def changes_new_destination_where_to_verify_in_dataset (step, destination, dataset):
+    """
+    change new destination and dataset to validate
+    """
+    world.cygnus.change_destination_to_pattern (destination, dataset)
 

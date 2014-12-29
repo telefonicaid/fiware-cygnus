@@ -3,6 +3,12 @@
 *.out
 *.pyc
 properties.json
+.idea/
+logs/
 testreport/
 settings/
-selenium-server-standalone*.jar
+old/
+conf/
+script/
+scripts/
+
