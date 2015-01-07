@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact:
+#  iot_support at tid.es
 #
-#     Author: Ivan Arias
 #
 
 
@@ -26,31 +25,24 @@ import random
 import string
 import time
 import xmltodict
-from myTools.constants import *
 
-def errorLabel(value, error):
-    """
-    insert error label name
-    :param value: last value
-    :param error: error type
-    :return:
-    """
-    if error == "wrong":
-        return '1234567890'
-    elif error == "empty":
-        return ''
-    else:
-        return value
 
-def stringGenerator(size=10, chars=string.ascii_letters + string.digits):
-        """Method to create random strings
+# general constants
+EMPTY   = u''
+XML     = u'xml'
+JSON    = u'json'
+
+
+def string_generator(size=10, chars=string.ascii_letters + string.digits):
+        """
+        Method to create random strings
         :param size: define the string size
         :param chars: the characters to be use to create the string
         return ''.join(random.choice(chars) for x in range(size))
         """
         return ''.join(random.choice(chars) for x in range(size))
 
-def numberGenerator (size=5, decimals="%0.1f"):
+def number_generator (size=5, decimals="%0.1f"):
     """"
     Method to create random number
     :param decimals: decimal account
@@ -59,60 +51,62 @@ def numberGenerator (size=5, decimals="%0.1f"):
     """
     return decimals % (random.random() * (10**size))
 
-def isXML(content):
-    """
-    verify if an element contains xml string
-    :param content: XML, JSOn o header complete
-    :return: boolean
-    """
-    return (content.find(XML) >= 0)
-
-def convertStrToDict (body, content):
+def convert_str_to_dict (body, content):
     """
     Convert string to Dictionary
     :param body: String to convert
     :param content: content type (json or xml)
     :return: dictionary
     """
-    if isXML(content):
+    if content == XML:
         return xmltodict.parse(body)
     else:
         return json.loads(body)
 
-def convertDictToStr (body, content):
+def convert_dict_to_str (body, content):
     """
     Convert Dictionary to String
     :param body: dictionary to convert
     :param content: content type (json or xml)
     :return: string
     """
-    if isXML(content):
+    if content == XML:
         return xmltodict.unparse(body)
     else:
         return json.dumps(body)
 
-def ifSubstrExistsInStr (text, subtext):
+def convert_str_to_list (text, separator):
     """
-    Verify if text contains subtext
-    :param text:
-    :param subtext:
-    :return:
+    Convert String to list
+    :param text: text to convert
+    :param separator: separator used
+    :return: list []
     """
-    return (text.find(subtext) > 0)
-#------------------
-def validateHTTPCode(expectedStatusCode, receivedStatus, receivedBody):
-    """
-    validate http status code
-    :param expected_status_code: Http code expected
-    """
+    return text.split(separator)
 
-    assert receivedStatus == status_codes[expectedStatusCode], \
-        "Wrong status code received: %s. Expected: %s. \n\nBody content: %s" \
-        % (str(receivedStatus), str(status_codes[expectedStatusCode]), str(receivedBody))
+def convert_list_to_string (list, separator):
+    """
+    Convert  List to String
+    :param text: list to convert
+    :param separator: separator used
+    :return: string ""
+    """
+    return separator.join(list)
 
-
-def showTimes (initValue):
+def show_times (init_value):
+    """
+    shows the time duration of the entire test
+    :param initValue: initial time
+    """
     print "**************************************************************"
-    print "Initial (date & time): " + str(initValue)
+    print "Initial (date & time): " + str(init_value)
     print "Final   (date & time): " + str(time.strftime("%c"))
     print "**************************************************************"
+
+def generate_date_zulu():
+    """
+    generate date & time zulu
+    ex: 2014-05-06T10:39:47.696Z
+    """
+    return str(time.strftime("%Y-%m-%dT%H:%M:%S.095Z"))
+

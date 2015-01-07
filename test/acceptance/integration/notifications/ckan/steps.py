@@ -13,172 +13,126 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact:
+#  iot_support at tid.es
 #
-#      Author: Ivan Arias
 #
 
-from lettuce import step
-from myTools.ckan_utils import *
+from lettuce import step, world
 
 
 #----------------------------------------------------------------------------------
 @step(u'"([^"]*)" is installed correctly')
-def ckan_is_installed_correctly(step, operation):
+def ckan_is_installed_correctly(step, sink):
     """
      verify that CKAN is installed correctly, version is controlled
     :param step:
     """
-    world.operation = operation
-    world.ckan.versionCKAN()
+    world.sink = sink
+    world.ckan.verify_version ()
 
 @step (u'cygnus is installed with type "([^"]*)"')
-def cygnus_is_installed_with_type(step, type):
+def cygnus_is_installed_with_type(step, mode):
     """
     Verify if cygnus is installed and the type of persistent
     :param step:
     :param type: type of persistent (ROW or COLUMN)
     """
-    world.cygnus.verifyCygnus (type)
+    world.cygnus.verify_cygnus (mode)
 
-@step(u'create a new organization "([^"]*)"')
-def create_a_new_organization (step, orgName):
+@step(u'create a new organization "([^"]*)" with a dataset "([^"]*)"')
+def create_a_new_organization (step, tenant, service_path):
     """
     create a new organization and a new dataset if they do exists
     :param step:
-    :param orgName: organization name. the dataset name is organizationName_packageDefault
+    :param orgName: organization name (tenant).
+    :param servPath: service path
     """
-    world.organizationOperation = orgName
-    world.ckan.createOrganization (orgName)
+    world.organization_operation = tenant  # this flag is used at create a new resource
+    world.cygnus.create_organization_and_dataset(tenant, service_path)
 
-@step (u'create a new resource "([^"]*)" with "([^"]*)" attributes, attrValue data type "([^"]*)" and metadata data type "([^"]*)"')
-def create_a_new_resource_with_attrValue_data_type_and_metadata_data_type (step, resourceName, attrQuantity, attrValueType, metadataType):
+@step (u'create a new resource "([^"]*)" with "([^"]*)" attributes called "([^"]*)", attribute type "([^"]*)", attribute data type "([^"]*)" and metadata data type "([^"]*)"')
+def create_a_new_resource_with_attrValue_data_type_and_metadata_data_type (step, resource_name, attribute_number, attribute_name, attribute_type,attribute_data_type, metadata_data_type):
     """
     Create a new resource with a datastore if it does not exists
     :param step:
-    :param resourceName: resource name
-    :param attrQuantity: Quantity of attributes
-    :param attrValueType: attribute data type
-    :param metadataType:  metadata data type
+    :param resource_name: resource name
+    :param attribute_number: Quantity of attributes
+    :param attribute_name: attribute name
+    :param attribute_data_type: attribute data type
+    :param metadata_data_type:  metadata data type
     """
-    world.resourceOperation = resourceName
-    world.metadataType = metadataType
-    world.ckan.createResource(resourceName, attrQuantity, attrValueType, metadataType)
+    world.cygnus.create_resource_and_datastore (resource_name, attribute_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type)
 
-#----------------------------------------------------------------------------------
-@step (u'store in ckan with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')
-def new_notifications_in_a_organization_by_default_with_content(step, organization, resource, attributesNumber, compoundNumber, metadatasNumber, content):
+@step (u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_a_notification_with_attributes_value_metadata_value_and_content (step, attribute_value, metadata_value, content):
     """
-    Store a notification in Ckan with different scenarios in row type
-    :param step:
-    :param organization:
-    :param resource:
-    :param attributesNumber:
-    :param compoundNumber:
-    :param metadatasNumber:
-    :param content:
+    store notification values in ckan
     """
-    world.content = content
-    world.cygnus.notification_row (organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, ERROR[NOT])
+    world.resp = world.cygnus.received_notification(attribute_value, metadata_value, content)
 
-@step(u'append a new attribute values "([^"]*)", the metadata value "([^"]*)" and content "([^"]*)"')
-def append_new_attribute_values_the_metadata_value_and_content(step, attrValue, metadataValue, content):
+@step (u'a tenant "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
     """
-    store in ckan values in column type
-    :param step:
-    :param attrValue:
-    :param metadataValue:
-    :param content: (XML or JSON)
+    ckan configuration in row mode
     """
-    world.content = content
-    world.metadataValue = metadataValue
-    world.cygnus.notification_col (attrValue, metadataValue, content, ERROR[NOT])
+    world.cygnus.row_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
 
-#----------------------------------------------------------------------------------
+@step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
+def update_real_values_in_resource_and_service_path_to_notification_request (step, resource, service_path):
+    """
+    change real resource and service path to notification request
+    """
+    world.cygnus.change_destination_to_pattern (resource, service_path)
+
+@step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+def changes_new_destination_where_to_verify_in_dataset (step, destination, dataset):
+    """
+    change new destination and dataset to validate
+    """
+    world.cygnus.change_destination_to_pattern (destination, dataset)
+
+#----------------------------- validations -----------------------------------------------------
 @step(u'I receive an "([^"]*)" http code')
-def i_receive_an_http_code (step, httpCode):
+def i_receive_an_http_code (step, http_code_expected):
     """
     validate http code in response
-    :param httpCode:  http code for validate
+    :param http_code_expected:  http code for validate
     """
-    status = world.response.status
-    body = world.body
-    general_utils.validateHTTPCode(httpCode, status, body)
-
-@step (u'Validate that the attribute value and type are stored in ckan')
-def validate_that_the_attribute_value_and_type_are_stored_in_ckan(step):
-    """
-    Validate that the attribute value and type are stored in ckan per row
-    """
-    resp = world.ckan.verifyDatasetSearch_valuesAndType(world.content)
-    world.ckan.validateResponse (resp)
-
-
-@step (u'Validate that the attribute metadatas are stored in ckan')
-def validate_that_the_attribute_metadatas_are_stored_in_ckan(step):
-    """
-    Validate that the attribute value and type are stored in ckan per row
-    """
-    resp = world.ckan.verifyDatasetSearch_metadatas (world.content)
-    world.ckan.validateResponse (resp)
-
-@step (u'Validate that the dataset is not created in ckan')
-def validate_that_the_dataset_is_not_created_in_ckan(step):
-    """
-    Validate that dataset is not created in ckan per row
-    :param step:
-    """
-    world.ckan.verifyIfDatasetExist()
+    world.cygnus.verify_response_http_code (http_code_expected, world.resp)
 
 @step (u'Verify that the attribute value is stored in ckan')
 def verify_that_the_attribute_value_is_stored_in_ckan(step):
     """
-    Validate that the attributes values are stored in ckan per column
-    :param step:
+    Validate that the attributes values are stored in ckan per column mode
     """
-    resp = world.ckan.verifyDatasetSearch_values_column(world.content)
-    world.ckan.validateResponse (resp)
-    pass
+    world.cygnus.verify_dataset_search_values_by_column()
 
 @step (u'Verify the metadatas are stored in ckan')
 def verify_that_the_metadata_are_stored_in_ckan(step):
     """
-    Validate that the metadatas values are stored in ckan per column
-    :param step:
+    Validate that the attribute metadatas values are stored in ckan per column
     """
-    resp = world.ckan.verifyDatasetSearch_metadata_column (world.content)
-    world.ckan.validateResponse (resp)
-    pass
+    world.cygnus.verify_dataset_search_metadata_values_by_column()
 
-@step (u'Verify the notification is not stored in ckan')
-def verify_that_the_notification_is_not_stored_in_ckan (step):
+@step (u'Verify that is not stored in ckan "([^"]*)"')
+def verify_that_is_not_stored_in_ckan(step, error_msg):
     """
-    Validate that the attributes values are not stored in ckan per column
-    :param step:
+    Verify that is not stored in ckan
     """
-    world.ckan.verifyIfResourceIsEmpty ()
+    world.cygnus.verify_dataset_search_without_data(error_msg)
 
-@step(u'Verify that the organization does not exist in ckan')
-def verify_that_the_organization_does_not_exist_in_ckan(step):
+@step (u'Verify that is not stored if element does not exist "([^"]*)" in ckan')
+def verify_that_is_not_stored_if_element_does_not_exist(step, error_msg):
     """
-    Validate that the organization is  not created in ckan per column
-    :param step:
+    Verify that is not stored in ckan
     """
-    world.ckan.verifyOrganizationNotExist()
+    world.cygnus.verify_dataset_search_without_element(error_msg)
 
-@step(u'Verify that the dataset does not exist in ckan')
-def verify_that_the_dataset_does_not_exist_in_ckan(step):
+@step (u'Validate that the attribute value, metadata and type are stored in ckan')
+def validate_that_the_attribute_value_and_type_are_stored_in_ckan (step):
     """
-    Validate that the dataset is  not created in ckan per column
-    :param step:
+    Validate that the attributes values and type are stored in ckan per row mode
     """
-    world.ckan.verifyDatasetNotExist ()
+    world.cygnus.verify_dataset_search_values_by_row()
 
-@step(u'Verify that the resource does not exist in ckan')
-def verify_that_the_resource_does_not_exist_in_ckan(step):
-    """
-    Validate that the resource is  not created in ckan per column
-    :param step:
-    """
-    world.ckan.verifyResourceNotExist ()
