@@ -13,34 +13,24 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact:
+#  iot_support at tid.es
 #
-#      Author: Ivan Arias
 #
 
-from lettuce import step
-from myTools.mysql_utils import *
+from lettuce import step, world
 
 
-#----------------------------------------------------------------------------------
-@step(u'"([^"]*)" is installed correctly')
-def mysql_is_installed_correctly(step, operation):
-    """
-     verify that MySQL is installed correctly, version is controlled
-    :param step:
-    """
-    world.operation = operation
-    world.mysql.openConnection ()
+
 
 @step (u'cygnus is installed with type "([^"]*)"')
-def cygnus_is_installed_with_type(step, type):
+def cygnus_is_installed_with_type(step, mode):
     """
     Verify if cygnus is installed and the type of persistent
     :param step:
     :param type: type of persistent (ROW or COLUMN)
     """
-    world.cygnus.verifyCygnus (type)
+    world.cygnus.verify_cygnus (mode)
 
 @step (u'Close mysql connection')
 def close_mysql_connection(step):
@@ -48,139 +38,90 @@ def close_mysql_connection(step):
     Close mysql connection
     :param step:
     """
-    world.mysql.closeConnection()
+    world.cygnus.close_connection()
+
+@step(u'"([^"]*)" is installed correctly')
+def mysql_is_installed_correctly(step, sink):
+    """
+     verify that Mysql is installed correctly, version is controlled
+    :param step:
+    """
+    world.sink = sink
+    world.mysql.connect()
+    world.mysql.verify_version()
 
 @step (u'create a new database "([^"]*)"')
-def create_a_new_database (step, organization):
+def create_a_new_database (step, tenant):
     """
     create a new Database per column
     :param step:
     :param DBname: database name
     """
-    world.organizationOperation = organization
-    world.mysql.createDB(organization)
+    world.organization_operation = tenant  # this flag is used at create a new table
+    world.cygnus.create_database(tenant)
 
-@step (u'create a new table "([^"]*)" with "([^"]*)" attributes, attrValue data type "([^"]*)" and metadata data type "([^"]*)"')
-def create_a_new_table_with_attrValue_data_type_and_metadata_data_type (step, resource, attrQuantity, attrValueType, metadataType):
-    #world.mysql.createTable (tableName, attrValueType, metadataType)
+@step (u'create a new table "([^"]*)" with service path "([^"]*)", "([^"]*)" attributes called "([^"]*)", attribute type "([^"]*)", attribute data type "([^"]*)" and metadata data type "([^"]*)"')
+def create_a_new_table_with_service_attributes_attribute_type_attribute_data_type_and_metadata_data_type (step, resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type):
     """
-    create a new table per column
-    :param step:
-    :param tableName:
-    :param attrQuantity:
-    :param attrValueType:
-    :param metadataType:
+    create a new table to column mode
     """
-    world.metadataType = metadataType
-    world.resourceOperation = resource
-    world.mysql.createTable(resource, attrQuantity, attrValueType, metadataType)
+    world.cygnus.create_table (resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type)
 
+@step (u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_a_notification_with_attributes_value_metadata_value_and_content (step, attribute_value, metadata_value, content):
+    """
+    store notification values in mysql
+    """
+    world.resp = world.cygnus.received_notification(world.cygnus.mappingQuotes (attribute_value), metadata_value, content)
 
-#----------------------------------------------------------------------------------
-@step (u'store in mysql with a organization "([^"]*)", resource "([^"]*)" and the attribute number "([^"]*)", the compound number "([^"]*)", the metadata number "([^"]*)" and content "([^"]*)"')
-def new_notifications_in_a_organization_by_default_with_content(step, organization, resource, attributesNumber, compoundNumber, metadatasNumber, content):
+@step (u'a tenant "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
     """
-    Store a notification in mysql with different scenarios per rows
-    :param step:
-    :param organization:
-    :param resource:
-    :param attributesNumber:
-    :param compoundNumber:
-    :param metadatasNumber:
-    :param content:
+    row configuration in row mode
     """
-    world.content = content
-    world.cygnus.notification_row (organization, resource, content, attributesNumber, compoundNumber, metadatasNumber, ERROR[NOT])
+    world.cygnus.row_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
 
-@step (u'append a new attribute values "([^"]*)", the metadata value "([^"]*)" and content "([^"]*)"')
-def append_a_new_attribute_values_the_metadata_value_and_content(step, attrValue, metadataValue, content):
+@step (u'changes new destination "([^"]*)" where to verify in table "([^"]*)"')
+def changes_new_destination_where_to_verify_in_table (step, new_destination, new_service_path):
     """
-    Store a notification in mysql with different scenarios per columns
-    :param step:
-    :param attrValue:
-    :param metadataValue:
-    :param content:
+    change new destination and dataset to validate
     """
-    world.content = content
-    world.metadataValue = metadataValue
-    world.cygnus.notification_col (attrValue, metadataValue, content, ERROR[NOT])
+    world.cygnus.change_destination_to_pattern (new_destination, new_service_path)
 
-#----------------------------------------------------------------------------------
-@step (u'Validate that the attribute value and type are stored in mysql')
-def validate_that_the_attribute_value_and_type_are_stored_in_mysql(step):
-    """
-    Validate that the attribute value and type are stored in mysql per row
-    """
-    resp = world.mysql.verifyDatasetSearch_valuesAndType (world.content)
-    world.mysql.validateResponse (resp)
-
-
-@step (u'Validate that the attribute metadatas are stored in mysql')
-def validate_that_the_attribute_metadatas_are_stored_in_mysql(step):
-    """
-    Validate that the attribute metadata is stored in mysql per row
-    """
-    resp = world.mysql.verifyDatasetSearch_metadatas (world.content)
-    world.mysql.validateResponse (resp)
-
-
-@step (u'Validate that the database is not created in mysql')
-def validate_that_the_database_does_not_created_in_mysql (step):
-    """
-    Validate that the database parameter are not created in mysql per row
-    :param step:
-    """
-    world.mysql.verifyIfDatabaseExist ()
-
+# ------------------------------------------------------------------------------------------------------------------
 @step (u'Verify that the attribute value is stored in mysql')
 def verify_that_the_attribute_value_is_stored_in_mysql(step):
     """
     Validate that the attribute value and type are stored in mysql per column
     """
-    resp = world.mysql.verifyDatasetSearch_valuesAndType_per_column (world.content)
-    world.mysql.validateResponse (resp)
+    world.cygnus.verify_table_search_values_by_column()
 
 @step (u'Verify the metadatas are stored in mysql')
 def verify_the_metadatas_are_stored_in_mysql(step):
     """
     Validate that the attribute metadata is stored in mysql per column
     """
-    resp = world.mysql.verifyDatasetSearch_metadatas_per_column (world.content)
-    world.mysql.validateResponse (resp)
+    world.cygnus.verify_table_search_metadatas_values_by_column()
 
-
-@step (u'Verify the notification is not stored in mysql')
-def verify_the_notification_is_not_stored_in_mysql (step):
+@step (u'Verify that is not stored in mysql "([^"]*)"')
+def verify_that_is_not_stored_in_mysql (step, error_msg):
     """
-    Verify the notification is not stored in mysql
-    :param step:
+    Verify that is not stored in mysql
     """
-    world.mysql.verifyIfTableIsEmpty()
+    world.cygnus.verify_table_search_without_data (error_msg)
 
-
-@step (u'Verify that the database does not exist in mysql')
-def verify_that_the_database_does_not_exist_in_mysql (step):
+@step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
+def update_real_values_in_resource_and_service_path_to_notification_request (step, resource, service_path):
     """
-    Verify that the database does not exist in mysql in column mode
-    :param step:
+    change real resource and service path to notification request
     """
-    world.mysql.verifyDatabaseNotExist()
+    world.cygnus.change_destination_to_pattern (resource, service_path)
 
-
-@step (u'Verify that the table does not exist in mysql')
-def verify_that_the_table_does_not_exist_in_mysql (step):
+@step (u'Validate that the attribute value, metadata and type are stored in mysql')
+def validate_that_the_attribute_value_and_type_are_stored_in_mysql (step):
     """
-    Verify that the table does not exist in mysql in column mode
-    :param step:
+    Validate that the attributes values and type are stored in mysql per row mode
     """
-    world.mysql.verifyTableNotExist()
+    world.cygnus.verify_table_search_values_by_row()
 
-
-
-#----------------------------------------------------------------------------------------
-
-
-
-
-
-
+#----------------------------------------------------------------------------------
