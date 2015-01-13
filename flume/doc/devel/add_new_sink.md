@@ -25,7 +25,7 @@ We will not merge new code in the Cygnus repository if such coding style is not 
 ## New sink development
 
 ### `OrionSink` class
-`Orionsink` is the base class all the Cygnus sinks extend. This class governs the consumption of the Flume events put by `OrionRestHandler` in the sink channel, taking them from the channel and calls to the persistence abstract method which in final term is the unique method that must be implemented by the extending class. All the logic about starting and stopping the sink, beginning, committing and closing Flume transactions and many other features is already there, thus you will not have to deal with it.
+`OrionSink` is the base class all the Cygnus sinks extend. This class governs the consumption of the Flume events put by `OrionRestHandler` in the sink channel, taking them from the channel and calls to the persistence abstract method which in final term is the unique method that must be implemented by the extending class. All the logic about starting and stopping the sink, beginning, committing and closing Flume transactions and many other features is already there, thus you will not have to deal with it.
 
 You find this class at the following path:
 
