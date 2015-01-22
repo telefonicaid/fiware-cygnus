@@ -44,6 +44,13 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
 
 ![](../images/multiple_sinks_multiple_channels_architecture.jpg)
 
+##High availability Cygnus architecture
+High Availability (or HA) is achieved by replicating a whole Cygnus agent, independently of the internal architecture (basic or advance), in an active-passive standard schema. I.e. when the active Cygnus agent fails, a load balancer redirects all the incoming Orion notifications to the passive one. Both Cygnus agents are able to persist the notified context data using the same set of sinks with identical configuration.
+
+![](../images/ha_architecture.jpg)
+
+Please observe the described configuration shows a little drawback: when migrating from the old active Cygnus (now passive) to the new active one (previously passive), the already notified context data to the old active Cygnus is lost, due to this information is stored within its channel in the form of Flume events. Independently of the channel type used in the agent (`MemoryChannel`, `FileChannel` or `JDBCChannel`), this data cannot be retrieved by an external agent. This drawback can only be fixed if a custom channel allowing for external data retrieval is implemented.
+
 ##Sequence diagrams
 The achitecture shown in this document is complemented with some sequence diagrams depicting more details about the notification handling and event producing, and the event cosumption and data persistency by all the differente persistence backends. 
    
