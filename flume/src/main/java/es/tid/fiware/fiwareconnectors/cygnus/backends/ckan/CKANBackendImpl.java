@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.StringTokenizer;
 import org.apache.http.client.HttpClient;
 
 /**
@@ -57,8 +56,8 @@ public class CKANBackendImpl implements CKANBackend {
         this.orionUrl = orionUrl;
 
         // create a Http client factory and a CKAN requester
-        httpClientFactory = new HttpClientFactory(ssl);
-        HttpClient httpClient = httpClientFactory.getHttpClient(ssl);
+        httpClientFactory = new HttpClientFactory(ssl, null, null);
+        HttpClient httpClient = httpClientFactory.getHttpClient(ssl, false);
         requester = new CKANRequester(httpClient, ckanHost, ckanPort, ssl, apiKey);
         
         // create the cache
