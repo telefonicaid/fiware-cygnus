@@ -123,8 +123,8 @@ public class OrionHDFSSinkTest {
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
-        when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
-        when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
+        when(mockHttpClientFactory.getHttpClient(true, false)).thenReturn(null);
+        when(mockHttpClientFactory.getHttpClient(false, false)).thenReturn(null);
         when(mockWebHDFSBackend.exists(null, null)).thenReturn(true);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, ATTRNAME);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, ATTRNAME, ATTRNAME);
