@@ -342,6 +342,8 @@ The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, t
 
 More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
 
+Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md).
+
 ```Python
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
@@ -398,7 +400,7 @@ cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = cosmos_username
 # default password for the default username
 cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
@@ -409,6 +411,16 @@ cygnusagent.sinks.hdfs-sink.attr_persistence = column
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# Kerberos-based authentication enabling
+cygnusagent.sinks.hdfs-sink.krb5_auth = false
+# Kerberos username
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+# Kerberos password
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+# Kerberos login file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
+# Kerberos configuration file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # OrionCKANSink configuration
