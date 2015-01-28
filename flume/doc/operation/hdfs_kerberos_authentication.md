@@ -2,9 +2,9 @@
 
 Hadoop Distributed File System (HDFS) can be remotely managed through a REST API called [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html). This API may be used without any kind of security (in this case, it is enough knowing a valid HDFS user name in order to access this user HDFS space), or a Kerberos infrastructure may be used for authenticating the users.
 
-Kerberos is an authentication protocol created by MIT, current version is 5. It is based in symmetric key cryptography and a trusted third party, the Kerberos servers themselves. The protocol is as easy as authenticating to the Authentication Server (AS), which forwards the user to the Key Distribution Center (KDC) in order to create a ticket-granting ticket (TGT). This ticket can then be used for authentication purposes against a service server; this service server takes the TGT and verifies it is valid against the KDC.
+[Kerberos](http://web.mit.edu/kerberos/) is an authentication protocol created by MIT, current version is 5. It is based in symmetric key cryptography and a trusted third party, the Kerberos servers themselves. The protocol is as easy as authenticating to the Authentication Server (AS), which forwards the user to the Key Distribution Center (KDC) with a ticket-granting ticket (TGT) that cab ne used to retrieve the definitive client-to-server ticket. This ticket can then be used for authentication purposes against a service server (in both directions).
 
-SPNEGO is a mechanism used to negotiate the choice of security technology. Through SPNEGO both client and server may negotiate the usageof Kerberos as authentication technology.   
+SPNEGO is a mechanism used to negotiate the choice of security technology. Through SPNEGO both client and server may negotiate the usage of Kerberos as authentication technology.   
 
 Kerberos authentication in HDFS is easy to achieve from the command line if the Kerberos 5 client is installed and the user already exists as a principal in the Kerberos infrastructure. Then just get a valid ticket and use the `--negotiate` option in `curl`:
 
@@ -16,7 +16,7 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 
 ## Kerberos-related Cygnus configuration
 ### `conf/cygnus.conf`
-Edit appropriately this part of the `OrionHDFSSink` configuration:
+This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `OrionHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
     cygnusagent.sinks.hdfs-sink.krb5_auth = true
@@ -33,7 +33,7 @@ I.e. start enabling (or not) the Kerberos authentication. Then, configure a user
 
 ### `conf/krb5_login.conf`
 
-Contains the following line, which must not be changed:
+Contains the following line, which must not be changed (thus, the distributed file is not a template but the definitive one).
 
     cygnus_krb5_login {
         com.sun.security.auth.module.Krb5LoginModule required doNotPrompt=false debug=true useTicketCache=false;
@@ -41,7 +41,7 @@ Contains the following line, which must not be changed:
 
 ### `conf/krb5.conf`
 
-Edit this file appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your netowork administrator in order to know them).
+This file can be built from the distributed `conf/krb5.conf.template`. Edit it appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your netowork administrator in order to know them).
 
     [libdefaults]
      default_realm = EXAMPLE.COM
