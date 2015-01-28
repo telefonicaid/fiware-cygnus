@@ -21,7 +21,19 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.Principal;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Set;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -54,8 +66,10 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @param cosmosDefaultPassword
      */
     public HDFSBackendImpl(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword,  String hiveHost, String hivePort) {
-        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort);
+            String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
+                krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         logger = Logger.getLogger(HDFSBackendImpl.class);
     } // HDFSBackendImpl
    
@@ -63,8 +77,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     public void createDir(String username, String dirPath) throws Exception {
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + dirPath + "?op=mkdirs&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
-            
-        
+
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new CygnusPersistenceError("The " + dirPath + " directory could not be created in HDFS. "
@@ -162,7 +175,11 @@ public class HDFSBackendImpl extends HDFSBackend {
                 String effectiveURL = "http://" + host + ":" + cosmosPort + url;
                 
                 try {
-                    response = doHDFSRequest(method, effectiveURL, headers, entity);
+                    if (krb5) {
+                        response = doPrivilegedHDFSRequest(method, effectiveURL, headers, entity);
+                    } else {
+                        response = doHDFSRequest(method, effectiveURL, headers, entity);
+                    } // if else
                 } catch (Exception e) {
                     logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
@@ -185,7 +202,11 @@ public class HDFSBackendImpl extends HDFSBackend {
                 break;
             } // for
         } else {
-            response = doHDFSRequest(method, url, headers, entity);
+            if (krb5) {
+                response = doPrivilegedHDFSRequest(method, url, headers, entity);
+            } else {
+                response = doHDFSRequest(method, url, headers, entity);
+            } // if else
         } // if else
         
         return response;
@@ -236,5 +257,96 @@ public class HDFSBackendImpl extends HDFSBackend {
         logger.debug("HDFS response: " + response.getStatusLine().toString());
         return response;
     } // doHDFSRequest
+    
+    // from here on, consider this link:
+    // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
+    private HttpResponse doPrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers,
+            StringEntity entity) throws Exception {
+        try {
+            LoginContext loginContext = new LoginContext("cygnus_krb5_login",
+                    new KerberosCallBackHandler(krb5User, krb5Password));
+            loginContext.login();
+            PrivilegedHDFSRequest req = new PrivilegedHDFSRequest(method, url, headers, entity);
+            return (HttpResponse) Subject.doAs(loginContext.getSubject(), req);
+        } catch (LoginException e) {
+            logger.error(e.getMessage());
+            return null;
+        } // try catch
+    } // doPrivilegedHDFSRequest
+    
+    /**
+     * PrivilegedHDFSRequest class.
+     */
+    private class PrivilegedHDFSRequest implements PrivilegedAction {
+        
+        private Logger logger;
+        private String method;
+        private String url;
+        private ArrayList<Header> headers;
+        private StringEntity entity;
+               
+        /**
+         * Constructor.
+         * @param mrthod
+         * @param url
+         * @param headers
+         * @param entity
+         */
+        public PrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
+            this.logger = Logger.getLogger(PrivilegedHDFSRequest.class);
+            this.method = method;
+            this.url = url;
+            this.headers = headers;
+            this.entity = entity;
+        } // PrivilegedHDFSRequest
+
+        @Override
+        public Object run() {
+            try {
+                Subject current = Subject.getSubject(AccessController.getContext());
+                Set<Principal> principals = current.getPrincipals();
+                
+                for (Principal next : principals) {
+                    logger.info("DOAS Principal: " + next.getName());
+                } // for
+
+                return doHDFSRequest(method, url, headers, entity);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                return null;
+            } // try catch
+        } // run
+        
+    } // PrivilegedHDFSRequest
+    
+    /**
+     * KerberosCallBackHandler class.
+     */
+    private class KerberosCallBackHandler implements CallbackHandler {
+
+        private final String user;
+        private final String password;
+
+        public KerberosCallBackHandler(String user, String password) {
+            this.user = user;
+            this.password = password;
+        } // KerberosCallBackHandler
+
+        @Override
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    NameCallback nc = (NameCallback) callback;
+                    nc.setName(user);
+                } else if (callback instanceof PasswordCallback) {
+                    PasswordCallback pc = (PasswordCallback) callback;
+                    pc.setPassword(password.toCharArray());
+                } else {
+                    throw new UnsupportedCallbackException(callback, "Unknown Callback");
+                } // if else if
+            } // for
+        } // handle
+        
+    } // KerberosCallBackHandler
     
 } // HDFSBackendImpl
