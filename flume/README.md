@@ -250,9 +250,9 @@ In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc
 
 Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
 
-    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
-    $ tar xzvf apache-maven-3.2.1-bin.tar.gz
-    $ mv apache-maven-3.2.1 APACHE_MAVEN_HOME
+    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+    $ tar xzvf apache-maven-3.2.5-bin.tar.gz
+    $ mv apache-maven-3.2.5 APACHE_MAVEN_HOME
 
 ## Installing Cygnus and its dependencies (from sources)
 
@@ -274,6 +274,7 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
 
 or not:
 
@@ -282,6 +283,7 @@ or not:
     $ cd fiware-connectors/flume
     $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+    $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
 
 where `<branch>` is `develop` if you are trying to install the latest features or `release/<x.y.z>` if you are trying to install a stable release. `<x.y.z>` stands for a specific version number (e.g. `0.3`, `0.5.1`...).
 
