@@ -85,6 +85,11 @@ public class OrionHDFSSink extends OrionSink {
     private boolean rowAttrPersistence;
     private String hiveHost;
     private String hivePort;
+    private boolean krb5;
+    private String krb5User;
+    private String krb5Password;
+    private String krb5LoginConfFile;
+    private String krb5ConfFile;
     private HDFSBackend persistenceBackend;
     
     /**
@@ -191,6 +196,16 @@ public class OrionHDFSSink extends OrionSink {
         logger.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
         logger.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")");
+        krb5 = context.getBoolean("krb5_auth", false);
+        logger.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (krb5 ? "true" : "false") + ")");
+        krb5User = context.getString("krb5_auth.krb5_user", "");
+        logger.debug("[" + this.getName() + "] Reading configuration (krb5_user=" + krb5User + ")");
+        krb5Password = context.getString("krb5_auth.krb5_password", "");
+        logger.debug("[" + this.getName() + "] Reading configuration (krb5_password=" + krb5Password + ")");
+        krb5LoginConfFile = context.getString("krb5_auth.krb5_login_conf_file", "");
+        logger.debug("[" + this.getName() + "] Reading configuration (krb5_login_conf_file=" + krb5LoginConfFile + ")");
+        krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
+        logger.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
     } // configure
 
     @Override
@@ -199,11 +214,13 @@ public class OrionHDFSSink extends OrionSink {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hiveHost, hivePort);
+                        cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile);
                 logger.debug("[" + this.getName() + "] HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hiveHost, hivePort);
+                        cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile);
                 logger.debug("[" + this.getName() + "] WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
