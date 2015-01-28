@@ -21,14 +21,19 @@ package es.tid.fiware.fiwareconnectors.cygnus.http;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.log4j.Logger;
@@ -44,6 +49,8 @@ import org.apache.log4j.Logger;
 public class HttpClientFactory {
     
     private static Logger logger;
+    private String loginConfFile;
+    private String krb5ConfFile;
     private static PoolingClientConnectionManager connectionsManager;
     private static PoolingClientConnectionManager sslConnectionsManager;
    
@@ -51,12 +58,17 @@ public class HttpClientFactory {
      * Constructor.
      * @param ssl True if SSL connections are desired. False otherwise.
      */
-    public HttpClientFactory(boolean ssl) {
+    public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile) {
         // create the logger
         logger = Logger.getLogger(HttpClientFactory.class);
         
+        // set the Kerberos parameters
+        this.loginConfFile = loginConfFile;
+        this.krb5ConfFile = krb5ConfFile;
+        
+        // create the appropriate connections manager
         if (ssl) {
-            sslConnectionsManager = new PoolingClientConnectionManager(getSchemeRegistry());
+            sslConnectionsManager = new PoolingClientConnectionManager(getSSLSchemeRegistry());
             sslConnectionsManager.setMaxTotal(Constants.MAX_CONNS);
             sslConnectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } else {
@@ -74,12 +86,43 @@ public class HttpClientFactory {
      * @param ssl True if SSL connections are desired. False otherwise.
      * @return A http client obtained from the (SSL) Connections Manager.
      */
-    public DefaultHttpClient getHttpClient(boolean ssl) {
+    public DefaultHttpClient getHttpClient(boolean ssl, boolean krb5Auth) {
+        DefaultHttpClient httpClient;
+        
         if (ssl) {
-            return new DefaultHttpClient(sslConnectionsManager);
+            httpClient = new DefaultHttpClient(sslConnectionsManager);
         } else {
-            return new DefaultHttpClient(connectionsManager);
+            httpClient = new DefaultHttpClient(connectionsManager);
         } // if else
+        
+        if (krb5Auth) {
+            // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
+            
+            System.setProperty("java.security.auth.login.config", loginConfFile);
+            System.setProperty("java.security.krb5.conf", krb5ConfFile);
+            System.setProperty("sun.security.krb5.debug", "false");
+            System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
+            Credentials jaasCredentials = new Credentials() {
+                
+                @Override
+                public String getPassword() {
+                    return null;
+                } // getPassword
+
+                @Override
+                public Principal getUserPrincipal() {
+                    return null;
+                } // getUserPrincipal
+                
+            };
+
+            // 'true' means the port is stripped from the principal names
+            SPNegoSchemeFactory spnegoSchemeFactory = new SPNegoSchemeFactory(true);
+            httpClient.getAuthSchemes().register(AuthPolicy.SPNEGO, spnegoSchemeFactory);
+            httpClient.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), jaasCredentials);
+        } // if
+        
+        return httpClient;
     } // getHttpClient
     
     /**
@@ -97,10 +140,10 @@ public class HttpClientFactory {
     } // getLeasedConnections
     
     /**
-     * Gets a SchemeRegistry object accepting all the X509 certificates by default.
-     * @return A SchemeRegistry object.
+     * Gets a SSL SchemeRegistry object accepting all the X509 certificates by default.
+     * @return A SSL SchemeRegistry object.
      */
-    private SchemeRegistry getSchemeRegistry() {
+    private SchemeRegistry getSSLSchemeRegistry() {
         // http://stackoverflow.com/questions/2703161/how-to-ignore-ssl-certificate-errors-in-apache-httpclient-4-0
         
         SSLContext sslContext = null;
@@ -139,12 +182,12 @@ public class HttpClientFactory {
             logger.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
             return null;
         } // if
-        
+
         SSLSocketFactory sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
         Scheme httpsScheme = new Scheme("https", 443, sf);
         SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(httpsScheme);
         return schemeRegistry;
-    } // getSchemeRegistry
-    
+    } // getSSLSchemeRegistry
+
 } // HttpClientFactory
