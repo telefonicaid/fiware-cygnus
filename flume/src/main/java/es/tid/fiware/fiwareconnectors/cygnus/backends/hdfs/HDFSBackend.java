@@ -42,6 +42,9 @@ public abstract class HDFSBackend {
     protected String hivePort;
     protected HttpClientFactory httpClientFactory;
     protected HttpClient httpClient;
+    protected boolean krb5;
+    protected String krb5User;
+    protected String krb5Password;
     private Logger logger;
     
     /**
@@ -54,7 +57,8 @@ public abstract class HDFSBackend {
      * @param hivePort
      */
     public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword, String hiveHost, String hivePort) {
+            String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
         // this class attributes
         this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
@@ -62,10 +66,13 @@ public abstract class HDFSBackend {
         this.cosmosDefaultUsername = cosmosDefaultUsername;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
+        this.krb5 = krb5;
+        this.krb5User = krb5User;
+        this.krb5Password = krb5Password;
 
         // create a Http clients factory (no SSL) and an initial connection (no SSL)
-        httpClientFactory = new HttpClientFactory(false);
-        httpClient = httpClientFactory.getHttpClient(false);
+        httpClientFactory = new HttpClientFactory(false, krb5LoginConfFile, krb5ConfFile);
+        httpClient = httpClientFactory.getHttpClient(false, krb5);
 
         // logger
         logger = Logger.getLogger(HDFSBackend.class);
