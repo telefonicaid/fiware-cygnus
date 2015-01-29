@@ -3,16 +3,15 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * fiware-connectors is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version. fiware-connectors is distributed in the hope that
- * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Affero General Public License for more details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with fiware-connectors. If not, see http://www.gnu.org/licenses/.
+ * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+ * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
@@ -138,29 +137,31 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 // check the event HEADER_TTL
                 int ttl;
                 String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
+                
                 try {
                     ttl = Integer.parseInt(ttlStr);
                 } catch (NumberFormatException nfe) {
                     ttl = 0;
                     logger.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
                           +  ", " + nfe.getMessage() + ")");
-                }
-                if (ttl == 0) {
+                } // try catch
+                
+                if (ttl == -1) {
+                    txn.rollback();
+                    status = Status.BACKOFF;
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                } else if (ttl == 0) {
                     logger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
                     txn.commit();
                     status = Status.READY;
                 } else {
-                    int newTTL = ttl; //keep -1 without modification
-                    if (newTTL > 0) {
-                        newTTL--;
-                        String newTTLStr = Integer.toString(newTTL);
-                        event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
-                    }
+                    ttl--;
+                    String newTTLStr = Integer.toString(ttl);
+                    event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
                     txn.rollback();
                     status = Status.BACKOFF;
-                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
-                            + ")");
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl + ")");
                 } // if else
             } else {
                 if (e instanceof CygnusRuntimeError) {
