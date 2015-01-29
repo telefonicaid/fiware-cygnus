@@ -43,16 +43,19 @@ import org.xml.sax.InputSource;
 /**
  *
  * @author frb
- *
- * Abstract class containing the common code to all the sinks persisting data
- * comming from Orion Context Broker.
- *
- * The common attributes are: - there is no common attributes The common methods
- * are: - void stop() - Status process() throws EventDeliveryException - void
- * persist(Event event) throws Exception The non common parts, and therefore
- * those that are sink dependant and must be implemented are: - void
- * configure(Context context) - void start() - void persist(Map<String, String>
- * eventHeaders, NotifyContextRequest notification) throws Exception
+ * 
+ * Abstract class containing the common code to all the sinks persisting data comming from Orion Context Broker.
+ * 
+ * The common attributes are:
+ *  - there is no common attributes
+ * The common methods are:
+ *  - void stop()
+ *  - Status process() throws EventDeliveryException
+ *  - void persist(Event event) throws Exception
+ * The non common parts, and therefore those that are sink dependant and must be implemented are:
+ *  - void configure(Context context)
+ *  - void start()
+ *  - void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
@@ -187,12 +190,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     } // process
 
     /**
-     * Given an event, it is preprocessed before it is persisted. Depending on
-     * the content type, it is appropriately parsed (Json or XML) in order to
-     * obtain a NotifyContextRequest instance.
-     *
-     * @param event A Flume event containing the data to be persisted and
-     * certain metadata (headers).
+     * Given an event, it is preprocessed before it is persisted. Depending on the content type, it is appropriately
+     * parsed (Json or XML) in order to obtain a NotifyContextRequest instance.
+     * 
+     * @param event A Flume event containing the data to be persisted and certain metadata (headers).
      * @throws Exception
      */
     private void persist(Event event) throws Exception {
@@ -231,12 +232,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     } // persist
 
     /**
-     * This is the method the classes extending this class must implement when
-     * dealing with persistence.
-     *
+     * This is the method the classes extending this class must implement when dealing with persistence.
      * @param eventHeaders Event headers
-     * @param notification Notification object (already parsed) regarding an
-     * event body
+     * @param notification Notification object (already parsed) regarding an event body
      * @throws Exception
      */
     abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
