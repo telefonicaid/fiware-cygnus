@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.utils;
@@ -53,19 +52,11 @@ public final class Constants {
     public static final String ATTR_TYPE    = "attrType";
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
-    public static final int NAMING_PREFIX_MAX_LEN = 32;
 
-    // HTTP client factory
+    // Maximum values
     public static final int MAX_CONNS = 500;
     public static final int MAX_CONNS_PER_ROUTE = 100;
-    
-    // MySQL
-    public static final int MYSQL_DB_NAME_MAX_LEN = 64;
-    public static final int MYSQL_TABLE_NAME_MAX_LEN = 64;
-    
-    // CKAN
-    public static final int CKAN_PKG_MAX_LEN = 100;
-    public static final int CKAN_RESOURCE_MAX_LEN = 100;
+    public static final int MAX_NAME_LEN = 64;
     
     // Others
     public static final String EMPTY_MD = "[]";

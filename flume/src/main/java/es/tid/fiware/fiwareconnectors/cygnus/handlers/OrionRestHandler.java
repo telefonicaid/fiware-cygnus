@@ -13,14 +13,11 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
-import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
-import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -144,12 +141,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
         logger.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
         eventsTTL = context.getString(Constants.PARAM_EVENTS_TTL, "10");
         logger.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
-        
-        // FIXME: temporal location for the Jetty server startup, this should be run at the same time the other Flume
-        // components are initialized, i.e. within the Node Application.
-        JettyServer js = new JettyServer(context.getInteger("management_port", 8081), new ManagementInterface());
-        js.start();
-        
         logger.info("Startup completed");
     } // configure
             
