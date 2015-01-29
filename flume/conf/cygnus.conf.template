@@ -12,8 +12,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
@@ -49,16 +48,15 @@ cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded
 cygnusagent.sources.http-source.handler.events_ttl = 10
-# Management interface port (FIXME: temporal location for this parameter)
-cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts de
 # Timestamp interceptor, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 # Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwreconnectors.cygnus.interceptors.DestinationExtractor$Builder
-# Matching table for the destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.matching_table = matching_table.conf
+cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
+# Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+# See the doc/design/interceptors document for more details
+cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
 
 # ============================================
 # OrionHDFSSink configuration
@@ -71,19 +69,27 @@ cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = cosmos_username
 # default password for the default username
 cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink.naming_prefix =
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# Kerberos-based authentication enabling
+cygnusagent.sinks.hdfs-sink.krb5_auth = false
+# Kerberos username
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+# Kerberos password
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+# Kerberos login file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
+# Kerberos configuration file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # OrionCKANSink configuration
@@ -101,6 +107,8 @@ cygnusagent.sinks.ckan-sink.ckan_port = 80
 cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.ckan-sink.attr_persistence = row
+# enable SSL for secure Http transportation; 'true' or 'false'
+cygnusagent.sinks.ckan-sink.ssl = false
 
 # ============================================
 # OrionMySQLSink configuration
@@ -118,8 +126,6 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration

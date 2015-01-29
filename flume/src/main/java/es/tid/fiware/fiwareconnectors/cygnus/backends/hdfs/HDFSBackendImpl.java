@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
@@ -22,18 +21,28 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.Principal;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Set;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.log4j.Logger;
@@ -57,22 +66,18 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @param cosmosDefaultPassword
      */
     public HDFSBackendImpl(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword,  String hiveHost, String hivePort) {
-        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort);
+            String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
+                krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         logger = Logger.getLogger(HDFSBackendImpl.class);
     } // HDFSBackendImpl
    
     @Override
-    public void createDir(HttpClient httpClient, String username, String dirPath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
+    public void createDir(String username, String dirPath) throws Exception {
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + dirPath + "?op=mkdirs&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "PUT", relativeURL, true, null, null);
-            
-        
+        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
+
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new CygnusPersistenceError("The " + dirPath + " directory could not be created in HDFS. "
@@ -82,15 +87,10 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createDir
     
     @Override
-    public void createFile(HttpClient httpClient, String username, String filePath, String data)
+    public void createFile(String username, String filePath, String data)
         throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=create&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "PUT", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -106,7 +106,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest(httpClient, "PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doHDFSRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
         // check the status
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -117,14 +117,9 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // createFile
     
     @Override
-    public void append(HttpClient httpClient, String username, String filePath, String data) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
+    public void append(String username, String filePath, String data) throws Exception {
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=append&user.name=" + username;
-        HttpResponse response = doHDFSRequest(httpClient, "POST", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
@@ -140,7 +135,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest(httpClient, "POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doHDFSRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -151,15 +146,10 @@ public class HDFSBackendImpl extends HDFSBackend {
     } // append
     
     @Override
-    public boolean exists(HttpClient httpClient, String username, String filePath) throws Exception {
-        // check the username
-        if (username == null) {
-            username = this.cosmosDefaultUsername;
-        } // if
-
+    public boolean exists(String username, String filePath) throws Exception {
         String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=getfilestatus&user.name="
                 + username;
-        HttpResponse response = doHDFSRequest(httpClient, "GET", relativeURL, true, null, null);
+        HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
 
         // check the status
         return (response.getStatusLine().getStatusCode() == 200);
@@ -168,14 +158,13 @@ public class HDFSBackendImpl extends HDFSBackend {
     /**
      * Does a HDFS request given a HTTP client, a method and a relative URL (the final URL will be composed by using
      * this relative URL and the active HDFS endpoint).
-     * @param httpClient
      * @param method
      * @param relativeURL
      * @return
      * @throws Exception
      */
-    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url, boolean relative,
-            ArrayList<Header> headers, StringEntity entity) throws Exception {
+    private HttpResponse doHDFSRequest(String method, String url, boolean relative, ArrayList<Header> headers,
+            StringEntity entity) throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_SERVICE_UNAVAILABLE,
                 "Service unavailable");
         
@@ -186,7 +175,11 @@ public class HDFSBackendImpl extends HDFSBackend {
                 String effectiveURL = "http://" + host + ":" + cosmosPort + url;
                 
                 try {
-                    response = doHDFSRequest(httpClient, method, effectiveURL, headers, entity);
+                    if (krb5) {
+                        response = doPrivilegedHDFSRequest(method, effectiveURL, headers, entity);
+                    } else {
+                        response = doHDFSRequest(method, effectiveURL, headers, entity);
+                    } // if else
                 } catch (Exception e) {
                     logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
@@ -209,14 +202,18 @@ public class HDFSBackendImpl extends HDFSBackend {
                 break;
             } // for
         } else {
-            response = doHDFSRequest(httpClient, method, url, headers, entity);
+            if (krb5) {
+                response = doPrivilegedHDFSRequest(method, url, headers, entity);
+            } else {
+                response = doHDFSRequest(method, url, headers, entity);
+            } // if else
         } // if else
         
         return response;
     } // doHDFSRequest
         
-    private HttpResponse doHDFSRequest(HttpClient httpClient, String method, String url,
-            ArrayList<Header> headers, StringEntity entity) throws Exception {
+    private HttpResponse doHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
+        throws Exception {
         HttpResponse response = null;
         HttpRequestBase request = null;
 
@@ -260,5 +257,96 @@ public class HDFSBackendImpl extends HDFSBackend {
         logger.debug("HDFS response: " + response.getStatusLine().toString());
         return response;
     } // doHDFSRequest
+    
+    // from here on, consider this link:
+    // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
+    private HttpResponse doPrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers,
+            StringEntity entity) throws Exception {
+        try {
+            LoginContext loginContext = new LoginContext("cygnus_krb5_login",
+                    new KerberosCallBackHandler(krb5User, krb5Password));
+            loginContext.login();
+            PrivilegedHDFSRequest req = new PrivilegedHDFSRequest(method, url, headers, entity);
+            return (HttpResponse) Subject.doAs(loginContext.getSubject(), req);
+        } catch (LoginException e) {
+            logger.error(e.getMessage());
+            return null;
+        } // try catch
+    } // doPrivilegedHDFSRequest
+    
+    /**
+     * PrivilegedHDFSRequest class.
+     */
+    private class PrivilegedHDFSRequest implements PrivilegedAction {
+        
+        private Logger logger;
+        private String method;
+        private String url;
+        private ArrayList<Header> headers;
+        private StringEntity entity;
+               
+        /**
+         * Constructor.
+         * @param mrthod
+         * @param url
+         * @param headers
+         * @param entity
+         */
+        public PrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
+            this.logger = Logger.getLogger(PrivilegedHDFSRequest.class);
+            this.method = method;
+            this.url = url;
+            this.headers = headers;
+            this.entity = entity;
+        } // PrivilegedHDFSRequest
+
+        @Override
+        public Object run() {
+            try {
+                Subject current = Subject.getSubject(AccessController.getContext());
+                Set<Principal> principals = current.getPrincipals();
+                
+                for (Principal next : principals) {
+                    logger.info("DOAS Principal: " + next.getName());
+                } // for
+
+                return doHDFSRequest(method, url, headers, entity);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                return null;
+            } // try catch
+        } // run
+        
+    } // PrivilegedHDFSRequest
+    
+    /**
+     * KerberosCallBackHandler class.
+     */
+    private class KerberosCallBackHandler implements CallbackHandler {
+
+        private final String user;
+        private final String password;
+
+        public KerberosCallBackHandler(String user, String password) {
+            this.user = user;
+            this.password = password;
+        } // KerberosCallBackHandler
+
+        @Override
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    NameCallback nc = (NameCallback) callback;
+                    nc.setName(user);
+                } else if (callback instanceof PasswordCallback) {
+                    PasswordCallback pc = (PasswordCallback) callback;
+                    pc.setPassword(password.toCharArray());
+                } else {
+                    throw new UnsupportedCallbackException(callback, "Unknown Callback");
+                } // if else if
+            } // for
+        } // handle
+        
+    } // KerberosCallBackHandler
     
 } // HDFSBackendImpl

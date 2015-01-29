@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #################################################
 ###       Main script for Cygnus RPM Stage    ###
@@ -75,6 +74,12 @@ function download_flume(){
 	return 0
 
 	_logStage "######## The apache-flume is ready for use! ... ########"
+}
+
+function copy_cygnus_startup_script(){
+        _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
+        rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
+        cp $BASE_DIR/target/classes/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
 }
 
 function copy_cygnus_to_flume(){
@@ -186,8 +191,11 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	download_flume
 	[[ $? -ne 0 ]] && exit 1
 
+        copy_cygnus_startup_script
+        [[ $? -ne 0 ]] && _logError "Cygnus startup script copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+
 	copy_cygnus_to_flume
-	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+	[[ $? -ne 0 ]] && _logError "Cygnus jar copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
 	copy_cygnus_conf
 	[[ $? -ne 0 ]] && exit 1

@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.management;
@@ -58,7 +57,7 @@ public class ManagementInterfaceTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        managementInterface = new ManagementInterface();
+        managementInterface = new ManagementInterface(null, null, null);
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getRequestURI()).thenReturn(requestURI);

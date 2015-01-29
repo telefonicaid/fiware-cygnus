@@ -22,7 +22,7 @@
 # This script is aimed to Cygnus debugging. It uses one argument: the URL to which
 # the notification will be sent
 
-URL = $1
+URL=$1
 
 if [ "$2" != "" ]
 then
