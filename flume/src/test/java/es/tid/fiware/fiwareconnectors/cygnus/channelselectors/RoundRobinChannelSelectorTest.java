@@ -65,14 +65,27 @@ public class RoundRobinChannelSelectorTest {
         channel2.setName("ch2");
         Channel channel3 = new MemoryChannel();
         channel3.setName("ch3");
+        Channel channel4 = new MemoryChannel();
+        channel4.setName("ch4");
+        Channel channel5 = new MemoryChannel();
+        channel5.setName("ch5");
+        Channel channel6 = new MemoryChannel();
+        channel6.setName("ch6");
         ArrayList<Channel> allChannels = new ArrayList<Channel>();
         allChannels.add(channel1);
         allChannels.add(channel2);
         allChannels.add(channel3);
+        allChannels.add(channel4);
+        allChannels.add(channel5);
+        allChannels.add(channel6);
         channelSelector.setChannels(allChannels);
         
         // set up other instances
         context = new Context();
+        context.put("storages", "3");
+        context.put("storages.storage1", "ch1");
+        context.put("storages.storage2", "ch2,ch3");
+        context.put("storages.storage3", "ch4,ch5,ch6");
     } // setUp
     
     /**
@@ -102,19 +115,34 @@ public class RoundRobinChannelSelectorTest {
     public void testGetRequiredChannels() {
         System.out.println("Testing RoundRobinChannelSelector.getRequiredChannels");
         channelSelector.configure(context);
+        
+        // first round
         List<Channel> requiredChannels = channelSelector.getRequiredChannels(event);
-        assertEquals(1, requiredChannels.size());
+        assertEquals(3, requiredChannels.size());
         assertEquals("ch1", requiredChannels.get(0).getName());
+        assertEquals("ch2", requiredChannels.get(1).getName());
+        assertEquals("ch4", requiredChannels.get(2).getName());
+        
+        // second round
         requiredChannels = channelSelector.getRequiredChannels(event);
-        assertEquals(1, requiredChannels.size());
-        assertEquals("ch2", requiredChannels.get(0).getName());
-        requiredChannels = channelSelector.getRequiredChannels(event);
-        assertEquals(1, requiredChannels.size());
-        assertEquals("ch3", requiredChannels.get(0).getName());
-        // from here, the returned channels must start again from "ch1"
-        requiredChannels = channelSelector.getRequiredChannels(event);
-        assertEquals(1, requiredChannels.size());
+        assertEquals(3, requiredChannels.size());
         assertEquals("ch1", requiredChannels.get(0).getName());
+        assertEquals("ch3", requiredChannels.get(1).getName());
+        assertEquals("ch5", requiredChannels.get(2).getName());
+        
+        // third round
+        requiredChannels = channelSelector.getRequiredChannels(event);
+        assertEquals(3, requiredChannels.size());
+        assertEquals("ch1", requiredChannels.get(0).getName());
+        assertEquals("ch2", requiredChannels.get(1).getName());
+        assertEquals("ch6", requiredChannels.get(2).getName());
+        
+        // fourth round
+        requiredChannels = channelSelector.getRequiredChannels(event);
+        assertEquals(3, requiredChannels.size());
+        assertEquals("ch1", requiredChannels.get(0).getName());
+        assertEquals("ch3", requiredChannels.get(1).getName());
+        assertEquals("ch4", requiredChannels.get(2).getName());
     } // testGetRequiredChannels
     
 } // RoundRobinChannelSelectorTest

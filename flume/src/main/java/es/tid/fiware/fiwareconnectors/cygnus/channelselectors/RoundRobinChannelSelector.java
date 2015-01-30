@@ -19,6 +19,9 @@
 package es.tid.fiware.fiwareconnectors.cygnus.channelselectors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
@@ -33,25 +36,39 @@ import org.apache.log4j.Logger;
 public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
     private Logger logger;
-    private int numChannels;
-    private int lastUsedChannel;
+    private int numStorages;
+    private LinkedHashMap<String, ArrayList<String>> channelsPerStorage;
+    private LinkedHashMap<String, Integer> lastUsedChannelPerStorage;
     
     /**
      * Constructor.
      */
     public RoundRobinChannelSelector() {
-        logger = Logger.getLogger(RoundRobinChannelSelector.class);
+        this.logger = Logger.getLogger(RoundRobinChannelSelector.class);
+        this.channelsPerStorage = new LinkedHashMap<String, ArrayList<String>>();
+        this.lastUsedChannelPerStorage = new LinkedHashMap<String, Integer>();
     } // RoundRobinChannelSelector
     
     @Override
     public void setChannels(List<Channel> channels) {
         super.setChannels(channels);
-        this.numChannels = channels.size();
-        this.lastUsedChannel = -1;
     } // setChannels
     
     @Override
     public void configure(Context context) {
+        numStorages = context.getInteger("storages", 1);
+        logger.debug("[" + this.getName() + "] Reading configuration (storages=" + numStorages + ")");
+        
+        for (int i = 0; i < numStorages; i++) {
+            String channelsStr = context.getString("storages.storage" + (i + 1));
+            logger.debug("[" + this.getName() + "] Reading configuration (storages.storage" + (i + 1) + "="
+                    + channelsStr + ")");
+            List<String> channelList = Arrays.asList(channelsStr.split(","));
+            ArrayList<String> channelArrayList = new ArrayList<String>();
+            channelArrayList.addAll(channelList);
+            channelsPerStorage.put("storage" + (i +  1), channelArrayList);
+            lastUsedChannelPerStorage.put("storage" + (i + 1), -1);
+        } // for
     } // configure
     
     @Override
@@ -62,11 +79,39 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
     @Override
     public List<Channel> getRequiredChannels(Event event) {
-        List<Channel> res = new ArrayList<Channel>(1);
-        lastUsedChannel = (lastUsedChannel + 1) % numChannels;
-        Channel channel = getAllChannels().get(lastUsedChannel);
-        res.add(channel);
-        logger.debug("Returning " + channel.getName() + " channel");
+        // resulting list of required channels
+        List<Channel> res = new ArrayList<Channel>();
+        
+        Iterator it = channelsPerStorage.keySet().iterator();
+        
+        while (it.hasNext()) {
+            String key = (String) it.next();
+            ArrayList<String> channelNames = channelsPerStorage.get(key);
+            
+            // get and update the last used channel
+            int lastUsedChannel = (lastUsedChannelPerStorage.get(key) + 1) % channelNames.size();
+            lastUsedChannelPerStorage.put(key, lastUsedChannel);
+        
+            // get the channel name and find its Channel object
+            String channelName = channelNames.get(lastUsedChannel);
+            List<Channel> allChannels = getAllChannels();
+            Channel channel = null;
+            
+            for (int i = 0; i < allChannels.size(); i++) {
+                channel = allChannels.get(i);
+                
+                if (channel.getName().equals(channelName)) {
+                    break;
+                } // if
+            } // while
+            
+            // add the channel to the list
+            if (channel != null) {
+                res.add(channel);
+            } // if
+        } // while
+                
+        logger.debug("Returning " + res.toString() + " channels");
         return res;
     } // getRequiredChannels
 
