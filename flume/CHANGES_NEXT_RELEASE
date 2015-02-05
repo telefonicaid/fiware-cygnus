@@ -1,2 +1,3 @@
 * Added Kerberos authentication in OrionHDFSSink (#290)
 * Fixed the RoundRoundChannelSelector, now it works for multiple storages (#298)
+* Allow for infinite TTL (#236)
