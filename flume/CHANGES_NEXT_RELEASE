@@ -1,1 +1,2 @@
 * Added Kerberos authentication in OrionHDFSSink (#290)
+* Allow for infinite TTL (#236)
