@@ -26,7 +26,7 @@ This can be clearly moved to a multiple sink configuration running in parallel. 
 You can simply add more sinks consuming events from the same single channel. This configuration theoretically increases the processing capabilities in the sink side, but usually shows an important drawback, specially if the events are consumed by the sinks very fast: the sinks have to compete for the single channel. Thus, some times you can find that adding more sinks in this way simply turns the system slower than a single sink configuration. This configuration is only recommended when the sinks require a lot of time to process a single event, ensuring few collisions when accessing the channel.
 
     cygnusagent.sources = mysource
-    cygnusagent.sinks = mysink1 mysink2 mysink3
+    cygnusagent.sinks = mysink1 mysink2 mysink3 ...
     cygnusagent.channels = mychannel
     
     cygnusagent.sources.mysource.type = ...
@@ -48,13 +48,16 @@ You can simply add more sinks consuming events from the same single channel. Thi
     cygnusagent.sinks.mysink3.channel = mychannel
     ... other sink configurations...
 
+    ... other sinks configurations...
+
 ### Multiple sinks, multiple channels
 The above mentioned drawback can be solved by configuring a channel per each sink, avoiding the competition for the single channel.
 
-This can only be done by using a Flume <i>Channel Selector</i>, a piece of software dispatching the events to the appropriate channel. The default one is [`Replicating Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default), i.e. each time a Flume event is generated at the sources, it is replicated in all the channels connected to those sources. There is another selector, the [`Multiplexing Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector), which puts the events in a channel given certain matching-like criteria. Nevertheless:
+However, when multiple channels are used for a same storage, then some kind of <i>dispatcher</i> deciding which channels will receive a copy of the events is required. This is the goal of the Flume <i>Channel Selectors</i>, a piece of software selecting the appropriate set of channels the Flume events will be put in. The default one is [`Replicating Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default), i.e. each time a Flume event is generated at the sources, it is replicated in all the channels connected to those sources. There is another selector, the [`Multiplexing Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector), which puts the events in a channel given certain matching-like criteria. Nevertheless:
 
-* We want the Flume events are put into a single channel, not replicated.
-* And the dispatching criteria is not based on a matching rule but on a <i>round robin</i>-like behaviour.
+* We want the Flume events to be replicated per each configured storage. E.g. we want the events are persisted both in a HDFS and CKAN storage.
+* But within a storage, we want the Flume events to be put into a single channel, not replicated. E.g. among all the channels associated to a HDFS storage, we only want to put the event within a single one of them.
+* And the dispatching criteria is not based on a matching rule but on a <i>round robin</i>-like behaviour. E.g. if we have 3 channels (`ch1`, `ch2`, `ch3`) associated to a HDFS storage, then select first `ch1`, then `ch2`, then `ch3` and then again `ch1`, etc.
 
 Due to the available <i>Channel Selectors</i> do not fit our needs, a custom selector has been developed: `RoundRobinChannelSelector`. This selector extends [`AbstractChannelSelector`](https://flume.apache.org/releases/content/1.4.0/apidocs/org/apache/flume/channel/AbstractChannelSelector.html) as [`Replicating Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default) and [`Multiplexing Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector) do.
 
@@ -63,8 +66,12 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
     cygnusagent.channels = mychannel1 mychannel2 mychannel3
     
     cygnusagent.sources.mysource.type = ...
-    cygnusagent.sources.mysource.channels = mychannel1 mychannel2 mychannel3
+    cygnusagent.sources.mysource.channels = mychannel1 mychannel2 mychannel3 ...
     cygnusagent.sources.mysource.selector.type = es.tid.fiware.fiwareconnectors.cygnus.channelselectors.RoundRobinChannelSelector
+    cygnusagent.sources.mysource.selector.storages = N
+    cygnusagent.sources.mysource.selector.storages.storage1 = <subset_of_cygnusagent.sources.mysource.channels>
+    ...
+    cygnusagent.sources.mysource.selector.storages.storageN = <subset_of_cygnusagent.sources.mysource.channels>
     ... other source configurations...
 
     cygnusagent.channels.mychannel1.type = ...
@@ -87,6 +94,13 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
     cygnusagent.sinks.mysink3.type = ...
     cygnusagent.sinks.mysink3.channel = mychannel3
     ... other sink configurations...
+
+    ... other sinks configurations...
+
+Basically, the custom <i>Channel Selector</i> type must be configured, together with the mapping of channels per storage. This mapping is configured in the form of:
+
+* Total number of different storages. E.g. if we have a MySQL storage, a CKAN storage and a HDFS storage then `cygnusagent.sources.mysource.selector.storages = 3`. Please observe this apply to different storages of the same type, e.g. if we have a MySQL storage and two different HDFS storages (i.e. different HDFS endpoints), then `cygnusagent.sources.mysource.selector.storages = 3` as well.
+* Subset of channels associated to each storage. The union of all the subsets must be equal to all the channels configured for the source. E.g. if `cygnusagent.sources.mysource.channels = ch1 ch2 ch3 ch4 ch5 ch6` and if `ch1` is associated to a MySQL storage, `ch2` and `ch3` are associated to a CKAN storage and `ch4`, `ch5` and `ch6` are associated to a HDFS storage then `cygnusagent.sources.mysource.selector.storages.storage1 = ch1`, `cygnusagent.sources.mysource.selector.storages.storage2 = ch2,ch3` and `cygnusagent.sources.mysource.selector.storages.storage3 = ch4,ch5,ch6`. 
 
 ### Why the `LoadBalancingSinkProcessor` is not suitable
 [This](http://flume.apache.org/FlumeUserGuide.html#load-balancing-sink-processor) Flume <i>Sink Processor</i> is not suitable for our parallelization purposes due to the load balancing is done in a sequential way. I.e. either in a round robin-like configuration of the load balancer either in a ramdom way, the sinks are used one by one and not at the same time.
