@@ -49,6 +49,6 @@ cygnusagent.sources.http-source.port = 5050
 ```
 
 All  onfiguration explained above is for basic configuration of Cygnus instance to run. More fine configuration 
-should be required, such as (Cygnus sinks)[https://github.com/telefonicaid/fiware-connectors/tree/master/flume#cygnus-configuration], 
-fine configuration of (log4j)[https://github.com/telefonicaid/fiware-connectors/tree/master/flume#logs], 
+should be required, such as [Cygnus configuration](https://github.com/telefonicaid/fiware-connectors/tree/master/flume#cygnus-configuration "Cygnus fine configuration"), 
+fine configuration of [log4j](https://github.com/telefonicaid/fiware-connectors/tree/master/flume#logs "Log4j fine configuration"), 
 etc. 
