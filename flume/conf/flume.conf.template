@@ -29,5 +29,11 @@ CONFIG_FOLDER=/usr/cygnus/conf
 # Which is the config file
 CONFIG_FILE=/usr/cygnus/conf/cygnus.conf
 
-# Name of the agent
+# Name of the agent. This value should match with the begining of the keys in ${CONFIG_FILE} otherwise service not start.
 AGENT_NAME=cygnusagent
+
+# Name of the logfile located at /var/log/cugnus. It is important to put the extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+
+# Administration port. Should be unique per instance
+ADMIN_PORT=8081
