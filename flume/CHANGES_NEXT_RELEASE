@@ -1,1 +1,3 @@
 * Added Kerberos authentication in OrionHDFSSink (#290)
+* Added posibility to start multiple instances of Cygnus (#299)
+
