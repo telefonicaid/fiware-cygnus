@@ -14,7 +14,7 @@
 # 
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
-/var/log/cygnus/flume.log
+/var/log/cygnus/*.log
 {
       daily
       rotate 7
