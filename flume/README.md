@@ -398,6 +398,7 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+# If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
@@ -420,7 +421,7 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
 # Kerberos password
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 # Kerberos login file
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
@@ -567,12 +568,12 @@ Cygnus uses the log4j facilities added by Flume for logging purposes. You can ma
     log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
     log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
     
-    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-    log4j.appender.cygnus1028.MaxFileSize=100MB
-    log4j.appender.cygnus1028.MaxBackupIndex=10
-    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
-    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+    log4j.appender.cygnus1029=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1029.MaxFileSize=100MB
+    log4j.appender.cygnus1029.MaxBackupIndex=10
+    log4j.appender.cygnus1029.File=${flume.log.dir}/cygnus.1029.log
+    log4j.appender.cygnus1029.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1029.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 Regarding the log4j Conversion Pattern:
 
