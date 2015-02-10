@@ -4,7 +4,7 @@
 
   <groupId>es.tid.fiware.orionconnectors</groupId>
   <artifactId>cygnus</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.0_SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>cygnus</name>
