@@ -203,7 +203,6 @@ rm -rf $RPM_BUILD_ROOT
 - Removed execution privileges from configuration files (#264)
 - Document how to install and run Cygnus from RPM (#275)
 - Discard invalid matching rules at DestinationExtractor (#271)
-- Added posibility to start multiple instances of Cygnus (#299)
 
 * Tue Nov 11 2014 Francisco Romero <francisco.romerobueno@telefonica.com> 0.4.2
 - Enable https connections in CKAN (#230)
