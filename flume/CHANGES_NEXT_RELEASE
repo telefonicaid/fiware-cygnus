@@ -1,3 +1,5 @@
 * Added Kerberos authentication in OrionHDFSSink (#290)
 * Added posibility to start multiple instances of Cygnus (#299)
-
+* Bug fixing: same port in log4j example about two Cygnus instances (#305)
+* Bug fixing: error in configuration template (cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file) (#308)
+* Encourage the usage of FQDNs regarding HDFS namenodes when using Kerberos (#309)
