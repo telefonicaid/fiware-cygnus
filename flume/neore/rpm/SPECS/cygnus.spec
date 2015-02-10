@@ -121,7 +121,7 @@ echo "[INFO] Configuring application"
 mkdir -p /etc/%{_project_name}
 echo "[INFO] Creating links"
 ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
-ln -s %{_project_install_dir}/conf/flume.conf /etc/%{_project_name}/flume.conf
+ln -s %{_project_install_dir}/conf /etc/%{_project_name}
 ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
 
 #Logs
