@@ -40,6 +40,11 @@ cygnus_start()
         exit 1
     fi
 
+    if [[ $(ls -l ${CYGNUS_DIR}/conf/cygnus_instance_*.conf 2> /dev/null | wc -l) -eq 0 ]]; then
+        printf "%s\n" "There aren't any instance of Cygnus configured. Refer to file /usr/cygnus/conf/README.md for further information."
+        return 1
+    fi
+
     for instance in $(ls ${CYGNUS_DIR}/conf/cygnus_instance_*.conf)
     do
         local NAME

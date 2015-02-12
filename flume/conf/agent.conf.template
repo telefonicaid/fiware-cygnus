@@ -15,7 +15,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #=============================================
-# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+# To be put in APACHE_FLUME_HOME/conf/agent.conf
 #
 # General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
