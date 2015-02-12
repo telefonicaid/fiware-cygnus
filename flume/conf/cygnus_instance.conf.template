@@ -33,7 +33,7 @@ CONFIG_FILE=/usr/cygnus/conf/agent.conf
 # naming conventions, e.g. it appears in .sources.http-source.channels=...
 AGENT_NAME=cygnusagent
 
-# Name of the logfile located at /var/log/cugnus. It is important to put the extension '.log' in order to the log rotation works properly
+# Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
 LOGFILE_NAME=cygnus.log
 
 # Administration port. Must be unique per instance
