@@ -90,6 +90,20 @@ function copy_cygnus_to_flume(){
 	cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
 }
 
+function copy_cygnus_conf() {
+	_logStage "######## Copying cygnus template config files to destination config directory... ########"
+	rm -rf {RPM_SOURCE_DIR}/config 
+	mkdir -p ${RPM_SOURCE_DIR}/config
+	for file in $(ls ${BASE_DIR}/conf)
+	do
+		# file=$(basename ${file})
+		# renamed_file=${file%.template}
+		# cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
+
+		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/
+	done
+}
+
 function usage() {
     SCRIPT=$(basename $0)
 
@@ -184,6 +198,9 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 
 	copy_cygnus_to_flume
 	[[ $? -ne 0 ]] && _logError "Cygnus jar copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+
+	copy_cygnus_conf
+	[[ $? -ne 0 ]] && exit 1
 
 	_logStage "######## Executing the rpmbuild ... ########"
 	rm -rf ${RPM_BASE_DIR}/BUILD
