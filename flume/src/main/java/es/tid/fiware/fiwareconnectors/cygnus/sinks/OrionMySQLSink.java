@@ -66,7 +66,7 @@ public class OrionMySQLSink extends OrionSink {
      */
     public OrionMySQLSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionHDFSSink.class);
+        logger = CygnusLogger.getLogger(OrionMySQLSink.class);
     } // OrionMySQLSink
     
     /**
@@ -181,7 +181,7 @@ public class OrionMySQLSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            logger.debug("[" + this.getName() + "] Processing context element (id= + " + entityId + ", type= "
+            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
                     + entityType + ")");
             
             // build the table name
