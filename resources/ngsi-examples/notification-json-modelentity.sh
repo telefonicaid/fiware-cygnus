@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2014 Telefonica Investigacion y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigacion y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors.
 #
@@ -65,23 +65,23 @@ curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: a
             "value": "def"
           },
           {
-            "name": "te",
+            "name": "et",
             "type": "compound",
             "value":
               {
-                "name": "Temperatura Exterior",
+                "name": "external temperature",
                 "phenomenon": "temperature",
       	        "type": "Quantity",
                 "uom": "Cel",
-                "persistence": "sth,ckan"
+                "persistence": [ "sth", "ckan" ]
               }
           },
           {
-            "name": "ti",
+            "name": "internal temperature",
             "type": "compound",
             "value": [
               {
-                "name": "Temperatura Interior",
+                "name": "internal temperature",
                 "phenomenon": "temperature",
                 "type": "Quantity",
                 "uom": "Cel"
@@ -93,7 +93,7 @@ curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: a
             "type": "compound",
             "value": [
               {
-                "name": "Humedad casa",
+                "name": "house humidity",
                 "phenomenon": "humidity",
       	        "type": "Quantity",
                 "uom": "%"
