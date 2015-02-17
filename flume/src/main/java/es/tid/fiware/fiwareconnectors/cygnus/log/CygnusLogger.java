@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -21,17 +21,25 @@ package es.tid.fiware.fiwareconnectors.cygnus.log;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * Cygnus logger basically extends log4j logger. It adds, nevertheless, certain useful features such as:
+ *    - Printing the name of the component trying to log.
+ *    - Checking for the logging system availability.
+ *    - Ordering the shutdown of Cygnus if the above check fails.
+ * 
  * @author frb
  */
 public class CygnusLogger extends Logger {
     
+    private boolean shutdown;
+    
     /**
      * Constructor.
      * @param name
+     * @param shutdown
      */
-    public CygnusLogger(String name) {
+    public CygnusLogger(String name, boolean shutdown) {
         super(name);
+        this.shutdown = shutdown;
     } // CygnusLogger
     
     /**
@@ -40,7 +48,14 @@ public class CygnusLogger extends Logger {
      * @param message
      */
     public void info(String componentName, String message) {
-        info("[" + componentName + "] " + message);
+        try {
+            info("[" + componentName + "] " + message);
+        } catch (Exception e) {
+            if (shutdown) {
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.exit(-1);
+            } // if
+        } // catch
     } // info
     
     /**
@@ -49,7 +64,14 @@ public class CygnusLogger extends Logger {
      * @param message
      */
     public void error(String componentName, String message) {
-        error("[" + componentName + "] " + message);
+        try {
+            error("[" + componentName + "] " + message);
+        } catch (Exception e) {
+            if (shutdown) {
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.exit(-1);
+            } // if
+        } // catch
     } // error
     
     /**
@@ -58,7 +80,14 @@ public class CygnusLogger extends Logger {
      * @param message
      */
     public void fatal(String componentName, String message) {
-        fatal("[" + componentName + "] " + message);
+        try {
+            fatal("[" + componentName + "] " + message);
+        } catch (Exception e) {
+            if (shutdown) {
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.exit(-1);
+            } // if
+        } // catch
     } // fatal
     
     /**
@@ -67,7 +96,14 @@ public class CygnusLogger extends Logger {
      * @param message
      */
     public void warn(String componentName, String message) {
-        warn("[" + componentName + "] " + message);
+        try {
+            warn("[" + componentName + "] " + message);
+        } catch (Exception e) {
+            if (shutdown) {
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.exit(-1);
+            } // if
+        } // catch
     } // warn
     
     /**
@@ -76,7 +112,14 @@ public class CygnusLogger extends Logger {
      * @param message
      */
     public void debug(String componentName, String message) {
-        debug("[" + componentName + "] " + message);
+        try {
+            debug("[" + componentName + "] " + message);
+        } catch (Exception e) {
+            if (shutdown) {
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.exit(-1);
+            } // if
+        } // catch
     } // debug
     
 } // CygnusLogger
