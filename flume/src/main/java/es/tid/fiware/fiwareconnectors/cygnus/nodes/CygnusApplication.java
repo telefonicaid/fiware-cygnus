@@ -18,13 +18,18 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.nodes;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusChannel;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusFileChannel;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusMemoryChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
 import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,8 +38,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.flume.Channel;
 import org.apache.flume.Constants;
+import org.apache.flume.SinkRunner;
+import org.apache.flume.SourceRunner;
 import org.apache.flume.lifecycle.LifecycleAware;
+import org.apache.flume.lifecycle.LifecycleState;
 import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
@@ -48,11 +57,15 @@ import org.apache.log4j.Logger;
 public class CygnusApplication extends Application {
     
     private static Logger logger;
-    private int mgmtIfPort;
+    private final int mgmtIfPort;
     private JettyServer server;
+    private static ImmutableMap<String, SourceRunner> sourcesRef;
+    private static ImmutableMap<String, Channel> channelsRef;
+    private static ImmutableMap<String, SinkRunner> sinksRef;
     
     /**
      * Constructor.
+     * @param mgmtIfPort
      */
     public CygnusApplication(int mgmtIfPort) {
         super();
@@ -63,6 +76,7 @@ public class CygnusApplication extends Application {
     /**
      * Constructor.
      * @param components
+     * @param mgmtIfPort
      */
     public CygnusApplication(List<LifecycleAware> components, int mgmtIfPort) {
         super(components);
@@ -87,6 +101,16 @@ public class CygnusApplication extends Application {
                 conf.getSinkRunners()));
         server.start();
     } // startManagementInterface
+    
+    /**
+     * Gets references to all the Flume elements: sources, channels and sinks.
+     * @param conf
+     */
+    private static void getReferences(MaterializedConfiguration conf) {
+        sourcesRef = conf.getSourceRunners();
+        channelsRef = conf.getChannels();
+        sinksRef = conf.getSinkRunners();
+    } // getReferences
    
     /**
      * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
@@ -161,25 +185,148 @@ public class CygnusApplication extends Application {
                 components.add(configurationProvider);
                 application = new CygnusApplication(components, mgmtIfPort);
                 eventBus.register(application);
+                
+                // get references to the created elements (channels, sinks, sources...)
+                getReferences(configurationProvider.getConfiguration());
             } else {
                 PropertiesFileConfigurationProvider configurationProvider =
                         new PropertiesFileConfigurationProvider(agentName, configurationFile);
                 application = new CygnusApplication(mgmtIfPort);
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
+                
+                // get references to the created elements (channels, sinks, sources...)
+                getReferences(configurationProvider.getConfiguration());
             } // if else
             
+            // start the Cygnus application
             application.start();
 
-            final CygnusApplication appReference = application;
-            Runtime.getRuntime().addShutdownHook(new Thread("agent-shutdown-hook") {
-                @Override
-                public void run() {
-                    appReference.stop();
-                } // run
-            });
+            // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
+            final CygnusApplication appRef = application;
+            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", appRef));
         } catch (Exception e) {
             logger.error("A fatal error occurred while running. Exception follows.", e);
         } // try catch
     } // main
+    
+    /**
+     * Implements a thread that starts when the Cygnus applications exits (runtime.exit(int), ctrl+c, etc).
+     */
+    private static class AgentShutdownHook extends Thread {
+        
+        private final CygnusApplication appRef;
+        
+        public AgentShutdownHook(String name, CygnusApplication appRef) {
+            super(name);
+            this.appRef = appRef;
+        } // AgentShutdownHook
+        
+        @Override
+        public void run() {
+            try {
+                System.out.println("Starting an ordered shutdown of Cygnus");
+                
+                // stop the sources
+                System.out.println("Stopping sources");
+                stopSources();
+                
+                // wait until the channels are empty; if at least one of them has a single event, Cygnus cannot stop
+                while (true) {
+                    Iterator it = channelsRef.keySet().iterator();
+                    boolean emptyChannels = true;
+
+                    while (it.hasNext()) {
+                        String channelName = (String) it.next();
+                        Channel channel = channelsRef.get(channelName);
+                        CygnusChannel cygnusChannel;
+
+                        if (channel instanceof CygnusMemoryChannel) {
+                            cygnusChannel = (CygnusMemoryChannel) channel;
+                        } else if (channel instanceof CygnusFileChannel) {
+                            cygnusChannel = (CygnusFileChannel) channel;
+                        } else {
+                            continue;
+                        } // if else
+                        
+                        int numEvents = cygnusChannel.getNumEvents();
+                        
+                        if (numEvents != 0) {
+                            System.out.println("There are " + numEvents + " events within " + channelName
+                                    + ", Cygnus cannnot shutdown yet");
+                            emptyChannels = false;
+                            break;
+                        } // if
+                    } // while
+
+                    if (emptyChannels) {
+                        System.out.println("All the channels are empty");
+                        break;
+                    } else {
+                        System.out.println("Waiting 5 seconds");
+                        Thread.sleep(5000);
+                    } // if else
+                } // while
+
+                // stop the channels
+                System.out.println("Stopping channels");
+                stopChannels();
+                
+                // stop the sinks
+                System.out.println("Stopping sinks");
+                stopSinks();
+                
+//                System.out.println("Shutting down Cygnus");
+//                appRef.stop();
+            } catch (InterruptedException e) {
+                System.err.println("There was some problem while shutting down Cygnus. Details=" + e.getMessage());
+            } // try catch
+        } // run
+        
+        /**
+         * Stops the sources.
+         */
+        private void stopSources() {
+            Iterator it = sourcesRef.keySet().iterator();
+            
+            while (it.hasNext()) {
+                String sourceName = (String) it.next();
+                SourceRunner source = sourcesRef.get(sourceName);
+                LifecycleState state = source.getLifecycleState();
+                System.out.println("Stopping " + sourceName + " (lyfecycle state=" + state.toString() + ")");
+                source.stop();
+            } // while
+        } // stopSources
+        
+        /**
+         * Stops the channels.
+         */
+        private void stopChannels() {
+            Iterator it = channelsRef.keySet().iterator();
+            
+            while (it.hasNext()) {
+                String channelName = (String) it.next();
+                Channel channel = channelsRef.get(channelName);
+                LifecycleState state = channel.getLifecycleState();
+                System.out.println("Stopping " + channelName + " (lyfecycle state=" + state.toString() + ")");
+                channel.stop();
+            } // while
+        } // stopChannels
+        
+        /**
+         * Stops the sinks.
+         */
+        private void stopSinks() {
+            Iterator it = sinksRef.keySet().iterator();
+            
+            while (it.hasNext()) {
+                String sinkName = (String) it.next();
+                SinkRunner sink = sinksRef.get(sinkName);
+                LifecycleState state = sink.getLifecycleState();
+                System.out.println("Stopping " + sinkName + " (lyfecycle state=" + state.toString() + ")");
+                sink.stop();
+            } // while
+        } // stopSinks
+                
+    } // AgentShutdownHook
     
 } // CygnusApplication
