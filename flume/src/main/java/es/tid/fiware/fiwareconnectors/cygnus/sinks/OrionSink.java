@@ -19,6 +19,7 @@
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
@@ -145,6 +146,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     String newTTL = new Integer(ttl - 1).toString();
                     event.getHeaders().put(Constants.HEADER_TTL, newTTL);
                     txn.rollback();
+                    ((CygnusChannel) ch).rollback();
                     status = Status.BACKOFF;
                     logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
                             + ")");
