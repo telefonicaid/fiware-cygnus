@@ -73,7 +73,7 @@ public class HiveClient {
             
             // execute the query
             rs = stmt.executeQuery(query);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("Runtime error (The Hive table cannot be created. Hive query='" + query + "'. Details="
                     + e.getMessage() + ")");
             res = false;
