@@ -18,7 +18,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
-import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hive.HiveBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
@@ -45,16 +45,21 @@ public abstract class HDFSBackend {
     protected boolean krb5;
     protected String krb5User;
     protected String krb5Password;
-    private Logger logger;
+    private final Logger logger;
     
     /**
      * 
      * @param cosmosHost
      * @param cosmosPort
-     * @param cosmosUsername
      * @param cosmosDefaultUsername
      * @param cosmosDefaultPassword
+     * @param hiveHost
      * @param hivePort
+     * @param krb5
+     * @param krb5User
+     * @param krb5Password
+     * @param krb5LoginConfFile
+     * @param krb5ConfFile
      */
     public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
             String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
@@ -99,7 +104,7 @@ public abstract class HDFSBackend {
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
 
         // create the standard 8-fields
         String fields = "("
@@ -139,7 +144,7 @@ public abstract class HDFSBackend {
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
@@ -158,6 +163,7 @@ public abstract class HDFSBackend {
      * 
      * @param username Cosmos username
      * @param dirPath Directory to be created
+     * @throws Exception
      */
     public abstract void createDir(String username, String dirPath) throws Exception;
     
@@ -168,6 +174,7 @@ public abstract class HDFSBackend {
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be written in the created file
+     * @throws Exception
      */
     public abstract void createFile(String username, String filePath, String data)
         throws Exception;
@@ -177,6 +184,7 @@ public abstract class HDFSBackend {
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be appended in the file
+     * @throws Exception
      */
     public abstract void append(String username, String filePath, String data)
         throws Exception;
@@ -185,6 +193,8 @@ public abstract class HDFSBackend {
      * 
      * @param username Cosmos username
      * @param filePath File that must be checked
+     * @return
+     * @throws Exception
      */
     public abstract boolean exists(String username, String filePath) throws Exception;
     
