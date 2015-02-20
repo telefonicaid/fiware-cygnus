@@ -2,7 +2,7 @@
 
 This connector is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS, CKAN or MySQL.
 
-## Development
+## Design
 
 All the details about Flume can be found at [flume.apache.org](http://flume.apache.org/), but, as a reminder, some concepts will be explained here:
 
@@ -215,7 +215,7 @@ On the contrary, being the persistence mode `column`, the table named `workingro
 
 Each organization/tenant is associated to a different database.
 
-## XML notification example
+## Functionality explained (XML notification example)
 
 Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
@@ -234,100 +234,9 @@ Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugin
 
 The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
-## Prerequisites
-
-Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install and run Cygnus.
-
-In order to install Java SDK (not JRE), just type (CentOS machines):
-
-    $ yum install java-1.6.0-openjdk-devel
-
-Remember to export the JAVA_HOME environment variable. In the case of using `yum install` as shown above, it would be:
-
-    $ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
-
-In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc/profile` (other users).
-
-Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
-
-    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
-    $ tar xzvf apache-maven-3.2.5-bin.tar.gz
-    $ mv apache-maven-3.2.5 APACHE_MAVEN_HOME
-
-## Installing Cygnus and its dependencies (from sources)
-
-Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
-
-    $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
-    $ tar xvzf apache-flume-1.4.0-bin.tar.gz
-    $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
-    $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
-    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
-    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
-
-The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
-
-Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package (**recommended**):
-
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout <branch>
-    $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
-    $ cp target/cygnus-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
-    $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
-
-or not:
-
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout <branch>
-    $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
-    $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
-    $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
-
-where `<branch>` is `develop` if you are trying to install the latest features or `release/<x.y.z>` if you are trying to install a stable release. `<x.y.z>` stands for a specific version number (e.g. `0.3`, `0.5.1`...).
-
-If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/`. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
-
-In addition:
-* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar (it can be got from the following URL: http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar)
-
-### OrionCKANSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* json-simple-1.1.jar
-
-### OrionHDFSSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* hadoop-core-0.20.0.jar (or higher)
-* hive-exec-0.12.0.jar
-* hive-jdbc-0.12.0.jar
-* hive-metastore-0.12.0.jar
-* hive-service-0.12.0.jar
-* hive-common-0.12.0.jar
-* hive-shims-0.12.0.jar
-
-These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
-
-* httpclient-4.2.1.jar
-* httpcore-4.2.2.jar
-
-In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
-
-* libthrift-0.9.1.jar
-
-### OrionMysQLSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* mysql-connector-java-5.1.31-bin.jar
-
-## Installing Cygnus and its dependencies (RPM install)
-Simply configure the FIWARE repository if not yet configured and use your applications manager (CentOS/RedHat example):
+## Installing Cygnus
+###RPM install (recommended)
+Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
     [Fiware]
@@ -337,6 +246,9 @@ Simply configure the FIWARE repository if not yet configured and use your applic
     enabled=1
     EOL
     $ yum install cygnus
+
+###Installing from sources (advanced)
+Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
 
 ## Cygnus configuration
 
@@ -489,7 +401,18 @@ cygnusagent.channels.mysql-channel.capacity = 1000
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
 ```
 
-## Running (as standalone application)
+## Running as a service (recommended)
+<i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
+
+Just use the `service` command to start, stop or get the status (as a sudoer):
+
+    $ sudo service cygnus status
+
+    $ sudo service cygnus start
+
+    $ sudo service cygnus stop
+
+## Running as standalone application (advanced)
 
 <i>NOTE: If you installed Cygnus through the RPM, APACHE\_FLUME\_HOME is `/usr/cygnus/`. If not, it is a directory of your choice.</i>
 
@@ -511,17 +434,6 @@ The parameters used in these commands are:
 * `-n` (or `--name`). The name of the Flume agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
-
-## Running (as a service)
-<i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
-
-Just use the `service` command to start, stop or get the status (as a sudoer):
-
-    $ sudo service cygnus status
-
-    $ sudo service cygnus start
-
-    $ sudo service cygnus stop
 
 ## Orion subscription
 
@@ -606,5 +518,5 @@ From Cygnus 0.5 there is a REST-based management interface for administration pu
 
 ## Contact
 
-* Fermín Galán Márquez (fermin at tid dot es).
-* Francisco Romero Bueno (frb at tid dot es).
+* Fermín Galán Márquez (fermin.galanmarquez@telefonica.com).
+* Francisco Romero Bueno (francisco.romerobueno@telefonica.com).
