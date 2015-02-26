@@ -24,17 +24,18 @@ function download_flume(){
 	# download form artifactory and unzip it into ${RPM_BASE_DIR}
 	_logStage "######## Preparing the apache-flume component... ########"
 
+	local ARTIFACT_FLUME_URL=${1}
+	local FLUME_TAR=${2}
+
 	local TMP_DIR="tmp_deleteme"
 	mkdir -p ${TMP_DIR}
 	pushd ${TMP_DIR} &> /dev/null
-	local FLUME_TAR=${2}
 	#remove .tar.gz so twice is executed
 	local FLUME_WO_TAR=${FLUME_TAR%.*}
 	FLUME_WO_TAR=${FLUME_WO_TAR%.*}
 
 
 	_log "#### The version of the component is (${FLUME_TAR}) ####"
-	local ARTIFACT_FLUME_URL=${1}
 	_log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
 	curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
 	if [[ $? -ne 0 ]]; then
@@ -218,7 +219,7 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 
 	clean_up_previous_builds 
 
-	download_flume ARTIFACT_URL ARTIFACT_NAME
+	download_flume ${ARTIFACT_URL} ${ARTIFACT_NAME}
 	[[ $? -ne 0 ]] && exit 1
 
     copy_cygnus_startup_script
