@@ -132,9 +132,6 @@ chmod g+s %{_log_dir}
 setfacl -d -m g::rwx %{_log_dir}
 setfacl -d -m o::rx %{_log_dir}
 
-echo "[INFO] Configuring application service"
-# FIXME! Not supported
-# chkconfig --add %{_service_name}
 echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
@@ -142,31 +139,13 @@ echo "Done"
 # -------------------------------------------------------------------------------------------- #
 %preun
 
-echo "[INFO] Uninstall the %{_project_name}"
-/etc/init.d/%{_service_name} stop
-/sbin/chkconfig --del %{_service_name}
-
-echo "[INFO] Deleting links"
-rm /etc/init.d/%{_service_name} \
-/etc/%{_project_name}/flume.conf \
-/usr/bin/flume-ng
-
-echo "[INFO] Removing application log files"
-[ -d %{_log_dir} ] && rm -rfv %{_log_dir} &> /dev/null
-
-echo "[INFO] Deleting the %{_project_name} folder"
-[ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir} &> /dev/null
-
-echo "[INFO] Deleting the %{_project_user} user"
-sudo userdel %{_project_user}
-
-echo "Done"
-
 # -------------------------------------------------------------------------------------------- #
 # post-uninstall section:
 # clean section:
 # -------------------------------------------------------------------------------------------- #
 %postun
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
