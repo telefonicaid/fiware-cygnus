@@ -74,7 +74,6 @@ cp -R %{_sourcedir}/* %{_builddir}
 %build
 # Read from BUILD, write into BUILD
 
-echo "[INFO] Building..."
 
 # -------------------------------------------------------------------------------------------- #
 # pre-install section:
@@ -119,10 +118,17 @@ cp %{_builddir}/logrotate.d/logrotate-cygnus-daily    %{buildroot}/etc/logrotate
 
 echo "[INFO] Configuring application"
 mkdir -p /etc/%{_project_name}
-echo "[INFO] Creating links"
-ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
-ln -s %{_project_install_dir}/conf /etc/%{_project_name}
-ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
+
+echo "[INFO] Creating links if not exists "
+if [[ ! -L %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name} ]]; then
+	ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
+fi
+if [[ ! -L %{_project_install_dir}/conf /etc/%{_project_name} ]]; then
+	ln -s %{_project_install_dir}/conf /etc/%{_project_name}
+fi
+if [[ ! -L %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng ]]; then
+	ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
+fi
 
 #Logs
 echo "[INFO] Creating log directory"
