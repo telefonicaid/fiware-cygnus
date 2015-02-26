@@ -37,7 +37,7 @@ a Flume-based connector for context data coming from Orion Context Broker.
 %define _service_name cygnus
 
 # improve package speed avoiding jar repack
-define __jar_repack %{nil}
+%define __jar_repack %{nil}
 
 # System folders
 # _sourcedir =${topdir}/SOURCES
