@@ -107,6 +107,12 @@ mkdir -p %{buildroot}/${_log_dir}
 mkdir -p %{buildroot}/etc/cron.d
 # Create /etc/logrotate.d directory
 mkdir -p %{buildroot}/etc/logrotate.d
+# create /etc/cygnus
+mkdir -p %{buildroot}/etc/%{_project_name}
+# create /etc/init.d
+mkdir -p %{buildroot}/etc/init.d
+# create /usr/bin
+mkdir -p %{buildroot}/usr/bin
 
 cp -R %{_builddir}/usr/cygnus/*                       %{_build_root_project}
 cp %{_builddir}/init.d/%{_service_name}               %{_build_root_project}/init.d/%{_service_name}
@@ -114,24 +120,14 @@ cp %{_builddir}/config/*                              %{_build_root_project}/con
 cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles    %{buildroot}/etc/cron.d
 cp %{_builddir}/logrotate.d/logrotate-cygnus-daily    %{buildroot}/etc/logrotate.d
 
+ln -s %{_project_install_dir}/init.d/%{_service_name}  %{buildroot}/etc/init.d/%{_service_name}
+ln -s %{_project_install_dir}/conf                     %{buildroot}/etc/%{_project_name}/conf
+ln -s %{_project_install_dir}/bin/flume-ng             %{buildroot}/usr/bin/flume-ng
+
 # -------------------------------------------------------------------------------------------- #
 # post-install section:
 # -------------------------------------------------------------------------------------------- #
 %post
-
-echo "[INFO] Configuring application"
-mkdir -p /etc/%{_project_name}
-
-echo "[INFO] Creating links if not exists "
-if [[ ! -L %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name} ]]; then
-	ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
-fi
-if [[ ! -L %{_project_install_dir}/conf /etc/%{_project_name} ]]; then
-	ln -s %{_project_install_dir}/conf /etc/%{_project_name}
-fi
-if [[ ! -L %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng ]]; then
-	ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
-fi
 
 #Logs
 echo "[INFO] Creating log directory"
@@ -147,6 +143,9 @@ echo "Done"
 # pre-uninstall section:
 # -------------------------------------------------------------------------------------------- #
 %preun
+
+/sbin/service %{_service_name} stop
+
 
 # -------------------------------------------------------------------------------------------- #
 # post-uninstall section:
@@ -166,7 +165,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(755,%{_project_user},%{_project_user},755)
 %attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
 %attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
-%attr(0644, cygnus, cygnus) /usr/cygnus/conf/*
+%attr(0777, root, root) /etc/cygnus/conf
+%attr(0777, root, root) /etc/init.d/cygnus
+%attr(0777, root, root) /usr/bin/flume-ng
 
 %{_project_install_dir}
 /var/run/%{_project_name}
