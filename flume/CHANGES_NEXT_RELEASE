@@ -4,3 +4,4 @@
 * Bug fixing: error in configuration template (cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file) (#308)
 * Encourage the usage of FQDNs regarding HDFS namenodes when using Kerberos (#309)
 * Fixed OrionMySQLSink logger (now it logs as OrionMySQLSink, not as OrionHDFSSink) (#321)
+* Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
