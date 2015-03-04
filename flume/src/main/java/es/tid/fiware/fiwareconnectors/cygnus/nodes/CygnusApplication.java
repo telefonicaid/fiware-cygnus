@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -57,60 +57,34 @@ import org.apache.log4j.Logger;
 public class CygnusApplication extends Application {
     
     private static Logger logger;
-    private final int mgmtIfPort;
-    private JettyServer server;
+    private static JettyServer server;
     private static ImmutableMap<String, SourceRunner> sourcesRef;
     private static ImmutableMap<String, Channel> channelsRef;
     private static ImmutableMap<String, SinkRunner> sinksRef;
     
     /**
      * Constructor.
-     * @param mgmtIfPort
      */
-    public CygnusApplication(int mgmtIfPort) {
+    public CygnusApplication() {
         super();
-        this.mgmtIfPort = mgmtIfPort;
-        logger = Logger.getLogger(CygnusApplication.class);
     } // CygnusApplication
     
     /**
      * Constructor.
      * @param components
-     * @param mgmtIfPort
      */
-    public CygnusApplication(List<LifecycleAware> components, int mgmtIfPort) {
+    public CygnusApplication(List<LifecycleAware> components) {
         super(components);
-        this.mgmtIfPort = mgmtIfPort;
-        logger = Logger.getLogger(CygnusApplication.class);
     } // CygnusApplication
-
+    
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
-        super.handleConfigurationEvent(conf);
-        startManagementInterface(conf);
-    } // handleConfigurationEvent
-    
-    /**
-     * Starts a Management Interface instance based on a Jetty server.
-     * @param conf
-     */
-    private void startManagementInterface(MaterializedConfiguration conf) {
-        logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-        server = new JettyServer(mgmtIfPort, new ManagementInterface(conf.getSourceRunners(), conf.getChannels(),
-                conf.getSinkRunners()));
-        server.start();
-    } // startManagementInterface
-    
-    /**
-     * Gets references to all the Flume elements: sources, channels and sinks.
-     * @param conf
-     */
-    private static void getReferences(MaterializedConfiguration conf) {
         sourcesRef = conf.getSourceRunners();
         channelsRef = conf.getChannels();
         sinksRef = conf.getSinkRunners();
-    } // getReferences
+        super.handleConfigurationEvent(conf);
+    } // handleConfigurationEvent
    
     /**
      * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
@@ -120,6 +94,8 @@ public class CygnusApplication extends Application {
      */
     public static void main(String[] args) {
         try {
+            logger = Logger.getLogger(CygnusApplication.class);
+            
             Options options = new Options();
 
             Option option = new Option("n", "name", true, "the name of this agent");
@@ -148,14 +124,14 @@ public class CygnusApplication extends Application {
             boolean reload = !commandLine.hasOption("no-reload-conf");
 
             if (commandLine.hasOption('h')) {
-                new HelpFormatter().printHelp("flume-ng agent", options, true);
+                new HelpFormatter().printHelp("cygnus-flume-ng agent", options, true);
                 return;
             } // if
             
             int mgmtIfPort = 8081; // default value
             
             if (commandLine.hasOption('p')) {
-                mgmtIfPort = new Integer(commandLine.getOptionValue('p')).intValue();
+                mgmtIfPort = new Integer(commandLine.getOptionValue('p'));
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -179,34 +155,36 @@ public class CygnusApplication extends Application {
             CygnusApplication application;
 
             if (reload) {
+                logger.debug("no-reload-conf was not set, thus the configuration file will be polled each 30 seconds");
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
                         new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
                 components.add(configurationProvider);
-                application = new CygnusApplication(components, mgmtIfPort);
+                application = new CygnusApplication(components);
                 eventBus.register(application);
-                
-                // get references to the created elements (channels, sinks, sources...)
-                getReferences(configurationProvider.getConfiguration());
             } else {
+                logger.debug("no-reload-conf was set, thus the configuration file will only be read this time");
                 PropertiesFileConfigurationProvider configurationProvider =
                         new PropertiesFileConfigurationProvider(agentName, configurationFile);
-                application = new CygnusApplication(mgmtIfPort);
+                application = new CygnusApplication();
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
-                
-                // get references to the created elements (channels, sinks, sources...)
-                getReferences(configurationProvider.getConfiguration());
             } // if else
             
-            // start the Cygnus application
+            // start the Cygnus application, including the management interface
+            logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
+            server = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
+            server.start();
+            logger.info("Starting Cygnus application");
             application.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
-            final CygnusApplication appRef = application;
-            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", appRef));
-        } catch (Exception e) {
+            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook"));
+        } catch (IllegalArgumentException e) {
+            logger.error("A fatal error occurred while running. Exception follows.", e);
+        } catch (ParseException e) {
             logger.error("A fatal error occurred while running. Exception follows.", e);
         } // try catch
+         // try catch
     } // main
     
     /**
@@ -214,11 +192,12 @@ public class CygnusApplication extends Application {
      */
     private static class AgentShutdownHook extends Thread {
         
-        private final CygnusApplication appRef;
-        
-        public AgentShutdownHook(String name, CygnusApplication appRef) {
+        /**
+         * Constructor.
+         * @param name
+         */
+        public AgentShutdownHook(String name) {
             super(name);
-            this.appRef = appRef;
         } // AgentShutdownHook
         
         @Override
@@ -274,9 +253,6 @@ public class CygnusApplication extends Application {
                 // stop the sinks
                 System.out.println("Stopping sinks");
                 stopSinks();
-                
-//                System.out.println("Shutting down Cygnus");
-//                appRef.stop();
             } catch (InterruptedException e) {
                 System.err.println("There was some problem while shutting down Cygnus. Details=" + e.getMessage());
             } // try catch
@@ -286,45 +262,36 @@ public class CygnusApplication extends Application {
          * Stops the sources.
          */
         private void stopSources() {
-            Iterator it = sourcesRef.keySet().iterator();
-            
-            while (it.hasNext()) {
-                String sourceName = (String) it.next();
+            for (String sourceName : sourcesRef.keySet()) {
                 SourceRunner source = sourcesRef.get(sourceName);
                 LifecycleState state = source.getLifecycleState();
                 System.out.println("Stopping " + sourceName + " (lyfecycle state=" + state.toString() + ")");
                 source.stop();
-            } // while
+            } // for
         } // stopSources
         
         /**
          * Stops the channels.
          */
         private void stopChannels() {
-            Iterator it = channelsRef.keySet().iterator();
-            
-            while (it.hasNext()) {
-                String channelName = (String) it.next();
+            for (String channelName : channelsRef.keySet()) {
                 Channel channel = channelsRef.get(channelName);
                 LifecycleState state = channel.getLifecycleState();
                 System.out.println("Stopping " + channelName + " (lyfecycle state=" + state.toString() + ")");
                 channel.stop();
-            } // while
+            } // for
         } // stopChannels
         
         /**
          * Stops the sinks.
          */
         private void stopSinks() {
-            Iterator it = sinksRef.keySet().iterator();
-            
-            while (it.hasNext()) {
-                String sinkName = (String) it.next();
+            for (String sinkName : sinksRef.keySet()) {
                 SinkRunner sink = sinksRef.get(sinkName);
                 LifecycleState state = sink.getLifecycleState();
                 System.out.println("Stopping " + sinkName + " (lyfecycle state=" + state.toString() + ")");
                 sink.stop();
-            } // while
+            } // for
         } // stopSinks
                 
     } // AgentShutdownHook
