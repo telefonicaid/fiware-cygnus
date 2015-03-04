@@ -28,7 +28,9 @@ import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import java.util.Map;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.io.IOException;
 import java.io.StringReader;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Channel;
@@ -41,6 +43,7 @@ import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -61,7 +64,7 @@ import org.xml.sax.InputSource;
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
-    private Logger logger;
+    private final Logger logger;
     
     /**
      * Constructor.
@@ -140,10 +143,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 logger.error(e.getMessage());
                 
                 // check the event HEADER_TTL
-                int ttl = new Integer(event.getHeaders().get(Constants.HEADER_TTL)).intValue();
+                int ttl = new Integer(event.getHeaders().get(Constants.HEADER_TTL));
                 
                 if (ttl > 0) {
-                    String newTTL = new Integer(ttl - 1).toString();
+                    String newTTL = Integer.toString(ttl - 1);
                     event.getHeaders().put(Constants.HEADER_TTL, newTTL);
                     txn.rollback();
                     ((CygnusChannel) ch).rollback();
@@ -209,7 +212,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
                 saxParser.parse(new InputSource(new StringReader(eventData)), handler);
                 notification = handler.getNotifyContextRequest();
-            } catch (Exception e) {
+            } catch (ParserConfigurationException e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } catch (SAXException e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } catch (IOException e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
         } else {
