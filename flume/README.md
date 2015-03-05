@@ -521,7 +521,22 @@ Just use the `service` command to start, stop or get the status (as a sudoer):
 
     $ sudo service cygnus start
 
+    $ sudo service cygnus restart
+
     $ sudo service cygnus stop
+
+Previous commands afefcts to **all** of Cygnus instances configured. If only one instance is wanted to be 
+managed by service script a new parameter after de the action should be specified:
+
+    $ sudo service cygnus status <instance_name>
+
+    $ sudo service cygnus start <instance_name>
+
+    $ sudo service cygnus restart <instance_name>
+
+    $ sudo service cygnus stop <instance_name>
+
+Where `<instance_name>` is the suffix at the end of the `cygnus_instace_<instance_name>.conf` file
 
 ## Orion subscription
 
