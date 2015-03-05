@@ -25,6 +25,8 @@
 
 PARAM=$1
 
+CYGNUS_INSTANCE=${2}
+
 COMPONENT_NAME=cygnus
 PREFIX=/usr
 CYGNUS_DIR=${PREFIX}/cygnus
@@ -34,18 +36,23 @@ CYGNUS_USER=cygnus
 cygnus_start()
 {
     local result=0
+    local cygnus_instance=${1}
 
     if [[ ! -x ${FLUME_EXECUTABLE} ]]; then
         printf "%s\n" "Fail - ${FLUME_EXECUTABLE} not exists or is not executable."
         exit 1
     fi
 
-    if [[ $(ls -l ${CYGNUS_DIR}/conf/cygnus_instance_*.conf 2> /dev/null | wc -l) -eq 0 ]]; then
-        printf "%s\n" "There aren't any instance of Cygnus configured. Refer to file /usr/cygnus/conf/README.md for further information."
+    if [[ $(ls -l ${CYGNUS_DIR}/conf/cygnus_instance_${cygnus_instance}*.conf 2> /dev/null | wc -l) -eq 0 ]]; then
+        if [[ ${cygnus_instance} == "" ]]; then
+            printf "%s\n" "There aren't any instance of Cygnus configured. Refer to file /usr/cygnus/conf/README.md for further information."
+        else
+            printf "%s\n" "There aren't any instance of Cygnus configured with the name ${cygnus_instance}. Refer to file /usr/cygnus/conf/README.md for further information."
+        fi
         return 1
     fi
 
-    for instance in $(ls ${CYGNUS_DIR}/conf/cygnus_instance_*.conf)
+    for instance in $(ls ${CYGNUS_DIR}/conf/cygnus_instance_${cygnus_instance}*.conf)
     do
         local NAME
         NAME=${instance%.conf}
@@ -84,13 +91,14 @@ cygnus_start()
 cygnus_stop()
 {
     local result=0
+    local cygnus_instance=${1}
 
-    if [[ $(ls -l /var/run/cygnus/cygnus_*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
-        printf "%s\n" "There aren't any instance of Cygnus running $(success)"
+    if [[ $(ls -l /var/run/cygnus/cygnus_${cygnus_instance}*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
+        printf "%s\n" "There aren't any instance of Cygnus ${cygnus_instance} running $(success)"
         return 0
     fi
 
-    for run_instance in $(ls /var/run/cygnus/cygnus_*.pid)
+    for run_instance in $(ls /var/run/cygnus/cygnus_${cygnus_instance}*.pid)
     do
 
         local NAME
@@ -117,13 +125,14 @@ cygnus_stop()
 cygnus_status()
 {
     local result=0
+    local cygnus_instance=${1}
 
-    if [[ $(ls -l /var/run/cygnus/cygnus_*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
-        printf "%s\n" "There aren't any instance of Cygnus running"
+    if [[ $(ls -l /var/run/cygnus/cygnus_${cygnus_instance}*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
+        printf "%s\n" "There aren't any instance of Cygnus ${cygnus_instance} running"
         exit 1
     fi
 
-    for run_instance in $(ls /var/run/cygnus/cygnus_*.pid)
+    for run_instance in $(ls /var/run/cygnus/cygnus_${cygnus_instance}*.pid)
     do
 
         local NAME
@@ -142,20 +151,20 @@ cygnus_status()
 case ${PARAM} in
 
     'start')
-        cygnus_start
+        cygnus_start ${CYGNUS_INSTANCE}
         ;;
 
     'stop')
-        cygnus_stop
+        cygnus_stop ${CYGNUS_INSTANCE}
         ;;
 
     'restart')
-        cygnus_stop
-        cygnus_start
+        cygnus_stop ${CYGNUS_INSTANCE}
+        cygnus_start ${CYGNUS_INSTANCE}
         ;;
 
     'status')
-        cygnus_status
+        cygnus_status ${CYGNUS_INSTANCE}
         ;;
 
 esac

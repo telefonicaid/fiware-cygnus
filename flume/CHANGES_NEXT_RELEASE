@@ -1,0 +1,1 @@
+* Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
