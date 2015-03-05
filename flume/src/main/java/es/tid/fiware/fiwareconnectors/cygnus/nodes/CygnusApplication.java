@@ -53,10 +53,17 @@ import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.apache.log4j.Logger;
 
 /**
- * CygnusApplication class is basically a modification of the alredy existent org.apache.flume.node.Application class.
- * At a first attempt we tried to extend the Application class, but access to certain private variables such as the
- * supervisor were needed, thus finally CygnusApplication class had to be created from the scratch, highly inspired by
- * the original Application class.
+ * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
+ * is closed in an ordered way, first the sources in order to no not receiving further notifications, then the
+ * application waits until the channels are emptied by the sinks, finally the sinks are closed.
+ * 
+ * Java Reflection has been used in order to access the LifecycleSupervisor supervisor private variable since this
+ * object allows to effectively stop the Cygnus agent components (if directly stoped from the components referecnes
+ * then the lifecycle supervisor starts them again).
+ * 
+ * Cygnus agent components references are obtained only once, at handleConfigurationEvent method since it already
+ * receives as an argument a MaterializedConfiguration object (if a new MaterializedConfiguration is gotten then new
+ * instances of the components are started).
  * 
  * @author frb
  */
