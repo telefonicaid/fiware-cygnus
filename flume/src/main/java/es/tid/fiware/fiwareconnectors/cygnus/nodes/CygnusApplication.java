@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,13 +18,19 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.nodes;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusChannel;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusFileChannel;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusMemoryChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
 import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,8 +39,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.flume.Channel;
 import org.apache.flume.Constants;
+import org.apache.flume.SinkRunner;
+import org.apache.flume.SourceRunner;
 import org.apache.flume.lifecycle.LifecycleAware;
+import org.apache.flume.lifecycle.LifecycleState;
+import org.apache.flume.lifecycle.LifecycleSupervisor;
 import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
@@ -42,52 +53,83 @@ import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
+ * is closed in an ordered way, first the sources in order to no not receiving further notifications, then the
+ * application waits until the channels are emptied by the sinks, finally the sinks are closed.
+ * 
+ * Java Reflection has been used in order to access the LifecycleSupervisor supervisor private variable since this
+ * object allows to effectively stop the Cygnus agent components (if directly stoped from the components referecnes
+ * then the lifecycle supervisor starts them again).
+ * 
+ * Cygnus agent components references are obtained only once, at handleConfigurationEvent method since it already
+ * receives as an argument a MaterializedConfiguration object (if a new MaterializedConfiguration is gotten then new
+ * instances of the components are started).
+ * 
  * @author frb
  */
 public class CygnusApplication extends Application {
     
-    private static Logger logger;
-    private int mgmtIfPort;
-    private JettyServer server;
+    private static Logger logger = Logger.getLogger(CygnusApplication.class);
+    private static JettyServer server;
+    private static ImmutableMap<String, SourceRunner> sourcesRef;
+    private static ImmutableMap<String, Channel> channelsRef;
+    private static ImmutableMap<String, SinkRunner> sinksRef;
+    private static LifecycleSupervisor supervisorRef;
     
     /**
      * Constructor.
      */
-    public CygnusApplication(int mgmtIfPort) {
+    public CygnusApplication() {
         super();
-        this.mgmtIfPort = mgmtIfPort;
-        logger = Logger.getLogger(CygnusApplication.class);
     } // CygnusApplication
     
     /**
      * Constructor.
      * @param components
      */
-    public CygnusApplication(List<LifecycleAware> components, int mgmtIfPort) {
+    public CygnusApplication(List<LifecycleAware> components) {
         super(components);
-        this.mgmtIfPort = mgmtIfPort;
-        logger = Logger.getLogger(CygnusApplication.class);
+        
+        try {
+            // get a reference to the supervisor, if not possible then Cygnus application cannot start
+            getSupervisorRef();
+        } catch (NoSuchFieldException e) {
+            logger.debug(e);
+            supervisorRef = null;
+        } catch (IllegalAccessException e) {
+            logger.debug(e);
+            supervisorRef = null;
+        } // try catch
     } // CygnusApplication
-
+    
+    /**
+     * Gets a reference to the private variable "supervisor" within the super class "Application". This is achieved by
+     * using Java Reflection.
+     */
+    private void getSupervisorRef() throws NoSuchFieldException, IllegalAccessException {
+        // get a reference to the supervisor object, this will be needed when shutting down Cygnus in a certain order
+        Field privateField = Application.class.getDeclaredField("supervisor");
+        privateField.setAccessible(true);
+        supervisorRef = (LifecycleSupervisor) privateField.get(this);
+        privateField.setAccessible(false);
+    } // getSupervisorRef
+    
+    /**
+     * Stops and starts all the components when a configuration change event is generated.
+     * @param conf
+     */
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
         super.handleConfigurationEvent(conf);
-        startManagementInterface(conf);
+        
+        // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
+        // certain order
+        sourcesRef = conf.getSourceRunners();
+        channelsRef = conf.getChannels();
+        sinksRef = conf.getSinkRunners();
     } // handleConfigurationEvent
-    
-    /**
-     * Starts a Management Interface instance based on a Jetty server.
-     * @param conf
-     */
-    private void startManagementInterface(MaterializedConfiguration conf) {
-        logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-        server = new JettyServer(mgmtIfPort, new ManagementInterface(conf.getSourceRunners(), conf.getChannels(),
-                conf.getSinkRunners()));
-        server.start();
-    } // startManagementInterface
-   
+
     /**
      * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
      * are the CygnusApplication is used instead of the Application one, and the Management Interface port option in
@@ -124,14 +166,14 @@ public class CygnusApplication extends Application {
             boolean reload = !commandLine.hasOption("no-reload-conf");
 
             if (commandLine.hasOption('h')) {
-                new HelpFormatter().printHelp("flume-ng agent", options, true);
+                new HelpFormatter().printHelp("cygnus-flume-ng agent", options, true);
                 return;
             } // if
             
             int mgmtIfPort = 8081; // default value
             
             if (commandLine.hasOption('p')) {
-                mgmtIfPort = new Integer(commandLine.getOptionValue('p')).intValue();
+                mgmtIfPort = new Integer(commandLine.getOptionValue('p'));
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -155,31 +197,155 @@ public class CygnusApplication extends Application {
             CygnusApplication application;
 
             if (reload) {
+                logger.debug("no-reload-conf was not set, thus the configuration file will be polled each 30 seconds");
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
                         new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
                 components.add(configurationProvider);
-                application = new CygnusApplication(components, mgmtIfPort);
+                application = new CygnusApplication(components);
                 eventBus.register(application);
             } else {
+                logger.debug("no-reload-conf was set, thus the configuration file will only be read this time");
                 PropertiesFileConfigurationProvider configurationProvider =
                         new PropertiesFileConfigurationProvider(agentName, configurationFile);
-                application = new CygnusApplication(mgmtIfPort);
+                application = new CygnusApplication();
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
             
+            // start the Cygnus application, including the management interface
+            logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
+            server = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
+            server.start();
+            logger.info("Starting Cygnus application");
             application.start();
 
-            final CygnusApplication appReference = application;
-            Runtime.getRuntime().addShutdownHook(new Thread("agent-shutdown-hook") {
-                @Override
-                public void run() {
-                    appReference.stop();
-                } // run
-            });
-        } catch (Exception e) {
+            // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
+            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
+        } catch (IllegalArgumentException e) {
+            logger.error("A fatal error occurred while running. Exception follows.", e);
+        } catch (ParseException e) {
             logger.error("A fatal error occurred while running. Exception follows.", e);
         } // try catch
     } // main
+    
+    /**
+     * Implements a thread that starts when the Cygnus applications exits (runtime.exit(int), ctrl+c, etc).
+     */
+    private static class AgentShutdownHook extends Thread {
+        
+        private final LifecycleSupervisor supervisorRef;
+
+        /**
+         * Constructor.
+         * @param name
+         */
+        public AgentShutdownHook(String name, LifecycleSupervisor supervisorRef) {
+            super(name);
+            this.supervisorRef = supervisorRef;
+        } // AgentShutdownHook
+        
+        @Override
+        public void run() {
+            if (supervisorRef == null) {
+                System.err.println("Cygnus cannot be shutdown in an ordered way since the supervisor variable at "
+                        + "super class org.apache.flume.node.Application could not be accessed");
+                return;
+            } // if
+            
+            try {
+                System.out.println("Starting an ordered shutdown of Cygnus");
+                
+                // stop the sources
+                System.out.println("Stopping sources");
+                stopSources();
+                
+                // wait until the channels are empty; if at least one of them has a single event, Cygnus cannot stop
+                while (true) {
+                    Iterator it = channelsRef.keySet().iterator();
+                    boolean emptyChannels = true;
+
+                    while (it.hasNext()) {
+                        String channelName = (String) it.next();
+                        Channel channel = channelsRef.get(channelName);
+                        CygnusChannel cygnusChannel;
+
+                        if (channel instanceof CygnusMemoryChannel) {
+                            cygnusChannel = (CygnusMemoryChannel) channel;
+                        } else if (channel instanceof CygnusFileChannel) {
+                            cygnusChannel = (CygnusFileChannel) channel;
+                        } else {
+                            continue;
+                        } // if else
+                        
+                        int numEvents = cygnusChannel.getNumEvents();
+                        
+                        if (numEvents != 0) {
+                            System.out.println("There are " + numEvents + " events within " + channelName
+                                    + ", Cygnus cannnot shutdown yet");
+                            emptyChannels = false;
+                            break;
+                        } // if
+                    } // while
+
+                    if (emptyChannels) {
+                        System.out.println("All the channels are empty");
+                        break;
+                    } else {
+                        System.out.println("Waiting 5 seconds");
+                        Thread.sleep(5000);
+                    } // if else
+                } // while
+
+                // stop the channels
+                System.out.println("Stopping channels");
+                stopChannels();
+                
+                // stop the sinks
+                System.out.println("Stopping sinks");
+                stopSinks();
+            } catch (InterruptedException e) {
+                System.err.println("There was some problem while shutting down Cygnus. Details=" + e.getMessage());
+            } // try catch
+        } // run
+        
+        /**
+         * Stops the sources.
+         */
+        private void stopSources() {
+            for (String sourceName : sourcesRef.keySet()) {
+                SourceRunner source = sourcesRef.get(sourceName);
+                LifecycleState state = source.getLifecycleState();
+                System.out.println("Stopping " + sourceName + " (lyfecycle state=" + state.toString() + ")");
+                supervisorRef.unsupervise(source);
+                //source.stop();
+            } // for
+            
+        } // stopSources
+        
+        /**
+         * Stops the channels.
+         */
+        private void stopChannels() {
+            for (String channelName : channelsRef.keySet()) {
+                Channel channel = channelsRef.get(channelName);
+                LifecycleState state = channel.getLifecycleState();
+                System.out.println("Stopping " + channelName + " (lyfecycle state=" + state.toString() + ")");
+                supervisorRef.unsupervise(channel);
+            } // for
+        } // stopChannels
+        
+        /**
+         * Stops the sinks.
+         */
+        private void stopSinks() {
+            for (String sinkName : sinksRef.keySet()) {
+                SinkRunner sink = sinksRef.get(sinkName);
+                LifecycleState state = sink.getLifecycleState();
+                System.out.println("Stopping " + sinkName + " (lyfecycle state=" + state.toString() + ")");
+                supervisorRef.unsupervise(sink);
+            } // for
+        } // stopSinks
+                
+    } // AgentShutdownHook
     
 } // CygnusApplication
