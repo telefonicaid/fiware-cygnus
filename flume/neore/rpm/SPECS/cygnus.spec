@@ -173,6 +173,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Feb 20 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.0
+- Added Kerberos authentication in OrionHDFSSink (#290)
+- Added posibility to start multiple instances of Cygnus (#299)
+- Bug fixing: same port in log4j example about two Cygnus instances (#305)
+- Bug fixing: error in configuration template (cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file) (#308)
+- Encourage the usage of FQDNs regarding HDFS namenodes when using Kerberos (#309)
+- Fixed the RoundRoundChannelSelector, now it works for multiple storages (#298)
+- Allow for infinite TTL (#236)
+- Added OrionTestSink (#307)
+- Fixed OrionMySQLSink logger (now it logs as OrionMySQLSink, not as OrionHDFSSink) (#321)
+
 * Wed Dec 17 2014 Daniel Moran <daniel.moranjimenez@telefonica.com> 0.6.0
 - Remove the "resource" prefixing feature from MySQL and HDFS (#224)
 - Add the "fiware-servicePath" header as a valid field of the grouping mechanism (#215)
