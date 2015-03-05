@@ -29,6 +29,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
 import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
@@ -44,6 +45,7 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.lifecycle.LifecycleAware;
 import org.apache.flume.lifecycle.LifecycleState;
+import org.apache.flume.lifecycle.LifecycleSupervisor;
 import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
@@ -51,16 +53,21 @@ import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * CygnusApplication class is basically a modification of the alredy existent org.apache.flume.node.Application class.
+ * At a first attempt we tried to extend the Application class, but access to certain private variables such as the
+ * supervisor were needed, thus finally CygnusApplication class had to be created from the scratch, highly inspired by
+ * the original Application class.
+ * 
  * @author frb
  */
 public class CygnusApplication extends Application {
     
-    private static Logger logger;
+    private static Logger logger = Logger.getLogger(CygnusApplication.class);
     private static JettyServer server;
     private static ImmutableMap<String, SourceRunner> sourcesRef;
     private static ImmutableMap<String, Channel> channelsRef;
     private static ImmutableMap<String, SinkRunner> sinksRef;
+    private static LifecycleSupervisor supervisorRef;
     
     /**
      * Constructor.
@@ -75,17 +82,47 @@ public class CygnusApplication extends Application {
      */
     public CygnusApplication(List<LifecycleAware> components) {
         super(components);
+        
+        try {
+            // get a reference to the supervisor, if not possible then Cygnus application cannot start
+            getSupervisorRef();
+        } catch (NoSuchFieldException e) {
+            logger.debug(e);
+            supervisorRef = null;
+        } catch (IllegalAccessException e) {
+            logger.debug(e);
+            supervisorRef = null;
+        } // try catch
     } // CygnusApplication
     
+    /**
+     * Gets a reference to the private variable "supervisor" within the super class "Application". This is achieved by
+     * using Java Reflection.
+     */
+    private void getSupervisorRef() throws NoSuchFieldException, IllegalAccessException {
+        // get a reference to the supervisor object, this will be needed when shutting down Cygnus in a certain order
+        Field privateField = Application.class.getDeclaredField("supervisor");
+        privateField.setAccessible(true);
+        supervisorRef = (LifecycleSupervisor) privateField.get(this);
+        privateField.setAccessible(false);
+    } // getSupervisorRef
+    
+    /**
+     * Stops and starts all the components when a configuration change event is generated.
+     * @param conf
+     */
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        super.handleConfigurationEvent(conf);
+        
+        // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
+        // certain order
         sourcesRef = conf.getSourceRunners();
         channelsRef = conf.getChannels();
         sinksRef = conf.getSinkRunners();
-        super.handleConfigurationEvent(conf);
     } // handleConfigurationEvent
-   
+
     /**
      * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
      * are the CygnusApplication is used instead of the Application one, and the Management Interface port option in
@@ -94,8 +131,6 @@ public class CygnusApplication extends Application {
      */
     public static void main(String[] args) {
         try {
-            logger = Logger.getLogger(CygnusApplication.class);
-            
             Options options = new Options();
 
             Option option = new Option("n", "name", true, "the name of this agent");
@@ -178,13 +213,12 @@ public class CygnusApplication extends Application {
             application.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
-            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook"));
+            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
         } catch (IllegalArgumentException e) {
             logger.error("A fatal error occurred while running. Exception follows.", e);
         } catch (ParseException e) {
             logger.error("A fatal error occurred while running. Exception follows.", e);
         } // try catch
-         // try catch
     } // main
     
     /**
@@ -192,16 +226,25 @@ public class CygnusApplication extends Application {
      */
     private static class AgentShutdownHook extends Thread {
         
+        private final LifecycleSupervisor supervisorRef;
+
         /**
          * Constructor.
          * @param name
          */
-        public AgentShutdownHook(String name) {
+        public AgentShutdownHook(String name, LifecycleSupervisor supervisorRef) {
             super(name);
+            this.supervisorRef = supervisorRef;
         } // AgentShutdownHook
         
         @Override
         public void run() {
+            if (supervisorRef == null) {
+                System.err.println("Cygnus cannot be shutdown in an ordered way since the supervisor variable at "
+                        + "super class org.apache.flume.node.Application could not be accessed");
+                return;
+            } // if
+            
             try {
                 System.out.println("Starting an ordered shutdown of Cygnus");
                 
@@ -266,8 +309,10 @@ public class CygnusApplication extends Application {
                 SourceRunner source = sourcesRef.get(sourceName);
                 LifecycleState state = source.getLifecycleState();
                 System.out.println("Stopping " + sourceName + " (lyfecycle state=" + state.toString() + ")");
-                source.stop();
+                supervisorRef.unsupervise(source);
+                //source.stop();
             } // for
+            
         } // stopSources
         
         /**
@@ -278,7 +323,7 @@ public class CygnusApplication extends Application {
                 Channel channel = channelsRef.get(channelName);
                 LifecycleState state = channel.getLifecycleState();
                 System.out.println("Stopping " + channelName + " (lyfecycle state=" + state.toString() + ")");
-                channel.stop();
+                supervisorRef.unsupervise(channel);
             } // for
         } // stopChannels
         
@@ -290,7 +335,7 @@ public class CygnusApplication extends Application {
                 SinkRunner sink = sinksRef.get(sinkName);
                 LifecycleState state = sink.getLifecycleState();
                 System.out.println("Stopping " + sinkName + " (lyfecycle state=" + state.toString() + ")");
-                sink.stop();
+                supervisorRef.unsupervise(sink);
             } // for
         } // stopSinks
                 
