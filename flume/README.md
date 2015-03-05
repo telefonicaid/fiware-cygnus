@@ -536,6 +536,8 @@ managed by service script a new parameter after de the action should be specifie
 
     $ sudo service cygnus stop <instance_name>
 
+Where `<instance_name>` is the suffix at the end of the `cygnus_instace_<instance_name>.conf` file
+
 ## Orion subscription
 
 Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
