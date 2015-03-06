@@ -173,6 +173,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Mar 06 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.1
+- Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
+- Added a Quick Start Guide (#319)
+- Added an explanation on the different configuration files in the README (#342)
+
 * Fri Feb 20 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.0
 - Added Kerberos authentication in OrionHDFSSink (#290)
 - Added posibility to start multiple instances of Cygnus (#299)
