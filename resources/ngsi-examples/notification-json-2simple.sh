@@ -22,14 +22,23 @@
 # This script is aimed to Cygnus debugging. It uses one argument: the URL to which
 # the notification will be sent
 
+URL=$1
+
 if [ "$2" != "" ]
 then
-   ORG=$2
+   SERVICE=$2
 else
-   ORG=default_org
+   SERVICE=def_serv
 fi
 
-curl $1 -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $ORG" -d @- <<EOF
+if [ "$3" != "" ]
+then
+   SERVICE_PATH=$3
+else
+   SERVICE_PATH=def_serv_path
+fi
+
+curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
   "originator" : "localhost",

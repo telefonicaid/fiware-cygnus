@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.utils;
@@ -88,7 +87,8 @@ public final class TestUtils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_");
+        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_").toLowerCase();
+        return (res.startsWith("_") ? res.substring(1, res.length()) : res);
     } // encode
     
 } // TestUtils

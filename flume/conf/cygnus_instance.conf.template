@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 # Who to run cygnus as. Note that you may need to use root if you want
 # to run cygnus in a privileged port (<1024)
@@ -28,7 +27,14 @@ CYGNUS_USER=cygnus
 CONFIG_FOLDER=/usr/cygnus/conf
 
 # Which is the config file
-CONFIG_FILE=/usr/cygnus/conf/cygnus.conf
+CONFIG_FILE=/usr/cygnus/conf/agent.conf
 
-# Name of the agent
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters 
+# naming conventions, e.g. it appears in .sources.http-source.channels=...
 AGENT_NAME=cygnusagent
+
+# Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081

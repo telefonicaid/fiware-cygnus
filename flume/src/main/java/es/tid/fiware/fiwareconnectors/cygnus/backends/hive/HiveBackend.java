@@ -13,11 +13,10 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package es.tid.fiware.fiwareconnectors.cygnus.hive;
+package es.tid.fiware.fiwareconnectors.cygnus.backends.hive;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -30,29 +29,30 @@ import org.apache.log4j.Logger;
  *
  * @author frb
  */
-public class HiveClient {
+public class HiveBackend {
     
     // JDBC driver required for Hive connections
-    private Logger logger;
-    private static String driverName = "org.apache.hadoop.hive.jdbc.HiveDriver";
-    private String hiveServer;
-    private String hivePort;
-    private String hadoopUser;
-    private String hadoopPassword;
+    private final Logger logger;
+    private static final String DRIVERNAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
+    private final String hiveServer;
+    private final String hivePort;
+    private final String hadoopUser;
+    private final String hadoopPassword;
     
     /**
      * Constructor.
      * @param hiveServer
      * @param hivePort
      * @param hadoopUser
+     * @param hadoopPassword
      */
-    public HiveClient(String hiveServer, String hivePort, String hadoopUser, String hadoopPassword) {
-        logger = Logger.getLogger(HiveClient.class);
+    public HiveBackend(String hiveServer, String hivePort, String hadoopUser, String hadoopPassword) {
+        logger = Logger.getLogger(HiveBackend.class);
         this.hiveServer = hiveServer;
         this.hivePort = hivePort;
         this.hadoopUser = hadoopUser;
         this.hadoopPassword = hadoopPassword;
-    } // HiveClient
+    } // HiveBackend
     
     /**
      * Creates a HiveQL external table.
@@ -74,7 +74,7 @@ public class HiveClient {
             
             // execute the query
             rs = stmt.executeQuery(query);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("Runtime error (The Hive table cannot be created. Hive query='" + query + "'. Details="
                     + e.getMessage() + ")");
             res = false;
@@ -114,7 +114,7 @@ public class HiveClient {
               
                 s += rs.getString(rs.getMetaData().getColumnCount());
             } // while
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("Runtime error (The Hive query cannot be executed. Hive query='" + query + "'. Details="
                     + e.getMessage() + ")");
             res = false;
@@ -170,7 +170,7 @@ public class HiveClient {
      */
     private Connection getConnection() throws Exception {
         // dynamically load the Hive JDBC driver
-        Class.forName(driverName);
+        Class.forName(DRIVERNAME);
 
         // return a connection based on the Hive JDBC driver
         logger.debug("Connecting to jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
@@ -179,4 +179,4 @@ public class HiveClient {
                 + "&password=" + hadoopPassword);
     } // getConnection
     
-} // HiveClient
+} // HiveBackend

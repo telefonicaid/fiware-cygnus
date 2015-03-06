@@ -13,14 +13,15 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
-import es.tid.fiware.fiwareconnectors.cygnus.hive.HiveClient;
+import es.tid.fiware.fiwareconnectors.cygnus.backends.hive.HiveBackend;
+import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.apache.http.client.HttpClient;
@@ -39,43 +40,71 @@ public abstract class HDFSBackend {
     protected String cosmosDefaultPassword;
     protected String hiveHost;
     protected String hivePort;
-    private Logger logger;
+    protected HttpClientFactory httpClientFactory;
+    protected HttpClient httpClient;
+    protected boolean krb5;
+    protected String krb5User;
+    protected String krb5Password;
+    private final Logger logger;
     
     /**
      * 
      * @param cosmosHost
      * @param cosmosPort
-     * @param cosmosUsername
      * @param cosmosDefaultUsername
      * @param cosmosDefaultPassword
+     * @param hiveHost
      * @param hivePort
+     * @param krb5
+     * @param krb5User
+     * @param krb5Password
+     * @param krb5LoginConfFile
+     * @param krb5ConfFile
      */
     public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword, String hiveHost, String hivePort) {
+            String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+        // this class attributes
         this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
         this.cosmosDefaultPassword = cosmosDefaultPassword;
         this.cosmosDefaultUsername = cosmosDefaultUsername;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
+        this.krb5 = krb5;
+        this.krb5User = krb5User;
+        this.krb5Password = krb5Password;
+
+        // create a Http clients factory (no SSL) and an initial connection (no SSL)
+        httpClientFactory = new HttpClientFactory(false, krb5LoginConfFile, krb5ConfFile);
+        httpClient = httpClientFactory.getHttpClient(false, krb5);
+
+        // logger
         logger = Logger.getLogger(HDFSBackend.class);
     } // HDFSBackend
+    
+    /**
+     * Sets the http client. This is protected since it is only used by the tests.
+     * @param httpClient
+     */
+    protected void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    } // setHttpClient
 
     /**
      * Provisions a Hive external table (row mode).
-     * @param organization
-     * @param entityDescriptor
+     * @param username
+     * @param dirPath
      * @throws Exception
      */
-    public void provisionHiveTable(String organization, String entityDescriptor) throws Exception {
+    public void provisionHiveTable(String username, String dirPath) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
-                + "_row";
+        String tableName = Utils.encodeHive(username + "_" + dirPath) + "_row";
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
 
         // create the standard 8-fields
         String fields = "("
@@ -92,8 +121,7 @@ public abstract class HDFSBackend {
         // create the query
         
         String query = "create external table " + tableName + " " + fields + " row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
-                + organization + "/" + entityDescriptor + "'";
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + username + "/" + dirPath + "'";
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -104,25 +132,23 @@ public abstract class HDFSBackend {
     
     /**
      * Provisions a Hive external table (column mode).
-     * @param organization
-     * @param entitydescriptor
+     * @param username
+     * @param dirPath
      * @param fields
      * @throws Exception
      */
-    public void provisionHiveTable(String organization, String entityDescriptor, String fields) throws Exception {
+    public void provisionHiveTable(String username, String dirPath, String fields) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = cosmosDefaultUsername + "_" + organization + "_" + entityDescriptor.replaceAll("-", "_")
-                + "_column";
+        String tableName = Utils.encodeHive(username + "_" + dirPath) + "_column";
         logger.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveClient hiveClient = new HiveClient(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + cosmosDefaultUsername + "/"
-                + organization + "/" + entityDescriptor + "'";
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + username + "/" + dirPath + "'";
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -135,40 +161,41 @@ public abstract class HDFSBackend {
      * Creates a directory in HDFS such as hdfs:///user/<username>/<organization>/<dirPath>/. If username is null, the
      * default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param dirPath Directory to be created
+     * @throws Exception
      */
-    public abstract void createDir(HttpClient httpClient, String username, String dirPath) throws Exception;
+    public abstract void createDir(String username, String dirPath) throws Exception;
     
     /**
      * Creates a file in HDFS with initial content such as hdfs:///user/<username>/<organization>/<filePath>. If
      * username is null, the default one is used. If organization is null, the default one is used.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be written in the created file
+     * @throws Exception
      */
-    public abstract void createFile(HttpClient httpClient, String username, String filePath, String data)
+    public abstract void createFile(String username, String filePath, String data)
         throws Exception;
     /**
      * Appends data to an existent file in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File to be created
      * @param data Data to be appended in the file
+     * @throws Exception
      */
-    public abstract void append(HttpClient httpClient, String username, String filePath, String data)
+    public abstract void append(String username, String filePath, String data)
         throws Exception;
     /**
      * Checks if the file exists in HDFS.
      * 
-     * @param httpClient HTTP client for accessing the backend server
      * @param username Cosmos username
      * @param filePath File that must be checked
+     * @return
+     * @throws Exception
      */
-    public abstract boolean exists(HttpClient httpClient, String username, String filePath) throws Exception;
+    public abstract boolean exists(String username, String filePath) throws Exception;
     
 } // HDFSBackend

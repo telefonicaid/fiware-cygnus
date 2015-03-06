@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #################################################
 ###       Main script for Cygnus RPM Stage    ###
@@ -25,14 +24,18 @@ function download_flume(){
 	# download form artifactory and unzip it into ${RPM_BASE_DIR}
 	_logStage "######## Preparing the apache-flume component... ########"
 
-	TMP_DIR="tmp_deleteme"
+	local ARTIFACT_FLUME_URL=${1}
+	local FLUME_TAR=${2}
+
+	local TMP_DIR="tmp_deleteme"
 	mkdir -p ${TMP_DIR}
 	pushd ${TMP_DIR} &> /dev/null
-	FLUME_TAR="apache-flume-1.4.0-bin.tar.gz"
-	FLUME_WO_TAR="apache-flume-1.4.0-bin"
+	#remove .tar.gz so twice is executed
+	local FLUME_WO_TAR=${FLUME_TAR%.*}
+	FLUME_WO_TAR=${FLUME_WO_TAR%.*}
+
 
 	_log "#### The version of the component is (${FLUME_TAR}) ####"
-	ARTIFACT_FLUME_URL="http://archive.apache.org/dist/flume/1.4.0/"
 	_log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
 	curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
 	if [[ $? -ne 0 ]]; then
@@ -77,6 +80,12 @@ function download_flume(){
 	_logStage "######## The apache-flume is ready for use! ... ########"
 }
 
+function copy_cygnus_startup_script(){
+        _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
+        rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
+        cp $BASE_DIR/target/classes/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
+}
+
 function copy_cygnus_to_flume(){
 	_logStage "######## Copying the cygnus jar into the apache-flume... ########"
 	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
@@ -91,10 +100,20 @@ function copy_cygnus_conf() {
 	mkdir -p ${RPM_SOURCE_DIR}/config
 	for file in $(ls ${BASE_DIR}/conf)
 	do
-		file=$(basename ${file})
-		renamed_file=${file%.template}
-		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
+		# file=$(basename ${file})
+		# renamed_file=${file%.template}
+		# cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
+
+		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/
 	done
+}
+
+function clean_up_previous_builds() {
+	_logStage "######## Cleaning up previous builds of rpm... ########"
+
+	rm -rf ${RPM_BASE_DIR}/{RPMS,BUILDROOT,BUILD,SRPMS}
+	rm -rf ${RPM_SOURCE_DIR}/{config,usr}
+	return 0
 }
 
 function usage() {
@@ -108,11 +127,13 @@ function usage() {
     printf "    -h                    show usage\n" >&2
     printf "    -v VERSION            Mandatory parameter. Version for rpm product preferably in format x.y.z \n" >&2
     printf "    -r RELEASE            Optional parameter. Release for product. I.E. 0.ge58dffa \n" >&2
+    printf "    -u ARTIFACT_URL       Optional parameter. Url to server that contains flume package. Default value is http://archive.apache.org/dist/flume/1.4.0/ \n" >&2
+    printf "    -a ARTIFACT_NAME      Optional parameter. Artifact name. Default value is apache-flume-1.4.0-bin.tar.gz. It is important that artifact be in .tar.gz format\n" >&2
     printf "\n" >&2
     exit 1
 }
 
-while getopts ":v:r:h" opt
+while getopts ":v:r:u:a:h" opt
 
 do
     case $opt in
@@ -121,6 +142,12 @@ do
             ;;
         r)
             RELEASE_ARG=${OPTARG}
+            ;;
+        u)
+            ARTIFACT_URL=${OPTARG}
+            ;;
+        a)
+            ARTIFACT_NAME=${OPTARG}
             ;;
         h)
             usage
@@ -176,6 +203,13 @@ else
 	PRODUCT_RELEASE=${GIT_PRODUCT_RELEASE}
 fi
 
+if [[ -z ${ARTIFACT_URL} ]]; then
+	ARTIFACT_URL="http://archive.apache.org/dist/flume/1.4.0/"
+fi
+
+if [[ -z ${ARTIFACT_NAME} ]]; then
+	ARTIFACT_NAME="apache-flume-1.4.0-bin.tar.gz"
+fi
 
 _logStage "######## Setting the environment... ########"
 
@@ -183,11 +217,16 @@ _logStage "######## Setting the environment... ########"
 _log "#### Iterate over every SPEC file ####"
 if [[ -d "${RPM_BASE_DIR}" ]]; then
 
-	download_flume
+	clean_up_previous_builds 
+
+	download_flume ${ARTIFACT_URL} ${ARTIFACT_NAME}
 	[[ $? -ne 0 ]] && exit 1
 
+    copy_cygnus_startup_script
+    [[ $? -ne 0 ]] && _logError "Cygnus startup script copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+
 	copy_cygnus_to_flume
-	[[ $? -ne 0 ]] && _logError "Cygnus copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+	[[ $? -ne 0 ]] && _logError "Cygnus jar copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
 	copy_cygnus_conf
 	[[ $? -ne 0 ]] && exit 1

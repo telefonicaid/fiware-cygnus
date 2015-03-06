@@ -3,27 +3,25 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
+import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import static org.junit.Assert.*; // this is required by "fail" like assertions
-import es.tid.fiware.fiwareconnectors.cygnus.backends.ckan.CKANBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
-import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.TestUtils;
 import java.util.HashMap;
@@ -46,8 +44,6 @@ public class OrionCKANSinkTest {
     
     // mocks
     @Mock
-    private HttpClientFactory mockHttpClientFactory;
-    @Mock
     private CKANBackend mockCKANBackend;
     
     // instance to be tested
@@ -61,15 +57,25 @@ public class OrionCKANSinkTest {
     private final String ckanHost = "localhost";
     private final String ckanPort = "3306";
     private final String apiKey = "xyzwxyzwxyzw";
-    private final String dataset = "data";
-    private final long ts = 123456789;
+    private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
-    private final String entityId = "room1";
-    private final String entityType = "room";
-    private final String attrName = "temperature";
-    private final String attrType = "degrees";
-    private final String attrValue = "26.5";
-    private final String attrMd = "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
+    private final String normalServiceName = "rooms";
+    private final String abnormalServiceName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
+    private final String normalServicePathName = "numeric-rooms";
+    private final String abnormalServicePathName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+    private final String rootServicePathName = "";
+    private final String normalDestinationName = "room1-room";
+    private final String abnormalDestinationName =
+            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
+    private static final String ATTRNAME = "temperature";
+    private static final String ATTRTYPE = "degrees";
+    private static final String ATTRVALUE = "26.5";
+    private static final String ATTRMD =
+            "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
+    private static final HashMap<String, String> ATTRLIST;
+    private static final HashMap<String, String> ATTRMDLIST;
     private final String notifyXMLSimple = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -95,6 +101,13 @@ public class OrionCKANSinkTest {
             +     "</contextElementResponse>"
             +   "</contextResponseList>"
             + "</notifyContextRequest>";
+    
+    static {
+        ATTRLIST = new HashMap<String, String>();
+        ATTRLIST.put(ATTRNAME, ATTRVALUE);
+        ATTRMDLIST = new HashMap<String, String>();
+        ATTRMDLIST.put(ATTRNAME + "_md", ATTRMD);
+    } // static
 
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -106,7 +119,6 @@ public class OrionCKANSinkTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         sink = new OrionCKANSink();
-        sink.setHttpClientFactory(mockHttpClientFactory);
         sink.setPersistenceBackend(mockCKANBackend);
         
         // set up other instances
@@ -114,15 +126,14 @@ public class OrionCKANSinkTest {
         context.put("ckan_host", ckanHost);
         context.put("ckan_port", ckanPort);
         context.put("api_key", apiKey);
-        context.put("default_dataset", dataset);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
         // set up the behaviour of the mocked classes
-        when(mockHttpClientFactory.getHttpClient(true)).thenReturn(null);
-        when(mockHttpClientFactory.getHttpClient(false)).thenReturn(null);
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).initOrg(null, "");
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                null, 0, null, null, entityId, attrName, attrType, attrValue, attrMd);
+                recvTimeTs, recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRNAME,
+                ATTRTYPE, ATTRVALUE, ATTRMD);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
+                recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRLIST, ATTRMDLIST);
     } // setUp
 
     /**
@@ -135,7 +146,6 @@ public class OrionCKANSinkTest {
         assertEquals(ckanHost, sink.getCKANHost());
         assertEquals(ckanPort, sink.getCKANPort());
         assertEquals(apiKey, sink.getAPIKey());
-        assertEquals(dataset, sink.getDefaultDataset());
     } // testConfigure
 
     /**
@@ -143,11 +153,10 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("start");
+        System.out.println("Testing OrionCKANSinkTest.start");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
-        assertTrue(sink.getHttpClientFactory() != null);
         assertTrue(sink.getPersistenceBackend() != null);
         assertEquals(LifecycleState.START, sink.getLifecycleState());
     } // testStart
@@ -157,13 +166,79 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testProcessContextResponses() throws Exception {
-        System.out.println("processContextResponses");
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", "123456789");
-        headers.put(Constants.ORG_HEADER, "any_org");
-        headers.put(Constants.DESTINATION, "any_dest");
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long destination name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.DESTINATION, abnormalDestinationName);
+        
+        try {
+            sink.persist(headers, notifyContextRequest);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (\"root\" servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
+        headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
