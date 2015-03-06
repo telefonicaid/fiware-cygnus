@@ -36,12 +36,6 @@ EOL
 $ sudo yum install cygnus
 ```
 
-When installing through the RPM, Cygnus is started as a service. Stop it since this Quick Start Guide will run Cygnus from the command line.
-
-```
-$ service cygnus stop
-```
-
 **IMPORTANT NOTE:**
 
 Cygnus, as it is based on Apache Flume, needs Java SDK is installed. If not yet installed, do it right now:
