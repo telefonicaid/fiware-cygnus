@@ -251,14 +251,40 @@ Simply configure the FIWARE repository if not yet configured and use your applic
 Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
 
 ## Cygnus configuration
+Cygnus is configured through two different files:
 
-The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`).
+* A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
+* An `agent_<id>.conf` file addressing all those Flume parameters, i.e. how to configure the different sources, channels, sinks, etc. that compose the Flume agent behind the Cygnus instance. always mandatory.
 
-More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
+Please observe there may exist several instances identified by `<id>`, which must be the same for both configuration files regarding the same instance.
 
-Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md). If your HDFS is not using such an authentication method, just set `cygnusagent.sinks.hdfs-sink.krb5_auth` to `false` and forget the rest of the Kerberos part. 
+###`cygnus_instance_<id>.conf`
 
-```Python
+The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
+
+```
+# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus in a privileged port (<1024)
+CYGNUS_USER=cygnus
+# Which is the config folder
+CONFIG_FOLDER=/usr/cygnus/conf
+# Which is the config file
+CONFIG_FILE=/usr/cygnus/conf/agent_<id>.conf
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters naming conventions, e.g. it appears in <AGENT_NAME>.sources.http-source.channels=...
+AGENT_NAME=cygnusagent
+# Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081
+```
+
+###`agent_<id>.conf`
+A typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and any of the available sinks is shown below. More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
+
+Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md). If your HDFS is not using such an authentication method, just set `cygnusagent.sinks.hdfs-sink.krb5_auth` to `false` and forget the rest of the Kerberos part.
+
+The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent.conf.template`.
+
+```Java
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
@@ -404,7 +430,7 @@ cygnusagent.channels.mysql-channel.transactionCapacity = 100
 ## Running as a service (recommended)
 <i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
 
-Just use the `service` command to start, stop or get the status (as a sudoer):
+Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly configured, just use the `service` command to start, restart, stop or get the status (as a sudoer):
 
     $ sudo service cygnus status
 
@@ -414,18 +440,17 @@ Just use the `service` command to start, stop or get the status (as a sudoer):
 
     $ sudo service cygnus stop
 
-Previous commands afefcts to **all** of Cygnus instances configured. If only one instance is wanted to be
-managed by service script a new parameter after de the action should be specified:
+Previous commands afefcts to **all** of Cygnus instances configured. If only one instance is wanted to be managed by the service script then the instance identifier after de the action must be specified:
 
-    $ sudo service cygnus status <instance_name>
+    $ sudo service cygnus status <id>
 
-    $ sudo service cygnus start <instance_name>
+    $ sudo service cygnus start <id>
 
-    $ sudo service cygnus restart <instance_name>
+    $ sudo service cygnus restart <id>
 
-    $ sudo service cygnus stop <instance_name>
+    $ sudo service cygnus stop <id>
 
-Where `<instance_name>` is the suffix at the end of the `cygnus_instace_<instance_name>.conf` file you used to configure the instance.
+Where `<id>` is the suffix at the end of the `cygnus_instace_<id>.conf` or `agent_<id>.conf` files you used to configure the instance.
 
 ## Running as standalone application (advanced)
 
@@ -445,7 +470,7 @@ The parameters used in these commands are:
 
 * `agent`. This is the type of application to be run by the `cygnus-flume-ng` script.
 * `--conf`. Points to the Apache Flume configuration folder.
-* `-f` (or `--conf-file`). This is the Cygnus configuration file within the above configuration folder.
+* `-f` (or `--conf-file`). This is the agent configuration (`agent_<id>.conf`) file. Please observe when running in this mode no `cygnus_instance_<id>.conf` file is required.
 * `-n` (or `--name`). The name of the Flume agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
