@@ -263,7 +263,7 @@ Please observe there may exist several Cygnus instances identified by `<id>`, wh
 The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
 
 ```
-# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus sources in a privileged port (<1024)
+# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus in a privileged port (<1024), either the admin port or the port in which Cygnus receives Orion notifications
 CYGNUS_USER=cygnus
 # Which is the config folder
 CONFIG_FOLDER=/usr/cygnus/conf
