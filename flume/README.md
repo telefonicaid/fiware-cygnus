@@ -256,14 +256,14 @@ Cygnus is configured through two different files:
 * A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
 * An `agent_<id>.conf` file addressing all those Flume parameters, i.e. how to configure the different sources, channels, sinks, etc. that compose the Flume agent behind the Cygnus instance. always mandatory.
 
-Please observe there may exist several instances identified by `<id>`, which must be the same for both configuration files regarding the same instance.
+Please observe there may exist several Cygnus instances identified by `<id>`, which must be the same for both configuration files regarding the same Cygnus instance.
 
 ###`cygnus_instance_<id>.conf`
 
 The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
 
 ```
-# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus in a privileged port (<1024)
+# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus sources in a privileged port (<1024)
 CYGNUS_USER=cygnus
 # Which is the config folder
 CONFIG_FOLDER=/usr/cygnus/conf
