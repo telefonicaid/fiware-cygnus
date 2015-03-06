@@ -95,7 +95,7 @@ cygnusagent.sinks.test-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.O
 $ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/conf/agent_test.conf -n cygnusagent -Dflume.root.logger=INFO,console
 ```
 
-(3) Open a new terminal (since Cygnus should be printing logs on the standard output of the first one) and create and edit somewhere a `notification-json-simple.sh` file:
+(3) Open a new terminal (since Cygnus should be printing logs on the standard output of the first one) and create and edit somewhere a `notification.sh` file:
 
 ```
 URL=$1
@@ -130,11 +130,11 @@ EOF
 
 This script will emulate the sending of an Orion notification to the URL endpoint passed as argument.
 
-(4) Give execution permissions to `notification-json-simple.sh` and run it, pasing as argument the URL of the listening `HTTPSource`:
+(4) Give execution permissions to `notification.sh` and run it, pasing as argument the URL of the listening `HTTPSource`:
 
 ```
-$ chmod a+x notification-json-simple.sh
-$ ./notification-json-simple.sh http://localhost:5050/notify
+$ chmod a+x notification.sh
+$ ./notification.sh http://localhost:5050/notify
 ```
 
 (5) Look at the logs printed by Cygnus. You should find something like this, which means the notification was successfully received, processed as a Flume event, put into the channel and taken by the test sink in order to print it!
