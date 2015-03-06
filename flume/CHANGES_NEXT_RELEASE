@@ -1,3 +1,0 @@
-* Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
-* Added a Quick Start Guide (#319)
-* Added an explanation on the different configuration files in the README (#342)
