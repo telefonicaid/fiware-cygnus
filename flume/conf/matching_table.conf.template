@@ -12,8 +12,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero Bueno
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 # This file defines a matching table for context data grouping. The table is composed of several mathcing rules. It
 # works by defining a set of fields within the Orion notification and a regular expression to be applied over the
@@ -22,11 +21,13 @@
 # 
 # Append as many matching rules as you need, following this format:
 #
-# integer id|comma-separated fields|regex to be applied to the fields concatenation|destination
+# integer id|comma-separated fields|regex to be applied to the fields concatenation|destination|dataset
 #
 # The available "dictionary" of fields is:
 #  - entitydId
 #  - entityType
+#  - servicePath
 
-1|entityId,entityType|Room\.(\d*)Room|rooms
-2|entityId|Car|cars
+1|entityId,entityType|Room\.(\d*)Room|numeric_rooms|rooms
+2|entityId|Car|cars|vehicles
+3|servicePath|GARDENS|gardens|city_indicators

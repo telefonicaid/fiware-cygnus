@@ -1,0 +1,14 @@
+# test
+#------
+*.out
+*.pyc
+properties.json
+.idea/
+logs/
+testreport/
+settings/
+old/
+conf/
+script/
+scripts/
+

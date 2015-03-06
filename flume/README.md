@@ -2,7 +2,7 @@
 
 This connector is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS, CKAN or MySQL.
 
-## Development
+## Design
 
 All the details about Flume can be found at [flume.apache.org](http://flume.apache.org/), but, as a reminder, some concepts will be explained here:
 
@@ -34,7 +34,8 @@ Let's consider the following notification in Json format coming from an Orion Co
     Host: localhost:1028
     Accept: application/xml, application/json
     Content-Type: application/json
-    Fiware-Service: Org42
+    Fiware-Service: my-company-name
+    Fiware-ServicePath: /workingrooms/floor4 
     
     {
       "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
@@ -74,7 +75,8 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 		body=json_data,
 		headers={
 			content-type=application/json,
-			fiware-service=Org42,
+			fiware-service=my_company_name,
+			fiware-servicepath=workingrooms_floor4,
 			timestamp=1402409899391,
 			transactionId=asdfasdfsdfa,
 			ttl=10,
@@ -87,10 +89,11 @@ Such a notification is sent by Orion to the default Flume HTTP source, which rel
 Let's have a look on the Flume event headers:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
-* Note that Orion can include a Fiware-Service HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well. Since version 0.3, Cygnus is able to support this header (<b>fiware-service</b>), although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include the Fiware-Service header, then Cygnus will use the default organization specified in the default_organization configuration property.
-* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the <i>doc/design/interceptors</i> document for more details.
+* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well (as `fiware-service`). Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property. Please observe that the notified `fiware-service` is transformed following the rules described at [`doc/design/naming_conventions.md`](doc/design/naming_conventions.md).
+* Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization, which is added to the event headers as well (as `fiware-servicepath`). Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property. Please observe that the notified `fiware-servicePath` is transformed following the rules described at [`doc/design/naming_conventions.md`](doc/design/naming_conventions.md).
+* The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor. See the [doc/design/interceptors.md](doc/design/interceptors.md) document for more details.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
-* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume.
+* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. -1 means inifinite retries.
 * The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
 
 Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
@@ -99,15 +102,15 @@ Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and fro
 
 This sink persists the data in files, one per each entity, following this entity descriptor format:
 
-    <entityDescriptor>=<naming_prefix><entity_id>-<entity_type>.txt
-
-Observe `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    <entityDescriptor>=<entity_id>-<entity_type>.txt
 
 These files are stored under this HDFS path:
 
-    hdfs:///user/<username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
+    hdfs:///user/<username>/<service>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
 
-Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. The `organization` directory is given by Orion as a header in the notification (`Fiware-Service`) and sent to the sinks through the Flume event headers (`fiware-service`).
+Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. Both the `service` and `servicePath` directories are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively).
+
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
     
 Within files, Json documents are written following one of these two schemas:
 
@@ -116,25 +119,25 @@ Within files, Json documents are written following one of these two schemas:
 
 In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, being the persistence mode `row`, an empty `prefix_naming` and `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+Thus, by receiving a notification like the one above, being the persistence mode `row` and a `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
-On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/Org42/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
+On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
     {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
 A special particularity regarding HDFS persisted data is the posssibility to exploit such data through Hive, a SQL-like querying system. OrionHDFSSink automatically creates a Hive table (similar to a SQL table) for each persisted entity in the default database, being the name for such tables:
 
-    <username>_<organization>_<entity_descriptor>_[row|column]
+    <username>_<service>_<servicePath>_<entity_descriptor>_[row|column]
 
-Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_Org42_room1_Room_row` will contain a new row such as:
+Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_row` will contain a new row such as:
 
     | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
-On the contrary, being the persistence mode `column`, the table named `default_user_Org42_room1_Room_column` will contain a new row such as:
+On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_column` will contain a new row such as:
 
     | recvTime            | temperature | temperature_md                                     | 
     |---------------------|-------------|----------------------------------------------------|
@@ -142,7 +145,9 @@ On the contrary, being the persistence mode `column`, the table named `default_u
 
 ### OrionCKANSink persistence
 
-This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), which name is specified with the `default_dataset` property (prefixed by organization name) in the CKAN sink configuration.
+This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), whose name is specified by the notified `Fiware-ServicePath` header (or by the `default_service_path` property -prefixed by organization name- in the CKAN sink configuration, if such a header is not notified). Datasets belong to single organization, whose name is specified by the notified `Fiware-Service` header (or by the `default_service` property if it is not notified). 
+
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
 
 Each datastore, we can find two options:
 
@@ -151,7 +156,7 @@ Each datastore, we can find two options:
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing) will containt the following row in its datastore:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing), will containt the following row in its datastore:
 
     | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
@@ -167,6 +172,8 @@ On the contrary, being the persistence mode `column`, the resource `Room1-Room` 
 
 where `i` depends on the number of rows previously inserted.
 
+In both cases, `row` or `column`, the CKAN organization will be `mycompanyname` and the dataset containing the resource will be `workingrooms_floor4`.
+
 The information stored in the datastore can be accesses as any other CKAN information, e.g. through the web frontend or using the query API, e.g;
 
     curl -s -S "http://${CKAN_HOST}/api/3/action/datastore_search?resource_id=${RESOURCE_ID}
@@ -177,15 +184,15 @@ Each organization/tenant is associated to a CKAN organization.
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
-    <entity_descriptor>=<naming_prefix><entity_id>_<entity_type>
-
-Observe as well `naming_prefix` is a configuration parameter of the sink, which may be empty if no prefix is desired.
+    <entity_descriptor>=<servicePath>_<entity_id>_<entity_type>
 
 These tables are stored in databases, one per service, enabling a private data space such as:
 
-    jdbc:mysql:///<naming_prefix><organization>
+    jdbc:mysql:///<service>
 
-Observe, contrary to OrionHDFSSink, that any client/tenant identifier is used at all and thus privacy aspects are given at the level of the organization. This organization, the same than OrionHDFSSink, is given by the (`Fiware-Service`) header sent by Orion (which is sent to the sinks through the Flume event header `fiware-service`). 
+Both the `service` and `servicePath` names are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively). 
+
+More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
 
 Within tables, we can find two options:
 
@@ -194,13 +201,13 @@ Within tables, we can find two options:
 
 The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
 
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `room1-Room` (it is created if not existing) will contain a new row such as:
+Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `workingrooms_floor4_room1_Room` (it is created if not existing) will contain a new row such as:
 
     | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
     | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
-On the contrary, being the persistence mode `column`, the table named `room1-Room` (it must be created in advance) will contain a new row such as:
+On the contrary, being the persistence mode `column`, the table named `workingrooms_floor4_room1_Room` (it must be created in advance) will contain a new row such as:
 
     | recvTime            | temperature | temperature_md                                     | 
     |---------------------|-------------|----------------------------------------------------|
@@ -208,109 +215,76 @@ On the contrary, being the persistence mode `column`, the table named `room1-Roo
 
 Each organization/tenant is associated to a different database.
 
-## XML notification example
+## Functionality explained (XML notification example)
 
 Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
-    event={body={the_xml_part...},headers={{"content-type","application/xml"}, {"fiware-service","Org42"}, {"recvTimeTs","1402409899391"}}
+    event={
+		body=json_data,
+		headers={
+			content-type=application/xml,
+			fiware-service=my_company_name,
+			fiware-servicepath=workingrooms_floor4,
+			timestamp=1402409899391,
+			transactionId=asdfasdfsdfa,
+			ttl=10,
+			destination=Room1-Room
+		}
+	}
 
 The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
-## Prerequisites
+## Installing Cygnus
+###RPM install (recommended)
+Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
 
-Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install and run Cygnus.
+    $ cat > /etc/yum.repos.d/fiware.repo <<EOL
+    [Fiware]
+    name=FIWARE repository
+    baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
+    gpgcheck=0
+    enabled=1
+    EOL
+    $ yum install cygnus
 
-In order to install Java SDK (not JRE), just type (CentOS machines):
-
-    $ yum install java-1.6.0-openjdk-devel
-
-Remember to export the JAVA_HOME environment variable. In the case of using `yum install` as shown above, it would be:
-
-    $ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
-
-In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc/profile` (other users).
-
-Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
-
-    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
-    $ tar xzvf apache-maven-3.2.1-bin.tar.gz
-    $ mv apache-maven-3.2.1 APACHE_MAVEN_HOME
-
-## Installing Cygnus and its dependencies
-
-Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
-
-    $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
-    $ tar xvzf apache-flume-1.4.0-bin.tar.gz
-    $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
-    $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
-    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
-    $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
-
-The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
-
-Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package (**recommended**):
-
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout <branch>
-    $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
-    $ cp target/cygnus-0.2.1-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
-
-or not:
-
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
-    $ git checkout <branch>
-    $ cd fiware-connectors/flume
-    $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
-    $ cp target/cygnus-0.2.1.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
-
-where `<branch>` is `develop` if you are trying to install the latest features or `release/x.y` if you are trying to install a stable release.
-
-If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/`. Typically, you can get the .jar file from your Maven repository (under .m2 in your user home directory) and use the `cp` command.
-
-In addition:
-* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1.jar must overwrite APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar (it can be got from the following URL: http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar)
-
-### OrionCKANSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* json-simple-1.1.jar
-
-### OrionHDFSSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* hadoop-core-0.20.0.jar (or higher)
-* hive-exec-0.12.0.jar
-* hive-jdbc-0.12.0.jar
-* hive-metastore-0.12.0.jar
-* hive-service-0.12.0.jar
-* hive-common-0.12.0.jar
-* hive-shims-0.12.0.jar
-
-These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
-
-* httpclient-4.2.1.jar
-* httpcore-4.2.2.jar
-
-In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
-
-* libthrift-0.9.1.jar
-
-### OrionMysQLSink dependencies
-
-These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
-
-* mysql-connector-java-5.1.31-bin.jar
+###Installing from sources (advanced)
+Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
 
 ## Cygnus configuration
+Cygnus is configured through two different files:
 
-The typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and the sinks is shown below (the file `cygnus.conf` can be instantiated from a template given in the clone Cygnus repository, `conf/cygnus.conf.template`):
+* A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
+* An `agent_<id>.conf` file addressing all those Flume parameters, i.e. how to configure the different sources, channels, sinks, etc. that compose the Flume agent behind the Cygnus instance. always mandatory.
 
-```Python
+Please observe there may exist several Cygnus instances identified by `<id>`, which must be the same for both configuration files regarding the same Cygnus instance.
+
+###`cygnus_instance_<id>.conf`
+
+The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
+
+```
+# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus in a privileged port (<1024), either the admin port or the port in which Cygnus receives Orion notifications
+CYGNUS_USER=cygnus
+# Which is the config folder
+CONFIG_FOLDER=/usr/cygnus/conf
+# Which is the config file
+CONFIG_FILE=/usr/cygnus/conf/agent_<id>.conf
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters naming conventions, e.g. it appears in <AGENT_NAME>.sources.http-source.channels=...
+AGENT_NAME=cygnusagent
+# Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081
+```
+
+###`agent_<id>.conf`
+A typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and any of the available sinks is shown below. More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
+
+Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md). If your HDFS is not using such an authentication method, just set `cygnusagent.sinks.hdfs-sink.krb5_auth` to `false` and forget the rest of the Kerberos part.
+
+The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent.conf.template`.
+
+```Java
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
@@ -339,12 +313,12 @@ cygnusagent.sources.http-source.port = 5050
 cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
-# Default organization (organization semantic depend on the persistence sink)
-cygnusagent.sources.http-source.handler.default_organization = org42
-# Number of channel re-injection retries before a Flume event is definitely discarded 
+# Default service (service semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service = def_serv
+# Default service path (service path semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service_path = def_servpath
+# Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
-# Management interface port (temporal location for this parameter)
-cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
@@ -362,23 +336,32 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+# If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = cosmos_username
 # default password for the default username
 cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink.naming_prefix =
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# Kerberos-based authentication enabling
+cygnusagent.sinks.hdfs-sink.krb5_auth = false
+# Kerberos username
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+# Kerberos password
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+# Kerberos login file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+# Kerberos configuration file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # OrionCKANSink configuration
@@ -392,14 +375,12 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
-# characters plus "-" and "_" acording to CKAN limitations. The default_dataset is prefixed by organization name
-# to ensure uniqueness (see http://stackoverflow.com/questions/24203808/is-it-possible-to-create-packages-with-the-same-name-in-different-organizations)
-cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
 cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.ckan-sink.attr_persistence = row
+# enable SSL for secure Http transportation; 'true' or 'false'
+cygnusagent.sinks.ckan-sink.ssl = false
 
 # ============================================
 # OrionMySQLSink configuration
@@ -417,8 +398,6 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration
@@ -446,20 +425,55 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
-
 ```
 
-## Running
+## Running as a service (recommended)
+<i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
+
+Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly configured, just use the `service` command to start, restart, stop or get the status (as a sudoer):
+
+    $ sudo service cygnus status
+
+    $ sudo service cygnus start
+
+    $ sudo service cygnus restart
+
+    $ sudo service cygnus stop
+
+Previous commands afefcts to **all** of Cygnus instances configured. If only one instance is wanted to be managed by the service script then the instance identifier after de the action must be specified:
+
+    $ sudo service cygnus status <id>
+
+    $ sudo service cygnus start <id>
+
+    $ sudo service cygnus restart <id>
+
+    $ sudo service cygnus stop <id>
+
+Where `<id>` is the suffix at the end of the `cygnus_instace_<id>.conf` or `agent_<id>.conf` files you used to configure the instance.
+
+## Running as standalone application (advanced)
+
+<i>NOTE: If you installed Cygnus through the RPM, APACHE\_FLUME\_HOME is `/usr/cygnus/`. If not, it is a directory of your choice.</i>
+
+Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `es.tid.fiware.fiwareconnectors.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
 
 In foreground (with logging):
 
-    $ APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console
+    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>]
 
 In background:
 
-    $ nohup APACHE_FLUME_HOME/bin/flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE &
+    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] &
 
-Remember you can change the logging level and the logging appender by changing the `-Dflume.root.logger` parameter.
+The parameters used in these commands are:
+
+* `agent`. This is the type of application to be run by the `cygnus-flume-ng` script.
+* `--conf`. Points to the Apache Flume configuration folder.
+* `-f` (or `--conf-file`). This is the agent configuration (`agent_<id>.conf`) file. Please observe when running in this mode no `cygnus_instance_<id>.conf` file is required.
+* `-n` (or `--name`). The name of the Flume agent to be run.
+* `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
+* `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
 
 ## Orion subscription
 
@@ -506,12 +520,12 @@ Cygnus uses the log4j facilities added by Flume for logging purposes. You can ma
     log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
     log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
     
-    log4j.appender.cygnus1028=org.apache.log4j.RollingFileAppender
-    log4j.appender.cygnus1028.MaxFileSize=100MB
-    log4j.appender.cygnus1028.MaxBackupIndex=10
-    log4j.appender.cygnus1028.File=${flume.log.dir}/cygnus.1029.log
-    log4j.appender.cygnus1028.layout=org.apache.log4j.PatternLayout
-    log4j.appender.cygnus1028.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+    log4j.appender.cygnus1029=org.apache.log4j.RollingFileAppender
+    log4j.appender.cygnus1029.MaxFileSize=100MB
+    log4j.appender.cygnus1029.MaxBackupIndex=10
+    log4j.appender.cygnus1029.File=${flume.log.dir}/cygnus.1029.log
+    log4j.appender.cygnus1029.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cygnus1029.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 Regarding the log4j Conversion Pattern:
 
@@ -544,5 +558,5 @@ From Cygnus 0.5 there is a REST-based management interface for administration pu
 
 ## Contact
 
-* Fermín Galán Márquez (fermin at tid dot es).
-* Francisco Romero Bueno (frb at tid dot es).
+* Fermín Galán Márquez (fermin.galanmarquez@telefonica.com).
+* Francisco Romero Bueno (francisco.romerobueno@telefonica.com).

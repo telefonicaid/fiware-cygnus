@@ -3,18 +3,17 @@
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- * details.
+ * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * frb@tid.es
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
-
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Before;
@@ -59,14 +57,19 @@ public class OrionRestHandlerTest {
     private HttpServletRequest mockRequest;
     
     // constants
-    private final String orionVersion = "orion/0.9.0";
-    private final String orionVersionRegexPattern = ".*";
-    private final String notificationsTarget = "/notify";
-    private final String[] headerNamesStr = {"user-agent", "content-type", "fiware-service"};
-    private final String contentType = "application/json";
-    private final String defaultOrg = "default_org";
-    private final String requestMethod = "POST";
-    private final String notifiedService = "a.service-with-rare characters%@";
+    private final String configuredNotificationTarget = "/notify";
+    private final String configuredEventsTTL = "10";
+    private final String configuredDefaultService = "a.SERV_with-rare chars%@";
+    private final String configuredDefaultServicePath = "a.SERVPATH_with-rare chars%@";
+    private final String rootServicePath = "/";
+    private final String[] notificationHeaderNamesStr = {"user-agent", "content-type", "fiware-service",
+        "fiware-servicepath"};
+    private final String notificationNotificationTarget = "/notify";
+    private final String notificationContentType = "application/json";
+    private final String notificationRequestMethod = "POST";
+    private final String notificationUserAgent = "orion/0.9.0";
+    private final String notificationService = "a.SERV_with-rare chars%@";
+    private final String notificationServicePath = "a.SERVPATH_with-rare chars%@";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -81,20 +84,26 @@ public class OrionRestHandlerTest {
         
         // set up other instances
         context = new Context();
-        context.put("orion_version", orionVersionRegexPattern);
-        context.put("notification_target", notificationsTarget);
-        context.put("default_organization", defaultOrg);
+        context.put(TestConstants.PARAM_DEFAULT_SERVICE, configuredDefaultService);
+        context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, configuredDefaultServicePath);
+        context.put(TestConstants.PARAM_EVENTS_TTL, configuredEventsTTL);
+        context.put(TestConstants.PARAM_NOTIFICATION_TARGET, configuredNotificationTarget);
         
         // set up the behaviour of the mocked classes
-        when(mockRequest.getMethod()).thenReturn(requestMethod);
-        when(mockRequest.getRequestURI()).thenReturn(notificationsTarget);
+        when(mockRequest.getMethod()).thenReturn(notificationRequestMethod);
+        when(mockRequest.getRequestURI()).thenReturn(notificationNotificationTarget);
         when(mockRequest.getHeaderNames()).thenReturn(
-                Collections.enumeration(new ArrayList(Arrays.asList(headerNamesStr))));
-        when(mockRequest.getHeader("user-agent")).thenReturn(orionVersion);
-        when(mockRequest.getHeader("content-type")).thenReturn(contentType);
-        when(mockRequest.getHeader("fiware-service")).thenReturn(notifiedService);
-        when(mockRequest.getReader()).thenReturn(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
+                Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))),
+                Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))));
+        when(mockRequest.getHeader("user-agent")).thenReturn(notificationUserAgent);
+        when(mockRequest.getHeader("content-type")).thenReturn(notificationContentType);
+        when(mockRequest.getHeader("fiware-service")).thenReturn(notificationService);
+        when(mockRequest.getHeader("fiware-servicepath")).thenReturn(notificationServicePath, rootServicePath);
+        when(mockRequest.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))),
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
     } // setUp
     
     /**
@@ -102,10 +111,12 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testConfigure() {
-        System.out.println("configure");
+        System.out.println("Testing 'configure' method from class 'OrionRestHandler'");
         handler.configure(context);
-        assertEquals(notificationsTarget, handler.getNotificationTarget());
-        assertEquals(defaultOrg, handler.getDefaultOrganization());
+        assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
+        assertEquals(configuredEventsTTL, handler.getEventsTTL());
+        assertEquals(TestUtils.encode(configuredDefaultService), handler.getDefaultService());
+        assertEquals(TestUtils.encode(configuredDefaultServicePath), handler.getDefaultServicePath());
     } // testConfigure
 
     /**
@@ -113,19 +124,39 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEvents() throws Exception {
-        System.out.println("getEvents");
+        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (invalid characters");
         handler.configure(context);
         List result = handler.getEvents(mockRequest);
         assertTrue(result.size() == 1);
         Event event = (Event) result.get(0);
         Map<String, String> eventHeaders = event.getHeaders();
         byte[] eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 4);
+        assertTrue(eventHeaders.size() == 5);
         assertTrue(eventHeaders.containsKey("content-type"));
         assertTrue(eventHeaders.get("content-type").equals("application/json")
                 || eventHeaders.get("content-type").equals("application/xml"));
-        assertTrue(eventHeaders.containsKey(TestConstants.ORG_HEADER));
-        assertTrue(eventHeaders.get(TestConstants.ORG_HEADER).equals(TestUtils.encode(notifiedService)));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(notificationServicePath));
+        assertTrue(eventMessage.length != 0);
+        
+        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (\"root\" servicePath name");
+        context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, rootServicePath);
+        handler.configure(context);
+        result = handler.getEvents(mockRequest);
+        assertTrue(result.size() == 1);
+        event = (Event) result.get(0);
+        eventHeaders = event.getHeaders();
+        eventMessage = event.getBody();
+        assertTrue(eventHeaders.size() == 5);
+        assertTrue(eventHeaders.containsKey("content-type"));
+        assertTrue(eventHeaders.get("content-type").equals("application/json")
+                || eventHeaders.get("content-type").equals("application/xml"));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
+        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
+        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(rootServicePath));
         assertTrue(eventMessage.length != 0);
     } // testGetEvents
     

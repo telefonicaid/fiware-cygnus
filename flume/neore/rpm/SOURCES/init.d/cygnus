@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 # cygnus         Start/Stop cygnus
 #
@@ -26,81 +25,146 @@
 
 PARAM=$1
 
+CYGNUS_INSTANCE=${2}
+
 COMPONENT_NAME=cygnus
 PREFIX=/usr
 CYGNUS_DIR=${PREFIX}/cygnus
-FLUME_EXECUTABLE=${CYGNUS_DIR}/bin/flume-ng
-CYGNUS_PID_FILE=/var/run/cygnus/cygnus.pid
+FLUME_EXECUTABLE=${CYGNUS_DIR}/bin/cygnus-flume-ng
 CYGNUS_USER=cygnus
-CYGNUS_PROCESS=java
-
-# Load the environment
- if [[ -f ${CYGNUS_DIR}/conf/flume.conf ]]; then
-    . ${CYGNUS_DIR}/conf/flume.conf
-else
-   echo "Configuration file ${CYGNUS_DIR}/conf/flume.conf not found"
-   exit 1
-fi
 
 cygnus_start()
 {
-    printf "%-50s" "Starting ${NAME}..."
-    if [[ -x ${FLUME_EXECUTABLE} ]]; then
-        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME} &> /dev/null &"
-        su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
-        sleep 2 # wait some time to know if flume is still alive
-        FLUME_PID=$(ps -f -u ${CYGNUS_USER} | grep ${CYGNUS_USER} | grep ${CYGNUS_PROCESS} | awk '{ print $2 }')
-        if [[ -z ${FLUME_PID} ]]; then
-            printf "%s\n" "$(failure)"
-            exit 1
-        else
-            echo ${FLUME_PID} > ${CYGNUS_PID_FILE}
-            chown ${CYGNUS_USER}:${CYGNUS_USER} ${CYGNUS_PID_FILE}
-            printf "%s\n" "$(success)"
-        fi
-    else
+    local result=0
+    local cygnus_instance=${1}
+
+    if [[ ! -x ${FLUME_EXECUTABLE} ]]; then
         printf "%s\n" "Fail - ${FLUME_EXECUTABLE} not exists or is not executable."
         exit 1
     fi
+
+    if [[ $(ls -l ${CYGNUS_DIR}/conf/cygnus_instance_${cygnus_instance}*.conf 2> /dev/null | wc -l) -eq 0 ]]; then
+        if [[ ${cygnus_instance} == "" ]]; then
+            printf "%s\n" "There aren't any instance of Cygnus configured. Refer to file /usr/cygnus/conf/README.md for further information."
+        else
+            printf "%s\n" "There aren't any instance of Cygnus configured with the name ${cygnus_instance}. Refer to file /usr/cygnus/conf/README.md for further information."
+        fi
+        return 1
+    fi
+
+    for instance in $(ls ${CYGNUS_DIR}/conf/cygnus_instance_${cygnus_instance}*.conf)
+    do
+        local NAME
+        NAME=${instance%.conf}
+        NAME=${NAME#*cygnus_instance_}
+
+        . ${instance}
+        
+        CYGNUS_PID_FILE="/var/run/cygnus/cygnus_${NAME}.pid"
+        
+        printf "%s" "Starting Cygnus ${NAME}...  "
+
+        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} &> /dev/null 
+
+        if [[ ${?} -eq 0 ]]; then
+            printf "%s\n" " Already running, skipping $(success)"
+            continue
+        fi
+
+        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent -p ${ADMIN_PORT} --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME}  -Dflume.log.file=${LOGFILE_NAME} &>> /var/log/cygnus/${LOGFILE_NAME} & echo \$! > ${CYGNUS_PID_FILE}"
+        su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
+        sleep 2 # wait some time to know if flume is still alive
+        PID=$(cat ${CYGNUS_PID_FILE})        
+        FLUME_PID=$(ps -ef | grep -v "grep" | grep "${PID:-not_found}")
+        if [[ -z ${FLUME_PID} ]]; then
+            printf "%s\n" "$(failure)"
+            result=$((${result}+1))
+            rm ${CYGNUS_PID_FILE}
+        else
+            chown ${CYGNUS_USER}:${CYGNUS_USER} ${CYGNUS_PID_FILE}
+            printf "%s\n" "$(success)"
+        fi
+    done
+    return ${result}
 }
 
 cygnus_stop()
 {
-    printf "%-50s" "Stopping $NAME..."
-    if [[ -f "${CYGNUS_PID_FILE}" ]]; then
-        kill -HUP $(cat ${CYGNUS_PID_FILE})
-        rm -f ${CYGNUS_PID_FILE}
-        printf "%s\n" "$(success)"
-    else
-        printf "%s\n" "$(failure)"
+    local result=0
+    local cygnus_instance=${1}
+
+    if [[ $(ls -l /var/run/cygnus/cygnus_${cygnus_instance}*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
+        printf "%s\n" "There aren't any instance of Cygnus ${cygnus_instance} running $(success)"
+        return 0
     fi
+
+    for run_instance in $(ls /var/run/cygnus/cygnus_${cygnus_instance}*.pid)
+    do
+
+        local NAME
+        NAME=${run_instance%.pid}
+        NAME=${NAME#*cygnus_}
+
+        printf "%-50s" "Stopping Cygnus ${NAME}..."
+        PID=$(cat ${run_instance})        
+        kill -HUP ${PID} &> /dev/null
+        sleep 2
+        FLUME_PID=$(ps -ef | grep -v "grep" | grep "${PID:-not_found}")
+        if [[ -z ${FLUME_PID} ]]; then
+            rm -f ${run_instance}
+            printf "%s\n" "$(success)"
+        else
+            printf "%s\n" "$(failure)"
+            result=$((${result}+1))
+            rm -f ${run_instance}
+        fi
+    done
+    return ${result}
 }
 
 cygnus_status()
 {
-    status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE}
+    local result=0
+    local cygnus_instance=${1}
+
+    if [[ $(ls -l /var/run/cygnus/cygnus_${cygnus_instance}*.pid 2> /dev/null | wc -l) -eq 0 ]]; then
+        printf "%s\n" "There aren't any instance of Cygnus ${cygnus_instance} running"
+        exit 1
+    fi
+
+    for run_instance in $(ls /var/run/cygnus/cygnus_${cygnus_instance}*.pid)
+    do
+
+        local NAME
+        NAME=${run_instance%.pid}
+        NAME=${NAME#*cygnus_}
+
+        printf "%s\n" "Cygnus ${NAME} status..."
+        status -p ${run_instance} ${FLUME_EXECUTABLE}
+        result=$((${result}+${?}))
+
+    done
+    return ${result}
 }
 
 
 case ${PARAM} in
 
     'start')
-        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} && exit 0
-        cygnus_start
+        cygnus_start ${CYGNUS_INSTANCE}
         ;;
 
     'stop')
-        status -p ${CYGNUS_PID_FILE} ${FLUME_EXECUTABLE} || exit 0
-        cygnus_stop
+        cygnus_stop ${CYGNUS_INSTANCE}
         ;;
 
     'restart')
-        cygnus_stop
-        cygnus_start
+        cygnus_stop ${CYGNUS_INSTANCE}
+        cygnus_start ${CYGNUS_INSTANCE}
         ;;
 
     'status')
-        cygnus_status
+        cygnus_status ${CYGNUS_INSTANCE}
         ;;
 
 esac

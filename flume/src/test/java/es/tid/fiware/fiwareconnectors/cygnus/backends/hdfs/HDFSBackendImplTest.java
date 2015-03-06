@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
@@ -72,7 +71,8 @@ public class HDFSBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, hiveHost, hivePort);
+        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, hiveHost, hivePort, false, null, null, null,
+                null);
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
@@ -94,7 +94,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.createDir");
         
         try {
-            backend.createDir(mockHttpClientExistsCreateDir, user, dirPath);
+            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.createDir(user, dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -110,7 +111,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.createFile");
         
         try {
-            backend.createFile(mockHttpClientCreateFile, user, dirPath, data);
+            backend.setHttpClient(mockHttpClientCreateFile);
+            backend.createFile(user, dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -126,7 +128,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.append");
         
         try {
-            backend.append(mockHttpClientAppend, user, dirPath, data);
+            backend.setHttpClient(mockHttpClientAppend);
+            backend.append(user, dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -142,7 +145,8 @@ public class HDFSBackendImplTest {
         System.out.println("Testing HDFSBackendImpl.exists");
         
         try {
-            backend.exists(mockHttpClientExistsCreateDir, user, dirPath);
+            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.exists(user, dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

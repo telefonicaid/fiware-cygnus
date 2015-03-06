@@ -12,11 +12,10 @@
 # You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
 # http://www.gnu.org/licenses/.
 # 
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# frb@tid.es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #=============================================
-# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
+# To be put in APACHE_FLUME_HOME/conf/agent.conf
 #
 # General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
@@ -43,12 +42,12 @@ cygnusagent.sources.http-source.port = 5050
 cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
-# Default organization (organization semantic depend on the persistence sink)
-cygnusagent.sources.http-source.handler.default_organization = org42
-# Number of channel re-injection retries before a Flume event is definitely discarded
+# Default service (service semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service = def_serv
+# Default service path (service path semantic depends on the persistence sink)
+cygnusagent.sources.http-source.handler.default_service_path = def_servpath
+# Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
-# Management interface port (FIXME: temporal location for this parameter)
-cygnusagent.sources.http-source.handler.management_port = 8081
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts de
 # Timestamp interceptor, do not change
@@ -66,23 +65,32 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
 # Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+# If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
 cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
 # default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.cosmos_default_username = default
+cygnusagent.sinks.hdfs-sink.cosmos_default_username = cosmos_username
 # default password for the default username
 cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
 # HDFS backend type (webhdfs, httpfs or infinity)
 cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.hdfs-sink.naming_prefix =
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
 cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# Kerberos-based authentication enabling
+cygnusagent.sinks.hdfs-sink.krb5_auth = false
+# Kerberos username
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+# Kerberos password
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+# Kerberos login file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+# Kerberos configuration file
+cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # OrionCKANSink configuration
@@ -96,14 +104,12 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 cygnusagent.sinks.ckan-sink.ckan_port = 80
-# the dasaset (i.e. package) name to use within the organization. Must be purely lowercase alphanumeric (ascii)
-# characters plus "-" and "_" acording to CKAN limitations. The default_dataset is prefixed by organization name
-# to ensure uniqueness (see http://stackoverflow.com/questions/24203808/is-it-possible-to-create-packages-with-the-same-name-in-different-organizations)
-cygnusagent.sinks.ckan-sink.default_dataset = mydataset
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
 cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.ckan-sink.attr_persistence = row
+# enable SSL for secure Http transportation; 'true' or 'false'
+cygnusagent.sinks.ckan-sink.ssl = false
 
 # ============================================
 # OrionMySQLSink configuration
@@ -121,8 +127,6 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
-# prefix for the database and table names, empty if no prefix is desired
-cygnusagent.sinks.mysql-sink.naming_prefix =
 
 #=============================================
 # hdfs-channel configuration

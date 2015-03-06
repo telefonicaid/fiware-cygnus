@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
  * http://www.gnu.org/licenses/.
  *
- * For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
- * francisco.romerobueno@telefonica.com
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
@@ -62,18 +61,18 @@ import org.xml.sax.InputSource;
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
     private Logger logger;
-    
+
     /**
      * Constructor.
      */
     public OrionSink() {
         // invoke the super class constructor
         super();
-        
+
         // create a logger
         logger = Logger.getLogger(OrionSink.class);
     } // OrionSink
-    
+
     @Override
     public void stop() {
         super.stop();
@@ -106,7 +105,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         try {
             // get the event
             event = ch.take();
-            
+
             if (event == null) {
                 txn.commit();
                 txn.close();
@@ -116,21 +115,21 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             logger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch
-            
+
         try {
             // set the transactionId in MDC
-            MDC.put(Constants.TRANSACTION_ID, event.getHeaders().get(Constants.TRANSACTION_ID));
+            MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
         } catch (Exception e) {
             logger.error("Runtime error (" + e.getMessage() + ")");
         } // catch
 
         logger.info("Event got from the channel (id=" + event.hashCode() + ", headers=" + event.getHeaders().toString()
                 + ", bodyLength=" + event.getBody().length + ")");
-        
+
         try {
             // persist the event
             persist(event);
-            
+
             // the transaction has succeded
             txn.commit();
             status = Status.READY;
@@ -138,22 +137,35 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 logger.error(e.getMessage());
+
+                // check the event HEADER_TTL
+                int ttl;
+                String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
                 
-                // check the event TTL
-                int ttl = new Integer(event.getHeaders().get(Constants.TTL)).intValue();
+                try {
+                    ttl = Integer.parseInt(ttlStr);
+                } catch (NumberFormatException nfe) {
+                    ttl = 0;
+                    logger.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                          +  ", " + nfe.getMessage() + ")");
+                } // try catch
                 
-                if (ttl > 0) {
-                    String newTTL = new Integer(ttl - 1).toString();
-                    event.getHeaders().put(Constants.TTL, newTTL);
+                if (ttl == -1) {
                     txn.rollback();
                     status = Status.BACKOFF;
-                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + newTTL
-                            + ")");
-                } else {
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                } else if (ttl == 0) {
                     logger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
                     txn.commit();
                     status = Status.READY;
+                } else {
+                    ttl--;
+                    String newTTLStr = Integer.toString(ttl);
+                    event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
+                    txn.rollback();
+                    status = Status.BACKOFF;
+                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl + ")");
                 } // if else
             } else {
                 if (e instanceof CygnusRuntimeError) {
@@ -172,12 +184,12 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } finally {
             // close the transaction
             txn.close();
-            logger.info("Finishing transaction (" + MDC.get(Constants.TRANSACTION_ID) + ")");
+            logger.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;
     } // process
-    
+
     /**
      * Given an event, it is preprocessed before it is persisted. Depending on the content type, it is appropriately
      * parsed (Json or XML) in order to obtain a NotifyContextRequest instance.
@@ -192,7 +204,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // parse the eventData
         NotifyContextRequest notification = null;
 
-        if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/json")) {
+        if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
 
             try {
@@ -200,9 +212,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             } catch (Exception e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
-        } else if (eventHeaders.get(Constants.CONTENT_TYPE).contains("application/xml")) {
+        } else if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            
+
             try {
                 SAXParser saxParser = saxParserFactory.newSAXParser();
                 NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
@@ -219,7 +231,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         persist(eventHeaders, notification);
     } // persist
-    
+
     /**
      * This is the method the classes extending this class must implement when dealing with persistence.
      * @param eventHeaders Event headers
@@ -227,5 +239,5 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
      * @throws Exception
      */
     abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
-    
+
 } // OrionSink
