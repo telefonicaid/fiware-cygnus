@@ -70,11 +70,12 @@ import org.apache.log4j.Logger;
 public class CygnusApplication extends Application {
     
     private static Logger logger = Logger.getLogger(CygnusApplication.class);
-    private static JettyServer server;
+    private static JettyServer mgmtIfServer;
     private static ImmutableMap<String, SourceRunner> sourcesRef;
     private static ImmutableMap<String, Channel> channelsRef;
     private static ImmutableMap<String, SinkRunner> sinksRef;
     private static LifecycleSupervisor supervisorRef;
+    private static final int CHANNEL_CHECKING_INTERVAL = 5000;
     
     /**
      * Constructor.
@@ -214,8 +215,8 @@ public class CygnusApplication extends Application {
             
             // start the Cygnus application, including the management interface
             logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            server = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
-            server.start();
+            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
+            mgmtIfServer.start();
             logger.info("Starting Cygnus application");
             application.start();
 
@@ -292,7 +293,7 @@ public class CygnusApplication extends Application {
                         break;
                     } else {
                         System.out.println("Waiting 5 seconds");
-                        Thread.sleep(5000);
+                        Thread.sleep(CHANNEL_CHECKING_INTERVAL);
                     } // if else
                 } // while
 
