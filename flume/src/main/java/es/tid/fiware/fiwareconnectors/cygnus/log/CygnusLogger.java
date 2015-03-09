@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class CygnusLogger extends Logger {
     
-    private boolean shutdown;
+    private final boolean shutdown;
     
     /**
      * Constructor.
@@ -52,7 +52,8 @@ public class CygnusLogger extends Logger {
             info("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                        + " Details=" + e.getMessage());
                 System.exit(-1);
             } // if
         } // catch
@@ -68,7 +69,8 @@ public class CygnusLogger extends Logger {
             error("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                        + " Details=" + e.getMessage());
                 System.exit(-1);
             } // if
         } // catch
@@ -84,7 +86,8 @@ public class CygnusLogger extends Logger {
             fatal("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                        + " Details=" + e.getMessage());
                 System.exit(-1);
             } // if
         } // catch
@@ -100,7 +103,8 @@ public class CygnusLogger extends Logger {
             warn("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                        + " Details=" + e.getMessage());
                 System.exit(-1);
             } // if
         } // catch
@@ -116,7 +120,8 @@ public class CygnusLogger extends Logger {
             debug("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!");
+                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                        + " Details=" + e.getMessage());
                 System.exit(-1);
             } // if
         } // catch
