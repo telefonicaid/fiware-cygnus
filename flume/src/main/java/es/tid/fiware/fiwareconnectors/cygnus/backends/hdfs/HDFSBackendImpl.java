@@ -56,7 +56,7 @@ import org.apache.log4j.Logger;
  */
 public class HDFSBackendImpl extends HDFSBackend {
     
-    private Logger logger;
+    private final Logger logger;
     
     /**
      * 
@@ -64,6 +64,13 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @param cosmosPort
      * @param cosmosDefaultUsername
      * @param cosmosDefaultPassword
+     * @param hiveHost
+     * @param hivePort
+     * @param krb5
+     * @param krb5User
+     * @param krb5Password
+     * @param krb5LoginConfFile
+     * @param krb5ConfFile
      */
     public HDFSBackendImpl(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
             String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
@@ -279,11 +286,11 @@ public class HDFSBackendImpl extends HDFSBackend {
      */
     private class PrivilegedHDFSRequest implements PrivilegedAction {
         
-        private Logger logger;
-        private String method;
-        private String url;
-        private ArrayList<Header> headers;
-        private StringEntity entity;
+        private final Logger logger;
+        private final String method;
+        private final String url;
+        private final ArrayList<Header> headers;
+        private final StringEntity entity;
                
         /**
          * Constructor.
