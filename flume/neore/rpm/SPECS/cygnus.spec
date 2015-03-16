@@ -36,6 +36,9 @@ a Flume-based connector for context data coming from Orion Context Broker.
 %define _project_user cygnus
 %define _service_name cygnus
 
+# improve package speed avoiding jar repack
+%define __jar_repack %{nil}
+
 # System folders
 # _sourcedir =${topdir}/SOURCES
 %define _srcdir %{_sourcedir}/../../../
@@ -74,7 +77,6 @@ cp -R %{_sourcedir}/* %{_builddir}
 %build
 # Read from BUILD, write into BUILD
 
-echo "[INFO] Building..."
 
 # -------------------------------------------------------------------------------------------- #
 # pre-install section:
@@ -105,6 +107,12 @@ mkdir -p %{buildroot}/${_log_dir}
 mkdir -p %{buildroot}/etc/cron.d
 # Create /etc/logrotate.d directory
 mkdir -p %{buildroot}/etc/logrotate.d
+# create /etc/cygnus
+mkdir -p %{buildroot}/etc/%{_project_name}
+# create /etc/init.d
+mkdir -p %{buildroot}/etc/init.d
+# create /usr/bin
+mkdir -p %{buildroot}/usr/bin
 
 cp -R %{_builddir}/usr/cygnus/*                       %{_build_root_project}
 cp %{_builddir}/init.d/%{_service_name}               %{_build_root_project}/init.d/%{_service_name}
@@ -112,17 +120,14 @@ cp %{_builddir}/config/*                              %{_build_root_project}/con
 cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles    %{buildroot}/etc/cron.d
 cp %{_builddir}/logrotate.d/logrotate-cygnus-daily    %{buildroot}/etc/logrotate.d
 
+ln -s %{_project_install_dir}/init.d/%{_service_name}  %{buildroot}/etc/init.d/%{_service_name}
+ln -s %{_project_install_dir}/conf                     %{buildroot}/etc/%{_project_name}/conf
+ln -s %{_project_install_dir}/bin/flume-ng             %{buildroot}/usr/bin/flume-ng
+
 # -------------------------------------------------------------------------------------------- #
 # post-install section:
 # -------------------------------------------------------------------------------------------- #
 %post
-
-echo "[INFO] Configuring application"
-mkdir -p /etc/%{_project_name}
-echo "[INFO] Creating links"
-ln -s %{_project_install_dir}/init.d/%{_service_name} /etc/init.d/%{_service_name}
-ln -s %{_project_install_dir}/conf /etc/%{_project_name}
-ln -s %{_project_install_dir}/bin/flume-ng /usr/bin/flume-ng
 
 #Logs
 echo "[INFO] Creating log directory"
@@ -132,9 +137,6 @@ chmod g+s %{_log_dir}
 setfacl -d -m g::rwx %{_log_dir}
 setfacl -d -m o::rx %{_log_dir}
 
-echo "[INFO] Configuring application service"
-# FIXME! Not supported
-# chkconfig --add %{_service_name}
 echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
@@ -142,31 +144,16 @@ echo "Done"
 # -------------------------------------------------------------------------------------------- #
 %preun
 
-echo "[INFO] Uninstall the %{_project_name}"
-/etc/init.d/%{_service_name} stop
-/sbin/chkconfig --del %{_service_name}
+/sbin/service %{_service_name} stop
 
-echo "[INFO] Deleting links"
-rm /etc/init.d/%{_service_name} \
-/etc/%{_project_name}/flume.conf \
-/usr/bin/flume-ng
-
-echo "[INFO] Removing application log files"
-[ -d %{_log_dir} ] && rm -rfv %{_log_dir} &> /dev/null
-
-echo "[INFO] Deleting the %{_project_name} folder"
-[ -d %{_project_install_dir} ] && rm -rfv %{_project_install_dir} &> /dev/null
-
-echo "[INFO] Deleting the %{_project_user} user"
-sudo userdel %{_project_user}
-
-echo "Done"
 
 # -------------------------------------------------------------------------------------------- #
 # post-uninstall section:
 # clean section:
 # -------------------------------------------------------------------------------------------- #
 %postun
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -178,12 +165,30 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(755,%{_project_user},%{_project_user},755)
 %attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
 %attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
-%attr(0644, cygnus, cygnus) /usr/cygnus/conf/*
+%attr(0777, root, root) /etc/cygnus/conf
+%attr(0777, root, root) /etc/init.d/cygnus
+%attr(0777, root, root) /usr/bin/flume-ng
 
 %{_project_install_dir}
 /var/run/%{_project_name}
 
 %changelog
+* Fri Mar 06 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.1
+- Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
+- Added a Quick Start Guide (#319)
+- Added an explanation on the different configuration files in the README (#342)
+
+* Fri Feb 20 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.0
+- Added Kerberos authentication in OrionHDFSSink (#290)
+- Added posibility to start multiple instances of Cygnus (#299)
+- Bug fixing: same port in log4j example about two Cygnus instances (#305)
+- Bug fixing: error in configuration template (cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file) (#308)
+- Encourage the usage of FQDNs regarding HDFS namenodes when using Kerberos (#309)
+- Fixed the RoundRoundChannelSelector, now it works for multiple storages (#298)
+- Allow for infinite TTL (#236)
+- Added OrionTestSink (#307)
+- Fixed OrionMySQLSink logger (now it logs as OrionMySQLSink, not as OrionHDFSSink) (#321)
+
 * Wed Dec 17 2014 Daniel Moran <daniel.moranjimenez@telefonica.com> 0.6.0
 - Remove the "resource" prefixing feature from MySQL and HDFS (#224)
 - Add the "fiware-servicePath" header as a valid field of the grouping mechanism (#215)
