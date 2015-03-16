@@ -76,7 +76,7 @@ import org.apache.log4j.Logger;
  */
 public class OrionHDFSSink extends OrionSink {
 
-    private Logger logger;
+    private final Logger logger;
     private String[] cosmosHost;
     private String cosmosPort;
     private String cosmosDefaultUsername;
@@ -97,7 +97,7 @@ public class OrionHDFSSink extends OrionSink {
      */
     public OrionHDFSSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionHDFSSink.class);
+        logger = new CygnusLogger("global", true);
     } // OrionHDFSSink
     
     /**
@@ -239,7 +239,7 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");

@@ -53,7 +53,7 @@ import org.apache.log4j.Logger;
  */
 public class OrionMySQLSink extends OrionSink {
     
-    private Logger logger;
+    private final Logger logger;
     private String mysqlHost;
     private String mysqlPort;
     private String mysqlUsername;
@@ -66,7 +66,7 @@ public class OrionMySQLSink extends OrionSink {
      */
     public OrionMySQLSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionMySQLSink.class);
+        logger = new CygnusLogger("global", true);
     } // OrionMySQLSink
     
     /**
@@ -154,7 +154,7 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");

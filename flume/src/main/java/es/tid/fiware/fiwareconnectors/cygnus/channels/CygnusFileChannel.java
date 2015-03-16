@@ -17,6 +17,7 @@
  */
 package es.tid.fiware.fiwareconnectors.cygnus.channels;
 
+import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.file.FileChannel;
 
@@ -29,6 +30,13 @@ import org.apache.flume.channel.file.FileChannel;
 public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
     private int numEvents;
+    private int capacity;
+    
+    @Override
+    public void configure(Context context) {
+        super.configure(context);
+        capacity = context.getInteger("capacity");
+    } // configure
     
     @Override
     protected void initialize() {
@@ -38,14 +46,24 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
     @Override
     public void put(Event event) {
+        if (numEvents != capacity) {
+            numEvents++;
+        } // if
+        
+        // independently of the remaining capacity, call the super version of the method in order to behave as a
+        // FileChannel (exceptions, errors, etc)
         super.put(event);
-        numEvents++;
     } // put
     
     @Override
     public Event take() {
-        numEvents--;
-        return super.take();
+        Event event = super.take();
+        
+        if (event != null) {
+            numEvents--;
+        } // if
+        
+        return event;
     } // take
     
     @Override

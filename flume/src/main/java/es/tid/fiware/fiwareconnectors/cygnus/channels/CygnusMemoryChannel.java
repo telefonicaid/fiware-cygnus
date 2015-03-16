@@ -17,6 +17,7 @@
  */
 package es.tid.fiware.fiwareconnectors.cygnus.channels;
 
+import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.MemoryChannel;
 
@@ -29,6 +30,13 @@ import org.apache.flume.channel.MemoryChannel;
 public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel {
     
     private int numEvents;
+    private int capacity;
+    
+    @Override
+    public void configure(Context context) {
+        super.configure(context);
+        capacity = context.getInteger("capacity");
+    } // configure
     
     @Override
     protected void initialize() {
@@ -38,8 +46,13 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
     
     @Override
     public void put(Event event) {
+        if (numEvents != capacity) {
+            numEvents++;
+        } // if
+        
+        // independently of the remaining capacity, call the super version of the method in order to behave as a
+        // MemoryChannel (exceptions, errors, etc)
         super.put(event);
-        numEvents++;
     } // put
     
     @Override
