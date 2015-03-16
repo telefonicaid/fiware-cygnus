@@ -43,7 +43,7 @@ import org.apache.flume.Context;
  */
 public class OrionCKANSink extends OrionSink {
 
-    private Logger logger;
+    private final Logger logger;
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
@@ -57,7 +57,7 @@ public class OrionCKANSink extends OrionSink {
      */
     public OrionCKANSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionCKANSink.class);
+        logger = new CygnusLogger("global", true);
     } // OrionCKANSink
 
     /**
@@ -121,7 +121,7 @@ public class OrionCKANSink extends OrionSink {
         logger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
-        ssl = context.getString("ssl", "false").equals("true") ? true : false;
+        ssl = context.getString("ssl", "false").equals("true");
         logger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
     } // configure
 
@@ -141,7 +141,7 @@ public class OrionCKANSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");

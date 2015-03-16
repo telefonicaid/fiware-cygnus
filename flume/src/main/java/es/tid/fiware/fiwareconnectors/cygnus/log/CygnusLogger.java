@@ -34,8 +34,9 @@ public class CygnusLogger extends Logger {
     
     /**
      * Constructor.
-     * @param name
-     * @param shutdown
+     * @param name A name for the logger.
+     * @param shutdown True if the whole application must exit when an error with the logging system appears. Otherwise
+     * false.
      */
     public CygnusLogger(String name, boolean shutdown) {
         super(name);
@@ -44,87 +45,83 @@ public class CygnusLogger extends Logger {
     
     /**
      * Traces a message with INFO level, belonging a component.
-     * @param componentName
-     * @param message
+     * @param componentName Component commanding the log
+     * @param message Message to be logged
      */
     public void info(String componentName, String message) {
         try {
             info("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
-                        + " Details=" + e.getMessage());
-                System.exit(-1);
+                traceAndExit(e);
             } // if
         } // catch
     } // info
     
     /**
      * Traces a message with ERROR level, belonging a component.
-     * @param componentName
-     * @param message
+     * @param componentName Component commanding the log
+     * @param message Message to be logged
      */
     public void error(String componentName, String message) {
         try {
             error("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
-                        + " Details=" + e.getMessage());
-                System.exit(-1);
+                traceAndExit(e);
             } // if
         } // catch
     } // error
     
     /**
      * Traces a message with FATAL level, belonging a component.
-     * @param componentName
-     * @param message
+     * @param componentName Component commanding the log
+     * @param message Message to be logged
      */
     public void fatal(String componentName, String message) {
         try {
             fatal("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
-                        + " Details=" + e.getMessage());
-                System.exit(-1);
+                traceAndExit(e);
             } // if
         } // catch
     } // fatal
     
     /**
      * Traces a message with WARN level, belonging a component.
-     * @param componentName
-     * @param message
+     * @param componentName Component commanding the log
+     * @param message Message to be logged
      */
     public void warn(String componentName, String message) {
         try {
             warn("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
-                        + " Details=" + e.getMessage());
-                System.exit(-1);
+                traceAndExit(e);
             } // if
         } // catch
     } // warn
     
     /**
      * Traces a message with DEBUG level, belonging a component.
-     * @param componentName
-     * @param message
+     * @param componentName Component commanding the log
+     * @param message Message to be logged
      */
     public void debug(String componentName, String message) {
         try {
             debug("[" + componentName + "] " + message);
         } catch (Exception e) {
             if (shutdown) {
-                System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
-                        + " Details=" + e.getMessage());
-                System.exit(-1);
+                traceAndExit(e);
             } // if
         } // catch
     } // debug
+    
+    private void traceAndExit(Exception e) {
+        System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                + " Details=" + e.getMessage());
+        System.exit(-1);
+    } // traceAndExit
     
 } // CygnusLogger
