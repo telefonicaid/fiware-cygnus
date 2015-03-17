@@ -486,7 +486,7 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
         <entityId type="Room" isPattern="false">
           <id>Room1</id>
         </entityId>
-      <entityIdList>
+      </entityIdList>
       <attributeList>
         <attribute>temperature</attribute>
       </attributeList>
