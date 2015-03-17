@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,9 +18,10 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.http;
 
-import org.apache.log4j.Logger;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,10 +29,10 @@ import org.mortbay.jetty.handler.AbstractHandler;
  */
 public class JettyServer extends Thread {
     
-    private Logger logger;
-    private int port;
-    private AbstractHandler handler;
-    private Server server;
+    private final CygnusLogger logger;
+    private final int port;
+    private final AbstractHandler handler;
+    private final Server server;
     
     /**
      * Constructor.
@@ -39,7 +40,7 @@ public class JettyServer extends Thread {
      * @param handler
      */
     public JettyServer(int port, AbstractHandler handler) {
-        logger = Logger.getLogger(JettyServer.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(JettyServer.class), true);
         this.port = port;
         this.handler = handler;
         server = new Server(port);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,6 +18,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.channelselectors;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -27,7 +28,7 @@ import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.AbstractChannelSelector;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,16 +36,16 @@ import org.apache.log4j.Logger;
  */
 public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
-    private Logger logger;
+    private final CygnusLogger logger;
     private int numStorages;
-    private LinkedHashMap<String, ArrayList<String>> channelsPerStorage;
-    private LinkedHashMap<String, Integer> lastUsedChannelPerStorage;
+    private final LinkedHashMap<String, ArrayList<String>> channelsPerStorage;
+    private final LinkedHashMap<String, Integer> lastUsedChannelPerStorage;
     
     /**
      * Constructor.
      */
     public RoundRobinChannelSelector() {
-        this.logger = Logger.getLogger(RoundRobinChannelSelector.class);
+        this.logger = new CygnusLogger(LoggerFactory.getLogger(RoundRobinChannelSelector.class), true);
         this.channelsPerStorage = new LinkedHashMap<String, ArrayList<String>>();
         this.lastUsedChannelPerStorage = new LinkedHashMap<String, Integer>();
     } // RoundRobinChannelSelector

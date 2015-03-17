@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -23,6 +23,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElement;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.io.BufferedReader;
@@ -36,13 +37,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Custom interceptor in charge of extracting the destination where the data must be persisted. This destination is
@@ -52,15 +55,16 @@ import org.xml.sax.InputSource;
  */
 public class DestinationExtractor implements Interceptor {
     
-    private Logger logger;
-    private String matchingTableFile;
+    private final CygnusLogger logger;
+    private final String matchingTableFile;
     private ArrayList<MatchingRule> matchingTable;
     
     /**
      * Constructor.
+     * @param matchingTableFile
      */
     public DestinationExtractor(String matchingTableFile) {
-        logger = Logger.getLogger(DestinationExtractor.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(DestinationExtractor.class), true);
         this.matchingTableFile = matchingTableFile;
     } // DestinationExtractor
     
@@ -76,7 +80,7 @@ public class DestinationExtractor implements Interceptor {
     public void initialize() {
         // load the matching table from the file where it is described
         matchingTable = new ArrayList<MatchingRule>();
-        BufferedReader reader = null;
+        BufferedReader reader;
         
         try {
             reader = new BufferedReader(new FileReader(matchingTableFile));
@@ -101,7 +105,7 @@ public class DestinationExtractor implements Interceptor {
                     continue;
                 } // if
                 
-                int id = new Integer(tokens[0]).intValue();
+                int id = new Integer(tokens[0]);
                 ArrayList<String> fields = new ArrayList<String>(Arrays.asList(tokens[1].split(",")));
                 matchingTable.add(new MatchingRule(id, fields, tokens[2], tokens[3], tokens[4]));
             } // while
@@ -120,7 +124,7 @@ public class DestinationExtractor implements Interceptor {
         String fiwareServicePath = headers.get(Constants.HEADER_SERVICE_PATH);
         
         // parse the original body
-        NotifyContextRequest notification = null;
+        NotifyContextRequest notification;
 
         if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
             Gson gson = new Gson();
@@ -139,7 +143,13 @@ public class DestinationExtractor implements Interceptor {
                 NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
                 saxParser.parse(new InputSource(new StringReader(body)), handler);
                 notification = handler.getNotifyContextRequest();
-            } catch (Exception e) {
+            } catch (ParserConfigurationException e) {
+                logger.error("Runtime error (" + e.getMessage() + ")");
+                return null;
+            } catch (SAXException e) {
+                logger.error("Runtime error (" + e.getMessage() + ")");
+                return null;
+            } catch (IOException e) {
                 logger.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } // try catch
@@ -245,7 +255,7 @@ public class DestinationExtractor implements Interceptor {
      */
     protected class MatchingRule {
         
-        private int id;
+        private final int id;
         private ArrayList<String> fields;
         private Pattern pattern;
         private String destination;
@@ -257,7 +267,7 @@ public class DestinationExtractor implements Interceptor {
          * @param fields
          * @param regex
          * @param destination
-         * @param dataset
+         * @param group
          */
         public MatchingRule(int id, ArrayList<String> fields, String regex, String destination, String group) {
             this.id = id;
@@ -269,6 +279,7 @@ public class DestinationExtractor implements Interceptor {
         
         /**
          * Gets the rule's id.
+         * @return 
          */
         public int getId() {
             return id;

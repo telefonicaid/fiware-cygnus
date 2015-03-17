@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -27,8 +27,8 @@ import org.json.simple.JSONObject;
  */
 public class CKANResponse {
 
-    private JSONObject jsonObject;
-    private int statusCode;
+    private final JSONObject jsonObject;
+    private final int statusCode;
 
     /**
      * Constructor.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -53,7 +53,7 @@ import org.apache.log4j.Logger;
  */
 public class OrionMySQLSink extends OrionSink {
     
-    private final Logger logger;
+    private final CygnusLogger cygnusLogger;
     private String mysqlHost;
     private String mysqlPort;
     private String mysqlUsername;
@@ -66,7 +66,7 @@ public class OrionMySQLSink extends OrionSink {
      */
     public OrionMySQLSink() {
         super();
-        logger = new CygnusLogger("global", true);
+        cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionMySQLSink.class), true);
     } // OrionMySQLSink
     
     /**
@@ -129,26 +129,26 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     public void configure(Context context) {
         mysqlHost = context.getString("mysql_host", "localhost");
-        logger.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", "3306");
-        logger.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         mysqlUsername = context.getString("mysql_username", "opendata");
-        logger.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
-        logger.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
     } // configure
 
     @Override
     public void start() {
         // create the persistence backend
-        logger.debug("[" + this.getName() + "] MySQL persistence backend created");
+        cygnusLogger.debug("[" + this.getName() + "] MySQL persistence backend created");
         persistenceBackend = new MySQLBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
         super.start();
-        logger.info("[" + this.getName() + "] Startup completed");
+        cygnusLogger.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
@@ -181,7 +181,7 @@ public class OrionMySQLSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+            cygnusLogger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
                     + entityType + ")");
             
             // build the table name
@@ -200,8 +200,8 @@ public class OrionMySQLSink extends OrionSink {
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
-                        + entityType + ")");
+                cygnusLogger.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 continue;
             } // if
             
@@ -220,11 +220,11 @@ public class OrionMySQLSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                logger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                cygnusLogger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
                 if (rowAttrPersistence) {
-                    logger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
+                    cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
                             + ", Table: " + tableName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
                             + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                             + attrMetadata);
@@ -239,7 +239,7 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of attrName-values.
             if (!rowAttrPersistence) {
-                logger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
+                cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
                         + ", Table: " + tableName + ", Timestamp: " + recvTime + ", Data (attrs): " + attrs.toString()
                         + ", (metadata): " + mds.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);

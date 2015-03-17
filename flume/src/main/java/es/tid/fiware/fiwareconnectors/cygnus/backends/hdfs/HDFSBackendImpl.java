@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -20,6 +20,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.Principal;
@@ -46,6 +47,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -56,7 +58,7 @@ import org.apache.log4j.Logger;
  */
 public class HDFSBackendImpl extends HDFSBackend {
     
-    private final Logger logger;
+    private final CygnusLogger logger;
     
     /**
      * 
@@ -77,7 +79,7 @@ public class HDFSBackendImpl extends HDFSBackend {
             String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
         super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
                 krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
-        logger = Logger.getLogger(HDFSBackendImpl.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(HDFSBackendImpl.class), true);
     } // HDFSBackendImpl
    
     @Override
