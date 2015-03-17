@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,12 +18,13 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.backends.hive;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
 public class HiveBackend {
     
     // JDBC driver required for Hive connections
-    private final Logger logger;
+    private final CygnusLogger logger;
     private static final String DRIVERNAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
     private final String hiveServer;
     private final String hivePort;
@@ -47,7 +48,7 @@ public class HiveBackend {
      * @param hadoopPassword
      */
     public HiveBackend(String hiveServer, String hivePort, String hadoopUser, String hadoopPassword) {
-        logger = Logger.getLogger(HiveBackend.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(HiveBackend.class), true);
         this.hiveServer = hiveServer;
         this.hivePort = hivePort;
         this.hadoopUser = hadoopUser;

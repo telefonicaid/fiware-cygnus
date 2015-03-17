@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -28,11 +28,11 @@ import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.sql.Timestamp;
-import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -43,7 +43,7 @@ import org.apache.flume.Context;
  */
 public class OrionCKANSink extends OrionSink {
 
-    private final Logger logger;
+    private final CygnusLogger cygnusLogger;
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
@@ -57,7 +57,7 @@ public class OrionCKANSink extends OrionSink {
      */
     public OrionCKANSink() {
         super();
-        logger = new CygnusLogger("global", true);
+        cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionCKANSink.class), true);
     } // OrionCKANSink
 
     /**
@@ -112,17 +112,18 @@ public class OrionCKANSink extends OrionSink {
     @Override
     public void configure(Context context) {
         apiKey = context.getString("api_key", "nokey");
-        logger.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
         ckanHost = context.getString("ckan_host", "localhost");
-        logger.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
-        logger.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
         orionUrl = context.getString("orion_url", "http://localhost:1026");
-        logger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
+                + ")");
         ssl = context.getString("ssl", "false").equals("true");
-        logger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
+        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
     } // configure
 
     @Override
@@ -131,11 +132,11 @@ public class OrionCKANSink extends OrionSink {
             // create persistenceBackend backend
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl);
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
-        } // try catch
+            cygnusLogger.error(ex.getMessage());
+        } // try catch // try catch
 
         super.start();
-        logger.info("[" + this.getName() + "] Startup completed");
+        cygnusLogger.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
@@ -161,8 +162,8 @@ public class OrionCKANSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type=" + entityType
-                    + ")");
+            cygnusLogger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
             // build the pavkage and resource name
             String pkgName = buildPkgName(fiwareService, fiwareServicePath);
@@ -172,8 +173,8 @@ public class OrionCKANSink extends OrionSink {
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
-                        + entityType + ")");
+                cygnusLogger.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 continue;
             } // if
             
@@ -192,11 +193,11 @@ public class OrionCKANSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMd = contextAttribute.getContextMetadata();
-                logger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                cygnusLogger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
 
                 if (rowAttrPersistence) {
-                    logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+                    cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                             + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ", "
                             + recvTime + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ")");
                     persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType,
@@ -210,7 +211,7 @@ public class OrionCKANSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                logger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+                cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                         + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTime + ", "
                         + attrs.toString() + ", " + mds.toString() + ")");
                 persistenceBackend.persist(recvTime, orgName, pkgName, resName, attrs, mds);

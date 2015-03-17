@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,6 +18,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.http;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +37,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -48,19 +49,21 @@ import org.apache.log4j.Logger;
  */
 public class HttpClientFactory {
     
-    private static Logger logger;
-    private String loginConfFile;
-    private String krb5ConfFile;
+    private static CygnusLogger logger;
+    private final String loginConfFile;
+    private final String krb5ConfFile;
     private static PoolingClientConnectionManager connectionsManager;
     private static PoolingClientConnectionManager sslConnectionsManager;
    
     /**
      * Constructor.
      * @param ssl True if SSL connections are desired. False otherwise.
+     * @param loginConfFile
+     * @param krb5ConfFile
      */
     public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile) {
         // create the logger
-        logger = Logger.getLogger(HttpClientFactory.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(HttpClientFactory.class), true);
         
         // set the Kerberos parameters
         this.loginConfFile = loginConfFile;
@@ -83,7 +86,8 @@ public class HttpClientFactory {
     
     /**
      * Gets a HTTP client.
-     * @param ssl True if SSL connections are desired. False otherwise.
+     * @param ssl True if SSL connections are desired. False otherwise
+     * @param krb5Auth.
      * @return A http client obtained from the (SSL) Connections Manager.
      */
     public DefaultHttpClient getHttpClient(boolean ssl, boolean krb5Auth) {
@@ -146,7 +150,7 @@ public class HttpClientFactory {
     private SchemeRegistry getSSLSchemeRegistry() {
         // http://stackoverflow.com/questions/2703161/how-to-ignore-ssl-certificate-errors-in-apache-httpclient-4-0
         
-        SSLContext sslContext = null;
+        SSLContext sslContext;
         
         try {
             sslContext = SSLContext.getInstance("SSL");

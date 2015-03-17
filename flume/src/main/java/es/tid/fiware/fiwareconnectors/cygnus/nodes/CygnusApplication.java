@@ -26,6 +26,7 @@ import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusFileChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusMemoryChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.http.JettyServer;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.management.ManagementInterface;
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,7 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
@@ -69,7 +70,7 @@ import org.apache.log4j.Logger;
  */
 public class CygnusApplication extends Application {
     
-    private static Logger logger = Logger.getLogger(CygnusApplication.class);
+    private static CygnusLogger logger = new CygnusLogger(LoggerFactory.getLogger(CygnusApplication.class), true);
     private static JettyServer mgmtIfServer;
     private static ImmutableMap<String, SourceRunner> sourcesRef;
     private static ImmutableMap<String, Channel> channelsRef;
@@ -95,10 +96,10 @@ public class CygnusApplication extends Application {
             // get a reference to the supervisor, if not possible then Cygnus application cannot start
             getSupervisorRef();
         } catch (NoSuchFieldException e) {
-            logger.debug(e);
+            logger.debug(e.getMessage());
             supervisorRef = null;
         } catch (IllegalAccessException e) {
-            logger.debug(e);
+            logger.debug(e.getMessage());
             supervisorRef = null;
         } // try catch
     } // CygnusApplication

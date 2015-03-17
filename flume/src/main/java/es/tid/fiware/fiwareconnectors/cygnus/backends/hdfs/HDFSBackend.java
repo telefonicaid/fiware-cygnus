@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -20,12 +20,13 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.hdfs;
 
 import es.tid.fiware.fiwareconnectors.cygnus.backends.hive.HiveBackend;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.apache.http.client.HttpClient;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Interface for those backends implementing the persistence in HDFS.
@@ -45,7 +46,7 @@ public abstract class HDFSBackend {
     protected boolean krb5;
     protected String krb5User;
     protected String krb5Password;
-    private final Logger logger;
+    private final CygnusLogger logger;
     
     /**
      * 
@@ -80,7 +81,7 @@ public abstract class HDFSBackend {
         httpClient = httpClientFactory.getHttpClient(false, krb5);
 
         // logger
-        logger = Logger.getLogger(HDFSBackend.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(HDFSBackend.class), true);
     } // HDFSBackend
     
     /**

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,6 +18,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.handlers;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -30,11 +31,11 @@ import org.apache.flume.Event;
 import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
-import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.Date;
 import org.apache.flume.event.EventBuilder;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
@@ -48,13 +49,13 @@ import org.slf4j.MDC;
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
-    private Logger logger;
+    private final CygnusLogger logger;
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
     private String eventsTTL;
     private long transactionCount;
-    private long bootTimeSeconds;
+    private final long bootTimeSeconds;
     private long bootTimeMilliseconds;
     
     /**
@@ -64,7 +65,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
      */
     public OrionRestHandler() {
         // init the logger
-        logger = Logger.getLogger(OrionRestHandler.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(OrionRestHandler.class), true);
         
         // init the transaction id
         transactionCount = 0;

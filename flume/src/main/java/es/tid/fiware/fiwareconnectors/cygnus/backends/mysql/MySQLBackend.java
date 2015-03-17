@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -21,15 +21,16 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.mysql;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
-import org.apache.log4j.Logger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.sql.SQLTimeoutException;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -40,12 +41,12 @@ import java.sql.SQLTimeoutException;
  */
 public class MySQLBackend {
     
-    private static String driverName = "com.mysql.jdbc.Driver";
-    private String mysqlHost;
-    private String mysqlPort;
-    private String mysqlUsername;
-    private String mysqlPassword;
-    private Logger logger;
+    private static final String driverName = "com.mysql.jdbc.Driver";
+    private final String mysqlHost;
+    private final String mysqlPort;
+    private final String mysqlUsername;
+    private final String mysqlPassword;
+    private final CygnusLogger logger;
     
     /**
      * Constructor.
@@ -59,7 +60,7 @@ public class MySQLBackend {
         this.mysqlPort = mysqlPort;
         this.mysqlUsername = mysqlUsername;
         this.mysqlPassword = mysqlPassword;
-        logger = Logger.getLogger(MySQLBackend.class);
+        logger = new CygnusLogger(LoggerFactory.getLogger(MySQLBackend.class), true);
     } // MySQLBackend
     
     /**
