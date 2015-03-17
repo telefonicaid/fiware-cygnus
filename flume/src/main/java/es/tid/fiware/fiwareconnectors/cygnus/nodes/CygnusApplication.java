@@ -76,6 +76,8 @@ public class CygnusApplication extends Application {
     private static ImmutableMap<String, SinkRunner> sinksRef;
     private static LifecycleSupervisor supervisorRef;
     private static final int CHANNEL_CHECKING_INTERVAL = 5000;
+    private static final int DEF_MGMT_IF_PORT = 8081;
+    private static final int DEF_POLLING_INTERVAL = 30;
     
     /**
      * Constructor.
@@ -149,13 +151,17 @@ public class CygnusApplication extends Application {
             option.setRequired(true);
             options.addOption(option);
 
-            option = new Option(null, "no-reload-conf", false, "do not reload " + "conf file if changed");
+            option = new Option(null, "no-reload-conf", false, "do not reload conf file if changed");
             options.addOption(option);
 
             option = new Option("h", "help", false, "display help text");
             options.addOption(option);
             
             option = new Option("p", "mgmt-if-port", true, "the management interface port");
+            option.setRequired(false);
+            options.addOption(option);
+            
+            option = new Option("t", "polling-interval", true, "polling interval");
             option.setRequired(false);
             options.addOption(option);
 
@@ -171,10 +177,16 @@ public class CygnusApplication extends Application {
                 return;
             } // if
             
-            int mgmtIfPort = 8081; // default value
+            int mgmtIfPort = DEF_MGMT_IF_PORT;
             
             if (commandLine.hasOption('p')) {
                 mgmtIfPort = new Integer(commandLine.getOptionValue('p'));
+            } // if
+            
+            int pollingInterval = DEF_POLLING_INTERVAL;
+            
+            if (commandLine.hasOption('t')) {
+                pollingInterval = new Integer(commandLine.getOptionValue('t'));
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -202,7 +214,8 @@ public class CygnusApplication extends Application {
                 LOGGER.debug("no-reload-conf was not set, thus the configuration file will be polled each 30 seconds");
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
-                        new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
+                        new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus,
+                                pollingInterval);
                 components.add(configurationProvider);
                 application = new CygnusApplication(components);
                 eventBus.register(application);
