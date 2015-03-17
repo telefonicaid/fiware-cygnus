@@ -51,7 +51,6 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
-import org.slf4j.LoggerFactory;
 
 /**
  * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
@@ -70,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CygnusApplication extends Application {
     
-    private static CygnusLogger logger = new CygnusLogger(LoggerFactory.getLogger(CygnusApplication.class), true);
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusApplication.class);
     private static JettyServer mgmtIfServer;
     private static ImmutableMap<String, SourceRunner> sourcesRef;
     private static ImmutableMap<String, Channel> channelsRef;
@@ -96,12 +95,12 @@ public class CygnusApplication extends Application {
             // get a reference to the supervisor, if not possible then Cygnus application cannot start
             getSupervisorRef();
         } catch (NoSuchFieldException e) {
-            logger.debug(e.getMessage());
+            LOGGER.debug(e.getMessage());
             supervisorRef = null;
         } catch (IllegalAccessException e) {
-            logger.debug(e.getMessage());
+            LOGGER.debug(e.getMessage());
             supervisorRef = null;
-        } // try catch
+        } // try catch // try catch
     } // CygnusApplication
     
     /**
@@ -187,9 +186,10 @@ public class CygnusApplication extends Application {
                     
                     try {
                         path = configurationFile.getCanonicalPath();
-                    } catch (IOException ex) {
-                        logger.error("Failed to read canonical path for file: " + path, ex);
-                    } // try catch
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to read canonical path for file: " + path + ". Details="
+                                + e.getMessage());
+                    } // try catch // try catch
                     
                     throw new ParseException("The specified configuration file does not exist: " + path);
                 } // if
@@ -199,7 +199,7 @@ public class CygnusApplication extends Application {
             CygnusApplication application;
 
             if (reload) {
-                logger.debug("no-reload-conf was not set, thus the configuration file will be polled each 30 seconds");
+                LOGGER.debug("no-reload-conf was not set, thus the configuration file will be polled each 30 seconds");
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
                         new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
@@ -207,7 +207,7 @@ public class CygnusApplication extends Application {
                 application = new CygnusApplication(components);
                 eventBus.register(application);
             } else {
-                logger.debug("no-reload-conf was set, thus the configuration file will only be read this time");
+                LOGGER.debug("no-reload-conf was set, thus the configuration file will only be read this time");
                 PropertiesFileConfigurationProvider configurationProvider =
                         new PropertiesFileConfigurationProvider(agentName, configurationFile);
                 application = new CygnusApplication();
@@ -215,19 +215,19 @@ public class CygnusApplication extends Application {
             } // if else
             
             // start the Cygnus application, including the management interface
-            logger.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
+            LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
             mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
             mgmtIfServer.start();
-            logger.info("Starting Cygnus application");
+            LOGGER.info("Starting Cygnus application");
             application.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
             Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
         } catch (IllegalArgumentException e) {
-            logger.error("A fatal error occurred while running. Exception follows.", e);
+            LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
         } catch (ParseException e) {
-            logger.error("A fatal error occurred while running. Exception follows.", e);
-        } // try catch
+            LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
+        } // try catch // try catch
     } // main
     
     /**

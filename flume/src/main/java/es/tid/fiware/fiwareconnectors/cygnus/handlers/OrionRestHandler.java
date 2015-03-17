@@ -35,7 +35,6 @@ import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Utils;
 import java.util.Date;
 import org.apache.flume.event.EventBuilder;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
@@ -49,7 +48,7 @@ import org.slf4j.MDC;
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionRestHandler.class);
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
@@ -64,9 +63,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
-        // init the logger
-        logger = new CygnusLogger(LoggerFactory.getLogger(OrionRestHandler.class), true);
-        
         // init the transaction id
         transactionCount = 0;
         
@@ -76,7 +72,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         bootTimeMilliseconds = bootTime % 1000;
         
         // print Cygnus version
-        logger.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
+        LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
     } // OrionRestHandler
     
     /**
@@ -114,7 +110,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     @Override
     public void configure(Context context) {
         notificationTarget = context.getString(Constants.PARAM_NOTIFICATION_TARGET, "notify");
-        logger.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "=" + notificationTarget + ")");
+        LOGGER.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "=" + notificationTarget + ")");
 
         if (notificationTarget.charAt(0) != '/') {
             notificationTarget = "/" + notificationTarget;
@@ -123,26 +119,26 @@ public class OrionRestHandler implements HTTPSourceHandler {
         defaultService = Utils.encode(context.getString(Constants.PARAM_DEFAULT_SERVICE, "def_serv"));
         
         if (defaultService.length() > Constants.SERVICE_HEADER_MAX_LEN) {
-            logger.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
                     + Constants.SERVICE_HEADER_MAX_LEN + ")");
-            logger.info("Exiting Cygnus");
+            LOGGER.info("Exiting Cygnus");
             System.exit(-1);
         } // if
         
-        logger.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
+        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
         defaultServicePath = Utils.encode(context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "def_serv_path"));
         
         if (defaultServicePath.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
-            logger.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
                     + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-            logger.info("Exiting Cygnus");
+            LOGGER.info("Exiting Cygnus");
             System.exit(-1);
         } // if
         
-        logger.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
+        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
         eventsTTL = context.getString(Constants.PARAM_EVENTS_TTL, "10");
-        logger.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
-        logger.info("Startup completed");
+        LOGGER.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
+        LOGGER.info("Startup completed");
     } // configure
             
     @Override
@@ -151,13 +147,13 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // accessible by the whole source code
         String transId = generateTransId();
         MDC.put(Constants.HEADER_TRANSACTION_ID, transId);
-        logger.info("Starting transaction (" + transId + ")");
+        LOGGER.info("Starting transaction (" + transId + ")");
         
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
         if (!method.equals("POST")) {
-            logger.warn("Bad HTTP notification (" + method + " method not supported)");
+            LOGGER.warn("Bad HTTP notification (" + method + " method not supported)");
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
 
@@ -165,7 +161,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         String target = request.getRequestURI();
         
         if (!target.equals(notificationTarget)) {
-            logger.warn("Bad HTTP notification (" + target + " target not supported)");
+            LOGGER.warn("Bad HTTP notification (" + target + " target not supported)");
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
@@ -181,19 +177,19 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
             if (headerName.equals(Constants.HEADER_USER_AGENT)) {
                 if (!headerValue.startsWith("orion")) {
-                    logger.warn("Bad HTTP notification (" + headerValue + " user agent not supported)");
+                    LOGGER.warn("Bad HTTP notification (" + headerValue + " user agent not supported)");
                     throw new HTTPBadRequestException(headerValue + " user agent not supported");
                 } // if
             } else if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
-                    logger.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
+                    LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
                 } // if else
             } else if (headerName.equals(Constants.HEADER_SERVICE)) {
                 if (headerValue.length() > Constants.SERVICE_HEADER_MAX_LEN) {
-                    logger.warn("Bad HTTP notification ('fiware-service' header length greater than "
+                    LOGGER.warn("Bad HTTP notification ('fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
@@ -202,7 +198,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } // if else
             } else if (headerName.equals(Constants.HEADER_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
-                    logger.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
+                    LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
@@ -222,7 +218,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // while
                 
         if (data.length() == 0) {
-            logger.warn("Bad HTTP notification (No content in the request)");
+            LOGGER.warn("Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
         } // if
 
@@ -237,29 +233,29 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
 
         data = data.replaceAll(">[ ]*<", "><");
-        logger.info("Received data (" + data + ")");
+        LOGGER.info("Received data (" + data + ")");
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put(Constants.HEADER_CONTENT_TYPE, contentType);
-        logger.debug("Adding flume event header (name=" + Constants.HEADER_CONTENT_TYPE + ", value=" + contentType
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_CONTENT_TYPE + ", value=" + contentType
                 + ")");
         eventHeaders.put(Constants.HEADER_SERVICE, service == null ? defaultService : service);
-        logger.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
         eventHeaders.put(Constants.HEADER_SERVICE_PATH, servicePath == null ? defaultServicePath : servicePath);
-        logger.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE_PATH
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
         eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
-        logger.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID + ", value=" + transId + ")");
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID + ", value=" + transId + ")");
         eventHeaders.put(Constants.HEADER_TTL, eventsTTL);
-        logger.debug("Adding flume event header (name=" + Constants.HEADER_TTL + ", value=" + eventsTTL + ")");
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TTL + ", value=" + eventsTTL + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        logger.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
+        LOGGER.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
         return eventList;
     } // getEvents
     

@@ -43,7 +43,6 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -55,7 +54,7 @@ import org.xml.sax.SAXException;
  */
 public class DestinationExtractor implements Interceptor {
     
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(DestinationExtractor.class);
     private final String matchingTableFile;
     private ArrayList<MatchingRule> matchingTable;
     
@@ -64,7 +63,6 @@ public class DestinationExtractor implements Interceptor {
      * @param matchingTableFile
      */
     public DestinationExtractor(String matchingTableFile) {
-        logger = new CygnusLogger(LoggerFactory.getLogger(DestinationExtractor.class), true);
         this.matchingTableFile = matchingTableFile;
     } // DestinationExtractor
     
@@ -85,9 +83,9 @@ public class DestinationExtractor implements Interceptor {
         try {
             reader = new BufferedReader(new FileReader(matchingTableFile));
         } catch (FileNotFoundException e) {
-            logger.error("Runtime error (File not found. Details=" + e.getMessage() + ")");
+            LOGGER.error("Runtime error (File not found. Details=" + e.getMessage() + ")");
             return;
-        } // try catch
+        } // try catch // try catch
         
         String line;
         
@@ -101,7 +99,7 @@ public class DestinationExtractor implements Interceptor {
                 
                 if (tokens.length < 5 || tokens[0].length() == 0 || tokens[1].length() == 0 || tokens[2].length() == 0
                         || tokens[3].length() == 0 || tokens[4].length() == 0) {
-                    logger.warn("Malformed matching rule, it will be discarded. Details=" + line);
+                    LOGGER.warn("Malformed matching rule, it will be discarded. Details=" + line);
                     continue;
                 } // if
                 
@@ -110,8 +108,8 @@ public class DestinationExtractor implements Interceptor {
                 matchingTable.add(new MatchingRule(id, fields, tokens[2], tokens[3], tokens[4]));
             } // while
         } catch (IOException e) {
-            logger.error("Runtime error (I/O exception. Details=" + e.getMessage() + ")");
-        } // try catch
+            LOGGER.error("Runtime error (I/O exception. Details=" + e.getMessage() + ")");
+        } // try catch // try catch
     } // initialize
  
     @Override
@@ -132,9 +130,9 @@ public class DestinationExtractor implements Interceptor {
             try {
                 notification = gson.fromJson(body, NotifyContextRequest.class);
             } catch (Exception e) {
-                logger.error("Runtime error (" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 return null;
-            } // try catch
+            } // try catch // try catch
         } else if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             
@@ -144,19 +142,19 @@ public class DestinationExtractor implements Interceptor {
                 saxParser.parse(new InputSource(new StringReader(body)), handler);
                 notification = handler.getNotifyContextRequest();
             } catch (ParserConfigurationException e) {
-                logger.error("Runtime error (" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } catch (SAXException e) {
-                logger.error("Runtime error (" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } catch (IOException e) {
-                logger.error("Runtime error (" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 return null;
-            } // try catch
+            } // try catch // try catch
         } else {
             // this point should never be reached since the content type has been checked when receiving the
             // notification
-            logger.error("Runtime error (Unrecognized content type (not Json nor XML)");
+            LOGGER.error("Runtime error (Unrecognized content type (not Json nor XML)");
             return null;
         } // if else if
         
@@ -279,7 +277,7 @@ public class DestinationExtractor implements Interceptor {
         
         /**
          * Gets the rule's id.
-         * @return 
+         * @return
          */
         public int getId() {
             return id;

@@ -46,7 +46,7 @@ public abstract class HDFSBackend {
     protected boolean krb5;
     protected String krb5User;
     protected String krb5Password;
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackend.class);
     
     /**
      * 
@@ -79,9 +79,6 @@ public abstract class HDFSBackend {
         // create a Http clients factory (no SSL) and an initial connection (no SSL)
         httpClientFactory = new HttpClientFactory(false, krb5LoginConfFile, krb5ConfFile);
         httpClient = httpClientFactory.getHttpClient(false, krb5);
-
-        // logger
-        logger = new CygnusLogger(LoggerFactory.getLogger(HDFSBackend.class), true);
     } // HDFSBackend
     
     /**
@@ -102,7 +99,7 @@ public abstract class HDFSBackend {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive(username + "_" + dirPath) + "_row";
-        logger.info("Creating Hive external table=" + tableName);
+        LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
         HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
@@ -126,7 +123,7 @@ public abstract class HDFSBackend {
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
-            logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
     } // provisionHiveTable
@@ -142,7 +139,7 @@ public abstract class HDFSBackend {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive(username + "_" + dirPath) + "_column";
-        logger.info("Creating Hive external table=" + tableName);
+        LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
         HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, cosmosDefaultUsername, cosmosDefaultPassword);
@@ -153,7 +150,7 @@ public abstract class HDFSBackend {
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
-            logger.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
     } // provisionHiveTable

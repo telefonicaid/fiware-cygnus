@@ -26,11 +26,9 @@ import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Map;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.sql.SQLTimeoutException;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -41,13 +39,13 @@ import org.slf4j.LoggerFactory;
  */
 public class MySQLBackend {
     
-    private static final String driverName = "com.mysql.jdbc.Driver";
+    private static final String DRIVERNAME = "com.mysql.jdbc.Driver";
     private final String mysqlHost;
     private final String mysqlPort;
     private final String mysqlUsername;
     private final String mysqlPassword;
-    private final CygnusLogger logger;
-    
+    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
+            
     /**
      * Constructor.
      * @param mysqlHost
@@ -60,7 +58,6 @@ public class MySQLBackend {
         this.mysqlPort = mysqlPort;
         this.mysqlUsername = mysqlUsername;
         this.mysqlPassword = mysqlPassword;
-        logger = new CygnusLogger(LoggerFactory.getLogger(MySQLBackend.class), true);
     } // MySQLBackend
     
     /**
@@ -82,7 +79,7 @@ public class MySQLBackend {
         
         try {
             String query = "create database if not exists `" + dbName + "`";
-            logger.debug("Executing MySQL query '" + query + "'");
+            LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
@@ -119,7 +116,7 @@ public class MySQLBackend {
                     + Constants.ATTR_TYPE + " text, "
                     + Constants.ATTR_VALUE + " text, "
                     + Constants.ATTR_MD + " text)";
-            logger.debug("Executing MySQL query '" + query + "'");
+            LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
@@ -159,7 +156,7 @@ public class MySQLBackend {
             String query = "insert into `" + tableName + "` values ('" + recvTimeTs + "', '" + recvTime + "', '"
                     + entityId + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue
                     + "', '" + attrMd + "')";
-            logger.debug("Executing MySQL query '" + query + "'");
+            LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());
@@ -196,25 +193,17 @@ public class MySQLBackend {
             columnNames = Constants.RECV_TIME;
             columnValues = "'" + recvTime + "'";
 
-            // iterate on the attrs in order to build the query
-            Iterator it = attrs.keySet().iterator();
-
-            while (it.hasNext()) {
-                String attrName = (String) it.next();
+            for (String attrName : attrs.keySet()) {
                 columnNames += "," + attrName;
                 String attrValue = attrs.get(attrName);
                 columnValues += ",'" + attrValue + "'";
-            } // while
-
-            // iterate on the mds in order to build the query
-            it = mds.keySet().iterator();
-
-            while (it.hasNext()) {
-                String attrMdName = (String) it.next();
+            } // for
+            
+            for (String attrMdName : mds.keySet()) {
                 columnNames += "," + attrMdName;
                 String md = mds.get(attrMdName);
                 columnValues += ",'" + md + "'";
-            } // while
+            } // for
         } catch (Exception e) {
             throw new CygnusRuntimeError(e.getMessage());
         } // try catch
@@ -222,7 +211,7 @@ public class MySQLBackend {
         try {
             // finish creating the query and execute it
             String query = "insert into `" + tableName + "` (" + columnNames + ") values (" + columnValues + ")";
-            logger.debug("Executing MySQL query '" + query + "'");
+            LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(e.getMessage());
@@ -241,14 +230,16 @@ public class MySQLBackend {
     private Connection getConnection(String dbName) throws Exception {
         try {
             // dynamically load the MySQL JDBC driver
-            Class.forName(driverName);
+            Class.forName(DRIVERNAME);
 
             // return a connection based on the MySQL JDBC driver
-            logger.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
+            LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
                     + mysqlUsername + "&password=XXXXXXXXXX");
             return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
                     mysqlUsername, mysqlPassword);
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } catch (SQLException e) {
             throw new CygnusPersistenceError(e.getMessage());
         } // try catch
     } // getConnection
