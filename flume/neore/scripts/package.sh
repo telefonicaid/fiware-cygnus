@@ -70,6 +70,7 @@ function download_flume(){
 	_log "#### Cleaning the temporal folders... ####"
 	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
 	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
+        rm ${FLUME_WO_TAR}/conf/flume-conf.properties.template # we will add our own templates
 	rm -rf ${RPM_PRODUCT_SOURCE_DIR}
 	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
 	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
@@ -98,14 +99,7 @@ function copy_cygnus_conf() {
 	_logStage "######## Copying cygnus template config files to destination config directory... ########"
 	rm -rf {RPM_SOURCE_DIR}/config 
 	mkdir -p ${RPM_SOURCE_DIR}/config
-	for file in $(ls ${BASE_DIR}/conf)
-	do
-		# file=$(basename ${file})
-		# renamed_file=${file%.template}
-		# cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
-
-		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/
-	done
+        cp ${BASE_DIR}/conf/* ${RPM_SOURCE_DIR}/config/
 }
 
 function clean_up_previous_builds() {
