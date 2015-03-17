@@ -15,400 +15,103 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package es.tid.fiware.fiwareconnectors.cygnus.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
-
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
- * Extending log4j Logger class is extremely not recommended.
- * 
- * Cygnus logger is a utility class related to log4j logging system. It adds certain useful features such as:
- *    - Printing the name of the component trying to log.
- *    - Checking for the logging system availability.
- *    - Ordering the shutdown (if this behaviour was configured) of Cygnus if the above check fails.
+ * Wrapper class for log4j Logger class. Reference:
+ * https://books.google.es/books?id=hZBimlxiyAcC&lpg=PA162&ots=QgJm9Y3WZ9&dq=log4j%20decorator
+ *    &hl=es&pg=PA163#v=onepage&q=log4j%20decorator&f=false
  * 
  * @author frb
  */
-public class CygnusLogger implements Logger {
+public class CygnusLogger {
     
-    private final Logger logger;
-    private final boolean traceAndExit;
+    private static String fqcn = CygnusLogger.class.getName();
+    private Logger logger;
     
     /**
      * Constructor.
-     * @param clazz FQCN owning the logging facility
-     * @param traceAndExit True if the whole application must exit when an error with the logging system appears.
-     * Otherwise false.
+     * @param name
      */
-    public CygnusLogger(Class clazz, boolean traceAndExit) {
-        this.logger = LoggerFactory.getLogger(clazz);
-        this.traceAndExit = traceAndExit;
+    public CygnusLogger(String name) {
+        this.logger = Logger.getLogger(name);
     } // CygnusLogger
     
     /**
      * Constructor.
-     * @param logger Logging facility
-     * @param traceAndExit True if the whole application must exit when an error with the logging system appears.
-     * Otherwise false.
+     * @param clazz
      */
-    public CygnusLogger(Logger logger, boolean traceAndExit) {
-        this.logger = logger;
-        this.traceAndExit = traceAndExit;
+    public CygnusLogger(Class clazz) {
+        this(clazz.getName());
     } // CygnusLogger
     
-    @Override
-    public void info(String message) {
+    /**
+     * Traces a message with FATAL level.
+     * @param msg
+     */
+    public void fatal(Object msg) {
         try {
-            logger.info(message);
+            logger.log(fqcn, Level.FATAL, msg, null);
         } catch (Exception e) {
-            if (traceAndExit) {
-                traceAndExit(e);
-            } // if
-        } // catch // catch
-    } // info
+            traceAndExit(e);
+        } // try catch
+    } // fatal
     
-    @Override
-    public void error(String message) {
+    /**
+     * Traces a message with ERROR level.
+     * @param msg
+     */
+    public void error(Object msg) {
         try {
-            logger.error(message);
+            logger.log(fqcn, Level.ERROR, msg, null);
         } catch (Exception e) {
-            if (traceAndExit) {
-                traceAndExit(e);
-            } // if
-        } // catch // catch
+            traceAndExit(e);
+        } // try catch
     } // error
     
     /**
-     * Traces a log with FATAL level.
-     * @param message
+     * Traces a message with DEBUG level.
+     * @param msg
      */
-    public void fatal(String message) {
+    public void debug(Object msg) {
         try {
-            logger.error(MarkerFactory.getMarker("FATAL"), message);
+            logger.log(fqcn, Level.DEBUG, msg, null);
         } catch (Exception e) {
-            if (traceAndExit) {
-                traceAndExit(e);
-            } // if
-        } // catch // catch
-    } // fatal
-
-    @Override
-    public void warn(String message) {
-        try {
-            logger.warn(message);
-        } catch (Exception e) {
-            if (traceAndExit) {
-                traceAndExit(e);
-            } // if
-        } // catch // catch
-    } // warn
- 
-    @Override
-    public void debug(String message) {
-        try {
-            logger.debug(message);
-        } catch (Exception e) {
-            if (traceAndExit) {
-                traceAndExit(e);
-            } // if
-        } // catch // catch
+            traceAndExit(e);
+        } // try catch
     } // debug
+    
+    /**
+     * Traces a message with INFO level.
+     * @param msg
+     */
+    public void info(Object msg) {
+        try {
+            logger.log(fqcn, Level.INFO, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // info
+    
+    /**
+     * Traces a message with WARN level.
+     * @param msg
+     */
+    public void warn(Object msg) {
+        try {
+            logger.log(fqcn, Level.WARN, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // warn
     
     private void traceAndExit(Exception e) {
         System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
                 + " Details=" + e.getMessage());
         System.exit(-1);
     } // traceAndExit
-
-    @Override
-    public String getName() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isTraceEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isTraceEnabled(Marker marker) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(Marker marker, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(Marker marker, String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(Marker marker, String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(Marker marker, String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void trace(Marker marker, String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isDebugEnabled(Marker marker) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(Marker marker, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(Marker marker, String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(Marker marker, String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(Marker marker, String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void debug(Marker marker, String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isInfoEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isInfoEnabled(Marker marker) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(Marker marker, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(Marker marker, String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(Marker marker, String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(Marker marker, String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void info(Marker marker, String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isWarnEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isWarnEnabled(Marker marker) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(Marker marker, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(Marker marker, String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(Marker marker, String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(Marker marker, String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void warn(Marker marker, String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isErrorEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean isErrorEnabled(Marker marker) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(Marker marker, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(Marker marker, String string, Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(Marker marker, String string, Object o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(Marker marker, String string, Object... os) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void error(Marker marker, String string, Throwable thrwbl) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-   
+    
 } // CygnusLogger
