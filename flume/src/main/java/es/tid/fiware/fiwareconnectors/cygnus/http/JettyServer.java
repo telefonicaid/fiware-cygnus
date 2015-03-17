@@ -21,7 +21,6 @@ package es.tid.fiware.fiwareconnectors.cygnus.http;
 import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JettyServer extends Thread {
     
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(JettyServer.class);
     private final int port;
     private final AbstractHandler handler;
     private final Server server;
@@ -40,7 +39,6 @@ public class JettyServer extends Thread {
      * @param handler
      */
     public JettyServer(int port, AbstractHandler handler) {
-        logger = new CygnusLogger(LoggerFactory.getLogger(JettyServer.class), true);
         this.port = port;
         this.handler = handler;
         server = new Server(port);
@@ -61,7 +59,7 @@ public class JettyServer extends Thread {
             server.start();
             server.join();
         } catch (Exception ex) {
-            logger.fatal("Fatal error running the Management Interface. Details=" + ex.getMessage());
+            LOGGER.fatal("Fatal error running the Management Interface. Details=" + ex.getMessage());
         }
     } // run
     

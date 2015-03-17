@@ -31,10 +31,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CKANRequester {
     
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(CKANRequester.class);
     private final HttpClient httpClient;
     private final String apiKey;
     private final String baseURL;
@@ -56,7 +54,6 @@ public class CKANRequester {
      * @param apiKey CKAN API key
      */
     public CKANRequester(HttpClient httpClient, String ckanHost, String ckanPort, boolean ssl, String apiKey) {
-        logger = new CygnusLogger(LoggerFactory.getLogger(CKANRequester.class), true);
         this.httpClient = httpClient;
         this.apiKey = apiKey;
         baseURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort;
@@ -98,7 +95,7 @@ public class CKANRequester {
 
                 // payload (optional)
                 if (!payload.equals("")) {
-                    logger.debug("request payload: " + payload);
+                    LOGGER.debug("request payload: " + payload);
                     r.setEntity(new StringEntity(payload, ContentType.create("application/json")));
                 } // if
                 
@@ -111,7 +108,7 @@ public class CKANRequester {
             request.addHeader("Authorization", apiKey);
 
             // execute the request
-            logger.debug("CKAN operation: " + request.toString());
+            LOGGER.debug("CKAN operation: " + request.toString());
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -133,10 +130,10 @@ public class CKANRequester {
             String res = reader.readLine();
             request.releaseConnection();
             long l = response.getEntity().getContentLength();
-            logger.debug("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
+            LOGGER.debug("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
 
             // get the JSON encapsulated in the response
-            logger.debug("response payload: " + res);
+            LOGGER.debug("response payload: " + res);
             JSONParser j = new JSONParser();
             JSONObject o = (JSONObject) j.parse(res);
 

@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OrionCKANSink extends OrionSink {
 
-    private final CygnusLogger cygnusLogger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionCKANSink.class);
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
@@ -57,7 +56,6 @@ public class OrionCKANSink extends OrionSink {
      */
     public OrionCKANSink() {
         super();
-        cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionCKANSink.class), true);
     } // OrionCKANSink
 
     /**
@@ -112,18 +110,18 @@ public class OrionCKANSink extends OrionSink {
     @Override
     public void configure(Context context) {
         apiKey = context.getString("api_key", "nokey");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
         ckanHost = context.getString("ckan_host", "localhost");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
         orionUrl = context.getString("orion_url", "http://localhost:1026");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
                 + ")");
         ssl = context.getString("ssl", "false").equals("true");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
     } // configure
 
     @Override
@@ -132,11 +130,11 @@ public class OrionCKANSink extends OrionSink {
             // create persistenceBackend backend
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl);
         } catch (Exception ex) {
-            cygnusLogger.error(ex.getMessage());
-        } // try catch // try catch
+            LOGGER.error(ex.getMessage());
+        } // try catch // try catch // try catch // try catch
 
         super.start();
-        cygnusLogger.info("[" + this.getName() + "] Startup completed");
+        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
@@ -162,7 +160,7 @@ public class OrionCKANSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            cygnusLogger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
             // build the pavkage and resource name
@@ -173,7 +171,7 @@ public class OrionCKANSink extends OrionSink {
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                cygnusLogger.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
                 continue;
             } // if
@@ -193,11 +191,11 @@ public class OrionCKANSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMd = contextAttribute.getContextMetadata();
-                cygnusLogger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
 
                 if (rowAttrPersistence) {
-                    cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                             + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ", "
                             + recvTime + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ")");
                     persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType,
@@ -211,7 +209,7 @@ public class OrionCKANSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of name-values.
             if (!rowAttrPersistence) {
-                cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                         + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTime + ", "
                         + attrs.toString() + ", " + mds.toString() + ")");
                 persistenceBackend.persist(recvTime, orgName, pkgName, resName, attrs, mds);

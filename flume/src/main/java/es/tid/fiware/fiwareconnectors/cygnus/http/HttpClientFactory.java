@@ -37,7 +37,6 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpClientFactory {
     
-    private static CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(HttpClientFactory.class);
     private final String loginConfFile;
     private final String krb5ConfFile;
     private static PoolingClientConnectionManager connectionsManager;
@@ -62,9 +61,6 @@ public class HttpClientFactory {
      * @param krb5ConfFile
      */
     public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile) {
-        // create the logger
-        logger = new CygnusLogger(LoggerFactory.getLogger(HttpClientFactory.class), true);
-        
         // set the Kerberos parameters
         this.loginConfFile = loginConfFile;
         this.krb5ConfFile = krb5ConfFile;
@@ -80,8 +76,8 @@ public class HttpClientFactory {
             connectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } // if else
         
-        logger.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
-        logger.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
+        LOGGER.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
+        LOGGER.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
@@ -155,9 +151,9 @@ public class HttpClientFactory {
         try {
             sslContext = SSLContext.getInstance("SSL");
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Fatal error (SSL cannot be used, no such algorithm. Details=" + e.getMessage() + ")");
+            LOGGER.fatal("Fatal error (SSL cannot be used, no such algorithm. Details=" + e.getMessage() + ")");
             return null;
-        } // try catch
+        } // try catch // try catch
         
         try {
             // set up a TrustManager that trusts everything
@@ -178,12 +174,12 @@ public class HttpClientFactory {
                 }
             }, new SecureRandom());
         } catch (KeyManagementException e) {
-            logger.fatal("Fatal error (Cannot ignore SSL certificates. Details=" + e.getMessage() + ")");
+            LOGGER.fatal("Fatal error (Cannot ignore SSL certificates. Details=" + e.getMessage() + ")");
             return null;
-        } // try catch
+        } // try catch // try catch
 
         if (sslContext == null) {
-            logger.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
+            LOGGER.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
             return null;
         } // if
 

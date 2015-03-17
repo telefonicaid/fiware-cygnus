@@ -42,7 +42,6 @@ import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.MDC;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -65,7 +64,7 @@ import org.xml.sax.SAXException;
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
-    private final CygnusLogger cygnusLogger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
     
     /**
      * Constructor.
@@ -73,9 +72,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public OrionSink() {
         // invoke the super class constructor
         super();
-
-        // create a logger
-        cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionSink.class), true);
     } // OrionSink
 
     @Override
@@ -94,7 +90,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // get the channel
             ch = getChannel();
         } catch (Exception e) {
-            cygnusLogger.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
+            LOGGER.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch // try catch
 
@@ -103,8 +99,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             txn = ch.getTransaction();
             txn.begin();
         } catch (Exception e) {
-            cygnusLogger.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage()
-                    + ")");
+            LOGGER.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch // try catch
 
@@ -118,7 +113,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 return Status.READY;
             } // if
         } catch (Exception e) {
-            cygnusLogger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
+            LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch // try catch
 
@@ -126,10 +121,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // set the transactionId in MDC
             MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
         } catch (Exception e) {
-            cygnusLogger.error("Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
         } // catch // catch
 
-        cygnusLogger.info("Event got from the channel (id=" + event.hashCode() + ", headers="
+        LOGGER.info("Event got from the channel (id=" + event.hashCode() + ", headers="
                 + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
 
         try {
@@ -142,7 +137,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } catch (Exception e) {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
-                cygnusLogger.error(e.getMessage());
+                LOGGER.error(e.getMessage());
 
                 // check the event HEADER_TTL
                 int ttl;
@@ -152,7 +147,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ttl = Integer.parseInt(ttlStr);
                 } catch (NumberFormatException nfe) {
                     ttl = 0;
-                    cygnusLogger.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                    LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
                           +  ", " + nfe.getMessage() + ")");
                 } // try catch // try catch
                 
@@ -160,9 +155,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     txn.rollback();
                     ((CygnusChannel) ch).rollback();
                     status = Status.BACKOFF;
-                    cygnusLogger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
                 } else if (ttl == 0) {
-                    cygnusLogger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
+                    LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
                     txn.commit();
                     status = Status.READY;
@@ -172,18 +167,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
                     txn.rollback();
                     status = Status.BACKOFF;
-                    cygnusLogger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
                             + ")");
                 } // if else
             } else {
                 if (e instanceof CygnusRuntimeError) {
-                    cygnusLogger.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                 } else if (e instanceof CygnusBadConfiguration) {
-                    cygnusLogger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } else if (e instanceof CygnusBadContextData) {
-                    cygnusLogger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } else {
-                    cygnusLogger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } // if else if
 
                 txn.commit();
@@ -192,7 +187,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } finally {
             // close the transaction
             txn.close();
-            cygnusLogger.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+            LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;

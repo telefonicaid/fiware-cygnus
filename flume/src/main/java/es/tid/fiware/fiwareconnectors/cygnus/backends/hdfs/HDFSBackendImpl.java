@@ -47,7 +47,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.log4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -58,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HDFSBackendImpl extends HDFSBackend {
     
-    private final CygnusLogger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
     
     /**
      * 
@@ -79,7 +78,6 @@ public class HDFSBackendImpl extends HDFSBackend {
             String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
         super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
                 krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
-        logger = new CygnusLogger(LoggerFactory.getLogger(HDFSBackendImpl.class), true);
     } // HDFSBackendImpl
    
     @Override
@@ -190,14 +188,14 @@ public class HDFSBackendImpl extends HDFSBackend {
                         response = doHDFSRequest(method, effectiveURL, headers, entity);
                     } // if else
                 } catch (Exception e) {
-                    logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
+                    LOGGER.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
-                } // try catch
+                } // try catch // try catch
                 
                 int status = response.getStatusLine().getStatusCode();
 
                 if (status != 200 && status != 307 && status != 404 && status != 201) {
-                    logger.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
+                    LOGGER.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
                     continue;
                 } // if
                 
@@ -205,7 +203,7 @@ public class HDFSBackendImpl extends HDFSBackend {
                 if (!cosmosHost.getFirst().equals(host)) {
                     cosmosHost.remove(host);
                     cosmosHost.add(0, host);
-                    logger.debug("Placing the host in the first place of the list (host=" + host + ")");
+                    LOGGER.debug("Placing the host in the first place of the list (host=" + host + ")");
                 } // if
                 
                 break;
@@ -254,7 +252,7 @@ public class HDFSBackendImpl extends HDFSBackend {
             } // for
         } // if
 
-        logger.debug("HDFS request: " + request.toString());
+        LOGGER.debug("HDFS request: " + request.toString());
 
         try {
             response = httpClient.execute(request);
@@ -263,7 +261,7 @@ public class HDFSBackendImpl extends HDFSBackend {
         } // try catch
 
         request.releaseConnection();
-        logger.debug("HDFS response: " + response.getStatusLine().toString());
+        LOGGER.debug("HDFS response: " + response.getStatusLine().toString());
         return response;
     } // doHDFSRequest
     
@@ -278,9 +276,9 @@ public class HDFSBackendImpl extends HDFSBackend {
             PrivilegedHDFSRequest req = new PrivilegedHDFSRequest(method, url, headers, entity);
             return (HttpResponse) Subject.doAs(loginContext.getSubject(), req);
         } catch (LoginException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             return null;
-        } // try catch
+        } // try catch // try catch
     } // doPrivilegedHDFSRequest
     
     /**

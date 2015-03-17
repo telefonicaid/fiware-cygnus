@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -53,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OrionMySQLSink extends OrionSink {
     
-    private final CygnusLogger cygnusLogger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionMySQLSink.class);
     private String mysqlHost;
     private String mysqlPort;
     private String mysqlUsername;
@@ -66,7 +65,6 @@ public class OrionMySQLSink extends OrionSink {
      */
     public OrionMySQLSink() {
         super();
-        cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionMySQLSink.class), true);
     } // OrionMySQLSink
     
     /**
@@ -129,26 +127,26 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     public void configure(Context context) {
         mysqlHost = context.getString("mysql_host", "localhost");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", "3306");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         mysqlUsername = context.getString("mysql_username", "opendata");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        cygnusLogger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
     } // configure
 
     @Override
     public void start() {
         // create the persistence backend
-        cygnusLogger.debug("[" + this.getName() + "] MySQL persistence backend created");
+        LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         persistenceBackend = new MySQLBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
         super.start();
-        cygnusLogger.info("[" + this.getName() + "] Startup completed");
+        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
@@ -181,7 +179,7 @@ public class OrionMySQLSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            cygnusLogger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
                     + entityType + ")");
             
             // build the table name
@@ -200,7 +198,7 @@ public class OrionMySQLSink extends OrionSink {
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                cygnusLogger.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
                 continue;
             } // if
@@ -220,11 +218,11 @@ public class OrionMySQLSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                cygnusLogger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
                 if (rowAttrPersistence) {
-                    cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
                             + ", Table: " + tableName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
                             + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                             + attrMetadata);
@@ -239,7 +237,7 @@ public class OrionMySQLSink extends OrionSink {
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list of attrName-values.
             if (!rowAttrPersistence) {
-                cygnusLogger.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
                         + ", Table: " + tableName + ", Timestamp: " + recvTime + ", Data (attrs): " + attrs.toString()
                         + ", (metadata): " + mds.toString());
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
