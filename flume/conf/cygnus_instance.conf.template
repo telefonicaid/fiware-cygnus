@@ -39,5 +39,5 @@ LOGFILE_NAME=cygnus.log
 # Administration port. Must be unique per instance
 ADMIN_PORT=8081
 
-# Polling interval for the configuration reloading
+# Polling interval (seconds) for the configuration reloading
 POLLING_INTERVAL=30
