@@ -1,1 +1,2 @@
 * Added a polling interval parameter for reloading the Flume configuration (#334)
+* Bug fix, flume-conf.properties.template file from Apache Flume is not copied anymore to Cygnus folder (#348)
