@@ -1,2 +1,3 @@
 * Ordered death of Cygnus if the logging system fails or it is stoped (#320)
 * Management interface port is not opened twice anymore (#302)
+* Added a polling interval parameter for reloading the Flume configuration (#334)
