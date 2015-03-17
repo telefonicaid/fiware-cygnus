@@ -275,7 +275,7 @@ AGENT_NAME=cygnusagent
 LOGFILE_NAME=cygnus.log
 # Administration port. Must be unique per instance
 ADMIN_PORT=8081
-# Polling interval for the configuration reloading
+# Polling interval (seconds) for the configuration reloading
 POLLING_INTERVAL=30
 ```
 
@@ -476,7 +476,7 @@ The parameters used in these commands are:
 * `-n` (or `--name`). The name of the Flume agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
-* `-t` (or `--polling-interval`). Configures the polling interval when the configuration is periodically reloaded. If not configured, the default value is used, `30`.
+* `-t` (or `--polling-interval`). Configures the polling interval (seconds) when the configuration is periodically reloaded. If not configured, the default value is used, `30`.
 
 ## Orion subscription
 

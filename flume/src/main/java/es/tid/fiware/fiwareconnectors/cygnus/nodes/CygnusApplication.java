@@ -50,6 +50,9 @@ public class CygnusApplication extends Application {
     private static Logger logger;
     private int mgmtIfPort;
     private JettyServer server;
+    private static final int DEF_MGMT_IF_PORT = 8081;
+    private static final int DEF_POLLING_INTERVAL = 30;
+    
     
     /**
      * Constructor.
@@ -132,16 +135,16 @@ public class CygnusApplication extends Application {
                 return;
             } // if
             
-            int mgmtIfPort = 8081; // default value
+            int mgmtIfPort = DEF_MGMT_IF_PORT;
             
             if (commandLine.hasOption('p')) {
                 mgmtIfPort = new Integer(commandLine.getOptionValue('p')).intValue();
             } // if
             
-            int pollingTime = 30; // default value
+            int pollingInterval = DEF_POLLING_INTERVAL;
             
             if (commandLine.hasOption('t')) {
-                pollingTime = new Integer(commandLine.getOptionValue('t'));
+                pollingInterval = new Integer(commandLine.getOptionValue('t'));
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -168,7 +171,7 @@ public class CygnusApplication extends Application {
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
                         new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus,
-                                pollingTime);
+                                pollingInterval);
                 components.add(configurationProvider);
                 application = new CygnusApplication(components, mgmtIfPort);
                 eventBus.register(application);
