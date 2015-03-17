@@ -106,13 +106,17 @@ public class CygnusApplication extends Application {
             option.setRequired(true);
             options.addOption(option);
 
-            option = new Option(null, "no-reload-conf", false, "do not reload " + "conf file if changed");
+            option = new Option(null, "no-reload-conf", false, "do not reload conf file if changed");
             options.addOption(option);
 
             option = new Option("h", "help", false, "display help text");
             options.addOption(option);
             
             option = new Option("p", "mgmt-if-port", true, "the management interface port");
+            option.setRequired(false);
+            options.addOption(option);
+            
+            option = new Option("t", "polling-interval", true, "polling interval");
             option.setRequired(false);
             options.addOption(option);
 
@@ -132,6 +136,12 @@ public class CygnusApplication extends Application {
             
             if (commandLine.hasOption('p')) {
                 mgmtIfPort = new Integer(commandLine.getOptionValue('p')).intValue();
+            } // if
+            
+            int pollingTime = 30; // default value
+            
+            if (commandLine.hasOption('t')) {
+                pollingTime = new Integer(commandLine.getOptionValue('t'));
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -157,7 +167,8 @@ public class CygnusApplication extends Application {
             if (reload) {
                 EventBus eventBus = new EventBus(agentName + "-event-bus");
                 PollingPropertiesFileConfigurationProvider configurationProvider =
-                        new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus, 30);
+                        new PollingPropertiesFileConfigurationProvider(agentName, configurationFile, eventBus,
+                                pollingTime);
                 components.add(configurationProvider);
                 application = new CygnusApplication(components, mgmtIfPort);
                 eventBus.register(application);

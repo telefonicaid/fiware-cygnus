@@ -11,6 +11,7 @@ In order to build the RPM package, follow the following steps:
   You can see full options of script package.sh typing `./package.sh -h`
 
 When a package is built it introduces three features in Cygnus SW:
+
 * Daily log rotation: use logrotate tool to perform this operation. View 
   [logrotate config file](rpm/SOURCES/logrotate.d/logrotate-cygnus-daily) for more info
 * Automatic deletion of files older than 30 days programmed in cron:

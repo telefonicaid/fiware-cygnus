@@ -275,6 +275,8 @@ AGENT_NAME=cygnusagent
 LOGFILE_NAME=cygnus.log
 # Administration port. Must be unique per instance
 ADMIN_PORT=8081
+# Polling interval for the configuration reloading
+POLLING_INTERVAL=30
 ```
 
 ###`agent_<id>.conf`
@@ -460,11 +462,11 @@ Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the s
 
 In foreground (with logging):
 
-    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>]
+    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>] [-t <polling-interval>]
 
 In background:
 
-    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] &
+    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] [-t <polling-interval>] &
 
 The parameters used in these commands are:
 
@@ -474,6 +476,7 @@ The parameters used in these commands are:
 * `-n` (or `--name`). The name of the Flume agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
+* `-t` (or `--polling-interval`). Configures the polling interval when the configuration is periodically reloaded. If not configured, the default value is used, `30`.
 
 ## Orion subscription
 
