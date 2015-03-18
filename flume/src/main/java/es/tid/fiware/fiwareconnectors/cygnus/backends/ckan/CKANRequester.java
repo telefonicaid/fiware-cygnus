@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -21,6 +21,7 @@ package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.http.HttpResponse;
@@ -30,7 +31,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -40,18 +40,20 @@ import org.json.simple.parser.JSONParser;
  */
 public class CKANRequester {
     
-    private Logger logger;
-    private HttpClient httpClient;
-    private String apiKey;
-    private String baseURL;
+    private static final CygnusLogger LOGGER = new CygnusLogger(CKANRequester.class);
+    private final HttpClient httpClient;
+    private final String apiKey;
+    private final String baseURL;
     
     /**
      * Constructor.
      * @param httpClient Http client
+     * @param ckanHost
+     * @param ckanPort
+     * @param ssl
      * @param apiKey CKAN API key
      */
     public CKANRequester(HttpClient httpClient, String ckanHost, String ckanPort, boolean ssl, String apiKey) {
-        logger = Logger.getLogger(CKANRequester.class);
         this.httpClient = httpClient;
         this.apiKey = apiKey;
         baseURL = (ssl ? "https://" : "http://") + ckanHost + ":" + ckanPort;
@@ -93,7 +95,7 @@ public class CKANRequester {
 
                 // payload (optional)
                 if (!payload.equals("")) {
-                    logger.debug("request payload: " + payload);
+                    LOGGER.debug("request payload: " + payload);
                     r.setEntity(new StringEntity(payload, ContentType.create("application/json")));
                 } // if
                 
@@ -106,7 +108,7 @@ public class CKANRequester {
             request.addHeader("Authorization", apiKey);
 
             // execute the request
-            logger.debug("CKAN operation: " + request.toString());
+            LOGGER.debug("CKAN operation: " + request.toString());
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -128,10 +130,10 @@ public class CKANRequester {
             String res = reader.readLine();
             request.releaseConnection();
             long l = response.getEntity().getContentLength();
-            logger.debug("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
+            LOGGER.debug("CKAN response (" + l + " bytes): " + response.getStatusLine().toString());
 
             // get the JSON encapsulated in the response
-            logger.debug("response payload: " + res);
+            LOGGER.debug("response payload: " + res);
             JSONParser j = new JSONParser();
             JSONObject o = (JSONObject) j.parse(res);
 

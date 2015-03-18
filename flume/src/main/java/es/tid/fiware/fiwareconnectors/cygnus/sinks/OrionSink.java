@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -19,15 +19,19 @@
 package es.tid.fiware.fiwareconnectors.cygnus.sinks;
 
 import com.google.gson.Gson;
+import es.tid.fiware.fiwareconnectors.cygnus.channels.CygnusChannel;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequest;
 import es.tid.fiware.fiwareconnectors.cygnus.containers.NotifyContextRequestSAXHandler;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadContextData;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.util.Map;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
+import java.io.IOException;
 import java.io.StringReader;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Channel;
@@ -37,9 +41,9 @@ import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
-import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -60,17 +64,14 @@ import org.xml.sax.InputSource;
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
-    private Logger logger;
-
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
+    
     /**
      * Constructor.
      */
     public OrionSink() {
         // invoke the super class constructor
         super();
-
-        // create a logger
-        logger = Logger.getLogger(OrionSink.class);
     } // OrionSink
 
     @Override
@@ -89,18 +90,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // get the channel
             ch = getChannel();
         } catch (Exception e) {
-            logger.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
+            LOGGER.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
-        } // try catch
+        } // try catch // try catch
 
         try {
             // start a Flume transaction (it is not the same than a Cygnus transaction!)
             txn = ch.getTransaction();
             txn.begin();
         } catch (Exception e) {
-            logger.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
+            LOGGER.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
-        } // try catch
+        } // try catch // try catch
 
         try {
             // get the event
@@ -112,19 +113,19 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 return Status.READY;
             } // if
         } catch (Exception e) {
-            logger.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
+            LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
-        } // try catch
+        } // try catch // try catch
 
         try {
             // set the transactionId in MDC
             MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
         } catch (Exception e) {
-            logger.error("Runtime error (" + e.getMessage() + ")");
-        } // catch
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
+        } // catch // catch
 
-        logger.info("Event got from the channel (id=" + event.hashCode() + ", headers=" + event.getHeaders().toString()
-                + ", bodyLength=" + event.getBody().length + ")");
+        LOGGER.info("Event got from the channel (id=" + event.hashCode() + ", headers="
+                + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
 
         try {
             // persist the event
@@ -136,7 +137,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } catch (Exception e) {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
-                logger.error(e.getMessage());
+                LOGGER.error(e.getMessage());
 
                 // check the event HEADER_TTL
                 int ttl;
@@ -146,16 +147,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ttl = Integer.parseInt(ttlStr);
                 } catch (NumberFormatException nfe) {
                     ttl = 0;
-                    logger.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                    LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
                           +  ", " + nfe.getMessage() + ")");
-                } // try catch
+                } // try catch // try catch
                 
                 if (ttl == -1) {
                     txn.rollback();
+                    ((CygnusChannel) ch).rollback();
                     status = Status.BACKOFF;
-                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
                 } else if (ttl == 0) {
-                    logger.warn("The event TTL has expired, it is no more re-injected in the channel (id="
+                    LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
                             + event.hashCode() + ", ttl=0)");
                     txn.commit();
                     status = Status.READY;
@@ -165,17 +167,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
                     txn.rollback();
                     status = Status.BACKOFF;
-                    logger.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl + ")");
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
+                            + ")");
                 } // if else
             } else {
                 if (e instanceof CygnusRuntimeError) {
-                    logger.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                 } else if (e instanceof CygnusBadConfiguration) {
-                    logger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } else if (e instanceof CygnusBadContextData) {
-                    logger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } else {
-                    logger.warn(e.getMessage());
+                    LOGGER.warn(e.getMessage());
                 } // if else if
 
                 txn.commit();
@@ -184,7 +187,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } finally {
             // close the transaction
             txn.close();
-            logger.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+            LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
         } // try catch finally
 
         return status;
@@ -220,7 +223,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
                 saxParser.parse(new InputSource(new StringReader(eventData)), handler);
                 notification = handler.getNotifyContextRequest();
-            } catch (Exception e) {
+            } catch (ParserConfigurationException e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } catch (SAXException e) {
+                throw new CygnusBadContextData(e.getMessage());
+            } catch (IOException e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
         } else {

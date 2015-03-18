@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -22,10 +22,9 @@ import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusBadConfiguration;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusPersistenceError;
 import es.tid.fiware.fiwareconnectors.cygnus.errors.CygnusRuntimeError;
 import es.tid.fiware.fiwareconnectors.cygnus.http.HttpClientFactory;
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
-import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.http.client.HttpClient;
 
@@ -36,9 +35,9 @@ import org.apache.http.client.HttpClient;
  */
 public class CKANBackendImpl implements CKANBackend {
 
-    private Logger logger;
-    private String orionUrl;
-    private HttpClientFactory httpClientFactory;
+    private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
+    private final String orionUrl;
+    private final HttpClientFactory httpClientFactory;
     private CKANRequester requester;
     private CKANCache cache;
 
@@ -62,15 +61,12 @@ public class CKANBackendImpl implements CKANBackend {
         
         // create the cache
         cache = new CKANCache(requester);
-        
-        // logger
-        logger = Logger.getLogger(CKANBackendImpl.class);
     } // CKANBackendImpl
 
     @Override
     public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName,
         String attrName, String attrType, String attrValue, String attrMd) throws Exception {
-        logger.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
+        LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, true);
         
@@ -78,8 +74,8 @@ public class CKANBackendImpl implements CKANBackend {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName=" + resName + ")");
         } else {
-            logger.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName + ", resName/resId="
-                    + resName + "/" + resId + ")");
+            LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
+                    + ", resName/resId=" + resName + "/" + resId + ")");
             insert(recvTimeTs, recvTime, resId, attrName, attrType, attrValue, attrMd);
         } // if else
     } // persist
@@ -87,7 +83,7 @@ public class CKANBackendImpl implements CKANBackend {
     @Override
     public void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList,
         Map<String, String> attrMdList) throws Exception {
-        logger.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
+        LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, false);
                 
@@ -95,8 +91,8 @@ public class CKANBackendImpl implements CKANBackend {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName=" + resName + ")");
         } else {
-            logger.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName + ", resName/resId="
-                    + resName + "/" + resId + ")");
+            LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
+                    + ", resName/resId=" + resName + "/" + resId + ")");
             insert(recvTime, resId, attrList, attrMdList);
         } // if else
     } // persist
@@ -104,7 +100,7 @@ public class CKANBackendImpl implements CKANBackend {
     private String resourceLookupOrCreate(String orgName, String pkgName, String resName, boolean createEnabled)
         throws Exception {
         if (!cache.isCachedOrg(orgName)) {
-            logger.debug("The organization was not cached nor existed in CKAN (orgName=" + orgName + ")");
+            LOGGER.debug("The organization was not cached nor existed in CKAN (orgName=" + orgName + ")");
             
             if (createEnabled) {
                 String orgId = createOrganization(orgName);
@@ -123,10 +119,10 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // if
         
-        logger.debug("The organization was cached (orgName=" + orgName + ")");
+        LOGGER.debug("The organization was cached (orgName=" + orgName + ")");
         
         if (!cache.isCachedPkg(orgName, pkgName)) {
-            logger.debug("The package was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName="
+            LOGGER.debug("The package was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName="
                     + pkgName + ")");
             
             if (createEnabled) {
@@ -143,11 +139,11 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // if
         
-        logger.debug("The package was cached (orgName=" + orgName + ", pkgName=" + pkgName + ")");
+        LOGGER.debug("The package was cached (orgName=" + orgName + ", pkgName=" + pkgName + ")");
         
         if (!cache.isCachedRes(orgName, pkgName, resName)) {
-            logger.debug("The resource was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName=" + pkgName
-                    + ", resName=" + resName + ")");
+            LOGGER.debug("The resource was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName="
+                    + pkgName + ", resName=" + resName + ")");
             
             if (createEnabled) {
                 String resId = this.createResource(resName, cache.getPkgId(pkgName));
@@ -160,8 +156,8 @@ public class CKANBackendImpl implements CKANBackend {
             } // if else
         } // if
         
-        logger.debug("The resource was cached (orgName=" + orgName + ", pkgName=" + pkgName + ", resName=" + resName
-                + ")");
+        LOGGER.debug("The resource was cached (orgName=" + orgName + ", pkgName=" + pkgName + ", resName="
+                + resName + ")");
         
         return cache.getResId(resName);
     } // resourceLookupOrCreate
@@ -178,8 +174,8 @@ public class CKANBackendImpl implements CKANBackend {
      */
     private void insert(long recvTimeTs, String recvTime, String resourceId, String attrName, String attrType,
             String attrValue, String attrMd) throws Exception {
-        String urlPath = null;
-        String jsonString = null;
+        String urlPath;
+        String jsonString;
         
         try {
             // create the CKAN request JSON
@@ -208,7 +204,7 @@ public class CKANBackendImpl implements CKANBackend {
 
             // check the status
             if (res.getStatusCode() == 200) {
-                logger.debug("Successful insert (resource/datastore id=" + resourceId + ")");
+                LOGGER.debug("Successful insert (resource/datastore id=" + resourceId + ")");
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
             } // if else
@@ -232,26 +228,19 @@ public class CKANBackendImpl implements CKANBackend {
      */
     private void insert(String recvTime, String resourceId, Map<String, String> attrList,
             Map<String, String> attrMdList) throws Exception {
-        String urlPath = null;
-        String jsonString = null;
+        String urlPath;
+        String jsonString;
         
         try {
             // create the CKAN request JSON
             String records = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
 
-            // iterate on the attribute and metadata maps in order to build the query
-            Iterator it = attrList.keySet().iterator();
-
-            while (it.hasNext()) {
-                String attrName = (String) it.next();
+            for (String attrName : attrList.keySet()) {
                 String attrValue = attrList.get(attrName);
                 records += ", \"" + attrName + "\": " + attrValue;
-            } // while
-
-            it = attrMdList.keySet().iterator();
-
-            while (it.hasNext()) {
-                String attrName = (String) it.next();
+            } // for
+            
+            for (String attrName : attrMdList.keySet()) {
                 String attrMd = attrMdList.get(attrName);
 
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
@@ -259,7 +248,7 @@ public class CKANBackendImpl implements CKANBackend {
                 if (!attrMd.equals(Constants.EMPTY_MD)) {
                     records += ", \"" + attrName + "\": " + attrMd;
                 } // if
-            } // while
+            } // for
 
             jsonString = "{ \"resource_id\": \"" + resourceId
                     + "\", \"records\": [ { " + records + " } ], "
@@ -274,7 +263,7 @@ public class CKANBackendImpl implements CKANBackend {
 
             // check the status
             if (res.getStatusCode() == 200) {
-                logger.debug("Successful insert (resource/datastore id=" + resourceId + ")");
+                LOGGER.debug("Successful insert (resource/datastore id=" + resourceId + ")");
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
             } // if else
@@ -309,7 +298,7 @@ public class CKANBackendImpl implements CKANBackend {
             // check the status
             if (res.getStatusCode() == 200) {
                 String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                logger.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
+                LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
                 return orgId;
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the organization "
@@ -343,7 +332,7 @@ public class CKANBackendImpl implements CKANBackend {
             // check the status
             if (res.getStatusCode() == 200) {
                 String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                logger.debug("Successful package creation (pkgName/pkgId=" + pkgName + "/" + packageId + ")");
+                LOGGER.debug("Successful package creation (pkgName/pkgId=" + pkgName + "/" + packageId + ")");
                 return packageId;
             /*
             This is not deleted if in the future we try to activate deleted elements again
@@ -399,7 +388,8 @@ public class CKANBackendImpl implements CKANBackend {
             // check the status
             if (res.getStatusCode() == 200) {
                 String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                logger.debug("Successful resource creation (resName/resId=" + resourceName + "/" + resourceId + ")");
+                LOGGER.debug("Successful resource creation (resName/resId=" + resourceName + "/" + resourceId
+                        + ")");
                 return resourceId;
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the resource "
@@ -444,7 +434,7 @@ public class CKANBackendImpl implements CKANBackend {
 
             // check the status
             if (res.getStatusCode() == 200) {
-                logger.debug("Successful datastore creation (resourceId=" + resourceId + ")");
+                LOGGER.debug("Successful datastore creation (resourceId=" + resourceId + ")");
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
                         + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");

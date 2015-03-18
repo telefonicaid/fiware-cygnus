@@ -86,7 +86,7 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>7.2.0.v20101020</version>
-    </dependency>    
+    </dependency>
   </dependencies>
 
   <build>

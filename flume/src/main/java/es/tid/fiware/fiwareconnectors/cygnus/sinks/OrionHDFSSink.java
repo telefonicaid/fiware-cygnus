@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.log4j.Logger;
 
 /**
  * 
@@ -76,7 +75,7 @@ import org.apache.log4j.Logger;
  */
 public class OrionHDFSSink extends OrionSink {
 
-    private Logger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] cosmosHost;
     private String cosmosPort;
     private String cosmosDefaultUsername;
@@ -97,7 +96,6 @@ public class OrionHDFSSink extends OrionSink {
      */
     public OrionHDFSSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionHDFSSink.class);
     } // OrionHDFSSink
     
     /**
@@ -168,44 +166,46 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     public void configure(Context context) {
         cosmosHost = context.getString("cosmos_host", "localhost").split(",");
-        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost)
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost)
                 + ")");
         cosmosPort = context.getString("cosmos_port", "14000");
-        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + cosmosPort + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + cosmosPort + ")");
         cosmosDefaultUsername = context.getString("cosmos_default_username", "defaultCygnus");
-        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + cosmosDefaultUsername
-                + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username="
+                + cosmosDefaultUsername + ")");
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
         cosmosDefaultPassword = context.getString("cosmos_default_password", "");
-        logger.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + cosmosDefaultPassword
-                + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password="
+                + cosmosDefaultPassword + ")");
         hdfsAPI = context.getString("hdfs_api", "httpfs");
         
         if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
-            logger.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
-            logger.info("[" + this.getName() + "] Exiting Cygnus");
+            LOGGER.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
+            LOGGER.info("[" + this.getName() + "] Exiting Cygnus");
             System.exit(-1);
         } else {
-            logger.debug("[" + this.getName() + "] Reading configuration (hdfs_api=" + hdfsAPI + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_api=" + hdfsAPI + ")");
         } // if else
         
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        logger.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
         hiveHost = context.getString("hive_host", "localhost");
-        logger.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
-        logger.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")");
         krb5 = context.getBoolean("krb5_auth", false);
-        logger.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (krb5 ? "true" : "false") + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (krb5 ? "true" : "false")
+                + ")");
         krb5User = context.getString("krb5_auth.krb5_user", "");
-        logger.debug("[" + this.getName() + "] Reading configuration (krb5_user=" + krb5User + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_user=" + krb5User + ")");
         krb5Password = context.getString("krb5_auth.krb5_password", "");
-        logger.debug("[" + this.getName() + "] Reading configuration (krb5_password=" + krb5Password + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_password=" + krb5Password + ")");
         krb5LoginConfFile = context.getString("krb5_auth.krb5_login_conf_file", "");
-        logger.debug("[" + this.getName() + "] Reading configuration (krb5_login_conf_file=" + krb5LoginConfFile + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_login_conf_file=" + krb5LoginConfFile
+                + ")");
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
-        logger.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
     } // configure
 
     @Override
@@ -216,30 +216,31 @@ public class OrionHDFSSink extends OrionSink {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
                         krb5ConfFile);
-                logger.debug("[" + this.getName() + "] HttpFS persistence backend created");
+                LOGGER.debug("[" + this.getName() + "] HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
                         krb5ConfFile);
-                logger.debug("[" + this.getName() + "] WebHDFS persistence backend created");
+                LOGGER.debug("[" + this.getName() + "] WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
-                logger.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
-                logger.info("[" + this.getName() + "] Exiting Cygnus");
+                LOGGER.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI
+                        + ")");
+                LOGGER.info("[" + this.getName() + "] Exiting Cygnus");
                 System.exit(-1);
             } // if else if
         } catch (Exception e) {
-            logger.error(e.getMessage());
-        } // try catch
+            LOGGER.error(e.getMessage());
+        } // try catch // try catch
         
         super.start();
-        logger.info("[" + this.getName() + "] Startup completed");
+        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
@@ -256,7 +257,7 @@ public class OrionHDFSSink extends OrionSink {
             ContextElement contextElement = contextElementResponse.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            logger.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
             // build the effective HDFS stuff
@@ -277,8 +278,8 @@ public class OrionHDFSSink extends OrionSink {
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
             
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
-                        + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 continue;
             } // if
             
@@ -297,7 +298,7 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                logger.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
                 if (rowAttrPersistence) {
@@ -312,7 +313,7 @@ public class OrionHDFSSink extends OrionSink {
                             + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                             + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                             + "}";
-                    logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                             + hdfsFile + "), Data (" + rowLine + ")");
                     
                     // if the fileName exists, append the Json document to it; otherwise, create it with initial content
@@ -338,7 +339,7 @@ public class OrionHDFSSink extends OrionSink {
             if (!rowAttrPersistence) {
                 // insert a new row containing full attribute list
                 columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                logger.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + hdfsFile
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + hdfsFile
                         + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
