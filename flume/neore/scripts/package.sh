@@ -21,99 +21,92 @@
 #################################################
 
 function download_flume(){
-	# download form artifactory and unzip it into ${RPM_BASE_DIR}
-	_logStage "######## Preparing the apache-flume component... ########"
+    # download form artifactory and unzip it into ${RPM_BASE_DIR}
+    _logStage "######## Preparing the apache-flume component... ########"
 
-	local ARTIFACT_FLUME_URL=${1}
-	local FLUME_TAR=${2}
+    local ARTIFACT_FLUME_URL=${1}
+    local FLUME_TAR=${2}
 
-	local TMP_DIR="tmp_deleteme"
-	mkdir -p ${TMP_DIR}
-	pushd ${TMP_DIR} &> /dev/null
-	#remove .tar.gz so twice is executed
-	local FLUME_WO_TAR=${FLUME_TAR%.*}
-	FLUME_WO_TAR=${FLUME_WO_TAR%.*}
+    local TMP_DIR="tmp_deleteme"
+    mkdir -p ${TMP_DIR}
+    pushd ${TMP_DIR} &> /dev/null
+    #remove .tar.gz so twice is executed
+    local FLUME_WO_TAR=${FLUME_TAR%.*}
+    FLUME_WO_TAR=${FLUME_WO_TAR%.*}
 
 
-	_log "#### The version of the component is (${FLUME_TAR}) ####"
-	_log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
-	curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
-	if [[ $? -ne 0 ]]; then
-			_logError "cannot download apache-flume.tar.gz (${FLUME_TAR}) from ${ARTIFACT_FLUME_URL}"
-			return 1
-		else
-			_logOk ".............. Done! .............."
-		fi
+    _log "#### The version of the component is (${FLUME_TAR}) ####"
+    _log "#### Downloading apache-flume: ${FLUME_TAR}... ####"
+    curl -s -o ${FLUME_TAR} ${ARTIFACT_FLUME_URL}/${FLUME_TAR}
+    if [[ $? -ne 0 ]]; then
+        _logError "cannot download apache-flume.tar.gz (${FLUME_TAR}) from ${ARTIFACT_FLUME_URL}"
+        return 1
+    else
+        _logOk ".............. Done! .............."
+    fi
 
-	_log "#### Uncompresing apache-flume: ${FLUME_TAR}... ####"
-	tar xvzf ${FLUME_TAR} &> /dev/null
-	if [[ $? -ne 0 ]]; then
-		_logError ".............. Cannot untar flume.tar.gz (${FLUME_TAR}) .............."
-		return 1
-	else
-		_logOk ".............. Done! .............."
-	fi
+    _log "#### Uncompresing apache-flume: ${FLUME_TAR}... ####"
+    tar xvzf ${FLUME_TAR} &> /dev/null
+    if [[ $? -ne 0 ]]; then
+        _logError ".............. Cannot untar flume.tar.gz (${FLUME_TAR}) .............."
+        return 1
+    else
+        _logOk ".............. Done! .............."
+    fi
 
-	_log "### Download libthrift patch... ###"
-	ARTIFACT_LIBTHRIFT_URL="http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/"
-	LIBTHRIFT_JAR=libthrift-0.9.1.jar 
-	curl -s -o ${LIBTHRIFT_JAR} ${ARTIFACT_LIBTHRIFT_URL}/${LIBTHRIFT_JAR}
-	if [[ $? -ne 0 ]]; then
-			_logError "cannot download libthrift jar (${LIBTHRIFT_JAR}) from ${ARTIFACT_LIBTHRIFT_URL}"
-			return 1
-		else
-			_logOk ".............. Done! .............."
-		fi
-	rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
-	mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
+    _log "### Download libthrift patch... ###"
+    ARTIFACT_LIBTHRIFT_URL="http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/"
+    LIBTHRIFT_JAR=libthrift-0.9.1.jar 
+    curl -s -o ${LIBTHRIFT_JAR} ${ARTIFACT_LIBTHRIFT_URL}/${LIBTHRIFT_JAR}
+    if [[ $? -ne 0 ]]; then
+        _logError "cannot download libthrift jar (${LIBTHRIFT_JAR}) from ${ARTIFACT_LIBTHRIFT_URL}"
+        return 1
+    else
+        _logOk ".............. Done! .............."
+    fi
+    rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
+    mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
 
-	_log "#### Cleaning the temporal folders... ####"
-	rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
-	rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
-	rm -rf ${RPM_PRODUCT_SOURCE_DIR}
-	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
-	cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
-	popd &> /dev/null
-	rm -rf ${TMP_DIR}
-	return 0
+    _log "#### Cleaning the temporal folders... ####"
+    rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
+    rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
+    rm ${FLUME_WO_TAR}/conf/flume-conf.properties.template # we will add our own templates
+    rm -rf ${RPM_PRODUCT_SOURCE_DIR}
+    mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
+    cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
+    popd &> /dev/null
+    rm -rf ${TMP_DIR}
+    return 0
 
-	_logStage "######## The apache-flume is ready for use! ... ########"
+    _logStage "######## The apache-flume is ready for use! ... ########"
 }
 
 function copy_cygnus_startup_script(){
-        _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
-        rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
-        cp $BASE_DIR/target/classes/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
+    _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
+    rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
+    cp $BASE_DIR/target/classes/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
 }
 
 function copy_cygnus_to_flume(){
-	_logStage "######## Copying the cygnus jar into the apache-flume... ########"
-	mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
-	mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
-	mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
-	cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+    _logStage "######## Copying the cygnus jar into the apache-flume... ########"
+    mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
+    mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+    mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+    cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
 }
 
 function copy_cygnus_conf() {
-	_logStage "######## Copying cygnus template config files to destination config directory... ########"
-	rm -rf {RPM_SOURCE_DIR}/config 
-	mkdir -p ${RPM_SOURCE_DIR}/config
-	for file in $(ls ${BASE_DIR}/conf)
-	do
-		# file=$(basename ${file})
-		# renamed_file=${file%.template}
-		# cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/${renamed_file}
-
-		cp ${BASE_DIR}/conf/${file} ${RPM_SOURCE_DIR}/config/
-	done
+    _logStage "######## Copying cygnus template config files to destination config directory... ########"
+    rm -rf {RPM_SOURCE_DIR}/config 
+    mkdir -p ${RPM_SOURCE_DIR}/config
+    cp ${BASE_DIR}/conf/* ${RPM_SOURCE_DIR}/config/
 }
 
 function clean_up_previous_builds() {
-	_logStage "######## Cleaning up previous builds of rpm... ########"
-
-	rm -rf ${RPM_BASE_DIR}/{RPMS,BUILDROOT,BUILD,SRPMS}
-	rm -rf ${RPM_SOURCE_DIR}/{config,usr}
-	return 0
+    _logStage "######## Cleaning up previous builds of rpm... ########"
+    rm -rf ${RPM_BASE_DIR}/{RPMS,BUILDROOT,BUILD,SRPMS}
+    rm -rf ${RPM_SOURCE_DIR}/{config,usr}
+    return 0
 }
 
 function usage() {
