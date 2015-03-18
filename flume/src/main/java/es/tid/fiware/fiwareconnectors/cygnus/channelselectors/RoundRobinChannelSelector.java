@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,16 +18,15 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.channelselectors;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.AbstractChannelSelector;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -35,16 +34,15 @@ import org.apache.log4j.Logger;
  */
 public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
-    private Logger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(RoundRobinChannelSelector.class);
     private int numStorages;
-    private LinkedHashMap<String, ArrayList<String>> channelsPerStorage;
-    private LinkedHashMap<String, Integer> lastUsedChannelPerStorage;
+    private final LinkedHashMap<String, ArrayList<String>> channelsPerStorage;
+    private final LinkedHashMap<String, Integer> lastUsedChannelPerStorage;
     
     /**
      * Constructor.
      */
     public RoundRobinChannelSelector() {
-        this.logger = Logger.getLogger(RoundRobinChannelSelector.class);
         this.channelsPerStorage = new LinkedHashMap<String, ArrayList<String>>();
         this.lastUsedChannelPerStorage = new LinkedHashMap<String, Integer>();
     } // RoundRobinChannelSelector
@@ -57,11 +55,11 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
     @Override
     public void configure(Context context) {
         numStorages = context.getInteger("storages", 1);
-        logger.debug("[" + this.getName() + "] Reading configuration (storages=" + numStorages + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (storages=" + numStorages + ")");
         
         for (int i = 0; i < numStorages; i++) {
             String channelsStr = context.getString("storages.storage" + (i + 1));
-            logger.debug("[" + this.getName() + "] Reading configuration (storages.storage" + (i + 1) + "="
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (storages.storage" + (i + 1) + "="
                     + channelsStr + ")");
             List<String> channelList = Arrays.asList(channelsStr.split(","));
             ArrayList<String> channelArrayList = new ArrayList<String>();
@@ -73,7 +71,7 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
     
     @Override
     public List<Channel> getOptionalChannels(Event event) {
-        logger.debug("Returning empty optional channels");
+        LOGGER.debug("Returning empty optional channels");
         return new ArrayList<Channel>();
     } // getOptionalChannels
     
@@ -82,10 +80,7 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
         // resulting list of required channels
         List<Channel> res = new ArrayList<Channel>();
         
-        Iterator it = channelsPerStorage.keySet().iterator();
-        
-        while (it.hasNext()) {
-            String key = (String) it.next();
+        for (String key : channelsPerStorage.keySet()) {
             ArrayList<String> channelNames = channelsPerStorage.get(key);
             
             // get and update the last used channel
@@ -97,21 +92,20 @@ public class RoundRobinChannelSelector extends AbstractChannelSelector {
             List<Channel> allChannels = getAllChannels();
             Channel channel = null;
             
-            for (int i = 0; i < allChannels.size(); i++) {
-                channel = allChannels.get(i);
-                
+            for (Channel allChannel : allChannels) {
+                channel = allChannel;
                 if (channel.getName().equals(channelName)) {
                     break;
                 } // if
-            } // while
+            } // for
             
             // add the channel to the list
             if (channel != null) {
                 res.add(channel);
             } // if
-        } // while
+        } // for
                 
-        logger.debug("Returning " + res.toString() + " channels");
+        LOGGER.debug("Returning " + res.toString() + " channels");
         return res;
     } // getRequiredChannels
 

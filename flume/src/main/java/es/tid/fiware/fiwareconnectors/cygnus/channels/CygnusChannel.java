@@ -15,45 +15,27 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
-package es.tid.fiware.fiwareconnectors.cygnus.backends.ckan;
-
-import org.json.simple.JSONObject;
+package es.tid.fiware.fiwareconnectors.cygnus.channels;
 
 /**
- * Helper class encapsulating response code and JSON payload for CKAN response.
- *
- * @author fermin
+ * Interface that all the Cygnus proprietary channels must implement. It defines common methods for all of them, such
+ * as getNumEvents().
+ * 
+ * @author frb
  */
-public class CKANResponse {
-
-    private final JSONObject jsonObject;
-    private final int statusCode;
-
+public interface CygnusChannel {
+    
     /**
-     * Constructor.
-     * @param jsonObject
-     * @param statusCode
+     * Gets the number of events within the channel.
+     * @return The number of events within the channel.
      */
-    public CKANResponse(JSONObject jsonObject, int statusCode) {
-        this.jsonObject = jsonObject;
-        this.statusCode = statusCode;
-    } // CKANResponse
-
+    int getNumEvents();
+    
     /**
-     * Gets the Json object.
-     * @return jsonObject
+     * Rollbacks the number of events when a transaction is rollbacked as well. This method is necessary because when
+     * a transaction is rollbacked the "put" method is not used but some kind of internal re-linking is done at the
+     * chanel; thus, the number of events is not increased, which must be deliberatedly done by issuing this method.
      */
-    public JSONObject getJsonObject() {
-        return jsonObject;
-    } // getJsonObject
-
-    /**
-     * Gets the status code.
-     * @return statusCode
-     */
-    public int getStatusCode() {
-        return statusCode;
-    } // getStatusCode
-
-} // CKANResponse
+    void rollback();
+    
+} // CygnusChannel

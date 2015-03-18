@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -18,6 +18,7 @@
 
 package es.tid.fiware.fiwareconnectors.cygnus.http;
 
+import es.tid.fiware.fiwareconnectors.cygnus.log.CygnusLogger;
 import es.tid.fiware.fiwareconnectors.cygnus.utils.Constants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +37,6 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.log4j.Logger;
 
 /**
  * 
@@ -48,20 +48,19 @@ import org.apache.log4j.Logger;
  */
 public class HttpClientFactory {
     
-    private static Logger logger;
-    private String loginConfFile;
-    private String krb5ConfFile;
+    private static final CygnusLogger LOGGER = new CygnusLogger(HttpClientFactory.class);
+    private final String loginConfFile;
+    private final String krb5ConfFile;
     private static PoolingClientConnectionManager connectionsManager;
     private static PoolingClientConnectionManager sslConnectionsManager;
    
     /**
      * Constructor.
      * @param ssl True if SSL connections are desired. False otherwise.
+     * @param loginConfFile
+     * @param krb5ConfFile
      */
     public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile) {
-        // create the logger
-        logger = Logger.getLogger(HttpClientFactory.class);
-        
         // set the Kerberos parameters
         this.loginConfFile = loginConfFile;
         this.krb5ConfFile = krb5ConfFile;
@@ -77,13 +76,14 @@ public class HttpClientFactory {
             connectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
         } // if else
         
-        logger.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
-        logger.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
+        LOGGER.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
+        LOGGER.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
      * Gets a HTTP client.
-     * @param ssl True if SSL connections are desired. False otherwise.
+     * @param ssl True if SSL connections are desired. False otherwise
+     * @param krb5Auth.
      * @return A http client obtained from the (SSL) Connections Manager.
      */
     public DefaultHttpClient getHttpClient(boolean ssl, boolean krb5Auth) {
@@ -146,14 +146,14 @@ public class HttpClientFactory {
     private SchemeRegistry getSSLSchemeRegistry() {
         // http://stackoverflow.com/questions/2703161/how-to-ignore-ssl-certificate-errors-in-apache-httpclient-4-0
         
-        SSLContext sslContext = null;
+        SSLContext sslContext;
         
         try {
             sslContext = SSLContext.getInstance("SSL");
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Fatal error (SSL cannot be used, no such algorithm. Details=" + e.getMessage() + ")");
+            LOGGER.fatal("Fatal error (SSL cannot be used, no such algorithm. Details=" + e.getMessage() + ")");
             return null;
-        } // try catch
+        } // try catch // try catch
         
         try {
             // set up a TrustManager that trusts everything
@@ -174,12 +174,12 @@ public class HttpClientFactory {
                 }
             }, new SecureRandom());
         } catch (KeyManagementException e) {
-            logger.fatal("Fatal error (Cannot ignore SSL certificates. Details=" + e.getMessage() + ")");
+            LOGGER.fatal("Fatal error (Cannot ignore SSL certificates. Details=" + e.getMessage() + ")");
             return null;
-        } // try catch
+        } // try catch // try catch
 
         if (sslContext == null) {
-            logger.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
+            LOGGER.fatal("Fatal error (Cannot ignore SSL certificates, SSL context is null)");
             return null;
         } // if
 

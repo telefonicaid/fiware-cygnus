@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -37,9 +37,9 @@ import org.mortbay.jetty.handler.AbstractHandler;
  */
 public class ManagementInterface extends AbstractHandler {
     
-    private ImmutableMap<String, SourceRunner> sources;
-    private ImmutableMap<String, Channel> channels;
-    private ImmutableMap<String, SinkRunner> sinks;
+    private final ImmutableMap<String, SourceRunner> sources;
+    private final ImmutableMap<String, Channel> channels;
+    private final ImmutableMap<String, SinkRunner> sinks;
     
     /**
      * Constructor.

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.log4j.Logger;
 
 /**
  * Sink for testing purposes. It does not persist the notified context data but
@@ -41,14 +40,14 @@ import org.apache.log4j.Logger;
  */
 public class OrionTestSink extends OrionSink {
 
-    private Logger logger;
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionTestSink.class);
 
     /**
      * Constructor.
      */
     public OrionTestSink() {
         super();
-        logger = CygnusLogger.getLogger(OrionTestSink.class);
+        //cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionTestSink.class), true);
     } // OrionTestSink
 
     @Override
@@ -59,13 +58,13 @@ public class OrionTestSink extends OrionSink {
     @Override
     public void start() {
         super.start();
-        logger.info("[" + this.getName() + "] Startup completed");
+        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp")).longValue();
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
@@ -74,10 +73,10 @@ public class OrionTestSink extends OrionSink {
         String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
         
         // lob about the event headers with deliberated INFO level
-        logger.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime
+        LOGGER.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime
                 + "), fiwareService=" + fiwareService + ", fiwareServicePath=" + fiwareServicePath
                 + ", destinations=" + Arrays.toString(destinations) + ")");
-
+        
         // iterate on the contextResponses
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
 
@@ -87,15 +86,15 @@ public class OrionTestSink extends OrionSink {
             String entityType = contextElement.getType();
             
             // log about the context element with deliberated INFO level
-            logger.info("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+            LOGGER.info("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
                     + entityType + ")");
 
             // iterate on all this entity's attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-                logger.warn("No attributes within the notified entity, nothing is done (id=" + entityId + ", type="
-                        + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 continue;
             } // if
 
@@ -106,7 +105,7 @@ public class OrionTestSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
                 // log about the context attribute with deliberated INFO level
-                logger.info("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.info("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ", value=" + attrValue + ", metadata=" + attrMetadata + ")");
             } // for
         } // for

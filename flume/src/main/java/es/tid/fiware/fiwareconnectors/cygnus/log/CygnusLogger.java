@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-connectors (FI-WARE project).
  *
@@ -15,68 +15,103 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package es.tid.fiware.fiwareconnectors.cygnus.log;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * Wrapper class for log4j Logger class. Reference:
+ * https://books.google.es/books?id=hZBimlxiyAcC&lpg=PA162&ots=QgJm9Y3WZ9&dq=log4j%20decorator
+ *    &hl=es&pg=PA163#v=onepage&q=log4j%20decorator&f=false
+ * 
  * @author frb
  */
-public class CygnusLogger extends Logger {
+public class CygnusLogger {
+    
+    private static String fqcn = CygnusLogger.class.getName();
+    private Logger logger;
     
     /**
      * Constructor.
      * @param name
      */
     public CygnusLogger(String name) {
-        super(name);
+        this.logger = Logger.getLogger(name);
     } // CygnusLogger
     
     /**
-     * Traces a message with INFO level, belonging a component.
-     * @param componentName
-     * @param message
+     * Constructor.
+     * @param clazz
      */
-    public void info(String componentName, String message) {
-        info("[" + componentName + "] " + message);
-    } // info
+    public CygnusLogger(Class clazz) {
+        this(clazz.getName());
+    } // CygnusLogger
     
     /**
-     * Traces a message with ERROR level, belonging a component.
-     * @param componentName
-     * @param message
+     * Traces a message with FATAL level.
+     * @param msg
      */
-    public void error(String componentName, String message) {
-        error("[" + componentName + "] " + message);
-    } // error
-    
-    /**
-     * Traces a message with FATAL level, belonging a component.
-     * @param componentName
-     * @param message
-     */
-    public void fatal(String componentName, String message) {
-        fatal("[" + componentName + "] " + message);
+    public void fatal(Object msg) {
+        try {
+            logger.log(fqcn, Level.FATAL, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
     } // fatal
     
     /**
-     * Traces a message with WARN level, belonging a component.
-     * @param componentName
-     * @param message
+     * Traces a message with ERROR level.
+     * @param msg
      */
-    public void warn(String componentName, String message) {
-        warn("[" + componentName + "] " + message);
-    } // warn
+    public void error(Object msg) {
+        try {
+            logger.log(fqcn, Level.ERROR, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // error
     
     /**
-     * Traces a message with DEBUG level, belonging a component.
-     * @param componentName
-     * @param message
+     * Traces a message with DEBUG level.
+     * @param msg
      */
-    public void debug(String componentName, String message) {
-        debug("[" + componentName + "] " + message);
+    public void debug(Object msg) {
+        try {
+            logger.log(fqcn, Level.DEBUG, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
     } // debug
+    
+    /**
+     * Traces a message with INFO level.
+     * @param msg
+     */
+    public void info(Object msg) {
+        try {
+            logger.log(fqcn, Level.INFO, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // info
+    
+    /**
+     * Traces a message with WARN level.
+     * @param msg
+     */
+    public void warn(Object msg) {
+        try {
+            logger.log(fqcn, Level.WARN, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // warn
+    
+    private void traceAndExit(Exception e) {
+        System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
+                + " Details=" + e.getMessage());
+        System.exit(-1);
+    } // traceAndExit
     
 } // CygnusLogger
