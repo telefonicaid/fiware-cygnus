@@ -23,7 +23,7 @@ Then each file can be edited in order to change the configuration that will affe
 
 ## Files for each instance
 
-The other files are `cygnus.conf.template` and `flume.conf.template`. These files should be copied for each intantance of Cygnus that want to run.
+The other files are `cygnus.conf.template` and `flume.conf.template`. These files should be copied for each instance of Cygnus wanted to be run.
 
 Example:
 ```bash
