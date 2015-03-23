@@ -1,27 +1,23 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of perseo
+# This file is part of fiware-connectors (FI-WARE project).
 #
-# perseo is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the License,
-# or (at your option) any later version.
+# fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
 #
-# perseo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License along with perseo.
-# If not, seehttp://www.gnu.org/licenses/.
+# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 import requests
 
@@ -78,10 +74,11 @@ def print_request(method, url, headers, body):
     :param body: body used
     """
     print "------------------------------ Request ----------------------------------------------"
-    print "url: (" + str(method) + "  " + str(url)+")"
-    print "\nHeader: (" + str(headers) + ")\n"
-    if body is not None:
-        print "\nBody: ("  + str(body) + ")\n\n"
+    print "url: " + str(method) + "  " + str(url)+"\n"
+    if headers is not None:
+        print "Header: " + str(headers) + "\n"
+    if body != EMPTY:
+        print "Body: "  + str(body) + "\n\n\n"
     print "----------------------------- End request ---------------------------------------------\n\n\n\n"
 
 def print_response(response):
@@ -89,12 +86,15 @@ def print_response(response):
     Show response in console
     :param response: http code, header and body returned
     """
+    body = response.text
+    headers = response.headers
     print "---------------------------------- Response ----------------------------------------------"
-    print "status code: " + str(response.status_code)
-    print "\nHeader: " + str(response.headers)
-    print "\nBody: (" + str(response.text) + ")\n\n\n"
+    print "status code: " + str(response.status_code) + "\n"
+    if headers is not None:
+        print "Header: " + str(headers) + "\n"
+    if body != EMPTY:
+        print "Body: " + str(body) + "\n\n\n"
     print "--------------------------------- End Response --------------------------------------------"
-
 def request (method, **kwargs):
     """
     launch a request
@@ -107,8 +107,8 @@ def request (method, **kwargs):
     :param verify: if the SSL is verified
     :return: response (code, headers and body)
 
-    Note: two lines are comments because is only to debug, the first show the request and the second, show the response
-
+    Note: two lines are comments because these are only used to internal debug in tests, 
+	      the first show the request and the second, show the response
     """
     try:
         Url = kwargs.get(URL, EMPTY)
@@ -129,7 +129,7 @@ def request (method, **kwargs):
         #print_response(resp)
         return resp
     except Exception, e:
-         print " ERROR IN REQUEST: %s  \nurl    : %s \nheaders: %s \npayload: %s" % (str(e), Url, str(Headers), Body)
+        assert not True,  " ERROR IN REQUEST: %s  \nurl    : %s \nheaders: %s \npayload: %s" % (str(e), Url, str(Headers), Body)
 
 def assert_status_code (expected, resp, Error_msg):
      """

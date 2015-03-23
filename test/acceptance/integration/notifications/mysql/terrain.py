@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors (FI-WARE project).
 #
@@ -17,17 +17,19 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
+
+import time
 
 from lettuce import world, after, before
-import time
 import tools.general_utils
-from tools.cygnus import Cygnus
-from tools.mysql_utils import Mysql
+
+
 
 @before.all
 def before_all_scenarios():
     world.test_time_init = time.strftime("%c")
+    world.background_executed = False  # used to that background will be executed only once in each feature
 
 
 @before.each_scenario
@@ -36,30 +38,7 @@ def before_each_scenario(scenario):
     actions before each scenario
     :param scenario:
     """
-    world.cygnus        = Cygnus (world.config['cygnus']['cygnus_url'],
-                                  management_port=world.config['cygnus']['cygnus_management_port'],
-                                  version=world.config['cygnus']['cygnus_version'],
-                                  verify_version=world.config['cygnus']['cygnus_verify_version'],
-                                  notif_user_agent= world.config['cygnus']['cygnus_user_agent'],
-                                  tenant_row_default=world.config['cygnus']['cygnus_organization_per_row_default'],
-                                  tenant_col_default=world.config['cygnus']['cygnus_organization_per_col_default'],
-                                  service_path_default=world.config['cygnus']['cygnus_service_path_default'],
-                                  identity_id_default =world.config['cygnus']['cygnus_identity_id_default'],
-                                  identity_type_default=world.config['cygnus']['cygnus_identity_type_default'],
-                                  attribute_number_default=world.config['cygnus']['cygnus_attributes_number_default'],
-                                  attribute_name_default=world.config['cygnus']['cygnus_attributes_name_default']
-    )
-
-    world.mysql          = Mysql(
-                             world.config['mysql']['mysql_host'],
-                             world.config['mysql']['mysql_port'],
-                             world.config['mysql']['mysql_user'],
-                             world.config['mysql']['mysql_pass'],
-                             version=world.config['mysql']['mysql_version'],
-                             retries_number=world.config['mysql']['mysql_retries_table_search'],
-                             delay_to_retry=world.config['mysql']['mysql_delay_to_retry']
-    )
-
+    pass
 
 @after.each_scenario
 def after_each_scenario(scenario):
