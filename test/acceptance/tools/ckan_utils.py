@@ -1,34 +1,28 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of perseo
+# This file is part of fiware-connectors (FI-WARE project).
 #
-# perseo is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the License,
-# or (at your option) any later version.
+# fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
 #
-# perseo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License along with perseo.
-# If not, seehttp://www.gnu.org/licenses/.
+# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
-import time
-
-import http_utils
-import general_utils
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 
 # general constants
+from tools import general_utils, http_utils
+
 EMPTY   = u''
 WITHOUT = u'without'
 
@@ -38,6 +32,16 @@ HEADER_CONTENT_TYPE    = u'Content-Type'
 HEADER_APPLICATION     = u'application/json'
 VERSION                = u'ckan_version'
 VERSION_VALUE_DEFAULT  = u'2.0'
+HOST                   = u'host'
+HOST_VALUE_DEFAULT     = u'127.0.0.1'
+PORT                   = u'port'
+PORT_VALUE_DEFAULT     = u'80'
+AUTHORIZATION          = u'authorization'
+VERIFY_VERSION         = u'verify_version'
+FALSE_VALUE            = u'false'
+ORION_URL              = u'orion_url'
+ORION_URL_DEFAULT      = u'http://localhost:1026'
+SSL                    = u'ssl'
 RETRIES_DATASET_SEARCH = u'retries_dataset_search'
 DELAY_TO_RETRY         = u'delay_to_retry'
 
@@ -71,19 +75,39 @@ TRUE                   = u'true'
 
 
 class Ckan:
-    def __init__(self, endpoint_url, authorization, **kwargs):
+    def __init__(self, **kwargs):
         """
         constructor
-        :param endpoint_url: endpoint url used in ckan requests (MANDATORY)
-        :param authorization: API KEY (authorization) used in ckan requests (MANDATORY)
         :param ckan_version: ckan version (OPTIONAL)
+        :param ckan_verify_version: determine whether the version is verified or not (True or False). (OPTIONAL)
+        :param authorization: API KEY (authorization) used in ckan requests (OPTIONAL)
+        :param host: ckan host (MANDATORY)
+        :param port: ckan port (MANDATORY)
+        :param orion_url: Orion URL used to compose the resource URL with the convenience operation URL to query it (OPTIONAL)
+        :param ssl: enable SSL for secure Http transportation; 'true' or 'false' (OPTIONAL)
+        :param capacity: capacity of the channel (OPTIONAL)
+        :param channel_transaction_capacity: amount of bytes that can be sent per transaction (OPTIONAL)
+        :param retries_number: number of retries when get values (OPTIONAL)
+        :param delay_to_retry: time to delay each retry (OPTIONAL)
+        endpoint_url: endpoint url used in ckan requests
         """
-        self.endpoint = endpoint_url
-        self.authorization = authorization
-        self.version = kwargs.get(VERSION, VERSION_VALUE_DEFAULT)
+        self.version             = kwargs.get(VERSION, VERSION_VALUE_DEFAULT)
+        self.ckan_verify_version = kwargs.get(VERIFY_VERSION, FALSE_VALUE)
+        self.authorization       = kwargs.get(AUTHORIZATION, EMPTY)
+        self.host                = kwargs.get(HOST, HOST_VALUE_DEFAULT)
+        self.port                = kwargs.get(PORT, PORT_VALUE_DEFAULT)
+        self.orion_url           = kwargs.get(ORION_URL, ORION_URL_DEFAULT)
+        self.ssl                 = kwargs.get(SSL, FALSE_VALUE)
+        self.capacity            = kwargs.get("capacity", "1000")
+        self.transaction_capacity= kwargs.get("transaction_capacity", "100")
         self.retries_number = kwargs.get(RETRIES_DATASET_SEARCH, 15)
         self.retry_delay = kwargs.get(DELAY_TO_RETRY, 10)
 
+        if self.ssl.lower() == "true":
+            self.endpoint = "https://"
+        if self.ssl.lower() == "false":
+            self.endpoint = "http://"
+        self.endpoint = self.endpoint + self.host+":"+self.port
 
     def __create_url(self, operation, element=EMPTY):
         """
@@ -102,8 +126,11 @@ class Ckan:
         return value
 
     def __create_headers(self):
+        """
+        create headers for different requests
+        :return header dict
+        """
         return {HEADER_AUTHORIZATION: self.authorization, HEADER_CONTENT_TYPE: HEADER_APPLICATION}
-        pass
 
     def __create_datastore_in_resource (self, resource_id, fields):
         """
@@ -123,11 +150,11 @@ class Ckan:
         """
         Verify if ckan is installed and that version is the expected, default version is 2.0
         """
-        resp= http_utils.request(http_utils.GET, url=self.__create_url(VERSION), headers=self.__create_headers())
-        body_dict = general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
-        assert  self.version == str(body_dict[VERSION]), \
-        "Wrong ckan version verified: %s. Expected: %s. \n\nBody content: %s" \
-        % (str(body_dict[VERSION]), str(self.version), str(resp.text))
+        if self.ckan_verify_version.lower() == "true":
+            resp= http_utils.request(http_utils.GET, url=self.__create_url(VERSION), headers=self.__create_headers())
+            body_dict = general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
+            assert  self.version == str(body_dict[VERSION]), \
+                "Wrong ckan version verified: %s. Expected: %s. \n\nBody content: %s"  % (str(body_dict[VERSION]), str(self.version), str(resp.text))
         return True
 
     def verify_if_organization_exist(self, name):
@@ -171,7 +198,7 @@ class Ckan:
         """
         resp = http_utils.request(http_utils.GET, url=self.__create_url(PACKAGE_SHOW, name), headers=self.__create_headers())
         if resp.status_code == http_utils.status_codes[http_utils.OK]:
-            bodyDict=general_utils.convert_str_to_dict(resp.text,general_utils.JSON)
+            bodyDict= general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
             self.dataset_id = bodyDict[RESULT][ID]
             return self.dataset_id
         return False
@@ -184,10 +211,10 @@ class Ckan:
         self.dataset = name
         if not(self.verify_if_dataset_exist( name)):
             payload = general_utils.convert_dict_to_str({NAME:  self.dataset,
-                                                         OWNER_ORG: self.organization},general_utils.JSON)
+                                                         OWNER_ORG: self.organization}, general_utils.JSON)
             resp= http_utils.request(http_utils.POST, url=self.__create_url(PACKAGE_CREATE), headers=self.__create_headers(), data=payload)
             http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - creating dataset: %s ..." % (name))
-            bodyDict=general_utils.convert_str_to_dict(resp.text,general_utils.JSON)
+            bodyDict= general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
             self.dataset_id = bodyDict[RESULT][ID]
             return bodyDict[RESULT][ID]
         return False
@@ -235,7 +262,7 @@ class Ckan:
                                                          PACKAGE_ID: self.dataset_id}, general_utils.JSON)
             resp= http_utils.request(http_utils.POST, url=self.__create_url(RESOURCE_CREATE), headers=self.__create_headers(), data=payload)
             http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - creating resource: %s ..." % (name))
-            bodyDict=general_utils.convert_str_to_dict(resp.text,general_utils.JSON)
+            bodyDict= general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
             self.resource_id = bodyDict[RESULT][ID]
             self.__create_datastore_in_resource (self.resource_id, fields)
             return self.resource_id

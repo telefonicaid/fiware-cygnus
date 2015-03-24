@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+#
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors (FI-WARE project).
 #
@@ -16,21 +17,11 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
-from lettuce import step, world
+from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
 
-
-
-
-@step (u'cygnus is installed with type "([^"]*)"')
-def cygnus_is_installed_with_type(step, mode):
-    """
-    Verify if cygnus is installed and the type of persistent
-    :param step:
-    :param type: type of persistent (ROW or COLUMN)
-    """
-    world.cygnus.verify_cygnus (mode)
+#----------------------------------------------------------------------------------
 
 @step (u'Close mysql connection')
 def close_mysql_connection(step):
@@ -44,6 +35,7 @@ def close_mysql_connection(step):
 def mysql_is_installed_correctly(step, sink):
     """
      verify that Mysql is installed correctly, version is controlled
+    :param sink:
     :param step:
     """
     world.sink = sink
@@ -54,6 +46,7 @@ def mysql_is_installed_correctly(step, sink):
 def create_a_new_database (step, tenant):
     """
     create a new Database per column
+    :param tenant:
     :param step:
     :param DBname: database name
     """
@@ -64,6 +57,14 @@ def create_a_new_database (step, tenant):
 def create_a_new_table_with_service_attributes_attribute_type_attribute_data_type_and_metadata_data_type (step, resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type):
     """
     create a new table to column mode
+    :param step:
+    :param resource_name:
+    :param service_path:
+    :param attributes_number:
+    :param attribute_name:
+    :param attribute_type:
+    :param attribute_data_type:
+    :param metadata_data_type:
     """
     world.cygnus.create_table (resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type)
 
@@ -71,6 +72,10 @@ def create_a_new_table_with_service_attributes_attribute_type_attribute_data_typ
 def receives_a_notification_with_attributes_value_metadata_value_and_content (step, attribute_value, metadata_value, content):
     """
     store notification values in mysql
+    :param step:
+    :param attribute_value:
+    :param metadata_value:
+    :param content:
     """
     world.resp = world.cygnus.received_notification(world.cygnus.mappingQuotes (attribute_value), metadata_value, content)
 
@@ -78,6 +83,13 @@ def receives_a_notification_with_attributes_value_metadata_value_and_content (st
 def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
     """
     row configuration in row mode
+    :param step:
+    :param tenant:
+    :param service_path:
+    :param resource_name:
+    :param attribute_number:
+    :param attribute_name:
+    :param attribute_type:
     """
     world.cygnus.row_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
 
@@ -85,6 +97,9 @@ def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (ste
 def changes_new_destination_where_to_verify_in_table (step, new_destination, new_service_path):
     """
     change new destination and dataset to validate
+    :param step:
+    :param new_destination:
+    :param new_service_path:
     """
     world.cygnus.change_destination_to_pattern (new_destination, new_service_path)
 
@@ -93,6 +108,7 @@ def changes_new_destination_where_to_verify_in_table (step, new_destination, new
 def verify_that_the_attribute_value_is_stored_in_mysql(step):
     """
     Validate that the attribute value and type are stored in mysql per column
+    :param step:
     """
     world.cygnus.verify_table_search_values_by_column()
 
@@ -100,6 +116,7 @@ def verify_that_the_attribute_value_is_stored_in_mysql(step):
 def verify_the_metadatas_are_stored_in_mysql(step):
     """
     Validate that the attribute metadata is stored in mysql per column
+    :param step:
     """
     world.cygnus.verify_table_search_metadatas_values_by_column()
 
@@ -107,6 +124,8 @@ def verify_the_metadatas_are_stored_in_mysql(step):
 def verify_that_is_not_stored_in_mysql (step, error_msg):
     """
     Verify that is not stored in mysql
+    :param step:
+    :param error_msg:
     """
     world.cygnus.verify_table_search_without_data (error_msg)
 
@@ -114,6 +133,9 @@ def verify_that_is_not_stored_in_mysql (step, error_msg):
 def update_real_values_in_resource_and_service_path_to_notification_request (step, resource, service_path):
     """
     change real resource and service path to notification request
+    :param step:
+    :param resource:
+    :param service_path:
     """
     world.cygnus.change_destination_to_pattern (resource, service_path)
 
@@ -121,6 +143,7 @@ def update_real_values_in_resource_and_service_path_to_notification_request (ste
 def validate_that_the_attribute_value_and_type_are_stored_in_mysql (step):
     """
     Validate that the attributes values and type are stored in mysql per row mode
+    :param step:
     """
     world.cygnus.verify_table_search_values_by_row()
 
