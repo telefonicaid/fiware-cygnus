@@ -369,9 +369,9 @@ public class CygnusApplication extends Application {
     } // AgentShutdownHook
     
     /**
-     * Yet Another Flume Supervisor. This is a shortcut avoiding to extend the original LifecycleSupervisor class from
-     * Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding this:
-     * https://github.com/telefonicaid/fiware-connectors/issues/354
+     * Yet Another Flume Supervisor. FIXME: this is a shortcut avoiding to extend the original LifecycleSupervisor
+     * class from Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding
+     * this: https://github.com/telefonicaid/fiware-connectors/issues/354
      */
     private static class YAFS extends Thread {
         
