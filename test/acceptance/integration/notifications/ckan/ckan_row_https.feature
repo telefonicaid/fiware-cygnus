@@ -23,45 +23,38 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 #  Note: the "skip" tag is to skip the scenarios that still are not developed or failed
 #        -tg=-skip
 #
-
-
-Feature: Stored in hadoop new notifications per row from context broker
+Feature: Stored in ckan new notifications per row from context broker
   As a cygnus user
-  I want to be able to store in hadoop new notifications per row from context broker
+  I want to be able to store in ckan new notifications per row from context broker
   so that they become more functional and useful
 
   @happy_path
-  Scenario Outline:  store in hadoop new notifications from context broker
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  Scenario Outline: stored new notifications in ckan from context broker with or without metadata
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "service", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
-    When receives a notification with attributes value "random", metadata value "False" and content "<content>"
+    And "ckan" is installed correctly
+    And a tenant "tenant_3", service path "/servpath01", resource "room_room2", with attribute number "4", attribute name "random" and attribute type "celcius"
+    When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | content |
     | json    |
     | xml     |
 
   @happy_path
-  Scenario Outline: stored new notifications in hadoop from context broker with differents values
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  Scenario Outline: stored new notifications in ckan from context broker with or without metadata
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "default", service path "default", resource "room2_room", with attribute number "<attributes_number>", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "tenant_4", service path "default", resource "default", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | attributes_number | attribute_value   | metadata_value | content |
     | 1                 | 45.1              | True           | json    |
@@ -69,80 +62,75 @@ Feature: Stored in hadoop new notifications per row from context broker
     | 3                 | -45.2344          | False          | xml     |
     | 4                 | {'a':'1','b':'2'} | False          | json    |
 
+
   @organizations
-  Scenario Outline:  store in hadoop new notifications with different organizations values
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  Scenario Outline:  store in ckan new notifications with different organizations values
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "service", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "<tenant>", service path "default", resource "default", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | tenant                  | content |
-    | org6010000              | json    |
-    | org6010000              | xml     |
-    | ORGA6012000             | json    |
-    | ORGA6012000             | xml     |
-    | Orga_614000             | json    |
-    | Orga_614000             | xml     |
+    | orga60100_row           | json    |
+    | orga60100_row           | xml     |
+    | ORGA60111_row           | json    |
+    | ORGA60111_row           | xml     |
+    | Org_61401_row           | json    |
+    | Org_61401_row           | xml     |
     | with max length allowed | json    |
     | with max length allowed | xml     |
 
   @service_path
-  Scenario Outline:  store in hadoop new notifications with different service path values
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  Scenario Outline:  store in ckan new notifications with different service path values
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "<service_path>", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "<tenant>", service path "<service_path>", resource "room_room2", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
-    | tenant               | service_path | content |
-    | serv_path_several_10 |              | json    |
-    | serv_path_several_11 |              | xml     |
-    | serv_path_several_20 | serv6010     | json    |
-    | serv_path_several_21 | serv6011     | xml     |
-    | serv_path_several_30 | SERV6012     | json    |
-    | serv_path_several_31 | SERV6013     | xml     |
-    | serv_path_several_40 | Serv_614     | json    |
-    | serv_path_several_41 | Serv_615     | xml     |
-    | serv_path_several_50 | 1234567890   | json    |
-    | serv_path_several_51 | 1234567890   | xml     |
-    | serv_path_several_60 | /1234567890  | json    |
-    | serv_path_several_61 | /1234567890  | xml     |
-    | serv_path_several_70 | /            | json    |
-    | serv_path_several_71 | /            | xml     |
+    | tenant                 | service_path | content |
+    | serv_path_several_1000 |              | json    |
+    | serv_path_several_1100 |              | xml     |
+    | serv_path_several_2000 | serv6010     | json    |
+    | serv_path_several_2100 | serv6011     | xml     |
+    | serv_path_several_3000 | SERV6012     | json    |
+    | serv_path_several_3100 | SERV6013     | xml     |
+    | serv_path_several_4000 | Serv_614     | json    |
+    | serv_path_several_4100 | Serv_615     | xml     |
+    | serv_path_several_5000 | 1234567890   | json    |
+    | serv_path_several_5100 | 1234567890   | xml     |
+    | serv_path_several_6000 | /1234567890  | json    |
+    | serv_path_several_6100 | /1234567890  | xml     |
+    | serv_path_several_7000 | /            | json    |
+    | serv_path_several_7100 | /            | xml     |
 
-  @resources
-  Scenario Outline: store in hadoop new notifications with different resources values
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  @resource @BUG-280 @skip
+  Scenario Outline: store in ckan new notifications with different resources values in the same datastore
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "servicepath", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "tenant_240", service path "/servicepath", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | resource                | content |
     | Room2_Room              | json    |
     | Room2_Room              | xml     |
     | Room2_HOUSE             | json    |
     | Room2_HOUSE             | xml     |
+       # these lines are commented because is the same bug 280
     | Room2_                  | json    |
     | Room2_                  | xml     |
     | ROOM_house              | json    |
@@ -152,43 +140,63 @@ Feature: Stored in hadoop new notifications per row from context broker
     | with max length allowed | json    |
     | with max length allowed | xml     |
 
-  @attributes_number
-  Scenario Outline:  store in hadoop new notifications with different quantities of attributes
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  @resources
+  Scenario Outline: store in ckan new notifications with different resources values in differents datastore
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "<attribute_number>", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "tenant_250", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
-    | tenant               | attribute_number | content |
-    | attributes_multi_001 | 1                | json    |
-    | attributes_multi_001 | 1                | xml     |
-    | attributes_multi_003 | 3                | json    |
-    | attributes_multi_003 | 3                | xml     |
-    | attributes_multi_010 | 10               | json    |
-    | attributes_multi_010 | 10               | xml     |
+    | service_path | resource                | content |
+    | service10    | Room2_Room              | json    |
+    | service20    | Room2_Room              | xml     |
+    | service30    | Room2_HOUSE             | json    |
+    | service40    | Room2_HOUSE             | xml     |
+    | service50    | Room2_                  | json    |
+    | service60    | Room2_                  | xml     |
+    | service70    | ROOM_house              | json    |
+    | service80    | ROOM_house              | xml     |
+    | service90    | modelogw.assetgw_device | json    |
+    | serviceaa    | modelogw.assetgw_device | xml     |
+    | servicebb    | with max length allowed | json    |
+    | servicecc    | with max length allowed | xml     |
 
-  @values
-  Scenario Outline: stored new notifications in hadoop with different values
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  @attributes_number
+  Scenario Outline:  store in ckan new notifications with different quantities of attributes
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
+    When receives a notification with attributes value "random", metadata value "False" and content "<content>"
+    Then I receive an "OK" http code
+    And Validate that the attribute value, metadata and type are stored in ckan
+  Examples:
+    | tenant             | attribute_number | content |
+    | attributes_row_001 | 1                | json    |
+    | attributes_row_001 | 1                | xml     |
+    | attributes_row_003 | 3                | json    |
+    | attributes_row_003 | 3                | xml     |
+    | attributes_row_010 | 10               | json    |
+    | attributes_row_010 | 10               | xml     |
+
+  @values
+  Scenario Outline: stored new notifications in ckan with different values
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And copy another configuration files and restart cygnus service and this execution is only once "true"
+    And verify if cygnus is installed correctly
+    And "ckan" is installed correctly
+    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | tenant        | attribute_value   | content |
     | org_json_011  | 45.41             | json    |
@@ -214,20 +222,17 @@ Feature: Stored in hadoop new notifications per row from context broker
     | org_time_021  | 12:43:00          | xml     |
 
   @matching_table @skip
-  Scenario Outline: stored new notifications in hadoop with different matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+  Scenario Outline: stored new notifications in ckan with different matching_table patterns
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And "ckan" is installed correctly
+    And a tenant "match_table", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And changes new destination "<new_destination>" where to verify in dataset "<new_dataset>"
-    And Validate that the attribute value and type are stored in hadoop
-    And Validate that the attribute metadatas are stored in hadoop
-    And delete the file created in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
     | service_path | resource        | new_destination | new_dataset     | content |
     # identity id
@@ -265,22 +270,21 @@ Feature: Stored in hadoop new notifications per row from context broker
 
   @matching_table_errors @BUG-271 @skip
   Scenario Outline: not stored new notifications in mysql with errors in matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
-    When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
+    And "ckan" is installed correctly
+    And a tenant "match_table", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
+    When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value and type are stored in hadoop
-
+    And Validate that the attribute value, metadata and type are stored in ckan
   Examples:
   #  error lines in matching_table.conf file
-  #     14|entityId|destmissing(\d*)||errordataset
-  #     15|entityId|datasetmissing(\d*)|dest_error|
-    | service_path | resource              | content |
-    | servpath_33  | destmissing1_error    | json    |
-    | servpath_33  | destmissing1_error    | xml     |
-    | servpath_33  | datasetmissing1_error | json    |
-    | servpath_33  | datasetmissing1_error | xml     |
+  #  14|entityId|destmissing(\d*)||errordataset
+  #  15|entityId|datasetmissing(\d*)|dest_error|
+    | service_path     | resource              | content |
+    | servpath_row_010 | destmissing1_error    | json    |
+    | servpath_row_010 | destmissing1_error    | xml     |
+    | servpath_row_020 | datasetmissing1_error | json    |
+    | servpath_row_020 | datasetmissing1_error | xml     |

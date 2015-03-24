@@ -2,13 +2,13 @@
 #------
 *.out
 *.pyc
-properties.json
+
 .idea/
-logs/
-testreport/
-settings/
-old/
+certs/
 conf/
-script/
-scripts/
+logs/
+settings/
+testreport/
+properties.json
+
 
