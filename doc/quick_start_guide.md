@@ -147,7 +147,7 @@ $ ./notification.sh http://localhost:5050/notify
 ```
 
 ##Further reading
-This Quick Start Guide is just an initial approach to Cygnus. In order to understand all its power and how to play with sinks persisting data in real third-party storages, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-connectors), `flume/` section.
+This Quick Start Guide is just an initial approach to Cygnus. In order to understand all its power and how to play with sinks persisting data in real third-party storages, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-connectors) repository.
 
 Of special interest are:
 

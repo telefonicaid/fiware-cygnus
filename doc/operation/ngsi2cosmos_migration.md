@@ -42,7 +42,7 @@ This kind of migration is as simple as installing Cygnus 0.1. Take it from https
     $ git clone https://github.com/telefonicaid/fiware-connectors
     $ git checkout release/0.1
 
-Follow the `flume/README.md` in order to get an instance. Properly configured, Cygnus 0.1 is 100% functionally equivalent to ngsi2cosmos, thus nothing has to be done in Orion nor Cosmos.  
+Follow the `README.md` in order to get an instance. Properly configured, Cygnus 0.1 is 100% functionally equivalent to ngsi2cosmos, thus nothing has to be done in Orion nor Cosmos.  
 
 ## Moving to Cygnus 0.2
 
@@ -51,7 +51,7 @@ First of all, install Cygnus 0.2 (in fact, install 0.2.1 which has an important 
     $ git clone https://github.com/telefonicaid/fiware-connectors
     $ git checkout release/0.2.1
 
-Follow the `flume/README.md` in order to get an instance.
+Follow the `README.md` in order to get an instance.
 
 Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after installing Cygnus 0.2.1 you will need to translate the data within your HDFS space. In order to do so, please follow the guidelines within `doc/operation/cygnus_0.1_to_0.2_migration.md`.
 
@@ -62,7 +62,7 @@ First of all, install Cygnus 0.3 (or higher, if available). Take it from https:/
     $ git clone https://github.com/telefonicaid/fiware-connectors
     $ git checkout release/0.3 # or release/0.4 etc
 
-Follow the `flume/README.md` in order to get an instance.
+Follow the `README.md` in order to get an instance.
 
 Then, due to from Cygnus 0.2 the data is persisted in Json format, after installing Cygnus 0.3 you will need to translate the data. In order to do so, please follow the guidelines within `doc/operation/cygnus_0.1_to_0.3_migration.md`.
 
