@@ -37,18 +37,18 @@ Being the column mode as:
 
 ## Moving to Cygnus 0.1
 
-This kind of migration is as simple as installing Cygnus 0.1. Take it from https://github.com/telefonicaid/fiware-connectors/releases/tag/release-0.1, or `git checkout` to `release/0.1` after cloning the source code:
+This kind of migration is as simple as installing Cygnus 0.1. Take it from https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.1, or `git checkout` to `release/0.1` after cloning the source code:
 
-    $ git clone https://github.com/telefonicaid/fiware-connectors
+    $ git clone https://github.com/telefonicaid/fiware-cygnus
     $ git checkout release/0.1
 
 Follow the `README.md` in order to get an instance. Properly configured, Cygnus 0.1 is 100% functionally equivalent to ngsi2cosmos, thus nothing has to be done in Orion nor Cosmos.  
 
 ## Moving to Cygnus 0.2
 
-First of all, install Cygnus 0.2 (in fact, install 0.2.1 which has an important bugfix). Take it from https://github.com/telefonicaid/fiware-connectors/releases/tag/release-0.2.1, or `git checkout` to `release/0.2.1` after cloning the source code:
+First of all, install Cygnus 0.2 (in fact, install 0.2.1 which has an important bugfix). Take it from https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.2.1, or `git checkout` to `release/0.2.1` after cloning the source code:
 
-    $ git clone https://github.com/telefonicaid/fiware-connectors
+    $ git clone https://github.com/telefonicaid/fiware-cygnus
     $ git checkout release/0.2.1
 
 Follow the `README.md` in order to get an instance.
@@ -57,9 +57,9 @@ Then, due to Cygnus 0.2 (and higher) persists the data in Json format, after ins
 
 ## Moving to Cygnus 0.3 or higher
 
-First of all, install Cygnus 0.3 (or higher, if available). Take it from https://github.com/telefonicaid/fiware-connectors/releases/tag/release-3, or `git checkout` to `release/0.3` after cloning the source code:
+First of all, install Cygnus 0.3 (or higher, if available). Take it from https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-3, or `git checkout` to `release/0.3` after cloning the source code:
 
-    $ git clone https://github.com/telefonicaid/fiware-connectors
+    $ git clone https://github.com/telefonicaid/fiware-cygnus
     $ git checkout release/0.3 # or release/0.4 etc
 
 Follow the `README.md` in order to get an instance.

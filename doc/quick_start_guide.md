@@ -1,5 +1,5 @@
 #Cygnus Quick Start Guide
-This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-connectors).
+This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-cygnus).
 
 ##Basic knowlegde about Cygnus
 Previous to installing and using it, you should know a couple of things about Cygnus.
@@ -147,7 +147,7 @@ $ ./notification.sh http://localhost:5050/notify
 ```
 
 ##Further reading
-This Quick Start Guide is just an initial approach to Cygnus. In order to understand all its power and how to play with sinks persisting data in real third-party storages, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-connectors) repository.
+This Quick Start Guide is just an initial approach to Cygnus. In order to understand all its power and how to play with sinks persisting data in real third-party storages, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-cygnus) repository.
 
 Of special interest are:
 

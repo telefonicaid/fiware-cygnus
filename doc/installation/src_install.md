@@ -34,18 +34,18 @@ The creation of the `plugins.d` directory is related to the installation of thir
 
 Then, the developed classes must be packaged in a Java jar file; this can be done by including the dependencies in the package (**recommended**):
 
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
+    $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ git checkout <branch>
-    $ cd fiware-connectors/flume
+    $ cd fiware-cygnus
     $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
 
 or not:
 
-    $ git clone https://github.com/telefonicaid/fiware-connectors.git
+    $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ git checkout <branch>
-    $ cd fiware-connectors/flume
+    $ cd fiware-cygnus
     $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
