@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
 # This file is part of fiware-connectors (FI-WARE project).
 #
@@ -17,8 +17,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
-
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 import json
 import random
@@ -32,22 +31,21 @@ EMPTY   = u''
 XML     = u'xml'
 JSON    = u'json'
 
-
 def string_generator(size=10, chars=string.ascii_letters + string.digits):
-        """
-        Method to create random strings
-        :param size: define the string size
-        :param chars: the characters to be use to create the string
-        return ''.join(random.choice(chars) for x in range(size))
-        """
-        return ''.join(random.choice(chars) for x in range(size))
+    """
+    Method to create random strings
+    :param size: define the string size
+    :param chars: the characters to be use to create the string
+    return random string
+    """
+    return ''.join(random.choice(chars) for x in range(size))
 
 def number_generator (size=5, decimals="%0.1f"):
     """"
     Method to create random number
     :param decimals: decimal account
     :param size: define the number size
-    :return:
+    :return: random integer
     """
     return decimals % (random.random() * (10**size))
 
@@ -58,10 +56,13 @@ def convert_str_to_dict (body, content):
     :param content: content type (json or xml)
     :return: dictionary
     """
-    if content == XML:
-        return xmltodict.parse(body)
-    else:
-        return json.loads(body)
+    try:
+        if content == XML:
+            return xmltodict.parse(body)
+        else:
+            return json.loads(body)
+    except Exception, e:
+        assert False,  " ERROR - converting string to %s dictionary: \n%s \Exception error:\n%s" % (str(content), str(body), str(e))
 
 def convert_dict_to_str (body, content):
     """
@@ -70,10 +71,13 @@ def convert_dict_to_str (body, content):
     :param content: content type (json or xml)
     :return: string
     """
-    if content == XML:
-        return xmltodict.unparse(body)
-    else:
-        return json.dumps(body)
+    try:
+        if content == XML:
+            return xmltodict.unparse(body)
+        else:
+            return json.dumps(body)
+    except Exception, e:
+        assert False,  " ERROR - converting %s dictionary to string: \n%s \Exception error:\n%s" % (str(content), str(body), str(e))
 
 def convert_str_to_list (text, separator):
     """
@@ -107,6 +111,14 @@ def generate_date_zulu():
     """
     generate date & time zulu
     ex: 2014-05-06T10:39:47.696Z
+    :return date-time zulu formatted
     """
     return str(time.strftime("%Y-%m-%dT%H:%M:%S.095Z"))
 
+def generate_timestamp():
+    """
+    generate timestamp
+    ex: 1425373697
+    :return  timestamp
+    """
+    return time.time()
