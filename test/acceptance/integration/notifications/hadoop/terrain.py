@@ -48,7 +48,7 @@ def after_each_scenario(scenario):
     :param scenario:
     """
     world.hadoop.deleteFile()
-    s
+
 
 @after.all
 def after_all_scenarios(scenario):
