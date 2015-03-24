@@ -1,31 +1,27 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of perseo
+# This file is part of fiware-connectors (FI-WARE project).
 #
-# perseo is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the License,
-# or (at your option) any later version.
+# fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
 #
-# perseo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License along with perseo.
-# If not, seehttp://www.gnu.org/licenses/.
+# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
-import time
-import general_utils
-import http_utils
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
+import time
+from tools import general_utils
+import http_utils
 
 # general constants
 EMPTY = u''
@@ -33,11 +29,18 @@ EMPTY = u''
 # url and header constants
 VERSION             = u'version'
 VERIFY_VERSION      = u'verify_version'
+NAME_NODE_URL       = u'namenode_url'
 MANAGER_NODE_URL    = u'manager_node_url'
+USER                = u'user'
+PASSWORD            = u'password'
+API                 = u'api'
+KBR5_AUTH           = u'krb5_auth'
+KRB5_USER           = u'krb5_user'
+KRB5_PASSWORD       = u'krb5_password'
 RETRIES_NUMBER      = u'retries_number'
 DELAY_TO_RETRY      = u'delay_to_retry'
 OPEN_FILE           = 'OPEN'
-DELETE_DIR         = 'DELETE'
+DELETE_DIR          = 'DELETE'
 PATH_VERSION        = u'ws/v1/cluster/info'
 CONTENT_TYPE        = u'Content-Type'
 APPLICATION_CONTENT = u'application/json'
@@ -60,23 +63,36 @@ class Hadoop:
     Hadoop  functionabilities
     """
 
-    def __init__(self, name_node_url, user, **kwargs):
+    def __init__(self, **kwargs):
         """
         constructor
-        :param name node_url: namenode endpoint (MANDATORY)
-        :param user: hadoop user (MANDATORY)
+        :param name node_url: namenode endpoint (OPTIONAL)
+        :param user: hadoop user (OPTIONAL)
+        :param password: hadoop password (OPTIONAL)
         :param version: hadoop version (OPTIONAL)
         :param verify_version: verify version (True |False) (OPTIONAL)
         :param manager_node_url: manager_node endpoint (OPTIONAL)
+        :param api: HDFS backend type (webhdfs, httpfs or infinity)
+        :param krb5_auth: Kerberos-based authentication enabling (true | false)
+        :param krb5_user: Kerberos username
+        :param krb5_password: Kerberos password
+        :param capacity: capacity of the channel (OPTIONAL)
+        :param channel_transaction_capacity: amount of bytes that can be sent per transaction (OPTIONAL)
         :param retries_number: number of retries when get values (OPTIONAL)
         :param delay_to_retry: time to delay each retry (OPTIONAL)
-
         """
-        self.name_node_url       = name_node_url
-        self.user                = user
+        self.name_node_url       = kwargs.get(NAME_NODE_URL, EMPTY)
+        self.user                = kwargs.get(USER, EMPTY)
+        self.password            = kwargs.get(PASSWORD, EMPTY)
         self.version             = kwargs.get(VERSION, EMPTY)
         self.verify_version      = kwargs.get(VERSION, "False")
         self.manager_node_url    = kwargs.get(MANAGER_NODE_URL, EMPTY)
+        self.api                 = kwargs.get(API, "httpfs")
+        self.krb5_auth           = kwargs.get(KBR5_AUTH, "False")
+        self.krb5_user           = kwargs.get(KRB5_USER, EMPTY)
+        self.krb5_password       = kwargs.get(KRB5_PASSWORD, EMPTY)
+        self.capacity            = kwargs.get("capacity", "1000")
+        self.transaction_capacity= kwargs.get("transaction_capacity", "100")
         self.retries_number      = kwargs.get(RETRIES_NUMBER, 15)
         self.retry_delay         = kwargs.get(DELAY_TO_RETRY, 10)
 
@@ -92,7 +108,6 @@ class Hadoop:
             value = "%s/%s/%s/%s/%s.txt?op=OPEN&user.name=%s" % (self.name_node_url, PATH_HADOOP, self.user, self.directory, self.file_name, self.user)
         if operation == DELETE_DIR:
             value = "%s/%s/%s/%s?op=DELETE&recursive=true&user.name=%s" % (self.name_node_url, PATH_HADOOP, self.user, self.tenant, self.user)
-
         return value
 
     def __create_headers(self):
@@ -117,8 +132,6 @@ class Hadoop:
         "Wrong hadoop version \nverified: %s. Expected: %s. \n\nBody content: %s" \
         % (str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), str(self.version), str(resp.text))
 
-
-
     def open_file (self, directory, file_name):
         """
         open file in hadoop
@@ -130,7 +143,6 @@ class Hadoop:
         self.directory= directory
         resp = http_utils.request(http_utils.GET, url=self.__create_url(OPEN_FILE), headers=self.__create_headers())
         return resp
-
 
     def __splitElement (self, body, attribute_name, attribute_value):
         """
@@ -154,7 +166,6 @@ class Hadoop:
             if dictTemp [ATTR_NAME] == attribute_name and  dictTemp [ATTR_VALUE] == attribute_value :
                 return dictTemp
         return NAME_IS_MISSING
-
 
     def retry_in_file_search_data (self, directory, file_name, attribute_name, attribute_value):
         """
