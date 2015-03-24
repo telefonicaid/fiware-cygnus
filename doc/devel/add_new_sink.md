@@ -18,7 +18,7 @@ We will not merge new code in the Cygnus repository coming from a different path
 
 ### Coding style 
 
-Please, add the `fiware-connectors/flume/telefonica_checkstyle.xml` to you IDE as check style configuration. This XML file contains all the coding style rules accepted by Telefónica.
+Please, add the `fiware-connectors/telefonica_checkstyle.xml` to you IDE as check style configuration. This XML file contains all the coding style rules accepted by Telefónica.
 
 We will not merge new code in the Cygnus repository if such coding style is not met.
 
@@ -29,7 +29,7 @@ We will not merge new code in the Cygnus repository if such coding style is not 
 
 You find this class at the following path:
 
-    fiware-connectors/flume/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks/OrionSink.java
+    fiware-connectors/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks/OrionSink.java
 
 `OrionSink`, on its side, extends `AbstractSink` from the Flume API; this class is the one providing all the necessary methods, as previously said. As can be seen, all of them are already implemented (`start`, `stop`, etc) or overridden (`process`). Only showing relevant parts:
 
@@ -79,7 +79,7 @@ The `process` method is responsible for getting the channel, initiating a Flume 
 
 Please notice that the `process` method handles all the possible errors that may occur during a Flume transaction by catching exceptions, especially those thrown by the abstract `persist` method. There exists a collection of Cygnus-related exceptions whose usage is mandatory located at:
 
-    fiware-connectors/flume/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/errors/
+    fiware-connectors/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/errors/
 
 ### Sink configuration
 
@@ -132,13 +132,13 @@ New sink classes must be called `Orion<technology>Sink`, being <i>technology</i>
 
 The path where the new sink is to be placed:
 
-    fiware-connectors/flume/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks
+    fiware-connectors/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks
  
 ### Backend convenience classes
 
 Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. These classes must be placed at:
 
-    fiware-connectors/flume/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/backends/<my_backend_classes>/
+    fiware-connectors/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/backends/<my_backend_classes>/
 
 ## Contact information
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
