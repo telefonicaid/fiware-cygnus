@@ -62,7 +62,7 @@ class Mysql:
         self.port     = kwargs.get("port", EMPTY)
         self.user     = kwargs.get("user", EMPTY)
         self.password = kwargs.get("password", EMPTY)
-        #self.database = kwargs.get("database", EMPTY)
+        self.database = kwargs.get("database", EMPTY)
         self.version = kwargs.get("version", "2,2")
         self.mysql_verify_version = kwargs.get("mysql_verify_version", "false")
         self.capacity = kwargs.get("capacity", "1000")
@@ -124,7 +124,7 @@ class Mysql:
         """
         Close a mysql connection and drop the database before
         """
-        #self.__drop_database()
+        self.__drop_database()
         self.conn.close()  # close mysql connection
         gc.collect()       # invoking the Python garbage collector
 
