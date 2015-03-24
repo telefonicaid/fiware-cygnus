@@ -77,6 +77,7 @@ public class CygnusApplication extends Application {
     private static ImmutableMap<String, SinkRunner> sinksRef;
     private static LifecycleSupervisor supervisorRef;
     private static final int CHANNEL_CHECKING_INTERVAL = 5000;
+    private static final int YAFS_CHECKING_INTERVAL = 1000;
     private static final int DEF_MGMT_IF_PORT = 8081;
     private static final int DEF_POLLING_INTERVAL = 30;
     
@@ -397,7 +398,7 @@ public class CygnusApplication extends Application {
                 } // for
                 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(YAFS_CHECKING_INTERVAL);
                 } catch (InterruptedException ex) {
                     System.exit(-1);
                 }
