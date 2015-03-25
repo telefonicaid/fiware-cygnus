@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -76,6 +77,7 @@ public class CygnusApplication extends Application {
     private static ImmutableMap<String, SinkRunner> sinksRef;
     private static LifecycleSupervisor supervisorRef;
     private static final int CHANNEL_CHECKING_INTERVAL = 5000;
+    private static final int YAFS_CHECKING_INTERVAL = 1000;
     private static final int DEF_MGMT_IF_PORT = 8081;
     private static final int DEF_POLLING_INTERVAL = 30;
     
@@ -104,7 +106,7 @@ public class CygnusApplication extends Application {
             supervisorRef = null;
         } // try catch // try catch
     } // CygnusApplication
-    
+        
     /**
      * Gets a reference to the private variable "supervisor" within the super class "Application". This is achieved by
      * using Java Reflection.
@@ -118,7 +120,9 @@ public class CygnusApplication extends Application {
     } // getSupervisorRef
     
     /**
-     * Stops and starts all the components when a configuration change event is generated.
+     * Stops and starts all the components when a configuration change event is generated. It also gets a reference to
+     * all the Flume components.
+     * 
      * @param conf
      */
     @Override
@@ -226,7 +230,7 @@ public class CygnusApplication extends Application {
                 application = new CygnusApplication();
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
-            
+                        
             // start the Cygnus application, including the management interface
             LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
             mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
@@ -236,6 +240,10 @@ public class CygnusApplication extends Application {
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
             Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
+            
+            // start YAFS
+            YAFS yafs = new YAFS();
+            yafs.start();
         } catch (IllegalArgumentException e) {
             LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
         } catch (ParseException e) {
@@ -332,9 +340,7 @@ public class CygnusApplication extends Application {
                 LifecycleState state = source.getLifecycleState();
                 System.out.println("Stopping " + sourceName + " (lyfecycle state=" + state.toString() + ")");
                 supervisorRef.unsupervise(source);
-                //source.stop();
             } // for
-            
         } // stopSources
         
         /**
@@ -362,5 +368,43 @@ public class CygnusApplication extends Application {
         } // stopSinks
                 
     } // AgentShutdownHook
+    
+    /**
+     * Yet Another Flume Supervisor. FIXME: this is a shortcut avoiding to extend the original LifecycleSupervisor
+     * class from Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding
+     * this: https://github.com/telefonicaid/fiware-connectors/issues/354
+     */
+    private static class YAFS extends Thread {
+        
+        private final Thread[] threadArray;
+        
+        /**
+         * Constructor.
+         */
+        public YAFS() {
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+        } // YAFS
+        
+        @Override
+        public void run() {
+            while (true) {
+                for (Thread t: threadArray) {
+                    // exit Cygnus if some thread (except for the main one) is found to be not alive or in a terminated
+                    // state
+                    if (!t.getName().equals("main") && (t.getState() == State.TERMINATED || !t.isAlive())) {
+                        System.exit(-1);
+                    } // if
+                } // for
+                
+                try {
+                    Thread.sleep(YAFS_CHECKING_INTERVAL);
+                } catch (InterruptedException ex) {
+                    System.exit(-1);
+                }
+            } // while
+        } // run
+        
+    } // YAFS
     
 } // CygnusApplication

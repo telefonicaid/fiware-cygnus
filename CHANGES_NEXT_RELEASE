@@ -2,3 +2,4 @@
 * Management interface port is not opened twice anymore (#302)
 * Added a polling interval parameter for reloading the Flume configuration (#334)
 * Bug fix, flume-conf.properties.template file from Apache Flume is not copied anymore to Cygnus folder (#348)
+* Cygnus exits if the HTTPSource listening port is already in use (#340)
