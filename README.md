@@ -1,8 +1,47 @@
-# Cygnus connector
+#<a name="top"></a>Cygnus
 
-This connector is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos), and implements a Flume-based connector for context data coming from Orion Context Broker and aimed to be stored in a specific persistent storage, such as HDFS, CKAN or MySQL.
+* [What is Cygnus](#section1)
+* [Design](#section2)
+* [Functionality explained (Json notification example)](#section3)
+  * [OrionHDFSSink persistence](#section3.1)
+  * [OrionCKANSink persistence](#section3.2)
+  * [OrionMySQLSink persistence](#section3.3)
+* [Functionality explained (XML notification example)](#section4)
+* [Installing Cygnus](#section5)
+  * [RPM install (recommended)](#section5.1)
+  * [Installing from sources (advanced)](#section5.2)
+* [Cygnus configuration](#section6)
+  * [`cygnus_instance_<id>.conf`](#section6.1)
+  * [`agent_<id>.conf`](#section6.2)
+* [Running Cygnus](#section7)
+  * [As a service (recommended)](#section7.1)
+  * [As standalone application (advanced)](#section7.2)
+* [Orion subscription](#section8)
+* [Logs](#section9)
+  * [log4j configuration](#section9.1)
+  * [Message types](#section9.2)
+* [Management interface](#section10)
+* [Contact](#section11)
 
-## Design
+##<a name="section1"></a>What is Cygnus
+
+Cygnus is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus.
+
+Cygnus uses the subscription/notification feature of Orion. A subscription is made in Orion on behalf of Cygnus, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
+
+Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/). In fact, Cygnus is a Flume agent, which is basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
+
+Current stable release is able to persist Orion context data in:
+
+* [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
+* [MySQL](https://www.mysql.com/), the well-know relational database manager.
+* [CKAN](http://ckan.org/), an Open Data platform.
+
+Cygnus is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
+
+[Top](#top)
+
+##<a name="section2"></a>Design
 
 All the details about Flume can be found at [flume.apache.org](http://flume.apache.org/), but, as a reminder, some concepts will be explained here:
 
@@ -22,9 +61,11 @@ All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined wit
 1.  On behalf of Cygnus, subscribe to Orion for certain context information.
 2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
 3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
-4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the notifications from the sink channel and persist the data in the appropriate format.
+4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the Flume events from the sink channel and persist the data in the appropriate format.
 
-## Functionality explained (Json notification example)
+[Top](#top)
+
+##<a name="section3"></a>Functionality explained (Json notification example)
 
 Let's consider the following notification in Json format coming from an Orion Context Broker instance:
 
@@ -98,7 +139,9 @@ Let's have a look on the Flume event headers:
 
 Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
 
-### OrionHDFSSink persistence
+[Top](#top)
+
+###<a name="section3.1"></a>OrionHDFSSink persistence
 
 This sink persists the data in files, one per each entity, following this entity descriptor format:
 
@@ -143,7 +186,9 @@ On the contrary, being the persistence mode `column`, the table named `default_u
     |---------------------|-------------|----------------------------------------------------|
     | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
 
-### OrionCKANSink persistence
+[Top](#top)
+
+###<a name="section3.2"></a>OrionCKANSink persistence
 
 This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), whose name is specified by the notified `Fiware-ServicePath` header (or by the `default_service_path` property -prefixed by organization name- in the CKAN sink configuration, if such a header is not notified). Datasets belong to single organization, whose name is specified by the notified `Fiware-Service` header (or by the `default_service` property if it is not notified). 
 
@@ -180,7 +225,9 @@ The information stored in the datastore can be accesses as any other CKAN inform
 
 Each organization/tenant is associated to a CKAN organization.
 
-### OrionMySQLSink persistence
+[Top](#top)
+
+###<a name="section3.3"></a>OrionMySQLSink persistence
 
 Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
 
@@ -215,7 +262,9 @@ On the contrary, being the persistence mode `column`, the table named `workingro
 
 Each organization/tenant is associated to a different database.
 
-## Functionality explained (XML notification example)
+[Top](#top)
+
+##<a name="section4"></a>Functionality explained (XML notification example)
 
 Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
 
@@ -234,8 +283,10 @@ Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugin
 
 The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
 
-## Installing Cygnus
-###RPM install (recommended)
+[Top](#top)
+
+##<a name="section5"></a>Installing Cygnus
+###<a name="section5.1"></a>RPM install (recommended)
 Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -247,10 +298,14 @@ Simply configure the FIWARE repository if not yet configured and use your applic
     EOL
     $ yum install cygnus
 
-###Installing from sources (advanced)
+[Top](#top)
+
+###<a name="section5.2"></a>Installing from sources (advanced)
 Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
 
-## Cygnus configuration
+[Top](#top)
+
+##<a name="section6"></a>Cygnus configuration
 Cygnus is configured through two different files:
 
 * A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
@@ -258,7 +313,9 @@ Cygnus is configured through two different files:
 
 Please observe there may exist several Cygnus instances identified by `<id>`, which must be the same for both configuration files regarding the same Cygnus instance.
 
-###`cygnus_instance_<id>.conf`
+[Top](#top)
+
+###<a name="section6.1"></a>`cygnus_instance_<id>.conf`
 
 The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
 
@@ -279,7 +336,9 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
-###`agent_<id>.conf`
+[Top](#top)
+
+###<a name="section6.2"></a>`agent_<id>.conf`
 A typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and any of the available sinks is shown below. More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
 
 Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md). If your HDFS is not using such an authentication method, just set `cygnusagent.sinks.hdfs-sink.krb5_auth` to `false` and forget the rest of the Kerberos part.
@@ -312,7 +371,7 @@ cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
+cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
@@ -326,7 +385,7 @@ cygnusagent.sources.http-source.interceptors = ts de
 # Interceptor type, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 # Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
+cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
 # Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
 cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
@@ -336,7 +395,7 @@ cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/con
 # channel name from where to read notification events
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -370,7 +429,7 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.con
 # channel name from where to read notification events
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
-cygnusagent.sinks.ckan-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionCKANSink
+cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -389,7 +448,7 @@ cygnusagent.sinks.ckan-sink.ssl = false
 # channel name from where to read notification events
 cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-cygnusagent.sinks.mysql-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionMySQLSink
+cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
 # the FQDN/IP address where the MySQL server runs 
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listes for incomming connections
@@ -429,7 +488,10 @@ cygnusagent.channels.mysql-channel.capacity = 1000
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
 ```
 
-## Running as a service (recommended)
+[Top](#top)
+
+##<a name="section7"></a>Running Cygnus
+###<a name="section7.1"></a>As a service (recommended)
 <i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
 
 Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly configured, just use the `service` command to start, restart, stop or get the status (as a sudoer):
@@ -454,11 +516,13 @@ Previous commands afefcts to **all** of Cygnus instances configured. If only one
 
 Where `<id>` is the suffix at the end of the `cygnus_instace_<id>.conf` or `agent_<id>.conf` files you used to configure the instance.
 
-## Running as standalone application (advanced)
+[Top](#top)
+
+###<a name="section7.2"></a>As standalone application (advanced)
 
 <i>NOTE: If you installed Cygnus through the RPM, APACHE\_FLUME\_HOME is `/usr/cygnus/`. If not, it is a directory of your choice.</i>
 
-Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `es.tid.fiware.fiwareconnectors.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
+Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `com.telefonica.iot.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
 
 In foreground (with logging):
 
@@ -478,7 +542,9 @@ The parameters used in these commands are:
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
 * `-t` (or `--polling-interval`). Configures the polling interval (seconds) when the configuration is periodically reloaded. If not configured, the default value is used, `30`.
 
-## Orion subscription
+[Top](#top)
+
+##<a name="section8"></a>Orion subscription
 
 Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
 
@@ -510,9 +576,10 @@ Once the connector is running, it is necessary to tell Orion Context Broker abou
 
 Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
 
-## Logs
+[Top](#top)
 
-###log4j configuration
+##<a name="section9"></a>Logs
+###<a name="section9.1"></a>log4j configuration
 
 Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appender are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
@@ -545,11 +612,15 @@ Once the log4j has been properly configured, you only have to add to the Flume c
 
 In addition, you have a complete `log4j.properties` template in `conf/log4j.properties.template`, once you clone the Cygnus repository.
 
-### Message types
+[Top](#top)
+
+###<a name="section9.2"></a>Message types
 
 Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
 
-## Management interface
+[Top](#top)
+
+##<a name="section10"></a>Management interface
 
 From Cygnus 0.5 there is a REST-based management interface for administration purposes. Current available operations are:
 
@@ -559,7 +630,11 @@ From Cygnus 0.5 there is a REST-based management interface for administration pu
 
     {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
 
-## Contact
+[Top](#top)
+
+##<a name="section11"></a>Contact
 
 * Fermín Galán Márquez (fermin.galanmarquez@telefonica.com).
 * Francisco Romero Bueno (francisco.romerobueno@telefonica.com).
+
+[Top](#top)
