@@ -1,4 +1,4 @@
-package es.tid.fiware.cosmos.hivebasicclient;
+package com.telefonica.iot.hivebasicclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
