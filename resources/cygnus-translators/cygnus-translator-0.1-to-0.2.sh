@@ -1,7 +1,7 @@
 #! /bin/bash
 # Copyright 2014 Telefonica Investigacion y Desarrollo, S.A.U
 #
-# This file is part of fiware-connectors.
+# This file is part of fiware-cygnus.
 #
 # Orion Context Broker is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Affero General Public License as

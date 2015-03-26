@@ -1,16 +1,16 @@
 /**
  * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-connectors (FI-WARE project).
+ * This file is part of fiware-cygnus (FI-WARE project).
  *
- * fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
  * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
@@ -341,7 +341,7 @@ public class CKANCache {
 
             // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
             // method returns no resource lists for its packages! (not in CKAN 2.2)
-            // more info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+            // more info --> https://github.com/telefonicaid/fiware-cygnus/issues/153
             // if the resources list is null we must try to get it package by package
             if (ckanVersion.equals("2.0")) {
                 LOGGER.debug("CKAN version is 2.0, try to discover the resources for this package (pkgName="
@@ -403,7 +403,7 @@ public class CKANCache {
     /**
      * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
      * no resource lists for its packages! (not in CKAN 2.2)
-     * More info --> https://github.com/telefonicaid/fiware-connectors/issues/153
+     * More info --> https://github.com/telefonicaid/fiware-cygnus/issues/153
      * @param pkgName
      * @return The discovered resources for the given package.
      * @throws Exception
