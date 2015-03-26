@@ -58,7 +58,7 @@ The matching table file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there
 The usage of such an Interceptor is:
 
     cygnusagent.sources.http-source.interceptors = de <other-interceptors>
-    cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
+    cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
     cygnusagent.sources.http-source.interceptors.de.matching_table = [FLUME_HOME_DIR]/conf/matching_table.conf
 
 It is <b>very important</b> to configure the <b>absolute path to the matching table file</b>. 
