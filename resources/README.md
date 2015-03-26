@@ -1,4 +1,4 @@
-# Resources for fiware-connectors
+# Resources for fiware-cygnus
 
 ## Hive basic client
 

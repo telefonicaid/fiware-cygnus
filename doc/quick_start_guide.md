@@ -65,14 +65,14 @@ cygnusagent.channels = test-channel
 cygnusagent.sources.http-source.channels = test-channel
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 cygnusagent.sources.http-source.port = 5050
-cygnusagent.sources.http-source.handler = es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler
+cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
 cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 2
 cygnusagent.sources.http-source.interceptors = ts de
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.de.type = es.tid.fiware.fiwareconnectors.cygnus.interceptors.DestinationExtractor$Builder
+cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
 cygnusagent.sources.http-source.interceptors.de.matching_table = /Applications/apache-flume-1.4.0-bin/conf/matching_table.conf
 
 cygnusagent.channels.test-channel.type = memory
@@ -80,7 +80,7 @@ cygnusagent.channels.test-channel.capacity = 1000
 cygnusagent.channels.test-channel.transactionCapacity = 100
 
 cygnusagent.sinks.test-sink.channel = test-channel
-cygnusagent.sinks.test-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionTestSink
+cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
 ```
 
 (2) Start Cygnus from the command line; Cygnus will be printing logs on the standard output (i.e. your screen):
@@ -135,14 +135,14 @@ $ ./notification.sh http://localhost:5050/notify
 
 
 ```
-2015-03-06T08:54:20.696CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler[153] : Starting transaction (1425628437-99-0000000000)
-2015-03-06T08:54:20.699CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler[239] : Received data ({	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",	"originator" : "localhost",	"contextResponses" : [		{			"contextElement" : {"attributes" : [					{						"name" : "temperature",						"type" : "centigrade",						"value" : "26.5"					}				],				"type" : "Room",				"isPattern" : "false",				"id" : "Room1"			},			"statusCode" : {				"code" : "200",				"reasonPhrase" : "OK"			}		}	]})
-2015-03-06T08:54:20.704CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.handlers.OrionRestHandler[261] : Event put in the channel (id=1621938227, ttl=2)
-2015-03-06T08:54:20.799CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink[126] : Event got from the channel (id=1621938227, headers={fiware-servicepath=testsink, destination=room1_room, content-type=application/json, fiware-service=qsg, ttl=2, transactionId=1425628437-99-0000000000, timestamp=1425628460704}, bodyLength=384)
-2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionTestSink[77] : [test-sink] Processing headers (recvTimeTs=1425628460704 (2015-03-06T08:54:20.704), fiwareService=qsg, fiwareServicePath=testsink, destinations=[room1_room])
-2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionTestSink[90] : [test-sink] Processing context element (id=Room1, type= Room)
-2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionTestSink[109] : [test-sink] Processing context attribute (name=temperature, type=centigrade, value=26.5, metadata=[])
-2015-03-06T08:54:20.804CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionSink[187] : Finishing transaction (1425628437-99-0000000000)
+2015-03-06T08:54:20.696CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[153] : Starting transaction (1425628437-99-0000000000)
+2015-03-06T08:54:20.699CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[239] : Received data ({	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",	"originator" : "localhost",	"contextResponses" : [		{			"contextElement" : {"attributes" : [					{						"name" : "temperature",						"type" : "centigrade",						"value" : "26.5"					}				],				"type" : "Room",				"isPattern" : "false",				"id" : "Room1"			},			"statusCode" : {				"code" : "200",				"reasonPhrase" : "OK"			}		}	]})
+2015-03-06T08:54:20.704CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[261] : Event put in the channel (id=1621938227, ttl=2)
+2015-03-06T08:54:20.799CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[126] : Event got from the channel (id=1621938227, headers={fiware-servicepath=testsink, destination=room1_room, content-type=application/json, fiware-service=qsg, ttl=2, transactionId=1425628437-99-0000000000, timestamp=1425628460704}, bodyLength=384)
+2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[77] : [test-sink] Processing headers (recvTimeTs=1425628460704 (2015-03-06T08:54:20.704), fiwareService=qsg, fiwareServicePath=testsink, destinations=[room1_room])
+2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[90] : [test-sink] Processing context element (id=Room1, type= Room)
+2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[109] : [test-sink] Processing context attribute (name=temperature, type=centigrade, value=26.5, metadata=[])
+2015-03-06T08:54:20.804CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[187] : Finishing transaction (1425628437-99-0000000000)
 
 ```
 

@@ -12,7 +12,7 @@ Simply list the sink as usual in a basic Flume configuration, i.e. by especifyin
 <agentname>.sinks = test-sink
 <agentname>.channels = test-channel
 ...
-<agentname>.sinks.test-sink.type = es.tid.fiware.fiwareconnectors.cygnus.sinks.OrionTestSink
+<agentname>.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
 <agentname>.sinks.test-sink.channel = test-channel
 ```
 ## Use cases

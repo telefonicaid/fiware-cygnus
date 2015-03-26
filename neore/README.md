@@ -25,7 +25,7 @@ When a package is built it introduces three features in Cygnus SW:
   instance is not configured a special error will be shown.
   `service cygnus stop test1` Only test1 will be stopped. And so for `restart` and `status` operations.
 
-**Note:** due to a bug in rpm generation ([issue #329](https://github.com/telefonicaid/fiware-connectors/issues/329)) all packages 
+**Note:** due to a bug in rpm generation ([issue #329](https://github.com/telefonicaid/fiware-cygnus/issues/329)) all packages 
 that were built before 2015/03/05 and installed should be erased manually and install a new one build after 2015/03/05.
 
 The date of the building of the installed package can be viewed with `rpm -qi cygnus` and look into **Build Date** field:
