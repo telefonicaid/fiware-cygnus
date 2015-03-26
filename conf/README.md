@@ -49,4 +49,4 @@ Next edit `/usr/cygnus/agent_example1.conf` changing the value of listening port
 cygnusagent.sources.http-source.port = 5050
 ```
 
-The configuration explained above is for basic configuration of Cygnus instance to run. More detailed configuration should be required, such as [Cygnus configuration](https://github.com/telefonicaid/fiware-connectors/tree/master/flume#cygnus-configuration "Cygnus fine configuration"), fine configuration of [log4j](https://github.com/telefonicaid/fiware-connectors/tree/master/flume#logs "Log4j detailed configuration"), etc. 
+The configuration explained above is for basic configuration of Cygnus instance to run. More detailed configuration should be required, such as [Cygnus configuration](https://github.com/telefonicaid/fiware-cygnus/tree/master/flume#cygnus-configuration "Cygnus fine configuration"), fine configuration of [log4j](https://github.com/telefonicaid/fiware-cygnus/tree/master/flume#logs "Log4j detailed configuration"), etc. 
