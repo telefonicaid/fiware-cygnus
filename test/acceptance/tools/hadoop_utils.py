@@ -186,13 +186,13 @@ class Hadoop:
         http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - opening file: %s/%s.txt ..." % (self.directory, self.file_name))
         return u'ERROR - Attributes are missing....'
 
-    def delete_directory (self, name):
+    def delete_directory (self, name=EMPTY):
         """
         delete a directory
         :param name: directory name
         :return:
         """
-        self.tenant=name
+        if name != EMPTY: self.tenant=name
         resp = http_utils.request(http_utils.DELETE, url=self.__create_url(DELETE_DIR), headers=self.__create_headers())
         http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR- deleting directory %s ..." % (name))
         return resp

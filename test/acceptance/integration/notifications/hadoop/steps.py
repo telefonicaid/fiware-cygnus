@@ -15,11 +15,11 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
-
+from integration.notifications.common_steps.multi_instances import * # steps to multi-instances
 from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
 
 #----------------------------------------------------------------------------------
