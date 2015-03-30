@@ -38,6 +38,7 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
     And a tenant "tenant_multi_instance_020", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "false" and type are stored in ckan
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 1                | 40.0            | True           | json    |
@@ -63,6 +64,7 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
     And a tenant "tenant_multi_instance_030", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "false" and type are stored in ckan
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 2                | 40.0            | True           | json    |

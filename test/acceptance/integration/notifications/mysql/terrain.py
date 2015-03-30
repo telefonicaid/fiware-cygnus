@@ -59,6 +59,6 @@ def after_all_scenarios(scenario):
 	And cygnus services is stopped
     :param scenario:
     """
-    world.cygnus.delete_cygnus_instances_files()
     world.cygnus.cygnus_service("stop")
+    world.cygnus.delete_cygnus_instances_files()
     tools.general_utils.show_times(world.test_time_init)
