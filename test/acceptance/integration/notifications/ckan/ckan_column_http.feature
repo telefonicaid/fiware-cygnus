@@ -15,7 +15,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
@@ -31,8 +31,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @happy_path
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -41,7 +41,6 @@ Feature: Stored in ckan new notifications per column from context broker
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
-
   Examples:
     | organization   | service_path | attributesQuantity | attribute_name | attribute_type | attribute_value   | metadata_value | content |
     | cygnus_col_023 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | json    |
@@ -59,8 +58,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @organizations
   Scenario Outline: store in ckan new notifications with different organizations behavior
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances, with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -70,7 +69,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | organization            | content |
     | org60100008             | json    |
@@ -84,8 +82,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @service_path
   Scenario Outline: store in ckan new notifications with different service_path behavior
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances, with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -95,7 +93,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | organization          | service_path | content |
     | serv_path_several_101 |              | json    |
@@ -115,8 +112,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @resources
   Scenario Outline: store in ckan new notifications with different service_path behavior
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -126,7 +123,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | resource                | content |
     | Room2_Room              | json    |
@@ -144,8 +140,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @attributes_number
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -155,7 +151,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | organization          | attribute_number | content |
     | attributes_multi_0011 | 1                | json    |
@@ -167,8 +162,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @types
   Scenario Outline: stored new notifications in ckan with different data types
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -178,7 +173,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | organization       | attribute_data_type | attribute_value   | content |
     | org_col_json_0111  | json                | 45.41             | json    |
@@ -203,8 +197,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @error_field
   Scenario Outline: try to store new notification in ckan without value or metadata fields
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -213,7 +207,6 @@ Feature: Stored in ckan new notifications per column from context broker
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And Verify that is not stored in ckan "<error>"
-
   Examples:
     | value_field | metadata_field | content | error                                 |
     | text        | without        | json    | without metadata field                |
@@ -225,8 +218,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @error_data
   Scenario Outline: try to store new notifications in ckan with differents errors in data type
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -235,7 +228,6 @@ Feature: Stored in ckan new notifications per column from context broker
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And Verify that is not stored in ckan "error with value in wrong data type"
-
   Examples:
     | organization       | value_field | attribute_value   | content |
     | org_col_float_1001 | float       | df_json           | json    |
@@ -267,8 +259,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @element_not_exist @BUG-181
   Scenario Outline: try to store new notification in ckan if some element does not exist
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -277,7 +269,6 @@ Feature: Stored in ckan new notifications per column from context broker
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And Verify that is not stored if element does not exist "<error>" in ckan
-
   Examples:
     | tenant                       | resource         | content | error                        |
     | organization is missing      | default          | json    | organization is missing      |
@@ -289,8 +280,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @matching_table @skip
   Scenario Outline: stored new notifications in ckan with different matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -302,7 +293,6 @@ Feature: Stored in ckan new notifications per column from context broker
     And changes new destination "<new_destination>" where to verify in dataset "<new_dataset>"
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | service_path | resource        | new_destination | new_dataset     | content |
     # identity id
@@ -340,8 +330,8 @@ Feature: Stored in ckan new notifications per column from context broker
 
   @matching_table_errors @skip @BUG-271
   Scenario Outline: not stored new notifications in mysql with errors in matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -351,7 +341,6 @@ Feature: Stored in ckan new notifications per column from context broker
     Then I receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
   #  error lines in matching_table.conf file
   #  14|entityId|destmissing(\d*)||errordataset
