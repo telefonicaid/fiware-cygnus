@@ -15,7 +15,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
@@ -39,8 +39,8 @@ def copy_properties_json_file_to_test_from_setting_and_sudo_local (step, file_na
         properties.read_properties()
         properties.storing_dictionaries(sink)
 
-@step (u'configuration of cygnus instances, agents files quantity "([^"]*)", id "([^"]*)" and in "([^"]*)" mode')
-def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and_sink (step, quantity, id, persistence):
+@step (u'configuration of cygnus instances with different ports "([^"]*)", agents files quantity "([^"]*)", id "([^"]*)" and in "([^"]*)" mode')
+def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and_sink (step, different_port, quantity, id, persistence):
     """
     configuration of cygnus instances, agents files and properties.json file
     :param step:
@@ -50,7 +50,7 @@ def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and
     """
     world.persistence = persistence
     if not world.background_executed:
-        world.cygnus.config_instances(id, quantity, world.sink, persistence)
+        world.cygnus.config_instances(id, quantity, world.sink, persistence, different_port)
 
 @step (u'copy another configuration files and restart cygnus service and this execution is only once "([^"]*)"')
 def copy_another_configuration_files_to_cygnus(step, only_once):
@@ -78,4 +78,3 @@ def cygnus_is_installed_with_type(step):
     :param step:
     """
     world.cygnus.verify_cygnus()
-

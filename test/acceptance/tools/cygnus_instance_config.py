@@ -15,9 +15,8 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
-
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 #constant
