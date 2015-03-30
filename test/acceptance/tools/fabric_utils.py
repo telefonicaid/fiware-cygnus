@@ -15,16 +15,15 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
-
-
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
-
-from fabric.api import env, run
-from fabric.context_managers import cd, hide
+from fabric.api import env, run, get
+from fabric.context_managers import hide
 from fabric.operations import sudo
+from StringIO import StringIO
+
 
 #constants
 EMPTY             = u''
@@ -59,6 +58,7 @@ class FabricSupport:
         :param password: passwords associated to user
         :param cert_file: certificate file associated to user
         :param retry: number of retries in case of error
+        :param sudo: with superuser privileges (True | False)
         """
         self.host                = kwargs.get(HOST,HOST_DEFAULT)
         self.port                = kwargs.get(PORT,PORT_DEFAULT)
@@ -69,18 +69,18 @@ class FabricSupport:
         env.key_filename         = kwargs.get(CERT_FILE,EMPTY)
         env.connection_attempts  = kwargs.get(RETRY,RETRY_DEFAULT)
         env.cwd                  = kwargs.get(PATH, "")
+        self.sudo                = kwargs.get(SUDO, False)
 
     def __sub_run (self, command, sudo_run):
-          """
-          independently that the output message by console is displayed or not
-          :param command:
-          :param sudo_run:
-          """
-          with cd(env.cwd):
-              if sudo_run:
-                  sudo (command)
-              else:
-                  run(command)
+        """
+        run a command independently that the output message by console is displayed or not
+        :param command: command o script to execute in remote
+        :param sudo_run: with superuser privileges (True | False)
+        """
+        if sudo_run:
+            sudo (command)
+        else:
+            run(command)
 
     def run(self, command, **kwargs):
         """
@@ -88,9 +88,11 @@ class FabricSupport:
         :param command: command o script to execute in remote
         :param path: path where execute the command
         :param sudo: with superuser privileges (True | False)
+        :param hide: show message or not (True or False)
         """
-        env.cwd  = kwargs.get(PATH,env.cwd)
-        sudo_run = kwargs.get(SUDO,False)
+        env.cwd   = kwargs.get(PATH, env.cwd)
+        sudo_run  = kwargs.get(SUDO, self.sudo)
+        self.hide = kwargs.get(HIDE, self.hide)
         try:
             if self.hide:
                 with hide('running', 'stdout', 'stderr'):
@@ -98,7 +100,7 @@ class FabricSupport:
             else:
                 self.__sub_run(command,sudo_run)
         except Exception, e:
-            assert False, "ERROR  - running the command \"%s\" in Fabric \n       - %s" % (command, str (e))
+            assert False, "ERROR  - running the command \"%s\" remotely with Fabric \n       - %s" % (command, str (e))
 
     def runs(self, ops_list, **kwargs):
         """
@@ -107,7 +109,6 @@ class FabricSupport:
         :param ops_list: list of commands with its current path associated and if it is necessary of superuser privilege (dictionary).
                          ex:{"command": "ls", "path": "/tmp", "sudo": False}
         """
-        sudo_run = kwargs.get(SUDO,False)
         for op in ops_list:
             self.run(op[COMMAND], path=op[PATH], sudo=op[SUDO])
 
@@ -117,4 +118,31 @@ class FabricSupport:
         :param directory: directory path
         """
         env.cwd = directory
+
+    def __sub_read_file(self, file):
+        """
+        read a file independently that the output message by console is displayed or not
+        :param file: file name to read
+        """
+        fd = StringIO()
+        get(file, fd)
+        return fd.getvalue()
+
+    def read_file(self, file, **kwargs):
+        """
+        read a file remotely
+        :param file: file name to read
+        :param path: path where the file is read
+        :param hide: show message or not (True or False)
+        """
+        env.cwd  = kwargs.get(PATH, env.cwd)
+        self.hide = kwargs.get(HIDE, self.hide)
+        try:
+            if self.hide:
+                with hide('running', 'stdout', 'stderr'):
+                    return self.__sub_read_file(file)
+            else:
+                return self.__sub_read_file(file)
+        except Exception, e:
+            assert False, "ERROR  -reading a File \"%s\" remotely with Fabric \n       - %s" % (file, str (e))
 

@@ -19,46 +19,15 @@
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
-import time
+from lettuce import step, world
 
-from lettuce import world, after, before
-
-import tools.general_utils
-
-@before.all
-def before_all_scenarios():
+@step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_multiples_notifications(step, attribute_value, metadata_value, content):
     """
-    actions before all scenario
-    :param scenario:
+    receive several notifications by each instance, but changing port
+    :param step:
+    :param attribute_value:
+    :param metadata_value:
+    :param content:
     """
-    world.test_time_init = time.strftime("%c")
-    world.background_executed = False  # used to that background will be executed only once in each feature
-
-@before.each_scenario
-def before_each_scenario(scenario):
-    """
-    actions before each scenario
-    :param scenario:
-    """
-    pass
-
-@after.each_scenario
-def after_each_scenario(scenario):
-    """
-    actions after each scenario
-    :param scenario:
-    """
-    pass
-
-@after.all
-def after_all_scenarios(scenario):
-    """
-    Actions after all scenarios
-    Show the initial and final time of the tests completed
-    Delete all cygnus instances files
-	And cygnus services is stopped
-    :param scenario:
-    """
-    world.cygnus.delete_cygnus_instances_files()
-    world.cygnus.cygnus_service("stop")
-    tools.general_utils.show_times(world.test_time_init)
+    world.resp = world.cygnus.received_multiples_notifications(attribute_value, metadata_value, content)

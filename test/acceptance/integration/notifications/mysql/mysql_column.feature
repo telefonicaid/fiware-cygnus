@@ -15,7 +15,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
@@ -31,8 +31,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @happy_path
   Scenario Outline: stored new notifications in mysql from context broker with or without metadata
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -56,8 +56,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @organizations
   Scenario Outline: store in mysql new notifications with different organizations behavior
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -80,8 +80,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @service_path
   Scenario Outline: store in mysql new notifications with different organizations behavior
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -110,8 +110,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @resources
   Scenario Outline: store in mysql new notifications with different service_path behavior
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -138,8 +138,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @attributes_number
   Scenario Outline:  store in mysql new notifications with different quantities of attributes
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -160,8 +160,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @types
   Scenario Outline: stored new notifications in mysql with different data types
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -204,8 +204,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @error_data  @BUG-184
   Scenario Outline: try to store new notifications in mysql with differents errors in data type
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -257,8 +257,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @error_field
   Scenario Outline: try to store new notification in mysql without value or metadata fields
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -278,8 +278,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @element_not_exist @BUG-181
   Scenario Outline: try to store new notification in mysql if some element does not exist
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -300,8 +300,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @matching_table
   Scenario Outline: stored new notifications in mysql with different matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
@@ -351,8 +351,8 @@ Feature: Stored in mysql new notifications per column from context broker
 
   @matching_table_errors @BUG-271
   Scenario Outline: not stored new notifications in mysql with errors in matching_table patterns
-    Given copy properties.json file from "filab_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly

@@ -40,7 +40,7 @@ Note: We recommend the use of virtualenv, because is an isolated working copy of
 ### Tests execution:
 
 - Change to the test/acceptance folder of the project if not already on it.
-- Rename properties.json.base to properties.json and replace values.
+- `properties.json` will be create automatically from setting folder (see configuration.json), with configurations files previously created
 - Run lettuce_tools (see available params with the -h option).
 
 ```
@@ -51,16 +51,26 @@ Some examples:
    lettuce_tools -tg=-skip -ft ckan_row.feature    -- run all scenarios except tagged with "skip" in a feature
 ```
 
-### Tests Coverage:
+### Tests Suites Coverage:
 
-- Cygnus-CKAN per row.
+- Cygnus-CKAN per row using HTTP.
+- Cygnus-CKAN per row using HTTPS.
+- Cygnus-CKAN per row using multi-instances.
+- Cygnus-CKAN per column using HTTP.
+- Cygnus-CKAN per column using HTTPS.
+- Cygnus-CKAN per column using multi-instances.
 - Cygnus-MYSQL per row.
-- Cygnus-HADOOP per row.
+- Cygnus-MYSQL per row using multi-instances.
 - Cygnus-MYSQL per column.
-- Cygnus-CKAN per column.
+- Cygnus-MYSQL per column using multi-instances.
+- Cygnus-HADOOP per row.
+- Cygnus-HADOOP per row using Kerberos.
+- Cygnus-HADOOP per row using multi-instances.
 - Cygnus-HADOOP per column (pending).
+- Cygnus-HADOOP per row using Kerberos (pending).
 
 ### configuration.json
+
 We recommend to create `settings` folder in acceptance folder if it does not exists and store all configurations to features referenced by `properties.json.base` files.
 The settings folder path could be changed in the `configuration.json` file in `path_to_settings_folder` field
 This file initially will overwrite properties.json in each feature.
@@ -72,13 +82,13 @@ This file initially will overwrite properties.json in each feature.
 
 ### properties.json
 
-
 - environment
     * name: name of product tested.
     * logs_path: folder name to logs.
 
 - cygnus:
-    * cygnus_url: cygnus protocol, host and port used to connect cygnus (endpoint).
+    * cygnus_url: cygnus protocol, host used to connect at cygnus (endpoint).
+    * cygnus_port: port used to connect at cygnus .
     * cygnus_management_port: used to management operations (endpoint).
     * cygnus_version: cygnus version
     * cygnus_verify_version: determine whether the version is verified or not (True or False).
@@ -135,6 +145,14 @@ This file initially will overwrite properties.json in each feature.
     * hadoop_krb5_auth: Kerberos-based authentication enabling
     * hadoop_krb5_user: Kerberos username
     * hadoop_krb5_password: Kerberos password
+    * hadoop_krb5_default_realm: Identifies the default Kerberos realm for the client. Set its value to your Kerberos realm.
+    * hadoop_krb5_kdc: The name or address of a host running a KDC for that realm. An optional port number, separated from the hostname by a colon, may be included
+    * hadoop_krb5_admin_server: Identifies the host where the administration server is running. Typically, this is the master Kerberos server
+    * hadoop_krb5_dns_lookup_realm: Looks for DNS records for fallback host-to-realm mappings and the default realm
+    * hadoop_krb5_dns_lookup_kdc: Indicate whether DNS SRV records should be used to locate the KDCs and other servers for a realm
+    * hadoop_krb5_ticket_lifetime: Sets the default lifetime for initial ticket requests. The default value is 1 day.
+    * hadoop_krb5_renew_lifetime: Sets the default renewable lifetime for initial ticket requests. The default value is 0.
+    * hadoop_krb5_forwardable: If this flag is true, initial tickets will be forwardable by default, if allowed by the KDC. The default value is false.
     * hadoop_channel_capacity: capacity of the channel
     * hadoop_channel_transaction_capacity: amount of bytes that can be sent per transaction
     * hadoop_retries_open_file: number of retries for data verification.
@@ -144,7 +162,7 @@ This file initially will overwrite properties.json in each feature.
 
 You can to use multiples tags in each scenario, possibles tags used:
 
-    - happy_path, skip, errors_40x, only_develop, etc
+    - happy_path, skip, errors_40x, only_develop, ISSUE_XXX, BUG_XXX, multi_instances, etc
 
 and to filter scenarios by these tags: see Tests execution section.
 
