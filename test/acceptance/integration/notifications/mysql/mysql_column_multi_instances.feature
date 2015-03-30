@@ -42,6 +42,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
+    And delete instances files
   Examples:
     | instances_number | tenant                   | service_path | attributes_number | attribute_name | attribute_type | attribute_value | metadata_value | content |
     | 1                | cygnus_multi_instance_01 | /myserv1     | 1                 | pressure       | celcius        | 40.0            | True           | json    |
@@ -71,6 +72,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
+    And delete instances files
   Examples:
     | instances_number | tenant                   | service_path | attributes_number | attribute_name | attribute_type | attribute_value | metadata_value | content |
     | 2                | cygnus_multi_instance_04 | /myserv1     | 1                 | pressure       | celcius        | 40.0            | True           | json    |

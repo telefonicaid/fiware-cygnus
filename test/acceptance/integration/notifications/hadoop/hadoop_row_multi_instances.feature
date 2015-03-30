@@ -41,6 +41,7 @@ Feature: start multi-instances of cygnus using hadoop sink and row mode
     Then Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 1                | 40.0            | True           | json    |
@@ -68,6 +69,7 @@ Feature: start multi-instances of cygnus using hadoop sink and row mode
     Then Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 2                | 40.0            | True           | json    |

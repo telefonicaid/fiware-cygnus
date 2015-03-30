@@ -40,6 +40,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "false" and type are stored in mysql
     And Close mysql connection
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 1                | 40.0            | True           | json    |
@@ -66,6 +67,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "false" and type are stored in mysql
     And Close mysql connection
+    And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |
     | 2                | 40.0            | True           | json    |
