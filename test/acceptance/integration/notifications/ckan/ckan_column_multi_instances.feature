@@ -40,6 +40,7 @@ Feature: start multi-instances of cygnus using ckan sink and column mode
     And create a new resource "default" with "1" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "json" and metadata data type "json"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Verify that the attribute value is stored in ckan
+    And delete instances files
   Examples:
     | instances_number | organization                | service_path | attribute_name | attribute_type | attribute_value | metadata_value | content |
     | 1                | cygnus_multi_instance_01000 | /myserv1     | pressure       | celcius        | 40.0            | True           | json    |
@@ -66,6 +67,7 @@ Feature: start multi-instances of cygnus using ckan sink and column mode
     And create a new resource "default" with "1" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "json" and metadata data type "json"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Verify that the attribute value is stored in ckan
+    And delete instances files
   Examples:
     | instances_number | organization                | service_path | attribute_name | attribute_type | attribute_value | metadata_value | content |
     | 2                | cygnus_multi_instance_04000 | /myserv1     | pressure       | celcius        | 40.0            | True           | json    |

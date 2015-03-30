@@ -31,3 +31,12 @@ def receives_multiples_notifications(step, attribute_value, metadata_value, cont
     :param content:
     """
     world.resp = world.cygnus.received_multiples_notifications(attribute_value, metadata_value, content)
+
+@step (u'delete instances files')
+def delete_instances_files(step):
+    """
+    Delete instances files
+      - cygnus_instances_*.conf
+      - agent_*.conf
+    """
+    world.cygnus.delete_cygnus_instances_files()
