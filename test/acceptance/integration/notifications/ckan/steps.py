@@ -15,11 +15,12 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 
+from integration.notifications.common_steps.multi_instances import * # steps to multi-instances
 from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
 
 #----------------------------------------------------------------------------------
@@ -149,11 +150,11 @@ def verify_that_is_not_stored_if_element_does_not_exist(step, error_msg):
     """
     world.cygnus.verify_dataset_search_without_element(error_msg)
 
-@step (u'Validate that the attribute value, metadata and type are stored in ckan')
-def validate_that_the_attribute_value_and_type_are_stored_in_ckan (step):
+@step (u'Validate that the attribute value, metadata "([^"]*)" and type are stored in ckan')
+def validate_that_the_attribute_value_and_type_are_stored_in_ckan(step, metadata):
     """
     Validate that the attributes values and type are stored in ckan per row mode
     :param step:
     """
-    world.cygnus.verify_dataset_search_values_by_row()
+    world.cygnus.verify_dataset_search_values_by_row(metadata)
 
