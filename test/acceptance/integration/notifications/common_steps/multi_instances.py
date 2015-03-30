@@ -15,6 +15,19 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
+
+from lettuce import step, world
+
+@step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_multiples_notifications(step, attribute_value, metadata_value, content):
+    """
+    receive several notifications by each instance, but changing port
+    :param step:
+    :param attribute_value:
+    :param metadata_value:
+    :param content:
+    """
+    world.resp = world.cygnus.received_multiples_notifications(attribute_value, metadata_value, content)

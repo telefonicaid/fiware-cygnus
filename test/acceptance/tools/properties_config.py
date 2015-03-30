@@ -15,10 +15,8 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
-from tools.hadoop_utils import Hadoop
-
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 import json
@@ -29,6 +27,7 @@ from lettuce import world
 from tools.cygnus import Cygnus
 from tools.ckan_utils import Ckan
 from tools.mysql_utils import Mysql
+from tools.hadoop_utils import Hadoop
 
 # constants
 EMPTY                 = u''
@@ -86,7 +85,8 @@ class Properties:
         store dictionaries used by cygnus
         :param sink: ckan-sink | hdfs-sink | mysql-sink
         """
-        world.cygnus    = Cygnus (world.config['cygnus']['cygnus_url'],
+        world.cygnus    = Cygnus (cygnus_url=world.config['cygnus']['cygnus_url'],
+                                  cygnus_port=world.config['cygnus']['cygnus_port'],
                                   management_port=world.config['cygnus']['cygnus_management_port'],
                                   version=world.config['cygnus']['cygnus_version'],
                                   verify_version=world.config['cygnus']['cygnus_verify_version'],
@@ -109,7 +109,6 @@ class Properties:
                                   target_path=world.config['cygnus']['cygnus_fabric_target_path'],
                                   sudo_cygnus=world.config['cygnus']['cygnus_fabric_sudo']
         )
-
         if sink == "ckan-sink":
             world.ckan  = Ckan(ckan_version=world.config['ckan']['ckan_version'],
                                ckan_verify_version=world.config['ckan']['ckan_verify_version'],
