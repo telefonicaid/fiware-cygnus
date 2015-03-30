@@ -15,10 +15,9 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
-
 #
 #  Note: the "skip" tag is to skip the scenarios that still are not developed or failed
 #        -tg=-skip
@@ -31,14 +30,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @happy_path
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_3", service path "/servpath01", resource "room_room2", with attribute number "4", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | content |
     | json    |
@@ -47,14 +46,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @happy_path
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_4", service path "default", resource "default", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | attributes_number | attribute_value   | metadata_value | content |
     | 1                 | 45.1              | True           | json    |
@@ -66,14 +65,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @organizations
   Scenario Outline:  store in ckan new notifications with different organizations values
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "<tenant>", service path "default", resource "default", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | tenant                  | content |
     | orga60100_row           | json    |
@@ -88,14 +87,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @service_path
   Scenario Outline:  store in ckan new notifications with different service path values
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "<tenant>", service path "<service_path>", resource "room_room2", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | tenant                 | service_path | content |
     | serv_path_several_1000 |              | json    |
@@ -116,14 +115,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @resource @BUG-280 @skip
   Scenario Outline: store in ckan new notifications with different resources values in the same datastore
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_240", service path "/servicepath", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | resource                | content |
     | Room2_Room              | json    |
@@ -143,14 +142,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @resources
   Scenario Outline: store in ckan new notifications with different resources values in differents datastore
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_250", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | service_path | resource                | content |
     | service10    | Room2_Room              | json    |
@@ -169,14 +168,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @attributes_number
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | tenant             | attribute_number | content |
     | attributes_row_001 | 1                | json    |
@@ -189,14 +188,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @values
   Scenario Outline: stored new notifications in ckan with different values
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | tenant        | attribute_value   | content |
     | org_json_011  | 45.41             | json    |
@@ -224,7 +223,7 @@ Feature: Stored in ckan new notifications per row from context broker
   @matching_table @skip
   Scenario Outline: stored new notifications in ckan with different matching_table patterns
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
@@ -232,7 +231,7 @@ Feature: Stored in ckan new notifications per row from context broker
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And changes new destination "<new_destination>" where to verify in dataset "<new_dataset>"
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | service_path | resource        | new_destination | new_dataset     | content |
     # identity id
@@ -271,14 +270,14 @@ Feature: Stored in ckan new notifications per row from context broker
   @matching_table_errors @BUG-271 @skip
   Scenario Outline: not stored new notifications in mysql with errors in matching_table patterns
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy another configuration files and restart cygnus service and this execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "match_table", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Validate that the attribute value, metadata and type are stored in ckan
+    And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
   #  error lines in matching_table.conf file
   #  14|entityId|destmissing(\d*)||errordataset
