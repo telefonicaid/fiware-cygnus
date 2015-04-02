@@ -32,7 +32,7 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
   Scenario Outline: start multi-instances of cygnus using ckan sink, row mode, ports differents and store multiples notifications one by instance and the port defined incremented
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy another configuration files and restart cygnus service and this execution is only once "false"
+    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_multi_instance_020", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -58,7 +58,7 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
   Scenario Outline: try to start multi-instances of cygnus using ckan sink, row mode and same ports to all instances
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy another configuration files and restart cygnus service and this execution is only once "false"
+    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "tenant_multi_instance_030", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"

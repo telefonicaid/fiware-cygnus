@@ -56,18 +56,27 @@ Some examples:
 - Cygnus-CKAN per row using HTTP.
 - Cygnus-CKAN per row using HTTPS.
 - Cygnus-CKAN per row using multi-instances.
+- Cygnus-CKAN per row using matching table.
 - Cygnus-CKAN per column using HTTP.
 - Cygnus-CKAN per column using HTTPS.
 - Cygnus-CKAN per column using multi-instances.
+- Cygnus-CKAN per column using matching table.
+
 - Cygnus-MYSQL per row.
 - Cygnus-MYSQL per row using multi-instances.
+- Cygnus-MYSQL per row using matching table.
 - Cygnus-MYSQL per column.
 - Cygnus-MYSQL per column using multi-instances.
+- Cygnus-MYSQL per column using matching table.
+
 - Cygnus-HADOOP per row.
 - Cygnus-HADOOP per row using Kerberos.
 - Cygnus-HADOOP per row using multi-instances.
+- Cygnus-HADOOP per row using matching table.
 - Cygnus-HADOOP per column (pending).
-- Cygnus-HADOOP per row using Kerberos (pending).
+- Cygnus-HADOOP per column using Kerberos (pending).
+- Cygnus-HADOOP per column using multi-instances (pending).
+- Cygnus-HADOOP per column using matching table (pending).
 
 ### configuration.json
 
@@ -77,8 +86,21 @@ This file initially will overwrite properties.json in each feature.
    ```
    ex: ckan_column_http_properties.json
    ```
-
    * path_to_settings_folder: path where are stored all configurations referenced by properties.json.base
+   * matching_table_name: name of matching table configuration
+   * log_file: path and file where is log file
+
+### matching_table.conf
+
+We recommend to create your configurations lines in a copy file into settings folders and it will be copied to cygnus in conf folder, remotely.
+In cygnus will be called `matching_table.conf` by default (see configuration.json). If your tests do not use matching table implicitly,
+probably with to copy template to matching_table.conf is enough and then use `"default"` as file name value in step.
+`""` value (empty) in file name in step does not do anything and also removes the last matching_table.conf file if exists.
+Note: in case of Malformed matching rule, it will be discarded.
+
+### checking log file
+
+Verify if a label and its text exists in the last lines. The file log by default is `"/var/log/cygnus/cygnus.log`(see configuration.json)
 
 ### properties.json
 
@@ -162,7 +184,7 @@ This file initially will overwrite properties.json in each feature.
 
 You can to use multiples tags in each scenario, possibles tags used:
 
-    - happy_path, skip, errors_40x, only_develop, ISSUE_XXX, BUG_XXX, multi_instances, etc
+    - happy_path, skip, errors_40x, only_develop, ISSUE_XXX, BUG_XXX, multi_instances, matching_table, etc
 
 and to filter scenarios by these tags: see Tests execution section.
 

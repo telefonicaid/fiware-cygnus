@@ -1,3 +1,5 @@
 {
-    "path_to_settings_folder":"settings"
+    "path_to_settings_folder":"settings",
+    "matching_table_name": "matching_table.conf",
+    "log_file": "/var/log/cygnus/cygnus.log"
 }
