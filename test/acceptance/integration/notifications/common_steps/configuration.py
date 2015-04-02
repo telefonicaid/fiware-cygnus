@@ -52,8 +52,8 @@ def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and
     if not world.background_executed:
         world.cygnus.config_instances(id, quantity, world.sink, persistence, different_port)
 
-@step (u'copy another configuration files and restart cygnus service and this execution is only once "([^"]*)"')
-def copy_another_configuration_files_to_cygnus(step, only_once):
+@step (u'copy flume-env.sh, matching table file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
+def copy_another_configuration_files_to_cygnus(step, matching_table_file, only_once):
     """
     copy another configuration files used by cygnus and restart cygnus service
           - log4j.properties
@@ -64,7 +64,7 @@ def copy_another_configuration_files_to_cygnus(step, only_once):
     :param step:
     """
     if not world.background_executed:
-        world.cygnus.another_files()
+        world.cygnus.another_files(matching_table_file)
         world.cygnus.cygnus_service("restart")
     if only_once.lower() == "true":
         world.background_executed = True
@@ -78,3 +78,29 @@ def cygnus_is_installed_with_type(step):
     :param step:
     """
     world.cygnus.verify_cygnus()
+
+@step (u'reinitialize log file')
+def reinitialize_log_file(step):
+     """
+     reinitialize log file
+     :param step:
+     """
+     world.cygnus.init_log_file()
+
+@step (u'check in log, label "([^"]*)" and text "([^"]*)"')
+def check_in_log_label_and_text(step, label, text):
+    """
+    Verify in log file if a label with a text exists
+    :param step:
+    :param label: label to find
+    :param text: text to find (begin since the end)
+    """
+    world.cygnus.verify_log(label, text)
+
+@step (u'delete matching table file')
+def delete_matching_table_file(step):
+    """
+    delete matching table file in cygnus conf remotely
+    used the file name "matching_table_name" stored in configuration.json file
+    """
+    world.cygnus.delete_matching_table_file()

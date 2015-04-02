@@ -24,12 +24,14 @@ import time
 from lettuce import world
 
 from tools import general_utils
+from tools import http_utils
 from tools.notification_utils import Notifications
-import http_utils
 from tools.fabric_utils import FabricSupport
 from tools.cygnus_agent_config import Agent
 from tools.cygnus_instance_config import Cygnus_Instance
 from tools.cygnus_krb5_config import Krb5
+from tools.cygnus_matching_table_config import Matching_tables
+from tools.remote_log_utils import Remote_Log
 
 
 # notification constants
@@ -234,19 +236,25 @@ class Cygnus:
             # create and modify values in agent_<id>.conf
             myfab.runs(ops_list)
 
-    def another_files (self):
+    def another_files (self, matching_table_file_name=DEFAULT):
         """
         copy another configuration files used by cygnus
-          - matching_table.conf
           - flume-env.sh
-          -  log4j.properties
+          - matching_table.conf
+          - log4j.properties
           - krb5.conf
         """
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
         myfab.run("cp -R flume-env.sh.template flume-env.sh")
         #  matching_table.conf configuration
-        myfab.run("cp -R matching_table.conf.template matching_table.conf")
+        if matching_table_file_name == DEFAULT:
+            myfab.run("cp -R matching_table.conf.template matching_table.conf")
+        elif matching_table_file_name != EMPTY:
+            matching_table = Matching_tables(file=matching_table_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
+            myfab.runs(matching_table.content_to_copy())
+        else:
+            myfab.run("rm -rf matching_table.conf")
         # change to DEBUG mode in log4j.properties
         myfab.run("cp -R log4j.properties.template log4j.properties")
         myfab.run(' sed -i "s/flume.root.logger=INFO,LOGFILE/flume.root.logger=%s,LOGFILE /" log4j.properties.template' % (self.log_level))
@@ -277,14 +285,47 @@ class Cygnus:
                 "Wrong cygnus version verified: %s. Expected: %s. \n\nBody content: %s" % (str(body_dict[VERSION]), str(self.version), str(resp.text))
         return True
 
+    def init_log_file(self):
+        """
+        reinitialize log file
+        delete and create a new log file (empty)
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        log = Remote_Log (fabric=myfab)
+        log.delete_log_file()
+        log.create_log_file()
+
+    def verify_log(self, label, text):
+        """
+        Verify in log file if a label with a text exists
+        :param label: label to find
+        :param text: text to find (begin since the end)
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        log = Remote_Log (fabric=myfab)
+        line = log.find_line(label, text)
+        assert line != None, "ERROR  - label %s and text %s is not found.    \n       - %s" % (label, text, line)
+
+    def delete_matching_table_file(self):
+        """
+        delete matching table file in cygnus conf remotely
+        used the file name "matching_table_name" stored in configuration.json file
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        myfab.current_directory(self.fabric_target_path)
+        matching_table = Matching_tables()
+        myfab.run("rm -rf %s" % matching_table.get_matching_table_file_name())
+
     def delete_cygnus_instances_files(self):
         """
         delete all cygnus instances files (cygnus_instance_%s_*.conf and agent_test_*.conf)
         """
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
-        myfab.run("rm cygnus_instance_%s_*.conf" % self.instance_id)
-        myfab.run("rm agent_%s_*.conf" % self.instance_id)
+        myfab.run("rm -rf cygnus_instance_%s_*.conf" % self.instance_id)
+        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
+        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
+        self.delete_matching_table_file()
 
      # ----------------------------- general action -----------------------------------------------------
 
@@ -685,7 +726,6 @@ class Cygnus:
             VALUE_TEMP = CONTENT_VALUE
         else:
              VALUE_TEMP = VALUE
-
         self.row= self.retry_in_table_search_sql_column (self.table, self.tenant[self.cygnus_mode], self.attributes_value)
         assert self.row != u'ERROR - Attributes are missing....', u'ERROR - Attributes are missing....'
         for i in range(len (self.attributes)):
