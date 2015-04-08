@@ -33,7 +33,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
   Scenario Outline: start multi-instances of cygnus using mysql sink, column mode, ports differents and store multiples notifications one by instance and the port defined incremented
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "column" mode
-    And copy another configuration files and restart cygnus service and this execution is only once "false"
+    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And create a new database "<tenant>"
@@ -63,7 +63,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
   Scenario Outline: try to start multi-instances of cygnus using mysql sink, column mode and same ports to all instances
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "column" mode
-    And copy another configuration files and restart cygnus service and this execution is only once "false"
+    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And create a new database "<tenant>"
