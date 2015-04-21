@@ -6,6 +6,7 @@
   * [OrionHDFSSink persistence](#section3.1)
   * [OrionCKANSink persistence](#section3.2)
   * [OrionMySQLSink persistence](#section3.3)
+  * [OrionMongoSink persistence](#section3.4)
 * [Functionality explained (XML notification example)](#section4)
 * [Installing Cygnus](#section5)
   * [RPM install (recommended)](#section5.1)
@@ -36,6 +37,7 @@ Current stable release is able to persist Orion context data in:
 * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
+* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 
 Cygnus is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
@@ -55,13 +57,14 @@ There exists a wide collection of already developed sources, channels and sinks.
 * **OrionHDFSSink**. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing Json-like lines about the values such entity's attributes have had along time. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
 * **OrionCKANSink**. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
 * **OrionMySQLSink**. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Tables contain rows about the values such entity's attributes have had along time.
+* **OrionMongoSink**. A custom sink for persisting Orion context data in a MongoDB server. Each user owns a database, and each entity is mapped to a table within that database. Tables contain rows about the values such entity's attributes have had along time.
 
 All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
 
 1.  On behalf of Cygnus, subscribe to Orion for certain context information.
 2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
 3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
-4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink), get the Flume events from the sink channel and persist the data in the appropriate format.
+4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink, OrionMongoSink), get the Flume events from the sink channel and persist the data in the appropriate format.
 
 [Top](#top)
 
@@ -264,6 +267,37 @@ Each organization/tenant is associated to a different database.
 
 [Top](#top)
 
+###<a name="section3.4"></a>OrionMongoSink persistence
+Then `OrionMongoSink` will persist the data within the body as:
+
+    $ mongo
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    vehicles           0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    4wheels
+    4wheels_car1_car
+    4wheels_car1_car_speed
+    system.indexes
+    > db.4wheels.fnd()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : "2015-04-20T12:13:22.41", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    > db.4wheels_car1_car.find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : "2015-04-20T12:13:22.41", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    > db.4wheels_car1_car_speed.find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : "2015-04-20T12:13:22.41", "attrType" : "kmh", "attrValue" : "112.9" }
+
+NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
+
+All the details regarding this sink can be fount at [`doc/design/OrionMongoSink.md`](doc/design/OrionMongoSink.md).
+
+[Top](#top)
+
 ##<a name="section4"></a>Functionality explained (XML notification example)
 
 Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
@@ -359,13 +393,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -451,7 +485,7 @@ cygnusagent.sinks.mysql-sink.channel = mysql-channel
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
 # the FQDN/IP address where the MySQL server runs 
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
-# the port where the MySQL server listes for incomming connections
+# the port where the MySQL server listens for incomming connections
 cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 cygnusagent.sinks.mysql-sink.mysql_username = root
@@ -459,6 +493,27 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+
+# ============================================
+# OrionMongoSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+# channel name from where to read notification events
+cygnusagent.sinks.mongo-sink.channel = mongo-channel
+# the FQDN/IP address where the MongoDB server runs
+cygnusagent.sinks.mongo-sink.mongo_host = x.y.z.w
+# the port where the MongoDB server listens for incomming connections
+cygnusagent.sinks.mongo-sink.mongo_port = 27017
+# a valid user in the MongoDB server
+cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
+# password for the user above
+cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
+# data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
+cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+# prefix for the MongoDB databases (empty for none)
+cygnusagent.sinks.mongo-sink.db_prefix =
+# prefix pro the MongoDB collections (empty for none)
+cygnusagent.sinks.mongo-sink.collection_prefix =
 
 #=============================================
 # hdfs-channel configuration
@@ -486,6 +541,15 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# mongo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.mongo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.mongo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mongo-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
@@ -634,7 +698,12 @@ From Cygnus 0.5 there is a REST-based management interface for administration pu
 
 ##<a name="section11"></a>Contact
 
-* Fermín Galán Márquez (fermin.galanmarquez@telefonica.com).
-* Francisco Romero Bueno (francisco.romerobueno@telefonica.com).
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
+<br>
+Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
+<br>
+Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
+<br>
+Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
 
 [Top](#top)
