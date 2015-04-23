@@ -23,10 +23,12 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import org.apache.flume.Context;
 
 /**
@@ -51,8 +53,7 @@ public class OrionMongoSink extends OrionSink {
     public enum DataModel { COLLECTIONPERSERVICEPATH, COLLECTIONPERENTITY, COLLECTIONPERATTRIBUTE }
     
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionMongoSink.class);
-    private String mongoHost;
-    private int mongoPort;
+    private String mongoURI;
     private String mongoUsername;
     private String mongoPassword;
     private DataModel dataModel;
@@ -68,20 +69,12 @@ public class OrionMongoSink extends OrionSink {
     } // OrionMongoSink
     
     /**
-     * Gets the mongo host. It is protected since it is used by the tests.
+     * Gets the mongo URI. It is protected since it is used by the tests.
      * @return
      */
-    protected String getHost() {
-        return mongoHost;
-    } // getHost
-    
-    /**
-     * Gets the mongo port. It is protected since it is used by the tests.
-     * @return
-     */
-    protected int getPort() {
-        return mongoPort;
-    } // getPort
+    protected String getURI() {
+        return mongoURI;
+    } // getURI
     
     /**
      * Gets the mongo username. It is protected since it is used by the tests.
@@ -141,10 +134,8 @@ public class OrionMongoSink extends OrionSink {
     
     @Override
     public void configure(Context context) {
-        mongoHost = context.getString("mongo_host", "localhost");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_host=" + mongoHost + ")");
-        mongoPort = context.getInteger("mongo_port", 27017);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_port=" + mongoPort + ")");
+        mongoURI = context.getString("mongo_uri", "localhost:27017");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_uri=" + mongoURI + ")");
         mongoUsername = context.getString("mongo_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_username=" + mongoUsername + ")");
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
@@ -167,7 +158,7 @@ public class OrionMongoSink extends OrionSink {
     @Override
     public void start() {
         // create the persistence backend
-        backend = new MongoBackend(mongoHost, mongoPort, mongoUsername, mongoPassword, dataModel);
+        backend = new MongoBackend(mongoURI, mongoUsername, mongoPassword, dataModel);
         LOGGER.debug("[" + this.getName() + "] Mongo persistence backend created");
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
@@ -182,7 +173,7 @@ public class OrionMongoSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
-        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        String recvTime = Utils.getHumanReadable(recvTimeTs);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
