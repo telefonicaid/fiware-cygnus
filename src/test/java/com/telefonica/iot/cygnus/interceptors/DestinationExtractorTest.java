@@ -1,12 +1,12 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
  * details.
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.interceptors.DestinationExtractor;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.event.EventBuilder;
@@ -43,11 +42,10 @@ public class DestinationExtractorTest {
     private DestinationExtractor destExtractor;
     
     // other instances
-    private Map<String, String> eventHeaders;
+    private Map<String, String> beforeInterceptingEventHeaders;
     private Event event;
 
     // constants
-    private final String matchingTableFile = "conf/matching_table.conf.template";
     private final String eventData = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -100,13 +98,12 @@ public class DestinationExtractorTest {
      */
     @Before
     public void setUp() throws Exception {
-        // set up the instance of the tested class
-        destExtractor = new DestinationExtractor(matchingTableFile);
+        // the instance of the tested class can not be setup here since it depends on a variable
         
         // set up other instances
-        eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
-        event = EventBuilder.withBody(eventData.getBytes(), eventHeaders);
+        beforeInterceptingEventHeaders = new HashMap<String, String>();
+        beforeInterceptingEventHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
+        beforeInterceptingEventHeaders.put(Constants.HEADER_SERVICE_PATH, "def_servpath");
     } // setUp
     
     /**
@@ -114,7 +111,8 @@ public class DestinationExtractorTest {
      */
     @Test
     public void testInitialize() {
-        System.out.println("Testing EntityDescriptorExtractor.initialize");
+        System.out.println("Testing DestinationExtractor.initialize");
+        destExtractor = new DestinationExtractor("conf/matching_table.conf.template");
         destExtractor.initialize();
         ArrayList<MatchingRule> matchingTable = destExtractor.getMatchingTable();
         assertTrue(matchingTable.size() == 3);
@@ -143,12 +141,38 @@ public class DestinationExtractorTest {
      */
     @Test
     public void testIntercept() {
+        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf exists)");
+        destExtractor = new DestinationExtractor("conf/matching_table.conf.template");
         destExtractor.initialize();
+        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
         Event interceptedEvent = destExtractor.intercept(event);
-        String destinations = interceptedEvent.getHeaders().get(Constants.DESTINATION);
+        Map<String, String> afterInterceptingEventHeaders = interceptedEvent.getHeaders();
+        String destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
         assertEquals(destinations, "numeric_rooms,numeric_rooms");
-        String datasets = interceptedEvent.getHeaders().get(Constants.HEADER_SERVICE_PATH);
+        String datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
         assertEquals(datasets, "rooms,rooms");
+        
+        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf is not set)");
+        destExtractor = new DestinationExtractor(null);
+        destExtractor.initialize();
+        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
+        interceptedEvent = destExtractor.intercept(event);
+        afterInterceptingEventHeaders = interceptedEvent.getHeaders();
+        destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
+        assertEquals(destinations, "room.1_room,room.22_room");
+        datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        assertEquals(datasets, "def_servpath,def_servpath");
+        
+        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf does not exist)");
+        destExtractor = new DestinationExtractor("conf/anything.conf");
+        destExtractor.initialize();
+        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
+        interceptedEvent = destExtractor.intercept(event);
+        afterInterceptingEventHeaders = interceptedEvent.getHeaders();
+        destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
+        assertEquals(destinations, "room.1_room,room.22_room");
+        datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        assertEquals(datasets, "def_servpath,def_servpath");
     } // testIntercept
 
 } // DestinationExtractorTest
