@@ -4,15 +4,15 @@
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`; click [here](from_ngsi_events_to_flume_events.md) to see the details. In the end, the information within these Flume events must be mapped into specific MongoDB data structures.
 
-###Mapping to MongoDB data structures
+###Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionMongoSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
 2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
 3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The unit data depends on the chosen data model (see the configuration section):
-    * <i>collection-per-service-path</i>: the collection is called as the `fiware-servicePath` header value whitin the event.
+    * <i>collection-per-service-path</i>: the collection is called as the `fiware-servicePath` header value within the event.
     * <i>collection-per-entity</i>: the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
-    * <i>collection-per-attribute</i>: the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+    * <i>collection-per-attribute</i>: the collection is called as the concatenation of the `fiware-servicePath`\_`destination`\_`attrName`.
 4. The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
 ###Example
@@ -65,7 +65,7 @@ Then `OrionMongoSink` will persist the data within the body as:
     > db.4wheels_car1_car_speed.find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : "2015-04-20T12:13:22.41", "attrType" : "kmh", "attrValue" : "112.9" }
 
-NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see next section for more details).
+NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see next section for more details).
 
 ##Configuration
 `OrionMongoSink` is configured through the following parameters:

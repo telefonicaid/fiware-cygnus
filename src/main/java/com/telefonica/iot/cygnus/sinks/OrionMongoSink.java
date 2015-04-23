@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,9 +158,9 @@ public class OrionMongoSink extends OrionSink {
         } // if
         
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model=" + dataModel + ")");
-        dbPrefix = context.getString("db_prefix", "sth_");
+        dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        collectionPrefix = context.getString("collection_prefix", "sth_");
+        collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
     } // configure
     
