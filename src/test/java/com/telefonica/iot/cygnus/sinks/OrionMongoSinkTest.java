@@ -19,7 +19,6 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.mongo.MongoBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.sinks.OrionMongoSink.DataModel;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.HashMap;
@@ -54,8 +53,7 @@ public class OrionMongoSinkTest {
     private NotifyContextRequest notifyContextRequest;
     
     // constants
-    private final String mongoHost = "localhost";
-    private final String mongoPort = "27017";
+    private final String mongoURI = "localhost:27017";
     private final String mongoUsername = "admin";
     private final String mongoPassword = "1a2b3c4d";
     private final String dataModel = "collection-per-entity";
@@ -114,8 +112,7 @@ public class OrionMongoSinkTest {
         
         // set up other instances
         context = new Context();
-        context.put("mongo_host", mongoHost);
-        context.put("mongo_port", mongoPort);
+        context.put("mongo_uri", mongoURI);
         context.put("mongo_username", mongoUsername);
         context.put("mongo_password", mongoPassword);
         context.put("data_model", dataModel);
@@ -137,8 +134,7 @@ public class OrionMongoSinkTest {
     public void testConfigure() {
         System.out.println("Testing OrionMongosink.configure");
         sink.configure(context);
-        assertEquals(mongoHost, sink.getHost());
-        assertEquals(mongoPort, Integer.toString(sink.getPort()));
+        assertEquals(mongoURI, sink.getURI());
         assertEquals(mongoUsername, sink.getUsername());
         assertEquals(mongoPassword, sink.getPassword());
         assertEquals(sink.getDataModel(dataModel), sink.getDataModel());

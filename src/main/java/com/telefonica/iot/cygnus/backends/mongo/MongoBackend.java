@@ -25,7 +25,9 @@ import com.mongodb.client.MongoDatabase;
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionMongoSink.DataModel;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 
@@ -35,8 +37,7 @@ import org.bson.Document;
  */
 public class MongoBackend {
     
-    private final String mongoHost;
-    private final int mongoPort;
+    private final String mongoURI;
     private final String mongoUsername;
     private final String mongoPassword;
     private final DataModel dataModel;
@@ -44,16 +45,14 @@ public class MongoBackend {
             
     /**
      * Constructor.
-     * @param mongoHost
-     * @param mongoPort
+     * @param mongoURI
      * @param mongoUsername
      * @param mongoPassword
      * @param dataModel
      */
-    public MongoBackend(String mongoHost, int mongoPort, String mongoUsername, String mongoPassword,
+    public MongoBackend(String mongoURI, String mongoUsername, String mongoPassword,
             DataModel dataModel) {
-        this.mongoHost = mongoHost;
-        this.mongoPort = mongoPort;
+        this.mongoURI = mongoURI;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
         this.dataModel = dataModel;
@@ -145,18 +144,33 @@ public class MongoBackend {
         // FIXME: the row-like column insertion mode is not currently available for Mongo
     } // insertContextDataRaw
     
+    /**
+     * Gets a Mongo database.
+     * @param dbName
+     * @return
+     */
     private MongoDatabase getDatabase(String dbName) {
-        ServerAddress server = new ServerAddress(mongoHost, mongoPort);
+        // create a ServerAddress object for each configured URI
+        List<ServerAddress> servers = new ArrayList<ServerAddress>();
+        String[] uris = mongoURI.split(",");
+        
+        for (String uri: uris) {
+            String[] uriParts = uri.split(":");
+            servers.add(new ServerAddress(uriParts[0], new Integer(uriParts[1])));
+        } // for
+        
+        // create a Mongo client
         MongoClient client;
         
         if (mongoUsername.length() != 0) {
             MongoCredential credential = MongoCredential.createCredential(mongoUsername, dbName,
                     mongoPassword.toCharArray());
-            client = new MongoClient(server, Arrays.asList(credential));
+            client = new MongoClient(servers, Arrays.asList(credential));
         } else {
-            client = new MongoClient(server);
+            client = new MongoClient(servers);
         } // if else
         
+        // get the database
         return client.getDatabase(dbName);
     } // getDatabase
     

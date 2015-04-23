@@ -26,7 +26,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -158,5 +161,21 @@ public final class Utils {
             return "UNKNOWN";
         } // catch
     } // getLastCommit
+    
+    /**
+     * Gets the human redable version of timestamp expressed in miliseconds.
+     * @param ts
+     * @return
+     */
+    public static String getHumanReadable(long ts) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String humanRedable = sdf.format(new Date(ts));
+        humanRedable += "T";
+        sdf = new SimpleDateFormat("HH:mm:ss.Sz");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        humanRedable += sdf.format(new Date(ts));
+        return humanRedable;
+    } // getHumanRedable
         
 } // Utils
