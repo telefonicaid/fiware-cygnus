@@ -167,11 +167,11 @@ In both cases, the files are created at execution time if the file doesn't exist
 
 Thus, by receiving a notification like the one above, being the persistence mode `row` and a `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
+    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21UTC", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
 On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
+    {"recvTime":"2014-02-27T14:46:21UTC", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
 A special particularity regarding HDFS persisted data is the posssibility to exploit such data through Hive, a SQL-like querying system. OrionHDFSSink automatically creates a Hive table (similar to a SQL table) for each persisted entity in the default database, being the name for such tables:
 
@@ -179,15 +179,15 @@ A special particularity regarding HDFS persisted data is the posssibility to exp
 
 Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_row` will contain a new row such as:
 
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | recvTimeTs   | recvTime               | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
+    |--------------|------------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
+    | 13453464536  | 2014-02-27T14:46:21UTC | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_column` will contain a new row such as:
 
-    | recvTime            | temperature | temperature_md                                     | 
-    |---------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
+    | recvTime               | temperature | temperature_md                                     | 
+    |------------------------|-------------|----------------------------------------------------|
+    | 2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
 
 [Top](#top)
 
@@ -206,17 +206,17 @@ The behaviour of the connector regarding the internal representation of the data
 
 Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing), will containt the following row in its datastore:
 
-    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
-    |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
-    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
+    | _id | recvTimeTs   | recvTime               | attrName    | attrType   | attrValue | attrMd                                              |
+    |-----|--------------|------------------------|-----.-------|------------|-----------|-----------------------------------------------------|
+    | i   | 13453464536  | 2014-02-27T14:46:21UTC | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
 
 where `i` depends on the number of rows previously inserted.
 
 On the contrary, being the persistence mode `column`, the resource `Room1-Room` (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with `_md` is added for the metadata.
 
-    | _id | recvTime           | temperature | temperature_md                                     |
-    |--------------------------|-------------|----------------------------------------------------|
-    | i   |2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | _id | recvTime              | temperature | temperature_md                                     |
+    |-----|-----------------------|-------------|----------------------------------------------------|
+    | i   |2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -253,15 +253,15 @@ The behaviour of the connector regarding the internal representation of the data
 
 Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `workingrooms_floor4_room1_Room` (it is created if not existing) will contain a new row such as:
 
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | recvTimeTs   | recvTime               | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
+    |--------------|------------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
+    | 13453464536  | 2014-02-27T14:46:21UTC | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 On the contrary, being the persistence mode `column`, the table named `workingrooms_floor4_room1_Room` (it must be created in advance) will contain a new row such as:
 
-    | recvTime            | temperature | temperature_md                                     | 
-    |---------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | recvTime               | temperature | temperature_md                                     | 
+    |------------------------|-------------|----------------------------------------------------|
+    | 2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 Each organization/tenant is associated to a different database.
 
