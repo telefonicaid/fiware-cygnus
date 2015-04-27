@@ -26,9 +26,6 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 import org.apache.flume.Context;
 
 /**
@@ -53,7 +50,7 @@ public class OrionMongoSink extends OrionSink {
     public enum DataModel { COLLECTIONPERSERVICEPATH, COLLECTIONPERENTITY, COLLECTIONPERATTRIBUTE }
     
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionMongoSink.class);
-    private String mongoURI;
+    private String mongoHosts;
     private String mongoUsername;
     private String mongoPassword;
     private DataModel dataModel;
@@ -73,7 +70,7 @@ public class OrionMongoSink extends OrionSink {
      * @return
      */
     protected String getURI() {
-        return mongoURI;
+        return mongoHosts;
     } // getURI
     
     /**
@@ -134,8 +131,8 @@ public class OrionMongoSink extends OrionSink {
     
     @Override
     public void configure(Context context) {
-        mongoURI = context.getString("mongo_uri", "localhost:27017");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_uri=" + mongoURI + ")");
+        mongoHosts = context.getString("mongo_hosts", "localhost:27017");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_hosts=" + mongoHosts + ")");
         mongoUsername = context.getString("mongo_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_username=" + mongoUsername + ")");
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
@@ -158,7 +155,7 @@ public class OrionMongoSink extends OrionSink {
     @Override
     public void start() {
         // create the persistence backend
-        backend = new MongoBackend(mongoURI, mongoUsername, mongoPassword, dataModel);
+        backend = new MongoBackend(mongoHosts, mongoUsername, mongoPassword, dataModel);
         LOGGER.debug("[" + this.getName() + "] Mongo persistence backend created");
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");

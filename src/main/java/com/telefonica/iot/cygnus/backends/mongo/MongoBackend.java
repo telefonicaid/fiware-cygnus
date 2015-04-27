@@ -37,7 +37,7 @@ import org.bson.Document;
  */
 public class MongoBackend {
     
-    private final String mongoURI;
+    private final String mongoHosts;
     private final String mongoUsername;
     private final String mongoPassword;
     private final DataModel dataModel;
@@ -45,14 +45,14 @@ public class MongoBackend {
             
     /**
      * Constructor.
-     * @param mongoURI
+     * @param mongoHosts
      * @param mongoUsername
      * @param mongoPassword
      * @param dataModel
      */
-    public MongoBackend(String mongoURI, String mongoUsername, String mongoPassword,
+    public MongoBackend(String mongoHosts, String mongoUsername, String mongoPassword,
             DataModel dataModel) {
-        this.mongoURI = mongoURI;
+        this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
         this.dataModel = dataModel;
@@ -102,7 +102,8 @@ public class MongoBackend {
             String attrMd) throws Exception {
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
-        Document doc = new Document("recvTime", recvTime);
+        Document doc = new Document("recvTimeTs", recvTimeTs)
+                .append("recvTime", recvTime);
         
         switch (dataModel) {
             case COLLECTIONPERSERVICEPATH:
@@ -152,7 +153,7 @@ public class MongoBackend {
     private MongoDatabase getDatabase(String dbName) {
         // create a ServerAddress object for each configured URI
         List<ServerAddress> servers = new ArrayList<ServerAddress>();
-        String[] uris = mongoURI.split(",");
+        String[] uris = mongoHosts.split(",");
         
         for (String uri: uris) {
             String[] uriParts = uri.split(":");
