@@ -78,6 +78,12 @@ public class DestinationExtractor implements Interceptor {
     public void initialize() {
         // load the matching table from the file where it is described
         matchingTable = new ArrayList<MatchingRule>();
+        
+        if (matchingTableFile == null) {
+            // despite configuring the interceptor, no table_matching.conf file has been specified
+            return;
+        } // if
+        
         BufferedReader reader;
         
         try {
@@ -223,7 +229,7 @@ public class DestinationExtractor implements Interceptor {
  
         @Override
         public void configure(Context context) {
-            matchingTableFile = context.getString("matching_table");
+            matchingTableFile = context.getString("matching_table", null);
         } // configure
  
         @Override
