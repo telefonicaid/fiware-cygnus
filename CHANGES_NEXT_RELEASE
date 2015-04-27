@@ -3,4 +3,5 @@
 * Added a polling interval parameter for reloading the Flume configuration (#334)
 * Bug fix, flume-conf.properties.template file from Apache Flume is not copied anymore to Cygnus folder (#348)
 * Cygnus exits if the HTTPSource listening port is already in use (#340)
+* Added OrionMongoSink (#363)
 * Bug fixed: matching table name can be null (no Flume parameter is used) or wrong (#367)
