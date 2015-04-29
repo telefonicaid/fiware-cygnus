@@ -2,7 +2,7 @@
 ##Functionality
 `com.iot.telefonica.cygnus.sinks.OrionCKANSink`, or simply `OrionCKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific HDFS data structures.
+Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific CKAN data structures.
 
 ###Mapping Flume events to CKAN data structures
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `OrionCKANSink` each time a Flume event is taken, by performing the following workflow:
@@ -207,7 +207,7 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 
 ## Use cases
-Use `OrionCKANSink` if you are looking for a Json-based document storage growing in the mid-long term.
+Use `OrionCKANSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 ## Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
