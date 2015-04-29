@@ -64,13 +64,13 @@ Assuming the following Flume event is created from a notified NGSI context data 
 Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"percentage","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"percentage","attrValue":"74.6","attrMd":[]}
 
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTime":"2015-04-20T12:13:22.41.124UTC","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
+    {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
 
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
@@ -81,10 +81,10 @@ With respect to Hive, the content of the tables in the `row` and `column` modes,
     Hive history file=/tmp/root/hive_job_log_root_201504201213_821987796.txt
     hive> select * from myuser_vehicles_4wheels_car1_car_row;
     OK
-    1429535775	2015-04-20T12:13:22.41.124UTC	car1	car	speed		kmh			112.9	[]
-    1429535775	2015-04-20T12:13:22.41.124UTC	car1	car	oil_level	percentage	74.6	[]
+    1429535775	2015-04-20T12:13:22.41.124Z	car1	car	speed		kmh			112.9	[]
+    1429535775	2015-04-20T12:13:22.41.124Z	car1	car	oil_level	percentage	74.6	[]
     hive> select * from myuser_vehicles_4wheels_car1_car_column;
-    2015-04-20T12:13:22.41.124UTC		112.9	[]	74.6	[]
+    2015-04-20T12:13:22.41.124Z		112.9	[]	74.6	[]
 
 NOTE: `hive` is the Hive CLI for locally querying the data.
 
