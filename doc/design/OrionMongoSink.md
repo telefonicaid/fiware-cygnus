@@ -2,7 +2,7 @@
 ##Functionality
 `com.iot.telefonica.cygnus.sinks.OrionMongoSink`, or simply `OrionMongosink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`; click [here](from_ngsi_events_to_flume_events.md) to see the details. In the end, the information within these Flume events must be mapped into specific MongoDB data structures.
+Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific HDFS data structures.
 
 ###Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionMongoSink` each time a Flume event is taken, by performing the following workflow:
@@ -36,14 +36,19 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	                attrName=speed,
 	                attrType=kmh,
 	                attrValue=112.9
+	            },
+	            {
+	                attrName=oil_level,
+	                attrType=percentage,
+	                attrValue=74.6
 	            }
 	        ]
 	    }
     }
 
-Then `OrionMongoSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` as configuration parameter, then `OrionMongoSink` will persist the data within the body as:
 
-    $ mongo
+    $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
     connecting to: test
     > show databases
@@ -67,6 +72,8 @@ Then `OrionMongoSink` will persist the data within the body as:
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see next section for more details).
 
+NOTE: `mongo` is the MongoDB CLI for querying the data.
+
 ##Configuration
 `OrionMongoSink` is configured through the following parameters:
 
@@ -75,7 +82,6 @@ NOTE: the results for the three different data models (<i>collection-per-service
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-| mongo\_replica\_set | no | <i>empty</i> | Replica set name, not necessary in standalone case
 | mongo_username | no | <i>empty</i> |
 | mongo_password | no | <i>empty</i> |
 | data_model | no | collection-per-entity | Under study
@@ -90,9 +96,9 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
     cygnusagent.sinks.mongo-sink.channel = mongo-channel
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
-    cygnusagent.sinks.mongo-sink.mongo_username = admin
-    cygnusagent.sinks.mongo-sink.mongo_password = 1a2b3c4d
-    cygnusagent.sinks.mongo-sink.data_model = collection-per-service-path | collection-per-entity | collection-per-attribute
+    cygnusagent.sinks.mongo-sink.mongo_username = myuser
+    cygnusagent.sinks.mongo-sink.mongo_password = mypassword
+    cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
 
