@@ -99,7 +99,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             "records": [
                 {
                     "attrType": "kmh",
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
                     "attrValue": "112.9",
@@ -108,7 +108,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                 },
                 {
                     "attrType": "percentage",
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
                     "attrValue": "74.6",
@@ -160,7 +160,7 @@ If `attr_persistence=colum` then `OrionCKANSink` will persist the data within th
             ],
             "records": [
                 {
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "speed": "112.9",
                     "speed_md": null,
                     "oil_level": "74.6",

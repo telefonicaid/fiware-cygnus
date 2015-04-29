@@ -221,13 +221,13 @@ The body simply contains a byte representation of the HTTP payload that will be 
 Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"oil","attrType":"percentage","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"percentage","attrValue":"74.6","attrMd":[]}
 
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTime":"2015-04-20T12:13:22.41.124UTC","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
+    {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
@@ -278,7 +278,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             "records": [
                 {
                     "attrType": "kmh",
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
                     "attrValue": "112.9",
@@ -287,7 +287,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                 },
                 {
                     "attrType": "percentage",
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
                     "attrValue": "74.6",
@@ -339,7 +339,7 @@ If `attr_persistence=colum` then `OrionCKANSink` will persist the data within th
             ],
             "records": [
                 {
-                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "speed": "112.9",
                     "speed_md": null,
                     "oil_level": "74.6",
@@ -392,12 +392,12 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
-    | recvTimeTs | recvTime                      | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
-    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124UTC | car1     | car        |  speed      | kmh        | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124UTC | car1     | car        |  oil_level  | percentage | 74.6      | []     |
-    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
+    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
+    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
+    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | kmh        | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | percentage | 74.6      | []     |
+    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
     2 row in set (0.00 sec)
     
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
@@ -429,11 +429,11 @@ If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within th
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +-------------------------------+-------+----------+-----------+--------------+
-    | recvTime                      | speed | speed_md | oil_level | oil_level_md |
-    +-------------------------------+-------+----------+-----------+--------------+
-    | 2015-04-20T12:13:22.41.124UTC | 112.9 | []       |  74.6     | []           |
-    +-------------------------------+-------+----------+-----------+--------------+
+    +-----------------------------+-------+----------+-----------+--------------+
+    | recvTime                    | speed | speed_md | oil_level | oil_level_md |
+    +-----------------------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124Z | 112.9 | []       |  74.6     | []           |
+    +-----------------------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
 
 NOTE: `mysql` is the MySQL CLI for querying the data.
@@ -462,11 +462,11 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124UTC", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412UTC", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560UTC", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
