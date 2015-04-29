@@ -1,32 +1,26 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of perseo
+# This file is part of fiware-cygnus (FI-WARE project).
 #
-# perseo is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the License,
-# or (at your option) any later version.
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
 #
-# perseo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public
-# License along with perseo.
-# If not, seehttp://www.gnu.org/licenses/.
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
 #  iot_support at tid.es
 #
-#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 
-import general_utils
-import http_utils
-
+from tools import general_utils, http_utils
 
 # general constants
 EMPTY   = u''
@@ -163,8 +157,6 @@ class Notifications:
             NOTIFICATION[self.content][CONTEXT_RESPONSES][0][CONTEXT_ELEMENT][ATTRIBUTES] = self.attrs
         return general_utils.convert_dict_to_str(NOTIFICATION[self.content], self.content)
 
-
-
     def __new_metadata(self, name, type, value):
         """
          create a metadata
@@ -174,9 +166,9 @@ class Notifications:
         :return: metadata dictionary
         """
         if name == RANDOM:
-            name = 'name_' +general_utils.string_generator(4)
+            name = 'name_' + general_utils.string_generator(4)
         if type == RANDOM:
-            type = 'type_' +general_utils.string_generator(4)
+            type = 'type_' + general_utils.string_generator(4)
         if value == RANDOM:
             value = general_utils.string_generator(4)
         return {NAME: name, TYPE: type, VALUE: value}
@@ -190,7 +182,6 @@ class Notifications:
         :param metadata: metadata attribute
         :return: attribute dictionary
         """
-
         if self.content == XML:
             dict_temp = {NAME: name, TYPE: type, CONTENT_VALUE: value}
             if metadatas != None: dict_temp[METADATA] = metadatas
@@ -229,19 +220,19 @@ class Notifications:
         self.attrs = []
         self.attributes_number = number
         if name == RANDOM:
-            self.attributes_name = 'name_' +general_utils.string_generator(4)
+            self.attributes_name = 'name_' + general_utils.string_generator(4)
         else:
             self.attributes_name = name
         if type == RANDOM:
-            self.attribute_type = 'type_' +general_utils.string_generator(4)
+            self.attribute_type = 'type_' + general_utils.string_generator(4)
         else:
             self.attribute_type = type
         if value == RANDOM:
-            self.attribute_value = general_utils.string_generator(4)
+            self.attributes_value = general_utils.string_generator(4)
         else:
-            self.attribute_value = value
+            self.attributes_value = value
         for i in range(0,int(self.attributes_number)):
-            self.attrs.append(self.__append_attribute(self.attributes_name+"_"+str(i), self.attribute_type, self.attribute_value, self.metadatas))
+            self.attrs.append(self.__append_attribute(self.attributes_name+"_"+str(i), self.attribute_type, self.attributes_value, self.metadatas))
         return self.attrs
 
     def get_attributes_name(self):
@@ -251,12 +242,12 @@ class Notifications:
         """
         return self.attributes_name
 
-    def get_attribute_value(self):
+    def get_attributes_value(self):
         """
          Get attribute value
         :return: string
         """
-        return self.attribute_value
+        return self.attributes_value
 
     def send_notification(self, identity_id, identity_type):
         """
@@ -268,7 +259,7 @@ class Notifications:
         :return: response (code status, headers and body)
         """
         assert len(self.attrs) != 0, \
-            " WARN - It is necessary to create the attributes previously...."
+            " ERROR - It is necessary to create the attributes previously. See create_attributes() method... "
         self.identity_id = identity_id
         self.identity_type = identity_type
         self.__insert_identity_id_and_identity_type (self.identity_id, self.identity_type)
