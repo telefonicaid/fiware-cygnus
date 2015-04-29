@@ -5,3 +5,4 @@
 * Cygnus exits if the HTTPSource listening port is already in use (#340)
 * Added OrionMongoSink (#363)
 * Bug fixed: matching table name can be null (no Flume parameter is used) or wrong (#367)
+* Add specific sink documents, pointing to them from the README (#322)
