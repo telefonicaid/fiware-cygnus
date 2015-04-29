@@ -25,7 +25,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
-import java.sql.Timestamp;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class OrionTestSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
-        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        String recvTime = Utils.getHumanReadable(recvTimeTs);
         
         // lob about the event headers with deliberated INFO level
         LOGGER.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime
