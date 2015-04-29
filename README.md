@@ -1,28 +1,30 @@
 #<a name="top"></a>Cygnus
 
 * [What is Cygnus](#section1)
-* [Design](#section2)
-* [Functionality explained (Json notification example)](#section3)
-  * [OrionHDFSSink persistence](#section3.1)
-  * [OrionCKANSink persistence](#section3.2)
-  * [OrionMySQLSink persistence](#section3.3)
-  * [OrionMongoSink persistence](#section3.4)
-* [Functionality explained (XML notification example)](#section4)
-* [Installing Cygnus](#section5)
-  * [RPM install (recommended)](#section5.1)
-  * [Installing from sources (advanced)](#section5.2)
-* [Cygnus configuration](#section6)
-  * [`cygnus_instance_<id>.conf`](#section6.1)
-  * [`agent_<id>.conf`](#section6.2)
-* [Running Cygnus](#section7)
-  * [As a service (recommended)](#section7.1)
-  * [As standalone application (advanced)](#section7.2)
-* [Orion subscription](#section8)
-* [Logs](#section9)
-  * [log4j configuration](#section9.1)
-  * [Message types](#section9.2)
-* [Management interface](#section10)
-* [Contact](#section11)
+* [Design on top of Apache Flume](#section2)
+* [Data flow example](#section3)
+    * [Subscription to the NGSI-like source](#section3.1)
+    * [NGSI notification reception](#section3.2)
+    * [From NGSI format to Flume format](#section3.3)
+    * [Data persistence](#section3.4)
+        * [HDFS persistence](#section3.4.1)
+        * [CKAN persistence](#section3.4.2)
+        * [MySQL persistence](#section3.4.3)
+        * [MongoDB persistence](#section3.4.4)
+* [Installing Cygnus](#section4)
+    * [RPM install (recommended)](#section4.1)
+    * [Installing from sources (advanced)](#section4.2)
+* [Cygnus configuration](#section5)
+    * [`cygnus_instance_<id>.conf`](#section5.1)
+    * [`agent_<id>.conf`](#section5.2)
+* [Running Cygnus](#section6)
+    * [As a service (recommended)](#section6.1)
+    * [As standalone application (advanced)](#section6.2)
+* [Logs](#section7)
+    * [log4j configuration](#section7.1)
+    * [Message types](#section7.2)
+* [Advanced topics](#section8)
+* [Contact](#section9)
 
 ##<a name="section1"></a>What is Cygnus
 
@@ -39,98 +41,165 @@ Current stable release is able to persist Orion context data in:
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 
-Cygnus is a (conceptual) derivative work of [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
+Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
 [Top](#top)
 
-##<a name="section2"></a>Design
+##<a name="section2"></a>Design on top of Apache Flume
 
 All the details about Flume can be found at [flume.apache.org](http://flume.apache.org/), but, as a reminder, some concepts will be explained here:
 
-* A Flume source is an agent gathering event data from the real source (Twitter stream, a notification system, etc.), either by polling the source or listening for incoming pushes of data. Gathered data is sent to a Flume channel.
-* A Flume channel is a passive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
-* A Flume sink connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
+* A Flume **source** is an agent gathering event data from the real source (Twitter stream, a notification system, etc.), either by polling the source or listening for incoming pushes of data. Gathered data is sent to a Flume channel in the form of a Flume event (metadata headers + data body).
+    * Certain sources behaviour is governed through Flume **handlers**.
+    * Flume events may be transformed (by adding new metadata headers) or directly dropped by Flume **interceptors** before the events are put in the channel.
+* A Flume **channel** is a passive store (implemented by means of a file, memory, etc.) that holds the event until it is consumed by the Flume sink.
+* A Flume **sink** connects with the final destination of the data (a local file, HDFS, a database, etc.), taking events from the channel and consuming them (processing and/or persisting it).
 
 There exists a wide collection of already developed sources, channels and sinks. The Flume-based connector, also called Cygnus, development extends that collection by adding:
 
-* **OrionRestHandler**. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected [request format](https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
-* **OrionHDFSSink**. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing Json-like lines about the values such entity's attributes have had along time. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
-* **OrionCKANSink**. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
-* **OrionMySQLSink**. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Tables contain rows about the values such entity's attributes have had along time.
-* **OrionMongoSink**. A custom sink for persisting Orion context data in a MongoDB server. Each user owns a database, and each entity is mapped to a collection within that database. Collections contain documents about the values such entity's attributes have had along time.
+* `OrionRestHandler`. A custom HTTP source handler for the default HTTP source. The existing HTTP source behaviour can be governed depending on the request handler associated to it in the configuration. In this case, the custom handler takes care of the method, the target and the headers (specially the Content-Type one) within the request, cheking everything is according to the expected [request format](https://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE). This allows for a certain degree of control on the incoming data. The header inspection step allows for a content type identification as well by sending, together with the data, the Content-Type header.
+* `OrionHDFSSink`. A custom sink that persists Orion content data in a HDFS deployment. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Within Cygnus, the data coming from Orion must be persisted in the Cosmos HDFS in the form of files (a file per entity) containing Json-like lines about the values such entity's attributes have had along time. Several HDFS backends can be used for the data persistence (WebHDFS, HttpFS, Infinity), all of them based on the native WebHDFS REST API from Hadoop.
+* `OrionCKANSink`. A custom sink that persists Orion context data in CKAN server instances (see http://docs.ckan.org/en/latest/).
+* `OrionMySQLSink`. A custom sink for persisting Orion context data in a MySQL server. Each user owns a database, and each entity is mapped to a table within that database. Tables contain rows about the values such entity's attributes have had along time.
+* `OrionMongoSink`. A custom sink for persisting Orion context data in a MongoDB server. Each user owns a database, and each entity is mapped to a collection within that database. Collections contain documents about the values such entity's attributes have had along time.
+* `DestinationExtractorInterceptor`.
 
-All these new components (OrionRestHandler, OrionHDFSSink, etc) are combined with other native ones included in Flume itself (e.g. HttpSource), with the purpose of implementing the following data flow:
+All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
 
-1.  On behalf of Cygnus, subscribe to Orion for certain context information.
-2.  Receive from Orion notifications about new update context data; this notification will be handled by the native HttpSource together with the custom OrionRestHandler.
-3.  Translate the notification into the Flume event format, and put them into the different sink channels (native memory ones).
-4.  For each enabled custom sink (OrionHDFSSink, OrionCKANSink, OrionMySQLSink, OrionMongoSink), get the Flume events from the sink channel and persist the data in the appropriate format.
+1.  On behalf of Cygnus, subscribe to certain NGSI-like source (typically Orion Context Broker) for certain context information.
+2.  Receive from the NGSI-like source notifications about new updated context data; this notification will be handled by the native `HttpSource` together with the custom `OrionRestHandler`.
+3.  Translate the notification into the Flume event format (metadata headers + data body), and put them into the different sink channels, typically of type `MemoryChannel`.
+4.  In the meantime, some interceptors such as the native `Timestamp` one or the custom `DestinationExtractorInterceptor` may modify the event before it is put in the channel or channels.
+5.  For each enabled custom sink (`OrionHDFSSink`, `OrionCKANSink`, `OrionMySQLSink`, `OrionMongoSink`), get the Flume events from the sink channels and persist the data in the appropriate format.
+
+More complex architectures and data flows can be checked in the [architecture](doc/design/architecture.md) document.
 
 [Top](#top)
 
-##<a name="section3"></a>Functionality explained (Json notification example)
+##<a name="section3"></a>Data flow example
+Next sections will consider an example NGSI entity called 'car1' of type 'car', with attributes 'speed' (type 'kmh') and 'oil_level' (type 'percentage'). Is not a goal for this document to show you how to define a NGSI entity nor how to create it in the most common NGSI source for Cygnus, Orion Context Broker. Please, refer to the [official Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_Creation) for more details.
 
-Let's consider the following notification in Json format coming from an Orion Context Broker instance:
+[Top](#top)
 
-    POST http://localhost:1028/notify
-    Content-Length: 492
-    User-Agent: orion/0.9.0
-    Host: localhost:1028
-    Accept: application/xml, application/json
-    Content-Type: application/json
-    Fiware-Service: my-company-name
-    Fiware-ServicePath: /workingrooms/floor4 
-    
+###<a name="section3.1"></a>Subscription to the NGSI-like source
+Cygnus takes advantage of the subscription-notification mechanism of NGSI. Specifically, Cygnus needs to be notified each time certain entity's attributes change, and in order to do that, Cygnus must subscribe to those entity's attribute changes.
+
+As long as the typical NGSI-like source is Orion Context Broker, you can make a subscription about the example NGSI entity ('car1' of type 'car') by using the `curl` command in this [way](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) (assuming Orion runs in localhost and listens on the TCP/1026 port):
+
+    (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' -d @- | python -mjson.tool) <<EOF
     {
-      "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-      "originator" : "localhost",
-      "contextResponses" : [
-        {
-          "contextElement" : {
-            "attributes" : [
-              {
-                "name" : "temperature",
-                "type" : "centigrade",
-                "value" : "26.5",
-                "metadatas": [
-                  {
-                     "name": "ID",
-                     "type": "string",
-                     "value": "ground"
-                  }
+        "entities": [
+            {
+                "type": "car",
+                "isPattern": "false",
+                "id": "car1"
+            }
+        ],
+        "attributes": [
+            "speed",
+            "oil_level"
+        ],
+        "reference": "http://localhost:5050/notify",
+        "duration": "P1M",
+        "notifyConditions": [
+            {
+                "type": "ONCHANGE",
+                "condValues": [
+                    "speed"
                 ]
-              }
-            ],
-            "type" : "Room",
-            "isPattern" : "false",
-            "id" : "Room1"
-          },
-          "statusCode" : {
-            "code" : "200",
-            "reasonPhrase" : "OK"
-          }
+            }
+        ],
+        "throttling": "PT1S"
+    }
+    EOF
+
+Which means: <i>Each time the the 'car1' entity, of type 'car', changes its value of 'speed' send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than one per second</i>.
+
+[Top](#top)
+
+###<a name="section3.2"></a>NGSI notification reception
+Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the following NGSI notification (or NGSI event) would be sent as a Http POST to the configured Cygnus listener, i.e. the native `HTTPSource` (the code below is an <i>object representation</i>, not any real data format):
+
+    ngsi-event={
+        http-headers={
+            Content-Length: 492
+            User-Agent: orion/0.9.0
+            Host: localhost:1028
+            Accept: application/xml, application/json
+            Content-Type: application/json
+            Fiware-Service: vehicles
+            Fiware-ServicePath: 4wheels 
+        },
+        payload={
+            {
+                "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
+                "originator" : "localhost",
+                "contextResponses" : [
+                    {
+                        "contextElement" : {
+                        "attributes" : [
+                            {
+                                "name" : "speed",
+                                "type" : "kmh",
+                                "value" : "112.9",
+                                "metadatas": []
+                            },
+                            {
+                                "name" : "oil_level",
+                                "type" : "percentage",
+                                "value" : "74.6",
+                                "metadatas": []
+                            }
+                        ],
+                        "type" : "car",
+                        "isPattern" : "false",
+                        "id" : "car1"
+                    },
+                    "statusCode" : {
+                        "code" : "200",
+                        "reasonPhrase" : "OK"
+                    }
+                ]
+            }
         }
-      ]
     }
 
-Such a notification is sent by Orion to the default Flume HTTP source, which relies on the developed OrionRestHandler for checking its validity (that it is a POST request, that the target is 'notify' and that the headers are OK), detecting the content type (that it is in Json format), extracting the data (the Json part) and finally creating a Flume event to be put in the channel:
+[Top](#top)
 
-    event={
-		body=json_data,
-		headers={
-			content-type=application/json,
-			fiware-service=my_company_name,
-			fiware-servicepath=workingrooms_floor4,
-			timestamp=1402409899391,
-			transactionId=asdfasdfsdfa,
-			ttl=10,
-			destination=Room1-Room
-		}
-	}
+###<a name="section3.3"></a>From NGSI format to Flume format
+Flume events are not much more different than the above representation: there is a set of headers and a body. This is an advantage, since allows for a quick translation between formats. Thus, once the notification is received, the `HTTPSource` relies on the custom `OrionRestHandler` for checking its validity (that it is a POST request, that the target is 'notify' and that the headers are OK), detecting the content type (in the example, Json format), extracting the data (the Json part) and finally creating the Flume event to be put in the native `MemoryChannel`.
 
-<b>NOTE: The above is an <i>object representation</i>, not Json data nor any other data format.</b>
+The equivalent <i>object representation</i> (not any real data format) for such a notified NGSI event could be the following Flume event:
 
-Let's have a look on the Flume event headers:
+    flume-event={
+        headers={
+	         content-type=application/json,
+	         fiware-service=vehicles,
+	         fiware-servicepath=4wheels,
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         destination=car1_car
+        },
+        body={
+	         entityId=car1,
+	         entityType=car,
+	         attributes=[
+	             {
+	                  attrName=speed,
+	                  attrType=kmh,
+	                  attrValue=112.9
+	             },
+	             {
+	                  attrName=oil_level,
+	                  attrType=percentage,
+	                  attrValue=74.6
+	             }
+	         ]
+	     }
+    }
+
+The headers are a subset of the notified HTTP headers and others added by Cygnus [interceptors](doc/design/interceptors.md):
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification, which is added to the event headers as well (as `fiware-service`). Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property. Please observe that the notified `fiware-service` is transformed following the rules described at [`doc/design/naming_conventions.md`](doc/design/naming_conventions.md).
@@ -140,137 +209,244 @@ Let's have a look on the Flume event headers:
 * The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. -1 means inifinite retries.
 * The <b>destination</b> headers is used to identify the persistence element within the used storage, i.e. a file in HDFS, a MySQL table or a CKAN resource. This is added by a custom interceptor called `DestinationExtractor` added to the Flume's suite. See the <i>doc/design/interceptors</i> document for more details.
 
-Finally, the channel is a simple MemoryChannel behaving as a FIFO queue, and from where the different sinks extract the events in order to persist them; let's see how:
+The body simply contains a byte representation of the HTTP payload that will be parsed by the sinks.
 
 [Top](#top)
 
-###<a name="section3.1"></a>OrionHDFSSink persistence
+###<a name="section3.4"></a>Data persistence
+####<a name="section3.4.1"></a>HDFS persistence
 
-This sink persists the data in files, one per each entity, following this entity descriptor format:
+[HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-    <entityDescriptor>=<entity_id>-<entity_type>.txt
+Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
-These files are stored under this HDFS path:
+    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124UTC","entityId":"car1","entityType":"car","attrName":"oil","attrType":"percentage","attrValue":"74.6","attrMd":[]}
 
-    hdfs:///user/<username>/<service>/<servicePath>/<entityDescriptor>/<entityDescriptor>.txt
+If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
-Usernames allow for specific private HDFS data spaces, and in the current version, it is given by the `cosmos_default_username` parameter that can be found in the configuration. Both the `service` and `servicePath` directories are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively).
-
-More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
+    $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
+    {"recvTime":"2015-04-20T12:13:22.41.124UTC","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
     
-Within files, Json documents are written following one of these two schemas:
-
-* Fixed 8-field lines: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
-*  Two fields per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
-
-In both cases, the files are created at execution time if the file doesn't exist previously to the line insertion. The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
-
-Thus, by receiving a notification like the one above, being the persistence mode `row` and a `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
-
-    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
-
-On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
-
-    {"recvTime":"2014-02-27T14:46:21", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
-
-A special particularity regarding HDFS persisted data is the posssibility to exploit such data through Hive, a SQL-like querying system. OrionHDFSSink automatically creates a Hive table (similar to a SQL table) for each persisted entity in the default database, being the name for such tables:
-
-    <username>_<service>_<servicePath>_<entity_descriptor>_[row|column]
-
-Following with the example, by receiving a notification like the one above, and being the persistence mode `row`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_row` will contain a new row such as:
-
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
-
-On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_column` will contain a new row such as:
-
-    | recvTime            | temperature | temperature_md                                     | 
-    |---------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
+NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
 [Top](#top)
 
-###<a name="section3.2"></a>OrionCKANSink persistence
+####<a name="section3.4.2"></a>OrionCKANSink persistence
 
-This sink persists the data in a [datastore](see http://docs.ckan.org/en/latest/maintaining/datastore.html) in CKAN. Datastores are associated to CKAN resources and as CKAN resources we use the entityId-entityType string concatenation. All CKAN resource IDs belong to the same dataset  (also referred as package in CKAN terms), whose name is specified by the notified `Fiware-ServicePath` header (or by the `default_service_path` property -prefixed by organization name- in the CKAN sink configuration, if such a header is not notified). Datasets belong to single organization, whose name is specified by the notified `Fiware-Service` header (or by the `default_service` property if it is not notified). 
+[CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by [`OrionCKANSink`](doc/design/OrionCKANSink.md) each time a Flume event is taken from its channel.
 
-More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
+Assuming `api_key=myapikey` and `attr_persistence=row` as configuration parameter, then `OrionCKANSink` will persist the data within the body as:
 
-Each datastore, we can find two options:
+    $ curl -s -S -H "Authorization: myapikey" "http://192.168.80.34:80/api/3/action/datastore_search?resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7"
+    {
+        "help": "Search a DataStore resource...",
+        "success": true,
+        "result": {
+            "resource_id": "3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7",
+            "fields": [
+                {
+                    "type": "int4",
+                    "id": "_id"
+                },
+                {
+                    "type": "int4",
+                    "id": "recvTimeTs"
+                },
+                {
+                    "type": "timestamp",
+                    "id": "recvTime"
+                },
+                {
+                    "type": "text",
+                    "id": "attrName"
+                },
+                {
+                    "type": "text",
+                    "id": "attrType"
+                },
+                {
+                    "type": "json",
+                    "id": "attrValue"
+                },
+                {
+                    "type": "json",
+                    "id": "attrMd"
+                }
+            ],
+            "records": [
+                {
+                    "attrType": "kmh",
+                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTimeTs": 1429535775,
+                    "attrMd": null,
+                    "attrValue": "112.9",
+                    "attrName": "speed",
+                    "_id": 1
+                },
+                {
+                    "attrType": "percentage",
+                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "recvTimeTs": 1429535775,
+                    "attrMd": null,
+                    "attrValue": "74.6",
+                    "attrName": "oil_level",
+                    "_id": 2
+                }
+            ],
+            "_links": {
+                "start": "/api/3/action/datastore_search?resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7",
+                "next": "/api/3/action/datastore_search?offset=100&resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7"
+            },
+            "total": 2
+        }
+    }
 
-* Fixed 6-field lines: `recvTimeTs`, `recvTime`, `attrName`, `attrType`, `attrValue` and `attrMd`. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, `null` is inserted).
-* Two columns per each entity's attribute (one for the value and other for the metadata), plus an additional field about the reception time of the data (`recvTime`). Regarding this kind of persistence, the notifications must ensure a value per each attribute is notified.
+If `attr_persistence=colum` then `OrionCKANSink` will persist the data within the body as:
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
+    $ curl -s -S -H "Authorization: myapikey" "http://130.206.83.8:80/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986"
+    {
+        "help": "Search a DataStore resource...",
+        "success": true,
+        "result": {
+            "resource_id": "611417a4-8196-4faf-83bc-663c173f6986",
+            "fields": [
+                {
+                    "type": "int4",
+                    "id": "_id"
+                },
+                {
+                    "type": "timestamp",
+                    "id": "recvTime"
+                },
+                {
+                    "type": "json",
+                    "id": "speed"
+                },
+                {
+                    "type": "json",
+                    "id": "speed_md"
+                },
+                {
+                    "type": "json",
+                    "id": "oil_level"
+                },
+                {
+                    "type": "json",
+                    "id": "oil_level_md"
+                }
+            ],
+            "records": [
+                {
+                    "recvTime": "2015-04-20T12:13:22.41.124UTC",
+                    "speed": "112.9",
+                    "speed_md": null,
+                    "oil_level": "74.6",
+                    "oil_level_md": null,
+                    "_id": 1
+                }
+            ],
+            "_links": {
+                "start": "/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986",
+                "next": "/api/3/action/datastore_search?offset=100&resource_id=611417a4-8196-4faf-83bc-663c173f6986"
+            },
+            "total": 1 
+        }
+    }
 
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the resource `room1-Room` (it is created if not existing), will containt the following row in its datastore:
-
-    | _id | recvTimeTs   | recvTime            | attrName    | attrType   | attrValue | attrMd                                              |
-    |-----|--------------|---------------------|-----.-------|------------|-----------|-----------------------------------------------------|
-    | i   | 13453464536  | 2014-02-27T14:46:21 | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
-
-where `i` depends on the number of rows previously inserted.
-
-On the contrary, being the persistence mode `column`, the resource `Room1-Room` (it and its datastore must be created in advance) will contain a new row such as shown below. In this case, an extra column ended with `_md` is added for the metadata.
-
-    | _id | recvTime           | temperature | temperature_md                                     |
-    |--------------------------|-------------|----------------------------------------------------|
-    | i   |2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
-
-where `i` depends on the number of rows previously inserted.
-
-In both cases, `row` or `column`, the CKAN organization will be `mycompanyname` and the dataset containing the resource will be `workingrooms_floor4`.
-
-The information stored in the datastore can be accesses as any other CKAN information, e.g. through the web frontend or using the query API, e.g;
-
-    curl -s -S "http://${CKAN_HOST}/api/3/action/datastore_search?resource_id=${RESOURCE_ID}
-
-Each organization/tenant is associated to a CKAN organization.
+NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as the exposed by CKAN.
 
 [Top](#top)
 
-###<a name="section3.3"></a>OrionMySQLSink persistence
+####<a name="section3.4.3"></a>OrionMySQLSink persistence
 
-Similarly to OrionHDFSSink, a table is considered for each entity in order to store its notified context data, being the name for these tables the following entity descriptor:
+MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionCKANSink`](doc/design/OrionMySQL.md) each time a Flume event is taken from its channel.
 
-    <entity_descriptor>=<servicePath>_<entity_id>_<entity_type>
+Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
-These tables are stored in databases, one per service, enabling a private data space such as:
+    $ mysql -u myuser -p
+    Enter password: 
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    ...
+    mysql> show databases;
+    +-----------------------+
+    | Database              |
+    +-----------------------+
+    | information_schema    |
+    | vehicles              |
+    | mysql                 |
+    | test                  |
+    +-----------------------+
+    4 rows in set (0.05 sec)
 
-    jdbc:mysql:///<service>
+    mysql> use vehicles;
+    ...
+    Database changed
+    mysql> show tables;
+    +--------------------+
+    | Tables_in_vehicles |
+    +--------------------+
+    | 4wheels_car1_car   |
+    +--------------------+
+    1 row in set (0.00 sec)
 
-Both the `service` and `servicePath` names are given by Orion as headers in the notification (`Fiware-Service` and `Fiware-ServicePath` respectively) and sent to the sinks through the Flume event headers (`fiware-service` and `fiware-servicepath` respectively). 
+    mysql> select * from 4wheels_car1_car;
+    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
+    | recvTimeTs | recvTime                      | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
+    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124UTC | car1     | car        |  speed      | kmh        | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124UTC | car1     | car        |  oil_level  | percentage | 74.6      | []     |
+    +------------+-------------------------------+----------+------------+-------------+------------+-----------+--------+
+    2 row in set (0.00 sec)
+    
+If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
-More details regarding the naming conventions can be found at [doc/design/naming_convetions.md](doc/design/naming_convetions.md).
+    $ mysql -u myuser -p
+    Enter password: 
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    ...
+    mysql> show databases;
+    +-----------------------+
+    | Database              |
+    +-----------------------+
+    | information_schema    |
+    | vehicles              |
+    | mysql                 |
+    | test                  |
+    +-----------------------+
+    4 rows in set (0.05 sec)
 
-Within tables, we can find two options:
+    mysql> use vehicles;
+    ...
+    Database changed
+    mysql> show tables;
+    +--------------------+
+    | Tables_in_vehicles |
+    +--------------------+
+    | 4wheels_car1_car   |
+    +--------------------+
+    1 row in set (0.00 sec)
 
-* Fixed 8-field rows, as usual: `recvTimeTs`, `recvTime`, `entityId`, `entityType`, `attrName`, `attrType`, `attrValue` and `attrMd`. These tables (and the databases) are created at execution time if the table doesn't exist previously to the row insertion. Regarding `attrValue`, in its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array. Regarding `attrMd`, it contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted),
-* Two columns per each entity's attribute (one for the value and other for the metadata), plus an addition column about the reception time of the data (`recv_time`). This kind of tables (and the databases) must be provisioned previously to the execution of Cygnus, because each entity may have a different number of attributes, and the notifications must ensure a value per each attribute is notified.
+    mysql> select * from 4wheels_car1_car;
+    +-------------------------------+-------+----------+-----------+--------------+
+    | recvTime                      | speed | speed_md | oil_level | oil_level_md |
+    +-------------------------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124UTC | 112.9 | []       |  74.6     | []           |
+    +-------------------------------+-------+----------+-----------+--------------+
+    1 row in set (0.00 sec)
 
-The behaviour of the connector regarding the internal representation of the data is governed through a configuration parameter, `attr_persistence`, whose values can be `row` or `column`.
-
-Thus, by receiving a notification like the one above, and being the persistence mode `row`, the table named `workingrooms_floor4_room1_Room` (it is created if not existing) will contain a new row such as:
-
-    | recvTimeTs   | recvTime            | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
-    |--------------|---------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21 | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
-
-On the contrary, being the persistence mode `column`, the table named `workingrooms_floor4_room1_Room` (it must be created in advance) will contain a new row such as:
-
-    | recvTime            | temperature | temperature_md                                     | 
-    |---------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21 | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
-
-Each organization/tenant is associated to a different database.
+NOTE: `mysql` is the MySQL CLI for querying the data.
 
 [Top](#top)
 
-###<a name="section3.4"></a>OrionMongoSink persistence
-Then `OrionMongoSink` will persist the data within the body as:
+####<a name="section3.4.4"></a>OrionMongoSink persistence
 
-    $ mongo
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
+
+Assuming `mongo_username=myuser` as configuration parameter, the data within the body will be persisted as:
+
+    $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
     connecting to: test
     > show databases
@@ -294,33 +470,12 @@ Then `OrionMongoSink` will persist the data within the body as:
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
-All the details regarding this sink can be fount at [`doc/design/OrionMongoSink.md`](doc/design/OrionMongoSink.md).
+NOTE: `mongo` is the MongoDB CLI for querying the data.
 
 [Top](#top)
 
-##<a name="section4"></a>Functionality explained (XML notification example)
-
-Cygnus also works with [XML-based notifications](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) sent to the connector. The only difference is the event is created by specifying the content type will be XML (in order the notification parser notices it):
-
-    event={
-		body=json_data,
-		headers={
-			content-type=application/xml,
-			fiware-service=my_company_name,
-			fiware-servicepath=workingrooms_floor4,
-			timestamp=1402409899391,
-			transactionId=asdfasdfsdfa,
-			ttl=10,
-			destination=Room1-Room
-		}
-	}
-
-The key point is the behaviour remains the same than in the Json example: the same file/datastores/tables will be created, and the same data will be persisted within it.
-
-[Top](#top)
-
-##<a name="section5"></a>Installing Cygnus
-###<a name="section5.1"></a>RPM install (recommended)
+##<a name="section4"></a>Installing Cygnus
+###<a name="section4.1"></a>RPM install (recommended)
 Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -334,12 +489,12 @@ Simply configure the FIWARE repository if not yet configured and use your applic
 
 [Top](#top)
 
-###<a name="section5.2"></a>Installing from sources (advanced)
+###<a name="section4.2"></a>Installing from sources (advanced)
 Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
 
 [Top](#top)
 
-##<a name="section6"></a>Cygnus configuration
+##<a name="section5"></a>Cygnus configuration
 Cygnus is configured through two different files:
 
 * A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
@@ -349,7 +504,7 @@ Please observe there may exist several Cygnus instances identified by `<id>`, wh
 
 [Top](#top)
 
-###<a name="section6.1"></a>`cygnus_instance_<id>.conf`
+###<a name="section5.1"></a>`cygnus_instance_<id>.conf`
 
 The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
 
@@ -372,7 +527,7 @@ POLLING_INTERVAL=30
 
 [Top](#top)
 
-###<a name="section6.2"></a>`agent_<id>.conf`
+###<a name="section5.2"></a>`agent_<id>.conf`
 A typical configuration when using the `HTTPSource`, the `OrionRestHandler`, the `MemoryChannel` and any of the available sinks is shown below. More advanced configurations can be found at [`doc/operation/performance_tuning_tips.md`](doc/operation/performance_tuning_tips.md).
 
 Kerberos authentication enabling in HDFS is described at [`doc/operation/hdfs_kerberos_authentication.md`](doc/operation/hdfs_kerberos_authentication.md). If your HDFS is not using such an authentication method, just set `cygnusagent.sinks.hdfs-sink.krb5_auth` to `false` and forget the rest of the Kerberos part.
@@ -552,8 +707,8 @@ cygnusagent.channels.mongo-channel.transactionCapacity = 100
 
 [Top](#top)
 
-##<a name="section7"></a>Running Cygnus
-###<a name="section7.1"></a>As a service (recommended)
+##<a name="section6"></a>Running Cygnus
+###<a name="section6.1"></a>As a service (recommended)
 <i>NOTE: Cygnus can only be run as a service if you installed it through the RPM.</i>
 
 Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly configured, just use the `service` command to start, restart, stop or get the status (as a sudoer):
@@ -580,7 +735,7 @@ Where `<id>` is the suffix at the end of the `cygnus_instace_<id>.conf` or `agen
 
 [Top](#top)
 
-###<a name="section7.2"></a>As standalone application (advanced)
+###<a name="section6.2"></a>As standalone application (advanced)
 
 <i>NOTE: If you installed Cygnus through the RPM, APACHE\_FLUME\_HOME is `/usr/cygnus/`. If not, it is a directory of your choice.</i>
 
@@ -606,42 +761,8 @@ The parameters used in these commands are:
 
 [Top](#top)
 
-##<a name="section8"></a>Orion subscription
-
-Once the connector is running, it is necessary to tell Orion Context Broker about it, in order Orion can send context data notifications to the connector. This can be done on behalf of the connector by performing the following curl command:
-
-    $ (curl localhost:1026/NGSI10/subscribeContext -s -S --header 'Content-Type: application/xml' -d @- | xmllint --format -) <<EOF
-    <?xml version="1.0"?>
-    <subscribeContextRequest>
-      <entityIdList>
-        <entityId type="Room" isPattern="false">
-          <id>Room1</id>
-        </entityId>
-      </entityIdList>
-      <attributeList>
-        <attribute>temperature</attribute>
-      </attributeList>
-      <!-- This is the part where Cygnus endpoint is specified -->
-      <reference>http://host_running_cygnus:5050/notify</reference>
-      <duration>P1M</duration>
-      <notifyConditions>
-        <notifyCondition>
-          <type>ONCHANGE</type>
-          <condValueList>
-            <condValue>pressure</condValue>
-          </condValueList>
-        </notifyCondition>
-      </notifyConditions>
-      <throttling>PT5S</throttling>
-    </subscribeContextRequest>
-    EOF
-
-Its equivalent in Json format can be seen [here](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE).
-
-[Top](#top)
-
-##<a name="section9"></a>Logs
-###<a name="section9.1"></a>log4j configuration
+##<a name="section7"></a>Logs
+###<a name="section7.1"></a>log4j configuration
 
 Cygnus uses the log4j facilities added by Flume for logging purposes. You can maintain the default `APACHE_FLUME_HOME/conf/log4j.properties` file, where a console and a file appender are defined (in addition, the console is used by default), or customize it by adding new appenders. Typically, you will have several instances of Cygnus running; they will be listening on different TCP ports for incoming notifyContextRequest and you'll probably want to have differente log files for them. E.g., if you have two Flume processes listening on TCP/1028 and TCP/1029 ports, then you can add the following lines to the `log4j.properties` file:
 
@@ -676,25 +797,25 @@ In addition, you have a complete `log4j.properties` template in `conf/log4j.prop
 
 [Top](#top)
 
-###<a name="section9.2"></a>Message types
+###<a name="section7.2"></a>Message types
 
 Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of message types.
 
 [Top](#top)
 
-##<a name="section10"></a>Management interface
+##<a name="section8"></a>Advanced topics
+Please refer to the linked specific documents when looking for information regarding these topics:
 
-From Cygnus 0.5 there is a REST-based management interface for administration purposes. Current available operations are:
-
-<b>Get the version of the running software, including the last Git commit</b>:
-
-    GET http://host:management_port/version
-
-    {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
+* [Management Interface](doc/design/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
+* [Pattern-based grouping](doc/design/interceptors.md). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events.
+* [Kerberized HDFS](doc/operation/hdfs_kerberos_authentication.md). This document shows you how to authenticate Cygnus on a Kerberized HDFS.
+* [Multi-instance](conf/README.md). Several instances of Cygnus can be run as a service.
+* [Performance tips](doc/operation/performance_tuning_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtaint the best from Cygnus.
+* [New sink development](doc/devel/add_new_sink.md). Addressed to those developers aiming to contribute to Cygnus with new sinks.
 
 [Top](#top)
 
-##<a name="section11"></a>Contact
+##<a name="section9"></a>Contact
 
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
