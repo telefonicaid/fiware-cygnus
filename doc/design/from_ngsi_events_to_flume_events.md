@@ -10,68 +10,73 @@ A NGSI-like event example could be (the code below is an <i>object representatio
             Host: localhost:1028
             Accept: application/xml, application/json
             Content-Type: application/json
-            Fiware-Service:vehicles
+            Fiware-Service: vehicles
             Fiware-ServicePath: 4wheels 
         },
         payload={
             {
-               "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-               "originator" : "localhost",
-               "contextResponses" : [
-                  {
-                     "contextElement" : {
+                "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
+                "originator" : "localhost",
+                "contextResponses" : [
+                    {
+                        "contextElement" : {
                         "attributes" : [
-                           {
-                              "name" : "speed",
-                              "type" : "kmh",
-                              "value" : "112.9",
-                              "metadatas": [
-                                 {
-                                    "name": "meter",
-                                    "type": "string",
-                                    "value": "digital"
-                                 }
-                              ]
-                           }
+                            {
+                                "name" : "speed",
+                                "type" : "kmh",
+                                "value" : "112.9",
+                                "metadatas": []
+                            },
+                            {
+                                "name" : "oil_level",
+                                "type" : "percentage",
+                                "value" : "74.6",
+                                "metadatas": []
+                            }
                         ],
                         "type" : "car",
                         "isPattern" : "false",
                         "id" : "car1"
-                     },
-                     "statusCode" : {
+                    },
+                    "statusCode" : {
                         "code" : "200",
                         "reasonPhrase" : "OK"
-                     }
-                  }
-               ]
+                    }
+                ]
             }
-         }
+        }
+    }
 
 Flume events are not much more different than the above representation: there is a set of headers and a body. This is an advantage, since allows for a quick translation between formats. The equivalent <i>object representation</i> (not any real data format) for such a notified NGSI event could be the following Flume event:
 
     flume-event={
         headers={
-	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         content-type=application/json,
+	         fiware-service=vehicles,
+	         fiware-servicepath=4wheels,
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         destination=car1_car
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=kmh,
-	                attrValue=112.9
-	            }
-	        ]
-	    }
+	         entityId=car1,
+	         entityType=car,
+	         attributes=[
+	             {
+	                  attrName=speed,
+	                  attrType=kmh,
+	                  attrValue=112.9
+	             },
+	             {
+	                  attrName=oil_level,
+	                  attrType=percentage,
+	                  attrValue=74.6
+	             }
+	         ]
+	     }
     }
-
+    
 The headers are a subset of the notified HTTP headers and others added by Cygnus interceptors (see [doc/interceptors.md](interceptors.md) for more details):
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
