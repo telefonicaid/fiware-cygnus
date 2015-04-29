@@ -27,7 +27,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementR
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
-import java.sql.Timestamp;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -246,7 +246,7 @@ public class OrionHDFSSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
         
         // human readable version of the reception time
-        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        String recvTime = Utils.getHumanReadable(recvTimeTs);
         
         // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
