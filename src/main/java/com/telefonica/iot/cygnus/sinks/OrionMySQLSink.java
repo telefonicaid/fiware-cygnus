@@ -26,7 +26,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementR
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
-import java.sql.Timestamp;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -158,7 +158,7 @@ public class OrionMySQLSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
-        String recvTime = new Timestamp(recvTimeTs).toString().replaceAll(" ", "T");
+        String recvTime = Utils.getHumanReadable(recvTimeTs);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
