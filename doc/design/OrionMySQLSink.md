@@ -2,7 +2,7 @@
 ##Functionality
 `com.iot.telefonica.cygnus.sinks.OrionMySQLSink`, or simply `OrionMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific HDFS data structures.
+Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific MySQL data structures.
 
 ###Mapping Flume events to HDFS data structures
 MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `OrionCKANSink` each time a Flume event is taken, by performing the following workflow:
@@ -160,7 +160,7 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.attr_persistence = column
 
 ## Use cases
-Use `OrionHDFSSink` if you are looking for a Json-based document storage growing in the mid-long term.
+Use `OrionMySQLSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 ## Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
