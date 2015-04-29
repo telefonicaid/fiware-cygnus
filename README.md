@@ -167,11 +167,11 @@ In both cases, the files are created at execution time if the file doesn't exist
 
 Thus, by receiving a notification like the one above, being the persistence mode `row` and a `default_user` as the default Cosmos username, then the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21UTC", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
+    {"recvTimeTs":"13453464536", "recvTime":"2014-02-27T14:46:21Z", "entityId":"Room1", "entityType":"Room", "attrName":"temperature", "attrType":"centigrade", "attrValue":"26.5", "attrMd":[{name:ID, type:string, value:ground}]}
 
 On the contrary, being the persistence mode `column`, the file named `hdfs:///user/default_user/mycompanyname/workingrooms/floor4/Room1-Room/Room1-Room.txt` (it is created if not existing) will contain a new line such as:
 
-    {"recvTime":"2014-02-27T14:46:21UTC", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
+    {"recvTime":"2014-02-27T14:46:21Z", "temperature":"26.5", "temperature_md":[{"name":"ID", "type":"string", "value":"ground"}]}
 
 A special particularity regarding HDFS persisted data is the posssibility to exploit such data through Hive, a SQL-like querying system. OrionHDFSSink automatically creates a Hive table (similar to a SQL table) for each persisted entity in the default database, being the name for such tables:
 
@@ -181,13 +181,13 @@ Following with the example, by receiving a notification like the one above, and 
 
     | recvTimeTs   | recvTime               | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|------------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21UTC | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | 13453464536  | 2014-02-27T14:46:21Z | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 On the contrary, being the persistence mode `column`, the table named `default_user_mycompanyname_workingrooms_floor4_room1_Room_column` will contain a new row such as:
 
     | recvTime               | temperature | temperature_md                                     | 
     |------------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
+    | 2014-02-27T14:46:21Z | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |  
 
 [Top](#top)
 
@@ -208,7 +208,7 @@ Thus, by receiving a notification like the one above, and being the persistence 
 
     | _id | recvTimeTs   | recvTime               | attrName    | attrType   | attrValue | attrMd                                              |
     |-----|--------------|------------------------|-----.-------|------------|-----------|-----------------------------------------------------|
-    | i   | 13453464536  | 2014-02-27T14:46:21UTC | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
+    | i   | 13453464536  | 2014-02-27T14:46:21Z | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}]  |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -216,7 +216,7 @@ On the contrary, being the persistence mode `column`, the resource `Room1-Room` 
 
     | _id | recvTime              | temperature | temperature_md                                     |
     |-----|-----------------------|-------------|----------------------------------------------------|
-    | i   |2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | i   |2014-02-27T14:46:21Z | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 where `i` depends on the number of rows previously inserted.
 
@@ -255,13 +255,13 @@ Thus, by receiving a notification like the one above, and being the persistence 
 
     | recvTimeTs   | recvTime               | entityId | entityType | attrName    | attrType   | attrValue | attrMd                                             |
     |--------------|------------------------|----------|------------|-------------|------------|-----------|----------------------------------------------------|
-    | 13453464536  | 2014-02-27T14:46:21UTC | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | 13453464536  | 2014-02-27T14:46:21Z | Room1    | Room       | temperature | centigrade | 26.5      | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 On the contrary, being the persistence mode `column`, the table named `workingrooms_floor4_room1_Room` (it must be created in advance) will contain a new row such as:
 
     | recvTime               | temperature | temperature_md                                     | 
     |------------------------|-------------|----------------------------------------------------|
-    | 2014-02-27T14:46:21UTC | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
+    | 2014-02-27T14:46:21Z | 26.5        | [{"name":"ID", "type":"string", "value":"ground"}] |
 
 Each organization/tenant is associated to a different database.
 
@@ -286,11 +286,11 @@ Then `OrionMongoSink` will persist the data within the body as:
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124UTC", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412UTC", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560UTC", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 

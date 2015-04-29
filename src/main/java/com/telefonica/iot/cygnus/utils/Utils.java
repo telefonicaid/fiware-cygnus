@@ -172,9 +172,9 @@ public final class Utils {
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String humanRedable = sdf.format(new Date(ts));
         humanRedable += "T";
-        sdf = new SimpleDateFormat("HH:mm:ss.Sz");
+        sdf = new SimpleDateFormat("HH:mm:ss.S");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        humanRedable += sdf.format(new Date(ts));
+        humanRedable += sdf.format(new Date(ts)) + "Z";
         return humanRedable;
     } // getHumanRedable
         
