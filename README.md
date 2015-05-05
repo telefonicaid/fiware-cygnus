@@ -221,7 +221,7 @@ The body simply contains a byte representation of the HTTP payload that will be 
 
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
+Assuming `cosmos_default_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
@@ -465,11 +465,11 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrType" : "kmh", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
@@ -853,6 +853,15 @@ cygnusagent.channels.mongo-channel.type = memory
 cygnusagent.channels.mongo-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mongo-channel.transactionCapacity = 100
+
+#=============================================
+# sth-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.sth-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.sth-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.sth-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
