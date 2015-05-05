@@ -38,7 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class OrionMongoSinkTest {
+public class OrionSTHSinkTest {
     
     @Mock
     private MongoBackend mockMongoBackend;
@@ -96,7 +96,7 @@ public class OrionMongoSinkTest {
             +     "</contextElementResponse>"
             +   "</contextResponseList>"
             + "</notifyContextRequest>";
-
+    
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
      * classes.
@@ -122,16 +122,16 @@ public class OrionMongoSinkTest {
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName);
-        doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataRaw(dbName, collectionName,
+        doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataAggregated(dbName, collectionName,
                 recvTimeTs, recvTime, entityId, entityType, attrName, attrType, attrValue, attrMd);
     } // setUp
-
+    
     /**
      * Test of persist method, of class OrionMongoSink.
      */
     @Test
     public void testProcessContextResponses() {
-        System.out.println("Testing OrionMongoSink.processContextResponses");
+        System.out.println("Testing OrionSTHSink.processContextResponses");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
@@ -148,5 +148,5 @@ public class OrionMongoSinkTest {
             assertTrue(true);
         } // try catch finally
     } // testProcessContextResponses
-
-} // OrionMongoSinkTest
+    
+} // OrionSTHSinkTest
