@@ -166,7 +166,7 @@ public class MongoBackend {
         double value = new Double(attrValue);
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(recvTimeTs);
+        calendar.setTimeInMillis(recvTimeTs * 1000);
         
         // insert the data in an aggregated fashion for each resolution type
         insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
