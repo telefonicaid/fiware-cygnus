@@ -26,7 +26,6 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.apache.http.client.HttpClient;
-import org.slf4j.LoggerFactory;
 
 /**
  * Interface for those backends implementing the persistence in HDFS.
@@ -46,6 +45,7 @@ public abstract class HDFSBackend {
     protected boolean krb5;
     protected String krb5User;
     protected String krb5Password;
+    protected boolean serviceAsNamespace;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackend.class);
     
     /**
@@ -64,7 +64,7 @@ public abstract class HDFSBackend {
      */
     public HDFSBackend(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
             String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
-            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile, boolean serviceAsNamespace) {
         // this class attributes
         this.cosmosHost = new LinkedList(Arrays.asList(cosmosHost));
         this.cosmosPort = cosmosPort;
@@ -75,6 +75,7 @@ public abstract class HDFSBackend {
         this.krb5 = krb5;
         this.krb5User = krb5User;
         this.krb5Password = krb5Password;
+        this.serviceAsNamespace = serviceAsNamespace;
 
         // create a Http clients factory (no SSL) and an initial connection (no SSL)
         httpClientFactory = new HttpClientFactory(false, krb5LoginConfFile, krb5ConfFile);
@@ -98,7 +99,7 @@ public abstract class HDFSBackend {
     public void provisionHiveTable(String username, String dirPath) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive(username + "_" + dirPath) + "_row";
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + "_row";
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
@@ -119,7 +120,8 @@ public abstract class HDFSBackend {
         // create the query
         
         String query = "create external table " + tableName + " " + fields + " row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + username + "/" + dirPath + "'";
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (username + "/"))
+                + dirPath + "'";
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -138,7 +140,7 @@ public abstract class HDFSBackend {
     public void provisionHiveTable(String username, String dirPath, String fields) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive(username + "_" + dirPath) + "_column";
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + "_column";
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
@@ -146,7 +148,8 @@ public abstract class HDFSBackend {
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + username + "/" + dirPath + "'";
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (username + "/"))
+                + dirPath + "'";
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {

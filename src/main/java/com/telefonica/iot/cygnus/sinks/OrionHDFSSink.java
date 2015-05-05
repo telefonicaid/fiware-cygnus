@@ -89,6 +89,7 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5Password;
     private String krb5LoginConfFile;
     private String krb5ConfFile;
+    private boolean serviceAsNamespace;
     private HDFSBackend persistenceBackend;
     
     /**
@@ -206,6 +207,9 @@ public class OrionHDFSSink extends OrionSink {
                 + ")");
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
+        serviceAsNamespace = context.getBoolean("service_as_namespace", false);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
+                + ")");
     } // configure
 
     @Override
@@ -215,12 +219,12 @@ public class OrionHDFSSink extends OrionSink {
             if (hdfsAPI.equals("httpfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile);
+                        krb5ConfFile, serviceAsNamespace);
                 LOGGER.debug("[" + this.getName() + "] HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
                 persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
                         cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile);
+                        krb5ConfFile, serviceAsNamespace);
                 LOGGER.debug("[" + this.getName() + "] WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
