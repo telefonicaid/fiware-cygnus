@@ -8,3 +8,4 @@
 * Add specific sink documents, pointing to them from the README (#322)
 * UTC/Z time zone detail added to all the sink timestamps (#370) 
 * Added OrionSTHSink (#19)
+* Multitenancy support in HDFS (#338)
