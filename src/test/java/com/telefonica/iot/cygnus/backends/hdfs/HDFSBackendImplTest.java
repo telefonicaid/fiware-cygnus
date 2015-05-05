@@ -73,7 +73,7 @@ public class HDFSBackendImplTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, hiveHost, hivePort, false, null, null, null,
-                null);
+                null, false);
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
