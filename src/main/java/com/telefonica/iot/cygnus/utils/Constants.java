@@ -41,6 +41,7 @@ public final class Constants {
     // Only Flume header names
     public static final String HEADER_TRANSACTION_ID = "transactionId";
     public static final String HEADER_TTL = "ttl";
+    public static final String HEADER_TIMESTAMP = "timestamp";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS = "recvTimeTs";
