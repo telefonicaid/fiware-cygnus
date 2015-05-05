@@ -465,11 +465,11 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrType" : "kmh", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
