@@ -11,6 +11,7 @@
         * [CKAN persistence](#section3.4.2)
         * [MySQL persistence](#section3.4.3)
         * [MongoDB persistence](#section3.4.4)
+        * [STH persistence](#section3.4.5)
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
@@ -40,6 +41,7 @@ Current stable release is able to persist Orion context data in:
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
+* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
 Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
@@ -62,6 +64,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * `OrionCKANSink`. A custom sink that persists Orion context data in [CKAN](http://ckan.org/) server instances under a organization, package, resource and Datastore structure. Check for specific details [here](doc/design/OrionCKANSink.md).
 * `OrionMySQLSink`. A custom sink for persisting Orion context data in [MySQL](https://www.mysql.com/) server instances under a database and table structure. Check for specific details [here](doc/design/OrionMySQLSink.md).
 * `OrionMongoSink`. A custom sink for persisting Orion context data in [MongoDB](https://www.mongodb.org/) server instances under a database and collection structure. Check for specific details [here](doc/design/OrionMongoSink.md).
+* `OrionSTHSink`. A custom sink for persisting Orion context data in [STH](https://github.com/telefonicaid/IoT-STH) server instances under a database and aggregated-like collection structure. Check for specific details [here](doc/design/OrionSTHSink.md).
 * `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table, CKAN resource or MongoDB collection) for the context data.
 
 All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
@@ -233,7 +236,7 @@ NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
 [Top](#top)
 
-####<a name="section3.4.2"></a>OrionCKANSink persistence
+####<a name="section3.4.2"></a>CKAN persistence
 
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by [`OrionCKANSink`](doc/design/OrionCKANSink.md) each time a Flume event is taken from its channel.
 
@@ -359,7 +362,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 [Top](#top)
 
-####<a name="section3.4.3"></a>OrionMySQLSink persistence
+####<a name="section3.4.3"></a>MySQL persistence
 
 MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionCKANSink`](doc/design/OrionMySQL.md) each time a Flume event is taken from its channel.
 
@@ -440,7 +443,7 @@ NOTE: `mysql` is the MySQL CLI for querying the data.
 
 [Top](#top)
 
-####<a name="section3.4.4"></a>OrionMongoSink persistence
+####<a name="section3.4.4"></a>Mongo persistence
 
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
 
@@ -469,6 +472,134 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
+
+NOTE: `mongo` is the MongoDB CLI for querying the data.
+
+[Top](#top)
+
+####<a name="section3.4.5"></a>STH persistence
+
+###Mapping Flume events to MongoDB data structures
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionSTHSink`](doc/desing/OrionSTHSink.md) each time a Flume event is taken from its channel.
+
+Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    vehicles           0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    4wheels.aggr
+    4wheels_car1_car.aggr
+    4wheels_car1_car_speed.aggr
+    system.indexes
+    > db.4wheels.aggr.find()
+    { 
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "kmh" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 12, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 23, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "sepeed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "kmh" },
+        "points" : [
+            { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
+            ...,
+            { "offset" : 3, "samples" : 0, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 11, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "kmh" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 22, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "kmh" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 13, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "kmh" },
+        "points" : [
+            { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 20, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    { 
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "percentage" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 12, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 23, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "percentage" },
+        "points" : [
+            { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
+            ...,
+            { "offset" : 3, "samples" : 0, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 11, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "percentage" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 22, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "percentage" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 13, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "percentage" },
+        "points" : [
+            { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 20, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
 
 NOTE: `mongo` is the MongoDB CLI for querying the data.
 
@@ -548,8 +679,8 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel
 
 #=============================================
 # source configuration
@@ -665,8 +796,27 @@ cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
 # prefix for the MongoDB databases (empty for none)
 cygnusagent.sinks.mongo-sink.db_prefix =
-# prefix pro the MongoDB collections (empty for none)
+# prefix for the MongoDB collections (empty for none)
 cygnusagent.sinks.mongo-sink.collection_prefix =
+
+# ============================================
+# OrionSTHSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
+# channel name from where to read notification events
+cygnusagent.sinks.sth-sink.channel = sth-channel
+# FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
+cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# a valid user in the MongoDB server
+cygnusagent.sinks.sth-sink.mongo_username = mongo_username
+# password for the user above
+cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
+# data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
+cygnusagent.sinks.sth-sink.data_model = collection-per-entity
+# prefix for the MongoDB databases (empty for none)
+cygnusagent.sinks.sth-sink.db_prefix =
+# prefix for the MongoDB collections (empty for none)
+cygnusagent.sinks.sth-sink.collection_prefix =
 
 #=============================================
 # hdfs-channel configuration
