@@ -34,12 +34,12 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        attributes=[
 	            {
 	                attrName=speed,
-	                attrType=kmh,
+	                attrType=float,
 	                attrValue=112.9
 	            },
 	            {
 	                attrName=oil_level,
-	                attrType=percentage,
+	                attrType=float,
 	                attrValue=74.6
 	            }
 	        ]
@@ -64,11 +64,11 @@ Assuming `mongo_username=myuser` as configuration parameter, then `OrionMongoSin
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "float", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see next section for more details).
 
@@ -81,12 +81,12 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
-| mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-| mongo_username | no | <i>empty</i> |
-| mongo_password | no | <i>empty</i> |
-| data_model | no | collection-per-entity | Under study
-| db_prefix | no | <i>empty</i> | Should not be public
-| collection_prefix | no | <i>empty</i> | Should not be public
+| mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run |
+| mongo_username | no | <i>empty</i> | If empty, no authentication is done |
+| mongo_password | no | <i>empty</i> | If empty, no authentication is done |
+| data_model | no | collection-per-entity | Under study |
+| db_prefix | no | <i>empty</i> | Under study |
+| collection_prefix | no | <i>empty</i> | Under study |
 
 A configuration example could be:
 

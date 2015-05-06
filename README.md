@@ -77,7 +77,7 @@ More complex architectures and data flows can be checked in the [architecture](d
 [Top](#top)
 
 ##<a name="section3"></a>Data flow example
-Next sections will consider an example NGSI entity called 'car1' of type 'car', with attributes 'speed' (type 'kmh') and 'oil_level' (type 'percentage'). Is not a goal for this document to show you how to define a NGSI entity nor how to create it in the most common NGSI source for Cygnus, Orion Context Broker. Please, refer to the [official Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_Creation) for more details.
+Next sections will consider an example NGSI entity called 'car1' of type 'car', with attributes 'speed' (type 'float') and 'oil_level' (type 'float'). Is not a goal for this document to show you how to define a NGSI entity nor how to create it in the most common NGSI source for Cygnus, Orion Context Broker. Please, refer to the [official Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_Creation) for more details.
 
 [Top](#top)
 
@@ -86,7 +86,7 @@ Cygnus takes advantage of the subscription-notification mechanism of NGSI. Speci
 
 As long as the typical NGSI-like source is Orion Context Broker, you can make a subscription about the example NGSI entity ('car1' of type 'car') by using the `curl` command in this [way](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) (assuming Orion runs in localhost and listens on the TCP/1026 port):
 
-    (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' -d @- | python -mjson.tool) <<EOF
+    (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Fiware-Service: vehicles' --header 'Fiware-ServicePath: /4wheels' -d @- | python -mjson.tool) <<EOF
     {
         "entities": [
             {
@@ -113,12 +113,12 @@ As long as the typical NGSI-like source is Orion Context Broker, you can make a 
     }
     EOF
 
-Which means: <i>Each time the the 'car1' entity, of type 'car', changes its value of 'speed' send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than one per second</i>.
+Which means: <i>Each time the the 'car1' entity, of type 'car', which is registered under the [service/tenant](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Multi_service_tenancy) 'vehicles', [subservice](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_service_paths) '/4wheels', changes its value of 'speed' then send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than once per second</i>.
 
 [Top](#top)
 
 ###<a name="section3.2"></a>NGSI notification reception
-Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the following NGSI notification (or NGSI event) would be sent as a Http POST to the configured Cygnus listener, i.e. the native `HTTPSource` (the code below is an <i>object representation</i>, not any real data format):
+Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the following NGSI notification (or NGSI event) would be sent as a Http POST to the configured Cygnus listener, i.e. the native `HTTPSource` (the code below is an <i>object representation</i>, not any real data format; look for it at [Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE)):
 
     ngsi-event={
         http-headers={
@@ -128,7 +128,7 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
             Accept: application/xml, application/json
             Content-Type: application/json
             Fiware-Service: vehicles
-            Fiware-ServicePath: 4wheels 
+            Fiware-ServicePath: /4wheels 
         },
         payload={
             {
@@ -140,13 +140,13 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
                         "attributes" : [
                             {
                                 "name" : "speed",
-                                "type" : "kmh",
+                                "type" : "float",
                                 "value" : "112.9",
                                 "metadatas": []
                             },
                             {
                                 "name" : "oil_level",
-                                "type" : "percentage",
+                                "type" : "float",
                                 "value" : "74.6",
                                 "metadatas": []
                             }
@@ -187,12 +187,12 @@ The equivalent <i>object representation</i> (not any real data format) for such 
 	         attributes=[
 	             {
 	                  attrName=speed,
-	                  attrType=kmh,
+	                  attrType=float,
 	                  attrValue=112.9
 	             },
 	             {
 	                  attrName=oil_level,
-	                  attrType=percentage,
+	                  attrType=float,
 	                  attrValue=74.6
 	             }
 	         ]
@@ -221,8 +221,8 @@ The body simply contains a byte representation of the HTTP payload that will be 
 Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"percentage","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"float","attrValue":"74.6","attrMd":[]}
 
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
@@ -277,7 +277,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             ],
             "records": [
                 {
-                    "attrType": "kmh",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
@@ -286,7 +286,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "_id": 1
                 },
                 {
-                    "attrType": "percentage",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
@@ -392,12 +392,12 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | kmh        | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | percentage | 74.6      | []     |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
     
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
@@ -462,11 +462,11 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "float", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
