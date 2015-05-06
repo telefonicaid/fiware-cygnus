@@ -340,7 +340,8 @@ public class MongoBackend {
                 offsetOrigin = 1;
                 break;
             case MONTH:
-                numValues = 12;
+                numValues = 13;
+                offsetOrigin = 1;
                 break;
             default:
                 // should never be reached
