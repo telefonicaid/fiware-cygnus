@@ -46,12 +46,12 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        attributes=[
 	            {
 	                attrName=speed,
-	                attrType=kmh,
+	                attrType=float,
 	                attrValue=112.9
 	            },
 	            {
 	                attrName=oil_level,
-	                attrType=percentage,
+	                attrType=float,
 	                attrValue=74.6
 	            }
 	        ]
@@ -87,12 +87,12 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | kmh        | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | percentage | 74.6      | []     |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
