@@ -46,12 +46,12 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        attributes=[
 	            {
 	                attrName=speed,
-	                attrType=kmh,
+	                attrType=float,
 	                attrValue=112.9
 	            },
 	            {
 	                attrName=oil_level,
-	                attrType=percentage,
+	                attrType=float,
 	                attrValue=74.6
 	            }
 	        ]
@@ -98,7 +98,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             ],
             "records": [
                 {
-                    "attrType": "kmh",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
@@ -107,7 +107,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "_id": 1
                 },
                 {
-                    "attrType": "percentage",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
