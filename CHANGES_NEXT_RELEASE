@@ -9,3 +9,4 @@
 * UTC/Z time zone detail added to all the sink timestamps (#370) 
 * Added OrionSTHSink (#19)
 * ISODate objects are used for timestamping in OrionMongoSink (#372)
+* Let the origin offset for months in aggregated points starts by 1 instead of 0 (#381)
