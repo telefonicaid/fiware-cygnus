@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
 public class HDFSBackendImpl extends HDFSBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
+    private static final String BASE_URL = "/webhdfs/v1/user/";
     
     /**
      * 
@@ -72,38 +73,41 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @param krb5Password
      * @param krb5LoginConfFile
      * @param krb5ConfFile
+     * @param serviceAsNamespace
      */
     public HDFSBackendImpl(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
             String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
-            String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+            String krb5Password, String krb5LoginConfFile, String krb5ConfFile, boolean serviceAsNamespace) {
         super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
-                krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+                krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
     } // HDFSBackendImpl
    
     @Override
     public void createDir(String username, String dirPath) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + username + "/" + dirPath + "?op=mkdirs&user.name=" + username;
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + dirPath
+                + "?op=mkdirs&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CygnusPersistenceError("The " + dirPath + " directory could not be created in HDFS. "
-                    + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
-                    + response.getStatusLine().getReasonPhrase());
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + dirPath
+                    + " directory could not be created in HDFS. HttpFS response: "
+                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
         } // if
     } // createDir
     
     @Override
     public void createFile(String username, String filePath, String data)
         throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=create&user.name=" + username;
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                + "?op=create&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
-            throw new CygnusPersistenceError("The " + filePath + " file could not be created in HDFS. "
-                    + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
-                    + response.getStatusLine().getReasonPhrase());
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                    + " file could not be created in HDFS. HttpFS response: "
+                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
         } // if
         
         // get the redirection location
@@ -117,22 +121,23 @@ public class HDFSBackendImpl extends HDFSBackend {
     
         // check the status
         if (response.getStatusLine().getStatusCode() != 201) {
-            throw new CygnusPersistenceError(filePath + " file created in HDFS, but could not write the "
-                    + "data. HttpFS response: " + response.getStatusLine().getStatusCode() + " "
-                    + response.getStatusLine().getReasonPhrase());
+            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                    + " file created in HDFS, but could not write the data. HttpFS response: "
+                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
         } // if
     } // createFile
     
     @Override
     public void append(String username, String filePath, String data) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=append&user.name=" + username;
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                + "?op=append&user.name=" + username;
         HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
 
         // check the status
         if (response.getStatusLine().getStatusCode() != 307) {
-            throw new CygnusPersistenceError("The " + filePath + " file seems to not exist in HDFS. "
-                    + "HttpFS response: " + response.getStatusLine().getStatusCode() + " "
-                    + response.getStatusLine().getReasonPhrase());
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                    + " file seems to not exist in HDFS. HttpFS response: "
+                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
         } // if
 
         // get the redirection location
@@ -146,15 +151,16 @@ public class HDFSBackendImpl extends HDFSBackend {
         
         // check the status
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CygnusPersistenceError(filePath + " file exists in HDFS, but could not write the "
-                    + "data. HttpFS response: " + response.getStatusLine().getStatusCode() + " "
-                    + response.getStatusLine().getReasonPhrase());
+            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                    + " file exists in HDFS, but could not write the data. HttpFS response: "
+                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
         } // if
     } // append
     
     @Override
     public boolean exists(String username, String filePath) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + username + "/" + filePath + "?op=getfilestatus&user.name="
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
+                + "?op=getfilestatus&user.name="
                 + username;
         HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
 
