@@ -1,7 +1,7 @@
 #From NGSI events to Flume events
 This document explains how a notified NGSI event containing context data is converted into a Flume event, suitable for being consumed by any of the Cygnus sinks.
 
-A NGSI-like event example could be (the code below is an <i>object representation</i>, not any real data format):
+A NGSI-like event example could be (the code below is an <i>object representation</i>, not any real data format; look for it at [Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE)):
 
     ngsi-event={
         http-headers={
@@ -23,13 +23,13 @@ A NGSI-like event example could be (the code below is an <i>object representatio
                         "attributes" : [
                             {
                                 "name" : "speed",
-                                "type" : "kmh",
+                                "type" : "float",
                                 "value" : "112.9",
                                 "metadatas": []
                             },
                             {
                                 "name" : "oil_level",
-                                "type" : "percentage",
+                                "type" : "float",
                                 "value" : "74.6",
                                 "metadatas": []
                             }
@@ -65,12 +65,12 @@ Flume events are not much more different than the above representation: there is
 	         attributes=[
 	             {
 	                  attrName=speed,
-	                  attrType=kmh,
+	                  attrType=float,
 	                  attrValue=112.9
 	             },
 	             {
 	                  attrName=oil_level,
-	                  attrType=percentage,
+	                  attrType=float,
 	                  attrValue=74.6
 	             }
 	         ]
