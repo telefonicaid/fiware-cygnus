@@ -117,8 +117,7 @@ public class MongoBackend {
         throws Exception {
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
-        Document doc = new Document("recvTimeTs", recvTimeTs)
-                .append("recvTime", recvTime);
+        Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
         
         switch (dataModel) {
             case COLLECTIONPERSERVICEPATH:
