@@ -59,7 +59,7 @@ Assuming `mongo_username=myuser` as configuration parameter, then `OrionMongoSin
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels
+    4wheels	
     4wheels_car1_car
     4wheels_car1_car_speed
     system.indexes
