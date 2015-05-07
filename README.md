@@ -657,9 +657,9 @@ cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSi
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
-# a valid user in the MongoDB server
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
-# password for the user above
+# password for the user above (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
