@@ -169,6 +169,11 @@ public class DestinationExtractor implements Interceptor {
         ArrayList<String> datasets = new ArrayList<String>();
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
         
+        if (contextResponses == null || contextResponses.isEmpty()) {
+            LOGGER.warn("No context responses within the notified entity, nothing is done");
+            return null;
+        } // if
+        
         for (ContextElementResponse contextElementResponse : contextResponses) {
             ContextElement contextElement = contextElementResponse.getContextElement();
             

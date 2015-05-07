@@ -7,3 +7,5 @@
 * Bug fixed: matching table name can be null (no Flume parameter is used) or wrong (#367)
 * Add specific sink documents, pointing to them from the README (#322)
 * UTC/Z time zone detail added to all the sink timestamps (#370) 
+* Added OrionSTHSink (#19)
+* Let the origin offset for months in aggregated points starts by 1 instead of 0 (#381)
