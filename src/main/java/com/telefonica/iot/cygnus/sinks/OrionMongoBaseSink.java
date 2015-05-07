@@ -117,7 +117,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dataModel = getDataModel(context.getString("data_model", "collection-per-attribute"));
+        dataModel = getDataModel(context.getString("data_model", "collection-per-entity"));
         
         if (dataModel == null) {
             LOGGER.error("Invalid data model, using 'collection-per-attribute' by default");
@@ -183,7 +183,8 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String fiwareServicePath, String destination, String attrName) throws Exception {
+    protected String buildCollectionName(String fiwareServicePath, String destination, String attrName)
+        throws Exception {
         String collectionName = collectionPrefix;
         
         switch (dataModel) {

@@ -46,7 +46,7 @@ import org.bson.Document;
 public class MongoBackend {
     
     /**
-     * Available data models when persisting data at Mongo.
+     * Available resolutions for aggregated data.
      */
     public enum Resolution { SECOND, MINUTE, HOUR, DAY, MONTH }
     
