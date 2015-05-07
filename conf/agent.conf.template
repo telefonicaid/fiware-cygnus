@@ -129,6 +129,25 @@ cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 
 # ============================================
+# OrionMongoSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+# channel name from where to read notification events
+cygnusagent.sinks.mongo-sink.channel = mongo-channel
+# FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
+cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
+# password for the user above (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
+# data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
+cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+# prefix for the MongoDB databases (empty for none)
+cygnusagent.sinks.mongo-sink.db_prefix =
+# prefix pro the MongoDB collections (empty for none)
+cygnusagent.sinks.mongo-sink.collection_prefix =
+
+# ============================================
 # OrionSTHSink configuration
 # sink class, must not be changed
 cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
@@ -173,6 +192,15 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# mongo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.mongo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.mongo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mongo-channel.transactionCapacity = 100
 
 #=============================================
 # sth-channel configuration
