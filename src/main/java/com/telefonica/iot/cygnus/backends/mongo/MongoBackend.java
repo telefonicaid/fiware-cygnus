@@ -46,7 +46,7 @@ import org.bson.Document;
 public class MongoBackend {
     
     /**
-     * Available data models when persisting data at Mongo.
+     * Available resolutions for aggregated data.
      */
     public enum Resolution { SECOND, MINUTE, HOUR, DAY, MONTH }
     
@@ -165,7 +165,7 @@ public class MongoBackend {
         double value = new Double(attrValue);
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(recvTimeTs);
+        calendar.setTimeInMillis(recvTimeTs * 1000);
         
         // insert the data in an aggregated fashion for each resolution type
         insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
@@ -339,7 +339,8 @@ public class MongoBackend {
                 offsetOrigin = 1;
                 break;
             case MONTH:
-                numValues = 12;
+                numValues = 13;
+                offsetOrigin = 1;
                 break;
             default:
                 // should never be reached

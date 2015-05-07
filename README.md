@@ -80,7 +80,7 @@ More complex architectures and data flows can be checked in the [architecture](d
 [Top](#top)
 
 ##<a name="section3"></a>Data flow example
-Next sections will consider an example NGSI entity called 'car1' of type 'car', with attributes 'speed' (type 'kmh') and 'oil_level' (type 'percentage'). Is not a goal for this document to show you how to define a NGSI entity nor how to create it in the most common NGSI source for Cygnus, Orion Context Broker. Please, refer to the [official Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_Creation) for more details.
+Next sections will consider an example NGSI entity called 'car1' of type 'car', with attributes 'speed' (type 'float') and 'oil_level' (type 'float'). Is not a goal for this document to show you how to define a NGSI entity nor how to create it in the most common NGSI source for Cygnus, Orion Context Broker. Please, refer to the [official Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_Creation) for more details.
 
 [Top](#top)
 
@@ -89,7 +89,7 @@ Cygnus takes advantage of the subscription-notification mechanism of NGSI. Speci
 
 As long as the typical NGSI-like source is Orion Context Broker, you can make a subscription about the example NGSI entity ('car1' of type 'car') by using the `curl` command in this [way](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) (assuming Orion runs in localhost and listens on the TCP/1026 port):
 
-    (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' -d @- | python -mjson.tool) <<EOF
+    (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Fiware-Service: vehicles' --header 'Fiware-ServicePath: /4wheels' -d @- | python -mjson.tool) <<EOF
     {
         "entities": [
             {
@@ -116,12 +116,12 @@ As long as the typical NGSI-like source is Orion Context Broker, you can make a 
     }
     EOF
 
-Which means: <i>Each time the the 'car1' entity, of type 'car', changes its value of 'speed' send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than one per second</i>.
+Which means: <i>Each time the the 'car1' entity, of type 'car', which is registered under the [service/tenant](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Multi_service_tenancy) 'vehicles', [subservice](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_service_paths) '/4wheels', changes its value of 'speed' then send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than once per second</i>.
 
 [Top](#top)
 
 ###<a name="section3.2"></a>NGSI notification reception
-Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the following NGSI notification (or NGSI event) would be sent as a Http POST to the configured Cygnus listener, i.e. the native `HTTPSource` (the code below is an <i>object representation</i>, not any real data format):
+Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the following NGSI notification (or NGSI event) would be sent as a Http POST to the configured Cygnus listener, i.e. the native `HTTPSource` (the code below is an <i>object representation</i>, not any real data format; look for it at [Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE)):
 
     ngsi-event={
         http-headers={
@@ -131,7 +131,7 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
             Accept: application/xml, application/json
             Content-Type: application/json
             Fiware-Service: vehicles
-            Fiware-ServicePath: 4wheels 
+            Fiware-ServicePath: /4wheels 
         },
         payload={
             {
@@ -143,13 +143,13 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
                         "attributes" : [
                             {
                                 "name" : "speed",
-                                "type" : "kmh",
+                                "type" : "float",
                                 "value" : "112.9",
                                 "metadatas": []
                             },
                             {
                                 "name" : "oil_level",
-                                "type" : "percentage",
+                                "type" : "float",
                                 "value" : "74.6",
                                 "metadatas": []
                             }
@@ -190,12 +190,12 @@ The equivalent <i>object representation</i> (not any real data format) for such 
 	         attributes=[
 	             {
 	                  attrName=speed,
-	                  attrType=kmh,
+	                  attrType=float,
 	                  attrValue=112.9
 	             },
 	             {
 	                  attrName=oil_level,
-	                  attrType=percentage,
+	                  attrType=float,
 	                  attrValue=74.6
 	             }
 	         ]
@@ -221,11 +221,11 @@ The body simply contains a byte representation of the HTTP payload that will be 
 
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-Assuming `cosmos_default_username=myuser` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
+Assuming `cosmos_default_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"kmh","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"percentage","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"float","attrValue":"74.6","attrMd":[]}
 
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
 
@@ -280,7 +280,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             ],
             "records": [
                 {
-                    "attrType": "kmh",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
@@ -289,7 +289,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "_id": 1
                 },
                 {
-                    "attrType": "percentage",
+                    "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
                     "attrMd": null,
@@ -395,12 +395,12 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType   | attrValue | attrMd |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | kmh        | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | percentage | 74.6      | []     |
-    +------------+-----------------------------+----------+------------+-------------+------------+-----------+--------+
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
     
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
@@ -465,11 +465,11 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     4wheels_car1_car_speed
     system.indexes
     > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrType" : "kmh", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrType" : "float", "attrValue" : "112.9" }
 
 NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
 
@@ -501,7 +501,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
     system.indexes
     > db.4wheels.aggr.find()
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "kmh" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -511,7 +511,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "sepeed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "kmh" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "sepeed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -521,7 +521,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "kmh" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -531,7 +531,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "kmh" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -541,7 +541,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "kmh" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -551,7 +551,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "percentage" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -561,7 +561,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "percentage" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -571,7 +571,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "percentage" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -581,7 +581,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "percentage" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -591,7 +591,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "percentage" },
+        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -788,16 +788,16 @@ cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSi
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
-# a valid user in the MongoDB server
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
-# password for the user above
+# password for the user above (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
-# prefix for the MongoDB databases (empty for none)
-cygnusagent.sinks.mongo-sink.db_prefix =
-# prefix for the MongoDB collections (empty for none)
-cygnusagent.sinks.mongo-sink.collection_prefix =
+# prefix for the MongoDB databases
+cygnusagent.sinks.mongo-sink.db_prefix = sth_
+# prefix for the MongoDB collections
+cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 
 # ============================================
 # OrionSTHSink configuration
@@ -807,16 +807,16 @@ cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 cygnusagent.sinks.sth-sink.channel = sth-channel
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
-# a valid user in the MongoDB server
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.sth-sink.mongo_username = mongo_username
-# password for the user above
+# password for the user above (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.sth-sink.data_model = collection-per-entity
-# prefix for the MongoDB databases (empty for none)
-cygnusagent.sinks.sth-sink.db_prefix =
-# prefix for the MongoDB collections (empty for none)
-cygnusagent.sinks.sth-sink.collection_prefix =
+# prefix for the MongoDB databases
+cygnusagent.sinks.sth-sink.db_prefix = sth_
+# prefix for the MongoDB collections
+cygnusagent.sinks.sth-sink.collection_prefix = sth_
 
 #=============================================
 # hdfs-channel configuration
@@ -853,6 +853,15 @@ cygnusagent.channels.mongo-channel.type = memory
 cygnusagent.channels.mongo-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mongo-channel.transactionCapacity = 100
+
+#=============================================
+# sth-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.sth-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.sth-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.sth-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
