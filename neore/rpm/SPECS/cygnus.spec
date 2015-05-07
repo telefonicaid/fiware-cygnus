@@ -173,6 +173,21 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu May 07 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.0
+- Ordered death of Cygnus if the logging system fails or it is stoped (#320)
+- Management interface port is not opened twice anymore (#302)
+- Added a polling interval parameter for reloading the Flume configuration (#334)
+- Bug fix, flume-conf.properties.template file from Apache Flume is not copied anymore to Cygnus folder (#348)
+- Cygnus exits if the HTTPSource listening port is already in use (#340)
+- Added OrionMongoSink (#363)
+- Bug fixed: matching table name can be null (no Flume parameter is used) or wrong (#367)
+- Add specific sink documents, pointing to them from the README (#322)
+- UTC/Z time zone detail added to all the sink timestamps (#370)
+- Added OrionSTHSink (#19)
+- Multitenancy support in HDFS (#338)
+- ISODate objects are used for timestamping in OrionMongoSink (#372)
+- Let the origin offset for months in aggregated points starts by 1 instead of 0 (#381)
+
 * Fri Mar 06 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.7.1
 - Added option to start/stop/status only one instance configured in Cygnus using init.d script (#332)
 - Added a Quick Start Guide (#319)
