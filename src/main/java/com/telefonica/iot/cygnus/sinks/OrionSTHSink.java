@@ -18,40 +18,31 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * OrionMongoSink will be in charge of persisting Orion context data in a historic fashion within a MongoDB deployment.
- * 
- * The way this sink will build the historics will be very similar to the already existent OrionHDFSSink,
- * OrionMySQLSink and OrionCKANSink, i.e. by appending ("to append" has several means, deppending on the final backend)
- * new raw data to the already existent one.
- * 
- * Because raw data is stored, this sinks differentiates from OrionSTHSink (issue #19), which is in charge of updating
- * already exitent data with new notified data since the goal is to offer aggregated measures to the end user.
- * Nevertheless, in the future most probably the usage of the Mongo Aggregation Framework will allow us to generate
- * such aggregated measures based on the stored raw data; in that case the usage of OrionSTHSink becomes deprecated.
- * 
+ *
  * @author frb
  */
-public class OrionMongoSink extends OrionMongoBaseSink {
+public class OrionSTHSink extends OrionMongoBaseSink {
 
     /**
      * Constructor.
      */
-    public OrionMongoSink() {
+    public OrionSTHSink() {
         super();
-    } // OrionMongoSink
-
+    } // OrionSTHSink
+    
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
+        // get some header values; they are not null nor empty thanks to OrionRESTHandler
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
@@ -67,8 +58,10 @@ public class OrionMongoSink extends OrionMongoBaseSink {
 
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.COLLECTIONPERSERVICEPATH) {
-            collectionName = buildCollectionName(fiwareServicePath, null, null);
-            backend.createCollection(dbName, collectionName);
+            for (String fiwareServicePath : fiwareServicePaths) {
+                collectionName = buildCollectionName(fiwareServicePath, null, null) + ".aggr";
+                backend.createCollection(dbName, collectionName);
+            } // for
         } // if
         
         // iterate on the contextResponses
@@ -85,7 +78,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             
             // create the collection at this stage, if the data model is collection-per-entity
             if (dataModel == DataModel.COLLECTIONPERENTITY) {
-                collectionName = buildCollectionName(fiwareServicePath, destinations[i], null);
+                collectionName = buildCollectionName(fiwareServicePaths[i], destinations[i], null) + ".aggr";
                 backend.createCollection(dbName, collectionName);
             } // if
             
@@ -106,20 +99,25 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                 LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
+                if (!Utils.isANumber(attrValue)) {
+                    LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
+                    continue;
+                } // if
+                
                 // create the collection at this stage, if the data model is collection-per-attribute
                 if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
-                    collectionName = buildCollectionName(fiwareServicePath, destinations[i], attrName);
+                    collectionName = buildCollectionName(fiwareServicePaths[i], destinations[i], attrName) + ".aggr";
                     backend.createCollection(dbName, collectionName);
                 } // if
 
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: " + dbName
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
                         + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
                         + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                         + attrMetadata);
-                backend.insertContextDataRaw(dbName, collectionName, recvTimeTs / 1000, recvTime,
+                backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
                         entityId, entityType, attrName, attrType, attrValue, attrMetadata);
             } // for
         } // for
     } // persist
-
-} // OrionMongoSink
+    
+} // OrionSTHSink
