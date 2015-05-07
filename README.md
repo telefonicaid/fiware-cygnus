@@ -795,9 +795,9 @@ cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
 # prefix for the MongoDB databases (empty for none)
-cygnusagent.sinks.mongo-sink.db_prefix =
+cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections (empty for none)
-cygnusagent.sinks.mongo-sink.collection_prefix =
+cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 
 # ============================================
 # OrionSTHSink configuration
@@ -814,9 +814,9 @@ cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.sth-sink.data_model = collection-per-entity
 # prefix for the MongoDB databases (empty for none)
-cygnusagent.sinks.sth-sink.db_prefix =
+cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections (empty for none)
-cygnusagent.sinks.sth-sink.collection_prefix =
+cygnusagent.sinks.sth-sink.collection_prefix = sth_
 
 #=============================================
 # hdfs-channel configuration
