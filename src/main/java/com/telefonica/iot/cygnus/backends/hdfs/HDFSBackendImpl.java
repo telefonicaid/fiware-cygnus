@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
 public class HDFSBackendImpl extends HDFSBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
+    private static final String BASE_URL = "/webhdfs/v1/user/";
     
     /**
      * 
@@ -83,7 +84,7 @@ public class HDFSBackendImpl extends HDFSBackend {
    
     @Override
     public void createDir(String username, String dirPath) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + (serviceAsNamespace ? "" : (username + "/")) + dirPath
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + dirPath
                 + "?op=mkdirs&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
 
@@ -98,7 +99,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     @Override
     public void createFile(String username, String filePath, String data)
         throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
                 + "?op=create&user.name=" + username;
         HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
         
@@ -128,7 +129,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     
     @Override
     public void append(String username, String filePath, String data) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
                 + "?op=append&user.name=" + username;
         HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
 
@@ -158,7 +159,7 @@ public class HDFSBackendImpl extends HDFSBackend {
     
     @Override
     public boolean exists(String username, String filePath) throws Exception {
-        String relativeURL = "/webhdfs/v1/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
                 + "?op=getfilestatus&user.name="
                 + username;
         HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
