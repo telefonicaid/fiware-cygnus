@@ -142,9 +142,9 @@ cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
 cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
-# prefix for the MongoDB databases (empty for none)
+# prefix for the MongoDB databases
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
-# prefix pro the MongoDB collections (empty for none)
+# prefix pro the MongoDB collections
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 
 # ============================================
@@ -161,9 +161,9 @@ cygnusagent.sinks.sth-sink.mongo_username = mongo_username
 cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
 # data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
 cygnusagent.sinks.sth-sink.data_model = collection-per-entity
-# prefix for the MongoDB databases (empty for none)
+# prefix for the MongoDB databases
 cygnusagent.sinks.sth-sink.db_prefix = sth_
-# prefix for the MongoDB collections (empty for none)
+# prefix for the MongoDB collections
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 
 #=============================================
