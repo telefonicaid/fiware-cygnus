@@ -1,36 +1,48 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-connectors (FI-WARE project).
+# This file is part of fiware-cygnus (FI-WARE project).
 #
-# fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
 # later version.
-# fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
 # details.
 #
-# You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
 # http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with Francisco Romero
-# francisco.romerobueno@telefonica.com
+# For those usages not covered by the GNU Affero General Public License please contact:
+# iot_support at tid.es
 #
-#     Author: Ivan Arias
-#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
+
+import time
 
 from lettuce import world
-import time
+
+from tools import general_utils
+from tools import http_utils
 from tools.notification_utils import Notifications
-import http_utils
-import general_utils
+from tools.fabric_utils import FabricSupport
+from tools.cygnus_agent_config import Agent
+from tools.cygnus_instance_config import Cygnus_Instance
+from tools.cygnus_krb5_config import Krb5
+from tools.cygnus_matching_table_config import Matching_tables
+from tools.remote_log_utils import Remote_Log
 
 
 # notification constants
+CYGNUS_URL                  = u'cygnus_url'
+CYGNUS_URL_VALUE            = u'http://localhost'
+CYGNUS_PORT                 = u'cygnus_port'
+CYGNUS_PORT_VALUE           = u'5050'
 MANAGEMENT_PORT             = u'management_port'
 VERSION                     = u'version'
 VERIFY_VERSION              = u'verify_version'
+LOG_LEVEL                   = u'log_level'
 MANAGEMENT_PORT_VALUE       = "8081"
 NOTIF_USER_AGENT            = u'notif_user_agent'
 NOTIF_USER_AGENT_VALUE      = u'orion/0.10.0'
@@ -43,23 +55,25 @@ IDENTITY_TYPE_DEFAULT       = u'identity_type_default'
 IDENTITY_TYPE_VALUE         = u'Room'
 ATTRIBUTES_NUMBER_DEFAULT   = u'attributes_number_default'
 ATTRIBUTES_NUMBER_VALUE     = 1
-attributes_name_DEFAULT     = u'attributes_name_default'
-attributes_name_VALUE       = "temperature"
+ATTRIBUTES_NAME_DEFAULT     = u'attributes_name_default'
+ATTRIBUTES_NAME_VALUE       = u'temperature'
+TTL                         = u'ttl'
+TTL_VALUE                   = u'10'
 
 # general constants
-ROW_MODE         = 'row'
-COL_MODE         = 'column'
+ROW_MODE         = u'row'
+COL_MODE         = u'column'
 CKAN_SINK        = u'ckan'
 MYSQL_SINK       = u'mysql'
-HADOOP_SINK      = u'hadoop'
+HDFS_SINK        = u'hdfs'
 DEFAULT          = u'default'
 RANDOM           = u'random'
 EMPTY            = u''
 
 # ckan constants
-MAX_TENANT_LENGTH              = u'abcde678901234567890123456789013'
-MAX_TENANT_LENGTH_ROW          = u'abcde67890123456789012345678_row'
-MAX_RESOURCE_LENGTH            = u'1234567890123_45678901234567890123456789012345678901234567890123'
+MAX_TENANT_LENGTH              = u'abcde678901234567890123456789019'
+MAX_TENANT_LENGTH_ROW          = u'abcde67890123456789012345699_row'
+MAX_RESOURCE_LENGTH            = u'1234567890123_45678901234567890123456789012345678901234567890126'
 WITH_MAX_LENGTH_ALLOWED        = u'with max length allowed'
 ORGANIZATION_MISSING           = u'organization is missing'
 ORGANIZATION_WITHOUT_DATASET   = u'organization_without_dataset'
@@ -83,14 +97,29 @@ DATABASE_WITHOUT_TABLE         = u'database_without_table'
 DATABASE_MISSING               = u'database_missing'
 MAX_TABLE_LENGTH               = 64
 
+#fabric
+HOST                           = u'host'
+USER                           = u'user'
+PASSWORD                       = u'password'
+CERT_FILE                      = u'cert_file'
+ERROR_RETRY                    = u'error_retry'
+SOURCE_PATH                    = u'source_path'
+TARGET_PATH                    = u'target_path'
+SUDO_CYGNUS                    = u'sudo_cygnus'
+
+
 
 class Cygnus:
+    """
+    cygnus class with generals features
+    """
 
     # --------------- Configuration ------------------------
-    def __init__(self, cygnus_url, **kwargs):
+    def __init__(self,  **kwargs):
         """
         constructor
-        :param cygnus_url: <protocol>://<host>:<port> cygnus (MANDATORY)
+        :param cygnus_url: <protocol>://<host> cygnus (OPTIONAL)
+        :param cygnus_port: <port> cygnus (OPTIONAL)
         :param management_port : management port to know the version (OPTIONAL)
         :param version : cygnus version (OPTIONAL)
         :param verify_version : determine if verify cygnus version or not (True | False)(OPTIONAL)
@@ -102,41 +131,203 @@ class Cygnus:
         :param identity_type_default: identity type by default (OPTIONAL)
         :param attributes_number_default: attribute number by default (OPTIONAL)
         :param attributes_name_default: attribute name by default (OPTIONAL)
+        :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries) (OPTIONAL)
+        :param user: user used to connect by fabric (OPTIONAL)
+        :param password: password used to connect by fabric, if use cert file, password will be None (OPTIONAL)
+        :param cert_file: cert_file used to connect by fabric, if use password, cert_file will be None (OPTIONAL)
+        :param error_retry: Number of times Fabric will attempt to connect when connecting to a new server (OPTIONAL)
+        :param source_path: source path where are templates files [OPTIONAL]
+        :param target_path: target path where are copied config files [OPTIONAL]
+        :param sudo_cygnus: operations in cygnus with superuser privileges (True | False) [OPTIONAL]
         """
+        self.cygnus_url              = kwargs.get(CYGNUS_URL, CYGNUS_URL_VALUE)
+        self.cygnus_port             = kwargs.get(CYGNUS_PORT, CYGNUS_PORT_VALUE)
+        self.cygnus_url              = self.cygnus_url + ":"+ self.cygnus_port
+        self.management_port         = kwargs.get(MANAGEMENT_PORT, MANAGEMENT_PORT_VALUE)
+        self.version                 = kwargs.get(VERSION, EMPTY)
+        self.verify_version          = kwargs.get(VERIFY_VERSION, "true")
+        self.log_level               = kwargs.get(LOG_LEVEL, "DEBUG")
+        self.notif_user_agent        = kwargs.get(NOTIF_USER_AGENT, NOTIF_USER_AGENT_VALUE)
+        self.tenant                  = {ROW_MODE: kwargs.get(TENANT_ROW_DEFAULT.lower(), TENANT_ROW_DEFAULT),
+                                        COL_MODE: kwargs.get(TENANT_COL_DEFAULT.lower(), TENANT_COL_DEFAULT)}
+        self.service_path            = kwargs.get(SERVICE_PATH_DEFAULT, SERVICE_PATH_DEFAULT)
+        self.identity_id             = kwargs.get(IDENTITY_ID_DEFAULT, IDENTITY_ID_VALUE)
+        self.identity_type           = kwargs.get(IDENTITY_TYPE_DEFAULT, IDENTITY_TYPE_VALUE)
+        self.attributes_number       = int(kwargs.get(ATTRIBUTES_NUMBER_DEFAULT, ATTRIBUTES_NUMBER_VALUE))
+        self.attributes_name         = kwargs.get(ATTRIBUTES_NAME_DEFAULT, ATTRIBUTES_NAME_VALUE)
+        self.ttl                     = kwargs.get(TTL, TTL_VALUE)
+        #fabric
+        self.fabric_host             = self.cygnus_url.split(":")[1][2:]
+        self.fabric_user             = kwargs.get(USER, None)
+        self.fabric_password         = kwargs.get(PASSWORD, None)
+        self.fabric_cert_file        = kwargs.get(CERT_FILE, None)
+        self.fabric_error_retry      = kwargs.get(ERROR_RETRY, 1)
+        self.fabric_source_path      = kwargs.get(SOURCE_PATH, EMPTY)
+        self.fabric_target_path      = kwargs.get(TARGET_PATH, EMPTY)
+        self.fabric_sudo_cygnus      = kwargs.get(SUDO_CYGNUS, False)
 
-        self.cygnus_url             = cygnus_url
-        self.management_port        = kwargs.get(MANAGEMENT_PORT, MANAGEMENT_PORT_VALUE)
-        self.version                = kwargs.get(VERSION, EMPTY)
-        self.verify_version         = kwargs.get(VERIFY_VERSION, "true")
-        self.notif_user_agent       = kwargs.get(NOTIF_USER_AGENT, NOTIF_USER_AGENT_VALUE)
-        self.tenant                 = {ROW_MODE: kwargs.get(TENANT_ROW_DEFAULT.lower(), TENANT_ROW_DEFAULT),
-                                       COL_MODE: kwargs.get(TENANT_COL_DEFAULT.lower(), TENANT_COL_DEFAULT)}
-        self.service_path           =  kwargs.get(SERVICE_PATH_DEFAULT, SERVICE_PATH_DEFAULT)
-        self.identity_id            =  kwargs.get(IDENTITY_ID_DEFAULT, IDENTITY_ID_VALUE)
-        self.identity_type          =  kwargs.get(IDENTITY_TYPE_DEFAULT, IDENTITY_TYPE_VALUE)
-        self.attributes_number       =  int(kwargs.get(ATTRIBUTES_NUMBER_DEFAULT, ATTRIBUTES_NUMBER_VALUE))
-        self.attributes_name         =  kwargs.get(attributes_name_DEFAULT, attributes_name_VALUE)
-        self.dataset_id             = None
-        self.resource_id            = None
+        self.dataset_id              = None
+        self.resource_id             = None
 
-    # ----------------------------- general action -----------------------------------------------------
-
-    def verify_cygnus (self, cygnus_mode):
+    def __get_port (self, port, inc, different_port):
         """
-        verify cygnus version
-        :param cygnus_mode: cygnus mode
+        get port value incremented to multi-instances
+        :param port: port value
+        :param inc: increment
+        :return port string
         """
-        self.cygnus_mode = cygnus_mode
+        try:
+            if different_port.lower() == "true":
+                return str(int(port)+inc)
+            else:
+                return port
+        except Exception, e:
+            assert False, "ERROR - port %s is not numeric format \n %s" % (str(port), str (e))
+
+    def __get_channels(self, sinks):
+        """
+        return the channel used by each sink
+        :param sinks: sinks list
+        :return: channels (string)
+        """
+        sink_list = sinks.split (" ")    # sink ex: ckan-sink mysql-sink hdfs-sink
+        channels = ""
+        for i in range(len(sink_list)):
+            channels = channels + sink_list[i].split("-")[0]+"-channel " # channel ex: ckan-channel mysql-channel hdfs-channel
+        return channels[:len(channels)-1]
+
+    def config_instances(self, id, quantity, sinks, persistence, different_port="true"):
+        """
+        initialize instance files
+        In case of multi-instances and different_port is true, the port will be increment to initial port. ex: 5050, 5051, 5053, 5054, etc.
+        :param id: postfix used in instances name
+        :param quantity: number of instances
+        :param sinks: sinks string list
+        :param persistence: determine the mode of persistence by cygnus (row | column)
+        :param different_port: determine if the port is different or not
+        """
+        self.instance_id       = id
+        self.instances_number = quantity
+        self.persistence       = persistence
+        self.different_port    = different_port
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True)
+        cygnus_instance = Cygnus_Instance(source_path=self.fabric_source_path, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
+        cygnus_agent    = Agent(source_path=self.fabric_source_path, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
+        for i in range(int(self.instances_number)):
+            # generate cygnus_instance_<id>.conf ex: cygnus_instance_test_0.conf
+            port = self.__get_port(self.cygnus_port, i, self.different_port)
+            myfab.runs(cygnus_instance.append_id(id=self.instance_id+"_"+str(i)))
+            # generate agent_<id>.conf ex: agent_test_0.conf
+            ops_list = cygnus_agent.append_id(id=self.instance_id+"_"+str(i))
+            ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port, matching_table_file=self.fabric_target_path+"/matching_table.conf", default_service=self.tenant[self.persistence], default_service_path=self.service_path, ttl=self.ttl)
+            sinks_list = sinks.split(" ")
+            for i in range(len(sinks_list)):
+                if sinks_list[i].find(HDFS_SINK)>=0:
+                    hdfs_host = world.config['hadoop']['hadoop_namenode_url'].split(":")[1][2:]
+                    hdfs_port = world.config['hadoop']['hadoop_namenode_url'].split(":")[2]
+                    ops_list = cygnus_agent.config_hdfs_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host=hdfs_host, port=hdfs_port, user=world.config['hadoop']['hadoop_user'], password=world.config['hadoop']['hadoop_password'], api=world.config['hadoop']['hadoop_api'], persistence=self.persistence, hive_host=hdfs_host, hive_port=hdfs_port, krb5_auth=world.config['hadoop']['hadoop_krb5_auth'], krb5_user=world.config['hadoop']['hadoop_krb5_user'], krb5_password=world.config['hadoop']['hadoop_krb5_password'], krb5_login_file=self.fabric_target_path+"/krb5_login.conf", krb5_conf_file=self.fabric_target_path+"/krb5.conf")
+                    ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['hadoop']['hadoop_channel_capacity'], transaction_capacity=world.config['hadoop']['hadoop_channel_transaction_capacity'])
+                elif sinks_list[i].find(CKAN_SINK)>=0:
+                    ops_list = cygnus_agent.config_ckan_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]),api_key=world.config['ckan']['ckan_authorization'], host=world.config['ckan']['ckan_host'],  port=world.config['ckan']['ckan_port'], orion_url=world.config['ckan']['ckan_orion_url'], persistence=self.persistence, ssl=world.config['ckan']['ckan_ssl'])
+                    ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['ckan']['ckan_channel_capacity'], transaction_capacity=world.config['ckan']['ckan_channel_transaction_capacity'])
+                elif sinks_list[i].find(MYSQL_SINK)>=0:
+                    ops_list = cygnus_agent.config_mysql_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host=world.config['mysql']['mysql_host'], port=world.config['mysql']['mysql_port'], user=world.config['mysql']['mysql_user'], password=world.config['mysql']['mysql_pass'], persistence=self.persistence)
+                    ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['mysql']['mysql_channel_capacity'], transaction_capacity=world.config['mysql']['mysql_channel_transaction_capacity'])
+            # create and modify values in agent_<id>.conf
+            myfab.runs(ops_list)
+
+    def another_files (self, matching_table_file_name=DEFAULT):
+        """
+        copy another configuration files used by cygnus
+          - flume-env.sh
+          - matching_table.conf
+          - log4j.properties
+          - krb5.conf
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        myfab.current_directory(self.fabric_target_path)
+        myfab.run("cp -R flume-env.sh.template flume-env.sh")
+        #  matching_table.conf configuration
+        if matching_table_file_name == DEFAULT:
+            myfab.run("cp -R matching_table.conf.template matching_table.conf")
+        elif matching_table_file_name != EMPTY:
+            matching_table = Matching_tables(file=matching_table_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
+            myfab.runs(matching_table.content_to_copy())
+        else:
+            myfab.run("rm -rf matching_table.conf")
+        # change to DEBUG mode in log4j.properties
+        myfab.run("cp -R log4j.properties.template log4j.properties")
+        myfab.run(' sed -i "s/flume.root.logger=INFO,LOGFILE/flume.root.logger=%s,LOGFILE /" log4j.properties.template' % (self.log_level))
+        # krb5.conf configuration
+        krb5 = Krb5(self.fabric_target_path, self.fabric_sudo_cygnus)
+        myfab.runs(krb5.config_kbr5(default_realm=world.config['hadoop']['hadoop_krb5_default_realm'], kdc=world.config['hadoop']['hadoop_krb5_kdc'], admin_server=world.config['hadoop']['hadoop_krb5_admin_server'], dns_lookup_realm=world.config['hadoop']['hadoop_krb5_dns_lookup_realm'], dns_lookup_kdc=world.config['hadoop']['hadoop_krb5_dns_lookup_kdc'], ticket_lifetime=world.config['hadoop']['hadoop_krb5_ticket_lifetime'], renew_lifetime=world.config['hadoop']['hadoop_krb5_renew_lifetime'], forwardable=world.config['hadoop']['hadoop_krb5_forwardable']))
+
+    def cygnus_service(self, operation):
+        """
+         cygnus service (status | stop | start | restart)
+        :param operation:
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry)
+        myfab.run("service cygnus %s" % operation, sudo=self.fabric_sudo_cygnus)
+
+    def verify_cygnus (self):
+        """
+        verify if cygnus is installed correctly and its version
+        """
+        self.cygnus_mode = world.persistence
         if self.verify_version.lower() == "true":
             temp_split = self.cygnus_url.split(":")
             management_url = "%s:%s:%s/%s" % (str(temp_split[0]), str(temp_split[1]), self.management_port, VERSION)
             resp = http_utils.request(http_utils.GET, url= management_url)
             http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - in management operation (version)")
-            body_dict=general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
+            body_dict= general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
             assert str(body_dict[VERSION]) == self.version, \
-                "Wrong cygnus version verified: %s. Expected: %s. \n\nBody content: %s" \
-                % (str(body_dict[VERSION]), str(self.version), str(resp.text))
+                "Wrong cygnus version verified: %s. Expected: %s. \n\nBody content: %s" % (str(body_dict[VERSION]), str(self.version), str(resp.text))
         return True
+
+    def init_log_file(self):
+        """
+        reinitialize log file
+        delete and create a new log file (empty)
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        log = Remote_Log (fabric=myfab)
+        log.delete_log_file()
+        log.create_log_file()
+
+    def verify_log(self, label, text):
+        """
+        Verify in log file if a label with a text exists
+        :param label: label to find
+        :param text: text to find (begin since the end)
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        log = Remote_Log (fabric=myfab)
+        line = log.find_line(label, text)
+        assert line != None, "ERROR  - label %s and text %s is not found.    \n       - %s" % (label, text, line)
+
+    def delete_matching_table_file(self):
+        """
+        delete matching table file in cygnus conf remotely
+        used the file name "matching_table_name" stored in configuration.json file
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        myfab.current_directory(self.fabric_target_path)
+        matching_table = Matching_tables()
+        myfab.run("rm -rf %s" % matching_table.get_matching_table_file_name())
+
+    def delete_cygnus_instances_files(self):
+        """
+        delete all cygnus instances files (cygnus_instance_%s_*.conf and agent_test_*.conf)
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        myfab.current_directory(self.fabric_target_path)
+        myfab.run("rm -rf cygnus_instance_%s_*.conf" % self.instance_id)
+        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
+        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
+        self.delete_matching_table_file()
+
+     # ----------------------------- general action -----------------------------------------------------
 
     def __split_resource (self, resource_name):
         """
@@ -156,12 +347,42 @@ class Cygnus:
         self.metadata_value = metadata_value
         metadata_attribute_number = 1
         cygnus_notification_path = u'/notify'
-        self.notification = Notifications (self.cygnus_url+cygnus_notification_path,tenant=self.tenant[self.cygnus_mode], service_path=self.service_path, content=self.content)
+        notification = Notifications (self.cygnus_url+cygnus_notification_path,tenant=self.tenant[self.cygnus_mode], service_path=self.service_path, content=self.content)
         if self.metadata_value:
-            self.notification.create_metadatas_attribute(metadata_attribute_number, RANDOM, RANDOM, RANDOM)
-        self.notification.create_attributes (self.attributes_number, self.attributes_name, self.attribute_type, attribute_value)
-        self.attribute_value = self.notification.get_attribute_value()
-        return self.notification.send_notification(self.identity_id, self.identity_type)
+            notification.create_metadatas_attribute(metadata_attribute_number, RANDOM, RANDOM, RANDOM)
+        notification.create_attributes (self.attributes_number, self.attributes_name, self.attribute_type, attribute_value)
+        resp =  notification.send_notification(self.identity_id, self.identity_type)
+
+        self.attributes=notification.get_attributes()
+        self.attributes_name=notification.get_attributes_name()
+        self.attributes_value=notification.get_attributes_value()
+        self.attributes_number=notification.get_attributes_number()
+        self.attributes_metadata=notification.get_attributes_metadata_number()
+        self.attributes_number=int(notification.get_attributes_number())
+        return resp
+
+    def __change_port(self, port):
+        """
+        change a port used by notifications, update url variables
+        :param port: new port
+        """
+        temp = self.cygnus_url.split(":")
+        self.cygnus_url =  "%s:%s:%s" % (temp[0], temp[1], port)
+
+    def received_multiples_notifications(self, attribute_value, metadata_value, content):
+        """
+        receive several notifications by each instance, but changing port
+        :param attribute_value:
+        :param metadata_value:
+        :param content:
+        :return: response
+        """
+        self.attrs_list = []
+        for i in range(int(self.instances_number)):
+            self.__change_port(self.__get_port(self.cygnus_port, i, self.different_port))
+            resp = self.received_notification(attribute_value, metadata_value, content)
+            http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - in multi-notifications")
+            self.attrs_list.append(self.attributes) # used by verify if dates are stored
 
     def row_configuration(self, tenant, service_path, resource_name, attributes_number, attributes_name, attribute_type):
         """
@@ -216,7 +437,6 @@ class Cygnus:
     def create_resource_and_datastore (self, resource_name, attributes_number, attributes_name, attribute_type, attribute_data_type, metadata_data_type):
         """
         create  a new resource and its datastore associated if it does not exists
-
         """
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH.lower()
@@ -344,7 +564,6 @@ class Cygnus:
                         for j in range(len(line)):
                             if str(line[4]) == str(attributes_name+"_"+str(position)):
                                 return line
-                return rows
             c += 1
             print " WARN - Retry in get data from mysql. No: ("+ str(c)+")"
             time.sleep(world.mysql.retry_delay)
@@ -390,6 +609,7 @@ class Cygnus:
 
         self.service_path = new_service_path                                     #  used in notification request
 
+
         self.dataset = self.tenant[self.cygnus_mode]+"_"+new_service_path        #  used in ckan validation request
         self.table = new_service_path +"_"+destination                           #  used in mysql validation
 
@@ -403,11 +623,9 @@ class Cygnus:
             VALUE_TEMP = CONTENT_VALUE
         else:
              VALUE_TEMP = VALUE
-        self.attributes=self.notification.get_attributes()
-        self.attributes_name=self.notification.get_attributes_name()
-        self.attributes_value=self.notification.get_attribute_value()
-        self.temp_dict=self.retry_in_datastore_search_sql_column (self.resource, self.dataset, self.attributes_name, self.attribute_value)
-        assert self.temp_dict != u'ERROR - Attributes are missing....', u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attribute_value, self.dataset, self.resource)
+
+        self.temp_dict=self.retry_in_datastore_search_sql_column (self.resource, self.dataset, self.attributes_name, self.attributes_value)
+        assert self.temp_dict != u'ERROR - Attributes are missing....', u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attributes_value, self.dataset, self.resource)
         for i in range(0,self.attributes_number-1):
             temp_attr = str(self.attributes_name+"_"+str(i))
             assert str(self.temp_dict[RESULT][RECORDS][0][temp_attr]) == str(self.attributes[i][VALUE_TEMP]),\
@@ -444,7 +662,7 @@ class Cygnus:
         resp= world.ckan.datastore_search_last_sql (row, self.resource, self.dataset)
         assert not (resp), "ERROR - " + error_msg
 
-    def verify_dataset_search_values_by_row(self):
+    def verify_dataset_search_values_by_row(self, metadata="true"):
         """
          Verify that the attribute contents (value, metadata and type) are stored in ckan in row mode
         """
@@ -452,16 +670,12 @@ class Cygnus:
             VALUE_TEMP = CONTENT_VALUE
         else:
              VALUE_TEMP = VALUE
-        self.attributes=self.notification.get_attributes()
 
-        self.attributes_name=self.notification.get_attributes_name()
-
-        self.attributes_value=self.notification.get_attribute_value()
-        self.attributes_number=self.notification.get_attributes_number()
         for i in range(0,self.attributes_number):
             self.temp_dict=self.retry_in_datastore_search_sql_row (i, self.resource, self.dataset, self.attributes_name)
 
-            assert self.temp_dict != u'ERROR - Attributes are missing....', u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attribute_value, self.dataset, self.resource)
+            assert self.temp_dict != u'ERROR - Attributes are missing....', \
+                u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attributes_value, self.dataset, self.resource)
 
             assert str(self.temp_dict[ATTR_VALUE]) == str(self.attributes[i][VALUE_TEMP]),\
                 "The "+self.attributes[i][NAME]+" value does not match..."
@@ -469,8 +683,9 @@ class Cygnus:
             assert str(self.temp_dict[ATTR_TYPE]) == str(self.attributes[i][TYPE]),\
                 "The "+self.attributes[i][NAME]+" type does not match..."
 
-            assert self.verify_dataset_search_metadata_by_row (i), \
-                "The "+self.attributes[i][NAME]+" metadata value does not match..."
+            if metadata.lower() == "true":
+                assert self.verify_dataset_search_metadata_by_row (i), \
+                    "The "+self.attributes[i][NAME]+" metadata value does not match..."
 
     def verify_dataset_search_metadata_by_row (self, position):
         """
@@ -503,7 +718,6 @@ class Cygnus:
         world.mysql.set_database(self.tenant[self.cygnus_mode])
         world.mysql.disconnect()
 
-
     def verify_table_search_values_by_column(self):
         """
          Verify that the attribute contents (value) are stored in mysql in column mode
@@ -512,10 +726,7 @@ class Cygnus:
             VALUE_TEMP = CONTENT_VALUE
         else:
              VALUE_TEMP = VALUE
-        self.attributes=self.notification.get_attributes()
-        self.attributes_name=self.notification.get_attributes_name()
-        self.attributes_value=self.notification.get_attribute_value()
-        self.row= self.retry_in_table_search_sql_column (self.table, self.tenant[self.cygnus_mode], self.attribute_value)
+        self.row= self.retry_in_table_search_sql_column (self.table, self.tenant[self.cygnus_mode], self.attributes_value)
         assert self.row != u'ERROR - Attributes are missing....', u'ERROR - Attributes are missing....'
         for i in range(len (self.attributes)):
             if str(self.row [((i+1)*2)-1]) != str(self.attributes[i][VALUE_TEMP]):                  # verify the value
@@ -525,8 +736,7 @@ class Cygnus:
         """
          Verify that the attribute metadata (value) are stored in mysql in column mode
         """
-        attributes_metadata=self.notification.get_attributes_metadata_number ()
-        if attributes_metadata > 0:
+        if self.attributes_metadata > 0:
             if self.row != None:
                 for i in range(len (self.attributes)):
                     self.metadata = general_utils.convert_str_to_dict(self.row [(i+1)*2], general_utils.JSON)
@@ -545,7 +755,7 @@ class Cygnus:
         row=world.mysql.table_search_one_row(self.tenant[self.cygnus_mode], self.table)
         assert row == None or row == False, u'ERROR - ' + error_msg
 
-    def verify_table_search_values_by_row(self):
+    def verify_table_search_values_by_row(self, metadata = "true"):
         """
           Verify that the attribute contents (value, metadata and type) are stored in mysql in row mode
         """
@@ -554,30 +764,26 @@ class Cygnus:
         else:
              VALUE_TEMP = VALUE
 
-        self.attributes=self.notification.get_attributes()
-        self.attributes_name=self.notification.get_attributes_name()
-        self.attributes_value=self.notification.get_attribute_value()
-        self.attributes_number=int(self.notification.get_attributes_number())
-
         for i in range(0,self.attributes_number):
             self.temp_dict=self.retry_in_table_search_sql_row (i, self.tenant[self.cygnus_mode], self.table,  self.attributes_name)
+
             assert self.temp_dict != u'ERROR - Attributes are missing....', \
-                u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attribute_value, self.table, )
+                u'\nERROR - Attributes %s are missing, value expected: %s \n In %s >>> %s ' %(self.attributes_name, self.attributes_value, self.table, )
 
             assert str(self.temp_dict[6]) == str(self.attributes[i][VALUE_TEMP]),\
                 "The "+self.attributes[i][NAME]+" value does not match..."
 
             assert str(self.temp_dict[5]) == str(self.attributes[i][TYPE]),\
                 "The "+self.attributes[i][NAME]+" type does not match..."
-
-            assert self.verify_table_search_metadata_by_row (i), \
-                "The "+self.attributes[i][NAME]+" metadata value does not match..."
+            if metadata.lower() == "true":
+                assert self.verify_table_search_metadata_by_row (i), \
+                    "The "+self.attributes[i][NAME]+" metadata value does not match..."
 
     def verify_table_search_metadata_by_row (self, position):
         """
          Verify that the attribute metadata contents (value) are stored in ckan by row mode
         """
-        metadata_remote =general_utils.convert_str_to_dict(self.temp_dict[7],general_utils.JSON)[0][VALUE]
+        metadata_remote = general_utils.convert_str_to_dict(self.temp_dict[7], general_utils.JSON)[0][VALUE]
         if self.metadata_value:
             if self.content == general_utils.XML:
                if (metadata_remote) != str(self.attributes[position][METADATA][CONTEXT_METADATA][0][VALUE]):
@@ -596,19 +802,17 @@ class Cygnus:
         directory = "%s/%s/%s" %(self.tenant[self.cygnus_mode], self.service_path, self.resource)
         file_name = self.resource
         for i in range (int(self.attributes_number)):
-            resp=world.hadoop.retry_in_file_search_data (directory, file_name, self.attributes_name+"_"+str(i), self.attribute_value)
+            resp=world.hadoop.retry_in_file_search_data (directory, file_name, self.attributes_name+"_"+str(i), self.attributes_value)
             assert resp != u'ERROR - Attributes are missing....', u'ERROR - Attributes are missing.... (%s)' % (self.attributes_name)
 
     def verify_file_search_metadata(self):
         """
         Verify that the attribute contents (type and value) are stored in hadoop un row mode
         """
-
-        self.attributes=self.notification.get_attributes()
         directory = "%s/%s/%s" %(self.tenant[self.cygnus_mode], self.service_path, self.resource)
         file_name = self.resource
         for i in range (int(self.attributes_number)):
-            resp=world.hadoop.retry_in_file_search_data (directory, file_name, self.attributes_name+"_"+str(i), self.attribute_value)
+            resp=world.hadoop.retry_in_file_search_data (directory, file_name, self.attributes_name+"_"+str(i), self.attributes_value)
             if self.content == general_utils.XML:
                 assert resp[ATTR_MD][0][VALUE] == self.attributes[i][METADATA][CONTEXT_METADATA][0][VALUE],\
                     "The "+self.attributes[i][NAME]+" metatada value does not match..."
