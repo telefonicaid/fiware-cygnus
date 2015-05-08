@@ -1,33 +1,20 @@
 # -*- coding: utf-8 -*-
-'''
-(c) Copyright 2013 Telefonica, I+D. Printed in Spain (Europe). All Rights
-Reserved.
-
-The copyright to the software program(s) is property of Telefonica I+D.
-The program(s) may be used and or copied only with the express written
-consent of Telefonica I+D or in accordance with the terms and conditions
-stipulated in the agreement/contract under which the program(s) have
-been supplied.
-'''
-
-from lettuce import world
-import json
-import os
-import sys
-
-"""
-Parse the JSON configuration file located in the src folder and
-store the resulting dictionary in the lettuce world global variable.
-"""
-with open("properties.json") as config_file:
-    try:
-        world.config = json.load(config_file)
-    except Exception, e:
-        print 'Error parsing config file: %s' % (e)
-        sys.exit(1)
-
-"""
-Make sure the logs path exists and create it otherwise.
-"""
-if not os.path.exists(world.config["environment"]["logs_path"]):
-    os.makedirs(world.config["environment"]["logs_path"])
+#
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FI-WARE project).
+#
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License please contact:
+#  iot_support at tid.es
+#
+__author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
