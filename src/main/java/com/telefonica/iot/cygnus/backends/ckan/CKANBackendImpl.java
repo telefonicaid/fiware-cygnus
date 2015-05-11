@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.backends.ckan;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
-import com.telefonica.iot.cygnus.http.HttpClientFactory;
+import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import org.json.simple.JSONObject;
