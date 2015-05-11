@@ -1,1 +1,2 @@
-OrionHDFSSink parameters are now called as "hdfs_*" instead of "cosmos_*" (#374)
+[FEATURE] OrionHDFSSink parameters are now called as "hdfs_*" instead of "cosmos_*" (#374)
+[FEATURE] Add a permament connection to the MySQL Backend (#364)
