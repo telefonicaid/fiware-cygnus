@@ -230,8 +230,12 @@ public class MySQLBackend {
      * @throws Exception
      */
     private Connection getConnection(String dbName) throws Exception {
-        if (connection == null || !connection.isValid(0)) {
-            try {
+        try {
+            if (connection == null || !connection.isValid(0)) {
+                if (connection != null) {
+                    connection.close();
+                } // if
+                
                 // dynamically load the MySQL JDBC driver
                 Class.forName(DRIVER_NAME);
 
@@ -240,14 +244,14 @@ public class MySQLBackend {
                         + mysqlUsername + "&password=XXXXXXXXXX");
                 connection = DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
                         mysqlUsername, mysqlPassword);
-            } catch (ClassNotFoundException e) {
-                throw new CygnusPersistenceError(e.getMessage());
-            } catch (SQLException e) {
-                throw new CygnusPersistenceError(e.getMessage());
-            } // try catch
-        } // if
-        
-        return connection;
+            } // if
+
+            return connection;
+        } catch (ClassNotFoundException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusPersistenceError(e.getMessage());
+        } // try catch        
     } // getConnection
     
     /**
