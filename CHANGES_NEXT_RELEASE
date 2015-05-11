@@ -1,0 +1,1 @@
+OrionHDFSSink parameters are now called as "hdfs_*" instead of "cosmos_*" (#374)
