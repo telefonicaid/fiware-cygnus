@@ -8,7 +8,7 @@ Independently of the data generator, NGSI context data is always [transformed](f
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `OrionHDFSSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
-2. According to the [naming conventions](naming_convetions.md), a folder called `/user/<cosmos_default_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<cosmos_default_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
+2. According to the [naming conventions](naming_convetions.md), a folder called `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<hdfs_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
 3. The context responses/entities within the container are iterated, and a file called `<destination>.txt` is created (if not yet existing), where `<destination>` value is got from the event headers.
 4. The context attributes within each context response/entity are iterated, and a new Json line (or lines) is appended to the current file. The format for this append depends on the configured persistence mode:
     * `row`: A Json line is added for each notified context attribute. This kind of line will always contain 8 fields:
@@ -61,7 +61,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `cosmos_default_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then `OrionHDFSSink` will persist the data within the body as:
+Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
@@ -95,11 +95,15 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
-| cosmos_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
-| cosmos_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
-| cosmos\_default\_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
-| cosmos\_default\_password | yes | N/A |
-| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `cosmos_default_username`, which in this case must be a HDFS superuser |
+| hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
+| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
+| hdfs_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
+| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
+| hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
+| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
+| hdfs_password | yes | N/A |
+| cosmos\_default\_password<br>(**deprecated**) | yes | N/A |
+| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | hdfs_api | no | httpfs | <i>httpfs</i> if using the HttpFS gateway or <i>webhdfs</i> if using the standard WebHDFS |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | hive_host | no | localhost |
@@ -117,10 +121,10 @@ A configuration example could be:
     ...
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
-    cygnusagent.sinks.hdfs-sink.cosmos_host = 192.168.80.34
-    cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
-    cygnusagent.sinks.hdfs-sink.cosmos_default_username = myuser
-    cygnusagent.sinks.hdfs-sink.cosmos_default_password = mypassword
+    cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
+    cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+    cygnusagent.sinks.hdfsƒsink.hdfs_username = myuser
+    cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
     cygnusagent.sinks.hdfs-sink.attr_persistence = column
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
