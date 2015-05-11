@@ -39,11 +39,12 @@ import java.sql.SQLTimeoutException;
  */
 public class MySQLBackend {
     
-    private static final String DRIVERNAME = "com.mysql.jdbc.Driver";
+    private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
     private final String mysqlHost;
     private final String mysqlPort;
     private final String mysqlUsername;
     private final String mysqlPassword;
+    private Connection connection;
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
             
     /**
@@ -58,6 +59,7 @@ public class MySQLBackend {
         this.mysqlPort = mysqlPort;
         this.mysqlUsername = mysqlUsername;
         this.mysqlPassword = mysqlPassword;
+        this.connection = null;
     } // MySQLBackend
     
     /**
@@ -228,20 +230,24 @@ public class MySQLBackend {
      * @throws Exception
      */
     private Connection getConnection(String dbName) throws Exception {
-        try {
-            // dynamically load the MySQL JDBC driver
-            Class.forName(DRIVERNAME);
+        if (connection == null || !connection.isValid(0)) {
+            try {
+                // dynamically load the MySQL JDBC driver
+                Class.forName(DRIVER_NAME);
 
-            // return a connection based on the MySQL JDBC driver
-            LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
-                    + mysqlUsername + "&password=XXXXXXXXXX");
-            return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
-                    mysqlUsername, mysqlPassword);
-        } catch (ClassNotFoundException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } // try catch
+                // return a connection based on the MySQL JDBC driver
+                LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
+                        + mysqlUsername + "&password=XXXXXXXXXX");
+                connection = DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
+                        mysqlUsername, mysqlPassword);
+            } catch (ClassNotFoundException e) {
+                throw new CygnusPersistenceError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusPersistenceError(e.getMessage());
+            } // try catch
+        } // if
+        
+        return connection;
     } // getConnection
     
     /**
