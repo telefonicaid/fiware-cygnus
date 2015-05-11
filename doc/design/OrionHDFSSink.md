@@ -96,23 +96,23 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
-| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
+| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
-| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
+| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS.<br>Still usable; if both are configured, `hdfs_port` is preferred |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
-| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
+| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
 | hdfs_password | yes | N/A |
-| cosmos\_default\_password<br>(**deprecated**) | yes | N/A |
+| cosmos\_default\_password<br>(**deprecated**) | yes | N/A | Still usable; if both are configured, `hdfs_password` is preferred |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | hdfs_api | no | httpfs | <i>httpfs</i> if using the HttpFS gateway or <i>webhdfs</i> if using the standard WebHDFS |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | hive_host | no | localhost |
 | hive_port | no | 10000 |
 | krb5_auth | no | false |
-| krb5_user | yes | <i>empty</i> | Ignored if <i>krb5_auth=false</i>, mandatory otherwise |
-| krb5_password | yes | <i>empty</i> | Ignored if <i>krb5_auth=false</i>, mandatory otherwise |
-| krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if <i>krb5_auth=false</i> |
-| krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if <i>krb5_auth=false</i> |
+| krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
+| krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
+| krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false` |
+| krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false` |
 
 A configuration example could be:
 
