@@ -18,12 +18,16 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -31,10 +35,10 @@ import org.json.simple.JSONObject;
  *
  * @author frb
  */
-public class CKANCache {
+public class CKANCache extends HttpBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANCache.class);
-    private CKANRequester requester;
+    private String apiKey;
     private HashMap<String, HashMap<String, ArrayList<String>>> tree; // this cache only contain human readable names
     private HashMap<String, String> orgMap; // this cache contains the translation from organization name to identifier
     private HashMap<String, String> pkgMap; // this cache contains the translation from package name to identifier
@@ -43,10 +47,14 @@ public class CKANCache {
     
     /**
      * Constructor.
-     * @param ckanRequester
+     * @param hosts
+     * @param port
+     * @param ssl
+     * @param apiKey
      */
-    public CKANCache(CKANRequester ckanRequester) {
-        this.requester = ckanRequester;
+    public CKANCache(String[] hosts, String port, boolean ssl, String apiKey) {
+        super(hosts, port, ssl, false, null, null, null, null);
+        this.apiKey = apiKey;
         tree = new HashMap<String, HashMap<String, ArrayList<String>>>();
         orgMap = new HashMap<String, String>();
         pkgMap = new HashMap<String, String>();
@@ -160,7 +168,9 @@ public class CKANCache {
         
         // query CKAN for the organization information
         String ckanURL = "/api/3/action/organization_show?id=" + orgName;
-        CKANResponse res = requester.doCKANRequest("GET", ckanURL);
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
         if (res.getStatusCode() == 200) {
             // the organization exists in CKAN
@@ -212,7 +222,9 @@ public class CKANCache {
         
         // query CKAN for the organization information
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
-        CKANResponse res = requester.doCKANRequest("GET", ckanURL);
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
         if (res.getStatusCode() == 200) {
             // the package exists in CKAN
@@ -272,7 +284,9 @@ public class CKANCache {
         // query CKAN for the organization information
         
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
-        CKANResponse res = requester.doCKANRequest("GET", ckanURL);
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
         if (res.getStatusCode() == 200) {
             // the package exists in CKAN
@@ -286,10 +300,15 @@ public class CKANCache {
             // get the resource and populate the resource map
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
             JSONArray resources = (JSONArray) result.get("resources");
-            LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
-                    + ")");
-            populateResourcesMap(resources, orgName, pkgName, true);
-            return true;
+            
+            if (resources.size() == 0) {
+                return false;
+            } else {
+                LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
+                        + ")");
+                populateResourcesMap(resources, orgName, pkgName, true);
+                return true;
+            } // if else
         } else if (res.getStatusCode() == 404) {
             throw new CygnusRuntimeError("Unexpected package error when updating its resources... the package was "
                     + "supposed to exist!");
@@ -411,7 +430,9 @@ public class CKANCache {
     private JSONArray discoverResources(String pkgName) throws Exception {
         // query CKAN for the resources within the given package
         String urlPath = "/api/3/action/package_show?id=" + pkgName;
-        CKANResponse res = requester.doCKANRequest("GET", urlPath);
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", urlPath, true, headers, null);
         
         if (res.getStatusCode() == 200) {
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
@@ -431,7 +452,9 @@ public class CKANCache {
      */
     private String getCKANVersion() throws Exception {
         String urlPath = "/api/util/status";
-        CKANResponse res = requester.doCKANRequest("GET", urlPath);
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", urlPath, true, headers, null);
         
         if (res.getStatusCode() == 200) {
             return res.getJsonObject().get("ckan_version").toString();
