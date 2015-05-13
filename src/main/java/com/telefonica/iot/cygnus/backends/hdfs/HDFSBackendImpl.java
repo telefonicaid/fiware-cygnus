@@ -20,13 +20,13 @@ package com.telefonica.iot.cygnus.backends.hdfs;
 
 import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 
@@ -65,7 +65,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword, String hiveHost,
             String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
             String krb5ConfFile, boolean serviceAsNamespace) {
-        super(hdfsHosts, hdfsPort, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
         this.hdfsPassword = hdfsPassword;
         this.hiveHost = hiveHost;
@@ -77,13 +77,13 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public void createDir(String dirPath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath
                 + "?op=mkdirs&user.name=" + hdfsUser;
-        HttpResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
+        if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + dirPath + " directory could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createDir
     
@@ -92,17 +92,17 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=create&user.name=" + hdfsUser;
-        HttpResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
         
         // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
+        if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
         
         // get the redirection location
-        Header header = response.getHeaders("Location")[0];
+        Header header = response.getLocationHeader();
         String absoluteURL = header.getValue();
 
         // do second step
@@ -111,10 +111,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
         // check the status
-        if (response.getStatusLine().getStatusCode() != 201) {
+        if (response.getStatusCode() != 201) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file created in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createFile
     
@@ -122,17 +122,17 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public void append(String filePath, String data) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=append&user.name=" + hdfsUser;
-        HttpResponse response = doRequest("POST", relativeURL, true, null, null);
+        JsonResponse response = doRequest("POST", relativeURL, true, null, null);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
+        if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file seems to not exist in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
 
         // get the redirection location
-        Header header = response.getHeaders("Location")[0];
+        Header header = response.getLocationHeader();
         String absoluteURL = header.getValue();
 
         // do second step
@@ -141,10 +141,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
         // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
+        if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file exists in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // append
     
@@ -152,10 +152,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public boolean exists(String filePath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=getfilestatus&user.name=" + hdfsUser;
-        HttpResponse response = doRequest("GET", relativeURL, true, null, null);
+        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
 
         // check the status
-        return (response.getStatusLine().getStatusCode() == 200);
+        return (response.getStatusCode() == 200);
     } // exists
     
     /**

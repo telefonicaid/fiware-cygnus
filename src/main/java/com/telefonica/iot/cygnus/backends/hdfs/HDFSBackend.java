@@ -26,8 +26,8 @@ package com.telefonica.iot.cygnus.backends.hdfs;
 public interface HDFSBackend {
     
     /**
-     * Creates a directory in HDFS such as hdfs:///user/\<username\>/\<organization\>/\<dirPath\>/. If username is
-     * null, the default one is used. If organization is null, the default one is used.
+     * Creates a directory in HDFS given its relative path. The absolute path will be built as:
+     * hdfs:///user/\<hdfsUser\>/\<dirPath\>
      * 
      * @param dirPath Directory to be created
      * @throws Exception
@@ -35,8 +35,8 @@ public interface HDFSBackend {
     void createDir(String dirPath) throws Exception;
     
     /**
-     * Creates a file in HDFS with initial content such as hdfs:///user/\<username\>/\<organization\>/\<filePath\>. If
-     * username is null, the default one is used. If organization is null, the default one is used.
+     * Creates a file in HDFS with initial content given its relative path. The absolute path will be build as:
+     * hdfs:///user/\<hdfsUser\>/\<filePath\>
      * 
      * @param filePath File to be created
      * @param data Data to be written in the created file
