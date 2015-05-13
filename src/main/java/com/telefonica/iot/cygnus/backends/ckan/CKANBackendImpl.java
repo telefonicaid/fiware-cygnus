@@ -18,27 +18,30 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
-import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
+import java.util.ArrayList;
 import org.json.simple.JSONObject;
 import java.util.Map;
-import org.apache.http.client.HttpClient;
+import org.apache.http.Header;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
  *
  * @author fermin
  */
-public class CKANBackendImpl implements CKANBackend {
+public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
     private final String orionUrl;
-    private final HttpClientFactory httpClientFactory;
-    private CKANRequester requester;
+    private final String apiKey;
     private CKANCache cache;
 
     /**
@@ -51,16 +54,14 @@ public class CKANBackendImpl implements CKANBackend {
      */
     public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String orionUrl,
             boolean ssl) {
+        super(new String[]{ckanHost}, ckanPort, ssl, false, null, null, null, null);
+        
         // this class attributes
+        this.apiKey = apiKey;
         this.orionUrl = orionUrl;
-
-        // create a Http client factory and a CKAN requester
-        httpClientFactory = new HttpClientFactory(ssl, null, null);
-        HttpClient httpClient = httpClientFactory.getHttpClient(ssl, false);
-        requester = new CKANRequester(httpClient, ckanHost, ckanPort, ssl, apiKey);
         
         // create the cache
-        cache = new CKANCache(requester);
+        cache = new CKANCache(new String[]{ckanHost}, ckanPort, ssl, apiKey);
     } // CKANBackendImpl
 
     @Override
@@ -200,7 +201,9 @@ public class CKANBackendImpl implements CKANBackend {
             urlPath = "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -259,7 +262,9 @@ public class CKANBackendImpl implements CKANBackend {
             urlPath = "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -293,7 +298,9 @@ public class CKANBackendImpl implements CKANBackend {
             String urlPath = "/api/3/action/organization_create";
             
             // do the CKAN request
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -325,9 +332,16 @@ public class CKANBackendImpl implements CKANBackend {
      */
     private String createPackage(String pkgName, String orgId) throws Exception {
         try {
+            // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
+            
+            // create the CKAN request URL
             String urlPath = "/api/3/action/package_create";
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            
+            // do the CKAN request
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -383,7 +397,9 @@ public class CKANBackendImpl implements CKANBackend {
             String urlPath = "/api/3/action/resource_create";
             
             // do the CKAN request
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -430,7 +446,9 @@ public class CKANBackendImpl implements CKANBackend {
             String urlPath = "/api/3/action/datastore_create";
             
             // do the CKAN request
-            CKANResponse res = requester.doCKANRequest("POST", urlPath, jsonString);
+            ArrayList<Header> headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("Authorization", apiKey));
+            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -457,13 +475,5 @@ public class CKANBackendImpl implements CKANBackend {
     protected void setCache(CKANCache cache) {
         this.cache = cache;
     } // setCache
-    
-    /**
-     * Sets the CKAN requester. This is protected since it is only used by the tests.
-     * @param requester
-     */
-    protected void setRequester(CKANRequester requester) {
-        this.requester = requester;
-    } // setRequester
 
 } // CKANBackendImpl
