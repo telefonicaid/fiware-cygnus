@@ -76,10 +76,10 @@ import org.apache.flume.Context;
 public class OrionHDFSSink extends OrionSink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
-    private String[] cosmosHost;
-    private String cosmosPort;
-    private String cosmosDefaultUsername;
-    private String cosmosDefaultPassword;
+    private String[] host;
+    private String port;
+    private String username;
+    private String password;
     private String hdfsAPI;
     private boolean rowAttrPersistence;
     private String hiveHost;
@@ -104,7 +104,7 @@ public class OrionHDFSSink extends OrionSink {
      * @return The Cosmos host
      */
     protected String[] getCosmosHost() {
-        return cosmosHost;
+        return host;
     } // getCosmosHost
     
     /**
@@ -112,7 +112,7 @@ public class OrionHDFSSink extends OrionSink {
      * @return The Cosmos port
      */
     protected String getCosmosPort() {
-        return cosmosPort;
+        return port;
     } // getCosmosPort
 
     /**
@@ -120,7 +120,7 @@ public class OrionHDFSSink extends OrionSink {
      * @return The default Cosmos username
      */
     protected String getCosmosDefaultUsername() {
-        return cosmosDefaultUsername;
+        return username;
     } // getCosmosDefaultUsername
     
     /**
@@ -129,7 +129,7 @@ public class OrionHDFSSink extends OrionSink {
      * @return The Cosmos password for the detault Cosmos username
      */
     protected String getCosmosDefaultPassword() {
-        return cosmosDefaultPassword;
+        return password;
     } // getCosmosDefaultPassword
     
     /**
@@ -166,18 +166,65 @@ public class OrionHDFSSink extends OrionSink {
        
     @Override
     public void configure(Context context) {
-        cosmosHost = context.getString("cosmos_host", "localhost").split(",");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(cosmosHost)
-                + ")");
-        cosmosPort = context.getString("cosmos_port", "14000");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + cosmosPort + ")");
-        cosmosDefaultUsername = context.getString("cosmos_default_username", "defaultCygnus");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username="
-                + cosmosDefaultUsername + ")");
+        String cosmosHost = context.getString("cosmos_host");
+        String hdfsHost = context.getString("hdfs_host");
+        
+        if (hdfsHost != null && hdfsHost.length() > 0) {
+            host = hdfsHost.split(",");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host)
+                    + ")");
+        } else if (cosmosHost != null && cosmosHost.length() > 0) {
+            host = cosmosHost.split(",");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(host)
+                    + ")");
+        } else {
+            host = new String[]{"localhost"};
+            LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_host=localhost");
+        } // if else
+        
+        String cosmosPort = context.getString("cosmos_port");
+        String hdfsPort = context.getString("hdfs_port");
+        
+        if (hdfsPort != null && hdfsPort.length() > 0) {
+            port = hdfsPort;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
+        } else if (cosmosPort != null && cosmosPort.length() > 0) {
+            port = cosmosPort;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")");
+        } else {
+            port = "14000";
+            LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_port=14000");
+        }
+        
+        String cosmosDefaultUsername = context.getString("cosmos_default_username");
+        String hdfsUsername = context.getString("hdfs_username");
+        
+        if (hdfsUsername != null && hdfsUsername.length() > 0) {
+            username = hdfsUsername;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_username=" + username + ")");
+        } else if (cosmosDefaultUsername != null && cosmosDefaultUsername.length() > 0) {
+            username = cosmosDefaultUsername;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + username + ")");
+        } else {
+            LOGGER.error("[" + this.getName() + "] No username provided. Cygnus can continue, but HDFS sink will not "
+                    + "properly work!");
+        } // if else
+        
         // FIXME: cosmosPassword should be read as a SHA1 and decoded here
-        cosmosDefaultPassword = context.getString("cosmos_default_password", "");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password="
-                + cosmosDefaultPassword + ")");
+        String cosmosDefaultPassword = context.getString("cosmos_default_password");
+        String hdfsPassword = context.getString("hdfs_password");
+        
+        if (hdfsPassword != null && hdfsPassword.length() > 0) {
+            password = hdfsPassword;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
+        } else if (cosmosDefaultPassword != null && cosmosDefaultPassword.length() > 0) {
+            password = cosmosDefaultPassword;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + password + ")");
+        } else {
+            LOGGER.error("[" + this.getName() + "] No password provided. Cygnus can continue, but HDFS sink will not "
+                    + "properly work!");
+        } // if else
+        
         hdfsAPI = context.getString("hdfs_api", "httpfs");
         
         if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
@@ -217,14 +264,12 @@ public class OrionHDFSSink extends OrionSink {
         try {
             // create the persistence backend
             if (hdfsAPI.equals("httpfs")) {
-                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, serviceAsNamespace);
+                persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
+                        krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
                 LOGGER.debug("[" + this.getName() + "] HttpFS persistence backend created");
             } else if (hdfsAPI.equals("webhdfs")) {
-                persistenceBackend = new HDFSBackendImpl(cosmosHost, cosmosPort, cosmosDefaultUsername,
-                        cosmosDefaultPassword, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, serviceAsNamespace);
+                persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
+                        krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
                 LOGGER.debug("[" + this.getName() + "] WebHDFS persistence backend created");
             } else {
                 // this point should never be reached since the HDFS API has been checked while configuring the sink
