@@ -1,16 +1,15 @@
-# Cygnus configuration Procedure
+#Cygnus configuration procedure
 
-From version 0.6.0 Cygnus is able to start multiple instances by renaming and configuring certain 
-templates files of this directory.
+From version 0.6.0 Cygnus is able to start multiple instances by renaming and configuring certain templates files within this directory.
 
 There are two types of configuration template files:
 
 * Those applying to all the Cygnus instances; thus, they are unique.
 * Those applying specifically to one Cygnus instance; thus, there is a configuration file per each instance.
 
-## Unique files for all instances
+##Unique files for all instances
 
-For them is necessary rename (or better copy) it without `.template` extension. These files are: `log4j.properties.template`, `flume-env.sh.template`, `krb5.conf.template` and `matching_table.conf.template`
+These files are `log4j.properties.template`, `flume-env.sh.template`, `krb5.conf.template` and `matching_table.conf.template`. It is necessary to rename them by removing the `.template` part:
 
 ```bash
 cp /usr/cygnus/conf/log4j.properties.template /usr/cygnus/conf/log4j.properties
@@ -21,20 +20,19 @@ cp /usr/cygnus/conf/matching_table.conf.template /usr/cygnus/conf/matching_table
 
 Then each file can be edited in order to change the configuration that will affect to all intances of Cygnus.
 
-## Files for each instance
+##Files per instance
 
-The other files are `cygnus.conf.template` and `flume.conf.template`. These files should be copied for each instance of Cygnus wanted to be run.
+These files are `cygnus_instance.conf.template` and `agent.conf.template`. A copy must be created for each instance of Cygnus wanted to be run, followinf this format:
 
-Example:
 ```bash
-cp /usr/cygnus/conf/cygnus_instance.conf.template  /usr/cygnus/conf/cygnus_instance_example1.conf
+cp /usr/cygnus/conf/cygnus_instance.conf.template /usr/cygnus/conf/cygnus_instance_example1.conf
 cp /usr/cygnus/conf/agent.conf.template /usr/cygnus/conf/agent_example1.conf
 ```
 
-It is very important that there are one, or more, file that begins with `cygnus_instance_.*` because the service script try to start a Cygnus instance per each file prefixed as previously mentioned within
+It is very important the Cygnus instance files begin with `cygnus_instance_.*` because the service script try to start a Cygnus instance per each file prefixed as previously mentioned within
  `/usr/cygnus/conf`.
 
-Then edit first `cygnus_instance_example1.conf` changing values of:
+Parameters within a `cygnus_instance_*.conf` file are the following ones, their semantic is straightforward:
 
 ```bash
 CONFIG_FILE=/usr/cygnus/conf/agent_example1.conf
@@ -43,10 +41,8 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
-Next edit `/usr/cygnus/agent_example1.conf` changing the value of listening port to be unique.
+Parameters within an `agent_*.conf` file are widely described in the main [README.md](../README.md) and in each [specific sink document](../doc/design). The only remark that will be done here is the value of sources listening ports must be unique.
 
 ```bash
 cygnusagent.sources.http-source.port = 5050
 ```
-
-The configuration explained above is for basic configuration of Cygnus instance to run. More detailed configuration should be required, such as [Cygnus configuration](https://github.com/telefonicaid/fiware-cygnus/tree/master/flume#cygnus-configuration "Cygnus fine configuration"), fine configuration of [log4j](https://github.com/telefonicaid/fiware-cygnus/tree/master/flume#logs "Log4j detailed configuration"), etc. 
