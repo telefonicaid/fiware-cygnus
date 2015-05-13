@@ -134,6 +134,25 @@ A configuration example could be:
 ## Use cases
 Use `OrionHDFSSink` if you are looking for a Json-based document storage growing in the mid-long term.
 
+## Implementation details
+### `OrionHDFSSink` class
+As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The methods that are extended are:
+
+    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    
+The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the HDFS backend by means of a `HDFSBackendImpl` instance. Header informacion from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
+    
+    public void start();
+
+`HDFSBackendImpl` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionHDFSSink()` (contructor), `configure()` and `start()`.
+
+    public void configure(Context);
+    
+A complete configuration as the described above is read from the given `Context` instance.
+
+### `HDFSBackendImpl` class
+This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement).
+
 ## Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
