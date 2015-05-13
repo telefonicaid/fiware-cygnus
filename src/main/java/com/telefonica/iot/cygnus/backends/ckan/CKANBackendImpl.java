@@ -201,10 +201,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             urlPath = "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
-
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+            
             // check the status
             if (res.getStatusCode() == 200) {
                 LOGGER.debug("Successful insert (resource/datastore id=" + resourceId + ")");
@@ -262,9 +260,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             urlPath = "/api/3/action/datastore_upsert";
         
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -298,9 +294,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             String urlPath = "/api/3/action/organization_create";
             
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -339,9 +333,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             String urlPath = "/api/3/action/package_create";
             
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -397,9 +389,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             String urlPath = "/api/3/action/resource_create";
             
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -446,9 +436,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             String urlPath = "/api/3/action/datastore_create";
             
             // do the CKAN request
-            ArrayList<Header> headers = new ArrayList<Header>();
-            headers.add(new BasicHeader("Authorization", apiKey));
-            JsonResponse res = doRequest("POST", urlPath, true, headers, new StringEntity(jsonString));
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
             // check the status
             if (res.getStatusCode() == 200) {
@@ -475,5 +463,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     protected void setCache(CKANCache cache) {
         this.cache = cache;
     } // setCache
+    
+    private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws Exception {
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        return doRequest(method, urlPath, true, headers, new StringEntity(jsonString));
+    } // doCKANRequest
 
 } // CKANBackendImpl

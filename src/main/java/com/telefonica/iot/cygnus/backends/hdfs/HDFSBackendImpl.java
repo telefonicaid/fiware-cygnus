@@ -223,5 +223,5 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
                     + "Check your Hive/Shark installation");
         } // if
     } // provisionHiveTable
-    
+
 } // HDFSBackendImpl
