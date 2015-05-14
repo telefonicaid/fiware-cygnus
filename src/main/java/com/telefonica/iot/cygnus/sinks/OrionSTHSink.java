@@ -43,6 +43,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
+        
+        for (int i = 0; i < fiwareServicePaths.length; i++) {
+            fiwareServicePaths[i] = "/" + fiwareServicePaths[i]; // this sink uses the removed initial slash
+        } // for
+        
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
