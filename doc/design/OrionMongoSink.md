@@ -54,23 +54,28 @@ Assuming `mongo_username=myuser` as configuration parameter, then `OrionMongoSin
     > show databases
     admin              (empty)
     local              0.031GB
-    vehicles           0.031GB
+    sth_vehicles       0.031GB
     test               0.031GB
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels	
-    4wheels_car1_car
-    4wheels_car1_car_speed
+    sth_/4wheels	
+    sth_/4wheels_car1_car
+    sth_/4wheels_car1_car_speed
     system.indexes
-    > db.4wheels.find()
+    > db['sth_/4wheels'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
-    > db.4wheels_car1_car.find()
+    > db['sth_/4wheels_car1_car'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
-    > db.4wheels_car1_car_speed.find()
+    > db['sth_/4wheels_car1_car_speed'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "float", "attrValue" : "112.9" }
 
-NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see next section for more details).
+NOTES:
+
+* `mongo` is the MongoDB CLI for querying the data.
+* The results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
 
 NOTE: `mongo` is the MongoDB CLI for querying the data.
 
@@ -85,8 +90,8 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
 | data_model | no | collection-per-entity | Under study |
-| db_prefix | no | <i>empty</i> | Under study |
-| collection_prefix | no | <i>empty</i> | Under study |
+| db_prefix | no | sth_ | Under study |
+| collection_prefix | no | sth_ | Under study |
 
 A configuration example could be:
 
