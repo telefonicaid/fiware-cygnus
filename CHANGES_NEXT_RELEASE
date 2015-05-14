@@ -1,2 +1,3 @@
 [FEATURE] OrionHDFSSink parameters are now called "hdfs_*" instead of "cosmos_*" (#374)
 [FEATURE] Add a permament connection to the MySQL Backend (#364)
+[BUG] Add the original (and removed by OrionRESTHandler) slash character to fiware-servicePath (#403)
