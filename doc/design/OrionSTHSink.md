@@ -54,16 +54,16 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
     > show databases
     admin              (empty)
     local              0.031GB
-    vehicles           0.031GB
+    sth_vehicles       0.031GB
     test               0.031GB
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels.aggr
-    4wheels_car1_car.aggr
-    4wheels_car1_car_speed.aggr
+    sth_/4wheels.aggr
+    sth_/4wheels_car1_car.aggr
+    sth_/4wheels_car1_car_speed.aggr
     system.indexes
-    > db.4wheels.aggr.find()
+    > db['sth_/4wheels.aggr'].find()
     { 
         "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
@@ -165,7 +165,11 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
 
-NOTE: `mongo` is the MongoDB CLI for querying the data.
+NOTES:
+
+* `mongo` is the MongoDB CLI for querying the data.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
 
 ##Configuration
 `OrionSTHSink` is configured through the following parameters:
@@ -178,8 +182,8 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
 | data_model | no | collection-per-entity | Under study |
-| db_prefix | no | <i>empty</i> | Under study |
-| collection_prefix | no | <i>empty</i> | Under study |
+| db_prefix | no | sth_ | Under study |
+| collection_prefix | no | sth_ | Under study |
 
 A configuration example could be:
 
