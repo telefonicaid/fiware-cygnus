@@ -341,7 +341,7 @@ class Agent:
     def config_channel(self, channel, **kwargs):
         """
         parameters values in channel configuration
-        :param channel: specific channel(hdfs-channel mongo-channel ckan-channel, mongo-channel, sth-channel)
+        :param channel: specific channel(hdfs-channel mysql-channel ckan-channel, mongo-channel, sth-channel)
         :param capacity: capacity of the channel
         :param transaction_capacity: amount of bytes that can be sent per transaction
         """

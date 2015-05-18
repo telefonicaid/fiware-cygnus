@@ -19,13 +19,11 @@
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
+import time
 import MySQLdb
 import gc
 
-
 # constants
-import time
-
 EMPTY         = u''
 WITHOUT       = u'without'
 

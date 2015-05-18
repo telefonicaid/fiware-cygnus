@@ -51,10 +51,10 @@ NOTIF_USER_AGENT_VALUE      = u'orion/0.10.0'
 TENANT_ROW_DEFAULT          = u'tenant_row_default'
 TENANT_COL_DEFAULT          = u'tenant_col_default'
 SERVICE_PATH_DEFAULT        = u'service_path_default'
-IDENTITY_ID_DEFAULT         = u'entity_id_default'
-IDENTITY_ID_VALUE           = u'Room1'
-IDENTITY_TYPE_DEFAULT       = u'entity_type_default'
-IDENTITY_TYPE_VALUE         = u'Room'
+ENTITY_ID_DEFAULT         = u'entity_id_default'
+ENTITY_ID_VALUE           = u'Room1'
+ENTITY_TYPE_DEFAULT       = u'entity_type_default'
+ENTITY_TYPE_VALUE         = u'Room'
 ATTRIBUTES_NUMBER_DEFAULT   = u'attributes_number_default'
 ATTRIBUTES_NUMBER_VALUE     = 1
 ATTRIBUTES_NAME_DEFAULT     = u'attributes_name_default'
@@ -135,8 +135,8 @@ class Cygnus:
         :param tenant_row_default: tenant by default per row mode (OPTIONAL)
         :param tenant_col_default: tenant by default per col mode (OPTIONAL)
         :param service_path_default: service path by default (OPTIONAL)
-        :param entity_id_default: identity id by default (OPTIONAL)
-        :param entity_type_default: identity type by default (OPTIONAL)
+        :param entity_id_default: entity id by default (OPTIONAL)
+        :param entity_type_default: entity type by default (OPTIONAL)
         :param attributes_number_default: attribute number by default (OPTIONAL)
         :param attributes_name_default: attribute name by default (OPTIONAL)
         :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries) (OPTIONAL)
@@ -159,8 +159,8 @@ class Cygnus:
         self.tenant                  = {ROW_MODE: kwargs.get(TENANT_ROW_DEFAULT.lower(), TENANT_ROW_DEFAULT),
                                         COL_MODE: kwargs.get(TENANT_COL_DEFAULT.lower(), TENANT_COL_DEFAULT)}
         self.service_path            = kwargs.get(SERVICE_PATH_DEFAULT, SERVICE_PATH_DEFAULT)
-        self.entity_id             = kwargs.get(IDENTITY_ID_DEFAULT, IDENTITY_ID_VALUE)
-        self.entity_type           = kwargs.get(IDENTITY_TYPE_DEFAULT, IDENTITY_TYPE_VALUE)
+        self.entity_id             = kwargs.get(ENTITY_ID_DEFAULT, ENTITY_ID_VALUE)
+        self.entity_type           = kwargs.get(ENTITY_TYPE_DEFAULT, ENTITY_TYPE_VALUE)
         self.attributes_number       = int(kwargs.get(ATTRIBUTES_NUMBER_DEFAULT, ATTRIBUTES_NUMBER_VALUE))
         self.attributes_name         = kwargs.get(ATTRIBUTES_NAME_DEFAULT, ATTRIBUTES_NAME_VALUE)
         self.ttl                     = kwargs.get(TTL, TTL_VALUE)
