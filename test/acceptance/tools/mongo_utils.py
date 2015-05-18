@@ -2,7 +2,7 @@
 #
 # Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of Short Term Historic (FI-WARE project).
+# This file is part of fiware-cygnus (FI-WARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
