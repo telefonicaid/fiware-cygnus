@@ -90,7 +90,7 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5LoginConfFile;
     private String krb5ConfFile;
     private boolean serviceAsNamespace;
-    private HDFSBackend persistenceBackend;
+    private HDFSBackendImpl persistenceBackend;
     
     /**
      * Constructor.
@@ -160,7 +160,7 @@ public class OrionHDFSSink extends OrionSink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(HDFSBackend persistenceBackend) {
+    protected void setPersistenceBackend(HDFSBackendImpl persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
        
@@ -319,7 +319,7 @@ public class OrionHDFSSink extends OrionSink {
             // check if the fileName exists in HDFS right now, i.e. when its attrName has been got
             boolean fileExists = false;
             
-            if (persistenceBackend.exists(username, hdfsFile)) {
+            if (persistenceBackend.exists(hdfsFile)) {
                 fileExists = true;
             } // if
             
@@ -369,11 +369,11 @@ public class OrionHDFSSink extends OrionSink {
                     // and mark as existing (this avoids checking if the fileName exists each time a Json document is
                     // going to be persisted)
                     if (fileExists) {
-                        persistenceBackend.append(username, hdfsFile, rowLine);
+                        persistenceBackend.append(hdfsFile, rowLine);
                     } else {
-                        persistenceBackend.createDir(username, hdfsFolder);
-                        persistenceBackend.createFile(username, hdfsFile, rowLine);
-                        persistenceBackend.provisionHiveTable(username, hdfsFolder);
+                        persistenceBackend.createDir(hdfsFolder);
+                        persistenceBackend.createFile(hdfsFile, rowLine);
+                        persistenceBackend.provisionHiveTable(hdfsFolder);
                         fileExists = true;
                     } // if else
                 } else {
@@ -392,11 +392,11 @@ public class OrionHDFSSink extends OrionSink {
                         + "), Data (" + columnLine + ")");
                 
                 if (fileExists) {
-                    persistenceBackend.append(username, hdfsFile, columnLine);
+                    persistenceBackend.append(hdfsFile, columnLine);
                 } else {
-                    persistenceBackend.createDir(username, hdfsFolder);
-                    persistenceBackend.createFile(username, hdfsFile, columnLine);
-                    persistenceBackend.provisionHiveTable(username, hdfsFolder, hiveFields);
+                    persistenceBackend.createDir(hdfsFolder);
+                    persistenceBackend.createFile(hdfsFile, columnLine);
+                    persistenceBackend.provisionHiveTable(hdfsFolder, hiveFields);
                     fileExists = true;
                 } // if else
             } // if
