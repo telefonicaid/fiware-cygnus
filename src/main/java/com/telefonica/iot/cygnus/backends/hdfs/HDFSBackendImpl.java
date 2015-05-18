@@ -18,35 +18,17 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
+import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
+import com.telefonica.iot.cygnus.backends.http.HttpBackend;
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import java.io.IOException;
-import java.security.AccessController;
-import java.security.Principal;
-import java.security.PrivilegedAction;
+import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Set;
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHttpResponse;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -55,18 +37,23 @@ import org.apache.log4j.Logger;
  * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implementation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
-public class HDFSBackendImpl extends HDFSBackend {
+public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     
+    private final String hdfsUser;
+    private final String hdfsPassword;
+    private final String hiveHost;
+    private final String hivePort;
+    private final boolean serviceAsNamespace;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
     
     /**
      * 
-     * @param cosmosHost
-     * @param cosmosPort
-     * @param cosmosDefaultUsername
-     * @param cosmosDefaultPassword
+     * @param hdfsHosts
+     * @param hdfsPort
+     * @param hdfsUser
      * @param hiveHost
+     * @param hdfsPassword
      * @param hivePort
      * @param krb5
      * @param krb5User
@@ -75,291 +62,166 @@ public class HDFSBackendImpl extends HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] cosmosHost, String cosmosPort, String cosmosDefaultUsername,
-            String cosmosDefaultPassword, String hiveHost, String hivePort, boolean krb5, String krb5User,
-            String krb5Password, String krb5LoginConfFile, String krb5ConfFile, boolean serviceAsNamespace) {
-        super(cosmosHost, cosmosPort, cosmosDefaultUsername, cosmosDefaultPassword, hiveHost, hivePort, krb5,
-                krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
+    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword, String hiveHost,
+            String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
+            String krb5ConfFile, boolean serviceAsNamespace) {
+        super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        this.hdfsUser = hdfsUser;
+        this.hdfsPassword = hdfsPassword;
+        this.hiveHost = hiveHost;
+        this.hivePort = hivePort;
+        this.serviceAsNamespace = serviceAsNamespace;
     } // HDFSBackendImpl
    
     @Override
-    public void createDir(String username, String dirPath) throws Exception {
-        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + dirPath
-                + "?op=mkdirs&user.name=" + username;
-        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
+    public void createDir(String dirPath) throws Exception {
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath
+                + "?op=mkdirs&user.name=" + hdfsUser;
+        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + dirPath
-                    + " directory could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + dirPath + " directory could not be created in HDFS. HttpFS response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createDir
     
     @Override
-    public void createFile(String username, String filePath, String data)
+    public void createFile(String filePath, String data)
         throws Exception {
-        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                + "?op=create&user.name=" + username;
-        HttpResponse response = doHDFSRequest("PUT", relativeURL, true, null, null);
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
+                + "?op=create&user.name=" + hdfsUser;
+        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
         
         // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
-            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                    + " file could not be created in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+        if (response.getStatusCode() != 307) {
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file could not be created in HDFS. HttpFS response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
         
         // get the redirection location
-        Header header = response.getHeaders("Location")[0];
+        Header header = response.getLocationHeader();
         String absoluteURL = header.getValue();
 
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
         // check the status
-        if (response.getStatusLine().getStatusCode() != 201) {
-            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                    + " file created in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+        if (response.getStatusCode() != 201) {
+            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file created in HDFS, but could not write the data. HttpFS response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createFile
     
     @Override
-    public void append(String username, String filePath, String data) throws Exception {
-        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                + "?op=append&user.name=" + username;
-        HttpResponse response = doHDFSRequest("POST", relativeURL, true, null, null);
+    public void append(String filePath, String data) throws Exception {
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
+                + "?op=append&user.name=" + hdfsUser;
+        JsonResponse response = doRequest("POST", relativeURL, true, null, null);
 
         // check the status
-        if (response.getStatusLine().getStatusCode() != 307) {
-            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                    + " file seems to not exist in HDFS. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+        if (response.getStatusCode() != 307) {
+            throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file seems to not exist in HDFS. HttpFS response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
 
         // get the redirection location
-        Header header = response.getHeaders("Location")[0];
+        Header header = response.getLocationHeader();
         String absoluteURL = header.getValue();
 
         // do second step
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doHDFSRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
         // check the status
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                    + " file exists in HDFS, but could not write the data. HttpFS response: "
-                    + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file exists in HDFS, but could not write the data. HttpFS response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // append
     
     @Override
-    public boolean exists(String username, String filePath) throws Exception {
-        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (username + "/")) + filePath
-                + "?op=getfilestatus&user.name="
-                + username;
-        HttpResponse response = doHDFSRequest("GET", relativeURL, true, null, null);
+    public boolean exists(String filePath) throws Exception {
+        String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
+                + "?op=getfilestatus&user.name=" + hdfsUser;
+        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
 
         // check the status
-        return (response.getStatusLine().getStatusCode() == 200);
+        return (response.getStatusCode() == 200);
     } // exists
     
     /**
-     * Does a HDFS request given a HTTP client, a method and a relative URL (the final URL will be composed by using
-     * this relative URL and the active HDFS endpoint).
-     * @param method
-     * @param relativeURL
-     * @return
+     * Provisions a Hive external table (row mode).
+     * @param dirPath
      * @throws Exception
      */
-    private HttpResponse doHDFSRequest(String method, String url, boolean relative, ArrayList<Header> headers,
-            StringEntity entity) throws Exception {
-        HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_SERVICE_UNAVAILABLE,
-                "Service unavailable");
+    public void provisionHiveTable(String dirPath) throws Exception {
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_row";
+        LOGGER.info("Creating Hive external table=" + tableName);
         
-        if (relative) {
-            // iterate on the hosts
-            for (String host : cosmosHost) {
-                // create the HttpFS URL
-                String effectiveURL = "http://" + host + ":" + cosmosPort + url;
-                
-                try {
-                    if (krb5) {
-                        response = doPrivilegedHDFSRequest(method, effectiveURL, headers, entity);
-                    } else {
-                        response = doHDFSRequest(method, effectiveURL, headers, entity);
-                    } // if else
-                } catch (Exception e) {
-                    LOGGER.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
-                    continue;
-                } // try catch // try catch
-                
-                int status = response.getStatusLine().getStatusCode();
+        // get a Hive client
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
 
-                if (status != 200 && status != 307 && status != 404 && status != 201) {
-                    LOGGER.debug("The used HDFS endpoint is not active, trying another one (host=" + host + ")");
-                    continue;
-                } // if
-                
-                // place the current host in the first place (if not yet placed), since it is currently working
-                if (!cosmosHost.getFirst().equals(host)) {
-                    cosmosHost.remove(host);
-                    cosmosHost.add(0, host);
-                    LOGGER.debug("Placing the host in the first place of the list (host=" + host + ")");
-                } // if
-                
-                break;
-            } // for
-        } else {
-            if (krb5) {
-                response = doPrivilegedHDFSRequest(method, url, headers, entity);
-            } else {
-                response = doHDFSRequest(method, url, headers, entity);
-            } // if else
-        } // if else
+        // create the standard 8-fields
+        String fields = "("
+                + Constants.RECV_TIME_TS + " bigint, "
+                + Constants.RECV_TIME + " string, "
+                + Constants.ENTITY_ID + " string, "
+                + Constants.ENTITY_TYPE + " string, "
+                + Constants.ATTR_NAME + " string, "
+                + Constants.ATTR_TYPE + " string, "
+                + Constants.ATTR_VALUE + " string, "
+                + Constants.ATTR_MD + " array<string>"
+                + ")";
+
+        // create the query
         
-        return response;
-    } // doHDFSRequest
-        
-    private HttpResponse doHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
-        throws Exception {
-        HttpResponse response = null;
-        HttpRequestBase request = null;
+        String query = "create external table " + tableName + " " + fields + " row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                + dirPath + "'";
 
-        if (method.equals("PUT")) {
-            HttpPut req = new HttpPut(url);
-
-            if (entity != null) {
-                req.setEntity(entity);
-            } // if
-
-            request = req;
-        } else if (method.equals("POST")) {
-            HttpPost req = new HttpPost(url);
-
-            if (entity != null) {
-                req.setEntity(entity);
-            } // if
-
-            request = req;
-        } else if (method.equals("GET")) {
-            request = new HttpGet(url);
-        } else {
-            throw new CygnusRuntimeError("HTTP method not supported: " + method);
-        } // if else
-
-        if (headers != null) {
-            for (Header header : headers) {
-                request.setHeader(header);
-            } // for
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
         } // if
-
-        LOGGER.debug("HDFS request: " + request.toString());
-
-        try {
-            response = httpClient.execute(request);
-        } catch (IOException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } // try catch
-
-        request.releaseConnection();
-        LOGGER.debug("HDFS response: " + response.getStatusLine().toString());
-        return response;
-    } // doHDFSRequest
-    
-    // from here on, consider this link:
-    // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
-    private HttpResponse doPrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers,
-            StringEntity entity) throws Exception {
-        try {
-            LoginContext loginContext = new LoginContext("cygnus_krb5_login",
-                    new KerberosCallBackHandler(krb5User, krb5Password));
-            loginContext.login();
-            PrivilegedHDFSRequest req = new PrivilegedHDFSRequest(method, url, headers, entity);
-            return (HttpResponse) Subject.doAs(loginContext.getSubject(), req);
-        } catch (LoginException e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        } // try catch // try catch
-    } // doPrivilegedHDFSRequest
+    } // provisionHiveTable
     
     /**
-     * PrivilegedHDFSRequest class.
+     * Provisions a Hive external table (column mode).
+     * @param dirPath
+     * @param fields
+     * @throws Exception
      */
-    private class PrivilegedHDFSRequest implements PrivilegedAction {
+    public void provisionHiveTable(String dirPath, String fields) throws Exception {
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_column";
+        LOGGER.info("Creating Hive external table=" + tableName);
         
-        private final Logger logger;
-        private final String method;
-        private final String url;
-        private final ArrayList<Header> headers;
-        private final StringEntity entity;
-               
-        /**
-         * Constructor.
-         * @param mrthod
-         * @param url
-         * @param headers
-         * @param entity
-         */
-        public PrivilegedHDFSRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
-            this.logger = Logger.getLogger(PrivilegedHDFSRequest.class);
-            this.method = method;
-            this.url = url;
-            this.headers = headers;
-            this.entity = entity;
-        } // PrivilegedHDFSRequest
-
-        @Override
-        public Object run() {
-            try {
-                Subject current = Subject.getSubject(AccessController.getContext());
-                Set<Principal> principals = current.getPrincipals();
-                
-                for (Principal next : principals) {
-                    logger.info("DOAS Principal: " + next.getName());
-                } // for
-
-                return doHDFSRequest(method, url, headers, entity);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                return null;
-            } // try catch
-        } // run
+        // get a Hive client
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
         
-    } // PrivilegedHDFSRequest
-    
-    /**
-     * KerberosCallBackHandler class.
-     */
-    private class KerberosCallBackHandler implements CallbackHandler {
+        // create the query
+        String query = "create external table " + tableName + " (" + fields + ") row format serde "
+                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                + dirPath + "'";
 
-        private final String user;
-        private final String password;
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
+    } // provisionHiveTable
 
-        public KerberosCallBackHandler(String user, String password) {
-            this.user = user;
-            this.password = password;
-        } // KerberosCallBackHandler
-
-        @Override
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-            for (Callback callback : callbacks) {
-                if (callback instanceof NameCallback) {
-                    NameCallback nc = (NameCallback) callback;
-                    nc.setName(user);
-                } else if (callback instanceof PasswordCallback) {
-                    PasswordCallback pc = (PasswordCallback) callback;
-                    pc.setPassword(password.toCharArray());
-                } else {
-                    throw new UnsupportedCallbackException(callback, "Unknown Callback");
-                } // if else if
-            } // for
-        } // handle
-        
-    } // KerberosCallBackHandler
-    
 } // HDFSBackendImpl
