@@ -23,7 +23,7 @@ import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.http.HttpClientFactory;
+import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.HashMap;
@@ -126,10 +126,10 @@ public class OrionHDFSSinkTest {
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true, false)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false, false)).thenReturn(null);
-        when(mockWebHDFSBackend.exists(null, null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, ATTRNAME, ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, ATTRNAME, ATTRNAME);
+        when(mockWebHDFSBackend.exists(null)).thenReturn(true);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(ATTRNAME, ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(ATTRNAME, ATTRNAME);
     } // setUp
 
     /**

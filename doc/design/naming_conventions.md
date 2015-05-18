@@ -51,12 +51,16 @@ Within CKAN, the data is really stored within a <i>datastore</i>, but this is tr
 Each one of the levels of the different data organizations managed by Cygnus (i.e. service, servicePath and entity) must be named with lowercase alphanumeric characters plus the `_` character. Any uppercase characters will be casted to lowercase, and any other character different than an alphanumeric will be scaped to `_`.
 
 #### Special considerations with `fiware-servicePath`
-This header is constrained by the previous valid character set, of course, but a special consideration has to be commented. Tipically this header values are Unix paths-like, for instance `/gardens/parks/south_park`. According to the above rules the '/' characters should be scaped to '_', resulting into `_gardens_parks_south_park`... but you will see it is really converted to `gardens_parks_south_park`. Please observe the initial '_' associated to the <i>root</i> directory has been deleted. This is in order to avoid converted strings such as `_` when only the root directoy `/` is notified.
+This header is constrained by the previous valid character set, of course, but a special consideration has to be commented. Tipically this header values are Unix paths-like, for instance `/gardens/parks/south_park`. According to the above rules the '/' characters should be scaped to `_`, resulting into `_gardens_parks_south_park`... but you will see it is really converted to `gardens_parks_south_park`. Please observe the initial `_` associated to the <i>root</i> directory has been deleted. This is in order to avoid converted strings such as `_` when only the root directoy `/` is notified.
 
 ### Maximum element (service, servicePath, entity) length
-It is limited to 64 characters, which is the minimum maximum length among all the storages (64 characters is the maximum length for MySQL).
+Service and servicePath are limited to 50 characters. Any other element is limited to 64 characters, even in the case the service or the servicePath are part of that element's name.
 
 ## Contact
-Fermín Galán Márquez (fermin.galanmarquez@telefonica.com)
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
+Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
+<br>
+Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
+<br>
+Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
