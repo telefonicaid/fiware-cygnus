@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,17 +18,17 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
-import com.telefonica.iot.cygnus.backends.ckan.CKANRequester;
-import com.telefonica.iot.cygnus.backends.ckan.CKANCache;
 import java.util.ArrayList;
 import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
 
 /**
  *
@@ -42,8 +42,6 @@ public class CKANCacheTest {
     
     // mocks
     @Mock
-    private CKANRequester mockRequester;
-    @Mock
     private HashMap<String, HashMap<String, ArrayList<String>>> tree;
     @Mock
     private HashMap<String, String> orgMap;
@@ -53,6 +51,10 @@ public class CKANCacheTest {
     private HashMap<String, String> resMap;
     
     // constants
+    private final String[] hosts = new String[]{"localhost"};
+    private final String port = "80";
+    private final boolean ssl = false;
+    private final String apiKey = "xxxxxxxxxxxxx";
     private final String orgName = "rooms";
     private final String pkgName = "numeric-rooms";
     private final String resName = "room1-room";
@@ -69,7 +71,7 @@ public class CKANCacheTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        cache = new CKANCache(mockRequester);
+        cache = new CKANCache(hosts, port, ssl, apiKey);
 
         // set up the behaviour of the mocked classes
         when(orgMap.get(orgName)).thenReturn(orgId);

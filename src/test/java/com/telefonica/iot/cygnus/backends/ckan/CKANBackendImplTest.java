@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,21 +18,22 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
-import com.telefonica.iot.cygnus.backends.ckan.CKANRequester;
-import com.telefonica.iot.cygnus.backends.ckan.CKANResponse;
-import com.telefonica.iot.cygnus.backends.ckan.CKANCache;
-import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
-import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import java.util.HashMap;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHttpResponse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.mockito.Mockito;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
 
 /**
  *
@@ -50,7 +51,8 @@ public class CKANBackendImplTest {
     @Mock
     private CKANCache mockCache;
     @Mock
-    private CKANRequester mockRequester;
+    private HttpClient mockHttpClient;
+    
     
     // constants
     private final String apiKey = "1a2b3c4d5e6f7g8h9i0j";
@@ -61,11 +63,8 @@ public class CKANBackendImplTest {
     private final String orgName = "rooms";
     private final String pkgName = "numeric-rooms";
     private final String resName = "room1-room";
-    private final String orgId = "org_id";
-    private final String pkgId = "pkg_id";
-    private final String resId = "res_id";
     private final String recvTime = "2014-09-23T11:26:45";
-    private final long recvTimeTs = new Long("123456789").longValue();
+    private final long recvTimeTs = Long.parseLong("123456789");
     private final String attrName = "temperature";
     private final String attrType = "centigrade";
     private final String attrValue = "26.5";
@@ -83,9 +82,6 @@ public class CKANBackendImplTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         backend = new CKANBackendImpl(apiKey, host, port, orionURL, ssl);
-        
-        // set up other instances
-        CKANResponse ckanResp = new CKANResponse(new JSONObject(), 200);
 
         // set up the behaviour of the mocked classes
         when(mockCache.isCachedOrg(orgName)).thenReturn(true);
@@ -94,9 +90,9 @@ public class CKANBackendImplTest {
         when(mockCache.getOrgId(orgName)).thenReturn("org_id");
         when(mockCache.getPkgId(pkgName)).thenReturn("pkg_id");
         when(mockCache.getResId(resName)).thenReturn("res_id");
-        when(mockRequester.doCKANRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(ckanResp);
-        when(mockRequester.doCKANRequest(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(ckanResp);
+        BasicHttpResponse response = new BasicHttpResponse(new ProtocolVersion("http", 1, 1), 200, "ok");
+        response.setEntity(new StringEntity("{\"result\": {\"whatever\":\"whatever\"}}"));
+        when(mockHttpClient.execute(Mockito.any(HttpUriRequest.class))).thenReturn(response);
     } // setUp
 
     /**
@@ -104,11 +100,11 @@ public class CKANBackendImplTest {
      */
     @Test
     public void testPersistRow() {
-        System.out.println("Testing MySQLBackend.persist (row)");
+        System.out.println("Testing CKANBackendImpl.persist (row)");
         
         try {
             backend.setCache(mockCache);
-            backend.setRequester(mockRequester);
+            backend.setHttpClient(mockHttpClient);
             backend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType, attrValue, attrMd);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -122,11 +118,11 @@ public class CKANBackendImplTest {
      */
     @Test
     public void testPersistColumn() {
-        System.out.println("Testing MySQLBackend.persist (column)");
+        System.out.println("Testing CKANBackendImpl.persist (column)");
         
         try {
             backend.setCache(mockCache);
-            backend.setRequester(mockRequester);
+            backend.setHttpClient(mockHttpClient);
             backend.persist(recvTime, orgName, pkgName, resName, attrList, attrMdList);
         } catch (Exception e) {
             // Check if the raised exception type is CygnusBadConfiguration. This exception means the resource does not
