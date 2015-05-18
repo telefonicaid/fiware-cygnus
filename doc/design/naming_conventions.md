@@ -57,6 +57,10 @@ This header is constrained by the previous valid character set, of course, but a
 Service and servicePath are limited to 50 characters. Any other element is limited to 64 characters, even in the case the service or the servicePath are part of that element's name.
 
 ## Contact
-Fermín Galán Márquez (fermin.galanmarquez@telefonica.com)
+Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
+Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
+<br>
+Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
+<br>
+Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
