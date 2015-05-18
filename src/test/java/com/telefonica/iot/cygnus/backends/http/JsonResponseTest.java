@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -16,9 +16,8 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.backends.ckan;
+package com.telefonica.iot.cygnus.backends.http;
 
-import com.telefonica.iot.cygnus.backends.ckan.CKANResponse;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -31,10 +30,10 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CKANResponseTest {
+public class JsonResponseTest {
     
     // instance to be tested
-    private CKANResponse response;
+    private JsonResponse response;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -47,25 +46,43 @@ public class CKANResponseTest {
         // set up the instance of the tested class
         JSONObject obj = new JSONObject();
         obj.put("test", "test");
-        response = new CKANResponse(obj, 200);
+        response = new JsonResponse(obj, 200, "OK", null);
     } // setUp
     
     /**
-     * Test of isCachedRes method, of class CKANCache.
+     * Test of getJsonObject method, of class JsonResponse.
      */
     @Test
     public void testGetJsonObject() {
-        System.out.println("Testing CKANResponseTest.getJsonObject");
+        System.out.println("Testing JsonResponseTest.getJsonObject");
         assertTrue(response.getJsonObject().containsKey("test"));
     } // testIsCachedRes
 
     /**
-     * Test of isCachedRes method, of class CKANCache.
+     * Test of getStatusCode method, of class JsonResponse.
      */
     @Test
     public void testGetStatusCode() {
-        System.out.println("Testing CKANResponseTest.getStatusCode");
-        assertTrue(response.getJsonObject().containsKey("test"));
+        System.out.println("Testing JsonResponseTest.getStatusCode");
+        assertEquals(200, response.getStatusCode());
     } // testGetStatusCode
     
-} // CKANResponseTest
+    /**
+     * Test of getReasonPhrase method, of class JsonResponse.
+     */
+    @Test
+    public void testGetReasonPhrase() {
+        System.out.println("Testing JsonResponseTest.getReasonPhrase");
+        assertEquals("OK", response.getReasonPhrase());
+    } // testGetReasonPhrase
+    
+    /**
+     * Test of getLocationHeader method, of class CKANCache.
+     */
+    @Test
+    public void testGetLocationHeader() {
+        System.out.println("Testing JsonResponseTest.getLocationHeader");
+        assertEquals(null, response.getLocationHeader());
+    } // testGetLocationHeader
+    
+} // JsonResponseTest

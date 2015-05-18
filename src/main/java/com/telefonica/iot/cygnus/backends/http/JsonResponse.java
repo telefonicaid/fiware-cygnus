@@ -16,8 +16,9 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.backends.ckan;
+package com.telefonica.iot.cygnus.backends.http;
 
+import org.apache.http.Header;
 import org.json.simple.JSONObject;
 
 /**
@@ -25,20 +26,26 @@ import org.json.simple.JSONObject;
  *
  * @author fermin
  */
-public class CKANResponse {
+public class JsonResponse {
 
     private final JSONObject jsonObject;
     private final int statusCode;
+    private final String reasonPhrase;
+    private final Header locationHeader;
 
     /**
      * Constructor.
      * @param jsonObject
      * @param statusCode
+     * @param reasonPhrase
+     * @param locationHeader
      */
-    public CKANResponse(JSONObject jsonObject, int statusCode) {
+    public JsonResponse(JSONObject jsonObject, int statusCode, String reasonPhrase, Header locationHeader) {
         this.jsonObject = jsonObject;
         this.statusCode = statusCode;
-    } // CKANResponse
+        this.reasonPhrase = reasonPhrase;
+        this.locationHeader = locationHeader;
+    } // JsonResponse
 
     /**
      * Gets the Json object.
@@ -55,5 +62,21 @@ public class CKANResponse {
     public int getStatusCode() {
         return statusCode;
     } // getStatusCode
+    
+    /**
+     * Gets the reason phrase.
+     * @return reasonPhrase
+     */
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    } // getReasonPhrase
+    
+    /**
+     * Gets the location header.
+     * @return locationHeader
+     */
+    public Header getLocationHeader() {
+        return locationHeader;
+    } // getLocationHeader
 
-} // CKANResponse
+} // JsonResponse
