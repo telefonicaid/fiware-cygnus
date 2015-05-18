@@ -171,12 +171,11 @@ public class OrionHDFSSink extends OrionSink {
         
         if (hdfsHost != null && hdfsHost.length() > 0) {
             host = hdfsHost.split(",");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host)
-                    + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
         } else if (cosmosHost != null && cosmosHost.length() > 0) {
             host = cosmosHost.split(",");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(host)
-                    + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(host) + ")"
+                    + " -- DEPRECATED, use hdfs_host instead");
         } else {
             host = new String[]{"localhost"};
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_host=localhost");
@@ -190,7 +189,8 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
         } else if (cosmosPort != null && cosmosPort.length() > 0) {
             port = cosmosPort;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
+                    + " -- DEPRECATED, use hdfs_port instead");
         } else {
             port = "14000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_port=14000");
@@ -204,7 +204,8 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_username=" + username + ")");
         } else if (cosmosDefaultUsername != null && cosmosDefaultUsername.length() > 0) {
             username = cosmosDefaultUsername;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + username + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + username + ")"
+                    + " -- DEPRECATED, use hdfs_username instead");
         } else {
             LOGGER.error("[" + this.getName() + "] No username provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
@@ -219,7 +220,8 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
         } else if (cosmosDefaultPassword != null && cosmosDefaultPassword.length() > 0) {
             password = cosmosDefaultPassword;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + password + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + password + ")"
+                    + " -- DEPRECATED, use hdfs_password instead");
         } else {
             LOGGER.error("[" + this.getName() + "] No password provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
