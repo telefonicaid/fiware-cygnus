@@ -39,7 +39,11 @@ DEFAULT_SERVICE_PATH   = u'default_service_path'
 TTL                    = u'ttl'
 MATCHING_TABLE_FILE    = u'matching_table_file'
 HOST                   = u'host'
+HOST_PORT              = u'host_port'
 LOCALHOST              = u'localhost'
+DATA_MODEL             = u'data_model'
+DB_PREFIX              = u'db_prefix'
+COLLECTION_PREFIX      = u'collection prefix'
 USER                   = u'user'
 PASSWORD               = u'password'
 API                    = u'api'
@@ -270,10 +274,74 @@ class Agent:
         self.__append_command('sed -i "s/%s.attr_persistence = .*/%s.attr_persistence = %s/" %s/%s ' % (self.mysql_sink, self.mysql_sink, self.mysql_persistence, self.target_path, self.name), self.target_path, self.sudo)
         return OPS_LIST
 
+    def config_mongo_sink(self, **kwargs):
+        """
+        parameters values in mongo sink
+        :param sink: sinks used mongo-sink1, mongo-sink2,...,mongo-sinkN)
+        :param channel: specific channel(ckan-channel)
+        :param host: the FQDN/IP address where the MySQL server runs
+        :param port: the port where the MySQL server listes for incomming connections
+        :param user: a valid user in the MySQL server
+        :param password:  password for the user above
+        :param persistence:  how the attributes are stored, either per row either per column (row, column)
+        """
+        mongo_sink                 = kwargs.get(SINK, "mongo-sink")
+        mongo_channel              = kwargs.get(CHANNEL, "mongo-channel")
+        mongo_host_port            = kwargs.get(HOST_PORT, "localhost:227017")
+        mongo_user                 = kwargs.get(USER, EMPTY)
+        mongo_password             = kwargs.get(PASSWORD, EMPTY)
+        mongo_data_model           = kwargs.get(DATA_MODEL, "collection-per-entity")
+        db_prefix                  = kwargs.get(DB_PREFIX, "sth_")
+        collection_prefix          = kwargs.get(COLLECTION_PREFIX, "sth_")
+
+        self.__append_command('sed -i "s/%s.sinks.mongo-sink./%s.sinks.%s./" %s/%s ' % (self.id, self.id, mongo_sink, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.channel = mongo-channel/%s.channel = %s/" %s/%s ' % (mongo_sink, mongo_sink,mongo_channel, self.target_path, self.name), self.target_path, self.sudo)
+        # replace all hdfs channel in configuration by a new one
+        self.__append_command('sed -i "s/%s.channels.mongo-channel./%s.channels.%s./" %s/%s ' % (mongo_sink,mongo_sink, mongo_channel, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_hosts = .*/%s.mongo_hosts = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_host_port, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_username = .*/%s.mongo_username = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_user, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_password = .*/%s.mongo_password = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.data_model = .*/%s.data_model = %s/" %s/%s ' % (mongo_sink, mongo_sink, mongo_data_model, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.db_prefix = .*/%s.db_prefix = %s/" %s/%s ' % (mongo_sink, mongo_sink, db_prefix, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.collection_prefix = .*/%s.collection_prefix = %s/" %s/%s ' % (mongo_sink, mongo_sink, collection_prefix, self.target_path, self.name), self.target_path, self.sudo)
+        return OPS_LIST
+
+    def config_sth_sink(self, **kwargs):
+        """
+        parameters values in sth sink
+        :param sink: sinks used sth-sink1, sth-sink2,...,sth-sinkN)
+        :param channel: specific channel(ckan-channel)
+        :param host: the FQDN/IP address where the MySQL server runs
+        :param port: the port where the MySQL server listes for incomming connections
+        :param user: a valid user in the MySQL server
+        :param password:  password for the user above
+        :param persistence:  how the attributes are stored, either per row either per column (row, column)
+        """
+        sth_sink                 = kwargs.get(SINK, "sth-sink")
+        sth_channel              = kwargs.get(CHANNEL, "sth-channel")
+        sth_host_port            = kwargs.get(HOST_PORT, "localhost:27017")
+        sth_user                 = kwargs.get(USER, EMPTY)
+        sth_password             = kwargs.get(PASSWORD, EMPTY)
+        sth_data_model           = kwargs.get(DATA_MODEL, "collection-per-entity")
+        db_prefix                  = kwargs.get(DB_PREFIX, "sth_")
+        collection_prefix          = kwargs.get(COLLECTION_PREFIX, "sth_")
+
+        self.__append_command('sed -i "s/%s.sinks.sth-sink./%s.sinks.%s./" %s/%s ' % (self.id, self.id, sth_sink, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.channel = sth-channel/%s.channel = %s/" %s/%s ' % (sth_sink, sth_sink,sth_channel, self.target_path, self.name), self.target_path, self.sudo)
+        # replace all hdfs channel in configuration by a new one
+        self.__append_command('sed -i "s/%s.channels.sth-channel./%s.channels.%s./" %s/%s ' % (sth_sink,sth_sink, sth_channel, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.sth_hosts = .*/%s.sth_hosts = %s/" %s/%s ' % (sth_sink,sth_sink, sth_host_port, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.sth_username = .*/%s.sth_username = %s/" %s/%s ' % (sth_sink,sth_sink, sth_user, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.sth_password = .*/%s.sth_password = %s/" %s/%s ' % (sth_sink,sth_sink, sth_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.data_model = .*/%s.data_model = %s/" %s/%s ' % (sth_sink, sth_sink, sth_data_model, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.db_prefix = .*/%s.db_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, db_prefix, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.collection_prefix = .*/%s.collection_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, collection_prefix, self.target_path, self.name), self.target_path, self.sudo)
+        return OPS_LIST
+
     def config_channel(self, channel, **kwargs):
         """
         parameters values in channel configuration
-        :param channel: specific channel(hdfs-channel mysql-channel ckan-channel)
+        :param channel: specific channel(hdfs-channel mongo-channel ckan-channel, mongo-channel, sth-channel)
         :param capacity: capacity of the channel
         :param transaction_capacity: amount of bytes that can be sent per transaction
         """

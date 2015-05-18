@@ -78,6 +78,8 @@ Some examples:
 - Cygnus-HADOOP per column using multi-instances (pending).
 - Cygnus-HADOOP per column using matching table (pending).
 
+- Cygnus-MONGO raw
+
 ### configuration.json
 
 We recommend to create `settings` folder in acceptance folder if it does not exists and store all configurations to features referenced by `properties.json.base` files.
@@ -92,10 +94,10 @@ This file initially will overwrite properties.json in each feature.
 
 ### matching_table.conf
 
-We recommend to create your configurations lines in a copy file into settings folders and it will be copied to cygnus in conf folder, remotely.
+We recommend to create your  configurations lines in a copy file into settings folders and it will be copied to cygnus in conf folder, remotely.
 In cygnus will be called `matching_table.conf` by default (see configuration.json). If your tests do not use matching table implicitly,
 probably with to copy template to matching_table.conf is enough and then use `"default"` as file name value in step.
-`""` value (empty) in file name in step does not do anything and also removes the last matching_table.conf file if exists.
+`""` value (empty) in file name in step does not do anything and also removes the last matching_table.conf  file if exists.
 Note: in case of Malformed matching rule, it will be discarded.
 
 ### checking log file
