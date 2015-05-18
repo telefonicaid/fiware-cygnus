@@ -127,7 +127,7 @@ Rules are tryed sequentially, and if any rules matches then the default destinat
 
 ###<a name="section3.2"></a>Usage
 
-The matching table file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there exists a template within Cygnus distribution.
+The grouping rules file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there exists a template within Cygnus distribution.
 
 The usage of such an Interceptor is:
 
