@@ -725,8 +725,6 @@ cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the username
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
-# HDFS backend type (webhdfs or httpfs)
-cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # Hive FQDN/IP address of the Hive server
