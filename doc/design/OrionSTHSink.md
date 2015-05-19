@@ -1,6 +1,6 @@
 #<a name="top"></a>OrionSTHSink
 * [Functionality](#section1)
-    * [Mapping Flume events to HDFS data structures](#section1.1)
+    * [Mapping Flume events to MongoDB data structures](#section1.1)
     * [Example](#section1.2)
 * [Configuration](#section2)
 * [Use cases](#section3)
