@@ -163,7 +163,7 @@ As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The m
 
     void persist(Map<String, String>, NotifyContextRequest) throws Exception;
     
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the HDFS backend by means of a `HDFSBackendImpl` instance. Header informacion from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
+The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the HDFS backend by means of a `HDFSBackendImpl` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
     
     public void start();
 

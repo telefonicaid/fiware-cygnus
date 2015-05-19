@@ -1,10 +1,22 @@
-#OrionMongoSink
-##Functionality
+#<a name="top"></a>OrionMongoSink
+* [Functionality](#section1)
+    * [Mapping Flume events to HDFS data structures](#section1.1)
+    * [Example](#section1.2)
+* [Configuration](#section2)
+* [Use cases](#section3)
+* [Implementation details](#section4)
+    * [`OrionMongoSink` class](#section4.1)
+    * [`MongoBackend` class](#section4.2)
+* [Contact](#section5)
+
+##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionMongoSink`, or simply `OrionMongosink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific MongoDB data structures.
 
-###Mapping Flume events to MongoDB data structures
+[Top](#top)
+
+###<a name="section1.1"></a>Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionMongoSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
@@ -15,7 +27,9 @@ MongoDB organizes the data in databases that contain collections of Json documen
     * <i>collection-per-attribute</i>: the collection is called as the concatenation of the `fiware-servicePath`\_`destination`\_`attrName`.
 4. The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
-###Example
+[Top](#top)
+
+###<a name="section1.2"></a>Example
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -79,7 +93,9 @@ NOTES:
 
 NOTE: `mongo` is the MongoDB CLI for querying the data.
 
-##Configuration
+[Top](#top)
+
+##<a name="section2"></a>Configuration
 `OrionMongoSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -107,10 +123,49 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
 
-## Use cases
+[Top](#top)
+
+##<a name="section3"></a>Use cases
 Use `OrionMongoSink` if you are looking for a Json-based document storage not growing so much in the mid-long term.
 
-## Contact
+[Top](#top)
+
+##<a name="section4"></a>Implementation details
+###<a name="section4.1"></a>`OrionMongoSink` class
+As any other NGSI-like sink, `OrionMongoSink` extends the base `OrionSink`. The methods that are extended are:
+
+    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    
+The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
+    
+    public void start();
+
+`MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMongoSink()` (contructor), `configure()` and `start()`.
+
+    public void configure(Context);
+    
+A complete configuration as the described above is read from the given `Context` instance.
+
+[Top](#top)
+
+###<a name="section4.2"></a>`MongoBackend` class
+This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
+
+    public void createDatabase(String dbName) throws Exception;
+    
+Creates a database, given its name, if not exists.
+    
+    public void createCollection(String dbName, String collectionName) throws Exception;
+    
+Creates a collection, given its name, if not exists in the given database.
+    
+    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
+    
+Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for a single attribute. See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+
+[Top](#top)
+
+##<a name="section5"></a>Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
 Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
@@ -118,3 +173,5 @@ Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and 
 Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
 <br>
 Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+
+[Top](#top)
