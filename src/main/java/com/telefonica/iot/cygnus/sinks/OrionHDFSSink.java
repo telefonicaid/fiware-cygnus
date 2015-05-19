@@ -80,7 +80,6 @@ public class OrionHDFSSink extends OrionSink {
     private String port;
     private String username;
     private String password;
-    private String hdfsAPI;
     private boolean rowAttrPersistence;
     private String hiveHost;
     private String hivePort;
@@ -131,14 +130,6 @@ public class OrionHDFSSink extends OrionSink {
     protected String getCosmosDefaultPassword() {
         return password;
     } // getCosmosDefaultPassword
-    
-    /**
-     * Gets the HDFS API. It is protected due to it is only required for testing purposes.
-     * @return The HDFS API
-     */
-    protected String getHDFSAPI() {
-        return hdfsAPI;
-    } // getHDFSAPI
     
     /**
      * Gets the Hive port. It is protected due to it is only required for testing purposes.
@@ -227,16 +218,6 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
-        hdfsAPI = context.getString("hdfs_api", "httpfs");
-        
-        if (!hdfsAPI.equals("webhdfs") && !hdfsAPI.equals("httpfs")) {
-            LOGGER.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI + ")");
-            LOGGER.info("[" + this.getName() + "] Exiting Cygnus");
-            System.exit(-1);
-        } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_api=" + hdfsAPI + ")");
-        } // if else
-        
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
@@ -265,21 +246,9 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create the persistence backend
-            if (hdfsAPI.equals("httpfs")) {
-                persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
-                        krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
-                LOGGER.debug("[" + this.getName() + "] HttpFS persistence backend created");
-            } else if (hdfsAPI.equals("webhdfs")) {
-                persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
-                        krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
-                LOGGER.debug("[" + this.getName() + "] WebHDFS persistence backend created");
-            } else {
-                // this point should never be reached since the HDFS API has been checked while configuring the sink
-                LOGGER.error("[" + this.getName() + "] Bad configuration (Unrecognized HDFS API " + hdfsAPI
-                        + ")");
-                LOGGER.info("[" + this.getName() + "] Exiting Cygnus");
-                System.exit(-1);
-            } // if else if
+            persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
+                    krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
+            LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         } // try catch // try catch
