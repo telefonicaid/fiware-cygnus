@@ -224,12 +224,8 @@ Use `OrionSTHSink` if you are looking for a Json-based document storage about ag
 
 ##<a name="section4"></a>Implementation details
 ###<a name="section4.1"></a>`OrionSTHSink` class
-As any other NGSI-like sink, `OrionSTHSink` extends the base `OrionSink`. The methods that are extended are:
+`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink extends the base `OrionSink`. The methods that are extended are by `OrionMongoBaseSink` are:
 
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
-    
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
-    
     public void start();
 
 `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
@@ -237,6 +233,12 @@ The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is it
     public void configure(Context);
     
 A complete configuration as the described above is read from the given `Context` instance.
+
+The methods that are extended by `OrionSTHSink` are:
+
+    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    
+The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
 
 [Top](#top)
 
