@@ -255,7 +255,7 @@ This is a convenience backend class for CKAN that extends the `HttpBackend` abst
 
     public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
     
-Persists the context data regarding a single entity's attribute within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. Other notified attributes will be persisted by using this method, next to current one. This method creates the parts of the hierarchy (organization-pacakge/dataset-resource-datastore) if any of them is missing (row-like mode).
+Persists the context data regarding a single entity's attribute within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. Other notified attributes will be persisted by using this method, next to current one. This method creates the parts of the hierarchy (organization-package/dataset-resource-datastore) if any of them is missing (row-like mode).
 
     public void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList, Map<String, String> attrMdList) throws Exception
     
