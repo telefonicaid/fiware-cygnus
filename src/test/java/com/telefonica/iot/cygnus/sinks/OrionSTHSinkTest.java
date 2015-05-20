@@ -48,7 +48,8 @@ public class OrionSTHSinkTest {
     
     // other instances
     private Context context;
-    private NotifyContextRequest notifyContextRequest;
+    private NotifyContextRequest singleNotifyContextRequest;
+    private NotifyContextRequest multipleNotifyContextRequest;
     
     // constants
     private final String mongoURI = "localhost:27017";
@@ -68,34 +69,79 @@ public class OrionSTHSinkTest {
     private final String attrValue = "112.9";
     private final String attrMd = "[]";
     private final String serviceHeader = "vehicles";
-    private final String servicePathHeader = "4wheels";
-    private final String destination = "4wheelsCars";
+    private final String singleServicePathHeader = "4wheels";
+    private final String multipleServicePathHeader = "4wheels,4wheels";
+    private final String singleDestinationHeader = "4wheelsCars";
+    private final String multipleDestinationHeader = "4wheelsCars,4wheelsCars";
     private final String timestamp = "123456789";
-    private final String notifyXMLSimple = ""
-            + "<notifyContextRequest>"
-            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
-            +   "<originator>localhost</originator>"
-            +   "<contextResponseList>"
-            +     "<contextElementResponse>"
-            +       "<contextElement>"
-            +         "<entityId type=\"AType\" isPattern=\"false\">"
-            +           "<id>Entity</id>"
-            +         "</entityId>"
-            +         "<contextAttributeList>"
-            +           "<contextAttribute>"
-            +             "<name>attribute</name>"
-            +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
-            +           "</contextAttribute>"
-            +         "</contextAttributeList>"
-            +       "</contextElement>"
-            +       "<statusCode>"
-            +         "<code>200</code>"
-            +         "<reasonPhrase>OK</reasonPhrase>"
-            +       "</statusCode>"
-            +     "</contextElementResponse>"
-            +   "</contextResponseList>"
-            + "</notifyContextRequest>";
+    private final String singleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
+    private final String multipleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"115.8\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car2\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -117,7 +163,8 @@ public class OrionSTHSinkTest {
         context.put("data_model", dataModel);
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
-        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
+        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
+        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
@@ -137,11 +184,29 @@ public class OrionSTHSinkTest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, serviceHeader);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePathHeader);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathHeader);
+        headers.put(Constants.DESTINATION, singleDestinationHeader);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (multiple destinations and "
+                + "fiware-servicePaths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_SERVICE, serviceHeader);
+        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathHeader);
+        headers.put(Constants.DESTINATION, multipleDestinationHeader);
+        
+        try {
+            sink.persist(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

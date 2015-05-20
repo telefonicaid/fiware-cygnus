@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.sinks.OrionCKANSink;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import static org.junit.Assert.*; // this is required by "fail" like assertions
@@ -52,7 +51,8 @@ public class OrionCKANSinkTest {
     
     // other instances
     private Context context;
-    private NotifyContextRequest notifyContextRequest;
+    private NotifyContextRequest singleNotifyContextRequest;
+    private NotifyContextRequest multipleNotifyContextRequest;
     
     // constants
     private final String ckanHost = "localhost";
@@ -64,10 +64,12 @@ public class OrionCKANSinkTest {
     private final String abnormalServiceName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
     private final String normalServicePathName = "numeric-rooms";
+    private final String multipleServicePathName = "numeric-rooms,numeric-rooms";
     private final String abnormalServicePathName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
     private final String rootServicePathName = "";
     private final String normalDestinationName = "room1-room";
+    private final String multipleDestinationName = "room1-room,room2-room";
     private final String abnormalDestinationName =
             "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
     private static final String ATTRNAME = "temperature";
@@ -77,31 +79,74 @@ public class OrionCKANSinkTest {
             "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private static final HashMap<String, String> ATTRLIST;
     private static final HashMap<String, String> ATTRMDLIST;
-    private final String notifyXMLSimple = ""
-            + "<notifyContextRequest>"
-            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
-            +   "<originator>localhost</originator>"
-            +   "<contextResponseList>"
-            +     "<contextElementResponse>"
-            +       "<contextElement>"
-            +         "<entityId type=\"AType\" isPattern=\"false\">"
-            +           "<id>Entity</id>"
-            +         "</entityId>"
-            +         "<contextAttributeList>"
-            +           "<contextAttribute>"
-            +             "<name>attribute</name>"
-            +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
-            +           "</contextAttribute>"
-            +         "</contextAttributeList>"
-            +       "</contextElement>"
-            +       "<statusCode>"
-            +         "<code>200</code>"
-            +         "<reasonPhrase>OK</reasonPhrase>"
-            +       "</statusCode>"
-            +     "</contextElementResponse>"
-            +   "</contextResponseList>"
-            + "</notifyContextRequest>";
+    private final String singleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"temperature\",\n"
+            + "                        \"type\" : \"centigrade\",\n"
+            + "                        \"value\" : \"26.5\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"Room\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"Room1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
+    private final String multipleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"temperature\",\n"
+            + "                        \"type\" : \"centigrade\",\n"
+            + "                        \"value\" : \"26.5\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"Room\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"Room1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"temperature\",\n"
+            + "                        \"type\" : \"centigrade\",\n"
+            + "                        \"value\" : \"26.5\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"Room\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"Room2\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     
     static {
         ATTRLIST = new HashMap<String, String>();
@@ -127,7 +172,8 @@ public class OrionCKANSinkTest {
         context.put("ckan_host", ckanHost);
         context.put("ckan_port", ckanPort);
         context.put("api_key", apiKey);
-        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
+        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
+        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
@@ -164,6 +210,7 @@ public class OrionCKANSinkTest {
 
     /**
      * Test of processContextResponses method, of class OrionCKANSink.
+     * @throws java.lang.Exception
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -171,13 +218,13 @@ public class OrionCKANSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -188,13 +235,13 @@ public class OrionCKANSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -204,13 +251,13 @@ public class OrionCKANSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -220,13 +267,13 @@ public class OrionCKANSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -236,13 +283,31 @@ public class OrionCKANSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionCKANSinkTest.processContextResponses (multiple destinations and "
+                + "fiware-servicePaths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathName);
+        headers.put(Constants.DESTINATION, multipleDestinationName);
+        
+        try {
+            sink.persist(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
