@@ -247,7 +247,7 @@ public class MongoBackend {
                 offset = calendar.get(Calendar.DAY_OF_MONTH);
                 break;
             case MONTH:
-                offset = calendar.get(Calendar.MONTH);
+                offset = calendar.get(Calendar.MONTH) + 1;
                 break;
             default:
                 // this should never be reached;
