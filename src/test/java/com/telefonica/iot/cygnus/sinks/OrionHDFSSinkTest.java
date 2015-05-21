@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.sinks.OrionHDFSSink;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
@@ -61,7 +60,6 @@ public class OrionHDFSSinkTest {
     private final String cosmosPort = "14000";
     private final String cosmosDefaultUsername = "user1";
     private final String cosmosDefaultPassword = "pass1234";
-    private final String hdfsAPI = "httpfs";
     private final String hivePort = "10000";
     private final long recvTimeTs = 123456789;
     private final String normalServiceName = "rooms";
@@ -119,7 +117,6 @@ public class OrionHDFSSinkTest {
         context.put("cosmos_port", cosmosPort);
         context.put("cosmos_default_username", cosmosDefaultUsername);
         context.put("cosmos_default_password", cosmosDefaultPassword);
-        context.put("hdfs_api", hdfsAPI);
         context.put("hive_port", hivePort);
         notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
         
@@ -143,7 +140,6 @@ public class OrionHDFSSinkTest {
         assertEquals(cosmosPort, sink.getCosmosPort());
         assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
         assertEquals(cosmosDefaultPassword, sink.getCosmosDefaultPassword());
-        assertEquals(hdfsAPI, sink.getHDFSAPI());
         assertEquals(hivePort, sink.getHivePort());
     } // testConfigure
 
@@ -162,6 +158,7 @@ public class OrionHDFSSinkTest {
 
     /**
      * Test of persist method, of class OrionHDFSSink.
+     * @throws java.lang.Exception
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -186,7 +183,7 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
@@ -202,7 +199,7 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
@@ -218,7 +215,7 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
@@ -234,7 +231,7 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
         headers.put(Constants.DESTINATION, normalDestinationName);
