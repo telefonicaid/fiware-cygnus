@@ -17,9 +17,8 @@
 # This file defines a set of grouping rules for context data grouping. It works by defining a set of fields within the
 # Orion notification and a regular expression to be applied over the concatenation of those fields. If there is a
 # matching then:
-# - The destination within the rule is used as the name of the storage element (i.e. this will be a file in
-#   the case of HDFS, part of a MySQL table or a CKAN resource).
-# - The notified fiware-sercicePath is replaced by the configured one.
+# - The destination within the rule is added to the Flume event headers.
+# - The notified fiware-servicePath header is replaced by the configured one.
 # 
 # Append as many matching rules as you need, following this format:
 #
@@ -41,14 +40,16 @@
 # - id: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful
 #   in the future.
 # - fields: These are the fields that will be concatenated for regular expression matching. The available dictionary of
-#   fields for concatenation is "entityId", "entityType" and "fiwareService". The order of these fields is important
+#   fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important
 #   since the concatenation is made from left to right.
 # - regex: Java-like regular expression to be applied on the concatenated fields.
-# - destination: Name of the HDFS file, MySQL table or CKAN resource where the data will be effectively persisted.
+# - destination: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of
+#   MySQL, Mongo and STH, this sufixes the table/collection name.
 #   Please, have a look to doc/design/naming_conventions.md for more details.
 # - fiware_service_path: New fiware-servicePath replacing the notified one. The sinks will translate this into the name
-#   of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, this
-#   prefixes the table name. Please, have a look to doc/design/naming_conventions.md for more details.
+#   of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, Mongo
+#   and STH, this prefixes the table/collection name. Please, have a look to doc/design/naming_conventions.md for more
+# details.
 
 #{
 #    "grouping_rules": [
