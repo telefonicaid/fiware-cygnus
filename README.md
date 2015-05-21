@@ -701,14 +701,14 @@ cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts de
-# Interceptor type, do not change
+cygnusagent.sources.http-source.interceptors = ts gi
+# TimestampInterceptor, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-# Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
-# Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+# GroupingInterceptor, do not change
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+# Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
-cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
+cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # OrionHDFSSink configuration
@@ -725,8 +725,6 @@ cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the username
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
-# HDFS backend type (webhdfs or httpfs)
-cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # Hive FQDN/IP address of the Hive server
@@ -966,7 +964,7 @@ Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of 
 Please refer to the linked specific documents when looking for information regarding these topics:
 
 * [Management Interface](doc/design/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
-* [Pattern-based grouping](doc/design/interceptors.md). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events.
+* [Pattern-based grouping](doc/design/interceptors.md). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events. It creates specific `fiware-servicePath` per notified context element as well.
 * [Kerberized HDFS](doc/operation/hdfs_kerberos_authentication.md). This document shows you how to authenticate Cygnus on a Kerberized HDFS.
 * [Multi-instance](conf/README.md). Several instances of Cygnus can be run as a service.
 * [Performance tips](doc/operation/performance_tuning_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtaint the best from Cygnus.
