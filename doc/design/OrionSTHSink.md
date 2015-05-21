@@ -200,6 +200,7 @@ NOTES:
 | data_model | no | collection-per-entity | Under study |
 | db_prefix | no | sth_ | Under study |
 | collection_prefix | no | sth_ | Under study |
+| should_hash | no | false | true is collection names are based on a hash, false for human redable collections |
 
 A configuration example could be:
 
@@ -214,6 +215,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.data_model = collection-per-entity
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
+    cygnusagent.sinks.sth-sink.should_hash = false
 
 [Top](#top)
 

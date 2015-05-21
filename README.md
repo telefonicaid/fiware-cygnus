@@ -796,6 +796,8 @@ cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
+# true is collection names are based on a hash, false for human redable collections
+cygnusagent.sinks.mongo-sink.should_hash = false
 
 # ============================================
 # OrionSTHSink configuration
@@ -815,6 +817,8 @@ cygnusagent.sinks.sth-sink.data_model = collection-per-entity
 cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
+# true is collection names are based on a hash, false for human redable collections
+cygnusagent.sinks.mongo-sink.should_hash = false
 
 #=============================================
 # hdfs-channel configuration

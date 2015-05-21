@@ -108,6 +108,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | data_model | no | collection-per-entity | Under study |
 | db_prefix | no | sth_ | Under study |
 | collection_prefix | no | sth_ | Under study |
+| should_hash | no | false | true is collection names are based on a hash, false for human redable collections |
 
 A configuration example could be:
 
@@ -122,6 +123,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
+    cygnusagent.sinks.mongo-sink.should_hash = false
 
 [Top](#top)
 
