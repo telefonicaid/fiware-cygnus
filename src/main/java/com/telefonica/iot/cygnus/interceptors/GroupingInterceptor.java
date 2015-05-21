@@ -180,7 +180,10 @@ public class GroupingInterceptor implements Interceptor {
             if (isValid(jsonRule)) {
                 GroupingRule rule = new GroupingRule(jsonRule);
                 groupingRules.add(rule);
-            } // if
+            } else {
+                LOGGER.info("Invalid grouping rule, some field is missing. It will be discarded. Details="
+                        + jsonRule.toJSONString());
+            } // if else
         } // for
         
         return groupingRules;
