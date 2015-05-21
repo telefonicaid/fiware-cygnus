@@ -3,5 +3,6 @@
 [BUG] Add the original (and removed by OrionRESTHandler) slash character to fiware-servicePath (#403)
 [FEATURE] Use Json-like rules definition for pattern-based grouping (#387)
 [BUG] Set the Fiware-Service and Fiware-ServicePath maximum lenght to 50 characters (previously, it was 32 characters) (#406)
+[FEATURE] Add implementation details to the specific sinks documentation (#397)
 [BUG] Fix the origin date in OrionSTHSink (#413)
 [HARDENING] Remove unnecessary hfds_api parameter in OrionHDFSSink (#415)
