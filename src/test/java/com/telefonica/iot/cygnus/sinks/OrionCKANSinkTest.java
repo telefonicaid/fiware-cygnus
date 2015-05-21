@@ -60,21 +60,21 @@ public class OrionCKANSinkTest {
     private final String apiKey = "xyzwxyzwxyzw";
     private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
-    private final String normalServiceName = "rooms";
+    private final String normalServiceName = "vehicles";
     private final String abnormalServiceName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
-    private final String normalServicePathName = "numeric-rooms";
-    private final String multipleServicePathName = "numeric-rooms,numeric-rooms";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+    private final String singleServicePathName = "4wheels";
+    private final String multipleServicePathName = "4wheelsSport,4wheelsUrban";
     private final String abnormalServicePathName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String rootServicePathName = "";
-    private final String normalDestinationName = "room1-room";
-    private final String multipleDestinationName = "room1-room,room2-room";
+    private final String singleDestinationName = "car1-car";
+    private final String multipleDestinationName = "sport1,urban1";
     private final String abnormalDestinationName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
-    private static final String ATTRNAME = "temperature";
-    private static final String ATTRTYPE = "degrees";
-    private static final String ATTRVALUE = "26.5";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private static final String ATTRNAME = "speed";
+    private static final String ATTRTYPE = "float";
+    private static final String ATTRVALUE = "112.9";
     private static final String ATTRMD =
             "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private static final HashMap<String, String> ATTRLIST;
@@ -88,14 +88,14 @@ public class OrionCKANSinkTest {
             + "            \"contextElement\" : {\n"
             + "                \"attributes\" : [\n"
             + "                    {\n"
-            + "                        \"name\" : \"temperature\",\n"
-            + "                        \"type\" : \"centigrade\",\n"
-            + "                        \"value\" : \"26.5\"\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
             + "                    }\n"
             + "                ],\n"
-            + "                \"type\" : \"Room\",\n"
+            + "                \"type\" : \"car\",\n"
             + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"Room1\"\n"
+            + "                \"id\" : \"car1\"\n"
             + "            },\n"
             + "            \"statusCode\" : {\n"
             + "                \"code\" : \"200\",\n"
@@ -113,14 +113,14 @@ public class OrionCKANSinkTest {
             + "            \"contextElement\" : {\n"
             + "                \"attributes\" : [\n"
             + "                    {\n"
-            + "                        \"name\" : \"temperature\",\n"
-            + "                        \"type\" : \"centigrade\",\n"
-            + "                        \"value\" : \"26.5\"\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
             + "                    }\n"
             + "                ],\n"
-            + "                \"type\" : \"Room\",\n"
+            + "                \"type\" : \"car\",\n"
             + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"Room1\"\n"
+            + "                \"id\" : \"car1\"\n"
             + "            },\n"
             + "            \"statusCode\" : {\n"
             + "                \"code\" : \"200\",\n"
@@ -131,14 +131,14 @@ public class OrionCKANSinkTest {
             + "            \"contextElement\" : {\n"
             + "                \"attributes\" : [\n"
             + "                    {\n"
-            + "                        \"name\" : \"temperature\",\n"
-            + "                        \"type\" : \"centigrade\",\n"
-            + "                        \"value\" : \"26.5\"\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"115.8\"\n"
             + "                    }\n"
             + "                ],\n"
-            + "                \"type\" : \"Room\",\n"
+            + "                \"type\" : \"car\",\n"
             + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"Room2\"\n"
+            + "                \"id\" : \"car2\"\n"
             + "            },\n"
             + "            \"statusCode\" : {\n"
             + "                \"code\" : \"200\",\n"
@@ -176,11 +176,10 @@ public class OrionCKANSinkTest {
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                recvTimeTs, recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRNAME,
-                ATTRTYPE, ATTRVALUE, ATTRMD);
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(
-                recvTime, normalServiceName, normalServicePathName, normalDestinationName, ATTRLIST, ATTRMDLIST);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTimeTs, recvTime, normalServiceName,
+                singleServicePathName, singleDestinationName, ATTRNAME, ATTRTYPE, ATTRVALUE, ATTRMD);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTime, normalServiceName,
+                singleServicePathName, singleDestinationName, ATTRLIST, ATTRMDLIST);
     } // setUp
 
     /**
@@ -220,8 +219,8 @@ public class OrionCKANSinkTest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -237,8 +236,8 @@ public class OrionCKANSinkTest {
         headers = new HashMap<String, String>();
         headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -254,7 +253,7 @@ public class OrionCKANSinkTest {
         headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -269,7 +268,7 @@ public class OrionCKANSinkTest {
         headers = new HashMap<String, String>();
         headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
         
         try {
@@ -286,7 +285,7 @@ public class OrionCKANSinkTest {
         headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);

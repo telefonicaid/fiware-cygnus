@@ -70,9 +70,9 @@ public class OrionSTHSinkTest {
     private final String attrMd = "[]";
     private final String serviceHeader = "vehicles";
     private final String singleServicePathHeader = "4wheels";
-    private final String multipleServicePathHeader = "4wheels,4wheels";
-    private final String singleDestinationHeader = "4wheelsCars";
-    private final String multipleDestinationHeader = "4wheelsCars,4wheelsCars";
+    private final String multipleServicePathHeader = "4wheelsSport,4wheelsUrban";
+    private final String singleDestinationHeader = "car1-car";
+    private final String multipleDestinationHeader = "sport1,urban1";
     private final String timestamp = "123456789";
     private final String singleContextElementNotification = ""
             + "{\n"
