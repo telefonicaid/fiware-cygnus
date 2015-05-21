@@ -1,10 +1,23 @@
-#OrionCKANSink
-##Functionality
+#<a name="top"></a>OrionCKANSink
+* [Functionality](#section1)
+    * [Mapping Flume events to CKAN data structures](#section1.1)
+    * [Example](#section1.2)
+* [Configuration](#section2)
+* [Use cases](#section3)
+* [Implementation details](#section4)
+    * [`OrionCKANSink` class](#section4.1)
+    * [`CKANBackendImpl` class](#section4.2)
+    * [`CKANCache` class](#section4.3)
+* [Contact](#section5)
+
+##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionCKANSink`, or simply `OrionCKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always [transformed](from_ngsi_events_to_flume_events.md) into internal Flume events at Cygnus sources thanks to `com.iot.telefonica.cygnus.handlers.OrionRestHandler`. In the end, the information within these Flume events must be mapped into specific CKAN data structures.
 
-###Mapping Flume events to CKAN data structures
+[Top](#top)
+
+###<a name="section1.1"></a>Mapping Flume events to CKAN data structures
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `OrionCKANSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
@@ -22,12 +35,16 @@ Independently of the data generator, NGSI context data is always [transformed](f
         * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
     * `column`: A single row is upserted for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
 
+[Top](#top)
+
 ####Important notes regarding the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields rows are upserted for each notified attribute. Nevertheless, the `column` mode may be affected by several rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 In addition, when running in `column` mode, due to the number of notified attributes (and therefore the number of fields to be written within the Datastore) is unknown by Cygnus, the Datastore can not be automatically created, and must be provisioned previously to the Cygnus execution. That's not the case of the `row` mode since the number of fields to be written is always constant, independently of the number of notified attributes.
 
-###Example
+[Top](#top)
+
+###<a name="section1.2"></a>Example
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -178,7 +195,9 @@ If `attr_persistence=colum` then `OrionCKANSink` will persist the data within th
 
 NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as the exposed by CKAN.
 
-##Configuration
+[Top](#top)
+
+##<a name="section2"></a>Configuration
 `OrionCKANSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -206,10 +225,57 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.attr_persistence = column
     cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 
-## Use cases
+[Top](#top)
+
+##<a name="section3"></a>Use cases
 Use `OrionCKANSink` if you are looking for a database storage not growing so much in the mid-long term.
 
-## Contact
+[Top](#top)
+
+##<a name="section4"></a>Implementation details
+###<a name="section4.1"></a>`OrionCKANSink` class
+As any other NGSI-like sink, `OrionCKANSink` extends the base `OrionSink`. The methods that are extended are:
+
+    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    
+The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the CKAN backend by means of a `CKANBackendImpl` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
+    
+    public void start();
+
+`CKANBackendImpl` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionCKANSink()` (contructor), `configure()` and `start()`.
+
+    public void configure(Context);
+    
+A complete configuration as the described above is read from the given `Context` instance.
+
+[Top](#top)
+
+###<a name="section4.2"></a>`CKANBackendImpl` class
+This is a convenience backend class for CKAN that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `CKANBackend` interface (provides the methods that any CKAN backend must implement). Relevant methods are:
+
+    public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
+    
+Persists the context data regarding a single entity's attribute within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. Other notified attributes will be persisted by using this method, next to current one. This method creates the parts of the hierarchy (organization-package/dataset-resource-datastore) if any of them is missing (row-like mode).
+
+    public void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList, Map<String, String> attrMdList) throws Exception
+    
+Persists the context data regarding all an entity's attributes within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. Since all the attributes are stored with this operation, no other one is required. This method does not create any part of the hierarchy (organization-pacakge/dataset-resource-datastore), and all of them must be provisioned in advanced (column-like).
+
+[Top](#top)
+
+###<a name="section4.3"></a>`CKANCache` class
+This class is used to improve the performance of `OrionCKANSink` by caching information about the already created organizations, packages/datasets and resources (and datastores). `CKANCache` implements the `HttpBackend` interface since its methods are able to interact directly with CKAN API when some element of the hierarchy is not cached.
+
+In detail, this is the workflow when `OrionCKANSink` is combined with `CKANCache`:
+
+1. `OrionCKANSink`, previously to accessing CKAN API (it consumes a lot of computational resources), queries the cache for the data (stored in memory, faster and efficient), in order to know if the different elements of the hierarchy involved in the persistence operation are already created or not.
+2. If the element is cached, then a single upsert operation is done against the CKAN API.
+3. If the element is not cached, CKAN is queried in order to get the information. If the element was not found, `OrionCKANSink` is informed about that. If the element was found, it is cached for future queries and `OrionCAKNSink` performs an upsert operation against the CKAN API.
+4. If the element was not found in the cache nor in CKAN, it is created by `OrionCKANSink`. Then, an upsert operation is performed.
+
+[Top](#top)
+
+##<a name="section5"></a>Contact
 Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
 <br>
 Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
@@ -218,3 +284,4 @@ Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
 <br>
 Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
 
+[Top](#top)
