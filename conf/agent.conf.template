@@ -49,14 +49,14 @@ cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts de
-# Timestamp interceptor, do not change
+cygnusagent.sources.http-source.interceptors = ts gi
+# TimestampInterceptor, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-# Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
-# Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+# GroupinInterceptor, do not change
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+# Grouping rules for the GroupingInterceptor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
-cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
+cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # OrionHDFSSink configuration
