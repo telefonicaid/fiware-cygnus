@@ -43,8 +43,8 @@ Feature: Stored in ckan new notifications per column from context broker
     And Verify that the attribute value is stored in ckan
   Examples:
     | organization   | service_path | attributesQuantity | attribute_name | attribute_type | attribute_value   | metadata_value | content |
-    | cygnus_col_023 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | json    |
-    | cygnus_col_023 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | xml     |
+    | cygnus_col_021 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | json    |
+    | cygnus_col_021 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | xml     |
     | cygnus_col_031 | myserv6      | 2                  | my_attribute   | my_Type        | dfgdfgdg          | True           | json    |
     | cygnus_col_031 | myserv6      | 2                  | my_attribute   | my_Type        | dfgdfgdg          | True           | xml     |
     | cygnus_col_041 | myserv6      | 3                  | my_attribute   | my_Type        | {'a':'1','b':'2'} | False          | json    |

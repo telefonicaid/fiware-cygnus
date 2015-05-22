@@ -75,5 +75,31 @@
         "hadoop_channel_transaction_capacity": "100",
         "hadoop_retries_open_file": 10,
         "hadoop_delay_to_retry": 10
-     }
+     },
+    "mongo": {
+        "mongo_version": "x.y.z",
+        "mongo_verify_version": "false",
+        "mongo_host": "localhost",
+        "mongo_port": "27017",
+        "mongo_user": "",
+        "mongo_password": "",
+        "mongo_database": "sth",
+        "mongo_channel_capacity": "1000",
+        "mongo_channel_transaction_capacity": "100",
+        "mongo_retries_search": 5,
+        "mongo_delay_to_retry": 5
+    },
+    "sth": {
+        "sth_version": "x.y.z",
+        "sth_verify_version": "false",
+        "sth_host_port": "localhost",
+        "sth_host_port": "27017",
+        "sth_user": "",
+        "sth_password": "",
+        "sth_database": "sth",
+        "sth_channel_capacity": "1000",
+        "sth_channel_transaction_capacity": "100",
+        "sth_retries_search": 5,
+        "sth_delay_to_retry": 5
+    }
 }
