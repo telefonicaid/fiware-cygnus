@@ -22,9 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.event.EventBuilder;
 import org.apache.flume.Event;
-import com.telefonica.iot.cygnus.interceptors.DestinationExtractor.MatchingRule;
+import com.telefonica.iot.cygnus.interceptors.GroupingInterceptor.GroupingRule;
 import com.telefonica.iot.cygnus.utils.Constants;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,16 +41,55 @@ import static org.junit.Assert.*;
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DestinationExtractorTest {
+public class GroupingInterceptorTest {
     
     // instance to be tested
-    private DestinationExtractor destExtractor;
+    private GroupingInterceptor groupingInterceptor;
     
     // other instances
     private Map<String, String> beforeInterceptingEventHeaders;
     private Event event;
 
     // constants
+    private final String groupingRulesFileName = "conf/grouping_rules.conf.deleteme";
+    private final String jsonRules = ""
+            + "{\n"
+            + "    \"grouping_rules\": [\n"
+            + "        {\n"
+            + "            \"id\": 1,\n"
+            + "            \"fields\": [\n"
+            + "                \"entityId\",\n"
+            + "                \"entityType\"\n"
+            + "            ],\n"
+            + "            \"regex\": \"Room\\.(\\d*)Room\",\n"
+            + "            \"destination\": \"numeric_rooms\",\n"
+            + "            \"fiware_service_path\": \"rooms\"\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"id\": 2,\n"
+            + "            \"fields\": [\n"
+            + "                \"entityId\"\n"
+            + "            ],\n"
+            + "            \"regex\": \"Car\",\n"
+            + "            \"destination\": \"cars\",\n"
+            + "            \"fiware_service_path\": \"vehicles\"\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"id\": 3,\n"
+            + "            \"fields\": [\n"
+            + "                \"servicePath\"\n"
+            + "            ],\n"
+            + "            \"regex\": \"GARDENS\",\n"
+            + "            \"destination\": \"gardens\",\n"
+            + "            \"fiware_service_path\": \"city_indicators\",\n"
+            + "            \"some_other_field_to_be_ignored\": \"xxx\"\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"id\": 4\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
+    
     private final String eventData = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -104,70 +148,120 @@ public class DestinationExtractorTest {
         beforeInterceptingEventHeaders = new HashMap<String, String>();
         beforeInterceptingEventHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
         beforeInterceptingEventHeaders.put(Constants.HEADER_SERVICE_PATH, "def_servpath");
+        
+        // create a temporal grouping rules file
+        PrintWriter writer = new PrintWriter(groupingRulesFileName, "UTF-8");
+        writer.println(jsonRules);
+        writer.close();
     } // setUp
     
     /**
-     * Test of initialize method, of class DestinationExtractor.
+     * Tears down the tests.
+     */
+    @After
+    public void tearDown() {
+        File file = new File(groupingRulesFileName);
+        file.delete();
+    } // tearDown
+    
+    /**
+     * Test of initialize method, of class GroupingInterceptor.
      */
     @Test
     public void testInitialize() {
         System.out.println("Testing DestinationExtractor.initialize");
-        destExtractor = new DestinationExtractor("conf/matching_table.conf.template");
-        destExtractor.initialize();
-        ArrayList<MatchingRule> matchingTable = destExtractor.getMatchingTable();
-        assertTrue(matchingTable.size() == 3);
-        MatchingRule firstRule = matchingTable.get(0);
+        groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
+        groupingInterceptor.initialize();
+        LinkedList<GroupingRule> groupingRules = groupingInterceptor.getGroupingRules();
+        assertTrue(groupingRules.size() == 3); // there are 5 rules, but two are invalid
+        GroupingRule firstRule = groupingRules.get(0);
         assertEquals(1, firstRule.getId());
         assertTrue(firstRule.getFields().size() == 2);
         assertEquals("Room\\.(\\d*)Room", firstRule.getRegex());
         assertEquals("numeric_rooms", firstRule.getDestination());
-        assertEquals("rooms", firstRule.getDataset());
-        MatchingRule secondRule = matchingTable.get(1);
+        assertEquals("rooms", firstRule.getNewFiwareServicePath());
+        GroupingRule secondRule = groupingRules.get(1);
         assertEquals(2, secondRule.getId());
         assertTrue(secondRule.getFields().size() == 1);
         assertEquals("Car", secondRule.getRegex());
         assertEquals("cars", secondRule.getDestination());
-        assertEquals("vehicles", secondRule.getDataset());
-        MatchingRule thirdRule = matchingTable.get(2);
+        assertEquals("vehicles", secondRule.getNewFiwareServicePath());
+        GroupingRule thirdRule = groupingRules.get(2);
         assertEquals(3, thirdRule.getId());
         assertTrue(thirdRule.getFields().size() == 1);
         assertEquals("GARDENS", thirdRule.getRegex());
         assertEquals("gardens", thirdRule.getDestination());
-        assertEquals("city_indicators", thirdRule.getDataset());
+        assertEquals("city_indicators", thirdRule.getNewFiwareServicePath());
     } // testInitialize
     
     /**
-     * Test of intercept method, of class DestinationExtractor.
+     * Test of intercept method, of class GroupingInterceptor.
      */
     @Test
     public void testIntercept() {
-        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf exists)");
-        destExtractor = new DestinationExtractor("conf/matching_table.conf.template");
-        destExtractor.initialize();
+        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf exists)");
+        
+        // create a grouping interceptor
+        groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
+        groupingInterceptor.initialize();
+        
+        // create a list of events to be intercepted
         event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
-        Event interceptedEvent = destExtractor.intercept(event);
+        ArrayList<Event> events = new ArrayList<Event>();
+        events.add(event);
+        
+        // intercept the events
+        List<Event> interceptedEvents = groupingInterceptor.intercept(events);
+        
+        // analyze the validity of the intercepted events
+        assertTrue(interceptedEvents.size() == 1);
+        Event interceptedEvent = interceptedEvents.get(0);
         Map<String, String> afterInterceptingEventHeaders = interceptedEvent.getHeaders();
         String destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
         assertEquals(destinations, "numeric_rooms,numeric_rooms");
         String datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
         assertEquals(datasets, "rooms,rooms");
         
-        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf is not set)");
-        destExtractor = new DestinationExtractor(null);
-        destExtractor.initialize();
+        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf is not set)");
+        
+        // create a grouping interceptor
+        groupingInterceptor = new GroupingInterceptor(null);
+        groupingInterceptor.initialize();
+        
+        // create a list of events to be intercepted
         event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
-        interceptedEvent = destExtractor.intercept(event);
+        events = new ArrayList<Event>();
+        events.add(event);
+        
+        // intercept the events
+        interceptedEvents = groupingInterceptor.intercept(events);
+        
+        // analyze the validity of the intercepted events
+        assertTrue(interceptedEvents.size() == 1);
+        interceptedEvent = interceptedEvents.get(0);
         afterInterceptingEventHeaders = interceptedEvent.getHeaders();
         destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
         assertEquals(destinations, "room.1_room,room.22_room");
         datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
         assertEquals(datasets, "def_servpath,def_servpath");
         
-        System.out.println("Testing DestinationExtractor.intercept (matching_table.conf does not exist)");
-        destExtractor = new DestinationExtractor("conf/anything.conf");
-        destExtractor.initialize();
+        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf does not exist)");
+        
+        // create a grouping interceptor
+        groupingInterceptor = new GroupingInterceptor("whatever");
+        groupingInterceptor.initialize();
+        
+        // create a list of events to be intercepted
         event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
-        interceptedEvent = destExtractor.intercept(event);
+        events = new ArrayList<Event>();
+        events.add(event);
+        
+        // intercept the events
+        interceptedEvents = groupingInterceptor.intercept(events);
+        
+        // analyze the validity of the intercepted events
+        assertTrue(interceptedEvents.size() == 1);
+        interceptedEvent = interceptedEvents.get(0);
         afterInterceptingEventHeaders = interceptedEvent.getHeaders();
         destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
         assertEquals(destinations, "room.1_room,room.22_room");
@@ -175,4 +269,4 @@ public class DestinationExtractorTest {
         assertEquals(datasets, "def_servpath,def_servpath");
     } // testIntercept
 
-} // DestinationExtractorTest
+} // GroupingInterceptorTest

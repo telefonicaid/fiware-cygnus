@@ -35,8 +35,8 @@ public final class Constants {
     public static final String HEADER_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CONTENT_TYPE = "content-type";
     public static final String HEADER_USER_AGENT   = "user-agent";
-    public static final int SERVICE_HEADER_MAX_LEN = 32;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 32;
+    public static final int SERVICE_HEADER_MAX_LEN = 50;
+    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
     
     // Only Flume header names
     public static final String HEADER_TRANSACTION_ID = "transactionId";
