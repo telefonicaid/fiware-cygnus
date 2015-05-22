@@ -6,3 +6,4 @@
 [FEATURE] Add implementation details to the specific sinks documentation (#397)
 [BUG] Fix the origin date in OrionSTHSink (#413)
 [HARDENING] Remove unnecessary hfds_api parameter in OrionHDFSSink (#415)
+[BUG] Use multiple Fiware-ServicePaths in the sinks (#384)
