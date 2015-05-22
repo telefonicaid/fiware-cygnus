@@ -15,18 +15,22 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
+
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
+from decimal import Decimal
 
 from tools import general_utils, http_utils
 
 # general constants
-EMPTY   = u''
-XML     = u'xml'
-JSON    = u'json'
-RANDOM  = u'random'
+EMPTY         = u''
+XML           = u'xml'
+JSON          = u'json'
+RANDOM        = u'random'
+RANDOM_NUMBER = u'random number='
+RANDOM_ALPHANUMERIC = u'random alphanumeric='
 
 # headers constants
 HEADER_ACCEPT                             = u'Accept'
@@ -215,6 +219,10 @@ class Notifications:
     def create_attributes (self, number, name, type, value):
         """
         create attributes to Notifications
+        :param number: number of attributes
+        :param name: prefix to attribute name. ex: temperature --> temperature_0
+        :param type: attributes type
+        :param value: attributes value or in same cases could you use random values ( random (alphanumeric with 4 characters only) | random alphanumeric | random number)
         :return attributes list
         """
         self.attrs = []
@@ -227,10 +235,18 @@ class Notifications:
             self.attribute_type = 'type_' + general_utils.string_generator(4)
         else:
             self.attribute_type = type
+
         if value == RANDOM:
             self.attributes_value = general_utils.string_generator(4)
+        elif value.find(RANDOM_ALPHANUMERIC) >= 0:
+            length = int(value.split("=")[1])
+            self.attributes_value = general_utils.string_generator(length)
+        elif value.find(RANDOM_NUMBER) >= 0:
+            length = int(value.split("=")[1])
+            self.attributes_value = general_utils.number_generator(length)
         else:
             self.attributes_value = value
+        self.attributes_value = str(self.attributes_value)
         for i in range(0,int(self.attributes_number)):
             self.attrs.append(self.__append_attribute(self.attributes_name+"_"+str(i), self.attribute_type, self.attributes_value, self.metadatas))
         return self.attrs

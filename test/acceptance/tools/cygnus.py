@@ -17,11 +17,13 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 # iot_support at tid.es
 #
+
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 import time
 
 from lettuce import world
+from decimal import Decimal
 
 from tools import general_utils
 from tools import http_utils
@@ -49,10 +51,10 @@ NOTIF_USER_AGENT_VALUE      = u'orion/0.10.0'
 TENANT_ROW_DEFAULT          = u'tenant_row_default'
 TENANT_COL_DEFAULT          = u'tenant_col_default'
 SERVICE_PATH_DEFAULT        = u'service_path_default'
-IDENTITY_ID_DEFAULT         = u'identity_id_default'
-IDENTITY_ID_VALUE           = u'Room1'
-IDENTITY_TYPE_DEFAULT       = u'identity_type_default'
-IDENTITY_TYPE_VALUE         = u'Room'
+ENTITY_ID_DEFAULT         = u'entity_id_default'
+ENTITY_ID_VALUE           = u'Room1'
+ENTITY_TYPE_DEFAULT       = u'entity_type_default'
+ENTITY_TYPE_VALUE         = u'Room'
 ATTRIBUTES_NUMBER_DEFAULT   = u'attributes_number_default'
 ATTRIBUTES_NUMBER_VALUE     = 1
 ATTRIBUTES_NAME_DEFAULT     = u'attributes_name_default'
@@ -66,6 +68,8 @@ COL_MODE         = u'column'
 CKAN_SINK        = u'ckan'
 MYSQL_SINK       = u'mysql'
 HDFS_SINK        = u'hdfs'
+MONGO_SINK       = u'mongo'
+STH_SINK         = u'sth'
 DEFAULT          = u'default'
 RANDOM           = u'random'
 EMPTY            = u''
@@ -73,6 +77,7 @@ EMPTY            = u''
 # ckan constants
 MAX_TENANT_LENGTH              = u'abcde678901234567890123456789019'
 MAX_TENANT_LENGTH_ROW          = u'abcde67890123456789012345699_row'
+MAX_SERVICE_PATH_LENGTH        = u'abcdefghij1234567890abcdefghij1234567890abcdefghij'
 MAX_RESOURCE_LENGTH            = u'1234567890123_45678901234567890123456789012345678901234567890126'
 WITH_MAX_LENGTH_ALLOWED        = u'with max length allowed'
 ORGANIZATION_MISSING           = u'organization is missing'
@@ -107,14 +112,17 @@ SOURCE_PATH                    = u'source_path'
 TARGET_PATH                    = u'target_path'
 SUDO_CYGNUS                    = u'sudo_cygnus'
 
-
+# mongo/sth
+STH_DATABASE_PREFIX   = u'sth'
+STH_COLLECTION_PREFIX = u'sth'
+AGGR                  = u'aggr'
 
 class Cygnus:
     """
     cygnus class with generals features
     """
 
-    # --------------- Configuration ------------------------
+    # ---------------------------------------- Configuration -----------------------------------------------------------
     def __init__(self,  **kwargs):
         """
         constructor
@@ -127,8 +135,8 @@ class Cygnus:
         :param tenant_row_default: tenant by default per row mode (OPTIONAL)
         :param tenant_col_default: tenant by default per col mode (OPTIONAL)
         :param service_path_default: service path by default (OPTIONAL)
-        :param identity_id_default: identity id by default (OPTIONAL)
-        :param identity_type_default: identity type by default (OPTIONAL)
+        :param entity_id_default: entity id by default (OPTIONAL)
+        :param entity_type_default: entity type by default (OPTIONAL)
         :param attributes_number_default: attribute number by default (OPTIONAL)
         :param attributes_name_default: attribute name by default (OPTIONAL)
         :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries) (OPTIONAL)
@@ -151,8 +159,8 @@ class Cygnus:
         self.tenant                  = {ROW_MODE: kwargs.get(TENANT_ROW_DEFAULT.lower(), TENANT_ROW_DEFAULT),
                                         COL_MODE: kwargs.get(TENANT_COL_DEFAULT.lower(), TENANT_COL_DEFAULT)}
         self.service_path            = kwargs.get(SERVICE_PATH_DEFAULT, SERVICE_PATH_DEFAULT)
-        self.identity_id             = kwargs.get(IDENTITY_ID_DEFAULT, IDENTITY_ID_VALUE)
-        self.identity_type           = kwargs.get(IDENTITY_TYPE_DEFAULT, IDENTITY_TYPE_VALUE)
+        self.entity_id             = kwargs.get(ENTITY_ID_DEFAULT, ENTITY_ID_VALUE)
+        self.entity_type           = kwargs.get(ENTITY_TYPE_DEFAULT, ENTITY_TYPE_VALUE)
         self.attributes_number       = int(kwargs.get(ATTRIBUTES_NUMBER_DEFAULT, ATTRIBUTES_NUMBER_VALUE))
         self.attributes_name         = kwargs.get(ATTRIBUTES_NAME_DEFAULT, ATTRIBUTES_NAME_VALUE)
         self.ttl                     = kwargs.get(TTL, TTL_VALUE)
@@ -233,6 +241,13 @@ class Cygnus:
                 elif sinks_list[i].find(MYSQL_SINK)>=0:
                     ops_list = cygnus_agent.config_mysql_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host=world.config['mysql']['mysql_host'], port=world.config['mysql']['mysql_port'], user=world.config['mysql']['mysql_user'], password=world.config['mysql']['mysql_pass'], persistence=self.persistence)
                     ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['mysql']['mysql_channel_capacity'], transaction_capacity=world.config['mysql']['mysql_channel_transaction_capacity'])
+                elif sinks_list[i].find(MONGO_SINK)>=0:
+                    ops_list = cygnus_agent.config_mongo_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host_port="%s:%s" % (world.config['mongo']['mongo_host'], world.config['mongo']['mongo_port']), user=world.config['mongo']['mongo_user'], password=world.config['mongo']['mongo_password'])
+                    ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['mongo']['mongo_channel_capacity'], transaction_capacity=world.config['mongo']['mongo_channel_transaction_capacity'])
+                elif sinks_list[i].find(STH_SINK)>=0:
+                    ops_list = cygnus_agent.config_sth_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host_port=world.config['sth']['sth_host_post'], user=world.config['sth']['sth_user'], password=world.config['sth']['sth_pass'])
+                    ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['sth']['sth_channel_capacity'], transaction_capacity=world.config['sth']['sth_channel_transaction_capacity'])
+
             # create and modify values in agent_<id>.conf
             myfab.runs(ops_list)
 
@@ -327,7 +342,7 @@ class Cygnus:
         myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
         self.delete_matching_table_file()
 
-     # ----------------------------- general action -----------------------------------------------------
+    # --------------------------------------------- general action -----------------------------------------------------
 
     def __split_resource (self, resource_name):
         """
@@ -351,14 +366,27 @@ class Cygnus:
         if self.metadata_value:
             notification.create_metadatas_attribute(metadata_attribute_number, RANDOM, RANDOM, RANDOM)
         notification.create_attributes (self.attributes_number, self.attributes_name, self.attribute_type, attribute_value)
-        resp =  notification.send_notification(self.identity_id, self.identity_type)
+        resp =  notification.send_notification(self.entity_id, self.entity_type)
 
         self.attributes=notification.get_attributes()
         self.attributes_name=notification.get_attributes_name()
         self.attributes_value=notification.get_attributes_value()
-        self.attributes_number=notification.get_attributes_number()
+
         self.attributes_metadata=notification.get_attributes_metadata_number()
         self.attributes_number=int(notification.get_attributes_number())
+        return resp
+
+    def receives_n_notifications(self, notif_number, attribute_value_init):
+        """
+        receives N notifications with consecutive values, without metadatas and json content
+        :param attribute_value_init: attribute value for all attributes in each notification increment in one
+                hint: "random number=X" per attribute_value_init is not used in this function
+        :param notif_number: number of notification
+        """
+        for i in range(int(notif_number)):
+            temp_value = Decimal(attribute_value_init) + i
+            resp = world.cygnus.received_notification(str(temp_value), "False", "json")
+        self.attributes_value = attribute_value_init
         return resp
 
     def __change_port(self, port):
@@ -393,15 +421,19 @@ class Cygnus:
         if tenant == WITH_MAX_LENGTH_ALLOWED: self.tenant[self.cygnus_mode] = MAX_TENANT_LENGTH_ROW.lower()
         elif tenant != DEFAULT:
             self.tenant[self.cygnus_mode] = tenant.lower()
-        if service_path != DEFAULT: self.service_path = service_path.lower()
+
+        if service_path == WITH_MAX_LENGTH_ALLOWED: self.service_path = MAX_SERVICE_PATH_LENGTH.lower()
+        elif service_path != DEFAULT:
+            self.service_path = service_path.lower()
+
         if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH[0:(len(MAX_RESOURCE_LENGTH)-len(self.service_path)-1)].lower()  # file (max 64 chars) = service_path + "_" + resource
         elif resource_name == DEFAULT:
-            self.resource = str(self.identity_id+"_"+self.identity_type).lower()
+            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
         else:
             self.resource = resource_name.lower()
-        self.identity_id, self.identity_type = self.__split_resource (self.resource)
+        self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
         self.attribute_type = attribute_type
@@ -412,7 +444,7 @@ class Cygnus:
             self.dataset = self.dataset+"_"+self.service_path
             self.table = self.service_path+ "_" +self.table
 
-    # ----------------------------- CKAN Column Mode -----------------------------------------------------
+    # ------------------------------------------- CKAN Column Mode -----------------------------------------------------
 
     def create_organization_and_dataset(self, tenant, service_path):
         """
@@ -441,10 +473,10 @@ class Cygnus:
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH.lower()
         elif resource_name == DEFAULT:
-            self.resource = str(self.identity_id+"_"+self.identity_type).lower()
+            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
         else:
             self.resource = resource_name.lower()
-        self.identity_id, self.identity_type = self.__split_resource (self.resource)
+        self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
         self.attribute_type = attribute_type
@@ -493,9 +525,11 @@ class Cygnus:
             time.sleep(world.ckan.retry_delay)
         return u'ERROR - Attributes are missing....'
 
-     # ----------------------------- CKAN Row Mode -----------------------------------------------------
 
-    # ----------------------------- MySQL Column Mode -----------------------------------------------------
+    # ---------------------------------------------- CKAN Row Mode -----------------------------------------------------
+
+
+    # ------------------------------------------ MySQL Column Mode -----------------------------------------------------
 
     def create_database (self,tenant):
         """
@@ -519,12 +553,12 @@ class Cygnus:
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH[0:(len(MAX_RESOURCE_LENGTH)-len(self.service_path)-1)].lower()  # table (max 64 chars) = service_path + "_" + resource
         elif resource_name == DEFAULT:
-            self.resource = str(self.identity_id+"_"+self.identity_type).lower()
+            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
         else:
             self.resource = resource_name.lower()
         self.table = self.resource
         if self.service_path != EMPTY: self.table = self.service_path+ "_" +self.table
-        self.identity_id, self.identity_type = self.__split_resource (self.resource)
+        self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
         self.attribute_type = attribute_type
@@ -569,7 +603,10 @@ class Cygnus:
             time.sleep(world.mysql.retry_delay)
         return u'ERROR - Attributes are missing....'
 
-    # ----------------------------- Hadoop Row Mode -----------------------------------------------------
+
+    # ---------------------------------------------- Mysql Row Mode ----------------------------------------------------
+
+    # ------------------------------------------ Hadoop Row Mode -------------------------------------------------------
 
     def hadoop_configuration(self, tenant, service_path, resource_name, attributes_number, attributes_name, attribute_type):
         """
@@ -582,15 +619,129 @@ class Cygnus:
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH[0:(len(MAX_RESOURCE_LENGTH)-len(self.service_path)-1)].lower()  # file (max 64 chars) = service_path + "_" + resource
         elif resource_name == DEFAULT:
-            self.resource = str(self.identity_id+"_"+self.identity_type).lower()
+            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
         else:
             self.resource = resource_name.lower()
-        self.identity_id, self.identity_type = self.__split_resource (self.resource)
+        self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
         self.attribute_type = attribute_type
 
-    # ------------------------------------------  Validations ----------------------------------------------------
+    # ------------------------------------------  mongo raw ------------------------------------------------------------
+
+    def verify_mongo_version(self):
+        """
+        verify mongo version
+        if the version is incorrect show an error with both versions, the one used and the expected
+        """
+        world.mongo.connect()
+        resp = world.mongo.eval_version()
+        world.mongo.disconnect()
+        assert resp == u'OK', resp
+
+    def verify_values_in_mongo(self):
+        """
+        verify attribute value and type from mongo
+        :return document dict (cursor)
+        """
+        find_dict = { "attrName": {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix <_value>. ex: temperature_0
+                      "attrType" : self.attribute_type,
+                      "attrValue" : str(self.attributes_value)
+        }
+        world.mongo.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
+        world.mongo.choice_collection("%s_%s_%s_%s" % (STH_COLLECTION_PREFIX, self.service_path, self.entity_id, self.entity_type))
+        cursor = world.mongo.find_with_retry(find_dict)
+        assert cursor.count() != 0, " ERROR - the attributes with prefix %s has not been stored in mongo successfully" % (self.attributes_name)
+        world.mongo.disconnect()
+
+    def verify_aggregates_in_mongo(self, resolution):
+        """
+        verify aggregates from mongo:
+            - origin, max, min, sum sum2
+        :param resolution: resolutions type (  month | day | hour | minute | second )
+        """
+        time_zone = 2
+        find_dict = {"_id.attrName" :  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
+                     "_id.entityId" : self.entity_id,
+                     "_id.entityType" : self.entity_type,
+                     "_id.resolution" : resolution}
+
+        origin_year   = general_utils.get_date_only_one_value(self.date_time, "year")
+        origin_month  = general_utils.get_date_only_one_value(self.date_time, "month")
+        origin_day    = general_utils.get_date_only_one_value(self.date_time, "day")
+        origin_hour   = int(general_utils.get_date_only_one_value(self.date_time, "hour"))-time_zone
+        if origin_hour < 10: origin_hour = u'0' + str(origin_hour)
+        origin_minute = general_utils.get_date_only_one_value(self.date_time, "minute")
+        origin_second = general_utils.get_date_only_one_value(self.date_time, "second")
+
+        world.mongo.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
+        world.mongo.choice_collection("%s_%s.%s" % (STH_COLLECTION_PREFIX, self.service_path, AGGR))
+        cursor = world.mongo.find_with_retry(find_dict)
+        assert cursor.count() != 0, " ERROR - the aggregated has not been stored in mongo successfully "
+        doc_list = world.mongo.get_cursor_value(cursor)   # get all dictionaries into a cursor, return a list
+
+        for doc in doc_list:
+
+            offset = int(general_utils.get_date_only_one_value(self.date_time, resolution))
+            if resolution == "month":
+                offset=offset-1
+                origin_by_resolution = "%s-01-01 00:00:00" % (origin_year)
+            elif resolution == "day":
+                offset=offset-1
+                origin_by_resolution = "%s-%s-01 00:00:00" % (origin_year, origin_month)
+            elif resolution == "hour":
+                offset=offset-time_zone
+                origin_by_resolution = "%s-%s-%s 00:00:00" % (origin_year, origin_month, origin_day)
+            elif resolution == "minute":
+                origin_by_resolution = "%s-%s-%s %s:00:00" % (origin_year, origin_month, origin_day, origin_hour)
+            elif resolution == "second":
+                c = 0
+                MAX_SECS = 20
+                while (c < MAX_SECS):
+                    if float(doc["points"][offset]["min"]) == float(self.attributes_value):
+                        break
+                    offset = offset - 1
+                    if offset < 0: offset = 59
+                    c = c + 1
+                if (origin_second < c): origin_minute = origin_minute - 1
+                origin_by_resolution = "%s-%s-%s %s:%s:00" % (origin_year, origin_month, origin_day, origin_hour, origin_minute)
+            else:
+                assert False, " ERROR - resolution type \"%s\" is not allowed, review your tests in features..." % (resolution)
+
+            assert str(doc["_id"]["origin"]) == origin_by_resolution, " ERROR -- in origin field by the %s resolution in %s attribute" % (resolution, str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["min"]) == float(self.attributes_value), " ERROR -- in minimun value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["max"]) == float(self.attributes_value), " ERROR -- in maximun value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["sum"]) == float(self.attributes_value), " ERROR -- in sum value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["sum2"]) == (float(self.attributes_value)*float(self.attributes_value)), " ERROR -- in sum2 value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+        world.mongo.disconnect()
+
+    def verify_aggregates_is_not_in_mongo(self, resolution):
+        """
+        verify that aggregates is not stored in mongo:
+        :param resolution: resolutions type (  month | day | hour | minute | second )
+        """
+        find_dict = {"_id.attrName" :  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
+                     "_id.entityId" : self.entity_id,
+                     "_id.entityType" : self.entity_type,
+                     "_id.resolution" : resolution }
+        world.mongo.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
+        world.mongo.choice_collection("%s_%s.%s" % (STH_COLLECTION_PREFIX, self.service_path, AGGR))
+        cursor = world.mongo.find_data(find_dict)
+        assert cursor.count() == 0, " ERROR - the aggregated has been stored in mongo."
+        world.mongo.disconnect()
+
+    def drop_database_in_mongo(self, driver):
+         """
+         delete database and collections in mongo
+         :param driver: mongo instance
+         """
+         driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
+         driver.drop_database()
+         driver.disconnect()
+
+    # ---------------------------------------  mongo aggregated---------------------------------------------------------
+
+    # ------------------------------------------  Validations ----------------------------------------------------------
     def verify_response_http_code (self, http_code_expected, response):
         """
         validate http code in response
@@ -605,7 +756,7 @@ class Cygnus:
         """
         self.resource = destination
         if destination != EMPTY:
-            self.identity_id, self.identity_type = self.__split_resource (self.resource)
+            self.entity_id, self.entity_type = self.__split_resource (self.resource)
 
         self.service_path = new_service_path                                     #  used in notification request
 
@@ -613,7 +764,7 @@ class Cygnus:
         self.dataset = self.tenant[self.cygnus_mode]+"_"+new_service_path        #  used in ckan validation request
         self.table = new_service_path +"_"+destination                           #  used in mysql validation
 
-    # ------------------------------------------  ckan validations ----------------------------------------------------
+    # ------------------------------------------  ckan validations -----------------------------------------------------
 
     def verify_dataset_search_values_by_column(self):
         """
@@ -699,6 +850,7 @@ class Cygnus:
                 if str(self.temp_dict[ATTR_MD][0][VALUE]) != str(self.attributes[position][METADATAS][0][VALUE]):
                     return False
         return True
+
     # ------------------------------------------  mysql validations ----------------------------------------------------
 
     def mappingQuotes (self, attr_value):
@@ -793,7 +945,7 @@ class Cygnus:
                     return False
         return True
 
-    # ------------------------------------------  hadoop validations ----------------------------------------------------
+    # ------------------------------------------  hadoop validations ---------------------------------------------------
 
     def verify_file_search_values_and_type(self):
         """
@@ -819,6 +971,8 @@ class Cygnus:
             else:
                  assert resp[ATTR_MD][0][VALUE] == self.attributes[i][METADATAS][0][VALUE], \
                      "The "+self.attributes[i][NAME]+" metatada value does not match..."
+
+    # ------------------------------------------  mongo validations ---------------------------------------------------
 
 
 

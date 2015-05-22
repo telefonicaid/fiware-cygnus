@@ -7,3 +7,4 @@
 [BUG] Fix the origin date in OrionSTHSink (#413)
 [HARDENING] Remove unnecessary hfds_api parameter in OrionHDFSSink (#415)
 [HARDENING] Set data_model to collection-per-entity (#419)
+[BUG] Use multiple Fiware-ServicePaths in the sinks (#384)
