@@ -460,20 +460,16 @@ Assuming `mongo_username=myuser` as configuration parameter, the data within the
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels
     4wheels_car1_car
-    4wheels_car1_car_speed
     system.indexes
-    > db.4wheels.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db.4wheels_car1_car.find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
-    > db.4wheels_car1_car_speed.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrType" : "float", "attrValue" : "112.9" }
 
-NOTE: the results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-service</i> and <i>collection-per-attribute</i>) are shown respectively; and no database prefix nor collection prefix was used (see [Cygnus configuration](#section6) for more details).
+NOTES:
 
-NOTE: `mongo` is the MongoDB CLI for querying the data.
+* `mongo` is the MongoDB CLI for querying the data.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
 
 [Top](#top)
 
@@ -482,7 +478,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 ###Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionSTHSink`](doc/desing/OrionSTHSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` as configuration parameter, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -495,13 +491,11 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels.aggr
-    4wheels_car1_car.aggr
-    4wheels_car1_car_speed.aggr
+    sth_/4wheels_car1_car.aggr
     system.indexes
-    > db.4wheels.aggr.find()
+    > db['sth_/4wheels_car1_car.aggr'].find()
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -511,7 +505,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "sepeed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -521,7 +515,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -531,7 +525,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -541,7 +535,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -551,7 +545,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -561,7 +555,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -571,7 +565,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -581,7 +575,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -591,7 +585,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -601,7 +595,11 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
 
-NOTE: `mongo` is the MongoDB CLI for querying the data.
+NOTES:
+
+* `mongo` is the MongoDB CLI for querying the data.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
 
 [Top](#top)
 
@@ -790,8 +788,6 @@ cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,.
 cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
-# data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
-cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
 # prefix for the MongoDB databases
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
@@ -809,8 +805,6 @@ cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 cygnusagent.sinks.sth-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
-# data model (collection-per-service-path, collection-per-entity, collection-per-attribute)
-cygnusagent.sinks.sth-sink.data_model = collection-per-entity
 # prefix for the MongoDB databases
 cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
