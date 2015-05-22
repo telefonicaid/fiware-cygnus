@@ -201,7 +201,7 @@ public class MongoBackend {
         MongoCollection collection = db.getCollection(collectionName);
         
         // build the query
-        BasicDBObject query = buildQuery(calendar, entityId, entityType, attrName, resolution);
+        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolution);
         
         // prepopulate if needed
         BasicDBObject insert = buildInsertForPrepopulate(attrType, resolution);
@@ -229,8 +229,8 @@ public class MongoBackend {
      * @param resolution
      * @return
      */
-    private BasicDBObject buildQuery(GregorianCalendar calendar, String entityId, String entityType, String attrName,
-            Resolution resolution) {
+    private BasicDBObject buildQueryForInsertAggregated(GregorianCalendar calendar, String entityId, String entityType,
+            String attrName, Resolution resolution) {
         int offset = 0;
         
         switch (resolution) {
@@ -283,7 +283,7 @@ public class MongoBackend {
         } // switch
         
         return query;
-    } // buildQuery
+    } // buildQueryForInsertAggregated
     
     /**
      * Builds the Json update used when updating an aggregated collection.
@@ -465,5 +465,35 @@ public class MongoBackend {
         gc.setTimeZone(TimeZone.getTimeZone("UTC"));
         return new Date(gc.getTimeInMillis());
     } // getOrigin
+    
+    /**
+     * 
+     * @param dbName
+     * @param hash
+     * @param isAggregated
+     */
+    public void storeCollectionHash(String dbName, String hash, boolean isAggregated) {
+        // get the database and the collection; the collection is created if not existing
+        MongoDatabase db = getDatabase(dbName);
+        MongoCollection collection = db.getCollection("collection_names");
+
+        if (collection == null || collection.count() == 0) {
+            db.createCollection("collection_name");
+            collection = db.getCollection("collection_names");
+        } // if
+        
+        // get the query
+        BasicDBObject query = new BasicDBObject().append("_id", hash);
+        
+        // get the update
+        BasicDBObject update = buildUpdateForCollectionHash();
+        LOGGER.debug("Updating data within collection=collection_names, query=" + query.toString()
+                + ", update=" + update.toString());
+        collection.updateOne(query, update);
+    } // storeCollectionHash
+    
+    private BasicDBObject buildUpdateForCollectionHash() {
+        return null;
+    } // buildUpdateForCollectionHash
     
 } // MongoBackend
