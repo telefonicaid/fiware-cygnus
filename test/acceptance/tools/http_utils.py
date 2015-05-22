@@ -15,7 +15,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact:
-#  iot_support at tid.es
+# iot_support at tid.es
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
@@ -111,25 +111,18 @@ def request (method, **kwargs):
 	      the first show the request and the second, show the response
     """
     try:
-        Url = kwargs.get(URL, EMPTY)
-        Headers = kwargs.get(HEADERS, None)
-        Body = kwargs.get (DATA, EMPTY)
-        Parameters = kwargs.get (PARAM, EMPTY)
-        Redirect = kwargs.get(ALLOW_REDIRECTS, True)
-        VerifySSL = kwargs.get(VERIFY, False)
-        #print_request(method, Url, Headers, Body)
-        if method == POST:
-            resp = requests.post(url=Url, headers=Headers, data=Body, params=Parameters, allow_redirects= Redirect, verify=VerifySSL)
-        elif method == GET:
-            resp = requests.get(url=Url, headers=Headers, data=Body, params=Parameters, allow_redirects= Redirect, verify=VerifySSL)
-        if method == PUT:
-            resp = requests.put(url=Url, headers=Headers, data=Body, params=Parameters, allow_redirects= Redirect, verify=VerifySSL)
-        if method == DELETE:
-            resp = requests.delete(url=Url, headers=Headers, data=Body, params=Parameters, allow_redirects= Redirect, verify=VerifySSL)
+        url = kwargs.get(URL, EMPTY)
+        headers = kwargs.get(HEADERS, None)
+        body = kwargs.get (DATA, EMPTY)
+        parameters = kwargs.get (PARAM, EMPTY)
+        redirect = kwargs.get(ALLOW_REDIRECTS, True)
+        verify_SSL = kwargs.get(VERIFY, False)
+        #print_request(method, url, headers, body)
+        resp = requests.request(method, url, headers=headers, data=body, params=parameters, allow_redirects= redirect, verify=verify_SSL)
         #print_response(resp)
         return resp
     except Exception, e:
-        assert not True,  " ERROR IN REQUEST: %s  \nurl    : %s \nheaders: %s \npayload: %s" % (str(e), Url, str(Headers), Body)
+        assert not True,  " ERROR IN REQUEST: %s  \nurl    : %s \nheaders: %s \npayload: %s" % (str(e), url, str(headers), body)
 
 def assert_status_code (expected, resp, Error_msg):
      """

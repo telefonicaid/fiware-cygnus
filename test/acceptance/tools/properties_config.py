@@ -17,6 +17,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 # iot_support at tid.es
 #
+
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 import json
@@ -28,6 +29,7 @@ from tools.cygnus import Cygnus
 from tools.ckan_utils import Ckan
 from tools.mysql_utils import Mysql
 from tools.hadoop_utils import Hadoop
+from tools.mongo_utils import Mongo
 
 # constants
 EMPTY                 = u''
@@ -149,4 +151,32 @@ class Properties:
                                  transaction_capacity=world.config['hadoop']['hadoop_channel_transaction_capacity'],
                                  retries_number=world.config['hadoop']['hadoop_retries_open_file'],
                                  retry_delay=world.config['hadoop']['hadoop_delay_to_retry']
-    )
+            )
+        elif sink == "mongo-sink":
+            world.mongo = Mongo (version=world.config['mongo']['mongo_version'],
+                                 verify_version=world.config['mongo']['mongo_verify_version'],
+                                 host=world.config['mongo']['mongo_host'],
+                                 port=world.config['mongo']['mongo_port'],
+                                 user=world.config['mongo']['mongo_user'],
+                                 password=world.config['mongo']['mongo_password'],
+                                 database=world.config['mongo']['mongo_database'],
+                                 retries=world.config['mongo']['mongo_retries_search'],
+                                 retry_delay=world.config['mongo']['mongo_delay_to_retry']
+            )
+
+        """
+        elif sink == "sth-sink":
+            world.sth = STH     (version=world.config['sth']['sth_version'],
+                                 verify_version=world.config['sth']['sth_verify_version'],
+                                 host=world.config['sth']['sth_host'],
+                                 port=world.config['sth']['sth_port'],
+                                 user=world.config['sth']['sth_user'],
+                                 password=world.config['sth']['sth_password'],
+                                 database=world.config['sth']['sth_database'],
+                                 retries=world.config['sth']['sth_retries_search'],
+                                 retry_delay=world.config['sth']['sth_delay_to_retry']
+            )
+        """
+
+
+
