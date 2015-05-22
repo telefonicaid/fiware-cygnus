@@ -247,7 +247,7 @@ public class MongoBackend {
                 offset = calendar.get(Calendar.DAY_OF_MONTH);
                 break;
             case MONTH:
-                offset = calendar.get(Calendar.MONTH);
+                offset = calendar.get(Calendar.MONTH) + 1;
                 break;
             default:
                 // this should never be reached;
@@ -438,21 +438,21 @@ public class MongoBackend {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
+        int second;
         
         switch (resolution) {
             case MONTH:
                 month = 0;
-                break;
+                // falls through
             case DAY:
                 day = 1;
-                break;
+                // falls through
             case HOUR:
                 hour = 0;
-                break;
+                // falls through
             case MINUTE:
                 minute = 0;
-                break;
+                // falls through
             case SECOND:
                 second = 0;
                 break;
@@ -461,7 +461,9 @@ public class MongoBackend {
                 return null;
         } // switch
         
-        return new Date(new GregorianCalendar(year, month, day, hour, minute, second).getTimeInMillis());
+        GregorianCalendar gc = new GregorianCalendar(year, month, day, hour, minute, second);
+        gc.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return new Date(gc.getTimeInMillis());
     } // getOrigin
     
 } // MongoBackend
