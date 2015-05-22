@@ -262,7 +262,7 @@ public class OrionHDFSSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
         
         // human readable version of the reception time
@@ -282,7 +282,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // build the effective HDFS stuff
             String firstLevel = buildFirstLevel(fiwareService);
-            String secondLevel = buildSecondLevel(fiwareServicePath);
+            String secondLevel = buildSecondLevel(fiwareServicePaths[i]);
             String thirdLevel = buildThirdLevel(destinations[i]);
             String hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
             String hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
