@@ -21,10 +21,7 @@ MongoDB organizes the data in databases that contain collections of Json documen
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
 2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
-3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The unit data depends on the chosen data model (see the configuration section):
-    * <i>collection-per-service-path</i>: the collection is called as the `fiware-servicePath` header value within the event.
-    * <i>collection-per-entity</i>: the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
-    * <i>collection-per-attribute</i>: the collection is called as the concatenation of the `fiware-servicePath`\_`destination`\_`attrName`.
+3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
 4. The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
 [Top](#top)
@@ -60,7 +57,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` as configuration parameter, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -73,13 +70,11 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels.aggr
     sth_/4wheels_car1_car.aggr
-    sth_/4wheels_car1_car_speed.aggr
     system.indexes
-    > db['sth_/4wheels.aggr'].find()
+    > db['sth_/4wheels_car1_car.aggr'].find()
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -89,7 +84,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "sepeed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -99,7 +94,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -109,7 +104,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -119,7 +114,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -129,7 +124,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     { 
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -139,7 +134,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
             ...,
@@ -149,7 +144,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -159,7 +154,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -169,7 +164,7 @@ Assuming `mongo_username=myuser` and `data_model=collection-per-service-path` as
         ]
     }
     {
-        "_id" : { "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:22.41Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
         "points" : [
             { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
             ...,
@@ -197,9 +192,8 @@ NOTES:
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
-| data_model | no | collection-per-entity | Under study |
-| db_prefix | no | sth_ | Under study |
-| collection_prefix | no | sth_ | Under study |
+| db_prefix | no | sth_ |
+| collection_prefix | no | sth_ |
 
 A configuration example could be:
 
@@ -211,7 +205,6 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.sth-sink.mongo_username = myuser
     cygnusagent.sinks.sth-sink.mongo_password = mypassword
-    cygnusagent.sinks.sth-sink.data_model = collection-per-entity
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
 
