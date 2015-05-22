@@ -93,8 +93,8 @@ class Hadoop:
         self.krb5_password       = kwargs.get(KRB5_PASSWORD, EMPTY)
         self.capacity            = kwargs.get("capacity", "1000")
         self.transaction_capacity= kwargs.get("transaction_capacity", "100")
-        self.retries_number      = kwargs.get(RETRIES_NUMBER, 15)
-        self.retry_delay         = kwargs.get(DELAY_TO_RETRY, 10)
+        self.retries_number      = kwargs.get(RETRIES_NUMBER, 5)
+        self.retry_delay         = kwargs.get(DELAY_TO_RETRY, 5)
 
     def __create_url (self, operation):
         """

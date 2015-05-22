@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.utils;
 
-import com.telefonica.iot.cygnus.utils.Utils;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;

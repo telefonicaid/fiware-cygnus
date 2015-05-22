@@ -145,24 +145,24 @@ Feature: Stored in ckan new notifications per row from context broker
     And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
-    And a tenant "tenant_25000", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
+    And a tenant "test_resources", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
     | service_path | resource                | content |
-    | /service100  | Room2_Room              | json    |
-    | /service200  | Room2_Room              | xml     |
-    | /service300  | Room2_HOUSE             | json    |
-    | /service400  | Room2_HOUSE             | xml     |
-    | /service500  | Room2_                  | json    |
-    | /service600  | Room2_                  | xml     |
-    | /service700  | ROOM_house              | json    |
-    | /service800  | ROOM_house              | xml     |
-    | /service900  | modelogw.assetgw_device | json    |
-    | /serviceaa0  | modelogw.assetgw_device | xml     |
+    | /service10   | Room2_Room              | json    |
+    | /service10   | Room2_Room              | xml     |
+    | /service30   | Room2_HOUSE             | json    |
+    | /service30   | Room2_HOUSE             | xml     |
+    | /service50   | Room2_                  | json    |
+    | /service50   | Room2_                  | xml     |
+    | /service70   | ROOM_house              | json    |
+    | /service70   | ROOM_house              | xml     |
+    | /service90   | modelogw.assetgw_device | json    |
+    | /service90   | modelogw.assetgw_device | xml     |
     | /servicebbb  | with max length allowed | json    |
-    | /serviceccc  | with max length allowed | xml     |
+    | /servicebbb  | with max length allowed | xml     |
 
   @attributes_number
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
