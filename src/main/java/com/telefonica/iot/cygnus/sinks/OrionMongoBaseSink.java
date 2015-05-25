@@ -121,12 +121,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
         dataModel = getDataModel(context.getString("data_model", "collection-per-entity"));
-        
-        if (dataModel == null) {
-            LOGGER.error("Invalid data model, using 'collection-per-attribute' by default");
-            dataModel = DataModel.COLLECTIONPERATTRIBUTE;
-        } // if
-        
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model=" + dataModel + ")");
         dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");

@@ -78,6 +78,8 @@ Some examples:
 - Cygnus-HADOOP per column using multi-instances (pending).
 - Cygnus-HADOOP per column using matching table (pending).
 
+- Cygnus-MONGO raw
+
 ### configuration.json
 
 We recommend to create `settings` folder in acceptance folder if it does not exists and store all configurations to features referenced by `properties.json.base` files.
