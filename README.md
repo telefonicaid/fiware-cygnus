@@ -10,8 +10,6 @@
         * [HDFS persistence](#section3.4.1)
         * [CKAN persistence](#section3.4.2)
         * [MySQL persistence](#section3.4.3)
-        * [MongoDB persistence](#section3.4.4)
-        * [STH persistence](#section3.4.5)
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
@@ -40,8 +38,6 @@ Current stable release is able to persist Orion context data in:
 * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
-* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
 Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
@@ -63,9 +59,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * `OrionHDFSSink`. A custom sink that persists Orion content data in a [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment under a HDFS path structure. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Check for specific details [here](doc/design/OrionHDFSSink.md).
 * `OrionCKANSink`. A custom sink that persists Orion context data in [CKAN](http://ckan.org/) server instances under a organization, package, resource and Datastore structure. Check for specific details [here](doc/design/OrionCKANSink.md).
 * `OrionMySQLSink`. A custom sink for persisting Orion context data in [MySQL](https://www.mysql.com/) server instances under a database and table structure. Check for specific details [here](doc/design/OrionMySQLSink.md).
-* `OrionMongoSink`. A custom sink for persisting Orion context data in [MongoDB](https://www.mongodb.org/) server instances under a database and collection structure. Check for specific details [here](doc/design/OrionMongoSink.md).
-* `OrionSTHSink`. A custom sink for persisting Orion context data in [STH](https://github.com/telefonicaid/IoT-STH) server instances under a database and aggregated-like collection structure. Check for specific details [here](doc/design/OrionSTHSink.md).
-* `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table, CKAN resource or MongoDB collection) for the context data.
+* `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table or CKAN resource) for the context data.
 
 All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
 
@@ -73,7 +67,7 @@ All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined
 2.  Receive from the NGSI-like source notifications about new updated context data; this notification will be handled by the native `HttpSource` together with the custom `OrionRestHandler`.
 3.  Translate the notification into the Flume event format (metadata headers + data body), and put them into the different sink channels, typically of type `MemoryChannel`.
 4.  In the meantime, some interceptors such as the native `Timestamp` one or the custom `DestinationExtractorInterceptor` may modify the event before it is put in the channel or channels.
-5.  For each enabled custom sink (`OrionHDFSSink`, `OrionCKANSink`, `OrionMySQLSink`, `OrionMongoSink`), get the Flume events from the sink channels and persist the data in the appropriate format.
+5.  For each enabled custom sink (`OrionHDFSSink`, `OrionCKANSink`, `OrionMySQLSink`), get the Flume events from the sink channels and persist the data in the appropriate format.
 
 More complex architectures and data flows can be checked in the [architecture](doc/design/architecture.md) document.
 
@@ -677,13 +671,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -840,24 +834,6 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
-
-#=============================================
-# mongo-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.mongo-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.mongo-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.mongo-channel.transactionCapacity = 100
-
-#=============================================
-# sth-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.sth-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.sth-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.sth-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
