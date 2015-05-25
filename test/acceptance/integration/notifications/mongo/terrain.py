@@ -50,7 +50,12 @@ def after_each_scenario(scenario):
     actions after each scenario
     :param scenario:
     """
-    world.cygnus.drop_database_in_mongo(world.mongo)
+    driver = None
+    if world.sink == "mongo-sink":
+        driver = world.mongo
+    elif world.sink == "sth-sink":
+        driver = world.sth
+    world.cygnus.drop_database_in_mongo(driver)
     print colored("    And database is dropped. See terrain.py not steps", 'cyan', 'on_grey', attrs=['bold'])
 
 @after.all

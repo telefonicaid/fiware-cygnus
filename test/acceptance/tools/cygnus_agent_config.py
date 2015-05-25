@@ -330,9 +330,9 @@ class Agent:
         self.__append_command('sed -i "s/%s.channel = sth-channel/%s.channel = %s/" %s/%s ' % (sth_sink, sth_sink,sth_channel, self.target_path, self.name), self.target_path, self.sudo)
         # replace all hdfs channel in configuration by a new one
         self.__append_command('sed -i "s/%s.channels.sth-channel./%s.channels.%s./" %s/%s ' % (sth_sink,sth_sink, sth_channel, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/%s.sth_hosts = .*/%s.sth_hosts = %s/" %s/%s ' % (sth_sink,sth_sink, sth_host_port, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/%s.sth_username = .*/%s.sth_username = %s/" %s/%s ' % (sth_sink,sth_sink, sth_user, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/%s.sth_password = .*/%s.sth_password = %s/" %s/%s ' % (sth_sink,sth_sink, sth_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_hosts = .*/%s.mongo_hosts = %s/" %s/%s ' % (sth_sink,sth_sink, sth_host_port, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_username = .*/%s.mongo_username = %s/" %s/%s ' % (sth_sink,sth_sink, sth_user, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_password = .*/%s.mongo_password = %s/" %s/%s ' % (sth_sink,sth_sink, sth_password, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.data_model = .*/%s.data_model = %s/" %s/%s ' % (sth_sink, sth_sink, sth_data_model, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.db_prefix = .*/%s.db_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, db_prefix, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.collection_prefix = .*/%s.collection_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, collection_prefix, self.target_path, self.name), self.target_path, self.sudo)

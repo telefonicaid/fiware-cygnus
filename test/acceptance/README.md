@@ -79,6 +79,7 @@ Some examples:
 - Cygnus-HADOOP per column using matching table (pending).
 
 - Cygnus-MONGO raw
+- Cygnus-STH aggregated
 
 ### configuration.json
 
@@ -181,6 +182,32 @@ Verify if a label and its text exists in the last lines. The file log by default
     * hadoop_channel_transaction_capacity: amount of bytes that can be sent per transaction
     * hadoop_retries_open_file: number of retries for data verification.
     * hadoop_delay_to_retry: time to delay in each retry.
+
+ - mongo:
+    * mongo_version: mongo version installed.
+    * mongo_verify_version: determine whether the version is verified or not (True or False).
+    * mongo_host: IP address or host of mongo Server.
+    * mongo_port: port where mongo is listening.
+    * mongo_user: user used in mongo server.
+    * mongo_password: password to user above.
+    * mongo_database": mongo database by default
+    * mongo_channel_capacity: capacity of the channel
+    * mongo_channel_transaction_capacity: amount of bytes that can be sent per transaction
+    * mongo_retries_search: number of retries for data verification.
+    * mongo_delay_to_retry: time to delay in each retry.
+
+ - sth:
+    * sth_version: mongo version installed.
+    * sth_verify_version: determine whether the version is verified or not (True or False).
+    * sth_host: IP address or host of mongo Server.
+    * sth_port: port where mongo is listening.
+    * sth_user: user used in mongo server.
+    * sth_password: password to user above.
+    * sth_database": mongo database by default
+    * sth_channel_capacity: capacity of the channel
+    * sth_channel_transaction_capacity: amount of bytes that can be sent per transaction
+    * sth_retries_search: number of retries for data verification.
+    * sth_delay_to_retry: time to delay in each retry.
 
 ### tags
 
