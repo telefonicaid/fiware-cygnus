@@ -28,6 +28,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.DataModel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,9 +94,15 @@ public class MongoBackend {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
-        if (db.getCollection(collectionName) == null || db.getCollection(collectionName).count() == 0) {
+        try {
             db.createCollection(collectionName);
-        } // if
+        } catch (Exception e) {
+            if (e.getMessage().contains("collection already exists")) {
+                LOGGER.debug("Collection already exists, nothing to create");
+            } else {
+                throw e;
+            } // if else
+        } // try catch
     } // createCollection
     
     /**
@@ -208,14 +215,14 @@ public class MongoBackend {
         UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
         
         if (res.getMatchedCount() == 0) {
-            LOGGER.debug("Prepopulating data within collection=" + collectionName + ", query=" + query.toString()
-                + ", insert=" + insert.toString());
+            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", query="
+                    + query.toString() + ", insert=" + insert.toString());
         } // if
 
         // do the update
         BasicDBObject update = buildUpdateForUpdate(attrType, attrValue);
-        LOGGER.debug("Updating data within collection=" + collectionName + ", query=" + query.toString()
-                + ", update=" + update.toString());
+        LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", query="
+                + query.toString() + ", update=" + update.toString());
         collection.updateOne(query, update);
     } // insertContextDataAggregated
 
@@ -467,33 +474,90 @@ public class MongoBackend {
     } // getOrigin
     
     /**
-     * 
+     * Stores in per-service/database "collection_names" collection the matching between a hash and the fields used to
+     * build it.
+     * FIXME: destination is under study
      * @param dbName
      * @param hash
      * @param isAggregated
+     * @param fiwareService
+     * @param fiwareServicePath
+     * @param entityId
+     * @param entityType
+     * @param attrName
+     * @param destination
+     * @throws java.lang.Exception
      */
-    public void storeCollectionHash(String dbName, String hash, boolean isAggregated) {
+    public void storeCollectionHash(String dbName, String hash, boolean isAggregated, String fiwareService,
+            String fiwareServicePath, String entityId, String entityType, String attrName, String destination)
+        throws Exception {
         // get the database and the collection; the collection is created if not existing
         MongoDatabase db = getDatabase(dbName);
-        MongoCollection collection = db.getCollection("collection_names");
+        MongoCollection collection;
 
-        if (collection == null || collection.count() == 0) {
-            db.createCollection("collection_name");
+        try {
+            LOGGER.debug("Creating Mongo collection=collection_names at database=" + dbName);
+            db.createCollection("collection_names");
+        } catch (Exception e) {
+            if (e.getMessage().contains("collection already exists")) {
+                LOGGER.debug("Collection already exists, nothing to create");
+            } else {
+                throw e;
+            } // if else
+        } finally {
             collection = db.getCollection("collection_names");
+        } // try catch finally
+
+        // Two updates operations are needed since MongoDB currently does not support the possibility to address the
+        // same field in a $set operation as a $setOnInsert operation. More details:
+        // http://stackoverflow.com/questions/23992723/ \
+        //     findandmodify-fails-with-error-cannot-update-field1-and-field1-at-the-same
+        
+        // build the query
+        BasicDBObject query = new BasicDBObject().append("_id", hash + (isAggregated ? ".aggr" : ""));
+        
+        // do the first update
+        BasicDBObject update = buildUpdateForCollectionHash("$setOnInsert", isAggregated, fiwareService,
+                fiwareServicePath, entityId, entityType, attrName, destination);
+        LOGGER.debug("Updating data, database=" + dbName + ", collection=collection_names, query="
+                + query.toString() + ", update=" + update.toString());
+        UpdateResult res = collection.updateOne(query, update, new UpdateOptions().upsert(true));
+/*
+        Theoretically, this part is needed, but it works with a single unpdate operation!
+        
+        if (res.getMatchedCount() == 0) {
+            LOGGER.error("There was an error when storing the collecion hash, database=" + dbName
+                    + ", collection=collection_names, query=" + query.toString() + ", update=" + update.toString());
+            return;
         } // if
         
-        // get the query
-        BasicDBObject query = new BasicDBObject().append("_id", hash);
+        // do the second update
+        update = buildUpdateForCollectionHash("$set", isAggregated, fiwareService, fiwareServicePath, entityId,
+                entityType, attrName, destination);
+        LOGGER.debug("Updating data, database=" + dbName + ", collection=collection_names, query="
+                + query.toString() + ", update=" + update.toString());
+        res = collection.updateOne(query, update);
         
-        // get the update
-        BasicDBObject update = buildUpdateForCollectionHash();
-        LOGGER.debug("Updating data within collection=collection_names, query=" + query.toString()
-                + ", update=" + update.toString());
-        collection.updateOne(query, update);
+        if (res.getMatchedCount() == 0) {
+            LOGGER.error("There was an error when storing the collecion hash, database=" + dbName
+                    + ", collection=collection_names, query=" + query.toString() + ", update=" + update.toString());
+        } // if
+*/
     } // storeCollectionHash
-    
-    private BasicDBObject buildUpdateForCollectionHash() {
-        return null;
+
+    // FIXME: destination is under study
+    private BasicDBObject buildUpdateForCollectionHash(String operation, boolean isAggregated, String fiwareService,
+            String fiwareServicePath, String entityId, String entityType, String attrName, String destination) {
+        BasicDBObject update = new BasicDBObject();
+        update.append(operation, new BasicDBObject("dataModel", OrionMongoBaseSink.getStrDataModel(dataModel)).
+                append("isAggregated", isAggregated).
+                append("service", fiwareService).
+                append("servicePath", fiwareServicePath).
+                append("entityId", entityId).
+                append("entityType", entityType).
+                append("attrName", attrName).
+                append("destination", destination));
+        return update;
     } // buildUpdateForCollectionHash
     
 } // MongoBackend

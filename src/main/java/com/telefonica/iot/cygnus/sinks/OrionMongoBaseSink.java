@@ -23,7 +23,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.flume.Context;
 
@@ -162,6 +161,24 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             return null;
         } // if else if
     } // getDataModel
+    
+    /**
+     * Gets a trng reprensentation of a given data model.
+     * @param dataModel
+     * @return The string representation of the given data model
+     */
+    public static String getStrDataModel(DataModel dataModel) {
+        switch(dataModel) {
+            case COLLECTIONPERSERVICEPATH:
+                return "collection-per-service-path";
+            case COLLECTIONPERENTITY:
+                return "collection-per-entity";
+            case COLLECTIONPERATTRIBUTE:
+                return "collection-per-attribute";
+            default:
+                return null;
+        } // switch
+    } // getStrDataModel
 
     /**
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
@@ -187,10 +204,15 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @param fiwareServicePath
      * @param destination
      * @param attrName
+     * @param isAggregated
+     * @param entityId
+     * @param entityType
+     * @param fiwareService
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String dbName, String fiwareServicePath, String destination, String attrName)
+    protected String buildCollectionName(String dbName, String fiwareServicePath, String destination, String attrName,
+            boolean isAggregated, String entityId, String entityType, String fiwareService)
         throws Exception {
         String collectionName;
         
@@ -206,7 +228,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                 break;
             default:
                 // this should never be reached
-                collectionName = "";
+                collectionName = null;
         } // switch
         
         if (shouldHash) {
@@ -222,14 +244,14 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             
             String hash = generateHash(collectionName, limit);
             collectionName = collectionPrefix + hash;
-            backend.storeCollectionHash(dbName, hash, true);
+            backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
+                    entityType, attrName, destination);
         } else {
             collectionName = collectionPrefix + collectionName;
-            byte[] collectionNameBytes = collectionName.getBytes();
             
-            if (collectionNameBytes.length > Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
-                byte[] trunc = Arrays.copyOfRange(collectionNameBytes, 0, Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES);
-                collectionName = new String(trunc, "UTF-8");
+            if (collectionName.getBytes().length > Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
+                LOGGER.error("");
+                return null;
             } // if
         } // if else
         
