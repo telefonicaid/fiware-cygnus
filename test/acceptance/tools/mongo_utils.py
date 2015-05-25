@@ -88,7 +88,7 @@ class Mongo:
             if self.collection_name != EMPTY:
                 self.current_collection = self.current_database[self.collection_name]
         except Exception, e:
-             assert False, " ERROR - Connecting to MongoDB...\n %s " % (str(e))
+            assert False, " ERROR - Connecting to MongoDB...\n %s " % (str(e))
 
     def execute_command(self, command):
         """
