@@ -22,10 +22,7 @@ MongoDB organizes the data in databases that contain collections of Json documen
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
 2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
-3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The unit data depends on the chosen data model (see the configuration section):
-    * <i>collection-per-service-path</i>: the collection is called as the `fiware-servicePath` header value within the event.
-    * <i>collection-per-entity</i>: the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
-    * <i>collection-per-attribute</i>: the collection is called as the concatenation of the `fiware-servicePath`\_`destination`\_`attrName`.
+3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
 4. The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
 [Top](#top)
@@ -74,21 +71,14 @@ Assuming `mongo_username=myuser` and `should_hash=false` as configuration parame
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels	
     sth_/4wheels_car1_car
-    sth_/4wheels_car1_car_speed
     system.indexes
-    > db['sth_/4wheels'].find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.124Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     > db['sth_/4wheels_car1_car'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
-    > db['sth_/4wheels_car1_car_speed'].find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.560Z", "attrType" : "float", "attrValue" : "112.9" }
 
 NOTES:
 
 * `mongo` is the MongoDB CLI for querying the data.
-* The results for the three different data models (<i>collection-per-service-path</i>, <i>collection-per-entity</i> and <i>collection-per-attribute</i>) are shown respectively.
 * `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
 * This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
 
@@ -106,10 +96,9 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
-| data_model | no | collection-per-entity | Under study |
-| db_prefix | no | sth_ | Under study |
-| collection_prefix | no | sth_ | Under study |
 | should_hash | no | false | true for collection names based on a hash, false for human redable collections |
+| db_prefix | no | sth_ |
+| collection_prefix | no | sth_ |
 
 A configuration example could be:
 
@@ -121,7 +110,6 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.mongo-sink.mongo_username = myuser
     cygnusagent.sinks.mongo-sink.mongo_password = mypassword
-    cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.should_hash = false
