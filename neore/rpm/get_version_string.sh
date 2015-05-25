@@ -30,7 +30,7 @@ get_branch()
     git rev-parse --abbrev-ref HEAD
 }
 
-## PDI specific functions according the pdihub workflow
+## Specific functions according the TID workflow
 get_branch_type()
 {
     local branch="$(get_branch)"
@@ -46,7 +46,7 @@ get_branch_type()
 
 get_version_string()
 {
-    if [[ $(is_pdi_compliant) -eq 0 ]]; then # Not PDI compliant, return a dummy version
+    if [[ $(is_pdi_compliant) -eq 0 ]]; then # Not TID compliant, return a dummy version
         echo "HEAD-0-g$(git log --pretty=format:'%h' -1)"
         return
     fi
@@ -62,17 +62,17 @@ get_version_string()
         ;;
         develop)
            ## if we are in develop use the total count of commits
-           version=$(git describe --tags --long --match */KO)
+           version=$(git describe --tags --long --match *-KO)
            echo "${version%/*}-${version#*KO-}"
         ;;
         release)
            version=$(get_branch)
-           version=$(git describe --tags --long --match ${version#release/*}/KO)
-           echo "${version%/*}-${version#*KO-}"
-        ;;
+           version=$(git describe --tags --long --match ${version#release/*}-KO)
+           echo "${version%-KO*}-${version#*KO-}"
+  ;;
         other)
             ## We are in detached mode, use the last KO tag
-            version=$(git describe --tags --long --match */KO)
+            version=$(git describe --tags --long --match *-KO)
             echo "${version%/*}-${version#*KO-}"
         ;;
         *)
@@ -112,7 +112,7 @@ is_pdi_compliant()
     "other")
        # Maybe we are on detached mode but also are compliant
        # See if there's a tag (annotated or not) describing a Kick Off
-        git describe --tags --match */KO >/dev/null 2>/dev/null
+        git describe --tags --match *-KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -124,7 +124,7 @@ is_pdi_compliant()
         # remove the leading release/ if necessary
         ver=${ver#release/*}
         # see if there's a tag (annotated or not) describing its Kick Off
-        git describe --tags --match ${ver}/KO >/dev/null 2>/dev/null
+        git describe --tags --match ${ver}-KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -133,7 +133,7 @@ is_pdi_compliant()
     ;;
     "develop")
         # see if there's a tag (annotated or not) describing a Kick Off
-        git describe --tags --match */KO >/dev/null 2>/dev/null
+        git describe --tags --match *-KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -143,6 +143,3 @@ is_pdi_compliant()
     *)  echo 1 ;;
    esac
 }
-
-#cd $1
-#get_version_string| cut -d "-" -f $2
