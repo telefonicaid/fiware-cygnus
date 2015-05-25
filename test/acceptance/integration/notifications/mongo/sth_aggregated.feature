@@ -24,27 +24,45 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 #        -tg=-skip
 #
 
-Feature: Get raw values persisted by Cygnus using different requests
+Feature: Get aggregated values persisted by Cygnus using different requests
   As a cygnus user
-  I want to be able to get raw values persisted by Cygnus using different requests
+  I want to be able to get aggregated values persisted by Cygnus using different requests
   so that they become more functional and useful
 
-
   @happy_path
-  Scenario: received a notification at Cygnus and store it as raw data
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  Scenario: received a notification at Cygnus and store it as aggregated values
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
-    And service "test_happy_path", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And service "test_happy_path", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "json"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
+
+  @resolution
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several resolutions
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
+    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And verify if cygnus is installed correctly
+    And verify if mongo is installed correctly
+    And service "test_resolution", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And receives a notification with attributes value "random number=2", metadata value "True" and content "json"
+    Then I receive an "OK" http code
+    And validate that the aggregated value is generate by resolution "<resolution>" in mongo
+  Examples:
+    | resolution |
+    | month      |
+    | day        |
+    | hour       |
+    | minute     |
+    | second     |
 
   @service
-  Scenario Outline: received a notification at Cygnus and store it as raw data with several services
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several services
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
@@ -52,22 +70,22 @@ Feature: Get raw values persisted by Cygnus using different requests
     And service "<service>", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
     And delete database in mongo
   Examples:
     | service                 | content |
-    | test_orga601000         | json    |
-    | test_ORGA601110         | json    |
-    | test_Org_614010         | json    |
+    | test_orga60100000       | json    |
+    | test_ORGA60111000       | json    |
+    | test_Org_61401000       | json    |
     | with max length allowed | json    |
-    | test_orga601000         | xml     |
-    | test_ORGA601110         | xml     |
-    | test_Org_614010         | xml     |
+    | test_orga60100000       | xml     |
+    | test_ORGA60111000       | xml     |
+    | test_Org_61401000       | xml     |
     | with max length allowed | xml     |
 
-  @service_path @BUG_406
-  Scenario Outline: received a notification at Cygnus and store it as raw data with several services paths
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  @service_path
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several services paths
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
@@ -75,7 +93,7 @@ Feature: Get raw values persisted by Cygnus using different requests
     And service "test_service_path", service path "<service_path>", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | service_path            | content |
     | /serv60100              | json    |
@@ -93,17 +111,17 @@ Feature: Get raw values persisted by Cygnus using different requests
     | /                       | xml     |
     | with max length allowed | xml     |
 
-  @entities @BUG_407 @skip
-  Scenario Outline: received a notification at Cygnus and store it as raw data with several entities types and entities id
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  @resource @ISSUE_407 @skip
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several entities types and entities id
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
-    And service "test_entities", service path "/test", resource "<resource>", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And service "test_resource", service path "/test", resource "<resource>", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | resource                | content |
     | Room2_Room              | json    |
@@ -120,8 +138,8 @@ Feature: Get raw values persisted by Cygnus using different requests
     | with max length allowed | xml     |
 
   @attribute_name
-  Scenario Outline: received a notification at Cygnus and store it as raw data with several attributes names
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several attributes names
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
@@ -129,7 +147,7 @@ Feature: Get raw values persisted by Cygnus using different requests
     And service "test_attribute_name", service path "/test", resource "room2_room", with attribute number "1", attribute name "<attribute_name>" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | attribute_name          | content |
     | random                  | json    |
@@ -137,13 +155,10 @@ Feature: Get raw values persisted by Cygnus using different requests
     | temperature             | json    |
     | tempo_45                | json    |
     | random                  | xml     |
-    | RANDOM_ALPHANUMERIC=100 | xml     |
-    | temperature             | xml     |
-    | tempo_45                | xml     |
 
   @attribute_value
-  Scenario Outline: received a notification at Cygnus and store it as raw data with several attributes value
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several attributes value
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
@@ -151,7 +166,7 @@ Feature: Get raw values persisted by Cygnus using different requests
     And service "test_attribute_value", service path "/test", resource "room2_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "<attribute_value>", metadata value "True" and content "<content>"
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | attribute_value                     | content |
     | random number=2                     | json    |
@@ -176,21 +191,35 @@ Feature: Get raw values persisted by Cygnus using different requests
     | 1234567890122222                    | xml     |
 
   @several_notifications
-  Scenario Outline: received several notifications at Cygnus and store it as raw data with several notifications number
-    Given copy properties.json file from "epg_properties.json" to test "mongo-sink" and sudo local "false"
+  Scenario Outline: received a notification at Cygnus and store it as aggregated values with several notifications number
+    Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_several_notifications", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
-    And receives "<notifications_number>" notifications with consecutive values beginning with "25" and with one step
+    And receives "<notifications>" notifications with consecutive values beginning with "25" and with one step
     Then I receive an "OK" http code
-    And validate that the attribute value and type are stored in mongo
+    And validate that the aggregated is calculated successfully with resolution "<resolution>"
   Examples:
-    | notifications_number |
-    | 1                    |
-    | 10                   |
-    | 50                   |
-    | 100                  |
+    | resolution | notifications |
+    | month      | 5             |
+    | day        | 5             |
+    | hour       | 5             |
+    | minute     | 5             |
+    | month      | 10            |
+    | day        | 10            |
+    | hour       | 10            |
+    | minute     | 10            |
+    | month      | 50            |
+    | day        | 50            |
+    | hour       | 50            |
+    | minute     | 50            |
+    | month      | 100           |
+    | day        | 100           |
+    | hour       | 100           |
+    | minute     | 100           |
+
+
 
 
