@@ -3,6 +3,7 @@
     * [Mapping Flume events to MongoDB data structures](#section1.1)
     * [Example](#section1.2)
 * [Configuration](#section2)
+    * [Hashing based collections](#section2.1)
 * [Use cases](#section3)
 * [Implementation details](#section4)
     * [`OrionMongoSink` class](#section4.1)
@@ -60,7 +61,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser` as configuration parameter, then `OrionMongoSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameter, then `OrionMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -108,7 +109,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | data_model | no | collection-per-entity | Under study |
 | db_prefix | no | sth_ | Under study |
 | collection_prefix | no | sth_ | Under study |
-| should_hash | no | false | true is collection names are based on a hash, false for human redable collections |
+| should_hash | no | false | true for collection names based on a hash, false for human redable collections |
 
 A configuration example could be:
 
@@ -124,6 +125,13 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.should_hash = false
+
+[Top](#top)
+
+###<a name="section2.1"></a>Hashing based collections
+In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
+
+In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
 
 [Top](#top)
 
