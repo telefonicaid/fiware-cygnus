@@ -76,7 +76,7 @@ public class OrionMongoBaseSinkTest {
     public void testConfigure() {
         System.out.println("Testing OrionMongosink.configure");
         sink.configure(context);
-        assertEquals(mongoURI, sink.getURI());
+        assertEquals(mongoURI, sink.getMongoHosts());
         assertEquals(mongoUsername, sink.getUsername());
         assertEquals(mongoPassword, sink.getPassword());
         assertEquals(sink.getDataModel(dataModel), sink.getDataModel());

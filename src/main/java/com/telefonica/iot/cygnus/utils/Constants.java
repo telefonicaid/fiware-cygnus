@@ -67,5 +67,9 @@ public final class Constants {
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
     public static final String PARAM_NOTIFICATION_TARGET = "notification_target";
     public static final String PARAM_EVENTS_TTL = "events_ttl";
+    
+    // OrionSTHSink specific headers
+    public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 120;
+    public static final int STH_MIN_HASH_SIZE_IN_BYTES = 20;
 
 } // Constants
