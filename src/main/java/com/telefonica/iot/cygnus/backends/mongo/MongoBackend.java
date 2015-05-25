@@ -523,7 +523,9 @@ public class MongoBackend {
                 + query.toString() + ", update=" + update.toString());
         UpdateResult res = collection.updateOne(query, update, new UpdateOptions().upsert(true));
 /*
-        Theoretically, this part is needed, but it works with a single unpdate operation!
+        TECHDEBT:
+        https://github.com/telefonicaid/fiware-cygnus/issues/428
+        https://github.com/telefonicaid/fiware-cygnus/issues/429
         
         if (res.getMatchedCount() == 0) {
             LOGGER.error("There was an error when storing the collecion hash, database=" + dbName
