@@ -31,6 +31,7 @@ import java.util.Map;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -135,6 +136,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             txn.commit();
             status = Status.READY;
         } catch (Exception e) {
+            LOGGER.debug(Arrays.toString(e.getStackTrace()));
+            
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
