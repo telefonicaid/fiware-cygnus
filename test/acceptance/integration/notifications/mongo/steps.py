@@ -32,12 +32,36 @@ from integration.notifications.common_steps.notifications import *   # steps to 
 
 # ------------------------------------------------ validations --------------------------------------------------------
 @step(u'verify if mongo is installed correctly')
-def mysql_is_installed_correctly(step):
+def mongo_is_installed_correctly(step):
     """
      verify that mongo is installed correctly, the version is controlled
     :param step:
     """
-    world.cygnus.verify_mongo_version()
+    driver = None
+    if world.sink == "mongo-sink":
+        driver = world.mongo
+    elif world.sink == "sth-sink":
+        driver = world.sth
+    else:
+        raise Exception(" ERROR - unknown sink: %s" % world.sink)
+    world.cygnus.verify_mongo_version(driver)
+
+@step(u'delete database in mongo')
+def delete_database_in_mongo(step):
+    """
+    delete database and collections in mongo
+    :param step:
+    """
+    driver = None
+    if world.sink == "mongo-sink":
+        driver = world.mongo
+    elif world.sink == "sth-sink":
+        driver = world.sth
+    else:
+        raise Exception(" ERROR - unknown sink: %s" % world.sink)
+    world.cygnus.drop_database_in_mongo(driver)
+
+# ---------------------------------  validations -----------------------------------
 
 @step (u'validate that the attribute value and type are stored in mongo')
 def validate_that_the_attribute_value_metadata_and_type_are_stored_in_mongo(step):
@@ -56,13 +80,14 @@ def validate_that_the_aggregated_values_are_generate_in_mongo(step, resolution):
     :param step:
     :param resolution: resolutions type (  month | day | hour | minute | second )
     """
-    world.sth.verify_aggregates_in_mongo(resolution)
+    world.cygnus.verify_aggregates_in_mongo(resolution)
 
-@step(u'delete database in mongo')
-def delete_database_in_mongo(step):
+@step(u'validate that the aggregated is calculated successfully with resolution "([^"]*)"')
+def validate_that_the_aggregated_is_calculated_successfully(step, resolution):
     """
-    delete database and collections in mongo
+    validate that the aggregated is calculated successfully
+    :param method: resolution
     :param step:
     """
-    world.cygnus.drop_database_in_mongo(world.mongo)
+    world.cygnus.validate_that_the_aggregated_is_calculated_successfully(resolution)
 

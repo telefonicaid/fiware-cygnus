@@ -163,10 +163,8 @@ class Properties:
                                  retries=world.config['mongo']['mongo_retries_search'],
                                  retry_delay=world.config['mongo']['mongo_delay_to_retry']
             )
-
-        """
         elif sink == "sth-sink":
-            world.sth = STH     (version=world.config['sth']['sth_version'],
+            world.sth = Mongo   (version=world.config['sth']['sth_version'],
                                  verify_version=world.config['sth']['sth_verify_version'],
                                  host=world.config['sth']['sth_host'],
                                  port=world.config['sth']['sth_port'],
@@ -176,7 +174,7 @@ class Properties:
                                  retries=world.config['sth']['sth_retries_search'],
                                  retry_delay=world.config['sth']['sth_delay_to_retry']
             )
-        """
+
 
 
 

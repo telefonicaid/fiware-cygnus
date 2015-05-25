@@ -77,7 +77,7 @@ EMPTY            = u''
 # ckan constants
 MAX_TENANT_LENGTH              = u'abcde678901234567890123456789019'
 MAX_TENANT_LENGTH_ROW          = u'abcde67890123456789012345699_row'
-MAX_SERVICE_PATH_LENGTH        = u'abcdefghij1234567890abcdefghij1234567890abcdefghij'
+MAX_SERVICE_PATH_LENGTH        = u'/abcdefghij1234567890abcdefghij1234567890abcdefgh'
 MAX_RESOURCE_LENGTH            = u'1234567890123_45678901234567890123456789012345678901234567890126'
 WITH_MAX_LENGTH_ALLOWED        = u'with max length allowed'
 ORGANIZATION_MISSING           = u'organization is missing'
@@ -215,7 +215,8 @@ class Cygnus:
         :param different_port: determine if the port is different or not
         """
         self.instance_id       = id
-        self.instances_number = quantity
+        self.sink              = sinks
+        self.instances_number  = quantity
         self.persistence       = persistence
         self.different_port    = different_port
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True)
@@ -245,7 +246,7 @@ class Cygnus:
                     ops_list = cygnus_agent.config_mongo_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host_port="%s:%s" % (world.config['mongo']['mongo_host'], world.config['mongo']['mongo_port']), user=world.config['mongo']['mongo_user'], password=world.config['mongo']['mongo_password'])
                     ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['mongo']['mongo_channel_capacity'], transaction_capacity=world.config['mongo']['mongo_channel_transaction_capacity'])
                 elif sinks_list[i].find(STH_SINK)>=0:
-                    ops_list = cygnus_agent.config_sth_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host_port=world.config['sth']['sth_host_post'], user=world.config['sth']['sth_user'], password=world.config['sth']['sth_pass'])
+                    ops_list = cygnus_agent.config_sth_sink(sink=sinks_list[i], channel=self.__get_channels(sinks_list[i]), host_port="%s:%s" % (world.config['sth']['sth_host'], world.config['sth']['sth_port']), user=world.config['sth']['sth_user'], password=world.config['sth']['sth_password'])
                     ops_list = cygnus_agent.config_channel (self.__get_channels(sinks_list[i]), capacity=world.config['sth']['sth_channel_capacity'], transaction_capacity=world.config['sth']['sth_channel_transaction_capacity'])
 
             # create and modify values in agent_<id>.conf
@@ -351,6 +352,14 @@ class Cygnus:
         res = resource_name.split ("_")
         return  res [0], res [1] # identity Id , identity Type
 
+    def get_timestamp_remote(self):
+        """
+        return date-time in timestamp from sth server
+        :return float
+        """
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        return float(myfab.run("date +%s"))  # get timestamp
+
     def received_notification(self, attribute_value, metadata_value, content):
         """
         notifications
@@ -368,10 +377,10 @@ class Cygnus:
         notification.create_attributes (self.attributes_number, self.attributes_name, self.attribute_type, attribute_value)
         resp =  notification.send_notification(self.entity_id, self.entity_type)
 
+        self.date_time         = self.get_timestamp_remote()
         self.attributes=notification.get_attributes()
         self.attributes_name=notification.get_attributes_name()
         self.attributes_value=notification.get_attributes_value()
-
         self.attributes_metadata=notification.get_attributes_metadata_number()
         self.attributes_number=int(notification.get_attributes_number())
         return resp
@@ -383,6 +392,7 @@ class Cygnus:
                 hint: "random number=X" per attribute_value_init is not used in this function
         :param notif_number: number of notification
         """
+        self.notifications_number = notif_number
         for i in range(int(notif_number)):
             temp_value = Decimal(attribute_value_init) + i
             resp = world.cygnus.received_notification(str(temp_value), "False", "json")
@@ -425,8 +435,8 @@ class Cygnus:
         if service_path == WITH_MAX_LENGTH_ALLOWED: self.service_path = MAX_SERVICE_PATH_LENGTH.lower()
         elif service_path != DEFAULT:
             self.service_path = service_path.lower()
-
-        if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
+        if not (self.sink.find("mongo") >= 0 or self.sink.find("sth") >= 0): # if sink is different of mongo or sth values, the service path remove "/" char if does exists
+            if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
         if resource_name == WITH_MAX_LENGTH_ALLOWED:
             self.resource = MAX_RESOURCE_LENGTH[0:(len(MAX_RESOURCE_LENGTH)-len(self.service_path)-1)].lower()  # file (max 64 chars) = service_path + "_" + resource
         elif resource_name == DEFAULT:
@@ -629,14 +639,15 @@ class Cygnus:
 
     # ------------------------------------------  mongo raw ------------------------------------------------------------
 
-    def verify_mongo_version(self):
+    def verify_mongo_version(self, driver):
         """
         verify mongo version
         if the version is incorrect show an error with both versions, the one used and the expected
+        :param driver: mongo driver
         """
-        world.mongo.connect()
-        resp = world.mongo.eval_version()
-        world.mongo.disconnect()
+        driver.connect()
+        resp = driver.eval_version()
+        driver.disconnect()
         assert resp == u'OK', resp
 
     def verify_values_in_mongo(self):
@@ -654,6 +665,8 @@ class Cygnus:
         assert cursor.count() != 0, " ERROR - the attributes with prefix %s has not been stored in mongo successfully" % (self.attributes_name)
         world.mongo.disconnect()
 
+    # ---------------------------------------  mongo aggregated---------------------------------------------------------
+
     def verify_aggregates_in_mongo(self, resolution):
         """
         verify aggregates from mongo:
@@ -661,10 +674,8 @@ class Cygnus:
         :param resolution: resolutions type (  month | day | hour | minute | second )
         """
         time_zone = 2
-        find_dict = {"_id.attrName" :  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
-                     "_id.entityId" : self.entity_id,
-                     "_id.entityType" : self.entity_type,
-                     "_id.resolution" : resolution}
+        find_dict = {"_id.attrName":  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
+                     "_id.resolution": str(resolution)}
 
         origin_year   = general_utils.get_date_only_one_value(self.date_time, "year")
         origin_month  = general_utils.get_date_only_one_value(self.date_time, "month")
@@ -674,14 +685,13 @@ class Cygnus:
         origin_minute = general_utils.get_date_only_one_value(self.date_time, "minute")
         origin_second = general_utils.get_date_only_one_value(self.date_time, "second")
 
-        world.mongo.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
-        world.mongo.choice_collection("%s_%s.%s" % (STH_COLLECTION_PREFIX, self.service_path, AGGR))
-        cursor = world.mongo.find_with_retry(find_dict)
+        world.sth.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
+        world.sth.choice_collection("%s_%s_%s_%s.%s" % (STH_COLLECTION_PREFIX, self.service_path, self.entity_id, self.entity_type, AGGR))
+        cursor = world.sth.find_with_retry(find_dict)
         assert cursor.count() != 0, " ERROR - the aggregated has not been stored in mongo successfully "
-        doc_list = world.mongo.get_cursor_value(cursor)   # get all dictionaries into a cursor, return a list
+        doc_list = world.sth.get_cursor_value(cursor)   # get all dictionaries into a cursor, return a list
 
         for doc in doc_list:
-
             offset = int(general_utils.get_date_only_one_value(self.date_time, resolution))
             if resolution == "month":
                 offset=offset-1
@@ -713,7 +723,7 @@ class Cygnus:
             assert float(doc["points"][offset]["max"]) == float(self.attributes_value), " ERROR -- in maximun value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
             assert float(doc["points"][offset]["sum"]) == float(self.attributes_value), " ERROR -- in sum value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
             assert float(doc["points"][offset]["sum2"]) == (float(self.attributes_value)*float(self.attributes_value)), " ERROR -- in sum2 value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
-        world.mongo.disconnect()
+        world.sth.disconnect()
 
     def verify_aggregates_is_not_in_mongo(self, resolution):
         """
@@ -730,6 +740,45 @@ class Cygnus:
         assert cursor.count() == 0, " ERROR - the aggregated has been stored in mongo."
         world.mongo.disconnect()
 
+    def validate_that_the_aggregated_is_calculated_successfully(self, resolution):
+        """
+        validate that the aggregated is calculated successfully
+        """
+        sum  = 0
+        sum2 = 0
+        offset = 0
+        find_dict = {"_id.attrName":  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
+                     "_id.resolution": str(resolution)}
+
+        world.sth.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
+        world.sth.choice_collection("%s_%s_%s_%s.%s" % (STH_COLLECTION_PREFIX, self.service_path, self.entity_id, self.entity_type, AGGR))
+        cursor = world.sth.find_with_retry(find_dict)
+        assert cursor.count() != 0, " ERROR - the aggregated has not been stored in mongo successfully "
+        doc= world.sth.get_cursor_value(cursor)[0]   # get all dictionaries into a cursor, return a list
+
+        offset = int(general_utils.get_date_only_one_value(self.date_time, resolution))
+        if resolution == "month":
+            offset=offset-1
+        elif resolution == "day":
+            offset=offset-1
+        elif resolution == "hour":
+            offset =offset-2
+
+        assert float(doc["points"][offset]["min"]) == float(self.attributes_value), \
+             "  ERROR - in aggregated with min %s" % (str(doc["points"][offset]["min"]))
+        assert float(doc["points"][offset]["max"]) == float(self.attributes_value) + int(self.notifications_number)-1, \
+             "  ERROR - in aggregated with max %s" % (str(doc["points"][offset]["max"]))
+        for i in range(int(self.notifications_number)):
+            v = int(self.attributes_value) + i
+            sum = sum + v
+        assert float(doc["points"][offset]["sum"]) == float(sum), \
+             "  ERROR - in aggregated with sum %s" % (str(doc["points"][offset]["sum"]))
+        for i in range(int(self.notifications_number)):
+            v = int(self.attributes_value) + i
+            sum2 = sum2 + (v*v)
+        assert float(doc["points"][offset]["sum2"]) == float(sum2), \
+             "  ERROR - in aggregated with sum2 %s" % (str(doc["points"][offset]["sum2"]))
+
     def drop_database_in_mongo(self, driver):
          """
          delete database and collections in mongo
@@ -738,8 +787,6 @@ class Cygnus:
          driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.tenant[self.cygnus_mode]))
          driver.drop_database()
          driver.disconnect()
-
-    # ---------------------------------------  mongo aggregated---------------------------------------------------------
 
     # ------------------------------------------  Validations ----------------------------------------------------------
     def verify_response_http_code (self, http_code_expected, response):
