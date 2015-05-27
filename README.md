@@ -10,6 +10,8 @@
         * [HDFS persistence](#section3.4.1)
         * [CKAN persistence](#section3.4.2)
         * [MySQL persistence](#section3.4.3)
+        * [MongoDB persistence](#section3.4.4)
+        * [STH persistence](#section3.4.5)
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
@@ -38,6 +40,8 @@ Current stable release is able to persist Orion context data in:
 * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
+* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
+* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
 Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
@@ -441,7 +445,7 @@ NOTE: `mysql` is the MySQL CLI for querying the data.
 
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` as configuration parameter, the data within the body will be persisted as:
+Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameters, the data within the body will be persisted as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -468,11 +472,9 @@ NOTES:
 [Top](#top)
 
 ####<a name="section3.4.5"></a>STH persistence
-
-###Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionSTHSink`](doc/desing/OrionSTHSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` as configuration parameter, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -834,6 +836,24 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# mongo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.mongo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.mongo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mongo-channel.transactionCapacity = 100
+
+#=============================================
+# sth-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.sth-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.sth-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.sth-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
