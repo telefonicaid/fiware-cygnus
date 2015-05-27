@@ -66,15 +66,15 @@ public class OrionTestSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs);
         
-        // lob about the event headers with deliberated INFO level
+        // log about the event headers with deliberated INFO level
         LOGGER.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime
-                + "), fiwareService=" + fiwareService + ", fiwareServicePath=" + fiwareServicePath
+                + "), fiwareService=" + fiwareService + ", fiwareServicePath=" + Arrays.toString(fiwareServicePaths)
                 + ", destinations=" + Arrays.toString(destinations) + ")");
         
         // iterate on the contextResponses

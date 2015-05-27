@@ -2,7 +2,7 @@
 #
 # Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# This file is part of Short Term Historic (FI-WARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -17,11 +17,12 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 # iot_support at tid.es
 #
+
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 from fabric.api import env, run, get
-from fabric.context_managers import hide
-from fabric.operations import sudo
+from fabric.context_managers import hide, cd
+from fabric.operations import sudo, local
 from StringIO import StringIO
 
 
@@ -70,47 +71,58 @@ class FabricSupport:
         env.connection_attempts  = kwargs.get(RETRY,RETRY_DEFAULT)
         env.cwd                  = kwargs.get(PATH, "")
         self.sudo                = kwargs.get(SUDO, False)
+        # if host is localhost use Process instead of Fabric. see run method
+        if self.host.lower() == "localhost" or self.host == "127.0.0.1":
+            self.LOCALHOST = True
+        else:
+            self.LOCALHOST = False
 
-    def __sub_run (self, command, sudo_run):
+
+    def __sub_run (self, command, path, sudo_run):
         """
         run a command independently that the output message by console is displayed or not
         :param command: command o script to execute in remote
+        :param path: path where execute the command
         :param sudo_run: with superuser privileges (True | False)
         """
-        if sudo_run:
-            sudo (command)
-        else:
-            run(command)
+        with cd(path):
+            if self.LOCALHOST:
+                return local(command)
+            elif sudo_run:
+                return sudo(command)
+            else:
+                return run(command)
 
     def run(self, command, **kwargs):
         """
-        run a command or script in remote host
+        run a command or script in remote host, but if host is localhost use Process instead of Fabric
         :param command: command o script to execute in remote
         :param path: path where execute the command
         :param sudo: with superuser privileges (True | False)
         :param hide: show message or not (True or False)
         """
-        env.cwd   = kwargs.get(PATH, env.cwd)
-        sudo_run  = kwargs.get(SUDO, self.sudo)
-        self.hide = kwargs.get(HIDE, self.hide)
+        path     = kwargs.get(PATH, env.cwd)
+        sudo_run = kwargs.get(SUDO, self.sudo)
+        hide_msg = kwargs.get(HIDE, self.hide)
         try:
-            if self.hide:
+            if hide_msg:
                 with hide('running', 'stdout', 'stderr'):
-                    self.__sub_run(command,sudo_run)
+                    return self.__sub_run(command, path, sudo_run)
             else:
-                self.__sub_run(command,sudo_run)
+                return self.__sub_run(command, path, sudo_run)
         except Exception, e:
             assert False, "ERROR  - running the command \"%s\" remotely with Fabric \n       - %s" % (command, str (e))
 
     def runs(self, ops_list, **kwargs):
         """
         run several commands in a list with its path associated
-        :param sudo: with superuser privileges (True | False)
         :param ops_list: list of commands with its current path associated and if it is necessary of superuser privilege (dictionary).
                          ex:{"command": "ls", "path": "/tmp", "sudo": False}
+        :param hide: show message or not (True or False)
         """
+        hide_msg = kwargs.get(HIDE, self.hide)
         for op in ops_list:
-            self.run(op[COMMAND], path=op[PATH], sudo=op[SUDO])
+            self.run(op[COMMAND], path=op[PATH], sudo=op[SUDO], hide=hide_msg)
 
     def current_directory (self, directory):
         """
@@ -119,14 +131,20 @@ class FabricSupport:
         """
         env.cwd = directory
 
-    def __sub_read_file(self, file):
+    def __sub_read_file(self, file, sudo_run):
         """
         read a file independently that the output message by console is displayed or not
         :param file: file name to read
+        :param sudo_run: with superuser privileges (True | False)
         """
-        fd = StringIO()
-        get(file, fd)
-        return fd.getvalue()
+        if self.LOCALHOST:
+            with open(file) as config_file:
+                return config_file.readlines()
+        else:
+            fd = StringIO()
+            get(file, use_sudo=sudo_run)
+            get(file, fd)
+            return fd.getvalue()
 
     def read_file(self, file, **kwargs):
         """
@@ -134,15 +152,17 @@ class FabricSupport:
         :param file: file name to read
         :param path: path where the file is read
         :param hide: show message or not (True or False)
+        :param sudo: with superuser privileges (True | False)
         """
-        env.cwd  = kwargs.get(PATH, env.cwd)
-        self.hide = kwargs.get(HIDE, self.hide)
+        env.cwd   = kwargs.get(PATH, env.cwd)
+        hide_run = kwargs.get(HIDE, self.hide)
+        sudo_run  = kwargs.get(SUDO, self.sudo)
         try:
-            if self.hide:
+            if hide_run:
                 with hide('running', 'stdout', 'stderr'):
-                    return self.__sub_read_file(file)
+                    return self.__sub_read_file(file, sudo_run)
             else:
-                return self.__sub_read_file(file)
+                return self.__sub_read_file(file, sudo_run)
         except Exception, e:
             assert False, "ERROR  -reading a File \"%s\" remotely with Fabric \n       - %s" % (file, str (e))
 

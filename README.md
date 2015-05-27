@@ -215,7 +215,7 @@ The body simply contains a byte representation of the HTTP payload that will be 
 
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-Assuming `cosmos_default_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
+Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
@@ -437,6 +437,166 @@ NOTE: `mysql` is the MySQL CLI for querying the data.
 
 [Top](#top)
 
+####<a name="section3.4.4"></a>Mongo persistence
+
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
+
+Assuming `mongo_username=myuser` as configuration parameter, the data within the body will be persisted as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    vehicles           0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    4wheels_car1_car
+    system.indexes
+    > db.4wheels_car1_car.find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
+
+NOTES:
+
+* `mongo` is the MongoDB CLI for querying the data.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
+
+[Top](#top)
+
+####<a name="section3.4.5"></a>STH persistence
+
+###Mapping Flume events to MongoDB data structures
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionSTHSink`](doc/desing/OrionSTHSink.md) each time a Flume event is taken from its channel.
+
+Assuming `mongo_username=myuser` as configuration parameter, then `OrionSTHSink` will persist the data within the body as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    vehicles           0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels_car1_car.aggr
+    system.indexes
+    > db['sth_/4wheels_car1_car.aggr'].find()
+    { 
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 12, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 23, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
+            ...,
+            { "offset" : 3, "samples" : 0, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 11, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 22, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 13, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "points" : [
+            { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 20, "samples" : 1, "sum" : 112.9, "sum2" : 12746.41, "min" : 112.9, "max" : 112.9 },
+            ...,
+            { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    { 
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 12, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 23, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-01-01T00:00:00Z"), "resolution" : "month", "range" : "year", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 1, "sum" : 0, "sum2" : 0, "min" : 0, "max" : 0 },
+            ...,
+            { "offset" : 3, "samples" : 0, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 11, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:13:00Z"), "resolution" : "second", "range" : "minute", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 22, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T12:00:00Z"), "resolution" : "minute", "range" : "hour", "attrType" : "float" },
+        "points" : [
+            { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 13, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 59, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+    {
+        "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-01T00:00:00Z"), "resolution" : "day", "range" : "month", "attrType" : "float" },
+        "points" : [
+            { "offset" : 1, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
+            ...,
+            { "offset" : 20, "samples" : 1, "sum" : 74.6, "sum2" : 5565.16, "min" : 74.6, "max" : 74.6 },
+            ...,
+            { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
+        ]
+    }
+
+NOTES:
+
+* `mongo` is the MongoDB CLI for querying the data.
+* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
+
+[Top](#top)
+
 ##<a name="section4"></a>Installing Cygnus
 ###<a name="section4.1"></a>RPM install (recommended)
 Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
@@ -533,14 +693,14 @@ cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 # Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts de
-# Interceptor type, do not change
+cygnusagent.sources.http-source.interceptors = ts gi
+# TimestampInterceptor, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-# Destination extractor interceptor, do not change
-cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
-# Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+# GroupingInterceptor, do not change
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+# Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
-cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/conf/matching_table.conf
+cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # OrionHDFSSink configuration
@@ -548,17 +708,15 @@ cygnusagent.sources.http-source.interceptors.de.matching_table = /usr/cygnus/con
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
-# Comma-separated list of FQDN/IP address regarding the Cosmos Namenode endpoints
+# Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-cygnusagent.sinks.hdfs-sink.cosmos_host = x1.y1.z1.w1,x2.y2.z2.w2
-# port of the Cosmos service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs and free choice for inifinty
-cygnusagent.sinks.hdfs-sink.cosmos_port = 14000
-# default username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.cosmos_default_username = cosmos_username
-# default password for the default username
-cygnusagent.sinks.hdfs-sink.cosmos_default_password = xxxxxxxxxxxxx
-# HDFS backend type (webhdfs, httpfs or infinity)
-cygnusagent.sinks.hdfs-sink.hdfs_api = httpfs
+cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
+# port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
+cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+# username allowed to write in HDFS
+cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
+# password for the username
+cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # Hive FQDN/IP address of the Hive server
@@ -611,6 +769,44 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+
+# ============================================
+# OrionMongoSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+# channel name from where to read notification events
+cygnusagent.sinks.mongo-sink.channel = mongo-channel
+# FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
+cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
+# password for the user above (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
+# prefix for the MongoDB databases
+cygnusagent.sinks.mongo-sink.db_prefix = sth_
+# prefix for the MongoDB collections
+cygnusagent.sinks.mongo-sink.collection_prefix = sth_
+# true is collection names are based on a hash, false for human redable collections
+cygnusagent.sinks.mongo-sink.should_hash = false
+
+# ============================================
+# OrionSTHSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
+# channel name from where to read notification events
+cygnusagent.sinks.sth-sink.channel = sth-channel
+# FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
+cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.sth-sink.mongo_username = mongo_username
+# password for the user above (or empty if authentication is not enabled in MongoDB)
+cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
+# prefix for the MongoDB databases
+cygnusagent.sinks.sth-sink.db_prefix = sth_
+# prefix for the MongoDB collections
+cygnusagent.sinks.sth-sink.collection_prefix = sth_
+# true is collection names are based on a hash, false for human redable collections
+cygnusagent.sinks.mongo-sink.should_hash = false
 
 #=============================================
 # hdfs-channel configuration
@@ -742,7 +938,7 @@ Check [doc/operation/alarms.md](doc/operation/alarms.md) for a detailed list of 
 Please refer to the linked specific documents when looking for information regarding these topics:
 
 * [Management Interface](doc/design/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
-* [Pattern-based grouping](doc/design/interceptors.md). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events.
+* [Pattern-based grouping](doc/design/interceptors.md). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events. It creates specific `fiware-servicePath` per notified context element as well.
 * [Kerberized HDFS](doc/operation/hdfs_kerberos_authentication.md). This document shows you how to authenticate Cygnus on a Kerberized HDFS.
 * [Multi-instance](conf/README.md). Several instances of Cygnus can be run as a service.
 * [Performance tips](doc/operation/performance_tuning_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtaint the best from Cygnus.

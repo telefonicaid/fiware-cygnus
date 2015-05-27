@@ -1,12 +1,12 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
  * details.
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.utils;
 
-import com.telefonica.iot.cygnus.utils.Utils;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;

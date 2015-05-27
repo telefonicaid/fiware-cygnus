@@ -142,7 +142,7 @@ public class OrionCKANSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
         
         // human readable version of the reception time
@@ -164,7 +164,7 @@ public class OrionCKANSink extends OrionSink {
                     + entityType + ")");
             
             // build the pavkage and resource name
-            String pkgName = buildPkgName(fiwareService, fiwareServicePath);
+            String pkgName = buildPkgName(fiwareService, fiwareServicePaths[i]);
             String resName = buildResName(destinations[i]);
 
             // iterate on all this CKANBackend's attributes, if there are attributes

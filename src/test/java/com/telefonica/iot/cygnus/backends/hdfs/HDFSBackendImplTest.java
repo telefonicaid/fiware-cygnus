@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.mockito.Mockito;
@@ -96,7 +95,7 @@ public class HDFSBackendImplTest {
         
         try {
             backend.setHttpClient(mockHttpClientExistsCreateDir);
-            backend.createDir(user, dirPath);
+            backend.createDir(dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -113,7 +112,7 @@ public class HDFSBackendImplTest {
         
         try {
             backend.setHttpClient(mockHttpClientCreateFile);
-            backend.createFile(user, dirPath, data);
+            backend.createFile(dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -130,7 +129,7 @@ public class HDFSBackendImplTest {
         
         try {
             backend.setHttpClient(mockHttpClientAppend);
-            backend.append(user, dirPath, data);
+            backend.append(dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -147,7 +146,7 @@ public class HDFSBackendImplTest {
         
         try {
             backend.setHttpClient(mockHttpClientExistsCreateDir);
-            backend.exists(user, dirPath);
+            backend.exists(dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

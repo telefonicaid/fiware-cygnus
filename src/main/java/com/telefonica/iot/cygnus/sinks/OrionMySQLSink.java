@@ -154,7 +154,7 @@ public class OrionMySQLSink extends OrionSink {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String fiwareServicePath = eventHeaders.get(Constants.HEADER_SERVICE_PATH);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
@@ -183,7 +183,7 @@ public class OrionMySQLSink extends OrionSink {
                     + entityType + ")");
             
             // build the table name
-            String tableName = buildTableName(fiwareServicePath, destinations[i]);
+            String tableName = buildTableName(fiwareServicePaths[i], destinations[i]);
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
