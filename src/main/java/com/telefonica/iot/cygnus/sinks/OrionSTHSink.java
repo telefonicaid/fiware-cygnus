@@ -43,6 +43,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
+        
+        for (int i = 0; i < fiwareServicePaths.length; i++) {
+            fiwareServicePaths[i] = "/" + fiwareServicePaths[i]; // this sink uses the removed initial slash
+        } // for
+        
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
@@ -59,7 +64,8 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.COLLECTIONPERSERVICEPATH) {
             for (String fiwareServicePath : fiwareServicePaths) {
-                collectionName = buildCollectionName(fiwareServicePath, null, null) + ".aggr";
+                collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
+                        fiwareService) + ".aggr";
                 backend.createCollection(dbName, collectionName);
             } // for
         } // if
@@ -78,7 +84,8 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             
             // create the collection at this stage, if the data model is collection-per-entity
             if (dataModel == DataModel.COLLECTIONPERENTITY) {
-                collectionName = buildCollectionName(fiwareServicePaths[i], destinations[i], null) + ".aggr";
+                collectionName = buildCollectionName(dbName, fiwareServicePaths[i], destinations[i], null, true,
+                        entityId, entityType, fiwareService) + ".aggr";
                 backend.createCollection(dbName, collectionName);
             } // if
             
@@ -106,7 +113,8 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
                 if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
-                    collectionName = buildCollectionName(fiwareServicePaths[i], destinations[i], attrName) + ".aggr";
+                    collectionName = buildCollectionName(dbName, fiwareServicePaths[i], destinations[i], attrName,
+                            true, entityId, entityType, fiwareService) + ".aggr";
                     backend.createCollection(dbName, collectionName);
                 } // if
 

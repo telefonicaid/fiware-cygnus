@@ -22,6 +22,8 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
+import java.security.MessageDigest;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.flume.Context;
 
 /**
@@ -42,15 +44,16 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected DataModel dataModel;
     protected String dbPrefix;
     protected String collectionPrefix;
+    protected boolean shouldHash;
     protected MongoBackend backend;
     
     /**
-     * Gets the mongo URI. It is protected since it is used by the tests.
+     * Gets the mongo hosts. It is protected since it is used by the tests.
      * @return
      */
-    protected String getURI() {
+    protected String getMongoHosts() {
         return mongoHosts;
-    } // getURI
+    } // getMongoHosts
     
     /**
      * Gets the mongo username. It is protected since it is used by the tests.
@@ -118,17 +121,13 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
         dataModel = getDataModel(context.getString("data_model", "collection-per-entity"));
-        
-        if (dataModel == null) {
-            LOGGER.error("Invalid data model, using 'collection-per-attribute' by default");
-            dataModel = DataModel.COLLECTIONPERATTRIBUTE;
-        } // if
-        
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model=" + dataModel + ")");
         dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
         collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
+        shouldHash = context.getBoolean("should_hash", false);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
     } // configure
     
     @Override
@@ -156,6 +155,24 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             return null;
         } // if else if
     } // getDataModel
+    
+    /**
+     * Gets a trng reprensentation of a given data model.
+     * @param dataModel
+     * @return The string representation of the given data model
+     */
+    public static String getStrDataModel(DataModel dataModel) {
+        switch(dataModel) {
+            case COLLECTIONPERSERVICEPATH:
+                return "collection-per-service-path";
+            case COLLECTIONPERENTITY:
+                return "collection-per-entity";
+            case COLLECTIONPERATTRIBUTE:
+                return "collection-per-attribute";
+            default:
+                return null;
+        } // switch
+    } // getStrDataModel
 
     /**
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
@@ -177,36 +194,80 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     /**
      * Builds a collection name given a fiwareServicePath and a destination. It throws an exception if the naming
      * conventions are violated.
+     * @param dbName
      * @param fiwareServicePath
      * @param destination
      * @param attrName
+     * @param isAggregated
+     * @param entityId
+     * @param entityType
+     * @param fiwareService
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String fiwareServicePath, String destination, String attrName)
+    protected String buildCollectionName(String dbName, String fiwareServicePath, String destination, String attrName,
+            boolean isAggregated, String entityId, String entityType, String fiwareService)
         throws Exception {
-        String collectionName = collectionPrefix;
+        String collectionName;
         
         switch (dataModel) {
             case COLLECTIONPERSERVICEPATH:
-                collectionName += fiwareServicePath;
+                collectionName = fiwareServicePath;
                 break;
             case COLLECTIONPERENTITY:
-                collectionName += fiwareServicePath + "_" + destination;
+                collectionName = fiwareServicePath + "_" + destination;
                 break;
             case COLLECTIONPERATTRIBUTE:
-                collectionName += fiwareServicePath + "_" + destination + "_" + attrName;
+                collectionName = fiwareServicePath + "_" + destination + "_" + attrName;
                 break;
             default:
-                // this will never be reached
+                // this should never be reached
+                collectionName = null;
         } // switch
-
-        if (collectionName.length() > Constants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building collectionName=fiwareServicePath + '_' + destination ("
-                    + collectionName + ") and its length is greater than " + Constants.MAX_NAME_LEN);
-        } // if
+        
+        if (shouldHash) {
+            int limit = getHashSizeInBytes(dbName);
+            
+            if (limit < Constants.STH_MIN_HASH_SIZE_IN_BYTES) {
+                LOGGER.error("The available bytes for the hashes to be used as part of the collection names is not "
+                        + "big enough (at least " + Constants.STH_MIN_HASH_SIZE_IN_BYTES + " bytes are needed), "
+                        + "please reduce the size of the database prefix, the fiware-service and/or the collection "
+                        + "prefix");
+                return null;
+            } // if
+            
+            String hash = generateHash(collectionName, limit);
+            collectionName = collectionPrefix + hash;
+            backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
+                    entityType, attrName, destination);
+        } else {
+            collectionName = collectionPrefix + collectionName;
+            
+            if (collectionName.getBytes().length > Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
+                LOGGER.error("");
+                return null;
+            } // if
+        } // if else
         
         return collectionName;
     } // buildCollectionName
+    
+    private int getHashSizeInBytes(String dbName) {
+        return Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES - dbName.getBytes().length
+                - collectionPrefix.getBytes().length - ".aggr".getBytes().length - 1;
+    } // getHashSizeInBytes
+    
+    private String generateHash(String collectionName, int limit) throws Exception {
+        MessageDigest messageDigest;
+        messageDigest = MessageDigest.getInstance("SHA-512");
+        byte [] digest = messageDigest.digest(collectionName.getBytes());
+        String hash = Hex.encodeHexString(digest);
+
+        if (limit > 0) {
+            hash = hash.substring(0, limit);
+        } // if
+
+        return hash;
+    } // generateHash
     
 } // OrionMongoBaseSink

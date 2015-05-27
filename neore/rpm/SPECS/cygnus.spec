@@ -2,10 +2,10 @@
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
-# cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
 # later version.
-# cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
 # details.
 # 
@@ -173,6 +173,19 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Mon May 25 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.1
+- [HARDENING] OrionHDFSSink parameters are now called "hdfs_*" instead of "cosmos_*" (#374)
+- [HARDENING] Add a permament connection to the MySQL Backend (#364)
+- [BUG] Add the original (and removed by OrionRESTHandler) slash character to fiware-servicePath (#403)
+- [FEATURE] Use Json-like rules definition for pattern-based grouping (#387)
+- [BUG] Set the Fiware-Service and Fiware-ServicePath maximum lenght to 50 characters (previously, it was 32 characters) (#406)
+- [FEATURE] Add implementation details to the specific sinks documentation (#397)
+- [BUG] Fix the origin date in OrionSTHSink (#413)
+- [HARDENING] Remove unnecessary hfds_api parameter in OrionHDFSSink (#415)
+- [FEATURE] Hashing based collections for OrionMongoSink and OrionSTHSink (#420)
+- [HARDENING] Set data_model to collection-per-entity (#419)
+- [BUG] Use multiple Fiware-ServicePaths in the sinks (#384)
+
 * Thu May 07 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.0
 - Ordered death of Cygnus if the logging system fails or it is stoped (#320)
 - Management interface port is not opened twice anymore (#302)

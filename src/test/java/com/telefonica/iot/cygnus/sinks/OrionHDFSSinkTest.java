@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,12 +18,11 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.sinks.OrionHDFSSink;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.http.HttpClientFactory;
+import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.HashMap;
@@ -54,52 +53,97 @@ public class OrionHDFSSinkTest {
     
     // other instances
     private Context context;
-    private NotifyContextRequest notifyContextRequest;
+    private NotifyContextRequest singleNotifyContextRequest;
+    private NotifyContextRequest multipleNotifyContextRequest;
     
     // constants
     private final String[] cosmosHost = {"localhost"};
     private final String cosmosPort = "14000";
     private final String cosmosDefaultUsername = "user1";
     private final String cosmosDefaultPassword = "pass1234";
-    private final String hdfsAPI = "httpfs";
     private final String hivePort = "10000";
     private final long recvTimeTs = 123456789;
-    private final String normalServiceName = "rooms";
+    private final String normalServiceName = "vehicles";
     private final String abnormalServiceName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
-    private final String normalServicePathName = "numeric-rooms";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+    private final String singleServicePathName = "4wheels";
+    private final String multipleServicePathName = "4wheelsSport,4wheelsUrban";
     private final String abnormalServicePathName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String rootServicePathName = "";
-    private final String normalDestinationName = "room1-room";
+    private final String singleDestinationName = "car1-car";
+    private final String multipleDestinationName = "sport1,urban1";
     private final String abnormalDestinationName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
-    private static final String ATTRNAME = "temperature";
-    private final String notifyXMLSimple = ""
-            + "<notifyContextRequest>"
-            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
-            +   "<originator>localhost</originator>"
-            +   "<contextResponseList>"
-            +     "<contextElementResponse>"
-            +       "<contextElement>"
-            +         "<entityId type=\"AType\" isPattern=\"false\">"
-            +           "<id>Entity</id>"
-            +         "</entityId>"
-            +         "<contextAttributeList>"
-            +           "<contextAttribute>"
-            +             "<name>attribute</name>"
-            +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
-            +           "</contextAttribute>"
-            +         "</contextAttributeList>"
-            +       "</contextElement>"
-            +       "<statusCode>"
-            +         "<code>200</code>"
-            +         "<reasonPhrase>OK</reasonPhrase>"
-            +       "</statusCode>"
-            +     "</contextElementResponse>"
-            +   "</contextResponseList>"
-            + "</notifyContextRequest>";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private static final String ATTRNAME = "speed";
+    private final String singleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
+    private final String multipleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"115.8\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car2\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
 
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -119,17 +163,17 @@ public class OrionHDFSSinkTest {
         context.put("cosmos_port", cosmosPort);
         context.put("cosmos_default_username", cosmosDefaultUsername);
         context.put("cosmos_default_password", cosmosDefaultPassword);
-        context.put("hdfs_api", hdfsAPI);
         context.put("hive_port", hivePort);
-        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
+        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
+        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
         when(mockHttpClientFactory.getHttpClient(true, false)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false, false)).thenReturn(null);
-        when(mockWebHDFSBackend.exists(null, null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null, ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, ATTRNAME, ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, ATTRNAME, ATTRNAME);
+        when(mockWebHDFSBackend.exists(null)).thenReturn(true);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(ATTRNAME, ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(ATTRNAME, ATTRNAME);
     } // setUp
 
     /**
@@ -143,7 +187,6 @@ public class OrionHDFSSinkTest {
         assertEquals(cosmosPort, sink.getCosmosPort());
         assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
         assertEquals(cosmosDefaultPassword, sink.getCosmosDefaultPassword());
-        assertEquals(hdfsAPI, sink.getHDFSAPI());
         assertEquals(hivePort, sink.getHivePort());
     } // testConfigure
 
@@ -162,6 +205,7 @@ public class OrionHDFSSinkTest {
 
     /**
      * Test of persist method, of class OrionHDFSSink.
+     * @throws java.lang.Exception
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -171,11 +215,11 @@ public class OrionHDFSSinkTest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("timestamp", "123456789");
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -186,13 +230,13 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -202,13 +246,13 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -218,13 +262,13 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -234,13 +278,31 @@ public class OrionHDFSSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (multiple destinations and "
+                + "fiware-servicePaths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathName);
+        headers.put(Constants.DESTINATION, multipleDestinationName);
+        
+        try {
+            sink.persist(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

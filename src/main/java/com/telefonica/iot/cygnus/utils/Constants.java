@@ -35,8 +35,8 @@ public final class Constants {
     public static final String HEADER_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CONTENT_TYPE = "content-type";
     public static final String HEADER_USER_AGENT   = "user-agent";
-    public static final int SERVICE_HEADER_MAX_LEN = 32;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 32;
+    public static final int SERVICE_HEADER_MAX_LEN = 50;
+    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
     
     // Only Flume header names
     public static final String HEADER_TRANSACTION_ID = "transactionId";
@@ -67,5 +67,9 @@ public final class Constants {
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
     public static final String PARAM_NOTIFICATION_TARGET = "notification_target";
     public static final String PARAM_EVENTS_TTL = "events_ttl";
+    
+    // OrionSTHSink specific headers
+    public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 120;
+    public static final int STH_MIN_HASH_SIZE_IN_BYTES = 20;
 
 } // Constants

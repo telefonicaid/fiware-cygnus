@@ -1,12 +1,12 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
- * cosmos-injector is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
- * cosmos-injector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
  * details.
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.sinks.OrionMySQLSink;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
@@ -47,7 +46,8 @@ public class OrionMySQLSinkTest {
     
     // other instances
     private Context context;
-    private NotifyContextRequest notifyContextRequest;
+    private NotifyContextRequest singleNotifyContextRequest;
+    private NotifyContextRequest multipleNotifyContextRequest;
     
     // mocks
     @Mock
@@ -61,50 +61,95 @@ public class OrionMySQLSinkTest {
     private final String attrPersistence = "row";
     private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
-    private final String normalServiceName = "rooms";
+    private final String normalServiceName = "vehicles";
     private final String abnormalServiceName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongorgname";
-    private final String normalServicePathName = "numeric-rooms";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+    private final String singleServicePathName = "4wheels";
+    private final String multipleServicePathName = "4wheelsSport,4wheelsUrban";
     private final String abnormalServicePathName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongpkgname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String rootServicePathName = "";
-    private final String normalDestinationName = "room1-room";
+    private final String singleDestinationName = "car1-car";
+    private final String multipleDestinationName = "sport1,urban1";
     private final String abnormalDestinationName =
-            "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongresname";
-    private static final String ENTITYNAME = "room1";
-    private static final String ENTITYTYPE = "room";
-    private static final String ATTRNAME = "temperature";
-    private static final String ATTRTYPE = "degrees";
-    private static final String ATTRVALUE = "26.5";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private static final String ENTITYNAME = "car1";
+    private static final String ENTITYTYPE = "car";
+    private static final String ATTRNAME = "speed";
+    private static final String ATTRTYPE = "float";
+    private static final String ATTRVALUE = "112.9";
     private static final String ATTRMD =
             "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private static final HashMap<String, String> ATTRLIST;
     private static final HashMap<String, String> ATTRMDLIST;
-    private final String notifyXMLSimple = ""
-            + "<notifyContextRequest>"
-            +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
-            +   "<originator>localhost</originator>"
-            +   "<contextResponseList>"
-            +     "<contextElementResponse>"
-            +       "<contextElement>"
-            +         "<entityId type=\"AType\" isPattern=\"false\">"
-            +           "<id>Entity</id>"
-            +         "</entityId>"
-            +         "<contextAttributeList>"
-            +           "<contextAttribute>"
-            +             "<name>attribute</name>"
-            +             "<type>attributeType</type>"
-            +             "<contextValue>foo</contextValue>"
-            +           "</contextAttribute>"
-            +         "</contextAttributeList>"
-            +       "</contextElement>"
-            +       "<statusCode>"
-            +         "<code>200</code>"
-            +         "<reasonPhrase>OK</reasonPhrase>"
-            +       "</statusCode>"
-            +     "</contextElementResponse>"
-            +   "</contextResponseList>"
-            + "</notifyContextRequest>";
+    private final String singleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
+    private final String multipleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"115.8\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car2\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     
     static {
         ATTRLIST = new HashMap<String, String>();
@@ -132,7 +177,8 @@ public class OrionMySQLSinkTest {
         context.put("mysql_username", mysqlUsername);
         context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
-        notifyContextRequest = TestUtils.createXMLNotifyContextRequest(notifyXMLSimple);
+        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
+        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(null);
@@ -172,6 +218,7 @@ public class OrionMySQLSinkTest {
 
     /**
      * Test of persist method, of class OrionMySQLSink.
+     * @throws java.lang.Exception
      */
     @Test
     public void testProcessContextResponses() throws Exception {
@@ -179,13 +226,13 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -196,13 +243,13 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -212,13 +259,13 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -228,13 +275,13 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, normalServicePathName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -244,13 +291,31 @@ public class OrionMySQLSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", new Long(recvTimeTs).toString());
+        headers.put("timestamp", Long.toString(recvTimeTs));
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
-        headers.put(Constants.DESTINATION, normalDestinationName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionMySQLSinkTest.processContextResponses (multiple destinations and "
+                + "fiware-servicePaths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathName);
+        headers.put(Constants.DESTINATION, multipleDestinationName);
+        
+        try {
+            sink.persist(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
