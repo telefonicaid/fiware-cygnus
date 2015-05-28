@@ -17,7 +17,7 @@ Independently of the data generator, NGSI context data is always [transformed](f
 [Top](#top)
 
 ###<a name="section1.1"></a>Mapping Flume events to HDFS data structures
-MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `OrionCKANSink` each time a Flume event is taken, by performing the following workflow:
+MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `OrionMySQLSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
 2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
