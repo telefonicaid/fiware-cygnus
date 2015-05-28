@@ -364,7 +364,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 ####<a name="section3.4.3"></a>MySQL persistence
 
-MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionCKANSink`](doc/design/OrionMySQL.md) each time a Flume event is taken from its channel.
+MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionMySQLSink`](doc/design/OrionMySQLSink.md) each time a Flume event is taken from its channel.
 
 Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
