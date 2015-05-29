@@ -1,0 +1,1 @@
+[BUG] Fix MySQL connections, adding a permanent connection to each database/fiware-service (#445)
