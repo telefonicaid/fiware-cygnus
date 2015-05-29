@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.sql.SQLTimeoutException;
+import java.util.HashMap;
 
 /**
  *
@@ -44,7 +45,8 @@ public class MySQLBackend {
     private final String mysqlPort;
     private final String mysqlUsername;
     private final String mysqlPassword;
-    private Connection connection;
+    private final HashMap<String, Connection> connections;
+    private MySQLDriver driver;
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
             
     /**
@@ -59,8 +61,25 @@ public class MySQLBackend {
         this.mysqlPort = mysqlPort;
         this.mysqlUsername = mysqlUsername;
         this.mysqlPassword = mysqlPassword;
-        this.connection = null;
+        connections = new HashMap<String, Connection>();
+        driver = new MySQLDriver();
     } // MySQLBackend
+    
+    /**
+     * Gets the map of database name-connection. It is protected since it is only used by the tests.
+     * @return The mao of database name-connection.
+     */
+    protected HashMap<String, Connection> getConnections() {
+        return connections;
+    } // getCnnections
+    
+    /**
+     * Sets the MySQL driver. It is protected since it is only used by the tests.
+     * @param driver The MySQL driver to be set.
+     */
+    protected void setDriver(MySQLDriver driver) {
+        this.driver = driver;
+    } // setDriver
     
     /**
      * Creates a database, given its name, if not exists.
@@ -231,27 +250,25 @@ public class MySQLBackend {
      */
     private Connection getConnection(String dbName) throws Exception {
         try {
-            if (connection == null || !connection.isValid(0)) {
-                if (connection != null) {
-                    connection.close();
+            // FIXME: the number of cached connections should be limited to a certain number; with such a limit
+            //        number, if a new connection is needed, the oldest one is closed
+            Connection con = connections.get(dbName);
+
+            if (con == null || !con.isValid(0)) {
+                if (con != null) {
+                    con.close();
                 } // if
                 
-                // dynamically load the MySQL JDBC driver
-                Class.forName(DRIVER_NAME);
-
-                // return a connection based on the MySQL JDBC driver
-                LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
-                        + mysqlUsername + "&password=XXXXXXXXXX");
-                connection = DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
-                        mysqlUsername, mysqlPassword);
+                con = driver.getConnection(mysqlHost, mysqlPort, dbName, mysqlUsername, mysqlPassword);
+                connections.put(dbName, con);
             } // if
 
-            return connection;
+            return con;
         } catch (ClassNotFoundException e) {
             throw new CygnusPersistenceError(e.getMessage());
         } catch (SQLException e) {
             throw new CygnusPersistenceError(e.getMessage());
-        } // try catch        
+        } // try catch
     } // getConnection
     
     /**
@@ -279,5 +296,35 @@ public class MySQLBackend {
             } // try catch
         } // if
     } // closeMySQLObjects
+    
+    /**
+     * This code has been extracted from MySQLBackend.getConnection() for testing purposes. By extracting it into a
+     * class then it can be mocked.
+     */
+    protected class MySQLDriver {
+        
+        /**
+         * Gets a MySQL connection.
+         * @param host
+         * @param port
+         * @param dbName
+         * @param user
+         * @param password
+         * @return A MySQL connection
+         * @throws Exception
+         */
+        Connection getConnection(String host, String port, String dbName, String user, String password)
+            throws Exception {
+            // dynamically load the MySQL JDBC driver
+            Class.forName(DRIVER_NAME);
+
+            // return a connection based on the MySQL JDBC driver
+            LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
+                    + mysqlUsername + "&password=XXXXXXXXXX");
+            return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
+                    mysqlUsername, mysqlPassword);
+        } // getConnection
+        
+    } // MySQLDriver
     
 } // MySQLBackend
