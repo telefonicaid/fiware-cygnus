@@ -1,1 +1,2 @@
-[BUG] Fix MySQL connections, adding a permanent connection to each database/fiware-service (#445)
+- [BUG] Fix MySQL connections, adding a permanent connection to each database/fiware-service (#445)
+- [BUG] Fix OrionMySQLSink, time zone is not added to the timestamp fields (#441)
