@@ -70,7 +70,7 @@ public class OrionTestSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs);
+        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
         
         // log about the event headers with deliberated INFO level
         LOGGER.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime

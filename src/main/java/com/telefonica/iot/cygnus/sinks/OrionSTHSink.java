@@ -51,7 +51,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs);
+        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
