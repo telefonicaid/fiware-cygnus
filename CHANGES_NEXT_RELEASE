@@ -3,3 +3,4 @@
 - [BUG] Fix MySQL connections, adding a permanent connection to each database/fiware-service (#445)
 - [BUG] Fix mongo-sink appearance in sth-sink configuration (both template and README) (#449)
 - [BUG] Fix OrionMySQLSink, time zone is not added to the timestamp fields (#441)
+- [HARDENING] Link the Quick Start Guide from the README (#454)
