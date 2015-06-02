@@ -43,6 +43,8 @@ Current stable release is able to persist Orion context data in:
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 * [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
+You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
+
 Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
 [Top](#top)
