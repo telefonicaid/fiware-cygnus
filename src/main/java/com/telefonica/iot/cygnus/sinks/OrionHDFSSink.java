@@ -266,7 +266,7 @@ public class OrionHDFSSink extends OrionSink {
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
         
         // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs);
+        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
         
         // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
