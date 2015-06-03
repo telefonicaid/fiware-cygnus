@@ -144,12 +144,12 @@ class Mysql:
         self.database = name.lower() # converted to lowercase, because cygnus always convert to lowercase per ckan
         self.__query("%s `%s`;" % (MYSQL_CREATE_DATABASE, self.database))
 
-    def generate_field_datastore_to_resource (self, attributes_number, attributes_name, attribute_type, metadata_type):
+    def generate_field_datastore_to_resource (self, attributes_number, attributes_name, attribute_type, metadata_type, recvtime="timestamp"):
         """
         generate fields to datastore request
         :return: fields list
         """
-        field = " (recvTime text"
+        field = " (recvTime "+recvtime
         for i in range(int(attributes_number)):
             if attribute_type != WITHOUT: field = field + ", " + attributes_name+"_"+str(i)+" "+ attribute_type
             if metadata_type  != WITHOUT: field = field + ", " + attributes_name+"_"+str(i)+"_md "+ metadata_type
