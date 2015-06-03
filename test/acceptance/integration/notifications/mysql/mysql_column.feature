@@ -53,7 +53,6 @@ Feature: Stored in mysql new notifications per column from context broker
     | cygnus_col_051 | myserv6      | 4                 | my_attribute   | my_Type        | -45.2344          | False          | json    |
     | cygnus_col_051 | myserv6      | 4                 | my_attribute   | my_Type        | -45.2344          | False          | xml     |
 
-
   @organizations
   Scenario Outline: store in mysql new notifications with different organizations behavior
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
