@@ -33,7 +33,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "<service_path>"
@@ -60,7 +60,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different organizations behavior
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "/myservicepath"
@@ -84,7 +84,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different service_path behavior
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances, with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "<service_path>"
@@ -114,7 +114,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different service_path behavior
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "resource_multi_021" with a dataset "default"
@@ -142,7 +142,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "default"
@@ -164,7 +164,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: stored new notifications in ckan with different data types
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "default"
@@ -199,7 +199,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notification in ckan without value or metadata fields
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "without_fields_031" with a dataset "default"
@@ -220,7 +220,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notifications in ckan with differents errors in data type
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "default"
@@ -261,7 +261,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notification in ckan if some element does not exist
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<tenant>" with a dataset "default"

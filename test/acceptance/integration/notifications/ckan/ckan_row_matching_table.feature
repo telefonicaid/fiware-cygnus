@@ -22,16 +22,16 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 #  Note: the "skip" tag is to skip the scenarios that still are not developed or failed
 #        -tg=-skip
 #
-Feature: Stored in ckan new notifications per row from context broker using matching table with patterns
+Feature: Stored in ckan new notifications per row from context broker using grouping rules with patterns
   As a cygnus user
-  I want to be able to store in ckan new notifications per row from context broker using matching table with patterns
+  I want to be able to store in ckan new notifications per row from context broker using grouping rules with patterns
   so that they become more functional and useful
 
-  @happy_path  @matching_table
-  Scenario Outline: stored new notifications in ckan with different matching_table patterns
+  @happy_path  @grouping_rules
+  Scenario Outline: stored new notifications in ckan with different grouping_rules patterns
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "match_table", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -39,10 +39,9 @@ Feature: Stored in ckan new notifications per row from context broker using matc
     Then I receive an "OK" http code
     And changes new destination "<new_destination>" where to verify in dataset "<new_dataset>"
     And Validate that the attribute value, metadata "true" and type are stored in ckan
-    And delete matching table file
   Examples:
     | service_path | resource        | new_destination | new_dataset     | content |
-    # identity id
+  # identity id
     | parks        | car1_cars       | cars_modern     | vehicles        | json    |
     | parks        | car2_cars       | cars_modern     | vehicles        | xml     |
     | parks        | car.34_cars     | cars_modern     | vehicles        | json    |
@@ -75,25 +74,22 @@ Feature: Stored in ckan new notifications per row from context broker using matc
     | train        | town.1_center.1 | cars_modern     | vehicles        | json    |
     | train        | town.2_center.2 | cars_modern     | vehicles        | xml     |
 
-  @matching_table @BUG-271
-  Scenario Outline: not stored new notifications in mysql with errors in matching_table patterns
+  @errors @grouping_rules @BUG-271 @BUG_460 @skip
+  Scenario Outline: not stored new notifications in ckan with errors in grouping_rules patterns
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And reinitialize log file
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And a tenant "match_table", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Verify that is not stored in ckan "error with matching table"
+    And Verify that is not stored in ckan "error with grouping rules"
     And check in log, label "WARN" and text "Malformed matching rule, it will be discarded."
-    And delete matching table file
   Examples:
   # in case of Malformed matching rule, it will be discarded
-  #  error lines in matching_table.conf file
-  #  14|entityId|destmissing(\d*)||errordataset
-  #  15|entityId|datasetmissing(\d*)|dest_error|
+  #  error rules in grouping_rules.conf file (id: 15 and id:16)
     | service_path     | resource              | content |
     | servpath_row_010 | destmissing1_error    | json    |
     | servpath_row_010 | destmissing1_error    | xml     |
@@ -101,11 +97,11 @@ Feature: Stored in ckan new notifications per row from context broker using matc
     | servpath_row_020 | datasetmissing1_error | xml     |
 
 
-  @matching_table
-  Scenario: not start cygnus if matching_table file does not exists
+  @not_found @grouping_rules
+  Scenario: not start cygnus if grouping_rules file does not exists
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And reinitialize log file
-    And copy flume-env.sh, matching table file from "", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     Then verify if cygnus is installed correctly
-    And check in log, label "lvl=ERROR" and text "Runtime error (File not found. Details=/usr/cygnus/conf/matching_table.conf (No such file or directory))"
+    And check in log, label "lvl=ERROR" and text "Runtime error (File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory))"
