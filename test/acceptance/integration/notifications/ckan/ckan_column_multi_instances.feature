@@ -33,7 +33,7 @@ Feature: start multi-instances of cygnus using ckan sink and column mode
   Scenario Outline: start multi-instances of cygnus using ckan sink, column mode, ports differents and store multiples notifications one by instance and the port defined incremented
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "<service_path>"
@@ -60,7 +60,7 @@ Feature: start multi-instances of cygnus using ckan sink and column mode
   Scenario Outline: try to start multi-instances of cygnus using ckan sink, column mode and same ports to all instances
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And "ckan" is installed correctly
     And create a new organization "<organization>" with a dataset "<service_path>"

@@ -33,7 +33,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline: stored new notifications in mysql from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "tenant_3", service path "/test", resource "room2_room", with attribute number "4", attribute name "random" and attribute type "celcius"
@@ -49,7 +49,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline: stored new notifications in mysql from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "tenant_4", service path "/test", resource "room2_room", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
@@ -67,7 +67,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline:  store in mysql new notifications with different organization values
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "<tenant>", service path "/test", resource "room2_room", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -89,7 +89,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline:  store in mysql new notifications with different service path values
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "<tenant>", service path "<service_path>", resource "room2_room", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -117,7 +117,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline: store in ckan new notifications with different resources values
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "tenant", service path "servicepath", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -143,7 +143,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "tenant_5", service path "/test", resource "room2_room", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
@@ -163,7 +163,7 @@ Feature: Store in mysql new notifications per row from context broker
   Scenario Outline: stored new notifications in mysql with different data types
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And "mysql" is installed correctly
     And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "random" and attribute type "celcius"
