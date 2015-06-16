@@ -79,9 +79,12 @@ Some examples:
 - Cygnus-HADOOP per column using grouping rules (pending).
 
 - Cygnus-MONGO raw
-- Cygnus-MONGO raw using grouping rules (pending).
+- Cygnus-MONGO raw using grouping rules.
+- Cygnus-MONGO raw using multi-instances (pending).
+
 - Cygnus-STH aggregated
 - Cygnus-STH aggregated using grouping rules (pending).
+- Cygnus-STH aggregated using multi-instances (pending).
 
 ### configuration.json
 
