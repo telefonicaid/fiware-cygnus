@@ -33,7 +33,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario: received a notification at Cygnus and store it as aggregated values
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_happy_path", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -45,7 +45,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several resolutions
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_resolution", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -64,7 +64,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several services
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "<service>", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -87,7 +87,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several services paths
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_service_path", service path "<service_path>", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -115,7 +115,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several entities types and entities id
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_resource", service path "/test", resource "<resource>", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -141,7 +141,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several attributes names
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_attribute_name", service path "/test", resource "room2_room", with attribute number "1", attribute name "<attribute_name>" and attribute type "celcius"
@@ -160,7 +160,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several attributes value
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_attribute_value", service path "/test", resource "room2_room", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -194,7 +194,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
   Scenario Outline: received a notification at Cygnus and store it as aggregated values with several notifications number
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_several_notifications", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"

@@ -32,7 +32,7 @@ from tools.fabric_utils import FabricSupport
 from tools.cygnus_agent_config import Agent
 from tools.cygnus_instance_config import Cygnus_Instance
 from tools.cygnus_krb5_config import Krb5
-from tools.cygnus_matching_table_config import Matching_tables
+from tools.cygnus_grouping_rules_config import Grouping_Rules
 from tools.remote_log_utils import Remote_Log
 
 
@@ -228,7 +228,7 @@ class Cygnus:
             myfab.runs(cygnus_instance.append_id(id=self.instance_id+"_"+str(i)))
             # generate agent_<id>.conf ex: agent_test_0.conf
             ops_list = cygnus_agent.append_id(id=self.instance_id+"_"+str(i))
-            ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port, matching_table_file=self.fabric_target_path+"/matching_table.conf", default_service=self.tenant[self.persistence], default_service_path=self.service_path, ttl=self.ttl)
+            ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port, grouping_rules_file=self.fabric_target_path+"/grouping_rules.conf", default_service=self.tenant[self.persistence], default_service_path=self.service_path, ttl=self.ttl)
             sinks_list = sinks.split(" ")
             for i in range(len(sinks_list)):
                 if sinks_list[i].find(HDFS_SINK)>=0:
@@ -252,27 +252,27 @@ class Cygnus:
             # create and modify values in agent_<id>.conf
             myfab.runs(ops_list)
 
-    def another_files (self, matching_table_file_name=DEFAULT):
+    def another_files (self, grouping_rules_file_name=DEFAULT):
         """
         copy another configuration files used by cygnus
           - flume-env.sh
-          - matching_table.conf
+          - grouping_rules.conf
           - log4j.properties
           - krb5.conf
         """
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
         myfab.run("cp -R flume-env.sh.template flume-env.sh")
-        #  matching_table.conf configuration
-        if matching_table_file_name == DEFAULT:
-            myfab.run("cp -R matching_table.conf.template matching_table.conf")
-        elif matching_table_file_name != EMPTY:
-            matching_table = Matching_tables(file=matching_table_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
-            myfab.runs(matching_table.content_to_copy())
+        #  grouping_rules.conf configuration
+        if grouping_rules_file_name == DEFAULT:
+            myfab.run("cp -R grouping_rules.conf.template grouping_rules.conf")
+        elif grouping_rules_file_name != EMPTY:
+             Grouping_Rules(fab_driver=myfab, file=grouping_rules_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
         else:
-            myfab.run("rm -rf matching_table.conf")
+            myfab.run("rm -f grouping_rules.conf")
         # change to DEBUG mode in log4j.properties
-        myfab.run("cp -R log4j.properties.template log4j.properties")
+        myfab.current_directory(self.fabric_target_path)
+        myfab.run("cp -R log4j.properties.template log4j.properties", target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
         myfab.run(' sed -i "s/flume.root.logger=INFO,LOGFILE/flume.root.logger=%s,LOGFILE /" log4j.properties.template' % (self.log_level))
         # krb5.conf configuration
         krb5 = Krb5(self.fabric_target_path, self.fabric_sudo_cygnus)
@@ -322,15 +322,17 @@ class Cygnus:
         line = log.find_line(label, text)
         assert line != None, "ERROR  - label %s and text %s is not found.    \n       - %s" % (label, text, line)
 
-    def delete_matching_table_file(self):
+    def delete_grouping_rules_file(self):
         """
-        delete matching table file in cygnus conf remotely
-        used the file name "matching_table_name" stored in configuration.json file
+        delete grouping rules file in cygnus conf remotely
+        used the file name "grouping_rules_name" stored in configuration.json file
         """
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
-        matching_table = Matching_tables()
-        myfab.run("rm -rf %s" % matching_table.get_matching_table_file_name())
+        Grouping_Rules(fab_driver=myfab, file=grouping_rules_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
+
+        grouping_rules = Grouping_Rules()
+        myfab.run("rm -f %s" % grouping_rules.get_grouping_rules_file_name())
 
     def delete_cygnus_instances_files(self):
         """
@@ -341,7 +343,7 @@ class Cygnus:
         myfab.run("rm -rf cygnus_instance_%s_*.conf" % self.instance_id)
         myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
         myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
-        self.delete_matching_table_file()
+
 
     # --------------------------------------------- general action -----------------------------------------------------
 
