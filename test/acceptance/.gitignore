@@ -8,6 +8,7 @@ conf/
 logs/
 settings/
 testreport/
+10.95.*/
 properties.json
 
 
