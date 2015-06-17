@@ -103,9 +103,9 @@ Feature: Stored in hadoop new notifications per row from context broker using gr
 
   @not_found @grouping_rules
   Scenario: not start cygnus if grouping_rules file does not exists
-    Given copy properties.json file from "epg_properties.json" to test "hdfs-sink" and sudo local "false"
+    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And reinitialize log file
     And copy flume-env.sh, grouping rules file from "", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     Then verify if cygnus is installed correctly
-    And check in log, label "lvl=ERROR" and text "Runtime error (File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory))"
+    And check in log, label "lvl=ERROR" and text "File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory)"
