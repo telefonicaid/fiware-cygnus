@@ -24,26 +24,26 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 #        -tg=-skip
 #
 
-Feature: Stored in ckan new notifications per column from context broker using grouping rules with patterns
+
+Feature: Stored in hadoop new notifications per row from context broker using grouping rules with patterns
   As a cygnus user
-  I want to be able to store in ckan new notifications per column from context broker using grouping rules with patterns
+  I want to be able to store in hadoop new notifications per row from context broker using grouping rules with patterns
   so that they become more functional and useful
 
   @happy_path  @grouping_rules
-  Scenario Outline: stored new notifications in ckan with different grouping_rules patterns
-    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
+  Scenario Outline: stored new notifications in hadoop with different grouping_rules patterns
+    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "org_patterns" with a dataset "<new_dataset>"
-    And create a new resource "<new_destination>" with "1" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
-    And update real values in resource "<resource>" and service path "<service_path>" to notification request
+    And "hadoop" is installed correctly
+    And a tenant "tenant", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And changes new destination "<new_destination>" where to verify in dataset "<new_dataset>"
-    And Verify that the attribute value is stored in ckan
-    And Verify the metadatas are stored in ckan
+    And Validate that the attribute value and type are stored in hadoop
+    And Validate that the attribute metadatas are stored in hadoop
+    And delete the file created in hadoop
   Examples:
     | service_path | resource        | new_destination | new_dataset     | content |
     # identity id
@@ -79,34 +79,33 @@ Feature: Stored in ckan new notifications per column from context broker using g
     | train        | town.1_center.1 | cars_modern     | vehicles        | json    |
     | train        | town.2_center.2 | cars_modern     | vehicles        | xml     |
 
-  @grouping_rules @BUG-271 @skip @BUG_460
-  Scenario Outline: not stored new notifications in ckan with errors in grouping_rules patterns
-    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+  @errors @grouping_rules @BUG-271 @skip @460
+  Scenario Outline: not stored new notifications in hadoop with errors in grouping_rules patterns
+    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And reinitialize log file
-    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "org_patterns" with a dataset "<service_path>"
-    And create a new resource "<resource>" with "1" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
-    When receives a notification with attributes value "random", metadata value "False" and content "<content>"
+    And "hadoop" is installed correctly
+    And a tenant "tenant", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And Verify that is not stored in ckan "error with grouping rules"
+    And Validate that the attribute value and type are stored in hadoop
     And check in log, label "WARN" and text "Malformed matching rule, it will be discarded."
   Examples:
   # in case of Malformed matching rule, it will be discarded
   #  error rules in grouping_rules.conf file (id: 15 and id:16)
-    | service_path     | resource              | content |
-    | servpath_col_100 | destmissing1_error    | json    |
-    | servpath_col_100 | destmissing1_error    | xml     |
-    | servpath_col_200 | datasetmissing1_error | json    |
-    | servpath_col_200 | datasetmissing1_error | xml     |
+    | service_path | resource              | content |
+    | servpath_33  | destmissing1_error    | json    |
+    | servpath_33  | destmissing1_error    | xml     |
+    | servpath_33  | datasetmissing1_error | json    |
+    | servpath_33  | datasetmissing1_error | xml     |
 
   @not_found @grouping_rules
   Scenario: not start cygnus if grouping_rules file does not exists
-    Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
-    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
+    Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And reinitialize log file
     And copy flume-env.sh, grouping rules file from "", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     Then verify if cygnus is installed correctly
-    And check in log, label "lvl=ERROR" and text "Runtime error (File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory))"
+    And check in log, label "lvl=ERROR" and text "File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory)"
