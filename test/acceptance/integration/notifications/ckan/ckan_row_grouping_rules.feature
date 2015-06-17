@@ -104,4 +104,4 @@ Feature: Stored in ckan new notifications per row from context broker using grou
     And reinitialize log file
     And copy flume-env.sh, grouping rules file from "", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     Then verify if cygnus is installed correctly
-    And check in log, label "lvl=ERROR" and text "Runtime error (File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory))"
+    And check in log, label "lvl=ERROR" and text "File not found. Details=/usr/cygnus/conf/grouping_rules.conf (No such file or directory)"
