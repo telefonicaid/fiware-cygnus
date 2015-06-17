@@ -50,6 +50,9 @@
 #   of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, Mongo
 #   and STH, this prefixes the table/collection name. Please, have a look to doc/design/naming_conventions.md for more
 # details.
+#
+# More detailed information regarding this feature can be found at:
+# https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/interceptors.md#groupinginterceptor-interceptor
 
 #{
 #    "grouping_rules": [
