@@ -79,7 +79,7 @@ Feature: Stored in hadoop new notifications per row from context broker using gr
     | train        | town.1_center.1 | cars_modern     | vehicles        | json    |
     | train        | town.2_center.2 | cars_modern     | vehicles        | xml     |
 
-  @errors @grouping_rules @BUG-271 @skip @460
+  @errors @grouping_rules @BUG-271 @460
   Scenario Outline: not stored new notifications in hadoop with errors in grouping_rules patterns
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And reinitialize log file
@@ -91,7 +91,7 @@ Feature: Stored in hadoop new notifications per row from context broker using gr
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
-    And check in log, label "WARN" and text "Malformed matching rule, it will be discarded."
+    And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
   Examples:
   # in case of Malformed matching rule, it will be discarded
   #  error rules in grouping_rules.conf file (id: 15 and id:16)
