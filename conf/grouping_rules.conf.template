@@ -42,7 +42,8 @@
 # - fields: These are the fields that will be concatenated for regular expression matching. The available dictionary of
 #   fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important
 #   since the concatenation is made from left to right.
-# - regex: Java-like regular expression to be applied on the concatenated fields.
+# - regex: Java-like regular expression to be applied on the concatenated fields. Special characters like '\' must be
+#   escaped ('\' is escaped as "\\").
 # - destination: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of
 #   MySQL, Mongo and STH, this sufixes the table/collection name.
 #   Please, have a look to doc/design/naming_conventions.md for more details.
@@ -59,7 +60,7 @@
 #        {
 #            "id": 1,
 #            "fields": [
-#                entityType
+#                "entityType"
 #            ],
 #            "regex": "dummyregex1",
 #            "destination": "dummydest1",
@@ -68,8 +69,8 @@
 #        {
 #            "id": 2,
 #            "fields": [
-#                entityId,
-#                entityType
+#                "entityId",
+#                "entityType"
 #            ],
 #            "regex": "dummyregex2",
 #            "destination": "dummuydes2",
