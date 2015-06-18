@@ -123,6 +123,8 @@ The above rules set that:
 
 Rules are tryed sequentially, and if any rules matches then the default destination for the notified entity is generated, i.e. the concatenation of the entity id, `_` and the entity type; and the notified service path is maintained.
 
+Regarding the syntax of the rules, all the fields are mandatory and must have a valid value.
+
 [Top](#top)
 
 ###<a name="section3.2"></a>Usage
