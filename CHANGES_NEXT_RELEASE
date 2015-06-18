@@ -2,3 +2,4 @@
 - [BUG] Fix OrionMySQLSink, time zone is not added to the timestamp fields (#441)
 - [BUG] Fix mongo-sink appearance in sth-sink configuration (both template and README) (#449)
 - [BUG] Fix the grouping rules validator, now empty fields and non-numeric ids are not allowed (#460)
+- [HARDENING] Add detailed explanation about the syntax of the grouping rules (#459)
