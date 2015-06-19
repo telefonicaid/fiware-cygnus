@@ -63,6 +63,7 @@ def copy_another_configuration_files_to_cygnus(step, grouping_rules_file, only_o
     :param only_once: determine if the configuration is execute only once or no (True | False)
     :param step:
     """
+    world.grouping_rules_file = grouping_rules_file
     if not world.background_executed:
         world.cygnus.another_files(grouping_rules_file)
         world.cygnus.cygnus_service("restart")
@@ -103,4 +104,4 @@ def delete_grouping_rules_file(step):
     delete grouping rules file in cygnus conf remotely
     used the file name "grouping_rules_name" stored in configuration.json file
     """
-    world.cygnus.delete_grouping_rules_file()
+    world.cygnus.delete_grouping_rules_file(world.grouping_rules_file)
