@@ -85,30 +85,30 @@ public class GroupingInterceptor implements Interceptor {
         String jsonStr = readGroupingRulesFile(groupingRulesFileName);
         
         if (jsonStr == null) {
-            LOGGER.debug("No grouping rules read");
+            LOGGER.info("No grouping rules read");
             return;
         } // if
         
-        LOGGER.debug("Grouping rules read: " + jsonStr);
+        LOGGER.info("Grouping rules read: " + jsonStr);
         
         // parse the Json containing the grouping rules
         JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
         
         if (jsonGroupingRules == null) {
-            LOGGER.debug("Grouping rules syntax has errors");
+            LOGGER.warn("Grouping rules syntax has errors");
             return;
         } // if
         
-        LOGGER.debug("Grouping rules syntax is OK");
+        LOGGER.info("Grouping rules syntax is OK");
         
         // create a list of grouping rules, with precompiled regex
         groupingRules = createGroupingRules(jsonGroupingRules);
         
         if (groupingRules == null) {
-            LOGGER.debug("Grouping rules regex'es could not be compiled");
+            LOGGER.warn("Grouping rules regex'es could not be compiled");
         }
         
-        LOGGER.debug("Grouping rules regex'es have been compiled");
+        LOGGER.info("Grouping rules regex'es have been compiled");
     } // initialize
     
     /**
@@ -184,15 +184,15 @@ public class GroupingInterceptor implements Interceptor {
             } else {
                 switch (err) {
                     case 1:
-                        LOGGER.info("Invalid grouping rule, some field is missing. It will be discarded. Details="
+                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details="
                                 + jsonRule.toJSONString());
                         break;
                     case 2:
-                        LOGGER.info("Invalid grouping rule, the id is not numeric or it is missing. It will be "
+                        LOGGER.warn("Invalid grouping rule, the id is not numeric or it is missing. It will be "
                                 + "discarded. Details=" + jsonRule.toJSONString());
                         break;
                     case 3:
-                        LOGGER.info("Invalid grouping rule, some field is empty. It will be discarded. Details="
+                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details="
                                 + jsonRule.toJSONString());
                         break;
                     default:
