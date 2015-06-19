@@ -225,7 +225,8 @@ class Cygnus:
         for i in range(int(self.instances_number)):
             # generate cygnus_instance_<id>.conf ex: cygnus_instance_test_0.conf
             port = self.__get_port(self.cygnus_port, i, self.different_port)
-            myfab.runs(cygnus_instance.append_id(id=self.instance_id+"_"+str(i)))
+            management_port = self.__get_port(self.management_port, i, self.different_port)
+            myfab.runs(cygnus_instance.append_id(admin_port=str(management_port), id=self.instance_id+"_"+str(i)))
             # generate agent_<id>.conf ex: agent_test_0.conf
             ops_list = cygnus_agent.append_id(id=self.instance_id+"_"+str(i))
             ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port, grouping_rules_file=self.fabric_target_path+"/grouping_rules.conf", default_service=self.tenant[self.persistence], default_service_path=self.service_path, ttl=self.ttl)
@@ -322,7 +323,7 @@ class Cygnus:
         line = log.find_line(label, text)
         assert line != None, "ERROR  - label %s and text %s is not found.    \n       - %s" % (label, text, line)
 
-    def delete_grouping_rules_file(self):
+    def delete_grouping_rules_file(self, grouping_rules_file_name):
         """
         delete grouping rules file in cygnus conf remotely
         used the file name "grouping_rules_name" stored in configuration.json file
