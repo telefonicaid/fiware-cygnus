@@ -79,7 +79,7 @@ Feature: Stored in mysql new notifications per column from context broker using 
     | train        | town.1_center.1 | cars_modern     | vehicles         | json    |
     | train        | town.2_center.2 | cars_modern     | vehicles         | xml     |
 
-  @errors @grouping_rules @BUG-271 @skip @BUG_460
+  @errors @grouping_rules @BUG-271 @BUG_460
   Scenario Outline: not stored new notifications in mysql with errors in grouping_rules patterns
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And reinitialize log file
@@ -92,7 +92,7 @@ Feature: Stored in mysql new notifications per column from context broker using 
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
-    And check in log, label "WARN" and text "Malformed matching rule, it will be discarded."
+    And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
     And Close mysql connection
   Examples:
   # in case of Malformed matching rule, it will be discarded
