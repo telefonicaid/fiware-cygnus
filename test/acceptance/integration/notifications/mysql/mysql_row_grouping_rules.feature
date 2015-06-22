@@ -87,7 +87,7 @@ Feature: Store in mysql new notifications per row from context broker using grou
     And a tenant "tenant", service path "<service_path>", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
-    And check in log, label lvl="WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
+    And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
     And Close mysql connection
   Examples:
   # in case of Malformed matching rule, it will be discarded
