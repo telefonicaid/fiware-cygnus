@@ -284,7 +284,8 @@ class Cygnus:
          cygnus service (status | stop | start | restart)
         :param operation:
         """
-        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry)
+        myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
+        myfab.warn_only(True)
         myfab.run("service cygnus %s" % operation, sudo=self.fabric_sudo_cygnus)
 
     def verify_cygnus (self):
@@ -341,9 +342,9 @@ class Cygnus:
         """
         myfab = FabricSupport(host=self.fabric_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
-        myfab.run("rm -rf cygnus_instance_%s_*.conf" % self.instance_id)
-        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
-        myfab.run("rm -rf agent_%s_*.conf" % self.instance_id)
+        myfab.run("rm -f cygnus_instance_%s_*.conf" % self.instance_id)
+        myfab.run("rm -f agent_%s_*.conf" % self.instance_id)
+        myfab.run("rm -f agent_%s_*.conf" % self.instance_id)
 
 
     # --------------------------------------------- general action -----------------------------------------------------
@@ -676,7 +677,9 @@ class Cygnus:
             - origin, max, min, sum sum2
         :param resolution: resolutions type (  month | day | hour | minute | second )
         """
+
         time_zone = 2
+        time.sleep(int(self.instances_number)) # delay to process all notifications and calculate aggregates
         find_dict = {"_id.attrName":  {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix + <_value>. ex: temperature_0
                      "_id.resolution": str(resolution)}
 
@@ -721,11 +724,17 @@ class Cygnus:
             else:
                 assert False, " ERROR - resolution type \"%s\" is not allowed, review your tests in features..." % (resolution)
 
+            sum_value  = 0
+            sum2_value = 0
+            for i in range(int(self.instances_number)):
+                sum_value = sum_value + float(self.attributes_value)
+                sum2_value = sum2_value + (float(self.attributes_value)*float(self.attributes_value))
+
             assert str(doc["_id"]["origin"]) == origin_by_resolution, " ERROR -- in origin field by the %s resolution in %s attribute" % (resolution, str(doc["_id"]["attrName"]))
             assert float(doc["points"][offset]["min"]) == float(self.attributes_value), " ERROR -- in minimun value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
             assert float(doc["points"][offset]["max"]) == float(self.attributes_value), " ERROR -- in maximun value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
-            assert float(doc["points"][offset]["sum"]) == float(self.attributes_value), " ERROR -- in sum value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
-            assert float(doc["points"][offset]["sum2"]) == (float(self.attributes_value)*float(self.attributes_value)), " ERROR -- in sum2 value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["sum"]) == float(sum_value), " ERROR -- in sum value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
+            assert float(doc["points"][offset]["sum2"]) == float(sum2_value), " ERROR -- in sum2 value into offset %s in %s attribute" % (str(offset), str(doc["_id"]["attrName"]))
         world.sth.disconnect()
 
     def verify_aggregates_is_not_in_mongo(self, resolution):
