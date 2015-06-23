@@ -78,6 +78,12 @@ class FabricSupport:
         else:
             self.LOCALHOST = False
 
+    def warn_only(self, value):
+        """
+        Boolean setting determining whether Fabric exits when detecting errors on the remote end
+        :param value: ( True |False )
+        """
+        env.warn_only = value
 
     def __sub_run (self, command, path, sudo_run):
         """

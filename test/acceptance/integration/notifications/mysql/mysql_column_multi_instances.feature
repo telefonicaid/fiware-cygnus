@@ -62,6 +62,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
   @same_port @multi_instances @ISSUE_46
   Scenario Outline: try to start multi-instances of cygnus using mysql sink, column mode and same ports to all instances
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And reinitialize log file
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "column" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
@@ -69,8 +70,7 @@ Feature: start multi-instances of cygnus using mysql sink and column mode
     And create a new database "<tenant>"
     And create a new table "default" with service path "<service_path>", "<attributes_number>" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "text" and metadata data type "text"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then Verify that the attribute value is stored in mysql
-    And Verify the metadatas are stored in mysql
+    Then check in log, label "lvl=FATAL" and text "Fatal error running the Management Interface. Details=Address already in use"
     And Close mysql connection
     And delete instances files
   Examples:
