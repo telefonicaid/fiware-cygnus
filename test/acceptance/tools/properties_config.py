@@ -47,6 +47,9 @@ class Properties:
     after storing dictionaries
     """
 
+
+
+
     def __init__(self, **kwargs):
         """
          constructor
@@ -87,20 +90,13 @@ class Properties:
         store dictionaries used by cygnus
         :param sink: ckan-sink | hdfs-sink | mysql-sink
         """
-        world.cygnus    = Cygnus (cygnus_url=world.config['cygnus']['cygnus_url'],
-                                  cygnus_port=world.config['cygnus']['cygnus_port'],
+        world.cygnus    = Cygnus (protocol=world.config['cygnus']['cygnus_protocol'],
+                                  host=world.config['cygnus']['cygnus_host'],
+                                  port=world.config['cygnus']['cygnus_port'],
                                   management_port=world.config['cygnus']['cygnus_management_port'],
                                   version=world.config['cygnus']['cygnus_version'],
                                   verify_version=world.config['cygnus']['cygnus_verify_version'],
                                   log_level=world.config['cygnus']['cygnus_log_level'],
-                                  notif_user_agent= world.config['cygnus']['cygnus_user_agent'],
-                                  tenant_row_default=world.config['cygnus']['cygnus_organization_per_row_default'],
-                                  tenant_col_default=world.config['cygnus']['cygnus_organization_per_col_default'],
-                                  service_path_default=world.config['cygnus']['cygnus_service_path_default'],
-                                  identity_id_default =world.config['cygnus']['cygnus_identity_id_default'],
-                                  identity_type_default=world.config['cygnus']['cygnus_identity_type_default'],
-                                  attribute_number_default=world.config['cygnus']['cygnus_attributes_number_default'],
-                                  attribute_name_default=world.config['cygnus']['cygnus_attributes_name_default'],
                                   ttl=world.config['cygnus']['cygnus_ttl'],
                                   # fabric
                                   user=world.config['cygnus']['cygnus_fabric_user'],
@@ -109,7 +105,12 @@ class Properties:
                                   error_retry=world.config['cygnus']['cygnus_fabric_error_retry'],
                                   source_path=world.config['cygnus']['cygnus_fabric_source_path'],
                                   target_path=world.config['cygnus']['cygnus_fabric_target_path'],
-                                  sudo_cygnus=world.config['cygnus']['cygnus_fabric_sudo']
+                                  sudo_run=world.config['cygnus']['cygnus_fabric_sudo'],
+                                  # log file
+                                  log_file=world.config['cygnus']['cygnus_log_file'],
+                                  log_owner=world.config['cygnus']['cygnus_log_owner'],
+                                  log_group=world.config['cygnus']['cygnus_log_group'],
+                                  log_mod=world.config['cygnus']['cygnus_log_mod']
         )
         if sink == "ckan-sink":
             world.ckan  = Ckan(ckan_version=world.config['ckan']['ckan_version'],

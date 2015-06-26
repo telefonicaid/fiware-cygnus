@@ -21,11 +21,22 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 from lettuce import step, world
 
-@step (u'delete instances files')
-def delete_instances_files(step):
+@step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
+def update_real_values_in_resource_and_service_path_to_notification_request (step, destination, service_path):
     """
-    Delete instances files
-      - cygnus_instances_*.conf
-      - agent_*.conf
+    change real resource and service path to notification request
+    :param step:
+    :param resource:
+    :param service_path:
     """
-    world.cygnus.delete_cygnus_instances_files()
+    world.cygnus.change_destination_to_pattern (destination, service_path)
+
+@step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+def changes_new_destination_where_to_verify_in_dataset (step, destination, dataset):
+    """
+    change new destination and dataset to validate
+    :param step:
+    :param destination:
+    :param dataset:
+    """
+    world.cygnus.change_destination_to_pattern (destination, dataset)
