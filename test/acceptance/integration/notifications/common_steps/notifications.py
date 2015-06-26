@@ -21,9 +21,8 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 from lettuce import step, world
 
-
-@step (u'service "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
-def a_service_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
+@step (u'service "([^"]*)", service path "([^"]*)", entity type "([^"]*)", entity id "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+def a_service_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, entity_type, entity_id, attribute_number, attribute_name, attribute_type):
     """
     row configuration in row mode
     :param step:
@@ -34,7 +33,7 @@ def a_service_service_path_resource_with_attribute_number_and_attribute_name (st
     :param attribute_name:
     :param attribute_type:
     """
-    world.cygnus.row_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
+    world.cygnus.configuration(tenant, service_path, entity_type, entity_id, attribute_number, attribute_name, attribute_type)
 
 @step(u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
 def and_receives_a_notification_with_attributes_value_group1_metadata_value_group2_and_content_group3(step, attribute_value, metadata_value, content):
@@ -45,7 +44,7 @@ def and_receives_a_notification_with_attributes_value_group1_metadata_value_grou
     :param metadata_value:
     :param content:
     """
-    world.resp = world.cygnus.received_notification(world.cygnus.mappingQuotes (attribute_value), metadata_value, content)
+    world.resp = world.cygnus.received_notification(attribute_value, metadata_value, content)
 
 @step (u'receives "([^"]*)" notifications with consecutive values beginning with "([^"]*)" and with one step')
 def receives_notifications_with_consecutive_values(step, notif_number, attribute_value_init):
@@ -56,7 +55,18 @@ def receives_notifications_with_consecutive_values(step, notif_number, attribute
     """
     world.resp = world.cygnus.receives_n_notifications(notif_number, attribute_value_init)
 
-@step(u'I receive an "([^"]*)" http code')
+@step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+def receives_multiples_notifications(step, attribute_value, metadata_value, content):
+    """
+    receive several notifications by each instance, but changing port
+    :param step:
+    :param attribute_value:
+    :param metadata_value:
+    :param content:
+    """
+    world.resp = world.cygnus.received_multiples_notifications(attribute_value, metadata_value, content)
+
+@step(u'receive an "([^"]*)" http code')
 def i_receive_an_http_code (step, http_code_expected):
     """
     validate http code in response
