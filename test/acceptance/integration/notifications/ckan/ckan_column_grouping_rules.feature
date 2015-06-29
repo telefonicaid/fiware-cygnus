@@ -41,7 +41,7 @@ Feature: Stored in ckan new notifications per column from context broker using g
     And update real values in resource "<resource>" and service path "<service_path>" to notification request
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
     Then I receive an "OK" http code
-    And changes new destination "<new_dest_entity_id>_<new_dest_entity_type>" where to verify in dataset "<new_service_path>"
+    And changes new destination "<new_dest_entity_id>_<new_dest_entity_type>" where to verify "<new_service_path>"
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
   Examples:

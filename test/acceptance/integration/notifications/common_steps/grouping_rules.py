@@ -31,7 +31,7 @@ def update_real_values_in_resource_and_service_path_to_notification_request (ste
     """
     world.cygnus.change_destination_to_pattern (destination, service_path)
 
-@step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+@step (u'changes new destination "([^"]*)" where to verify "([^"]*)"')
 def changes_new_destination_where_to_verify_in_dataset (step, destination, dataset):
     """
     change new destination and dataset to validate
