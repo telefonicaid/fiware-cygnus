@@ -54,7 +54,6 @@ EMPTY            = u''
 
 # ckan constants
 MAX_TENANT_LENGTH              = u'abcde678901234567890123456789019'
-MAX_TENANT_LENGTH_ROW          = u'abcde67890123456789012345699_row'
 MAX_SERVICE_PATH_LENGTH        = u'/abcdefghij1234567890abcdefghij1234567890abcdefgh'
 MAX_RESOURCE_LENGTH            = u'123456789012345678901234567890123456789012345678901234567890123'
 WITH_MAX_LENGTH_ALLOWED        = u'with max length allowed'
@@ -94,27 +93,25 @@ class Cygnus:
     def __init__(self,  **kwargs):
         """
         constructor
-        :param cygnus_url: <protocol>://<host> cygnus (OPTIONAL)
-        :param cygnus_port: <port> cygnus (OPTIONAL)
-        :param management_port : management port to know the version (OPTIONAL)
-        :param version : cygnus version (OPTIONAL)
-        :param verify_version : determine if verify cygnus version or not (True | False)(OPTIONAL)
-        :param notif_user_agent : user agent to notification (OPTIONAL)
-        :param tenant_row_default: tenant by default per row mode (OPTIONAL)
-        :param tenant_col_default: tenant by default per col mode (OPTIONAL)
-        :param service_path_default: service path by default (OPTIONAL)
-        :param entity_id_default: entity id by default (OPTIONAL)
-        :param entity_type_default: entity type by default (OPTIONAL)
-        :param attributes_number_default: attribute number by default (OPTIONAL)
-        :param attributes_name_default: attribute name by default (OPTIONAL)
-        :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries) (OPTIONAL)
-        :param user: user used to connect by fabric (OPTIONAL)
-        :param password: password used to connect by fabric, if use cert file, password will be None (OPTIONAL)
-        :param cert_file: cert_file used to connect by fabric, if use password, cert_file will be None (OPTIONAL)
-        :param error_retry: Number of times Fabric will attempt to connect when connecting to a new server (OPTIONAL)
-        :param source_path: source path where are templates files [OPTIONAL]
-        :param target_path: target path where are copied config files [OPTIONAL]
-        :param sudo_cygnus: operations in cygnus with superuser privileges (True | False) [OPTIONAL]
+        :param protocol: protocol used in cygnus requests
+        :param host: host used in cygnus, in multi-instances, will be incremental
+        :param host: port used in cygnus
+        :param management_port : management port to know the version
+        :param version : cygnus version
+        :param verify_version : determine if verify cygnus version or not (True | False)
+        :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
+        :param user: user used to connect by fabric
+        :param password: password used to connect by fabric, if use cert file, password will be None
+        :param cert_file: cert_file used to connect by fabric, if use password, cert_file will be None
+        :param error_retry: Number of times Fabric will attempt to connect when connecting to a new server
+        :param source_path: source path where are templates files
+        :param target_path: target path where are copied config files
+        :param sudo_run: operations in cygnus with superuser privileges (True | False)
+        :param log_level: log level used in cygnus (log4j.properties)
+        :param log_file: log file used in cygnus
+        :param log_owner: log file's owner of cygnus
+        :param log_group: log file's group of cygnus
+        :param log_mod: log file's mod of cygnus
         """
         self.cygnus_protocol         = kwargs.get("protocol", "http")
         self.cygnus_host             = kwargs.get("host", "localhost")
@@ -155,7 +152,7 @@ class Cygnus:
         """
         self.dataset = None
         self.table = None
-        if service == WITH_MAX_LENGTH_ALLOWED: self.service = MAX_TENANT_LENGTH_ROW.lower()
+        if service == WITH_MAX_LENGTH_ALLOWED: self.service = MAX_TENANT_LENGTH.lower()
         elif service != DEFAULT:
             self.service = service.lower()
 
@@ -173,7 +170,7 @@ class Cygnus:
 
         self.attributes_number = int(attributes_number)
         self.attributes_name = attributes_name
-        self.attribute_type = attribute_type
+        self.attributes_type = attribute_type
 
         self.dataset = self.service
         self.table = self.resource
@@ -382,7 +379,7 @@ class Cygnus:
         notification = Notifications (self.cygnus_url+cygnus_notification_path,tenant=self.service, service_path=self.service_path, content=self.content)
         if self.metadata_value:
             notification.create_metadatas_attribute(metadata_attribute_number, RANDOM, RANDOM, RANDOM)
-        notification.create_attributes (self.attributes_number, self.attributes_name, self.attribute_type, attribute_value)
+        notification.create_attributes (self.attributes_number, self.attributes_name, self.attributes_type, attribute_value)
         resp =  notification.send_notification(self.entity_id, self.entity_type)
 
         self.date_time         = self.get_timestamp_remote()
@@ -434,45 +431,28 @@ class Cygnus:
 
     # ------------------------------------------- CKAN Column Mode -----------------------------------------------------
 
-    def create_organization_and_dataset(self, tenant, service_path):
+    def create_organization_and_dataset(self):
         """
         Create a new organization and a dataset associated
-        :param tenant: organization name
-        :param serv_path: dataset is organization_<service_path>
         """
-        self.dataset = None
-        if tenant == WITH_MAX_LENGTH_ALLOWED: self.service = MAX_TENANT_LENGTH.lower()
-        elif tenant != DEFAULT:
-            self.service = tenant.lower()
-
-        if service_path != DEFAULT: self.service_path = service_path.lower()
-        if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
         self.dataset = self.service
         if self.service_path != EMPTY: self.dataset = self.dataset+"_"+self.service_path
-        if tenant != ORGANIZATION_MISSING:
+        if self.service != ORGANIZATION_MISSING:
             world.ckan.create_organization (self.service)
-            if tenant != ORGANIZATION_WITHOUT_DATASET:
+            if self.service != ORGANIZATION_WITHOUT_DATASET:
                 self.dataset_id = world.ckan.create_dataset (self.dataset)
 
-    def create_resource_and_datastore (self, resource_name, attributes_number, attributes_name, attribute_type, attribute_data_type, metadata_data_type):
+    def create_resource_and_datastore (self, attribute_data_type, metadata_data_type):
         """
         create  a new resource and its datastore associated if it does not exists
+        :param attribute_data_type: attribute data type
+        :param metadata_data_type:  metadata data type
         """
-        if resource_name == WITH_MAX_LENGTH_ALLOWED:
-            self.resource = MAX_RESOURCE_LENGTH.lower()
-        elif resource_name == DEFAULT:
-            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
-        else:
-            self.resource = resource_name.lower()
-        self.entity_id, self.entity_type = self.__split_resource (self.resource)
-        if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
-        if attributes_name != DEFAULT: self.attributes_name = attributes_name
-        self.attribute_type = attribute_type
         self.dataset_id = world.ckan.verify_if_dataset_exist(self.dataset)
         if (self.service != ORGANIZATION_MISSING and \
            self.service != ORGANIZATION_WITHOUT_DATASET and \
            self.dataset_id  != False) and \
-           resource_name != RESOURCE_MISSING:
+           self.entity_id != RESOURCE_MISSING:
             fields = world.ckan.generate_field_datastore_to_resource(self.attributes_number, self.attributes_name, attribute_data_type, metadata_data_type)
             self.resource_id = world.ckan.create_resource(self.resource, self.dataset_id, fields)
 
@@ -549,11 +529,11 @@ class Cygnus:
         self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
-        self.attribute_type = attribute_type
+        self.attributes_type = attribute_type
 
         if self.service != DATABASE_MISSING and \
             self.service != DATABASE_WITHOUT_TABLE and \
-            resource_name != RESOURCE_MISSING:
+            self.entity_id != RESOURCE_MISSING:
              fields = world.mysql.generate_field_datastore_to_resource (attributes_number, attributes_name, attribute_data_type, metadata_data_type)
              world.mysql.create_table (self.table, self.service, fields)
 
@@ -613,7 +593,7 @@ class Cygnus:
         self.entity_id, self.entity_type = self.__split_resource (self.resource)
         if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
         if attributes_name != DEFAULT: self.attributes_name = attributes_name
-        self.attribute_type = attribute_type
+        self.attributes_type = attribute_type
 
     # ------------------------------------------  mongo raw ------------------------------------------------------------
 
@@ -634,7 +614,7 @@ class Cygnus:
         :return document dict (cursor)
         """
         find_dict = { "attrName": {'$regex':'%s.*' % (self.attributes_name)}, #the regular expression is because in  multi attribute the name is with postfix <_value>. ex: temperature_0
-                      "attrType" : self.attribute_type,
+                      "attrType" : self.attributes_type,
                       "attrValue" : str(self.attributes_value)
         }
         world.mongo.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
