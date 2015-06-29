@@ -58,33 +58,16 @@ def ckan_is_installed_correctly(step):
     """
     world.ckan.verify_version()
 
-@step(u'create a new organization "([^"]*)" with a dataset "([^"]*)"')
-def create_a_new_organization (step, tenant, service_path):
+@step (u'create a new organization with a dataset and a new resource with attribute data type "([^"]*)" and metadata data type "([^"]*)"')
+def create_a_new_organization_with_a_dataset_and_a_new_resource_with_attribute_data_type_and_metadata_data_type(step, attribute_data_type, metadata_data_type):
     """
-    create a new organization and a new dataset if they do exists
-    :param tenant:
-    :param service_path:
+    create a new organization with a dataset and a new resource with attribute data type "([^"]*)" and metadata data type
     :param step:
-    :param orgName: organization name (tenant).
-    :param servPath: service path
-    """
-    world.organization_operation = tenant  # this flag is used at create a new resource
-    world.cygnus.create_organization_and_dataset(tenant, service_path)
-
-@step (u'create a new resource "([^"]*)" with "([^"]*)" attributes called "([^"]*)", attribute type "([^"]*)", attribute data type "([^"]*)" and metadata data type "([^"]*)"')
-def create_a_new_resource_with_attrValue_data_type_and_metadata_data_type (step, resource_name, attribute_number, attribute_name, attribute_type,attribute_data_type, metadata_data_type):
-    """
-    Create a new resource with a datastore if it does not exists
-    :param attribute_type:
-    :param step:
-    :param resource_name: resource name
-    :param attribute_number: Quantity of attributes
-    :param attribute_name: attribute name
     :param attribute_data_type: attribute data type
     :param metadata_data_type:  metadata data type
     """
-    world.cygnus.create_resource_and_datastore (resource_name, attribute_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type)
-
+    world.cygnus.create_organization_and_dataset()
+    world.cygnus.create_resource_and_datastore (attribute_data_type, metadata_data_type)
 
 #----------------------------- validations -----------------------------------------------------
 
