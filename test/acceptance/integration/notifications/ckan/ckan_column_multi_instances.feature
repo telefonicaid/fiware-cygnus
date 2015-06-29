@@ -66,8 +66,6 @@ Feature: start multi-instances of cygnus using ckan sink and column mode
     And verify if ckan is installed correctly
     And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "1", attribute name "pressure" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
-    And create a new organization "<organization>" with a dataset "<service_path>"
-    And create a new resource "default" with "1" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "json" and metadata data type "json"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then check in log, label "lvl=FATAL" and text "Fatal error running the Management Interface. Details=Address already in use"
     And delete instances files
