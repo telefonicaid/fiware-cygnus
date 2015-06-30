@@ -176,3 +176,14 @@ def generate_hash_sha512(input, limit=-1):
     if limit == -1:
         limit = len(hash_resp)
     return hash_resp[0:limit]
+
+
+def mappingQuotes (attr_value):
+        """
+        limitation in lettuce change ' by " in mysql
+        """
+        temp = ""
+        for i in range (len(attr_value)):
+            if attr_value[i] == "'":  temp = temp + "\""
+            else:temp = temp + attr_value[i]
+        return temp

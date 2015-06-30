@@ -142,6 +142,7 @@ class Cygnus:
     def configuration(self, service, service_path, entity_type, entity_id, attributes_number, attributes_name, attribute_type):
         """
         general configuration
+         table (max 64 chars) = service_path + "_" + resource
         :param service:  service used in scenario
         :param service_path: service path used in scenario
         :param entity_type: entity type used in scenario
@@ -372,6 +373,8 @@ class Cygnus:
         :param metadata_value: metadata value (true or false)
         :param content: xml or json
         """
+        if self.sink == "mysql-sink":  # limitation in lettuce change ' by " in mysql
+            attribute_value = general_utils.mappingQuotes(attribute_value)
         self.content = content
         self.metadata_value = metadata_value
         metadata_attribute_number = 1
@@ -382,12 +385,12 @@ class Cygnus:
         notification.create_attributes (self.attributes_number, self.attributes_name, self.attributes_type, attribute_value)
         resp =  notification.send_notification(self.entity_id, self.entity_type)
 
-        self.date_time         = self.get_timestamp_remote()
-        self.attributes=notification.get_attributes()
-        self.attributes_name=notification.get_attributes_name()
-        self.attributes_value=notification.get_attributes_value()
-        self.attributes_metadata=notification.get_attributes_metadata_number()
-        self.attributes_number=int(notification.get_attributes_number())
+        self.date_time           = self.get_timestamp_remote()
+        self.attributes          = notification.get_attributes()
+        self.attributes_name     = notification.get_attributes_name()
+        self.attributes_value    = notification.get_attributes_value()
+        self.attributes_metadata = notification.get_attributes_metadata_number()
+        self.attributes_number   = int(notification.get_attributes_number())
         return resp
 
     def receives_n_notifications(self, notif_number, attribute_value_init):
@@ -499,42 +502,25 @@ class Cygnus:
 
     # ------------------------------------------ MySQL Column Mode -----------------------------------------------------
 
-    def create_database (self,tenant):
+    def create_database (self):
         """
         create a new Database per column
         :param tenant: database name
         """
-        if tenant == WITH_MAX_LENGTH_ALLOWED: self.service = MAX_TENANT_LENGTH.lower()
-        elif        tenant != DATABASE_WITHOUT_TABLE \
-                and tenant != DATABASE_MISSING \
-                and tenant != DEFAULT:
-            self.service = tenant.lower()
-        if tenant != DATABASE_MISSING:
+        if self.service != DATABASE_MISSING:
             world.mysql.create_database (self.service)
 
-    def create_table (self, resource_name, service_path, attributes_number, attributes_name, attribute_type, attribute_data_type, metadata_data_type):
+    def create_table (self, attribute_data_type, metadata_data_type):
         """
         create a new table per column
         """
-        if service_path != DEFAULT: self.service_path = service_path.lower()
-        if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
-        if resource_name == WITH_MAX_LENGTH_ALLOWED:
-            self.resource = MAX_RESOURCE_LENGTH[0:(len(MAX_RESOURCE_LENGTH)-len(self.service_path)-1)].lower()  # table (max 64 chars) = service_path + "_" + resource
-        elif resource_name == DEFAULT:
-            self.resource = str(self.entity_id+"_"+self.entity_type).lower()
-        else:
-            self.resource = resource_name.lower()
+
         self.table = self.resource
         if self.service_path != EMPTY: self.table = self.service_path+ "_" +self.table
-        self.entity_id, self.entity_type = self.__split_resource (self.resource)
-        if attributes_number != DEFAULT: self.attributes_number = int(attributes_number)
-        if attributes_name != DEFAULT: self.attributes_name = attributes_name
-        self.attributes_type = attribute_type
-
         if self.service != DATABASE_MISSING and \
             self.service != DATABASE_WITHOUT_TABLE and \
             self.entity_id != RESOURCE_MISSING:
-             fields = world.mysql.generate_field_datastore_to_resource (attributes_number, attributes_name, attribute_data_type, metadata_data_type)
+             fields = world.mysql.generate_field_datastore_to_resource (self.attributes_number, self.attributes_name, attribute_data_type, metadata_data_type)
              world.mysql.create_table (self.table, self.service, fields)
 
     def retry_in_table_search_sql_column (self, table_name, database_name, value):
@@ -865,16 +851,6 @@ class Cygnus:
         return True
 
     # ------------------------------------------  mysql validations ----------------------------------------------------
-
-    def mappingQuotes (self, attr_value):
-        """
-        limitation in lettuce change ' by " in mysql
-        """
-        temp = ""
-        for i in range (len(attr_value)):
-            if attr_value[i] == "'":  temp = temp + "\""
-            else:temp = temp + attr_value[i]
-        return temp
 
     def close_connection (self):
         """
