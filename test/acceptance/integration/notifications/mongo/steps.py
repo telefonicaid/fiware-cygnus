@@ -22,15 +22,34 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 from integration.notifications.common_steps.multi_instances import * # steps to multi-instances
 from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
 from integration.notifications.common_steps.notifications import *   # steps to notifications
+from integration.notifications.common_steps.grouping_rules import *   # steps to grouping rules
 
-#  -------------------------------  notifications ----------------------------------------------------------------------
-#  steps in integration.notifications.common_steps.notifications.py:
-#    - service "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)
-#    - receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"
-#    - receives "([^"]*)" notifications with consecutive values beginning with "([^"]*)" and with one step
+# ----------------------------------- COMMON STEPS ------------------------------------
+# ---------------------------- configuration.py --------------------------------------
+# @step (u'copy properties.json file from "([^"]*)" to test "([^"]*)" and sudo local "([^"]*)"')
+# @step (u'configuration of cygnus instances with different ports "([^"]*)", agents files quantity "([^"]*)", id "([^"]*)" and in "([^"]*)" mode')
+# @step (u'copy flume-env.sh, grouping rules file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
+# @step (u'verify if cygnus is installed correctly')
+# @step (u'reinitialize log file')
+# @step (u'check in log, label "([^"]*)" and text "([^"]*)"')
+# @step (u'delete grouping rules file')
 
+# --------------------------- notifications.py ------------------------------------
+# @step (u'service "([^"]*)", service path "([^"]*)", entity type "([^"]*)", entity id "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+# @step(u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+# @step (u'receives "([^"]*)" notifications with consecutive values beginning with "([^"]*)" and with one step')
+# @step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+# @step(u'receive an "([^"]*)" http code')
 
-# ------------------------------------------------ validations --------------------------------------------------------
+# --------------------------- grouping_rules.py -----------------------------------
+# @step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
+# @step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+
+# --------------------------- multi_instances.py ----------------------------------
+# @step (u'delete instances files')
+
+#----------------------------------------------------------------------------------
+
 @step(u'verify if mongo is installed correctly')
 def mongo_is_installed_correctly(step):
     """
@@ -75,7 +94,6 @@ def validate_that_the_attribute_value_metadata_and_type_are_stored_in_mongo(step
 def validate_that_the_aggregated_values_are_generate_in_mongo(step, resolution):
     """
     Validate that the aggregated value is generate in mongo by several resolutions
-
           - origin, max, min, sum sum2
     :param step:
     :param resolution: resolutions type (  month | day | hour | minute | second )

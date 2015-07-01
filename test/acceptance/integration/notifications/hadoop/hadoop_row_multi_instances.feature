@@ -35,8 +35,8 @@ Feature: start multi-instances of cygnus using hadoop sink and row mode
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "cygnus_multi_instance_01", service path "/test", resource "room2_room", with attribute number "1", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "cygnus_multi_instance_01", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
@@ -64,8 +64,8 @@ Feature: start multi-instances of cygnus using hadoop sink and row mode
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "cygnus_multi_instance_02", service path "/test", resource "room2_room", with attribute number "1", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "cygnus_multi_instance_02", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then check in log, label "lvl=FATAL" and text "Fatal error running the Management Interface. Details=Address already in use"
     And delete the file created in hadoop

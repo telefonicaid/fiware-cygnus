@@ -4,20 +4,13 @@
         "logs_path": "logs"
     },
     "cygnus": {
-        "cygnus_url": "http://host",
-        "cygnus_port": "port",
-        "cygnus_management_port": "port",
-        "cygnus_version": "X.Y.z",
-        "cygnus_verify_version": "False",
+        "cygnus_protocol": "http",
+        "cygnus_host": "localhost",
+        "cygnus_port": "5050",
+        "cygnus_management_port": "8081",
+        "cygnus_version": "x.y.z",
+        "cygnus_verify_version": "false",
         "cygnus_log_level": "DEBUG",
-        "cygnus_user_agent": "notification user agent",
-        "cygnus_organization_per_row_default": "org_default_per_row",
-        "cygnus_organization_per_col_default": "org_default_per_col",
-        "cygnus_service_path_default": "testing",
-        "cygnus_identity_id_default": "room1",
-        "cygnus_identity_type_default": "room",
-        "cygnus_attributes_number_default": 2,
-        "cygnus_attributes_name_default": "temperature",
         "cygnus_ttl": "10",
         "cygnus_fabric_user": "username",
         "cygnus_fabric_password": "password",
@@ -25,7 +18,11 @@
         "cygnus_fabric_error_retry": 1,
         "cygnus_fabric_source_path": "<source path>",
         "cygnus_fabric_target_path": "<target path>",
-        "cygnus_fabric_sudo": False
+        "cygnus_fabric_sudo": False,
+        "cygnus_log_file": "/var/log/cygnus/cygnus.log",
+        "cygnus_log_owner": "cygnus",
+        "cygnus_log_group": "cygnus",
+        "cygnus_log_mod": "777"
     },
     "ckan": {
         "ckan_version": "X.Y",
@@ -43,7 +40,7 @@
     "mysql": {
         "mysql_version": "X.Y.z",
         "mysql_verify_version": "False",
-        "mysql_host": "hostname or IP",
+        "mysql_host": "w.x.y.z",
         "mysql_port": "port",
         "mysql_user": "user",
         "mysql_pass": "pass",

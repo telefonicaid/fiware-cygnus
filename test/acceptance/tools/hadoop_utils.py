@@ -120,17 +120,18 @@ class Hadoop:
         """
         Verify if hadoop is installed and that version is the expected
         """
-        resp = http_utils.request(http_utils.GET, url=self.__create_url(VERSION), headers=self.__create_headers())
-        http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - in version request... ")
-        bodyDict = general_utils.convert_to_str_to_dict(resp.text, general_utils.JSON)
+        if str(self.verify_version).lower().find("true") >= 0:
+            resp = http_utils.request(http_utils.GET, url=self.__create_url(VERSION), headers=self.__create_headers())
+            http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - in version request... ")
+            bodyDict = general_utils.convert_to_str_to_dict(resp.text, general_utils.JSON)
 
-        assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \
-        "hadoop is not started...\nverified: %s. Expected: %s. \n\nBody content: %s" \
-        % (str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), STARTED, str(resp.text))
+            assert  STARTED == str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), \
+            "hadoop is not started...\nverified: %s. Expected: %s. \n\nBody content: %s" \
+            % (str (bodyDict[CLUSTER_INFO][HADOOP_STATE]), STARTED, str(resp.text))
 
-        assert  str(self.version) == str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), \
-        "Wrong hadoop version \nverified: %s. Expected: %s. \n\nBody content: %s" \
-        % (str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), str(self.version), str(resp.text))
+            assert  str(self.version) == str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), \
+            "Wrong hadoop version \nverified: %s. Expected: %s. \n\nBody content: %s" \
+            % (str (bodyDict[CLUSTER_INFO][HADOOP_VERSION]), str(self.version), str(resp.text))
 
     def open_file (self, directory, file_name):
         """

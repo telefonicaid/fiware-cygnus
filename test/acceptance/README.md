@@ -80,11 +80,11 @@ Some examples:
 
 - Cygnus-MONGO raw
 - Cygnus-MONGO raw using grouping rules.
-- Cygnus-MONGO raw using multi-instances (pending).
+- Cygnus-MONGO raw using multi-instances.
 
 - Cygnus-STH aggregated
-- Cygnus-STH aggregated using grouping rules (pending).
-- Cygnus-STH aggregated using multi-instances (pending).
+- Cygnus-STH aggregated using grouping rules.
+- Cygnus-STH aggregated using multi-instances.
 
 ### configuration.json
 
