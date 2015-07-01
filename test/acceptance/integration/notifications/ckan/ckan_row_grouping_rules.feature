@@ -36,7 +36,7 @@ Feature: Stored in ckan new notifications per row from context broker using grou
     And verify if ckan is installed correctly
     And service "match_table", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And changes new destination "<new_destination>" where to verify "<new_dataset>"
     And Validate that the attribute value, metadata "true" and type are stored in ckan
   Examples:
@@ -84,7 +84,7 @@ Feature: Stored in ckan new notifications per row from context broker using grou
     And verify if ckan is installed correctly
     And service "match_table", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value, metadata "true" and type are stored in ckan
     And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
   Examples:

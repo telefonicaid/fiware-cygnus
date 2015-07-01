@@ -39,7 +39,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "happy_path", service path "/testing", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -57,7 +57,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "happy_path", service path "/test", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -77,7 +77,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -101,7 +101,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "<directory>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -131,7 +131,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "multi_resources", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -161,7 +161,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -183,7 +183,7 @@ Feature: Stored in hadoop new notifications per row from context broker
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop

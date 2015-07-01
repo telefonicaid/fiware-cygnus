@@ -39,7 +39,7 @@ Feature: Stored in hadoop new notifications per row from context broker using gr
     And verify if hadoop is installed correctly
     And service "happy_path_grouping_rules", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And changes new destination "<new_destination>" where to verify "<new_service_path>"
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
@@ -89,7 +89,7 @@ Feature: Stored in hadoop new notifications per row from context broker using gr
     And verify if hadoop is installed correctly
     And service "errors_grouping_rules", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
   Examples:
