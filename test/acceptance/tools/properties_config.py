@@ -38,6 +38,7 @@ FILE_NAME             = u'properties.json'
 CONFIGURATION_FILE    = u'configuration.json'
 SETTINGS_PATH         = u'path_to_settings_folder'
 SUDO                  = u'sudo'
+JENKINS               = u'jenkins'
 
 
 
@@ -65,11 +66,12 @@ class Properties:
             except Exception, e:
                 assert False, 'Error parsing configuration.json file: \n%s' % (e)
 
-        sudo_run = ""
-        if self.sudo.lower() == "true": sudo_run = SUDO
-        p = subprocess.Popen("%s cp -R %s/%s %s"% (sudo_run, configuration[SETTINGS_PATH], self.file_name, FILE_NAME), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        STDOUT = p.stdout.readlines()
-        assert STDOUT == [], "ERROR - coping %s from setting folder. \n %s" % (self.file_name, STDOUT)
+        if configuration[JENKINS].lower() == "false":
+            sudo_run = ""
+            if self.sudo.lower() == "true": sudo_run = SUDO
+            p = subprocess.Popen("%s cp -R %s/%s %s"% (sudo_run, configuration[SETTINGS_PATH], self.file_name, FILE_NAME), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            STDOUT = p.stdout.readlines()
+            assert STDOUT == [], "ERROR - coping %s from setting folder. \n %s" % (self.file_name, STDOUT)
 
     def read_properties(self):
         """
