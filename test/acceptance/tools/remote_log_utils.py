@@ -79,7 +79,7 @@ class Remote_Log:
         """
         delete file log
         """
-        self.fabric.run("rm -rf %s" % (self.file))
+        self.fabric.run("rm -f %s" % (self.file))
 
     def create_log_file(self, **kwargs):
         """

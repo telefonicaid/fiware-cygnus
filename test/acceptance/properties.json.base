@@ -40,7 +40,7 @@
     "mysql": {
         "mysql_version": "X.Y.z",
         "mysql_verify_version": "False",
-        "mysql_host": "hostname or IP",
+        "mysql_host": "w.x.y.z",
         "mysql_port": "port",
         "mysql_user": "user",
         "mysql_pass": "pass",
