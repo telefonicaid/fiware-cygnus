@@ -38,7 +38,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "<attributesQuantity>", attribute name "<attribute_name>" and attribute type "<attribute_type>"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
   Examples:
     | organization   | service_path | attributesQuantity | attribute_name | attribute_type | attribute_value   | metadata_value | content |
@@ -65,7 +65,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "/myservicepath", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
   Examples:
@@ -89,7 +89,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
@@ -120,7 +120,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "org_col_multi_resource_001", service path "/test_02", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
   Examples:
@@ -150,7 +150,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "resource_multi_02110", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
   Examples:
@@ -180,7 +180,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
@@ -203,7 +203,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "<attribute_data_type>" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
@@ -239,7 +239,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "without_fields_0311", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "<value_field>" and metadata data type "<metadata_field>"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored in ckan "<error>"
 
   Examples:
@@ -261,7 +261,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "<value_field>" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored in ckan "error with value in wrong data type"
 
   Examples:
@@ -303,7 +303,7 @@ Feature: Stored in ckan new notifications per column from context broker
     And service "<organization>", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored if element does not exist "<error>" in ckan
  Examples:
     | organization                 | entity_type | entity_id        | content | error                        |

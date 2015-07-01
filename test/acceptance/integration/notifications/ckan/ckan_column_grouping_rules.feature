@@ -40,7 +40,7 @@ Feature: Stored in ckan new notifications per column from context broker using g
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     And update real values in resource "<resource>" and service path "<service_path>" to notification request
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And changes new destination "<new_dest_entity_id>_<new_dest_entity_type>" where to verify "<new_service_path>"
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
@@ -90,7 +90,7 @@ Feature: Stored in ckan new notifications per column from context broker using g
     And service "org_patterns_02", service path "<service_path>", entity type "<new_dest_entity_type>", entity id "<new_dest_entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
     And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And check in log, label "lvl=WARN" and text "Invalid grouping rule, some field is empty. It will be discarded."
   Examples:

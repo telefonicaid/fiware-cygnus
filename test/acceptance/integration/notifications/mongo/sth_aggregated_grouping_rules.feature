@@ -39,7 +39,7 @@ Feature: stored in mongo new notifications from context broker but do not apply 
     And verify if mongo is installed correctly
     And service "test_happy_path", service path "<service_path>", resource "<resource>", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "<resolution>" in mongo
   Examples:
     | service_path | resource        | content | resolution |
