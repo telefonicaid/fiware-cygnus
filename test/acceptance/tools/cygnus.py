@@ -17,6 +17,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact:
 # iot_support at tid.es
 #
+import json
 
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
@@ -295,9 +296,16 @@ class Cygnus:
         verify if cygnus is installed correctly and its version
         """
         self.cygnus_mode = world.persistence
+
+        with open("configuration.json") as config_file:
+            try:
+                configuration = json.load(config_file)
+                if configuration["jenkins"].lower() == "true": self.cygnus_host = "127.0.0.1"
+            except Exception, e:
+                assert False, 'Error parsing configuration.json file: \n%s' % (e)
+
         if self.verify_version.lower() == "true":
-            temp_split = self.cygnus_url.split(":")
-            management_url = "%s:%s:%s/%s" % (str(temp_split[0]), str(temp_split[1]), self.management_port, VERSION)
+            management_url = "%s://%s:%s/%s" % (self.cygnus_protocol, self.cygnus_host, self.management_port, VERSION)
             resp = http_utils.request(http_utils.GET, url= management_url)
             http_utils.assert_status_code(http_utils.status_codes[http_utils.OK], resp, "ERROR - in management operation (version)")
             body_dict= general_utils.convert_str_to_dict(resp.text, general_utils.JSON)
