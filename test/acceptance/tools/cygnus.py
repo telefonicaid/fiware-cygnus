@@ -300,7 +300,9 @@ class Cygnus:
         with open("configuration.json") as config_file:
             try:
                 configuration = json.load(config_file)
-                if configuration["jenkins"].lower() == "true": self.cygnus_host = "127.0.0.1"
+                if configuration["jenkins"].lower() == "true":
+                    self.cygnus_host = "127.0.0.1"
+                    self.cygnus_url  = "%s://%s:%s" % (self.cygnus_protocol, self.cygnus_host, self.cygnus_port)
             except Exception, e:
                 assert False, 'Error parsing configuration.json file: \n%s' % (e)
 
