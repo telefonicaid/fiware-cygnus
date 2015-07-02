@@ -18,7 +18,7 @@
         "cygnus_fabric_error_retry": 1,
         "cygnus_fabric_source_path": "<source path>",
         "cygnus_fabric_target_path": "<target path>",
-        "cygnus_fabric_sudo": False,
+        "cygnus_fabric_sudo": "False",
         "cygnus_log_file": "/var/log/cygnus/cygnus.log",
         "cygnus_log_owner": "cygnus",
         "cygnus_log_group": "cygnus",
