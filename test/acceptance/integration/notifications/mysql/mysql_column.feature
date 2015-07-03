@@ -284,18 +284,17 @@ Feature: Stored in mysql new notifications per column from context broker
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if mysql is installed correctly
-    And service "<database>", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
     And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that is not stored in mysql "<error>"
     And Close mysql connection
 
   Examples:
-    | database                     | entity_type | entity_id        | content | error                        |
-    | organization is missing      | room        | room2            | json    | organization is missing      |
-    | organization is missing      | room        | room2            | xml     | organization is missing      |
-    | organization_without_dataset | room        | room2            | json    | organization without dataset |
-    | organization_without_dataset | room        | room2            | xml     | organization without dataset |
-    | org_without_resource         |             | resource_missing | json    | resource missing             |
-    | org_without_resource         |             | resource_missing | xml     | resource missing             |
+    | database               |  content | error                  |
+    | database_missing       |  json    | database_missing       |
+    | database_missing       |  xml     | database_missing       |
+    | database_without_table |  json    | database_without_table |
+    | database_without_table |  xml     | database_without_table |
+
 
