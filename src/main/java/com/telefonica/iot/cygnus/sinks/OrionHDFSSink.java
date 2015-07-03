@@ -74,13 +74,18 @@ import org.apache.flume.Context;
  * 
  */
 public class OrionHDFSSink extends OrionSink {
+    
+    /**
+     * Supported file formats when writting to HDFS.
+     */
+    private enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] host;
     private String port;
     private String username;
     private String password;
-    private boolean rowAttrPersistence;
+    private FileFormat fileFormat;
     private String hiveHost;
     private String hivePort;
     private boolean krb5;
@@ -218,9 +223,8 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
+        fileFormat = FileFormat.valueOf(context.getString("file_format", "row").replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
         hiveHost = context.getString("hive_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
@@ -306,7 +310,15 @@ public class OrionHDFSSink extends OrionSink {
             // this is used for storing the attribute's names and values in a Json-like way when dealing with a per
             // column attributes persistence; in that case the persistence is not done attribute per attribute, but
             // persisting all of them at the same time
-            String columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
+            String columnLine;
+            
+            if (fileFormat == FileFormat.JSONCOLUMN) {
+                columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
+            } else if (fileFormat == FileFormat.CSVCOLUMN) {
+                columnLine = recvTime + " ";
+            } else {
+                columnLine = "";
+            } // if else
             
             // this is used for storing the attribute's names needed by Hive in order to create the table when dealing
             // with a per column attributes persistence; in that case the Hive table creation is not done using
@@ -321,18 +333,10 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
-                if (rowAttrPersistence) {
-                    // create a Json document to be persisted
-                    String rowLine = "{"
-                            + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
-                            + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                            + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
-                            + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
-                            + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
-                            + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
-                            + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
-                            + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
-                            + "}";
+                if (fileFormat == FileFormat.JSONROW || fileFormat == FileFormat.CSVROW) {
+                    String rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
+                            attrType, attrValue, attrMetadata);
+                    
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                             + hdfsFile + "), Data (" + rowLine + ")");
                     
@@ -347,18 +351,20 @@ public class OrionHDFSSink extends OrionSink {
                         persistenceBackend.provisionHiveTable(hdfsFolder);
                         fileExists = true;
                     } // if else
-                } else {
-                    columnLine += "\"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata
-                            + ",";
+                } else if (fileFormat == FileFormat.JSONCOLUMN || fileFormat == FileFormat.CSVCOLUMN) {
+                    columnLine += createColumn(fileFormat, attrName, attrValue, attrMetadata);
                     hiveFields += "," + attrName + " string," + attrName + "_md array<string>";
                 } // if else
             } // for
                  
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list
-            if (!rowAttrPersistence) {
+            if (fileFormat == FileFormat.JSONCOLUMN || fileFormat == FileFormat.CSVCOLUMN) {
+                // replace/remove the last character of the string (',' is replaced by '}' for JSON,
+                // ' ' is removed for CSV)
+                columnLine = truncateColumn(fileFormat, columnLine);
+                
                 // insert a new row containing full attribute list
-                columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
                 LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + hdfsFile
                         + "), Data (" + columnLine + ")");
                 
@@ -429,4 +435,51 @@ public class OrionHDFSSink extends OrionSink {
         return thirdLevel;
     } // buildThirdLevel
     
+    private String createRow(FileFormat fileFormat, long recvTimeTs, String recvTime, String entityId,
+            String entityType, String attrName, String attrType, String attrValue, String attrMetadata) {
+        if (fileFormat == FileFormat.JSONROW) {
+            return "{"
+                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
+                    + "}";
+        } else if (fileFormat == FileFormat.CSVROW) {
+            return recvTimeTs / 1000 + " "
+                    + recvTime + " "
+                    + entityId + " "
+                    + entityType + " "
+                    + attrName + " "
+                    + attrType + " "
+                    + attrValue + " "
+                    + attrMetadata;
+        } else {
+            return "";
+        } // if else
+    } // createRow
+
+    private String createColumn(FileFormat fileFormat, String attrName, String attrValue, String attrMetadata) {
+        if (fileFormat == FileFormat.JSONCOLUMN) {
+            return "\"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata + ",";
+        } else if (fileFormat == FileFormat.CSVCOLUMN) {
+            return attrValue + " " + attrMetadata + " ";
+        } else {
+            return "";
+        } // if else
+    } // createJSONColumn
+    
+    private String truncateColumn(FileFormat fileFormat, String columnLine) {
+        if (fileFormat == FileFormat.JSONCOLUMN) {
+            return columnLine.substring(0, columnLine.length() - 1) + "}";
+        } else if (fileFormat == FileFormat.CSVCOLUMN) {
+            return columnLine.substring(0, columnLine.length() - 1);
+        } else {
+            return columnLine;
+        } // if else
+    } // truncateColumn
+
 } // OrionHDFSSink
