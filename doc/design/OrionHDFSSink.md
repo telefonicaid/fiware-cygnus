@@ -8,6 +8,7 @@
 * [Implementation details](#section4)
     * [`OrionHDFSSink` class](#section4.1)
     * [`HDFSBackendImpl` class](#section4.2)
+    * [Authentication and authorization](#section4.3)
 * [Contact](#section5)
 
 ##<a name="section1"></a>Functionality
@@ -198,6 +199,27 @@ Provisions a Hive table with data stored in row-like mode within the given HDFS 
     public void provisionHiveTable(String dirPath, String fields) throws Exception;
     
 Provisions a Hive table with data stores in column-like mode within the given HDFS path. The fields list is passed as comma-separated values since this storing mode has not a constant format.
+
+[Top](#top)
+
+###<a name="section4.3"></a>Authentication and authorization
+The sink for HDFS accepts  tokens as authentication and authorization mechanism. This can be configured through , as seen before.
+
+[OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
+
+A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
+
+* Access tokens are requested to the Identity Manager, which is asked by the final service for authentication purposes once the tokens are received. Please observe by asking this the service not only discover who is the real FIWARE user behind the request, but the service has full certainty the user is who he/she says to be.
+* At the same time, the Identity Manager relies on the Access Control for authorization purposes. The access token gives, in addition to the real identity of the user, his/her roles according to the requested resource. The Access Control owns a list of policies regarding who is allowed to access all the resources based on the user roles.
+
+This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnusagent.sinks.hdfs-sink.oauth2_token` parameter.
+
+In order to get an access token, do the following request to a global instance of the Identity Manager; in FIWARE Lab this is `account.lab.fiware.org`:
+
+    $ curl -X POST "https://account.lab.fiware.org/oauth2/token" -H "Authorization: Basic NGQxYWYyZWVjMzc1NDA5OWE0ZjhkYzg2YmY3MzUwNjg6Nzc5YTZlODY5MzdmNDljNzg0OTYzOGZhNTY1YmE0OGQ=" -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=password&username=frb@tid.es&password=xxxxxxxx”
+    {"access_token": "qjHPUcnW6leYAqr3Xw34DWLQlja0Ix", "token_type": "Bearer", "expires_in": 3600, "refresh_token": “V2Wlk7aFCnElKlW9BOmRzGhBtqgR2z"}
+
+As you can see, your FIWARE Lab credentials are required in the payload, in the form of a password-based grant type (this will be the only time you have to give them). Another important thing is the value of the authorization header; this is the same for all the users, since it identifies the WebHDFS application in the Identity Manager (this registration step is something to be done by the HDFS administrator, not by you).
 
 [Top](#top)
 
