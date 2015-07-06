@@ -123,13 +123,13 @@ public class OrionHDFSSink extends OrionSink {
     } // getCosmosDefaultUsername
     
     /**
-     * Gets the Cosmos oauth2Token for the default username. It is protected due to it is only required for testing
-     * purposes.
+     * Gets the OAuth2 token used for authentication and authorization. It is protected due to it is only required
+     * for testing purposes.
      * @return The Cosmos oauth2Token for the detault Cosmos username
      */
-    protected String getCosmosDefaultPassword() {
+    protected String getOAuth2Token() {
         return oauth2Token;
-    } // getCosmosDefaultPassword
+    } // getOAuth2Token
     
     /**
      * Gets the Hive port. It is protected due to it is only required for testing purposes.
