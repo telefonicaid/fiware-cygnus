@@ -120,8 +120,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS.<br>Still usable; if both are configured, `hdfs_port` is preferred |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
 | cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
-| hdfs_password | yes | N/A |
-| cosmos\_default\_password<br>(**deprecated**) | yes | N/A | Still usable; if both are configured, `hdfs_password` is preferred |
+| oauth2_token | yes | N/A |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | hive_host | no | localhost |
@@ -142,7 +141,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfsƒsink.hdfs_username = myuser
-    cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
+    cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
     cygnusagent.sinks.hdfs-sink.attr_persistence = column
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive_port = 10000
