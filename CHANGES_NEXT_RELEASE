@@ -6,3 +6,4 @@
 - [HARDENING] Link the Quick Start Guide from the README (#454)
 - [BUG] Fix the grouping rules validator, now empty fields and non-numeric ids are not allowed (#460)
 - [HARDENING] Add detailed explanation about the syntax of the grouping rules (#459)
+- [FEATURE] OAuth2 support for OrionHDFSSink (#483)

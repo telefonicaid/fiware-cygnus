@@ -60,7 +60,7 @@ public class OrionHDFSSinkTest {
     private final String[] cosmosHost = {"localhost"};
     private final String cosmosPort = "14000";
     private final String cosmosDefaultUsername = "user1";
-    private final String cosmosDefaultPassword = "pass1234";
+    private final String oauth2Token = "tokenabcdefghijk";
     private final String hivePort = "10000";
     private final long recvTimeTs = 123456789;
     private final String normalServiceName = "vehicles";
@@ -162,7 +162,7 @@ public class OrionHDFSSinkTest {
         context.put("cosmos_host", cosmosHost[0]);
         context.put("cosmos_port", cosmosPort);
         context.put("cosmos_default_username", cosmosDefaultUsername);
-        context.put("cosmos_default_password", cosmosDefaultPassword);
+        context.put("oauth2_token", oauth2Token);
         context.put("hive_port", hivePort);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
@@ -186,7 +186,7 @@ public class OrionHDFSSinkTest {
         assertEquals(cosmosHost[0], sink.getCosmosHost()[0]);
         assertEquals(cosmosPort, sink.getCosmosPort());
         assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
-        assertEquals(cosmosDefaultPassword, sink.getCosmosDefaultPassword());
+        assertEquals(oauth2Token, sink.getOAuth2Token());
         assertEquals(hivePort, sink.getHivePort());
     } // testConfigure
 
