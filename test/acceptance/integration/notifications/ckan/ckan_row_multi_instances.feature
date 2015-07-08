@@ -32,10 +32,10 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
   Scenario Outline: start multi-instances of cygnus using ckan sink, row mode, ports differents and store multiples notifications one by instance and the port defined incremented
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And a tenant "tenant_multi_instance_020", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And verify if ckan is installed correctly
+    And service "tenant_multi_instance_021", service path "/servpath01", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "false" and type are stored in ckan
     And delete instances files
@@ -57,13 +57,14 @@ Feature: start multi-instances of cygnus using ckan sink and row mode
   @same_port @multi_instances @ISSUE_46
   Scenario Outline: try to start multi-instances of cygnus using ckan sink, row mode and same ports to all instances
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
+    And reinitialize log file
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And a tenant "tenant_multi_instance_030", service path "/servpath01", resource "room_room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And verify if ckan is installed correctly
+    And service "tenant_multi_instance_031", service path "/servpath01", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then Validate that the attribute value, metadata "false" and type are stored in ckan
+    Then check in log, label "lvl=FATAL" and text "Fatal error running the Management Interface. Details=Address already in use"
     And delete instances files
   Examples:
     | instances_number | attribute_value | metadata_value | content |

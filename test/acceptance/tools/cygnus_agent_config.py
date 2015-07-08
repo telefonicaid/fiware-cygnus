@@ -37,7 +37,7 @@ PORT                   = u'port'
 DEFAULT_SERVICE        = u'default_service'
 DEFAULT_SERVICE_PATH   = u'default_service_path'
 TTL                    = u'ttl'
-MATCHING_TABLE_FILE    = u'matching_table_file'
+GROUPING_RULES_FILE    = u'grouping_rules_file'
 HOST                   = u'host'
 HOST_PORT              = u'host_port'
 LOCALHOST              = u'localhost'
@@ -127,17 +127,17 @@ class Agent:
         :param default_service: tenant used by default
         :param default_service_path: service path used by default
         :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
-        :param matching_table_file: Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
+        :param grouping_rules_file: Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
         :return commands list
         """
         self.sink                 = kwargs.get(SINK, EMPTY)
         self.channel              = kwargs.get(CHANNEL, EMPTY)
         self.cygnus_port          = kwargs.get(PORT, "5050")
-        self.default_service      = kwargs.get(DEFAULT_SERVICE, EMPTY)
-        self.default_service_path = kwargs.get(DEFAULT_SERVICE_PATH, EMPTY)
+        self.default_service      = kwargs.get(DEFAULT_SERVICE, "def_serv")
+        self.default_service_path = kwargs.get(DEFAULT_SERVICE_PATH, "def_servpath")
         self.ttl                  = kwargs.get(TTL, "10")
-        self.matching_table_file  = kwargs.get(MATCHING_TABLE_FILE, "/usr/cygnus/conf/matching_table.conf")
-        sed_matching_table_file = self.matching_table_file.replace("/", "\/")    # replace / to \/ in path that is used in sed command
+        self.grouping_rules_file  = kwargs.get(GROUPING_RULES_FILE, "/usr/cygnus/conf/grouping_rules.conf")
+        sed_grouping_rules_file = self.grouping_rules_file.replace("/", "\/")    # replace / to \/ in path that is used in sed command
         self.__append_command('sed -i "s/%s.sinks = .*/%s.sinks = %s/" %s/%s ' % (self.id, self.id, self.sink, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.channels = .*/%s.channels = %s/" %s/%s ' % (self.id, self.id, self.channel, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.sources\.http-source\.channels = .*/%s.sources\.http-source.channels = %s/" %s/%s ' % (self.id, self.id, self.channel, self.target_path, self.name), self.target_path, self.sudo)
@@ -148,7 +148,7 @@ class Agent:
             sed_default_service_path = self.default_service_path.replace("/", "\/")    # replace / to \/ in path that is used in sed command
             self.__append_command('sed -i "s/%s.sources.http-source.handler.default_service_path = .*/%s.sources.http-source.handler.default_service_path = %s/" %s/%s ' % (self.id, self.id, sed_default_service_path, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.sources.http-source.handler.events_ttl = .*/%s.sources.http-source.handler.events_ttl = %s/" %s/%s ' % (self.id, self.id, self.ttl, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/%s.sources.http-source.interceptors.de.matching_table = .*/%s.sources.http-source.interceptors.de.matching_table = %s/" %s/%s ' % (self.id, self.id, sed_matching_table_file, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.sources.http-source.interceptors.de.grouping_rules = .*/%s.sources.http-source.interceptors.de.grouping_rules = %s/" %s/%s ' % (self.id, self.id, sed_grouping_rules_file, self.target_path, self.name), self.target_path, self.sudo)
         return OPS_LIST
 
     def config_hdfs_sink(self, **kwargs):
@@ -192,10 +192,10 @@ class Agent:
         self.__append_command('sed -i "s/%s.channel = hdfs-channel/%s.channel = %s/" %s/%s ' % (self.hdfs_sink, self.hdfs_sink,self.hdfs_channel, self.target_path, self.name), self.target_path, self.sudo)
         # replace all hdfs channel in configuration by a new one
         self.__append_command('sed -i "s/.channels.hdfs-channel./.channels.%s./" %s/%s ' % (self.hdfs_channel, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/.cosmos_host = .*/.cosmos_host = %s/" %s/%s ' % (self.hdfs_host, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/.cosmos_port = .*/.cosmos_port = %s/" %s/%s ' % (self.hdfs_port, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/.cosmos_default_username = .*/.cosmos_default_username = %s/" %s/%s ' % (self.hdfs_user, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/.cosmos_default_password = .*/.cosmos_default_password = %s/" %s/%s ' % (self.hdfs_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/.hdfs_host = .*/.hdfs_host = %s/" %s/%s ' % (self.hdfs_host, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/.hdfs_port = .*/.hdfs_port = %s/" %s/%s ' % (self.hdfs_port, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/.hdfs_username = .*/.hdfs_username = %s/" %s/%s ' % (self.hdfs_user, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/.hdfs_password = .*/.hdfs_password = %s/" %s/%s ' % (self.hdfs_password, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/.hdfs_api = httpfs/.hdfs_api = %s/" %s/%s ' % (self.hdfs_api, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.attr_persistence = .*/%s.attr_persistence = %s/" %s/%s ' % (self.hdfs_sink, self.hdfs_sink, self.hdfs_persistence, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/.hive_host = x.y.z.w/.hive_host = %s/" %s/%s ' % (self.hdfs_hive_host, self.target_path, self.name), self.target_path, self.sudo)

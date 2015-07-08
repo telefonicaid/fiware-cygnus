@@ -18,10 +18,18 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.MySQLDriver;
+import java.sql.Connection;
+import java.sql.Statement;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -34,15 +42,23 @@ public class MySQLBackendTest {
     // instance to be tested
     private MySQLBackend backend;
     
-    // FIXME: the Connection object return by getConnection must be mocked. In order to pass mocked connections to the
-    // MySQLBackend, the connection object must be another argument of the different methods, e.g.:
-    // void createDatabase(Connection connection, String dbName) instead of void createDatabase(String dbName)
+    // mocks
+    @Mock
+    private MySQLDriver mockDriver;
+    @Mock
+    private Connection mockConnection;
+    @Mock
+    private Statement mockStatement;
     
     // constants
     private final String host = "localhost";
     private final String port = "3306";
     private final String user = "root";
     private final String password = "12345abcde";
+    private final String dbName1 = "db1";
+    private final String dbName2 = "db2";
+    private final String tableName1 = "table1";
+    private final String tableName2 = "table2";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -54,6 +70,13 @@ public class MySQLBackendTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         backend = new MySQLBackend(host, port, user, password);
+        backend.setDriver(mockDriver);
+        
+        // set up the behaviour of the mocked classes
+        when(mockDriver.getConnection(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString())).thenReturn(mockConnection);
+        when(mockConnection.createStatement()).thenReturn(mockStatement);
+        when(mockStatement.executeUpdate(Mockito.anyString())).thenReturn(1);
     } // setUp
     
     /**
@@ -61,7 +84,31 @@ public class MySQLBackendTest {
      */
     @Test
     public void testCreateDatabase() {
-        System.out.println("Testing MySQLBackend.createDatabase");
+        System.out.println("Testing MySQLBackend.createDatabase (first database creation");
+        
+        try {
+            backend.createDatabase(dbName1);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            // the empty database name is used to create new databases
+            assertTrue(backend.getConnections().containsKey(""));
+        } // try catch finally
+        
+        System.out.println("Testing MySQLBackend.createDatabase (second database creation");
+        
+        try {
+            // once created a database, the empty database name must be within the connections map; this empty
+            // database name has associated a default connection that will be used for new database creations
+            assertTrue(backend.getConnections().containsKey(""));
+            backend.createDatabase(dbName2);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            // despite the number of databases we create, the default connections asscoaited to the empty database name
+            // must be the unique element within the map
+            assertTrue(backend.getConnections().size() == 1);
+        } // try catch finally
     } // testCreateDatabase
     
     /**
@@ -69,9 +116,31 @@ public class MySQLBackendTest {
      */
     @Test
     public void testCreateTable() {
-        System.out.println("Testing MySQLBackend.createTable");
+        System.out.println("Testing MySQLBackend.createTable (within first database");
+        
+        try {
+            backend.createDatabase(dbName1);
+            backend.createTable(dbName1, tableName1);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(backend.getConnections().containsKey(""));
+            assertTrue(backend.getConnections().containsKey(dbName1));
+        } // try catch finally
+        
+        System.out.println("Testing MySQLBackend.createTable (within second database");
+        
+        try {
+            backend.createDatabase(dbName2);
+            backend.createTable(dbName2, tableName2);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(backend.getConnections().containsKey(""));
+            assertTrue(backend.getConnections().containsKey(dbName1));
+            assertTrue(backend.getConnections().containsKey(dbName2));
+        } // try catch finally
     } // testCreateTable
-
     
     /**
      * Test of insertContextData method, of class MySQLBackend.
@@ -80,7 +149,6 @@ public class MySQLBackendTest {
     public void testInsertContextData() {
         System.out.println("Testing MySQLBackend.insertContextData");
     } // testInsertContextData
-
     
     /**
      * Test of getConnection method, of class MySQLBackend.
@@ -89,9 +157,8 @@ public class MySQLBackendTest {
     public void testGetConnection() {
         System.out.println("Testing MySQLBackend.getConnection");
     } // testGetConnection
-
     
-        /**
+    /**
      * Test of closeMySQLObjects method, of class MySQLBackend.
      */
     @Test

@@ -43,6 +43,8 @@ Current stable release is able to persist Orion context data in:
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 * [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
+You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
+
 Cygnus is a (conceptual) derivative work of the deprecated [ngsi2cosmos](https://github.com/telefonicaid/fiware-livedemoapp/tree/master/package/ngsi2cosmos).
 
 [Top](#top)
@@ -393,12 +395,12 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                    | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
-    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  speed      | float     | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124Z | car1     | car        |  oil_level  | float     | 74.6      | []     |
-    +------------+-----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                   | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
     
 If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
@@ -430,14 +432,17 @@ If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within th
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +-----------------------------+-------+----------+-----------+--------------+
-    | recvTime                    | speed | speed_md | oil_level | oil_level_md |
-    +-----------------------------+-------+----------+-----------+--------------+
-    | 2015-04-20T12:13:22.41.124Z | 112.9 | []       |  74.6     | []           |
-    +-----------------------------+-------+----------+-----------+--------------+
+    +----------------------------+-------+----------+-----------+--------------+
+    | recvTime                   | speed | speed_md | oil_level | oil_level_md |
+    +----------------------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
+    +----------------------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
 
-NOTE: `mysql` is the MySQL CLI for querying the data.
+NOTES:
+
+* `mysql` is the MySQL CLI for querying the data.
+* Time zone information is not added in MySQL timestamps since MySQL stores that information as a environment variable. MySQL timestamps are stored in UTC time.
 
 [Top](#top)
 
@@ -717,8 +722,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# password for the username
-cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
+# OAuth2 token
+cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # Hive FQDN/IP address of the Hive server
@@ -808,7 +813,7 @@ cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.mongo-sink.should_hash = false
+cygnusagent.sinks.sth-sink.should_hash = false
 
 #=============================================
 # hdfs-channel configuration
@@ -894,11 +899,11 @@ Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the s
 
 In foreground (with logging):
 
-    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>] [-t <polling-interval>]
+    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/agent_<id>.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>] [-t <polling-interval>]
 
 In background:
 
-    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] [-t <polling-interval>] &
+    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/agent_<id>.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] [-t <polling-interval>] &
 
 The parameters used in these commands are:
 

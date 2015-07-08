@@ -1,5 +1,6 @@
 {
     "path_to_settings_folder":"settings",
-    "matching_table_name": "matching_table.conf",
-    "log_file": "/var/log/cygnus/cygnus.log"
+    "grouping_rules_name": "grouping_rules.conf",
+    "log_file": "/var/log/cygnus/cygnus.log",
+    "jenkins": "false"
 }

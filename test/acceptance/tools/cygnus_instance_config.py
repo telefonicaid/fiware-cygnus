@@ -27,6 +27,8 @@ EMPTY        = u''
 SOURCE_PATH  = u'source_path'
 TARGET_PATH  = u'target_path'
 PATH_DEFAULT = u'/'
+ADMIN_PORT   = u'admin_port'
+ADMIN_PORT_DEFAULT = u'8081'
 ID           = u'id'
 COMMAND      = u'command'
 CURRENT_PATH = u'path'
@@ -57,6 +59,7 @@ class Cygnus_Instance:
         append a new instance of cygnus
         :param source_path: source path where read the cygnus_instance.conf
         :param target_path: target path where store the cygnus_instance.conf
+        :param management_port: management port used in the instance
         :param id: id postfix used by instances
         :return: string (commands list)
         """
@@ -64,6 +67,7 @@ class Cygnus_Instance:
         OPS_LIST = []
         self.source_path = kwargs.get(SOURCE_PATH, self.source_path)
         self.target_path = kwargs.get(TARGET_PATH, self.target_path)
+        self.admin_port  = kwargs.get(ADMIN_PORT, ADMIN_PORT_DEFAULT)
         self.id   = kwargs.get(ID, self.id)
         return self.update()
 
@@ -91,6 +95,7 @@ class Cygnus_Instance:
         self.__append_command('sed -i "s/AGENT_NAME=.*/AGENT_NAME=%s/" %s/%s ' % (self.id, self.target_path, name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/CONFIG_FOLDER=.*/CONFIG_FOLDER=%s/" %s/%s ' % (sed_target_path, self.target_path, name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/CONFIG_FILE=.*/CONFIG_FILE=%s\/agent_%s.conf/" %s/%s ' % (sed_target_path, self.id, self.target_path, name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/ADMIN_PORT=.*/ADMIN_PORT=%s/" %s/%s ' % (self.admin_port, self.target_path, name), self.target_path, self.sudo)
         return OPS_LIST
 
     def get_file_name (self, id):

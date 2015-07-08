@@ -52,19 +52,20 @@ def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and
     if not world.background_executed:
         world.cygnus.config_instances(id, quantity, world.sink, persistence, different_port)
 
-@step (u'copy flume-env.sh, matching table file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
-def copy_another_configuration_files_to_cygnus(step, matching_table_file, only_once):
+@step (u'copy flume-env.sh, grouping rules file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
+def copy_another_configuration_files_to_cygnus(step, grouping_rules_file, only_once):
     """
     copy another configuration files used by cygnus and restart cygnus service
           - log4j.properties
           - krb5.conf
-          - matching_table.conf
+          - grouping_rules.conf
           - flume-env.sh
     :param only_once: determine if the configuration is execute only once or no (True | False)
     :param step:
     """
+    world.grouping_rules_file = grouping_rules_file
     if not world.background_executed:
-        world.cygnus.another_files(matching_table_file)
+        world.cygnus.another_files(grouping_rules_file)
         world.cygnus.cygnus_service("restart")
     if only_once.lower() == "true":
         world.background_executed = True
@@ -97,10 +98,10 @@ def check_in_log_label_and_text(step, label, text):
     """
     world.cygnus.verify_log(label, text)
 
-@step (u'delete matching table file')
-def delete_matching_table_file(step):
+@step (u'delete grouping rules file')
+def delete_grouping_rules_file(step):
     """
-    delete matching table file in cygnus conf remotely
-    used the file name "matching_table_name" stored in configuration.json file
+    delete grouping rules file in cygnus conf remotely
+    used the file name "grouping_rules_name" stored in configuration.json file
     """
-    world.cygnus.delete_matching_table_file()
+    world.cygnus.delete_grouping_rules_file(world.grouping_rules_file)

@@ -21,8 +21,45 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 from integration.notifications.common_steps.multi_instances import * # steps to multi-instances
 from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
+from integration.notifications.common_steps.notifications import *   # steps to notifications
+from integration.notifications.common_steps.grouping_rules import *   # steps to grouping rules
+
+# ----------------------------------- COMMON STEPS ------------------------------------
+# ---------------------------- configuration.py --------------------------------------
+# @step (u'copy properties.json file from "([^"]*)" to test "([^"]*)" and sudo local "([^"]*)"')
+# @step (u'configuration of cygnus instances with different ports "([^"]*)", agents files quantity "([^"]*)", id "([^"]*)" and in "([^"]*)" mode')
+# @step (u'copy flume-env.sh, grouping rules file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
+# @step (u'verify if cygnus is installed correctly')
+# @step (u'reinitialize log file')
+# @step (u'check in log, label "([^"]*)" and text "([^"]*)"')
+# @step (u'delete grouping rules file')
+
+# --------------------------- notifications.py ------------------------------------
+# @step (u'service "([^"]*)", service path "([^"]*)", entity type "([^"]*)", entity id "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
+# @step(u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+# @step (u'receives "([^"]*)" notifications with consecutive values beginning with "([^"]*)" and with one step')
+# @step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
+# @step(u'receive an "([^"]*)" http code')
+
+# --------------------------- grouping_rules.py -----------------------------------
+# @step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
+# @step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
+
+# --------------------------- multi_instances.py ----------------------------------
+# @step (u'delete instances files')
 
 #----------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
+
+@step(u'verify if mysql is installed correctly')
+def mysql_is_installed_correctly(step):
+    """
+     verify that Mysql is installed correctly, version is controlled
+    :param step:
+    """
+    world.mysql.connect()
+    world.mysql.verify_version()
+
 @step(u'Close mysql connection')
 def close_mysql_connection(step):
     """
@@ -31,77 +68,17 @@ def close_mysql_connection(step):
     """
     world.cygnus.close_connection()
 
-@step(u'"([^"]*)" is installed correctly')
-def mysql_is_installed_correctly(step, sink):
+@step (u'create a new database and a table with attribute data type "([^"]*)" and metadata data type "([^"]*)"')
+def create_a_new_table_with_service_attributes_attribute_type_attribute_data_type_and_metadata_data_type (step, attribute_data_type, metadata_data_type):
     """
-     verify that Mysql is installed correctly, version is controlled
-    :param sink:
+     create a new Database and a new table per column mode
     :param step:
-    """
-    world.sink = sink
-    world.mysql.connect()
-    world.mysql.verify_version()
 
-@step (u'create a new database "([^"]*)"')
-def create_a_new_database (step, tenant):
-    """
-    create a new Database per column
-    :param tenant:
-    :param step:
-    :param DBname: database name
-    """
-    world.organization_operation = tenant  # this flag is used at create a new table
-    world.cygnus.create_database(tenant)
-
-@step (u'create a new table "([^"]*)" with service path "([^"]*)", "([^"]*)" attributes called "([^"]*)", attribute type "([^"]*)", attribute data type "([^"]*)" and metadata data type "([^"]*)"')
-def create_a_new_table_with_service_attributes_attribute_type_attribute_data_type_and_metadata_data_type (step, resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type):
-    """
-    create a new table to column mode
-    :param step:
-    :param resource_name:
-    :param service_path:
-    :param attributes_number:
-    :param attribute_name:
-    :param attribute_type:
     :param attribute_data_type:
     :param metadata_data_type:
     """
-    world.cygnus.create_table (resource_name, service_path, attributes_number, attribute_name, attribute_type, attribute_data_type, metadata_data_type)
-
-@step (u'receives a notification with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
-def receives_a_notification_with_attributes_value_metadata_value_and_content (step, attribute_value, metadata_value, content):
-    """
-    store notification values in mysql
-    :param step:
-    :param attribute_value:
-    :param metadata_value:
-    :param content:
-    """
-    world.resp = world.cygnus.received_notification(world.cygnus.mappingQuotes (attribute_value), metadata_value, content)
-
-@step (u'a tenant "([^"]*)", service path "([^"]*)", resource "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
-def a_tenant_service_path_resource_with_attribute_number_and_attribute_name (step, tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type):
-    """
-    row configuration in row mode
-    :param step:
-    :param tenant:
-    :param service_path:
-    :param resource_name:
-    :param attribute_number:
-    :param attribute_name:
-    :param attribute_type:
-    """
-    world.cygnus.row_configuration(tenant, service_path, resource_name,attribute_number, attribute_name, attribute_type)
-
-@step (u'changes new destination "([^"]*)" where to verify in table "([^"]*)"')
-def changes_new_destination_where_to_verify_in_table (step, new_destination, new_service_path):
-    """
-    change new destination and dataset to validate
-    :param step:
-    :param new_destination:
-    :param new_service_path:
-    """
-    world.cygnus.change_destination_to_pattern (new_destination, new_service_path)
+    world.cygnus.create_database()
+    world.cygnus.create_table (attribute_data_type, metadata_data_type)
 
 # ------------------------------------------------------------------------------------------------------------------
 @step (u'Verify that the attribute value is stored in mysql')
@@ -128,16 +105,6 @@ def verify_that_is_not_stored_in_mysql (step, error_msg):
     :param error_msg:
     """
     world.cygnus.verify_table_search_without_data (error_msg)
-
-@step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
-def update_real_values_in_resource_and_service_path_to_notification_request (step, resource, service_path):
-    """
-    change real resource and service path to notification request
-    :param step:
-    :param resource:
-    :param service_path:
-    """
-    world.cygnus.change_destination_to_pattern (resource, service_path)
 
 @step (u'Validate that the attribute value, metadata "([^"]*)" and type are stored in mysql')
 def validate_that_the_attribute_value_and_type_are_stored_in_mysql (step, metadata):
