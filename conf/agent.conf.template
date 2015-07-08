@@ -190,21 +190,3 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
-
-#=============================================
-# mongo-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.mongo-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.mongo-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.mongo-channel.transactionCapacity = 100
-
-#=============================================
-# sth-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.sth-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.sth-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.sth-channel.transactionCapacity = 100
