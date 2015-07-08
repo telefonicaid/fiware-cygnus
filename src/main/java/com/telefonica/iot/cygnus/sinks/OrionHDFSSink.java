@@ -79,7 +79,7 @@ public class OrionHDFSSink extends OrionSink {
     private String[] host;
     private String port;
     private String username;
-    private String password;
+    private String oauth2Token;
     private boolean rowAttrPersistence;
     private String hiveHost;
     private String hivePort;
@@ -123,13 +123,13 @@ public class OrionHDFSSink extends OrionSink {
     } // getCosmosDefaultUsername
     
     /**
-     * Gets the Cosmos password for the default username. It is protected due to it is only required for testing
-     * purposes.
-     * @return The Cosmos password for the detault Cosmos username
+     * Gets the OAuth2 token used for authentication and authorization. It is protected due to it is only required
+     * for testing purposes.
+     * @return The Cosmos oauth2Token for the detault Cosmos username
      */
-    protected String getCosmosDefaultPassword() {
-        return password;
-    } // getCosmosDefaultPassword
+    protected String getOAuth2Token() {
+        return oauth2Token;
+    } // getOAuth2Token
     
     /**
      * Gets the Hive port. It is protected due to it is only required for testing purposes.
@@ -202,20 +202,14 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
-        // FIXME: cosmosPassword should be read as a SHA1 and decoded here
-        String cosmosDefaultPassword = context.getString("cosmos_default_password");
-        String hdfsPassword = context.getString("hdfs_password");
+        oauth2Token = context.getString("oauth2_token");
         
-        if (hdfsPassword != null && hdfsPassword.length() > 0) {
-            password = hdfsPassword;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
-        } else if (cosmosDefaultPassword != null && cosmosDefaultPassword.length() > 0) {
-            password = cosmosDefaultPassword;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_password=" + password + ")"
-                    + " -- DEPRECATED, use hdfs_password instead");
+        if (oauth2Token != null && oauth2Token.length() > 0) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (oauth2_token=" + this.oauth2Token + ")");
         } else {
-            LOGGER.error("[" + this.getName() + "] No password provided. Cygnus can continue, but HDFS sink will not "
-                    + "properly work!");
+            LOGGER.error("[" + this.getName() + "] No OAuth2 token provided. Cygnus can continue, but HDFS sink may "
+                    + "not properly work if WebHDFS service is protected with such an authentication and "
+                    + "authorization mechanism!");
         } // if else
         
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
@@ -246,7 +240,7 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create the persistence backend
-            persistenceBackend = new HDFSBackendImpl(host, port, username, password, hiveHost, hivePort, krb5,
+            persistenceBackend = new HDFSBackendImpl(host, port, username, oauth2Token, hiveHost, hivePort, krb5,
                     krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
