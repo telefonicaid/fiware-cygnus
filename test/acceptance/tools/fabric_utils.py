@@ -22,7 +22,7 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
 from fabric.api import env, run, get
 from fabric.context_managers import hide, cd
-from fabric.operations import sudo, local
+from fabric.operations import sudo, local, put
 from StringIO import StringIO
 
 
@@ -40,6 +40,7 @@ PATH              = u'path'
 RETRY             = u'retry'
 RETRY_DEFAULT     = u'1'
 SUDO              = u'sudo'
+MODE              = u'mode'
 COMMAND           = u'command'
 HIDE              = u'hide'
 
@@ -77,6 +78,12 @@ class FabricSupport:
         else:
             self.LOCALHOST = False
 
+    def warn_only(self, value):
+        """
+        Boolean setting determining whether Fabric exits when detecting errors on the remote end
+        :param value: ( True |False )
+        """
+        env.warn_only = value
 
     def __sub_run (self, command, path, sudo_run):
         """
@@ -130,6 +137,22 @@ class FabricSupport:
         :param directory: directory path
         """
         env.cwd = directory
+
+    def put_file_to_remote(self, file_name, target_path, **kwargs):
+        """
+        Upload one or more files to a remote host from local host
+        :param file_name: path and files to be copied into server
+        :param target_path: path where will be put the file
+        :param hide_run: show message or not (True or False)
+        :param use_sudo:  superuser privileges (True | False)
+        :param mode: to specify an exact mode (chmod)
+        """
+        hide_run = kwargs.get(HIDE, self.hide)
+        sudo_run  = kwargs.get(SUDO, self.sudo)
+        mode  = kwargs.get(MODE, None)
+        if hide_run:
+            with hide('running', 'stdout', 'stderr'):
+                put(local_path=file_name, remote_path=target_path, use_sudo=sudo_run, mode=mode)
 
     def __sub_read_file(self, file, sudo_run):
         """

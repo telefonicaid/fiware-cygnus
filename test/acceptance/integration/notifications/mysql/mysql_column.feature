@@ -33,42 +33,41 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: stored new notifications in mysql from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And create a new database "<tenant>"
-    And create a new table "default" with service path "<service_path>", "<attributes_number>" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant         | service_path | attributes_number | attribute_name | attribute_type | attribute_value   | metadata_value | content |
-    | cygnus_col_021 | myserv6      | 1                 | pressure       | celcius        | 49.3              | True           | json    |
-    | cygnus_col_021 | myserv6      | 1                 | pressure       | celcius        | 46.3              | True           | xml     |
-    | cygnus_col_031 | myserv6      | 2                 | my_attribute   | my_Type        | dfgdfgdg          | True           | json    |
-    | cygnus_col_031 | myserv6      | 2                 | my_attribute   | my_Type        | dfgdfgdg          | True           | xml     |
-    | cygnus_col_041 | myserv6      | 3                 | my_attribute   | my_Type        | {'a':'1','b':'2'} | False          | json    |
-    | cygnus_col_041 | myserv6      | 3                 | my_attribute   | my_Type        | {'a':'1','b':'2'} | False          | xml     |
-    | cygnus_col_051 | myserv6      | 4                 | my_attribute   | my_Type        | -45.2344          | False          | json    |
-    | cygnus_col_051 | myserv6      | 4                 | my_attribute   | my_Type        | -45.2344          | False          | xml     |
-
+    | database       | service_path | attributes_number | attribute_value   | metadata_value | content |
+    | cygnus_col_021 | /myserv6     | 1                 | 49.3              | True           | json    |
+    | cygnus_col_021 | /myserv6     | 1                 | 46.3              | True           | xml     |
+    | cygnus_col_031 | /myserv6     | 2                 | dfgdfgdg          | True           | json    |
+    | cygnus_col_031 | /myserv6     | 2                 | dfgdfgdg          | True           | xml     |
+    | cygnus_col_041 | /myserv6     | 3                 | {'a':'1','b':'2'} | False          | json    |
+    | cygnus_col_041 | /myserv6     | 3                 | {'a':'1','b':'2'} | False          | xml     |
+    | cygnus_col_051 | /myserv6     | 4                 | -45.2344          | False          | json    |
+    | cygnus_col_051 | /myserv6     | 4                 | -45.2344          | False          | xml     |
 
   @organizations
   Scenario Outline: store in mysql new notifications with different organizations behavior
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "<tenant>"
-    And create a new table "default" with service path "default", "2" attributes called "temperature", attribute type "temperature", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant                  | content |
+    | database                | content |
     | org601000               | json    |
     | org601100               | xml     |
     | ORGA601200              | json    |
@@ -82,11 +81,11 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: store in mysql new notifications with different organizations behavior
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "multi_service"
-    And create a new table "default" with service path "<service_path>", "2" attributes called "temperature", attribute type "nothing", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "multi_service_path", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
@@ -112,45 +111,47 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: store in mysql new notifications with different service_path behavior
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "multi_resource"
-    And create a new table "<resource>" with service path "default", "2" attributes called "temperature", attribute type "nothing", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "multi_resource", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
   Examples:
-    | resource                | content |
-    | Room2_Room              | json    |
-    | Room2_Room              | xml     |
-    | Room2_HOUSE             | json    |
-    | Room2_HOUSE             | xml     |
-    | Room2_                  | json    |
-    | Room2_                  | xml     |
-    | ROOM_house              | json    |
-    | ROOM_house              | xml     |
-    | modelogw.assetgw_device | json    |
-    | modelogw.assetgw_device | xml     |
-    | with max length allowed | json    |
-    | with max length allowed | xml     |
+    | entity_type             | entity_id               | content |
+    | Room                    | Room2                   | json    |
+    | Room                    | Room2                   | xml     |
+    | HOUSE                   | Room2                   | json    |
+    | HOUSE                   | Room2                   | xml     |
+    |                         | Room2                   | json    |
+    |                         | Room2                   | xml     |
+    | house                   | ROOM                    | json    |
+    | house                   | ROOM                    | xml     |
+    | device                  | modelogw.assetgw        | json    |
+    | device                  | modelogw.assetgw        | xml     |
+    | room                    | with max length allowed | json    |
+    | room                    | with max length allowed | xml     |
+    | with max length allowed | room2                   | json    |
+    | with max length allowed | room2                   | xml     |
 
   @attributes_number
   Scenario Outline:  store in mysql new notifications with different quantities of attributes
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "<tenant>"
-    And create a new table "room1_room" with service path "default", "<attribute_number>" attributes called "temperature", attribute type "nothing", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant              | attribute_number | content |
+    | database            | attribute_number | content |
     | attributes_multi_01 | 1                | json    |
     | attributes_multi_01 | 1                | xml     |
     | attributes_multi_03 | 3                | json    |
@@ -162,17 +163,17 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: stored new notifications in mysql with different data types
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "<tenant>"
-    And create a new table "room1_room" with service path "default", "2" attributes called "temperature", attribute type "nothing", attribute data type "<attribute_data_type>" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "<attribute_data_type>" and metadata data type "text"
     When receives a notification with attributes value "<attribute_value>", metadata value "True" and content "<content>"
     Then Verify that the attribute value is stored in mysql
     And Verify the metadatas are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant              | attribute_data_type | attribute_value   | content |
+    | database            | attribute_data_type | attribute_value   | content |
     | org_col_varchar_10  | varchar(10)         | 45.41             | json    |
     | org_col_varchar_10  | varchar(10)         | 45.41             | xml     |
     | org_col_varchar_100 | varchar(100)        | {'a':'1','b':'2'} | json    |
@@ -206,16 +207,16 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: try to store new notifications in mysql with differents errors in data type
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "<tenant>"
-    And create a new table "room1_room" with service path "default", "2" attributes called "temperature", attribute type "nothing", attribute data type "<attribute_data_type>" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "<attribute_data_type>" and metadata data type "text"
     When receives a notification with attributes value "<attribute_value>", metadata value "True" and content "<content>"
     Then Verify that is not stored in mysql "Error in <attribute_data_type> with value <attribute_data_type>"
     And Close mysql connection
   Examples:
-    | tenant            | attribute_data_type | attribute_value   | content |
+    | database          | attribute_data_type | attribute_value   | content |
     | org_col_float_10  | float               | df_json           | json    |
     | org_col_float_10  | float               | df_xml            | xml     |
     | org_col_float_10  | float               | 1,23              | json    |
@@ -259,41 +260,41 @@ Feature: Stored in mysql new notifications per column from context broker
   Scenario Outline: try to store new notification in mysql without value or metadata fields
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "without_metadata_field"
-    And create a new table "room1_room" with service path "default", "2" attributes called "temperature", attribute type "nothing", attribute data type "<value_field>" and metadata data type "<metadata_field>"
+    And verify if mysql is installed correctly
+    And service "without_metadata_field", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "<attribute_data_type>" and metadata data type "<attribute_metadata_type>"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that is not stored in mysql "<error>"
     And Close mysql connection
   Examples:
-    | value_field | metadata_field | content | error
-    | text        | without        | json    | without metadata field                |
-    | text        | without        | xml     | without metadata field                |
-    | without     | text           | json    | without attribute field               |
-    | without     | text           | xml     | without attribute field               |
-    | without     | without        | json    | without attribute and metadata fields |
-    | without     | without        | xml     | without attribute and metadata fields |
+    | attribute_data_type | attribute_metadata_type | content | error
+    | text                | without                 | json    | without metadata field                |
+    | text                | without                 | xml     | without metadata field                |
+    | without             | text                    | json    | without attribute field               |
+    | without             | text                    | xml     | without attribute field               |
+    | without             | without                 | json    | without attribute and metadata fields |
+    | without             | without                 | xml     | without attribute and metadata fields |
 
   @element_not_exist @BUG-181
   Scenario Outline: try to store new notification in mysql if some element does not exist
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "matching_table.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And  create a new database "<tenant>"
-    And create a new table "<resource>" with service path "default", "2" attributes called "temperature", attribute type "nothing", attribute data type "text" and metadata data type "text"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "pressure" and attribute type "celcius"
+    And create a new database and a table with attribute data type "text" and metadata data type "text"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Verify that is not stored in mysql "<error>"
     And Close mysql connection
 
   Examples:
-    | tenant                       | resource         | content | error                        |
-    | organization is missing      | default          | json    | organization is missing      |
-    | organization is missing      | default          | xml     | organization is missing      |
-    | organization_without_dataset | default          | json    | organization without dataset |
-    | organization_without_dataset | default          | xml     | organization without dataset |
-    | org_without_resource         | resource_missing | json    | resource missing             |
-    | org_without_resource         | resource_missing | xml     | resource missing             |
+    | database               |  content | error                  |
+    | database_missing       |  json    | database_missing       |
+    | database_missing       |  xml     | database_missing       |
+    | database_without_table |  json    | database_without_table |
+    | database_without_table |  xml     | database_without_table |
+
+

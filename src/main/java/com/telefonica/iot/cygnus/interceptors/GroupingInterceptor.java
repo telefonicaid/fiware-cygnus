@@ -85,30 +85,30 @@ public class GroupingInterceptor implements Interceptor {
         String jsonStr = readGroupingRulesFile(groupingRulesFileName);
         
         if (jsonStr == null) {
-            LOGGER.debug("No grouping rules read");
+            LOGGER.info("No grouping rules read");
             return;
         } // if
         
-        LOGGER.debug("Grouping rules read: " + jsonStr);
+        LOGGER.info("Grouping rules read: " + jsonStr);
         
         // parse the Json containing the grouping rules
         JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
         
         if (jsonGroupingRules == null) {
-            LOGGER.debug("Grouping rules syntax has errors");
+            LOGGER.warn("Grouping rules syntax has errors");
             return;
         } // if
         
-        LOGGER.debug("Grouping rules syntax is OK");
+        LOGGER.info("Grouping rules syntax is OK");
         
         // create a list of grouping rules, with precompiled regex
         groupingRules = createGroupingRules(jsonGroupingRules);
         
         if (groupingRules == null) {
-            LOGGER.debug("Grouping rules regex'es could not be compiled");
+            LOGGER.warn("Grouping rules regex'es could not be compiled");
         }
         
-        LOGGER.debug("Grouping rules regex'es have been compiled");
+        LOGGER.info("Grouping rules regex'es have been compiled");
     } // initialize
     
     /**
@@ -176,23 +176,59 @@ public class GroupingInterceptor implements Interceptor {
         
         for (Object jsonGroupingRule : jsonGroupingRules) {
             JSONObject jsonRule = (JSONObject) jsonGroupingRule;
+            int err = isValid(jsonRule);
             
-            if (isValid(jsonRule)) {
+            if (err == 0) {
                 GroupingRule rule = new GroupingRule(jsonRule);
                 groupingRules.add(rule);
             } else {
-                LOGGER.info("Invalid grouping rule, some field is missing. It will be discarded. Details="
-                        + jsonRule.toJSONString());
+                switch (err) {
+                    case 1:
+                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details="
+                                + jsonRule.toJSONString());
+                        break;
+                    case 2:
+                        LOGGER.warn("Invalid grouping rule, the id is not numeric or it is missing. It will be "
+                                + "discarded. Details=" + jsonRule.toJSONString());
+                        break;
+                    case 3:
+                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details="
+                                + jsonRule.toJSONString());
+                        break;
+                    default:
+                } // swtich
             } // if else
         } // for
         
         return groupingRules;
     } // createGroupingRules
     
-    private boolean isValid(JSONObject jsonRule) {
-        return (jsonRule.containsKey("id") && jsonRule.containsKey("fields")
-                && jsonRule.containsKey("regex") && jsonRule.containsKey("destination")
-                && jsonRule.containsKey("fiware_service_path"));
+    private int isValid(JSONObject jsonRule) {
+        // check if the rule contains all the required fields
+        if (!jsonRule.containsKey("id")
+                || !jsonRule.containsKey("fields")
+                || !jsonRule.containsKey("regex")
+                || !jsonRule.containsKey("destination")
+                || !jsonRule.containsKey("fiware_service_path")) {
+            return 1;
+        } // if
+        
+        // check if the id is numeric
+        try {
+            Long l = (Long) jsonRule.get("id");
+        } catch (Exception e) {
+            return 2;
+        } // catch
+        
+        // check if the rule has any empty field
+        if (((JSONArray) jsonRule.get("fields")).size() == 0
+                || ((String) jsonRule.get("regex")).length() == 0
+                || ((String) jsonRule.get("destination")).length() == 0
+                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
+            return 3;
+        } // if
+        
+        return 0;
     } // isValid
  
     @Override

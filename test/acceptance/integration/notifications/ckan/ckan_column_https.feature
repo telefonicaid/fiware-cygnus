@@ -32,15 +32,14 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "<service_path>"
-    And create a new resource "default" with "<attributesQuantity>" attributes called "<attribute_name>", attribute type "<attribute_type>", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "<attributesQuantity>", attribute name "<attribute_name>" and attribute type "<attribute_type>"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
-
   Examples:
     | organization   | service_path | attributesQuantity | attribute_name | attribute_type | attribute_value   | metadata_value | content |
     | cygnus_col_023 | myserv6      | 1                  | pressure       | celcius        | 46.3              | True           | json    |
@@ -60,16 +59,15 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different organizations behavior
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "/myservicepath"
-    And create a new resource "default" with "1" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "/myservicepath", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
     | organization            | content |
     | org60100008             | json    |
@@ -85,13 +83,13 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different service_path behavior
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "<service_path>"
-    And create a new resource "room2_room" with "1" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
@@ -113,104 +111,135 @@ Feature: Stored in ckan new notifications per column from context broker
     | serv_path_several_711 | /            | xml     |
 
   @resources
-  Scenario Outline: store in ckan new notifications with different service_path behavior
+  Scenario Outline: store in ckan new notifications with different resource behavior and with the same service_path
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "resource_multi_021" with a dataset "/"
-    And create a new resource "<resource>" with "1" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "org_col_multi_resource_001", service path "/test_02", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
-
   Examples:
-    | resource                | content |
-    | Room2_Room              | json    |
-    | Room2_Room              | xml     |
-    | Room2_HOUSE             | json    |
-    | Room2_HOUSE             | xml     |
-    | Room2_                  | json    |
-    | Room2_                  | xml     |
-    | ROOM_house              | json    |
-    | ROOM_house              | xml     |
-    | modelogw.assetgw_device | json    |
-    | modelogw.assetgw_device | xml     |
-    | with max length allowed | json    |
-    | with max length allowed | xml     |
+    | entity_type             | entity_id               | content |
+    | Room                    | Room2                   | json    |
+    | Room                    | Room2                   | xml     |
+    | HOUSE                   | Room2                   | json    |
+    | HOUSE                   | Room2                   | xml     |
+    |                         | Room2                   | json    |
+    |                         | Room2                   | xml     |
+    | house                   | ROOM                    | json    |
+    | house                   | ROOM                    | xml     |
+    | device                  | modelogw.assetgw        | json    |
+    | device                  | modelogw.assetgw        | xml     |
+    | room                    | with max length allowed | json    |
+    | room                    | with max length allowed | xml     |
+    | with max length allowed | room2                   | json    |
+    | with max length allowed | room2                   | xml     |
+
+  @resources_diff_service_path
+  Scenario Outline: store in ckan new notifications with different resources behavior and different service path
+    Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And verify if cygnus is installed correctly
+    And verify if ckan is installed correctly
+    And service "resource_multi_02110", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
+    When receives a notification with attributes value "random", metadata value "False" and content "<content>"
+    Then receive an "OK" http code
+    And Verify that the attribute value is stored in ckan
+    And Verify the metadatas are stored in ckan
+  Examples:
+    | service_path | entity_type             | entity_id               | content |
+    | /test_001    | Room                    | Room2                   | json    |
+    | /test_001    | Room                    | Room2                   | xml     |
+    | /test_002    | HOUSE                   | Room2                   | json    |
+    | /test_002    | HOUSE                   | Room2                   | xml     |
+    | /test_003    |                         | Room2                   | json    |
+    | /test_003    |                         | Room2                   | xml     |
+    | /test_004    | house                   | ROOM                    | json    |
+    | /test_004    | house                   | ROOM                    | xml     |
+    | /test_005    | device                  | modelogw.assetgw        | json    |
+    | /test_005    | device                  | modelogw.assetgw        | xml     |
+    | /test_006    | room                    | with max length allowed | json    |
+    | /test_006    | room                    | with max length allowed | xml     |
+    | /test_007    | with max length allowed | room2                   | json    |
+    | /test_007    | with max length allowed | room2                   | xml     |
 
   @attributes_number
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "default"
-    And create a new resource "room1_room" with "<attribute_number>" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
   Examples:
-    | organization          | attribute_number | content |
-    | attributes_multi_0011 | 1                | json    |
-    | attributes_multi_0011 | 1                | xml     |
-    | attributes_multi_0031 | 3                | json    |
-    | attributes_multi_0031 | 3                | xml     |
-    | attributes_multi_0101 | 10               | json    |
-    | attributes_multi_0101 | 10               | xml     |
+    | organization           | attribute_number | content |
+    | attributes_multi_00111 | 1                | json    |
+    | attributes_multi_00111 | 1                | xml     |
+    | attributes_multi_00311 | 3                | json    |
+    | attributes_multi_00311 | 3                | xml     |
+    | attributes_multi_01011 | 10               | json    |
+    | attributes_multi_01011 | 10               | xml     |
 
   @types
   Scenario Outline: stored new notifications in ckan with different data types
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "default"
-    And create a new resource "room1_room" with "1" attributes called "temperature", attribute type "celcius", attribute data type "<attribute_data_type>" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "<attribute_data_type>" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that the attribute value is stored in ckan
     And Verify the metadatas are stored in ckan
 
   Examples:
-    | organization       | attribute_data_type | attribute_value   | content |
-    | org_col_json_0111  | json                | 45.41             | json    |
-    | org_col_json_0111  | json                | 45.42             | xml     |
-    | org_col_json_0111  | json                | {'a':'1','b':'2'} | json    |
-    | org_col_text_0111  | text                | 45.43             | json    |
-    | org_col_text_0111  | text                | 45.44             | xml     |
-    | org_col_float_0111 | float               | 45.45             | json    |
-    | org_col_float_0111 | float               | 45.46             | xml     |
-    | org_col_float_0111 | float               | -45.47            | json    |
-    | org_col_float_0111 | float               | -45.48            | xml     |
-    | org_col_int_0211   | int                 | 45                | json    |
-    | org_col_int_0211   | int                 | 46                | xml     |
-    | org_col_int_0211   | int                 | -47               | json    |
-    | org_col_int_0211   | int                 | -48               | xml     |
-    | org_col_bool_0211  | bool                | True              | json    |
-    | org_col_bool_0211  | bool                | False             | xml     |
-    | org_col_date_0211  | date                | 2014-12-25        | json    |
-    | org_col_date_0211  | date                | 2014-11-25        | xml     |
-    | org_col_time_0211  | time                | 12:42:00          | json    |
-    | org_col_time_0211  | time                | 12:43:00          | xml     |
+    | organization        | attribute_data_type | attribute_value   | content |
+    | org_col_json_01111  | json                | 45.41             | json    |
+    | org_col_json_01111  | json                | 45.42             | xml     |
+    | org_col_json_01111  | json                | {'a':'1','b':'2'} | json    |
+    | org_col_text_01111  | text                | 45.43             | json    |
+    | org_col_text_01111  | text                | 45.44             | xml     |
+    | org_col_float_01111 | float               | 45.45             | json    |
+    | org_col_float_01111 | float               | 45.46             | xml     |
+    | org_col_float_01111 | float               | -45.47            | json    |
+    | org_col_float_01111 | float               | -45.48            | xml     |
+    | org_col_int_02111   | int                 | 45                | json    |
+    | org_col_int_02111   | int                 | 46                | xml     |
+    | org_col_int_02111   | int                 | -47               | json    |
+    | org_col_int_02111   | int                 | -48               | xml     |
+    | org_col_bool_02111  | bool                | True              | json    |
+    | org_col_bool_02111  | bool                | False             | xml     |
+    | org_col_date_02111  | date                | 2014-12-25        | json    |
+    | org_col_date_02111  | date                | 2014-11-25        | xml     |
+    | org_col_time_02111  | time                | 12:42:00          | json    |
+    | org_col_time_02111  | time                | 12:43:00          | xml     |
 
   @error_field
   Scenario Outline: try to store new notification in ckan without value or metadata fields
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "without_fields_031" with a dataset "default"
-    And create a new resource "room1_room" with "1" attributes called "temperature", attribute type "celcius", attribute data type "<value_field>" and metadata data type "<metadata_field>"
+    And verify if ckan is installed correctly
+    And service "without_fields_0311", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "<value_field>" and metadata data type "<metadata_field>"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored in ckan "<error>"
 
   Examples:
@@ -226,13 +255,13 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notifications in ckan with differents errors in data type
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<organization>" with a dataset "default"
-    And create a new resource "room2_room" with "1" attributes called "temperature", attribute type "celcius", attribute data type "<value_field>" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "<value_field>" and metadata data type "json"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored in ckan "error with value in wrong data type"
 
   Examples:
@@ -268,20 +297,19 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notification in ckan if some element does not exist
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, matching table file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "ckan" is installed correctly
-    And create a new organization "<tenant>" with a dataset "default"
-    And create a new resource "<resource>" with "2" attributes called "temperature", attribute type "celcius", attribute data type "json" and metadata data type "json"
+    And verify if ckan is installed correctly
+    And service "<organization>", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
+    And create a new organization with a dataset and a new resource with attribute data type "json" and metadata data type "json"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Verify that is not stored if element does not exist "<error>" in ckan
-
-  Examples:
-    | tenant                       | resource         | content | error                        |
-    | organization is missing      | default          | json    | organization is missing      |
-    | organization is missing      | default          | xml     | organization is missing      |
-    | organization_without_dataset | default          | json    | organization without dataset |
-    | organization_without_dataset | default          | xml     | organization without dataset |
-    | org_without_resource         | resource_missing | json    | resource missing             |
-    | org_without_resource         | resource_missing | xml     | resource missing             |
+ Examples:
+    | organization                 | entity_type | entity_id        | content | error                        |
+    | organization is missing      | room        | room2            | json    | organization is missing      |
+    | organization is missing      | room        | room2            | xml     | organization is missing      |
+    | organization_without_dataset | room        | room2            | json    | organization without dataset |
+    | organization_without_dataset | room        | room2            | xml     | organization without dataset |
+    | org_without_resource         |             | resource_missing | json    | resource missing             |
+    | org_without_resource         |             | resource_missing | xml     | resource missing             |
