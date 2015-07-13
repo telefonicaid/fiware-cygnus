@@ -65,9 +65,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * `OrionHDFSSink`. A custom sink that persists Orion content data in a [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment under a HDFS path structure. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Check for specific details [here](doc/design/OrionHDFSSink.md).
 * `OrionCKANSink`. A custom sink that persists Orion context data in [CKAN](http://ckan.org/) server instances under a organization, package, resource and Datastore structure. Check for specific details [here](doc/design/OrionCKANSink.md).
 * `OrionMySQLSink`. A custom sink for persisting Orion context data in [MySQL](https://www.mysql.com/) server instances under a database and table structure. Check for specific details [here](doc/design/OrionMySQLSink.md).
-* `OrionMongoSink`. A custom sink for persisting Orion context data in [MongoDB](https://www.mongodb.org/) server instances under a database and collection structure. Check for specific details [here](doc/design/OrionMongoSink.md).
-* `OrionSTHSink`. A custom sink for persisting Orion context data in [STH](https://github.com/telefonicaid/IoT-STH) server instances under a database and aggregated-like collection structure. Check for specific details [here](doc/design/OrionSTHSink.md).
-* `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table, CKAN resource or MongoDB collection) for the context data.
+* `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table or CKAN resource) for the context data.
 
 All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
 
@@ -75,7 +73,7 @@ All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined
 2.  Receive from the NGSI-like source notifications about new updated context data; this notification will be handled by the native `HttpSource` together with the custom `OrionRestHandler`.
 3.  Translate the notification into the Flume event format (metadata headers + data body), and put them into the different sink channels, typically of type `MemoryChannel`.
 4.  In the meantime, some interceptors such as the native `Timestamp` one or the custom `DestinationExtractorInterceptor` may modify the event before it is put in the channel or channels.
-5.  For each enabled custom sink (`OrionHDFSSink`, `OrionCKANSink`, `OrionMySQLSink`, `OrionMongoSink`), get the Flume events from the sink channels and persist the data in the appropriate format.
+5.  For each enabled custom sink (`OrionHDFSSink`, `OrionCKANSink`, `OrionMySQLSink`), get the Flume events from the sink channels and persist the data in the appropriate format.
 
 More complex architectures and data flows can be checked in the [architecture](doc/design/architecture.md) document.
 
@@ -452,7 +450,7 @@ NOTES:
 
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` as configuration parameter, the data within the body will be persisted as:
+Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameters, the data within the body will be persisted as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -479,11 +477,9 @@ NOTES:
 [Top](#top)
 
 ####<a name="section3.4.5"></a>STH persistence
-
-###Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionSTHSink`](doc/desing/OrionSTHSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` as configuration parameter, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -682,13 +678,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -726,8 +722,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# password for the username
-cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
+# OAuth2 token
+cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.hdfs-sink.attr_persistence = column
 # Hive FQDN/IP address of the Hive server
@@ -903,11 +899,11 @@ Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the s
 
 In foreground (with logging):
 
-    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>] [-t <polling-interval>]
+    $ APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/agent_<id>.conf -n cygnusagent -Dflume.root.logger=INFO,console [-p <mgmt-if-port>] [-t <polling-interval>]
 
 In background:
 
-    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] [-t <polling-interval>] &
+    $ nohup APACHE_FLUME_HOME/bin/cygnus-flume-ng agent --conf APACHE_FLUME_HOME/conf -f APACHE_FLUME_HOME/conf/agent_<id>.conf -n cygnusagent -Dflume.root.logger=INFO,LOGFILE [-p <mgmt-if-port>] [-t <polling-interval>] &
 
 The parameters used in these commands are:
 
