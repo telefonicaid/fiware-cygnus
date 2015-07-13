@@ -40,12 +40,13 @@ import org.apache.http.message.BasicHeader;
 public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     
     private final String hdfsUser;
-    private final String hdfsPassword;
+    private final String oauth2Token;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
+    private ArrayList<Header> headers;
     
     /**
      * 
@@ -53,7 +54,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param hdfsPort
      * @param hdfsUser
      * @param hiveHost
-     * @param hdfsPassword
+     * @param oauth2Token
      * @param hivePort
      * @param krb5
      * @param krb5User
@@ -62,22 +63,30 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword, String hiveHost,
+    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String oauth2Token, String hiveHost,
             String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
             String krb5ConfFile, boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
-        this.hdfsPassword = hdfsPassword;
+        this.oauth2Token = oauth2Token;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
+        
+        // add the OAuth2 token as a the unique header that will be sent
+        if (oauth2Token != null && oauth2Token.length() > 0) {
+            headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("X-Auth-Token", oauth2Token));
+        } else {
+            headers = null;
+        } // if else
     } // HDFSBackendImpl
    
     @Override
     public void createDir(String dirPath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath
                 + "?op=mkdirs&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
 
         // check the status
         if (response.getStatusCode() != 200) {
@@ -92,7 +101,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=create&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
         
         // check the status
         if (response.getStatusCode() != 307) {
@@ -106,7 +115,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-        ArrayList<Header> headers = new ArrayList<Header>();
+        if (headers == null) {
+            headers = new ArrayList<Header>();
+        } // if
+        
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
@@ -122,7 +134,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public void append(String filePath, String data) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=append&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("POST", relativeURL, true, null, null);
+        JsonResponse response = doRequest("POST", relativeURL, true, headers, null);
 
         // check the status
         if (response.getStatusCode() != 307) {
@@ -136,7 +148,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-        ArrayList<Header> headers = new ArrayList<Header>();
+        if (headers == null) {
+            headers = new ArrayList<Header>();
+        } // if
+
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
@@ -152,7 +167,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public boolean exists(String filePath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=getfilestatus&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
+        JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
 
         // check the status
         return (response.getStatusCode() == 200);
@@ -170,7 +185,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
 
         // create the standard 8-fields
         String fields = "("
@@ -210,7 +225,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
         
         // create the query
         String query = "create external table " + tableName + " (" + fields + ") row format serde "

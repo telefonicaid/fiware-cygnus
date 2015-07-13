@@ -133,8 +133,8 @@ class Agent:
         self.sink                 = kwargs.get(SINK, EMPTY)
         self.channel              = kwargs.get(CHANNEL, EMPTY)
         self.cygnus_port          = kwargs.get(PORT, "5050")
-        self.default_service      = kwargs.get(DEFAULT_SERVICE, EMPTY)
-        self.default_service_path = kwargs.get(DEFAULT_SERVICE_PATH, EMPTY)
+        self.default_service      = kwargs.get(DEFAULT_SERVICE, "def_serv")
+        self.default_service_path = kwargs.get(DEFAULT_SERVICE_PATH, "def_servpath")
         self.ttl                  = kwargs.get(TTL, "10")
         self.grouping_rules_file  = kwargs.get(GROUPING_RULES_FILE, "/usr/cygnus/conf/grouping_rules.conf")
         sed_grouping_rules_file = self.grouping_rules_file.replace("/", "\/")    # replace / to \/ in path that is used in sed command

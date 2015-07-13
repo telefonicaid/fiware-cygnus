@@ -35,8 +35,8 @@ Feature: Store in mysql new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "tenant_3", service path "/test", resource "room2_room", with attribute number "4", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "happy_path_row_01", service path "/test", entity type "room", entity id "room2", with attribute number "4", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
@@ -51,8 +51,8 @@ Feature: Store in mysql new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "tenant_4", service path "/test", resource "room2_room", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "happy_path_row_02", service path "/test", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
@@ -63,19 +63,19 @@ Feature: Store in mysql new notifications per row from context broker
     | 3                 | -45.2344          | False          | xml     |
     | 4                 | {'a':'1','b':'2'} | False          | json    |
 
-  @organizations
-  Scenario Outline:  store in mysql new notifications with different organization values
+  @database
+  Scenario Outline: store in mysql new notifications with different databases-services values
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "<tenant>", service path "/test", resource "room2_room", with attribute number "2", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant                  | content |
+    | database                | content |
     | orga60100_row           | json    |
     | orga60100_row           | xml     |
     | ORGA60111_row           | json    |
@@ -86,18 +86,18 @@ Feature: Store in mysql new notifications per row from context broker
     | with max length allowed | xml     |
 
   @service_path
-  Scenario Outline:  store in mysql new notifications with different service path values
+  Scenario Outline: store in mysql new notifications with different service path values
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "<tenant>", service path "<service_path>", resource "room2_room", with attribute number "2", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant                | service_path | content |
+    | database              | service_path | content |
     | serv_path_several_100 |              | json    |
     | serv_path_several_110 |              | xml     |
     | serv_path_several_200 | serv6010     | json    |
@@ -114,39 +114,69 @@ Feature: Store in mysql new notifications per row from context broker
     | serv_path_several_710 | /            | xml     |
 
   @resources
-  Scenario Outline: store in ckan new notifications with different resources values
+  Scenario Outline: store in ckan new notifications with different resources values in the same database
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "tenant", service path "servicepath", resource "<resource>", with attribute number "2", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "resource_test", service path "/testing", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
   Examples:
-    | resource                | content |
-    | Room2_Room              | json    |
-    | Room2_Room              | xml     |
-    | Room2_HOUSE             | json    |
-    | Room2_HOUSE             | xml     |
-    | Room2_                  | json    |
-    | Room2_                  | xml     |
-    | ROOM_house              | json    |
-    | ROOM_house              | xml     |
-    | modelogw.assetgw_device | json    |
-    | modelogw.assetgw_device | xml     |
-    | with max length allowed | json    |
-    | with max length allowed | xml     |
+    | entity_type             | entity_id               | content |
+    | Room                    | Room2                   | json    |
+    | Room                    | Room2                   | xml     |
+    | HOUSE                   | Room2                   | json    |
+    | HOUSE                   | Room2                   | xml     |
+    |                         | Room2                   | json    |
+    |                         | Room2                   | xml     |
+    | house                   | ROOM                    | json    |
+    | house                   | ROOM                    | xml     |
+    | device                  | modelogw.assetgw        | json    |
+    | device                  | modelogw.assetgw        | xml     |
+    | room                    | with max length allowed | json    |
+    | room                    | with max length allowed | xml     |
+    | with max length allowed | room                    | json    |
+    | with max length allowed | room                    | xml     |
 
-  @attributes_number
-  Scenario Outline:  store in ckan new notifications with different quantities of attributes
+  @resources_diff_db
+  Scenario Outline: store in ckan new notifications with different resources values in the different databases
     Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
-    And configuration of cygnus instances, agents files quantity "1", id "test" and in "row" mode
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "tenant_5", service path "/test", resource "room2_room", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/testing", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
+    When receives a notification with attributes value "random", metadata value "True" and content "<content>"
+    Then Validate that the attribute value, metadata "true" and type are stored in mysql
+    And Close mysql connection
+  Examples:
+    | database         | entity_type             | entity_id               | content |
+    | resource_test_01 | Room                    | Room2                   | json    |
+    | resource_test_01 | Room                    | Room2                   | xml     |
+    | resource_test_02 | HOUSE                   | Room2                   | json    |
+    | resource_test_02 | HOUSE                   | Room2                   | xml     |
+    | resource_test_03 |                         | Room2                   | json    |
+    | resource_test_03 |                         | Room2                   | xml     |
+    | resource_test_04 | house                   | ROOM                    | json    |
+    | resource_test_04 | house                   | ROOM                    | xml     |
+    | resource_test_05 | device                  | modelogw.assetgw        | json    |
+    | resource_test_05 | device                  | modelogw.assetgw        | xml     |
+    | resource_test_06 | room                    | with max length allowed | json    |
+    | resource_test_06 | room                    | with max length allowed | xml     |
+    | resource_test_07 | with max length allowed | room                    | json    |
+    | resource_test_01 | with max length allowed | room                    | xml     |
+
+  @attributes_number
+  Scenario Outline:  store in ckan new notifications with different number of attributes
+    Given copy properties.json file from "epg_properties.json" to test "mysql-sink" and sudo local "false"
+    And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
+    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And verify if cygnus is installed correctly
+    And verify if mysql is installed correctly
+    And service "attribute_number_test", service path "/testing", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
@@ -154,10 +184,14 @@ Feature: Store in mysql new notifications per row from context broker
     | attribute_number | content |
     | 1                | json    |
     | 1                | xml     |
-    | 3                | json    |
-    | 3                | xml     |
+    | 5                | json    |
+    | 5                | xml     |
     | 10               | json    |
     | 10               | xml     |
+    | 50               | json    |
+    | 50               | xml     |
+    | 100              | json    |
+    | 100              | xml     |
 
   @types
   Scenario Outline: stored new notifications in mysql with different data types
@@ -165,13 +199,13 @@ Feature: Store in mysql new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "mysql" is installed correctly
-    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "random" and attribute type "celcius"
+    And verify if mysql is installed correctly
+    And service "<database>", service path "/testing", entity type "room", entity id "room2", with attribute number "2", attribute name "random" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "True" and content "<content>"
     Then Validate that the attribute value, metadata "true" and type are stored in mysql
     And Close mysql connection
   Examples:
-    | tenant        | attribute_value   | content |
+    | database      | attribute_value   | content |
     | org_json_011  | 45.41             | json    |
     | org_json_011  | 45.42             | xml     |
     | org_json_011  | {'a':'1','b':'2'} | json    |

@@ -8,6 +8,7 @@
 * [Implementation details](#section4)
     * [`OrionHDFSSink` class](#section4.1)
     * [`HDFSBackendImpl` class](#section4.2)
+    * [Authentication and authorization](#section4.3)
 * [Contact](#section5)
 
 ##<a name="section1"></a>Functionality
@@ -120,8 +121,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS.<br>Still usable; if both are configured, `hdfs_port` is preferred |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
 | cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
-| hdfs_password | yes | N/A |
-| cosmos\_default\_password<br>(**deprecated**) | yes | N/A | Still usable; if both are configured, `hdfs_password` is preferred |
+| oauth2_token | yes | N/A |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | hive_host | no | localhost |
@@ -142,7 +142,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfsƒsink.hdfs_username = myuser
-    cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
+    cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
     cygnusagent.sinks.hdfs-sink.attr_persistence = column
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive_port = 10000
@@ -199,6 +199,25 @@ Provisions a Hive table with data stored in row-like mode within the given HDFS 
     public void provisionHiveTable(String dirPath, String fields) throws Exception;
     
 Provisions a Hive table with data stores in column-like mode within the given HDFS path. The fields list is passed as comma-separated values since this storing mode has not a constant format.
+
+[Top](#top)
+
+###<a name="section4.3"></a>Authentication and authorization
+[OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
+
+A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
+
+* Access tokens are requested to the Identity Manager, which is asked by the final service for authentication purposes once the tokens are received. Please observe by asking this the service not only discover who is the real FIWARE user behind the request, but the service has full certainty the user is who he/she says to be.
+* At the same time, the Identity Manager relies on the Access Control for authorization purposes. The access token gives, in addition to the real identity of the user, his/her roles according to the requested resource. The Access Control owns a list of policies regarding who is allowed to access all the resources based on the user roles.
+
+This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnusagent.sinks.hdfs-sink.oauth2_token` parameter.
+
+In order to get an access token, do the following request to your OAuth2 tokens provider; in FIWARE Lab this is `cosmos.lab.fi-ware.org:13000`:
+
+    $ curl -X POST "http://cosmos.lab.fi-ware.org:13000/cosmos-auth/v1/token" -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=password&username=frb@tid.es&password=xxxxxxxx”
+    {"access_token": "qjHPUcnW6leYAqr3Xw34DWLQlja0Ix", "token_type": "Bearer", "expires_in": 3600, "refresh_token": “V2Wlk7aFCnElKlW9BOmRzGhBtqgR2z"}
+
+As you can see, your FIWARE Lab credentials are required in the payload, in the form of a password-based grant type (this will be the only time you have to give them).
 
 [Top](#top)
 

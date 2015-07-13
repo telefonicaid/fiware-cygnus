@@ -36,10 +36,10 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "service", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "happy_path", service path "/testing", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
@@ -54,14 +54,13 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "default", service path "default", resource "room2_room", with attribute number "<attributes_number>", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "happy_path", service path "/test", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
-
   Examples:
     | attributes_number | attribute_value   | metadata_value | content |
     | 1                 | 45.1              | True           | json    |
@@ -75,15 +74,15 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "service", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
   Examples:
-    | tenant                  | content |
+    | directory               | content |
     | org6010000              | json    |
     | org6010000              | xml     |
     | ORGA6012000             | json    |
@@ -99,15 +98,15 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "<service_path>", resource "room21_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "<directory>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
   Examples:
-    | tenant               | service_path | content |
+    | directory            | service_path | content |
     | serv_path_several_10 |              | json    |
     | serv_path_several_11 |              | xml     |
     | serv_path_several_20 | serv6010     | json    |
@@ -129,28 +128,29 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "tenant", service path "servicepath", resource "<resource>", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "multi_resources", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
-
   Examples:
-    | resource                | content |
-    | Room2_Room              | json    |
-    | Room2_Room              | xml     |
-    | Room2_HOUSE             | json    |
-    | Room2_HOUSE             | xml     |
-    | Room2_                  | json    |
-    | Room2_                  | xml     |
-    | ROOM_house              | json    |
-    | ROOM_house              | xml     |
-    | modelogw.assetgw_device | json    |
-    | modelogw.assetgw_device | xml     |
-    | with max length allowed | json    |
-    | with max length allowed | xml     |
+    | entity_type             | entity_id               | content |
+    | Room                    | Room2                   | json    |
+    | Room                    | Room2                   | xml     |
+    | HOUSE                   | Room2                   | json    |
+    | HOUSE                   | Room2                   | xml     |
+    |                         | Room2                   | json    |
+    |                         | Room2                   | xml     |
+    | house                   | ROOM                    | json    |
+    | house                   | ROOM                    | xml     |
+    | device                  | modelogw.assetgw        | json    |
+    | device                  | modelogw.assetgw        | xml     |
+    | room                    | with max length allowed | json    |
+    | room                    | with max length allowed | xml     |
+    | with max length allowed | room2                   | json    |
+    | with max length allowed | room2                   | xml     |
 
   @attributes_number
   Scenario Outline:  store in hadoop new notifications with different quantities of attributes
@@ -158,16 +158,15 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "<attribute_number>", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "random", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
-
   Examples:
-    | tenant               | attribute_number | content |
+    | directory            | attribute_number | content |
     | attributes_multi_001 | 1                | json    |
     | attributes_multi_001 | 1                | xml     |
     | attributes_multi_003 | 3                | json    |
@@ -181,16 +180,15 @@ Feature: Stored in hadoop new notifications per row from context broker
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
-    And "hadoop" is installed correctly
-    And a tenant "<tenant>", service path "servicepath", resource "room1_room", with attribute number "2", attribute name "attribute" and attribute type "celcius"
+    And verify if hadoop is installed correctly
+    And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
     When receives a notification with attributes value "<attribute_value>", metadata value "False" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And Validate that the attribute value and type are stored in hadoop
     And Validate that the attribute metadatas are stored in hadoop
     And delete the file created in hadoop
-
   Examples:
-    | tenant        | attribute_value   | content |
+    | directory     | attribute_value   | content |
     | org_json_011  | 45.41             | json    |
     | org_json_011  | 45.42             | xml     |
     | org_json_011  | {'a':'1','b':'2'} | json    |

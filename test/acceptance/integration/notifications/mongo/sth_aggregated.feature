@@ -38,7 +38,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_happy_path", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "json"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
 
   @resolution
@@ -50,7 +50,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_resolution", service path "/test", resource "room5_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "json"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "<resolution>" in mongo
   Examples:
     | resolution |
@@ -69,7 +69,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "<service>", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
     And delete database in mongo
   Examples:
@@ -92,7 +92,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_service_path", service path "<service_path>", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | service_path            | content |
@@ -120,7 +120,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_resource", service path "/test", resource "<resource>", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | resource                | content |
@@ -146,7 +146,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_attribute_name", service path "/test", resource "room2_room", with attribute number "1", attribute name "<attribute_name>" and attribute type "celcius"
     And receives a notification with attributes value "random number=2", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | attribute_name          | content |
@@ -165,7 +165,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_attribute_value", service path "/test", resource "room2_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives a notification with attributes value "<attribute_value>", metadata value "True" and content "<content>"
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated value is generate by resolution "month" in mongo
   Examples:
     | attribute_value                     | content |
@@ -199,7 +199,7 @@ Feature: Get aggregated values persisted by Cygnus using different requests
     And verify if mongo is installed correctly
     And service "test_several_notifications", service path "/test", resource "room3_room", with attribute number "1", attribute name "random" and attribute type "celcius"
     And receives "<notifications>" notifications with consecutive values beginning with "25" and with one step
-    Then I receive an "OK" http code
+    Then receive an "OK" http code
     And validate that the aggregated is calculated successfully with resolution "<resolution>"
   Examples:
     | resolution | notifications |
