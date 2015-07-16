@@ -36,7 +36,7 @@ Feature: start multi-instances of cygnus using mongo sink
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
-    And service "test_happy_path", service path "/test", resource "room2_room", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And service "test_happy_path", service path "<service_path>", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then validate that the attribute value and type are stored in mongo
     And delete instances files
@@ -63,7 +63,7 @@ Feature: start multi-instances of cygnus using mongo sink
     And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
-    And service "test_same_port", service path "/test", resource "room2_room", with attribute number "1", attribute name "random" and attribute type "celcius"
+    And service "test_same_port", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"
     When receives multiples notifications one by instance and the port defined incremented with attributes value "<attribute_value>", metadata value "<metadata_value>" and content "<content>"
     Then check in log, label "lvl=FATAL" and text "Fatal error running the Management Interface. Details=Address already in use"
     And delete instances files

@@ -607,6 +607,15 @@ class Cygnus:
         driver.disconnect()
         assert resp == u'OK', resp
 
+    def drop_database_in_mongo(self, driver):
+         """
+         delete database and collections in mongo
+         :param driver: mongo instance
+         """
+         driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
+         driver.drop_database()
+         driver.disconnect()
+
     def verify_values_in_mongo(self):
         """
         verify attribute value and type from mongo
@@ -744,16 +753,7 @@ class Cygnus:
         assert float(doc["points"][offset]["sum2"]) == float(sum2), \
              "  ERROR - in aggregated with sum2 %s" % (str(doc["points"][offset]["sum2"]))
 
-    def drop_database_in_mongo(self, driver):
-         """
-         delete database and collections in mongo
-         :param driver: mongo instance
-         """
-         driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
-         driver.drop_database()
-         driver.disconnect()
-
-    # ------------------------------------------  Validations ----------------------------------------------------------
+     # ------------------------------------------  Validations ----------------------------------------------------------
     def verify_response_http_code (self, http_code_expected, response):
         """
         validate http code in response
