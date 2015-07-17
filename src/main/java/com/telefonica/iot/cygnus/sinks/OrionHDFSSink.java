@@ -388,7 +388,8 @@ public class OrionHDFSSink extends OrionSink {
                     case JSONCOLUMN:
                         // "accumulate" the data for future persistence
                         columnLine += createColumn(fileFormat, attrName, attrValue, attrMetadata);
-                        hiveFields += "," + attrName + " string," + attrName + "_md array<string>";
+                        hiveFields += "," + attrName + " string," + attrName
+                                + "_md array<struct<name:string,type:string,value:string>>";
                         break;
                     case CSVROW:
                         // build some metadata related stuff
@@ -438,7 +439,7 @@ public class OrionHDFSSink extends OrionSink {
             // attribute list
             switch (fileFormat) {
                 case JSONCOLUMN:
-                    persistData(columnLine, hdfsFolder, hdfsFile, dataFileExists);
+                    persistData(columnLine + "}", hdfsFolder, hdfsFile, dataFileExists);
                     
                     // Hive table is only created once the file is created
                     if (!dataFileExists) {
