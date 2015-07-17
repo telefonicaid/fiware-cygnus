@@ -1,0 +1,1 @@
+- [FEATURE] Add support for multiple file formats in HDFS; JSON is maintained and CSV is added (#303) 
