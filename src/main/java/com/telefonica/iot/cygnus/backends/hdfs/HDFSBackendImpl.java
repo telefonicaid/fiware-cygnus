@@ -39,6 +39,11 @@ import org.apache.http.message.BasicHeader;
  */
 public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     
+    /**
+     * Supported file formats when writting to HDFS.
+     */
+    public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
+    
     private final String hdfsUser;
     private final String oauth2Token;
     private final String hiveHost;
@@ -174,63 +179,62 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     } // exists
     
     /**
-     * Provisions a Hive external table (row mode).
+     * Provisions a Hive external table. The fields are automatically generated.
+     * @param fileFormat
      * @param dirPath
+     * @param tag
      * @throws Exception
      */
-    public void provisionHiveTable(String dirPath) throws Exception {
-        // get the table name to be created
-        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_row";
-        LOGGER.info("Creating Hive external table=" + tableName);
-        
-        // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
-
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
         // create the standard 8-fields
-        String fields = "("
-                + Constants.RECV_TIME_TS + " bigint, "
+        String fields = Constants.RECV_TIME_TS + " bigint, "
                 + Constants.RECV_TIME + " string, "
                 + Constants.ENTITY_ID + " string, "
                 + Constants.ENTITY_TYPE + " string, "
                 + Constants.ATTR_NAME + " string, "
                 + Constants.ATTR_TYPE + " string, "
                 + Constants.ATTR_VALUE + " string, "
-                + Constants.ATTR_MD + " array<string>"
-                + ")";
-
-        // create the query
-        
-        String query = "create external table " + tableName + " " + fields + " row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
-
-        // execute the query
-        if (!hiveClient.doCreateTable(query)) {
-            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
-                    + "Check your Hive/Shark installation");
-        } // if
+                + (fileFormat == FileFormat.JSONROW ? Constants.ATTR_MD + " array<string>" : Constants.ATTR_MD_FILE
+                + " string");
+        provisionHiveTable(fileFormat, dirPath, fields, tag);
     } // provisionHiveTable
     
     /**
-     * Provisions a Hive external table (column mode).
+     * Provisions a Hive external table given its fields.
+     * @param fileFormat
      * @param dirPath
      * @param fields
+     * @param tag
      * @throws Exception
      */
-    public void provisionHiveTable(String dirPath, String fields) throws Exception {
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_column";
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
         HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
         
         // create the query
-        String query = "create external table " + tableName + " (" + fields + ") row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table " + tableName + " (" + fields + ") row format serde "
+                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table " + tableName + " (" + fields + ") row format delimited fields "
+                        + "terminated by ',' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                        + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
