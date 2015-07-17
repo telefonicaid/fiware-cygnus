@@ -194,8 +194,9 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
                 + Constants.ATTR_NAME + " string, "
                 + Constants.ATTR_TYPE + " string, "
                 + Constants.ATTR_VALUE + " string, "
-                + (fileFormat == FileFormat.JSONROW ? Constants.ATTR_MD + " array<string>" : Constants.ATTR_MD_FILE
-                + " string");
+                + (fileFormat == FileFormat.JSONROW
+                        ? Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>"
+                        : Constants.ATTR_MD_FILE + " string");
         provisionHiveTable(fileFormat, dirPath, fields, tag);
     } // provisionHiveTable
     
