@@ -22,8 +22,8 @@ Independently of the data generator, NGSI context data is always [transformed](f
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `OrionHDFSSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
-2. According to the [naming conventions](naming_convetions.md), a folder called `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<hdfs_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
-3. The context responses/entities within the container are iterated, and a file called `<destination>.txt` is created (if not yet existing), where `<destination>` value is got from the event headers.
+2. According to the [naming conventions](naming_convetions.md), a folder named `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<hdfs_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
+3. The context responses/entities within the container are iterated, and a file named `<destination>.txt` is created (if not yet existing), where `<destination>` value is got from the event headers.
 4. The context attributes within each context response/entity are iterated, and a one or more lines are appended to the current file. The format for this append depends on the configured persistence mode:
     * `json-row`: A JSON line is added for each notified context attribute. This kind of line will always contain 8 fields:
         * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -34,7 +34,7 @@ Independently of the data generator, NGSI context data is always [transformed](f
         * `attrType`: Notified attribute type.
         * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
         * `attrMd`: It contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, an empty array `[]` is inserted).
-    * `json-column`: A single JSON line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and another for the metadata, called `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
+    * `json-column`: A single JSON line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
     * `csv-row`: A CSV line is added for each notified context attribute. As `json-row`, this kind of line will always contain 8 fields:
         * `recvTimeTs`: UTC timestamp expressed in miliseconds.
         * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
@@ -42,12 +42,12 @@ Independently of the data generator, NGSI context data is always [transformed](f
         * `entityType`: Notified entity type.
         * `attrName`: Notified attribute name.
         * `attrType`: Notified attribute type.
-        * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
-        * `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
-    * `csv-column`: A single CSV line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and another for the metadata, called `<attrName>_md_file` and containing the name of the HDFS file storing such metadata), plus an additional field about the reception time of the data (`recvTime`).
+        * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 this can be a JSON object or JSON array.
+        * `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field sepator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
+    * `csv-column`: A single CSV line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md_file` and containing the name of the HDFS file storing such metadata as explained above), plus an additional field about the reception time of the data (`recvTime`).
 
 ####Important notes regarding the persistence mode
-Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields JSON/CSV documents are appended for each notified attribute. Nevertheless, the `column` mode may be affected by several JSON documents/CSV records of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
+Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `*-row` persistence mode, since fixed 8-fields JSON/CSV documents are appended for each notified attribute. Nevertheless, the `*-column` mode may be affected by several JSON documents/CSV records of different lengths (in term of fields). Thus, the `*-column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 [Top](#top)
 
@@ -93,7 +93,7 @@ Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=j
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
-{"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
 
 If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
 
@@ -112,6 +112,20 @@ If `file_format=csv-column` then `OrionHDFSSink` will persist the data within th
     2015-04-20T12:13:22.41.124Z,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
+    
+Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
+
+In the case the metadata for the `speed` attribute was, for instance:
+
+    [
+       {"name": "manufacturer", "type": "string", "value": "acme"},
+       {"name": "installation_year", "type": "integer", "value": 2014}
+    ]
+    
+then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt` file content would be:
+
+    1429535775,manufacturer,string,acme
+    1429535775,installation_year,integer,2014
 
 With respect to Hive, the content of the tables in the `json-row`, `json-column`, `csv-row` and `csv-column` modes, respectively, is:
 
@@ -221,11 +235,11 @@ Checks if a HDFS file, given its path, exists ot not.
     
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception;
     
-Provisions a Hive table with data stored using constant 8-fields. This is usually invoked for row-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_row`).
+Provisions a Hive table with data stored using constant 8-fields. This is usually invoked for `*-row`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_row`).
     
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
     
-Provisions a Hive table with data stored using the given variable length fields. This is usually invoked for column-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_column`).
+Provisions a Hive table with data stored using the given variable length fields. This is usually invoked for `*-column`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_column`).
 
 [Top](#top)
 
