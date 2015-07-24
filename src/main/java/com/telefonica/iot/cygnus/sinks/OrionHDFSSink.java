@@ -265,8 +265,23 @@ public class OrionHDFSSink extends OrionSink {
                     + "authorization mechanism!");
         } // if else
         
-        fileFormat = FileFormat.valueOf(context.getString("file_format", "json-row").replaceAll("-", "").toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
+        boolean rowAttrPersistenceConfigured = context.getParameters().containsKey("attr_persistence");
+        boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
+        
+        if (fileFormatConfigured) {
+            fileFormat = FileFormat.valueOf(context.getString("file_format").replaceAll("-", "").toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
+        } else if (rowAttrPersistenceConfigured) {
+            boolean rowAttrPersistence = context.getString("attr_persistence").equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (rowAttrPersistence ? "row" : "column") + ") -- DEPRECATED, converting to file_format="
+                + (rowAttrPersistence ? "json-row" : "json-column"));
+            fileFormat = (rowAttrPersistence ? FileFormat.JSONROW : FileFormat.JSONCOLUMN);
+        } else {
+            fileFormat = FileFormat.JSONROW;
+            LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
+        } // if else if
+
         hiveHost = context.getString("hive_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
