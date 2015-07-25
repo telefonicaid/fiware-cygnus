@@ -221,16 +221,27 @@ The body simply contains a byte representation of the HTTP payload that will be 
 
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
+Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"float","attrValue":"74.6","attrMd":[]}
 
-If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
+If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
+    
+If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
+
+    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+
+If `file_format=csv-column` then `OrionHDFSSink` will persist the data within the body as:
+
+    $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
+    2015-04-20T12:13:22.41.124Z,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
@@ -724,8 +735,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 # OAuth2 token
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxxxxxxx
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink.attr_persistence = column
+# how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
+cygnusagent.sinks.hdfs-sink.file_format = json-column
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning

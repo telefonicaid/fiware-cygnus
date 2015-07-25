@@ -56,13 +56,19 @@ public class OrionHDFSSinkTest {
     private NotifyContextRequest singleNotifyContextRequest;
     private NotifyContextRequest multipleNotifyContextRequest;
     
-    // constants
+    // context constants
     private final String[] cosmosHost = {"localhost"};
     private final String cosmosPort = "14000";
-    private final String cosmosDefaultUsername = "user1";
+    private final String hdfsUsername = "user1";
     private final String oauth2Token = "tokenabcdefghijk";
+    private final String serviceAsNamespace = "false";
+    private final String fileFormat = "json-row";
+    private final String hiveHost = "localhost";
     private final String hivePort = "10000";
-    private final long recvTimeTs = 123456789;
+    private final String krb5Auth = "false";
+    
+    // header contants
+    private final String timestamp = "123456789";
     private final String normalServiceName = "vehicles";
     private final String abnormalServiceName =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
@@ -71,11 +77,12 @@ public class OrionHDFSSinkTest {
     private final String abnormalServicePathName =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String rootServicePathName = "";
-    private final String singleDestinationName = "car1-car";
+    private final String singleDestinationName = "car1_car";
     private final String multipleDestinationName = "sport1,urban1";
     private final String abnormalDestinationName =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    private static final String ATTRNAME = "speed";
+    
+    // notification constants
     private final String singleContextElementNotification = ""
             + "{\n"
             + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
@@ -159,11 +166,15 @@ public class OrionHDFSSinkTest {
         
         // set up other instances
         context = new Context();
-        context.put("cosmos_host", cosmosHost[0]);
-        context.put("cosmos_port", cosmosPort);
-        context.put("cosmos_default_username", cosmosDefaultUsername);
+        context.put("hdfs_host", cosmosHost[0]);
+        context.put("hdfs_port", cosmosPort);
+        context.put("hdfs_username", hdfsUsername);
         context.put("oauth2_token", oauth2Token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("file_format", fileFormat);
+        context.put("hive_host", hiveHost);
         context.put("hive_port", hivePort);
+        context.put("krb5_auth", krb5Auth);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
@@ -171,9 +182,9 @@ public class OrionHDFSSinkTest {
         when(mockHttpClientFactory.getHttpClient(true, false)).thenReturn(null);
         when(mockHttpClientFactory.getHttpClient(false, false)).thenReturn(null);
         when(mockWebHDFSBackend.exists(null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(ATTRNAME, ATTRNAME);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(ATTRNAME, ATTRNAME);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, null);
+        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, null);
     } // setUp
 
     /**
@@ -183,11 +194,15 @@ public class OrionHDFSSinkTest {
     public void testConfigure() {
         System.out.println("configure");
         sink.configure(context);
-        assertEquals(cosmosHost[0], sink.getCosmosHost()[0]);
-        assertEquals(cosmosPort, sink.getCosmosPort());
-        assertEquals(cosmosDefaultUsername, sink.getCosmosDefaultUsername());
+        assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
+        assertEquals(cosmosPort, sink.getHDFSPort());
+        assertEquals(hdfsUsername, sink.getHDFSUsername());
         assertEquals(oauth2Token, sink.getOAuth2Token());
+        assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
+        assertEquals(fileFormat, sink.getFileFormat());
+        assertEquals(hiveHost, sink.getHiveHost());
         assertEquals(hivePort, sink.getHivePort());
+        assertEquals(krb5Auth, sink.getKrb5Auth());
     } // testConfigure
 
     /**
@@ -204,16 +219,17 @@ public class OrionHDFSSinkTest {
     } // testStart
 
     /**
-     * Test of persist method, of class OrionHDFSSink.
+     * Test of persist method, of class OrionHDFSSink. File formats are tested.
      * @throws java.lang.Exception
      */
     @Test
-    public void testProcessContextResponses() throws Exception {
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (normal resource lengths)");
+    public void testPersistFileFormats() throws Exception {
+        System.out.println("Testing OrionHDFSSinkTest.persist (json-row file format)");
+        context.put("file_format", "json-row");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", "123456789");
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, singleDestinationName);
@@ -226,11 +242,89 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long service name)");
+        System.out.println("Testing OrionHDFSSinkTest.persist (json-column file format)");
+        context.put("file_format", "json-column");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
+        
+        try {
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionHDFSSinkTest.persist (csv-row file format)");
+        context.put("file_format", "csv-row");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
+        
+        try {
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionHDFSSinkTest.persist (csv-column file format)");
+        context.put("file_format", "csv-column");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
+        
+        try {
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+    } // testPersistFileFormats
+    
+    /**
+     * Test of persist method, of class OrionHDFSSink. Special resources length is tested.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPersistResourceLengths() throws Exception {
+        System.out.println("Testing OrionHDFSSinkTest.persist (normal resource lengths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
+        headers.put(Constants.HEADER_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
+        headers.put(Constants.DESTINATION, singleDestinationName);
+        
+        try {
+            sink.persist(headers, singleNotifyContextRequest);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionHDFSSinkTest.persist (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        headers = new HashMap<String, String>();
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, singleDestinationName);
@@ -242,11 +336,11 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long servicePath name)");
+        System.out.println("Testing OrionHDFSSinkTest.persist (too long servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
         headers.put(Constants.DESTINATION, singleDestinationName);
@@ -258,11 +352,11 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (too long destination name)");
+        System.out.println("Testing OrionHDFSSinkTest.persist (too long destination name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
         headers.put(Constants.DESTINATION, abnormalDestinationName);
@@ -273,12 +367,19 @@ public class OrionHDFSSinkTest {
         } catch (Exception e) {
             assertTrue(true);
         } // try catch
-        
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (\"root\" servicePath name)");
+    } // testPersistResourceLengths
+    
+    /**
+     * Test of persist method, of class OrionHDFSSink. Special service and service-path are tested.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPersistServiceServicePath() throws Exception {
+        System.out.println("Testing OrionHDFSSinkTest.persist (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
         headers.put(Constants.DESTINATION, singleDestinationName);
@@ -291,12 +392,12 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.processContextResponses (multiple destinations and "
+        System.out.println("Testing OrionHDFSSinkTest.persist (multiple destinations and "
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
         headers.put(Constants.HEADER_SERVICE, normalServiceName);
         headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathName);
         headers.put(Constants.DESTINATION, multipleDestinationName);
@@ -308,6 +409,6 @@ public class OrionHDFSSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testProcessContextResponses
+    } // testPersistServiceServicePath
     
 } // OrionHDFSSinkTest
