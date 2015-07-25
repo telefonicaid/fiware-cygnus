@@ -73,8 +73,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 # OAuth2 token
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink.attr_persistence = column
+# how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
+cygnusagent.sinks.hdfs-sink.file_format = json-column
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
