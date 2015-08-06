@@ -1,1 +1,2 @@
 - [FEATURE] Add support for multiple file formats in HDFS; JSON is maintained and CSV is added (#303) 
+- [HARDENING] Add detailed information about reporting issues and contact information (#478)
