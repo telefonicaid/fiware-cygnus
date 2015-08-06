@@ -1,2 +1,2 @@
 - [FEATURE] Add support for multiple file formats in HDFS; JSON is maintained and CSV is added (#303) 
-- [FEATURE] The notified user agent is not controlled anymore (#493)
+- [FEATURE] The notified user agent is not checked anymore (#493)
