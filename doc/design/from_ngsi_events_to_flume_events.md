@@ -6,7 +6,6 @@ A NGSI-like event example could be (the code below is an <i>object representatio
     ngsi-event={
         http-headers={
             Content-Length: 492
-            User-Agent: orion/0.9.0
             Host: localhost:1028
             Accept: application/xml, application/json
             Content-Type: application/json
