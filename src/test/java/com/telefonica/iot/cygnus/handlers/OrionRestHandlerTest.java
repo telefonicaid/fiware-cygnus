@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
-import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
 import com.telefonica.iot.cygnus.utils.TestConstants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.io.BufferedReader;
@@ -68,7 +67,7 @@ public class OrionRestHandlerTest {
     private final String notificationNotificationTarget = "/notify";
     private final String notificationContentType = "application/json";
     private final String notificationRequestMethod = "POST";
-    private final String notificationUserAgent = "orion/0.9.0";
+    private final String notificationUserAgent = "whatever/0.12.7";
     private final String notificationService = "a.SERV_with-rare chars%@";
     private final String notificationServicePath = "a.SERVPATH_with-rare chars%@";
     
@@ -124,41 +123,52 @@ public class OrionRestHandlerTest {
      * Test of getEvents method, of class OrionRestHandler.
      */
     @Test
-    public void testGetEvents() throws Exception {
+    public void testGetEvents() {
         System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (invalid characters");
-        handler.configure(context);
-        List result = handler.getEvents(mockRequest);
-        assertTrue(result.size() == 1);
-        Event event = (Event) result.get(0);
-        Map<String, String> eventHeaders = event.getHeaders();
-        byte[] eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 5);
-        assertTrue(eventHeaders.containsKey("content-type"));
-        assertTrue(eventHeaders.get("content-type").equals("application/json")
-                || eventHeaders.get("content-type").equals("application/xml"));
-        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
-        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
-        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
-        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(notificationServicePath));
-        assertTrue(eventMessage.length != 0);
         
+        try {
+            handler.configure(context);
+            List result = handler.getEvents(mockRequest);
+            assertTrue(result.size() == 1);
+            Event event = (Event) result.get(0);
+            Map<String, String> eventHeaders = event.getHeaders();
+            byte[] eventMessage = event.getBody();
+            assertTrue(eventHeaders.size() == 5);
+            assertTrue(eventHeaders.containsKey("content-type"));
+            assertTrue(eventHeaders.get("content-type").equals("application/json")
+                    || eventHeaders.get("content-type").equals("application/xml"));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH),
+                    TestUtils.encode(notificationServicePath));
+            assertTrue(eventMessage.length != 0);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } // try catch
+ 
         System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (\"root\" servicePath name");
-        context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, rootServicePath);
-        handler.configure(context);
-        result = handler.getEvents(mockRequest);
-        assertTrue(result.size() == 1);
-        event = (Event) result.get(0);
-        eventHeaders = event.getHeaders();
-        eventMessage = event.getBody();
-        assertTrue(eventHeaders.size() == 5);
-        assertTrue(eventHeaders.containsKey("content-type"));
-        assertTrue(eventHeaders.get("content-type").equals("application/json")
-                || eventHeaders.get("content-type").equals("application/xml"));
-        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
-        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
-        assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
-        assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(rootServicePath));
-        assertTrue(eventMessage.length != 0);
+        
+        try {
+            context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, rootServicePath);
+            handler.configure(context);
+            List result = handler.getEvents(mockRequest);
+            assertTrue(result.size() == 1);
+            Event event = (Event) result.get(0);
+            Map<String, String> eventHeaders = event.getHeaders();
+            byte[] eventMessage = event.getBody();
+            assertTrue(eventHeaders.size() == 5);
+            assertTrue(eventHeaders.containsKey("content-type"));
+            assertTrue(eventHeaders.get("content-type").equals("application/json")
+                    || eventHeaders.get("content-type").equals("application/xml"));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(rootServicePath));
+            assertTrue(eventMessage.length != 0);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } // try catch
     } // testGetEvents
     
 } // OrionRestHandlerTest
