@@ -14,7 +14,7 @@ Cygnus uses the subscription/notification feature of Orion. A subscription is ma
 Current stable release is able to persist Orion context data in:
 
 * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
-* [MySQL](https://www.mysql.com/), the well-know relational database manager.
+* [MySQL](https://www.mysql.com/), the well-known relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 * [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
@@ -72,10 +72,10 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 2
-cygnusagent.sources.http-source.interceptors = ts de
+cygnusagent.sources.http-source.interceptors = ts gi
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
-cygnusagent.sources.http-source.interceptors.de.matching_table = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+cygnusagent.sources.http-source.interceptors.gi.gropuing_rules_conf_file = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
 
 cygnusagent.channels.test-channel.type = memory
 cygnusagent.channels.test-channel.capacity = 1000
