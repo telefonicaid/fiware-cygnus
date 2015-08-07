@@ -127,7 +127,6 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
     ngsi-event={
         http-headers={
             Content-Length: 492
-            User-Agent: orion/0.9.0
             Host: localhost:1028
             Accept: application/xml, application/json
             Content-Type: application/json
