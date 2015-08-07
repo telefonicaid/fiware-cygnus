@@ -19,10 +19,10 @@
 #
 __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 
-from integration.notifications.common_steps.multi_instances import * # steps to multi-instances
-from integration.notifications.common_steps.configuration import *   # steps to pre-configurations
-from integration.notifications.common_steps.notifications import *   # steps to notifications
-from integration.notifications.common_steps.grouping_rules import *   # steps to grouping rules
+from integration.notifications.common_steps.multi_instances import * # common_steps to multi-instances
+from integration.notifications.common_steps.configuration import *   # common_steps to pre-configurations
+from integration.notifications.common_steps.notifications import *   # common_steps to notifications
+from integration.notifications.common_steps.grouping_rules import *   # common_steps to grouping rules
 
 # ----------------------------------- COMMON STEPS ------------------------------------
 # ---------------------------- configuration.py --------------------------------------

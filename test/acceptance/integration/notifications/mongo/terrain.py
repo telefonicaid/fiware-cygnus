@@ -56,7 +56,7 @@ def after_each_scenario(scenario):
     elif world.sink == "sth-sink":
         driver = world.sth
     world.cygnus.drop_database_in_mongo(driver)
-    print colored("    And database is dropped. See terrain.py not steps", 'cyan', 'on_grey', attrs=['bold'])
+    print colored("    And database is dropped. See terrain.py not common_steps", 'cyan', 'on_grey', attrs=['bold'])
 
 @after.all
 def after_all_scenarios(scenario):

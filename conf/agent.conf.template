@@ -71,10 +71,10 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# password for the username
-cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxxxxxxx
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink.attr_persistence = column
+# OAuth2 token
+cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+# how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
+cygnusagent.sinks.hdfs-sink.file_format = json-column
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
@@ -196,21 +196,3 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
-
-#=============================================
-# mongo-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.mongo-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.mongo-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.mongo-channel.transactionCapacity = 100
-
-#=============================================
-# sth-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.sth-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.sth-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.sth-channel.transactionCapacity = 100

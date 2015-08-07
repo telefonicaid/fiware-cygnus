@@ -53,6 +53,7 @@ public final class Constants {
     public static final String ATTR_TYPE    = "attrType";
     public static final String ATTR_VALUE   = "attrValue";
     public static final String ATTR_MD      = "attrMd";
+    public static final String ATTR_MD_FILE = "attrMdFile";
 
     // Maximum values
     public static final int MAX_CONNS = 500;
