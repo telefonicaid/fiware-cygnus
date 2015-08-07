@@ -1,3 +1,4 @@
 - [FEATURE] Add support for multiple file formats in HDFS; JSON is maintained and CSV is added (#303) 
+- [HARDENING] Update the Quick Start Guide in order is is aligned with latest features (#490)
 - [HARDENING] Remove patch supporting old versions of the CKAN API (<= 2.0) (#188)
 - [FEATURE] The notified user agent is not checked anymore (#493)
