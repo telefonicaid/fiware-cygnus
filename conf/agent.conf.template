@@ -27,13 +27,13 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink kafka-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel kafka-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel kafka-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -163,6 +163,12 @@ cygnusagent.sinks.sth-sink.db_prefix = sth_
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.sth-sink.should_hash = false
+
+#=============================================
+cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+cygnusagent.sinks.kafka-sink.channel = kafka-channel
+cygnusagent.sinks.kafka-sink.topic_type = topic-by-service
+cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
 
 #=============================================
 # hdfs-channel configuration
