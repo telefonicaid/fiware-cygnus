@@ -25,9 +25,10 @@
     * [log4j configuration](#section7.1)
     * [Message types](#section7.2)
 * [Advanced topics](#section8)
-* [Contact](#section9)
+* [Reporting issues and contact information](#section9)
 
 ##<a name="section1"></a>What is Cygnus
+This project is part of [FIWARE](http://fiware.org).
 
 Cygnus is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus.
 
@@ -981,14 +982,17 @@ Please refer to the linked specific documents when looking for information regar
 
 [Top](#top)
 
-##<a name="section9"></a>Contact
+##<a name="section9"></a>Reporting issues and contact information
+There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
-<br>
-Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
-<br>
-Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
-<br>
-Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
+* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
+* Personal email:
+    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
+    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
+    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
+    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+
+**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
 
 [Top](#top)
