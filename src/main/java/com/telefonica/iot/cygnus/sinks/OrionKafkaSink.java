@@ -40,7 +40,7 @@ public class OrionKafkaSink extends OrionSink {
     /**
      * Available topic types.
      */
-    public enum TopicType { TOPICBYENTITYID, TOPICBYENTITYTYPE, TOPICBYSERVICEPATH, TOPICBYSERVICE }
+    public enum TopicType { TOPICBYDESTINATION, TOPICBYSERVICEPATH, TOPICBYSERVICE }
     
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionKafkaSink.class);
     private KafkaProducer persistenceBackend;
@@ -76,15 +76,11 @@ public class OrionKafkaSink extends OrionSink {
     } // start
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {       
+    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-//        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
-        
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
 
         // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
@@ -93,63 +89,32 @@ public class OrionKafkaSink extends OrionSink {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-            
-            // iterate on all this entity's attributes, if there are attributes
-            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                continue;
-            } // if
-            
-            String columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                columnLine += "\"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata
-                        + ",";
-            } // for
-            
-            // insert a new row containing full attribute list
-            columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-            ProducerRecord record = null;
+            ProducerRecord record;
  
             switch (topicType) {
-                case TOPICBYENTITYID:
+                case TOPICBYDESTINATION:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + entityId + "), Data (" + columnLine + ")");
-                    record = new ProducerRecord(entityId, columnLine);
-                    break;
-                case TOPICBYENTITYTYPE:
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + entityType + "), Data (" + columnLine + ")");
-                    record = new ProducerRecord(entityType, columnLine);
+                            + destinations[i] + "), Data (" + contextElement.toString() + ")");
+                    record = new ProducerRecord(destinations[i], contextElement);
                     break;
                 case TOPICBYSERVICEPATH:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareServicePaths[i] + "), Data (" + columnLine + ")");
-                    record = new ProducerRecord(fiwareServicePaths[i], columnLine);
+                            + fiwareServicePaths[i] + "), Data (" + contextElement.toString() + ")");
+                    record = new ProducerRecord(fiwareServicePaths[i], contextElement);
                     break;
                 case TOPICBYSERVICE:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareService + "), Data (" + columnLine + ")");
-                    record = new ProducerRecord(fiwareService, columnLine);
+                            + fiwareService + "), Data (" + contextElement.toString() + ")");
+                    record = new ProducerRecord(fiwareService, contextElement);
                     break;
                 default:
+                    record = null;
                     break;
             } // switch
             
-            persistenceBackend.send(record);
+            if (record != null) {
+                persistenceBackend.send(record);
+            } // if
         } // for
     } // persist
 
