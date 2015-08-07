@@ -173,6 +173,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Jul 08 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.2
+- [BUG] Fix many errors in the docuemtnation (#435)
+- [BUG] Fix OrionMySQLLink in the README (#442)
+- [BUG] Fix MySQL connections, adding a permanent connection to each database/fiware-service (#445)
+- [BUG] Fix mongo-sink appearance in sth-sink configuration (both template and README) (#449)
+- [BUG] Fix OrionMySQLSink, time zone is not added to the timestamp fields (#441)
+- [HARDENING] Link the Quick Start Guide from the README (#454)
+- [BUG] Fix the grouping rules validator, now empty fields and non-numeric ids are not allowed (#460)
+- [HARDENING] Add detailed explanation about the syntax of the grouping rules (#459)
+- [FEATURE] OAuth2 support for OrionHDFSSink (#483)
+
 * Mon May 25 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.1
 - [HARDENING] OrionHDFSSink parameters are now called "hdfs_*" instead of "cosmos_*" (#374)
 - [HARDENING] Add a permament connection to the MySQL Backend (#364)

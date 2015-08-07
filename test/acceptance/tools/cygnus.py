@@ -54,7 +54,7 @@ RANDOM           = u'random'
 EMPTY            = u''
 
 # ckan constants
-MAX_TENANT_LENGTH              = u'abcde678901234567890123456789019'
+MAX_TENANT_LENGTH              = u'abcde67890123456789012345'
 MAX_SERVICE_PATH_LENGTH        = u'/abcdefghij1234567890abcdefghij1234567890abcdefgh'
 MAX_RESOURCE_LENGTH            = u'123456789012345678901234567890123456789012345678901234567890123'
 WITH_MAX_LENGTH_ALLOWED        = u'with max length allowed'
@@ -154,13 +154,16 @@ class Cygnus:
         """
         self.dataset = None
         self.table = None
-        if service == WITH_MAX_LENGTH_ALLOWED: self.service = MAX_TENANT_LENGTH.lower()
-        elif service != DEFAULT:
+
+        if service == WITH_MAX_LENGTH_ALLOWED:
+            self.service = MAX_TENANT_LENGTH.lower()+self.persistence
+        else:
             self.service = service.lower()
 
         if service_path == WITH_MAX_LENGTH_ALLOWED: self.service_path = MAX_SERVICE_PATH_LENGTH.lower()
-        elif service_path != DEFAULT:
+        else:
             self.service_path = service_path.lower()
+
         if not (self.sink.find("mongo") >= 0 or self.sink.find("sth") >= 0): # if sink is different of mongo or sth values, the service path remove "/" char if does exists
             if self.service_path[:1] == "/": self.service_path = self.service_path[1:]
 
@@ -604,6 +607,15 @@ class Cygnus:
         driver.disconnect()
         assert resp == u'OK', resp
 
+    def drop_database_in_mongo(self, driver):
+         """
+         delete database and collections in mongo
+         :param driver: mongo instance
+         """
+         driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
+         driver.drop_database()
+         driver.disconnect()
+
     def verify_values_in_mongo(self):
         """
         verify attribute value and type from mongo
@@ -741,16 +753,7 @@ class Cygnus:
         assert float(doc["points"][offset]["sum2"]) == float(sum2), \
              "  ERROR - in aggregated with sum2 %s" % (str(doc["points"][offset]["sum2"]))
 
-    def drop_database_in_mongo(self, driver):
-         """
-         delete database and collections in mongo
-         :param driver: mongo instance
-         """
-         driver.connect("%s_%s" % (STH_DATABASE_PREFIX, self.service))
-         driver.drop_database()
-         driver.disconnect()
-
-    # ------------------------------------------  Validations ----------------------------------------------------------
+     # ------------------------------------------  Validations ----------------------------------------------------------
     def verify_response_http_code (self, http_code_expected, response):
         """
         validate http code in response

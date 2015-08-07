@@ -39,13 +39,19 @@ import org.apache.http.message.BasicHeader;
  */
 public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     
+    /**
+     * Supported file formats when writting to HDFS.
+     */
+    public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
+    
     private final String hdfsUser;
-    private final String hdfsPassword;
+    private final String oauth2Token;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
+    private ArrayList<Header> headers;
     
     /**
      * 
@@ -53,7 +59,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param hdfsPort
      * @param hdfsUser
      * @param hiveHost
-     * @param hdfsPassword
+     * @param oauth2Token
      * @param hivePort
      * @param krb5
      * @param krb5User
@@ -62,22 +68,30 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword, String hiveHost,
+    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String oauth2Token, String hiveHost,
             String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
             String krb5ConfFile, boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
-        this.hdfsPassword = hdfsPassword;
+        this.oauth2Token = oauth2Token;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
+        
+        // add the OAuth2 token as a the unique header that will be sent
+        if (oauth2Token != null && oauth2Token.length() > 0) {
+            headers = new ArrayList<Header>();
+            headers.add(new BasicHeader("X-Auth-Token", oauth2Token));
+        } else {
+            headers = null;
+        } // if else
     } // HDFSBackendImpl
    
     @Override
     public void createDir(String dirPath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath
                 + "?op=mkdirs&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
 
         // check the status
         if (response.getStatusCode() != 200) {
@@ -92,7 +106,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=create&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("PUT", relativeURL, true, null, null);
+        JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
         
         // check the status
         if (response.getStatusCode() != 307) {
@@ -106,7 +120,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-        ArrayList<Header> headers = new ArrayList<Header>();
+        if (headers == null) {
+            headers = new ArrayList<Header>();
+        } // if
+        
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
     
@@ -122,7 +139,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public void append(String filePath, String data) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=append&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("POST", relativeURL, true, null, null);
+        JsonResponse response = doRequest("POST", relativeURL, true, headers, null);
 
         // check the status
         if (response.getStatusCode() != 307) {
@@ -136,7 +153,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         String absoluteURL = header.getValue();
 
         // do second step
-        ArrayList<Header> headers = new ArrayList<Header>();
+        if (headers == null) {
+            headers = new ArrayList<Header>();
+        } // if
+
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
         response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
         
@@ -152,70 +172,70 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public boolean exists(String filePath) throws Exception {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=getfilestatus&user.name=" + hdfsUser;
-        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
+        JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
 
         // check the status
         return (response.getStatusCode() == 200);
     } // exists
     
     /**
-     * Provisions a Hive external table (row mode).
+     * Provisions a Hive external table. The fields are automatically generated.
+     * @param fileFormat
      * @param dirPath
+     * @param tag
      * @throws Exception
      */
-    public void provisionHiveTable(String dirPath) throws Exception {
-        // get the table name to be created
-        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_row";
-        LOGGER.info("Creating Hive external table=" + tableName);
-        
-        // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
-
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
         // create the standard 8-fields
-        String fields = "("
-                + Constants.RECV_TIME_TS + " bigint, "
+        String fields = Constants.RECV_TIME_TS + " bigint, "
                 + Constants.RECV_TIME + " string, "
                 + Constants.ENTITY_ID + " string, "
                 + Constants.ENTITY_TYPE + " string, "
                 + Constants.ATTR_NAME + " string, "
                 + Constants.ATTR_TYPE + " string, "
                 + Constants.ATTR_VALUE + " string, "
-                + Constants.ATTR_MD + " array<string>"
-                + ")";
-
-        // create the query
-        
-        String query = "create external table " + tableName + " " + fields + " row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
-
-        // execute the query
-        if (!hiveClient.doCreateTable(query)) {
-            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
-                    + "Check your Hive/Shark installation");
-        } // if
+                + (fileFormat == FileFormat.JSONROW
+                        ? Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>"
+                        : Constants.ATTR_MD_FILE + " string");
+        provisionHiveTable(fileFormat, dirPath, fields, tag);
     } // provisionHiveTable
     
     /**
-     * Provisions a Hive external table (column mode).
+     * Provisions a Hive external table given its fields.
+     * @param fileFormat
      * @param dirPath
      * @param fields
+     * @param tag
      * @throws Exception
      */
-    public void provisionHiveTable(String dirPath, String fields) throws Exception {
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_column";
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, hdfsPassword);
+        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
         
         // create the query
-        String query = "create external table " + tableName + " (" + fields + ") row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table " + tableName + " (" + fields + ") row format serde "
+                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table " + tableName + " (" + fields + ") row format delimited fields "
+                        + "terminated by ',' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                        + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
