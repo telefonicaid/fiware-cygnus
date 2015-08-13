@@ -60,7 +60,8 @@ public class OrionKafkaSink extends OrionSink {
         brokerList = context.getString("broker_list", "localhost:9092");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (broker_list=" + brokerList + ")");
         zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint=" + zookeeperEndpoint + ")");        
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
+                + zookeeperEndpoint + ")");
     } // configure
     
     @Override
@@ -105,7 +106,8 @@ public class OrionKafkaSink extends OrionSink {
             switch (topicType) {
                 case TOPICBYDESTINATION:
                     if (!AdminUtils.topicExists(zookeeperClient, destinations[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + destinations[i] + " at OrionKafkaSink");
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + destinations[i]
+                                + " at OrionKafkaSink");
                         AdminUtils.createTopic(zookeeperClient, destinations[i], 1, 1, new Properties());
                     } // if
                     
@@ -115,7 +117,8 @@ public class OrionKafkaSink extends OrionSink {
                     break;
                 case TOPICBYSERVICEPATH:
                     if (!AdminUtils.topicExists(zookeeperClient, fiwareServicePaths[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i] + " at OrionKafkaSink");
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i]
+                                + " at OrionKafkaSink");
                         AdminUtils.createTopic(zookeeperClient, fiwareServicePaths[i], 1, 1, new Properties());
                     } // if
                     
@@ -125,7 +128,8 @@ public class OrionKafkaSink extends OrionSink {
                     break;
                 case TOPICBYSERVICE:
                     if (!AdminUtils.topicExists(zookeeperClient, fiwareService)) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareService + " at OrionKafkaSink");
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareService
+                                + " at OrionKafkaSink");
                         AdminUtils.createTopic(zookeeperClient, fiwareService, 1, 1, new Properties());
                     } // if
                     
