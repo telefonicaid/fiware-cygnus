@@ -17,6 +17,7 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -27,7 +28,9 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.flume.Context;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 /**
  *
@@ -41,7 +44,7 @@ public class OrionKafkaSink extends OrionSink {
     public enum TopicType { TOPICBYDESTINATION, TOPICBYSERVICEPATH, TOPICBYSERVICE }
     
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionKafkaSink.class);
-    private KafkaProducer persistenceBackend;
+    private KafkaProducer<String, String> persistenceBackend;
     private TopicType topicType;
     private String brokerList;
     
@@ -59,11 +62,10 @@ public class OrionKafkaSink extends OrionSink {
         try {
             // create the persistence backend
             Properties props = new Properties();
-            props.put("metadata.broker.list", brokerList);
-            props.put("serializer.class", "kafka.serializer.StringEncoder");
-            props.put("producer.type", "sync");
-            props.put("request.required.acks", "1");
-            persistenceBackend = new KafkaProducer(props);
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            persistenceBackend = new KafkaProducer<String, String>(props);
             LOGGER.debug("[" + this.getName() + "] Kafka persistence backend (KafkaProducer) created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -86,24 +88,25 @@ public class OrionKafkaSink extends OrionSink {
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            ContextElement contextElement = contextElementResponse.getContextElement();
-            ProducerRecord record;
- 
+            Gson gson = new Gson();
+            String contextElementResponseStr = gson.toJson(contextElementResponse);
+            ProducerRecord<String, String> record;
+            
             switch (topicType) {
                 case TOPICBYDESTINATION:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + destinations[i] + "), Data (" + contextElement.toString() + ")");
-                    record = new ProducerRecord(destinations[i], contextElement);
+                            + destinations[i] + "), Data (" + contextElementResponseStr + ")");
+                    record = new ProducerRecord<String, String>(destinations[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICEPATH:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareServicePaths[i] + "), Data (" + contextElement.toString() + ")");
-                    record = new ProducerRecord(fiwareServicePaths[i], contextElement);
+                            + fiwareServicePaths[i] + "), Data (" + contextElementResponseStr + ")");
+                    record = new ProducerRecord<String, String>(fiwareServicePaths[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICE:
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareService + "), Data (" + contextElement.toString() + ")");
-                    record = new ProducerRecord(fiwareService, contextElement);
+                            + fiwareService + "), Data (" + contextElementResponseStr + ")");
+                    record = new ProducerRecord<String, String>(fiwareService, contextElementResponseStr);
                     break;
                 default:
                     record = null;
