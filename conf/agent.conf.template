@@ -56,8 +56,7 @@ cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
 # Grouping rules for the GroupingInterceptor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
-#cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /Users/frb/devel/fiware/fiware-cygnus/conf/grouping_rules.conf.template
+cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # OrionHDFSSink configuration
