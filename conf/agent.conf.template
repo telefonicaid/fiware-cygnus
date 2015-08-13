@@ -56,7 +56,8 @@ cygnusagent.sources.http-source.interceptors.ts.type = timestamp
 cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
 # Grouping rules for the GroupingInterceptor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
+#cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
+cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /Users/frb/devel/fiware/fiware-cygnus/conf/grouping_rules.conf.template
 
 # ============================================
 # OrionHDFSSink configuration
@@ -165,10 +166,15 @@ cygnusagent.sinks.sth-sink.collection_prefix = sth_
 cygnusagent.sinks.sth-sink.should_hash = false
 
 #=============================================
+# OrionKafkaSink configuration
+# sink class, must not be changed
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+# channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-service
-cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
+# comma-separated list of Kafka brokers (a broker is defined as host:port)
+cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 
 #=============================================
 # hdfs-channel configuration
@@ -196,3 +202,12 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# kafka-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.kafka-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.kafka-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mkafka-channel.transactionCapacity = 100
