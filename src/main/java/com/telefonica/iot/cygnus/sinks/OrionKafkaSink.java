@@ -19,13 +19,15 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import kafka.admin.AdminUtils;
+import kafka.utils.ZKStringSerializer$;
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -47,6 +49,8 @@ public class OrionKafkaSink extends OrionSink {
     private KafkaProducer<String, String> persistenceBackend;
     private TopicType topicType;
     private String brokerList;
+    private String zookeeperEndpoint;
+    private ZkClient zookeeperClient;
     
     @Override
     public void configure(Context context) {
@@ -55,12 +59,14 @@ public class OrionKafkaSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (topic_type=" + topicTypeStr + ")");
         brokerList = context.getString("broker_list", "localhost:9092");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (broker_list=" + brokerList + ")");
+        zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint=" + zookeeperEndpoint + ")");        
     } // configure
     
     @Override
     public void start() {
+        // create the persistence backend
         try {
-            // create the persistence backend
             Properties props = new Properties();
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -68,8 +74,12 @@ public class OrionKafkaSink extends OrionSink {
             persistenceBackend = new KafkaProducer<String, String>(props);
             LOGGER.debug("[" + this.getName() + "] Kafka persistence backend (KafkaProducer) created");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
+                    + e.getMessage());
         } // try catch // try catch
+        
+        // create the Zookeeper client
+        zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
@@ -94,16 +104,31 @@ public class OrionKafkaSink extends OrionSink {
             
             switch (topicType) {
                 case TOPICBYDESTINATION:
+                    if (!AdminUtils.topicExists(zookeeperClient, destinations[i])) {
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + destinations[i] + " at OrionKafkaSink");
+                        AdminUtils.createTopic(zookeeperClient, destinations[i], 1, 1, new Properties());
+                    } // if
+                    
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
                             + destinations[i] + "), Data (" + contextElementResponseStr + ")");
                     record = new ProducerRecord<String, String>(destinations[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICEPATH:
+                    if (!AdminUtils.topicExists(zookeeperClient, fiwareServicePaths[i])) {
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i] + " at OrionKafkaSink");
+                        AdminUtils.createTopic(zookeeperClient, fiwareServicePaths[i], 1, 1, new Properties());
+                    } // if
+                    
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
                             + fiwareServicePaths[i] + "), Data (" + contextElementResponseStr + ")");
                     record = new ProducerRecord<String, String>(fiwareServicePaths[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICE:
+                    if (!AdminUtils.topicExists(zookeeperClient, fiwareService)) {
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareService + " at OrionKafkaSink");
+                        AdminUtils.createTopic(zookeeperClient, fiwareService, 1, 1, new Properties());
+                    } // if
+                    
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
                             + fiwareService + "), Data (" + contextElementResponseStr + ")");
                     record = new ProducerRecord<String, String>(fiwareService, contextElementResponseStr);
