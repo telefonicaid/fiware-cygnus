@@ -151,7 +151,7 @@ public class OrionKafkaSinkTest {
      * Test of persist method, of class OrionKafkaSink. Topic types are tested.
      */
     @Test
-    public void testPersistFileFormats() {
+    public void testPersistTopicTypes() {
         System.out.println("Testing OrionKafkaSink.persist (topic-per-service)");
         context.put("topic_type", "topic-by-service");
         sink.configure(context);
@@ -205,6 +205,6 @@ public class OrionKafkaSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testPersistFileFormats
+    } // testPersistTopicTypes
     
 } // OrionKafkaSinkTest
