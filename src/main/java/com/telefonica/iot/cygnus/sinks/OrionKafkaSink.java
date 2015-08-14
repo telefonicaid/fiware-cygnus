@@ -206,10 +206,22 @@ public class OrionKafkaSink extends OrionSink {
      */
     public class TopicAPI {
         
+        /**
+         * Returns true if the given topic exists, false otherwise.
+         * @param zookeeperClient
+         * @param topic
+         * @return True if the given topic exists, false otherwise
+         */
         public boolean topicExists(ZkClient zookeeperClient, String topic) {
             return AdminUtils.topicExists(zookeeperClient, topic);
         } // topicExists
         
+        /**
+         * Creates the given topic with given properties.
+         * @param zookeeperClient
+         * @param topic
+         * @param props
+         */
         public void createTopic(ZkClient zookeeperClient, String topic, Properties props) {
             AdminUtils.createTopic(zookeeperClient, topic, 1, 1, props);
         } // createTopic
