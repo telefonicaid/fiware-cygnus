@@ -72,6 +72,8 @@ If `topic_type=topic-per-service` then `OrionKafkaSink` will persist the data wi
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
     {"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}
     
+NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
+    
 [Top](#top)
 
 ##<a name="section2"></a>Configuration
