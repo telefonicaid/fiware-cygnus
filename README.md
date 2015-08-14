@@ -12,6 +12,7 @@
         * [MySQL persistence](#section3.4.3)
         * [MongoDB persistence](#section3.4.4)
         * [STH persistence](#section3.4.5)
+        * [Kafka persistence](#section3.4.6)
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
@@ -43,6 +44,7 @@ Current stable release is able to persist Orion context data in:
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 * [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+* [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 
 You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
 
@@ -66,6 +68,7 @@ There exists a wide collection of already developed sources, channels and sinks.
 * `OrionHDFSSink`. A custom sink that persists Orion content data in a [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment under a HDFS path structure. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Check for specific details [here](doc/design/OrionHDFSSink.md).
 * `OrionCKANSink`. A custom sink that persists Orion context data in [CKAN](http://ckan.org/) server instances under a organization, package, resource and Datastore structure. Check for specific details [here](doc/design/OrionCKANSink.md).
 * `OrionMySQLSink`. A custom sink for persisting Orion context data in [MySQL](https://www.mysql.com/) server instances under a database and table structure. Check for specific details [here](doc/design/OrionMySQLSink.md).
+* `OrionKafkaSink`. A custom sink that persists Orion context data in a [Kafka](http://kafka.apache.org/) broker under certain topics. Check for specific details [here](doc/design/OrionKafkasink.md).
 * `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table or CKAN resource) for the context data.
 
 All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
@@ -615,6 +618,18 @@ NOTES:
 
 [Top](#top)
 
+####<a name="section3.4.6"></a>Kafka persistence
+Kafka organizes the data in topics (a category or feed name to which messages are published). Such organization is exploited by [`OrionKafkaSink`](doc/desing/OrionKafkaSink.md) each time a Flume event is taken from its channel.
+
+Assuming `topic_type=topic-per-destination` as configuration parameter, then `OrionKafkaSink` will persist the data within the body as:
+
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
+    {"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}
+    
+NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
+
+[Top](#top)
+
 ##<a name="section4"></a>Installing Cygnus
 ###<a name="section4.1"></a>RPM install (recommended)
 Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
@@ -827,6 +842,19 @@ cygnusagent.sinks.sth-sink.collection_prefix = sth_
 cygnusagent.sinks.sth-sink.should_hash = false
 
 #=============================================
+# OrionKafkaSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+# channel name from where to read notification events
+cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
+cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+# comma-separated list of Kafka brokers (a broker is defined as host:port)
+cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# Zookeeper endpoint needed to create Kafka topics, in the form of host:port
+cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+
+#=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
 cygnusagent.channels.hdfs-channel.type = memory
@@ -870,6 +898,15 @@ cygnusagent.channels.sth-channel.type = memory
 cygnusagent.channels.sth-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.sth-channel.transactionCapacity = 100
+
+#=============================================
+# kafka-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.kafka-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.kafka-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
