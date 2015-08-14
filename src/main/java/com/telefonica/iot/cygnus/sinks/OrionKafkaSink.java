@@ -50,11 +50,60 @@ public class OrionKafkaSink extends OrionSink {
     private TopicType topicType;
     private String brokerList;
     private String zookeeperEndpoint;
+    private TopicAPI topicAPI;
     private ZkClient zookeeperClient;
+    
+    /**
+     * Gets the topic type.
+     * @return The topic type
+     */
+    public TopicType getTopicType() {
+        return topicType;
+    } // getTopicType
+    
+    /**
+     * Gets the broker list.
+     * @return The broker list
+     */
+    public String getBrokerList() {
+        return brokerList;
+    } // getBrokerList
+    
+    /**
+     * Gets the Zookeeper endpoint.
+     * @return The Zookeeper endpoint
+     */
+    public String getZookeeperEndpoint() {
+        return zookeeperEndpoint;
+    } // getZookeeperEndpoint
+    
+    /**
+     * Gets the persistence backend.
+     * @return The persistence backend
+     */
+    public KafkaProducer getPersistenceBackend() {
+        return persistenceBackend;
+    } // getPersistenceBackend
+    
+    /**
+     * Sets the persistence backend. It is protected since it is used by the tests.
+     * @param persistenceBackend The persistence backend to be set
+     */
+    protected void setPersistenceBackend(KafkaProducer persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    } // setPersistenceBackend
+    
+    /**
+     * Sets the topic API. It is protected since it is used by the tests.
+     * @param topicAPI The topic API to be set
+     */
+    protected void setTopicAPI(TopicAPI topicAPI) {
+        this.topicAPI = topicAPI;
+    } // setTopicAPI
     
     @Override
     public void configure(Context context) {
-        String topicTypeStr = context.getString("topic_type", "topic-by-entity-id");
+        String topicTypeStr = context.getString("topic_type", "topic-by-destination");
         topicType = TopicType.valueOf(topicTypeStr.replaceAll("-", "").toUpperCase());
         LOGGER.debug("[" + this.getName() + "] Reading configuration (topic_type=" + topicTypeStr + ")");
         brokerList = context.getString("broker_list", "localhost:9092");
@@ -78,6 +127,9 @@ public class OrionKafkaSink extends OrionSink {
             LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
                     + e.getMessage());
         } // try catch // try catch
+        
+        // creat the topic API
+        topicAPI = new TopicAPI();
         
         // create the Zookeeper client
         zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
@@ -105,10 +157,10 @@ public class OrionKafkaSink extends OrionSink {
             
             switch (topicType) {
                 case TOPICBYDESTINATION:
-                    if (!AdminUtils.topicExists(zookeeperClient, destinations[i])) {
+                    if (!topicAPI.topicExists(zookeeperClient, destinations[i])) {
                         LOGGER.info("[" + this.getName() + "] Creating topic " + destinations[i]
                                 + " at OrionKafkaSink");
-                        AdminUtils.createTopic(zookeeperClient, destinations[i], 1, 1, new Properties());
+                        topicAPI.createTopic(zookeeperClient, destinations[i], new Properties());
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -116,10 +168,10 @@ public class OrionKafkaSink extends OrionSink {
                     record = new ProducerRecord<String, String>(destinations[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICEPATH:
-                    if (!AdminUtils.topicExists(zookeeperClient, fiwareServicePaths[i])) {
+                    if (!topicAPI.topicExists(zookeeperClient, fiwareServicePaths[i])) {
                         LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i]
                                 + " at OrionKafkaSink");
-                        AdminUtils.createTopic(zookeeperClient, fiwareServicePaths[i], 1, 1, new Properties());
+                        topicAPI.createTopic(zookeeperClient, fiwareServicePaths[i], new Properties());
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -127,10 +179,10 @@ public class OrionKafkaSink extends OrionSink {
                     record = new ProducerRecord<String, String>(fiwareServicePaths[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICE:
-                    if (!AdminUtils.topicExists(zookeeperClient, fiwareService)) {
+                    if (!topicAPI.topicExists(zookeeperClient, fiwareService)) {
                         LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareService
                                 + " at OrionKafkaSink");
-                        AdminUtils.createTopic(zookeeperClient, fiwareService, 1, 1, new Properties());
+                        topicAPI.createTopic(zookeeperClient, fiwareService, new Properties());
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -147,5 +199,21 @@ public class OrionKafkaSink extends OrionSink {
             } // if
         } // for
     } // persist
+    
+    /**
+     * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
+     * cannot be tested with Mockito; however, this class can be mocked.
+     */
+    public class TopicAPI {
+        
+        public boolean topicExists(ZkClient zookeeperClient, String topic) {
+            return AdminUtils.topicExists(zookeeperClient, topic);
+        } // topicExists
+        
+        public void createTopic(ZkClient zookeeperClient, String topic, Properties props) {
+            AdminUtils.createTopic(zookeeperClient, topic, 1, 1, props);
+        } // createTopic
+        
+    } // TopicAPI
 
 } // OrionKafkaSink
