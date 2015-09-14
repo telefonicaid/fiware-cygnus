@@ -27,13 +27,13 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -165,6 +165,19 @@ cygnusagent.sinks.sth-sink.collection_prefix = sth_
 cygnusagent.sinks.sth-sink.should_hash = false
 
 #=============================================
+# OrionKafkaSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+# channel name from where to read notification events
+cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
+cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+# comma-separated list of Kafka brokers (a broker is defined as host:port)
+cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# Zookeeper endpoint needed to create Kafka topics, in the form of host:port
+cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+
+#=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
 cygnusagent.channels.hdfs-channel.type = memory
@@ -208,3 +221,12 @@ cygnusagent.channels.sth-channel.type = memory
 cygnusagent.channels.sth-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.sth-channel.transactionCapacity = 100
+
+#=============================================
+# kafka-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.kafka-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.kafka-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mkafka-channel.transactionCapacity = 100
