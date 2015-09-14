@@ -64,12 +64,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
     flume-event={
         headers={
 	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         notified-service=vehicles,
+	         notified-servicepath=4wheels,
+	         default-destination=car1_car
+	         default-servicepaths=4wheels
+	         grouped-destination=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
@@ -156,6 +159,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
+| enable_grouping | no | false | <i>true</i> or <i>false</i> |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
 | cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
@@ -180,6 +184,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+    cygnusagent.sinks.hdfs-sink.enable_grouping = false
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfsƒsink.hdfs_username = myuser
