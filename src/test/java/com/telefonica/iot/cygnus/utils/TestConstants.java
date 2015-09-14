@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -31,10 +31,16 @@ public final class TestConstants {
     } // TestConstants
 
     // HTTP header names
-    public static final String HEADER_SERVICE = "fiware-service";
-    public static final String HEADER_SERVICE_PATH = "fiware-servicepath";
+    public static final String HEADER_NOTIFIED_SERVICE      = "notified-service";
+    public static final String HEADER_NOTIFIED_SERVICE_PATH = "notified-servicepath";
+    public static final String HEADER_DEFAULT_SERVICE_PATHS = "default-fiware-servicepaths";
+    public static final String HEADER_GROUPED_SERVICE_PATHS = "grouped-fiware-servicepaths";
+    public static final String HEADER_DEFAULT_DESTINATIONS  = "default-destinations";
+    public static final String HEADER_GROUPED_DESTINATIONS  = "grouped-destinations";
     public static final String HEADER_CONTENT_TYPE = "content-type";
     public static final String HEADER_USER_AGENT   = "user-agent";
+    public static final int SERVICE_HEADER_MAX_LEN = 50;
+    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS = "recvTimeTs";
