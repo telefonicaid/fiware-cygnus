@@ -31,8 +31,12 @@ public final class Constants {
     } // Constants
 
     // HTTP and Flume header names
-    public static final String HEADER_SERVICE      = "fiware-service";
-    public static final String HEADER_SERVICE_PATH = "fiware-servicepath";
+    public static final String HEADER_NOTIFIED_SERVICE      = "notified-service";
+    public static final String HEADER_NOTIFIED_SERVICE_PATH = "notified-servicepath";
+    public static final String HEADER_DEFAULT_SERVICE_PATHS = "default-fiware-servicepaths";
+    public static final String HEADER_GROUPED_SERVICE_PATHS = "grouped-fiware-servicepaths";
+    public static final String HEADER_DEFAULT_DESTINATIONS  = "default-destinations";
+    public static final String HEADER_GROUPED_DESTINATIONS  = "grouped-destinations";
     public static final String HEADER_CONTENT_TYPE = "content-type";
     public static final String HEADER_USER_AGENT   = "user-agent";
     public static final int SERVICE_HEADER_MAX_LEN = 50;
@@ -47,7 +51,6 @@ public final class Constants {
     public static final String RECV_TIME_TS = "recvTimeTs";
     public static final String RECV_TIME    = "recvTime";
     public static final String ENTITY_ID    = "entityId";
-    public static final String DESTINATION  = "destination";
     public static final String ENTITY_TYPE  = "entityType";
     public static final String ATTR_NAME    = "attrName";
     public static final String ATTR_TYPE    = "attrType";
