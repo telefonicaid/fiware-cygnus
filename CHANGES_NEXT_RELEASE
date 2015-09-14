@@ -4,3 +4,4 @@
 - [HARDENING] Remove patch supporting old versions of the CKAN API (<= 2.0) (#188)
 - [FEATURE] The notified user agent is not checked anymore (#493)
 - [FEATURE] Add OrionKafkaSink (#456)
+- [HARDENING] Add missing configuration and documentation regarding OrionMongoSink and OrionSTHSink (#505)

@@ -27,13 +27,13 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink kafka-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel kafka-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel kafka-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -203,6 +203,24 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# mongo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.mongo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.mongo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mongo-channel.transactionCapacity = 100
+
+#=============================================
+# sth-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.sth-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.sth-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.sth-channel.transactionCapacity = 100
 
 #=============================================
 # kafka-channel configuration
