@@ -47,7 +47,7 @@ public class GroupingInterceptorTest {
     private GroupingInterceptor groupingInterceptor;
     
     // other instances
-    private Map<String, String> beforeInterceptingEventHeaders;
+    private Map<String, String> notifiedHeaders;
     private Event event;
 
     // constants
@@ -118,7 +118,12 @@ public class GroupingInterceptorTest {
             + "        }\n"
             + "    ]\n"
             + "}";
-    
+    private final String notifiedService = "vehicles";
+    private final String notifiedServicePath = "4wheels";
+    private final String defaultServicePaths = "4wheels,4wheels";
+    private final String groupedServicePaths = "rooms,rooms";
+    private final String defaultDestinations = "room.1_room,room.22_room";
+    private final String groupedDestinations = "numeric_rooms,numeric_rooms";
     private final String eventData = ""
             + "<notifyContextRequest>"
             +   "<subscriptionId>51c0ac9ed714fb3b37d7d5a8</subscriptionId>"
@@ -174,9 +179,10 @@ public class GroupingInterceptorTest {
         // the instance of the tested class can not be setup here since it depends on a variable
         
         // set up other instances
-        beforeInterceptingEventHeaders = new HashMap<String, String>();
-        beforeInterceptingEventHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
-        beforeInterceptingEventHeaders.put(Constants.HEADER_SERVICE_PATH, "def_servpath");
+        notifiedHeaders = new HashMap<String, String>();
+        notifiedHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
+        notifiedHeaders.put(Constants.HEADER_NOTIFIED_SERVICE, notifiedService);
+        notifiedHeaders.put(Constants.HEADER_NOTIFIED_SERVICE_PATH, notifiedServicePath);
         
         // create a temporal grouping rules file
         PrintWriter writer = new PrintWriter(groupingRulesFileName, "UTF-8");
@@ -198,7 +204,7 @@ public class GroupingInterceptorTest {
      */
     @Test
     public void testInitialize() {
-        System.out.println("Testing DestinationExtractor.initialize");
+        System.out.println("Testing GroupingInterceptor.initialize");
         groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
         groupingInterceptor.initialize();
         LinkedList<GroupingRule> groupingRules = groupingInterceptor.getGroupingRules();
@@ -228,14 +234,14 @@ public class GroupingInterceptorTest {
      */
     @Test
     public void testIntercept() {
-        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf exists)");
+        System.out.println("Testing GroupingInterceptor.intercept (grouping_rules.conf exists)");
         
         // create a grouping interceptor
         groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
         groupingInterceptor.initialize();
         
         // create a list of events to be intercepted
-        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
+        event = EventBuilder.withBody(eventData.getBytes(), notifiedHeaders);
         ArrayList<Event> events = new ArrayList<Event>();
         events.add(event);
         
@@ -245,20 +251,24 @@ public class GroupingInterceptorTest {
         // analyze the validity of the intercepted events
         assertTrue(interceptedEvents.size() == 1);
         Event interceptedEvent = interceptedEvents.get(0);
-        Map<String, String> afterInterceptingEventHeaders = interceptedEvent.getHeaders();
-        String destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
-        assertEquals(destinations, "numeric_rooms,numeric_rooms");
-        String datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
-        assertEquals(datasets, "rooms,rooms");
+        Map<String, String> interceptedHeaders = interceptedEvent.getHeaders();
+        String groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        assertEquals(groupedDestinations, groupedDests);
+        String groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        assertEquals(groupedServicePaths, groupedServPaths);
+        String defaultDests = interceptedHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS);
+        assertEquals(defaultDestinations, defaultDests);
+        String defaultServPaths = interceptedHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS);
+        assertEquals(defaultServicePaths, defaultServPaths);
         
-        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf is not set)");
+        System.out.println("Testing GroupingInterceptor.intercept (grouping_rules.conf is not set)");
         
         // create a grouping interceptor
         groupingInterceptor = new GroupingInterceptor(null);
         groupingInterceptor.initialize();
         
         // create a list of events to be intercepted
-        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
+        event = EventBuilder.withBody(eventData.getBytes(), notifiedHeaders);
         events = new ArrayList<Event>();
         events.add(event);
         
@@ -268,20 +278,26 @@ public class GroupingInterceptorTest {
         // analyze the validity of the intercepted events
         assertTrue(interceptedEvents.size() == 1);
         interceptedEvent = interceptedEvents.get(0);
-        afterInterceptingEventHeaders = interceptedEvent.getHeaders();
-        destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
-        assertEquals(destinations, "room.1_room,room.22_room");
-        datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
-        assertEquals(datasets, "def_servpath,def_servpath");
+        interceptedHeaders = interceptedEvent.getHeaders();
+        // gropued destinations must match the default destinations since there are no rules
+        groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        assertEquals(defaultDestinations, groupedDests);
+        // gropued service paths must match the default destinations since there are no rules
+        groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        assertEquals(defaultServicePaths, groupedServPaths);
+        defaultDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        assertEquals(defaultDestinations, defaultDests);
+        defaultServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        assertEquals(defaultServicePaths, defaultServPaths);
         
-        System.out.println("Testing DestinationExtractor.intercept (grouping_rules.conf does not exist)");
+        System.out.println("Testing GroupingInterceptor.intercept (grouping_rules.conf does not exist)");
         
         // create a grouping interceptor
         groupingInterceptor = new GroupingInterceptor("whatever");
         groupingInterceptor.initialize();
         
         // create a list of events to be intercepted
-        event = EventBuilder.withBody(eventData.getBytes(), beforeInterceptingEventHeaders);
+        event = EventBuilder.withBody(eventData.getBytes(), notifiedHeaders);
         events = new ArrayList<Event>();
         events.add(event);
         
@@ -291,11 +307,17 @@ public class GroupingInterceptorTest {
         // analyze the validity of the intercepted events
         assertTrue(interceptedEvents.size() == 1);
         interceptedEvent = interceptedEvents.get(0);
-        afterInterceptingEventHeaders = interceptedEvent.getHeaders();
-        destinations = afterInterceptingEventHeaders.get(Constants.DESTINATION);
-        assertEquals(destinations, "room.1_room,room.22_room");
-        datasets = afterInterceptingEventHeaders.get(Constants.HEADER_SERVICE_PATH);
-        assertEquals(datasets, "def_servpath,def_servpath");
+        interceptedHeaders = interceptedEvent.getHeaders();
+        // gropued destinations must match the default destinations since there are no rules
+        groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        assertEquals(defaultDestinations, groupedDests);
+        // gropued service paths must match the default destinations since there are no rules
+        groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        assertEquals(defaultServicePaths, groupedServPaths);
+        defaultDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        assertEquals(defaultDestinations, defaultDests);
+        defaultServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        assertEquals(defaultServicePaths, defaultServPaths);
     } // testIntercept
 
 } // GroupingInterceptorTest
