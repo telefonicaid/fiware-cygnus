@@ -38,7 +38,6 @@ import org.junit.Test;
  *
  * @author fgalan
  */
-
 @RunWith(MockitoJUnitRunner.class)
 public class OrionCKANSinkTest {
     
@@ -54,10 +53,13 @@ public class OrionCKANSinkTest {
     private NotifyContextRequest singleNotifyContextRequest;
     private NotifyContextRequest multipleNotifyContextRequest;
     
-    // constants
+    // context constants
     private final String ckanHost = "localhost";
     private final String ckanPort = "3306";
     private final String apiKey = "xyzwxyzwxyzw";
+    private final String enableGrouping = "true";
+    
+    // header constants
     private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
     private final String normalServiceName = "vehicles";
@@ -79,6 +81,8 @@ public class OrionCKANSinkTest {
             "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
     private static final HashMap<String, String> ATTRLIST;
     private static final HashMap<String, String> ATTRMDLIST;
+    
+    // notification constants
     private final String singleContextElementNotification = ""
             + "{\n"
             + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
@@ -172,6 +176,7 @@ public class OrionCKANSinkTest {
         context.put("ckan_host", ckanHost);
         context.put("ckan_port", ckanPort);
         context.put("api_key", apiKey);
+        context.put("enable_grouping", enableGrouping);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
@@ -187,11 +192,12 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testConfigure() {
-        System.out.println("configure");
+        System.out.println("Testing OrionCKANSink.configure");
         sink.configure(context);
         assertEquals(ckanHost, sink.getCKANHost());
         assertEquals(ckanPort, sink.getCKANPort());
         assertEquals(apiKey, sink.getAPIKey());
+        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
     } // testConfigure
 
     /**
@@ -199,7 +205,7 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("Testing OrionCKANSinkTest.start");
+        System.out.println("Testing OrionCKANSink.start");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -213,14 +219,14 @@ public class OrionCKANSinkTest {
      */
     @Test
     public void testProcessContextResponses() throws Exception {
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (normal resource lengths)");
+        System.out.println("Testing OrionCKANSink.processContextResponses (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
-        headers.put(Constants.DESTINATION, singleDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -230,14 +236,14 @@ public class OrionCKANSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long service name)");
+        System.out.println("Testing OrionCKANSink.processContextResponses (too long service name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
-        headers.put(Constants.DESTINATION, singleDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, abnormalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -246,14 +252,14 @@ public class OrionCKANSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long servicePath name)");
+        System.out.println("Testing OrionCKANSink.processContextResponses (too long servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, abnormalServicePathName);
-        headers.put(Constants.DESTINATION, singleDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, abnormalServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -262,14 +268,14 @@ public class OrionCKANSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (too long destination name)");
+        System.out.println("Testing OrionCKANSink.processContextResponses (too long destination name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathName);
-        headers.put(Constants.DESTINATION, abnormalDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -278,14 +284,14 @@ public class OrionCKANSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (\"root\" servicePath name)");
+        System.out.println("Testing OrionCKANSink.processContextResponses (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, rootServicePathName);
-        headers.put(Constants.DESTINATION, singleDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, rootServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -295,15 +301,15 @@ public class OrionCKANSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (multiple destinations and "
+        System.out.println("Testing OrionCKANSink.processContextResponses (multiple destinations and "
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathName);
-        headers.put(Constants.DESTINATION, multipleDestinationName);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, multipleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
         
         try {
             sink.persist(headers, multipleNotifyContextRequest);
