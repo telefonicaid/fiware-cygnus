@@ -162,9 +162,11 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS.<br>Still usable; if both are configured, `hdfs_port` is preferred |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
 | cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
-| oauth2_token | yes | N/A |
+| hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication |
+| oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
+| hive\_server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
 | hive_host | no | localhost |
 | hive_port | no | 10000 |
 | krb5_auth | no | false |
@@ -182,9 +184,11 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
-    cygnusagent.sinks.hdfsƒsink.hdfs_username = myuser
+    cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
+    cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
     cygnusagent.sinks.hdfs-sink.file_format = json-column
+    cygnusagent.sinks.hdfs-sink.hive_server_version = 2
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive_port = 10000
     cygnusagent.sinks.hdfs-sink.krb5_auth = false

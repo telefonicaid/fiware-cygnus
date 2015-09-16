@@ -60,9 +60,11 @@ public class OrionHDFSSinkTest {
     private final String[] cosmosHost = {"localhost"};
     private final String cosmosPort = "14000";
     private final String hdfsUsername = "user1";
+    private final String hdfsPassword = "12345";
     private final String oauth2Token = "tokenabcdefghijk";
     private final String serviceAsNamespace = "false";
     private final String fileFormat = "json-row";
+    private final String hiveServerVersion = "2";
     private final String hiveHost = "localhost";
     private final String hivePort = "10000";
     private final String krb5Auth = "false";
@@ -169,9 +171,11 @@ public class OrionHDFSSinkTest {
         context.put("hdfs_host", cosmosHost[0]);
         context.put("hdfs_port", cosmosPort);
         context.put("hdfs_username", hdfsUsername);
+        context.put("hdfs_password", hdfsPassword);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
+        context.put("hive_server_version", hiveServerVersion);
         context.put("hive_host", hiveHost);
         context.put("hive_port", hivePort);
         context.put("krb5_auth", krb5Auth);
@@ -197,9 +201,11 @@ public class OrionHDFSSinkTest {
         assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
         assertEquals(cosmosPort, sink.getHDFSPort());
         assertEquals(hdfsUsername, sink.getHDFSUsername());
+        assertEquals(hdfsPassword, sink.getHDFSPassword());
         assertEquals(oauth2Token, sink.getOAuth2Token());
         assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
         assertEquals(fileFormat, sink.getFileFormat());
+        assertEquals(hiveServerVersion, sink.getHiveServerVersion());
         assertEquals(hiveHost, sink.getHiveHost());
         assertEquals(hivePort, sink.getHivePort());
         assertEquals(krb5Auth, sink.getKrb5Auth());

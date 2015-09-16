@@ -5,3 +5,4 @@
 - [FEATURE] The notified user agent is not checked anymore (#493)
 - [FEATURE] Add OrionKafkaSink (#456)
 - [HARDENING] Add missing configuration and documentation regarding OrionMongoSink and OrionSTHSink (#505)
+- [FEATURE] Add HiveServer2 support to OrionHDFSSink (#513)
