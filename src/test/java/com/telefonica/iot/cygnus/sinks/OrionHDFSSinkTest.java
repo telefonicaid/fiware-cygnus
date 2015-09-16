@@ -171,6 +171,7 @@ public class OrionHDFSSinkTest {
         context.put("hdfs_host", cosmosHost[0]);
         context.put("hdfs_port", cosmosPort);
         context.put("hdfs_username", hdfsUsername);
+        context.put("hdfs_password", hdfsPassword);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
