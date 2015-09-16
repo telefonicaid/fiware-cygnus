@@ -45,7 +45,9 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
     public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
     
     private final String hdfsUser;
+    private final String hdfsPassword;
     private final String oauth2Token;
+    private final String hiveServerVersion;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
@@ -58,8 +60,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param hdfsHosts
      * @param hdfsPort
      * @param hdfsUser
-     * @param hiveHost
+     * @param hdfsPassword
      * @param oauth2Token
+     * @param hiveServerVersion
+     * @param hiveHost
      * @param hivePort
      * @param krb5
      * @param krb5User
@@ -68,12 +72,15 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String oauth2Token, String hiveHost,
-            String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
-            String krb5ConfFile, boolean serviceAsNamespace) {
+    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+            String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
+            String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
+            boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
+        this.hdfsPassword = hdfsPassword;
         this.oauth2Token = oauth2Token;
+        this.hiveServerVersion = hiveServerVersion;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
@@ -215,7 +222,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
+        HiveBackend hiveClient = new HiveBackend(hiveServerVersion, hiveHost, hivePort, hdfsUser, hdfsPassword);
         
         // create the query
         String query;
