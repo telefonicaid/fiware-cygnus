@@ -192,7 +192,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     service = Utils.encode(headerValue);
                 } // if else
-            } else if (headerName.equals(Constants.HEADER_DEFAULT_SERVICE_PATHS)) {
+            } else if (headerName.equals(Constants.HEADER_NOTIFIED_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
