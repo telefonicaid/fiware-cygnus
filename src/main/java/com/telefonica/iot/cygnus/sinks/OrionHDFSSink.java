@@ -87,8 +87,10 @@ public class OrionHDFSSink extends OrionSink {
     private String[] host;
     private String port;
     private String username;
+    private String password;
     private FileFormat fileFormat;
     private String oauth2Token;
+    private String hiveServerVersion;
     private String hiveHost;
     private String hivePort;
     private boolean krb5;
@@ -131,6 +133,15 @@ public class OrionHDFSSink extends OrionSink {
     } // getHDFSUsername
     
     /**
+     * Gets the password for the default Cosmos username. It is protected due to it is only required for testing
+     * purposes.
+     * @return The password for the default Cosmos username
+     */
+    protected String getHDFSPassword() {
+        return password;
+    } // getHDFSPassword
+    
+    /**
      * Gets the OAuth2 token used for authentication and authorization. It is protected due to it is only required
      * for testing purposes.
      * @return The Cosmos oauth2Token for the detault Cosmos username
@@ -166,6 +177,14 @@ public class OrionHDFSSink extends OrionSink {
                 return "";
         } // switch;
     } // getFileFormat
+    
+    /**
+     * Gets the Hive server version. It is protected due to it is only required for testing purposes.
+     * @return The Hive server version
+     */
+    protected String getHiveServerVersion() {
+        return hiveServerVersion;
+    } // getHiveServerVersion
     
     /**
      * Gets the Hive host. It is protected due to it is only required for testing purposes.
@@ -265,6 +284,9 @@ public class OrionHDFSSink extends OrionSink {
                     + "authorization mechanism!");
         } // if else
         
+        password = context.getString("hdfs_password");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
+
         boolean rowAttrPersistenceConfigured = context.getParameters().containsKey("attr_persistence");
         boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
         
@@ -282,6 +304,8 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
         } // if else if
 
+        hiveServerVersion = context.getString("hive_server_version", "2");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion + ")");
         hiveHost = context.getString("hive_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
@@ -307,8 +331,9 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create the persistence backend
-            persistenceBackend = new HDFSBackendImpl(host, port, username, oauth2Token, hiveHost, hivePort, krb5,
-                    krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
+            persistenceBackend = new HDFSBackendImpl(host, port, username, password, oauth2Token, hiveServerVersion,
+                    hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile,
+                    serviceAsNamespace);
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
