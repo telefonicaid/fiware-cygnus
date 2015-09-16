@@ -66,8 +66,8 @@ public class OrionKafkaSinkTest {
     // header contants
     private final String timestamp = "123456789";
     private final String service = "vehicles";
-    private final String servicePath = "4wheels";
-    private final String destination = "car1_car";
+    private final String singleServicePathName = "4wheels";
+    private final String singleDestinationName = "car1_car";
     
     // notification constants
     private final String notification = ""
@@ -158,9 +158,9 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -176,9 +176,9 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -194,9 +194,9 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);

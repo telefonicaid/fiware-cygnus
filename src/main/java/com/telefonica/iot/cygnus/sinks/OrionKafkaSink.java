@@ -141,9 +141,17 @@ public class OrionKafkaSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
 
         // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
@@ -168,15 +176,15 @@ public class OrionKafkaSink extends OrionSink {
                     record = new ProducerRecord<String, String>(destinations[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICEPATH:
-                    if (!topicAPI.topicExists(zookeeperClient, fiwareServicePaths[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i]
+                    if (!topicAPI.topicExists(zookeeperClient, servicePaths[i])) {
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + servicePaths[i]
                                 + " at OrionKafkaSink");
-                        topicAPI.createTopic(zookeeperClient, fiwareServicePaths[i], new Properties());
+                        topicAPI.createTopic(zookeeperClient, servicePaths[i], new Properties());
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareServicePaths[i] + "), Data (" + contextElementResponseStr + ")");
-                    record = new ProducerRecord<String, String>(fiwareServicePaths[i], contextElementResponseStr);
+                            + servicePaths[i] + "), Data (" + contextElementResponseStr + ")");
+                    record = new ProducerRecord<String, String>(servicePaths[i], contextElementResponseStr);
                     break;
                 case TOPICBYSERVICE:
                     if (!topicAPI.topicExists(zookeeperClient, fiwareService)) {
