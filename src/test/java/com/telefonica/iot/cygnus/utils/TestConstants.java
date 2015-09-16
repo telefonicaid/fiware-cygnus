@@ -31,8 +31,8 @@ public final class TestConstants {
     } // TestConstants
 
     // HTTP header names
-    public static final String HEADER_NOTIFIED_SERVICE      = "notified-service";
-    public static final String HEADER_NOTIFIED_SERVICE_PATH = "notified-servicepath";
+    public static final String HEADER_NOTIFIED_SERVICE      = "fiware-service";
+    public static final String HEADER_NOTIFIED_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_DEFAULT_SERVICE_PATHS = "default-fiware-servicepaths";
     public static final String HEADER_GROUPED_SERVICE_PATHS = "grouped-fiware-servicepaths";
     public static final String HEADER_DEFAULT_DESTINATIONS  = "default-destinations";
