@@ -57,6 +57,8 @@ public class HDFSBackendImplTest {
     private final String hdfsPort = "50070";
     private final String user = "hdfs-user";
     private final String password = "12345abcde";
+    private final String token = "erwfgwegwegewtgewtg";
+    private final String hiveServerVersion = "2";
     private final String hiveHost = "1.2.3.4";
     private final String hivePort = "10000";
     private final String dirPath = "path/to/my/data";
@@ -71,8 +73,8 @@ public class HDFSBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, hiveHost, hivePort, false, null, null, null,
-                null, false);
+        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost, hivePort,
+                false, null, null, null, null, false);
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
