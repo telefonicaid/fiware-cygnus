@@ -22,11 +22,23 @@ process.stdin.resume();
 process.stdin.setEncoding('utf8');
 var util = require('util');
 
+// get the given arguments
+if (process.argv.size < 7) {
+    console.log('Usage: npm start hive_host hive_port db_name hadoop_user hadoop_password');
+    process.exit();
+} // if
+
+var hiveHost = process.argv[2];
+var hivePort = process.argv[3];
+var dbName = process.argv[4];
+var hadoopUser = process.argv[5];
+var hadoopPassword = process.argv[6];
+
 // get a connection
 var client = hive.createClient({
     version: '0.7.1-cdh3u2',
-    server: 'cosmos.lab.fiware.org',
-    port: 9999,
+    server: hiveHost,
+    port: hivePort,
     timeout: 1000
 });
 
@@ -43,7 +55,7 @@ function doLoop() {
         } // if
 
         // use the given database
-        client.execute('use default', function (err) {
+        client.execute('use ' + dbName, function (err) {
             if (err) {
                 console.log(err);
                 return;

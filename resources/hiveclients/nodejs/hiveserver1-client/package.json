@@ -10,6 +10,6 @@
     "thrift-hive": "^0.0.7"
   },
   "scripts": {
-    "start": "node ./src/hiveserver1-client.js"
+    "start": "node ./src/hiveserver1-client.js $HIVE_HOST $HIVE_PORT $DB_NAME $HADOOP_USER $HADOOP_PASSWORD"
   }
 }
