@@ -79,4 +79,3 @@ function doLoop() {
 
 // do the loop
 doLoop();
-
