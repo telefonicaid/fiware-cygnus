@@ -7,3 +7,4 @@
 - [HARDENING] Add missing configuration and documentation regarding OrionMongoSink and OrionSTHSink (#505)
 - [FEATURE] Add HiveServer2 support to OrionHDFSSink (#513)
 - [FEATURE] Add Java-based clients both for HiveServer1 and HiveServer2 (#518)
+- [FEATURE] Add Node.js-based clients both for HiveServer1 and HiveServer2 (#520)
