@@ -14,6 +14,9 @@ A set of Hive clients mimicing the native Hive CLI written in several programmin
 * Java:
     * [`hiveserver1-client`](./hiveclients/java/hiveserver1-client)
     * [`hiveserver2-client`](/.hiveclients/java/hiveserver2-client)
+* Python:
+    * [`hiveserver1-client.py`](./hiveclients/java/hiveserver1-client.py)
+    * [`hiveserver2-client.py`](./hiveclients/java/hiveserver2-client.py)
 
 These clients can be used as the base for a custom Hive remote client (interactive or not).
 
