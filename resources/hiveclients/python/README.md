@@ -5,7 +5,7 @@ This sample code works with [`python_hive_utils`](https://github.com/eventbrite/
 
 Thus, start by installing `python_hive_utils`:
 
-    $ pip install hive_utils
+    $ (sudo) pip install hive_utils
     
 In order to run the client, just execute the `hiveserver1-client` script:
 
@@ -14,7 +14,7 @@ In order to run the client, just execute the `hiveserver1-client` script:
 ##HiveServer2 client
 This sample code works with [`pyhs2`](https://github.com/BradRuderman/pyhs2), thus start by installing it:
 
-    $ pip install pyhs2
+    $ (sudo) pip install pyhs2
     
 In order to run the client, just execute the `hiveserver2-client` script:
 
