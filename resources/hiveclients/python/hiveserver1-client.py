@@ -24,7 +24,7 @@ from hive_service.ttypes import HiveServerException
 
 # get the input parameters
 if len(sys.argv) != 6:
-    print 'Usage: python hiveserve1-client.py <hive_host> <hive_port> <db_name> <hadoop_user> <hadoop_password>'
+    print 'Usage: python hiveserver1-client.py <hive_host> <hive_port> <db_name> <hadoop_user> <hadoop_password>'
     sys.exit()
 
 hiveHost = sys.argv[1]
