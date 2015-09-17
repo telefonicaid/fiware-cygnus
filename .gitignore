@@ -3,3 +3,6 @@ target/
 *.idea
 *.iml
 nbactions.xml
+node_modules
+npm-debug.log
+.DS_Store
