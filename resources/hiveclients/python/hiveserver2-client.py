@@ -24,7 +24,7 @@ from pyhs2.error import Pyhs2Exception
 
 # get the input parameters
 if len(sys.argv) != 6:
-    print 'Usage: python hiveserve2-client.py <hive_host> <hive_port> <db_name> <hadoop_user> <hadoop_password>'
+    print 'Usage: python hiveserver2-client.py <hive_host> <hive_port> <db_name> <hadoop_user> <hadoop_password>'
     sys.exit()
 
 hiveHost = sys.argv[1]
