@@ -230,15 +230,15 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         switch (fileFormat) {
             case JSONCOLUMN:
             case JSONROW:
-                query = "create external table " + tableName + " (" + fields + ") row format serde "
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
                         + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
                         + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
             case CSVROW:
-                query = "create external table " + tableName + " (" + fields + ") row format delimited fields "
-                        + "terminated by ',' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                        + dirPath + "'";
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
+                        + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             default:
                 query = "";
