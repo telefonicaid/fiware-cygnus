@@ -11,3 +11,4 @@
 - [HARDENING] Replace logs containing "HttpFS response" by "Server response" (#517)
 - [BUG] Use a testing version of Zookeeper in OrionKafkaSink (#514)
 - [BUG] Always create the Hive tables if not existing yet (#401)
+- [HARDENING] Add {headers,body} structure to messages sent to Kafka (#512)
