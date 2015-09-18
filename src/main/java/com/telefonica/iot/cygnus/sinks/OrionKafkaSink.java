@@ -141,6 +141,7 @@ public class OrionKafkaSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
+        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
         String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
         String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
@@ -151,8 +152,9 @@ public class OrionKafkaSink extends OrionSink {
         for (int i = 0; i < contextResponses.size(); i++) {
             // get the i-th contextElement
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            Gson gson = new Gson();
-            String contextElementResponseStr = gson.toJson(contextElementResponse);
+            
+            // build the message/record to be sent to Kafka
+            String message = buildMessage(contextElementResponse, fiwareService, fiwareServicePaths[i], recvTimeTs);
             ProducerRecord<String, String> record;
             
             switch (topicType) {
@@ -164,8 +166,8 @@ public class OrionKafkaSink extends OrionSink {
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + destinations[i] + "), Data (" + contextElementResponseStr + ")");
-                    record = new ProducerRecord<String, String>(destinations[i], contextElementResponseStr);
+                            + destinations[i] + "), Data (" + message + ")");
+                    record = new ProducerRecord<String, String>(destinations[i], message);
                     break;
                 case TOPICBYSERVICEPATH:
                     if (!topicAPI.topicExists(zookeeperClient, fiwareServicePaths[i])) {
@@ -175,8 +177,8 @@ public class OrionKafkaSink extends OrionSink {
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareServicePaths[i] + "), Data (" + contextElementResponseStr + ")");
-                    record = new ProducerRecord<String, String>(fiwareServicePaths[i], contextElementResponseStr);
+                            + fiwareServicePaths[i] + "), Data (" + message + ")");
+                    record = new ProducerRecord<String, String>(fiwareServicePaths[i], message);
                     break;
                 case TOPICBYSERVICE:
                     if (!topicAPI.topicExists(zookeeperClient, fiwareService)) {
@@ -186,8 +188,8 @@ public class OrionKafkaSink extends OrionSink {
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareService + "), Data (" + contextElementResponseStr + ")");
-                    record = new ProducerRecord<String, String>(fiwareService, contextElementResponseStr);
+                            + fiwareService + "), Data (" + message + ")");
+                    record = new ProducerRecord<String, String>(fiwareService, message);
                     break;
                 default:
                     record = null;
@@ -199,6 +201,17 @@ public class OrionKafkaSink extends OrionSink {
             } // if
         } // for
     } // persist
+    
+    private String buildMessage(ContextElementResponse contextElementResponse, String fiwareService,
+            String fiwareServicePath, long recvTimeTs) {
+        String message = "{\"headers\":[{\"fiware-service\":\"" + fiwareService + "\"},"
+                + "{\"fiware-servicePath\":\"" + fiwareServicePath + "\"},"
+                + "{\"timestamp\":" + recvTimeTs + "}" + "],\"body\":";
+        Gson gson = new Gson();
+        String contextElementResponseStr = gson.toJson(contextElementResponse);
+        message += contextElementResponseStr + "}";
+        return message;
+    } // buildMessage
     
     /**
      * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
