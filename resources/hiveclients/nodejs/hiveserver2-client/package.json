@@ -1,0 +1,15 @@
+{
+  "name": "hiveserver2-client",
+  "description": "Hive client for HiveServer2",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/telefonicaid/fiware-cygnus.git"
+  },
+  "dependencies": {
+    "": "^"
+  },
+  "scripts": {
+    "start": "node ./src/hiveserver2-client.js $HIVE_HOST $HIVE_PORT $DB_NAME $HADOOP_USER $HADOOP_PASSWORD"
+  }
+}
