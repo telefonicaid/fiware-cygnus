@@ -23,10 +23,12 @@ import com.telefonica.iot.cygnus.sinks.OrionKafkaSink.TopicType;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.HashMap;
+import org.apache.curator.test.TestingServer;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -51,6 +53,9 @@ public class OrionKafkaSinkTest {
     @Mock
     private TopicAPI mockTopicAPI;
     
+    // not a mock, but a testing purpose Zookepper server by Curator
+    private TestingServer zkServer;
+    
     // instance to be tested
     private OrionKafkaSink sink;
     
@@ -60,8 +65,10 @@ public class OrionKafkaSinkTest {
     
     // context constants
     private final String topicType = "topic-by-destination";
-    private final String brokerList = "localhost:9092";
-    private final String zookeeperEndpoint = "localhost:2181";
+    private final int brokerPort = 9092;
+    private final String brokerList = "localhost:" + brokerPort;
+    private final int zookeeperPort = 2181;
+    private final String zookeeperEndpoint = "localhost:" + zookeeperPort;
     
     // header contants
     private final String timestamp = "123456789";
@@ -120,7 +127,19 @@ public class OrionKafkaSinkTest {
         when(mockKafkaBackend.send(null)).thenReturn(null, null, null);
         when(mockTopicAPI.topicExists(null, null)).thenReturn(false, false, false);
         doNothing().doNothing().doNothing().when(mockTopicAPI).createTopic(null, null, null);
+        
+        // setup the testing purpose Zookeeper server
+        zkServer = new TestingServer(zookeeperPort);
     } // setUp
+    
+    /**
+     * Shutdowns all necessary testing classes.
+     * @throws IOException
+     */
+    @After
+    public void shutdown() throws Exception {
+        zkServer.stop();
+    } // shutdown
 
     /**
      * Test of configure method, of class OrionKafkaSink.

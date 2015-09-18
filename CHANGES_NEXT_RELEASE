@@ -9,3 +9,4 @@
 - [FEATURE] Add Python-based clients both for HiveServer1 and HiveServer2 (#519)
 - [FEATURE] Add Java-based clients both for HiveServer1 and HiveServer2 (#518)
 - [HARDENING] Replace logs containing "HttpFS response" by "Server response" (#517)
+- [BUG] Use a testing version of Zookeeper in OrionKafkaSink (#514)
