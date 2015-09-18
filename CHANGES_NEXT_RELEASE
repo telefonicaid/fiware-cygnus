@@ -8,3 +8,4 @@
 - [FEATURE] Add HiveServer2 support to OrionHDFSSink (#513)
 - [FEATURE] Add Python-based clients both for HiveServer1 and HiveServer2 (#519)
 - [FEATURE] Add Java-based clients both for HiveServer1 and HiveServer2 (#518)
+- [HARDENING] Replace logs containing "HttpFS response" by "Server response" (#517)
