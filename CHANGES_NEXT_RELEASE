@@ -13,3 +13,4 @@
 - [BUG] Use a testing version of Zookeeper in OrionKafkaSink (#514)
 - [BUG] Always create the Hive tables if not existing yet (#401)
 - [HARDENING] Add {headers,body} structure to messages sent to Kafka (#512)
+- [BUG] A second CKAN resource may be added to an existeng dataset in row mode (#280)

@@ -297,7 +297,17 @@ public class CKANCache extends HttpBackend {
                 LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
                         + ")");
                 populateResourcesMap(resources, orgName, pkgName, true);
-                return true;
+                
+                // check if the resource is within the resources cache, once populated
+                if (tree.get(orgName).get(pkgName).contains(resName)) {
+                    LOGGER.debug("Resource found in the cache, once queried CKAN " + "(orgName=" + orgName
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                    return true;
+                } else {
+                    LOGGER.debug("Resource not found in the cache, once queried CKAN " + "(orgName=" + orgName
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                    return false;
+                } // if else
             } // if else
         } else if (res.getStatusCode() == 404) {
             throw new CygnusRuntimeError("Unexpected package error when updating its resources... the package was "
