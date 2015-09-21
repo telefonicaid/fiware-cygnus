@@ -57,20 +57,20 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `topic_type=topic-per-destination` as configuration parameter, then `OrionKafkaSink` will persist the data within the body as:
+Assuming `topic_type=topic-per-destination` as configuration parameter, then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
-    {"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     
-If `topic_type=topic-per-service-path` then `OrionKafkaSink` will persist the data within the body as:
+If `topic_type=topic-per-service-path` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic 4wheels --from-beginning
-    {"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     
-If `topic_type=topic-per-service` then `OrionKafkaSink` will persist the data within the body as:
+If `topic_type=topic-per-service` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
-    {"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     
 NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
     
