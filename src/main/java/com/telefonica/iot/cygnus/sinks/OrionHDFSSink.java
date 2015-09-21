@@ -426,13 +426,8 @@ public class OrionHDFSSink extends OrionSink {
                         String rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
                                 attrType, attrValue, attrMetadata);
                         persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
-                        
-                        // Hive table is only created once the HDFS file is created
-                        if (!dataFileExists) {
-                            persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
-                            dataFileExists = true;
-                        } // if
-                        
+                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
+                        dataFileExists = true;
                         break;
                     case JSONCOLUMN:
                         // "accumulate" the data for future persistence
@@ -455,13 +450,8 @@ public class OrionHDFSSink extends OrionSink {
                         // metadata is persisted in a separated HDFS file
                         boolean mdFileExists = persistenceBackend.exists(attrMdFileName);
                         persistCSVMetadata(attrMetadata, recvTimeTs, attrMdFolder, attrMdFileName, mdFileExists);
-                        
-                        // Hive table is only created once the HDFS file is created
-                        if (!dataFileExists) {
-                            persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
-                            dataFileExists = true;
-                        } // if
-                        
+                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
+                        dataFileExists = true;
                         break;
                     case CSVCOLUMN:
                         // build some metadata related stuff
@@ -489,21 +479,11 @@ public class OrionHDFSSink extends OrionSink {
             switch (fileFormat) {
                 case JSONCOLUMN:
                     persistData(columnLine + "}", hdfsFolder, hdfsFile, dataFileExists);
-                    
-                    // Hive table is only created once the file is created
-                    if (!dataFileExists) {
-                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
-                    } // if
-                    
+                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
                     break;
                 case CSVCOLUMN:
                     persistData(columnLine, hdfsFolder, hdfsFile, dataFileExists);
-                    
-                    // Hive table is only created once the file is created
-                    if (!dataFileExists) {
-                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
-                    } // if
-                    
+                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
                     break;
                 default:
                     break;

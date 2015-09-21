@@ -103,7 +103,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + dirPath + " directory could not be created in HDFS. HttpFS response: "
+                    + dirPath + " directory could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createDir
@@ -118,7 +118,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file could not be created in HDFS. HttpFS response: "
+                    + filePath + " file could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
         
@@ -137,7 +137,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 201) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file created in HDFS, but could not write the data. HttpFS response: "
+                    + filePath + " file created in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createFile
@@ -151,7 +151,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file seems to not exist in HDFS. HttpFS response: "
+                    + filePath + " file seems to not exist in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
 
@@ -170,7 +170,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file exists in HDFS, but could not write the data. HttpFS response: "
+                    + filePath + " file exists in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // append
@@ -230,15 +230,15 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         switch (fileFormat) {
             case JSONCOLUMN:
             case JSONROW:
-                query = "create external table " + tableName + " (" + fields + ") row format serde "
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
                         + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
                         + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
             case CSVROW:
-                query = "create external table " + tableName + " (" + fields + ") row format delimited fields "
-                        + "terminated by ',' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                        + dirPath + "'";
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
+                        + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             default:
                 query = "";
