@@ -382,7 +382,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionMySQLSink`](doc/design/OrionMySQLSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
+Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -418,8 +418,8 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
     +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
-    
-If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
+
+If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -454,6 +454,8 @@ If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within th
     | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
+    
+You can explore more parameter combinations and their output at [`OrionMySQLSink.md`](./doc/OrionMySQLSink.md).
 
 NOTES:
 
@@ -814,6 +816,8 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+# select the table type from table-by-destination and table-by-service-path
+cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 
 # ============================================
 # OrionMongoSink configuration
