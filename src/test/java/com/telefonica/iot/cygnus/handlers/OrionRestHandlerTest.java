@@ -137,10 +137,11 @@ public class OrionRestHandlerTest {
             assertTrue(eventHeaders.containsKey("content-type"));
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH),
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
+                    TestUtils.encode(notificationService));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
                     TestUtils.encode(notificationServicePath));
             assertTrue(eventMessage.length != 0);
         } catch (Exception e) {
@@ -161,10 +162,12 @@ public class OrionRestHandlerTest {
             assertTrue(eventHeaders.containsKey("content-type"));
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE), TestUtils.encode(notificationService));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_SERVICE_PATH), TestUtils.encode(rootServicePath));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
+                    TestUtils.encode(notificationService));
+            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
+                    TestUtils.encode(rootServicePath));
             assertTrue(eventMessage.length != 0);
         } catch (Exception e) {
             fail(e.getMessage());

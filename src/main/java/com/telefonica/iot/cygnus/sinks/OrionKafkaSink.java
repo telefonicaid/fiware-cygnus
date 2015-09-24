@@ -111,6 +111,7 @@ public class OrionKafkaSink extends OrionSink {
         zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
                 + zookeeperEndpoint + ")");
+        super.configure(context);
     } // configure
     
     @Override
@@ -142,9 +143,17 @@ public class OrionKafkaSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
 
         // iterate on the contextResponses
         ArrayList contextResponses = notification.getContextResponses();
@@ -154,7 +163,7 @@ public class OrionKafkaSink extends OrionSink {
             ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
             
             // build the message/record to be sent to Kafka
-            String message = buildMessage(contextElementResponse, fiwareService, fiwareServicePaths[i], recvTimeTs);
+            String message = buildMessage(contextElementResponse, fiwareService, servicePaths[i], recvTimeTs);
             ProducerRecord<String, String> record;
             
             switch (topicType) {
@@ -170,15 +179,15 @@ public class OrionKafkaSink extends OrionSink {
                     record = new ProducerRecord<String, String>(destinations[i], message);
                     break;
                 case TOPICBYSERVICEPATH:
-                    if (!topicAPI.topicExists(zookeeperClient, fiwareServicePaths[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareServicePaths[i]
+                    if (!topicAPI.topicExists(zookeeperClient, servicePaths[i])) {
+                        LOGGER.info("[" + this.getName() + "] Creating topic " + servicePaths[i]
                                 + " at OrionKafkaSink");
-                        topicAPI.createTopic(zookeeperClient, fiwareServicePaths[i], new Properties());
+                        topicAPI.createTopic(zookeeperClient, servicePaths[i], new Properties());
                     } // if
                     
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareServicePaths[i] + "), Data (" + message + ")");
-                    record = new ProducerRecord<String, String>(fiwareServicePaths[i], message);
+                            + servicePaths[i] + "), Data (" + message + ")");
+                    record = new ProducerRecord<String, String>(servicePaths[i], message);
                     break;
                 case TOPICBYSERVICE:
                     if (!topicAPI.topicExists(zookeeperClient, fiwareService)) {

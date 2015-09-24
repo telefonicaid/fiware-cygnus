@@ -128,6 +128,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         shouldHash = context.getBoolean("should_hash", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
+        super.configure(context);
     } // configure
     
     @Override

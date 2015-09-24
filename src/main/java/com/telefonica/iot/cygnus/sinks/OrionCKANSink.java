@@ -120,8 +120,9 @@ public class OrionCKANSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
                 + ")");
-        ssl = context.getString("ssl", "false").equals("true");
+        ssl = context.getBoolean("ssl", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
+        super.configure(context);
     } // configure
 
     @Override
@@ -140,10 +141,18 @@ public class OrionCKANSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
         
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, true);
@@ -164,7 +173,7 @@ public class OrionCKANSink extends OrionSink {
                     + entityType + ")");
             
             // build the pavkage and resource name
-            String pkgName = buildPkgName(fiwareService, fiwareServicePaths[i]);
+            String pkgName = buildPkgName(fiwareService, servicePaths[i]);
             String resName = buildResName(destinations[i]);
 
             // iterate on all this CKANBackend's attributes, if there are attributes

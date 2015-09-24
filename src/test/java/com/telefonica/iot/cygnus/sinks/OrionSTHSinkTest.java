@@ -58,6 +58,7 @@ public class OrionSTHSinkTest {
     private final String dataModel = "collection-per-entity";
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
+    private final String enableGrouping = "true";
     private final String dbName = "db-name";
     private final String collectionName = "collection-name";
     private final long recvTimeTs = 1429535775;
@@ -163,6 +164,7 @@ public class OrionSTHSinkTest {
         context.put("data_model", dataModel);
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
+        context.put("enable_grouping", enableGrouping);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
@@ -183,9 +185,9 @@ public class OrionSTHSinkTest {
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, serviceHeader);
-        headers.put(Constants.HEADER_SERVICE_PATH, singleServicePathHeader);
-        headers.put(Constants.DESTINATION, singleDestinationHeader);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, serviceHeader);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathHeader);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationHeader);
         
         try {
             sink.persist(headers, singleNotifyContextRequest);
@@ -200,10 +202,10 @@ public class OrionSTHSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put("timestamp", Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_SERVICE, serviceHeader);
-        headers.put(Constants.HEADER_SERVICE_PATH, multipleServicePathHeader);
-        headers.put(Constants.DESTINATION, multipleDestinationHeader);
+        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, serviceHeader);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, multipleServicePathHeader);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationHeader);
         
         try {
             sink.persist(headers, multipleNotifyContextRequest);

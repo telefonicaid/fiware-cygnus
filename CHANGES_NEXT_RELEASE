@@ -5,6 +5,7 @@
 - [FEATURE] The notified user agent is not checked anymore (#493)
 - [FEATURE] Add OrionKafkaSink (#456)
 - [HARDENING] Add missing configuration and documentation regarding OrionMongoSink and OrionSTHSink (#505)
+- [FEATURE] Enable/disable grouping rules usage per sink (#447)
 - [FEATURE] Add HiveServer2 support to OrionHDFSSink (#513)
 - [FEATURE] Add Python-based clients both for HiveServer1 and HiveServer2 (#519)
 - [FEATURE] Add Java-based clients both for HiveServer1 and HiveServer2 (#518)

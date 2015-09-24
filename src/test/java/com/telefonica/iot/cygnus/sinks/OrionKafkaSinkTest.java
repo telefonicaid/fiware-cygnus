@@ -73,8 +73,10 @@ public class OrionKafkaSinkTest {
     // header contants
     private final String timestamp = "123456789";
     private final String service = "vehicles";
-    private final String servicePath = "4wheels";
-    private final String destination = "car1_car";
+    private final String defaultServicePathName = "4wheels";
+    private final String defaultDestinationName = "car1_car";
+    private final String groupedServicePathName = "4wheels_cars";
+    private final String groupedDestinationName = "numeric_cars";
     
     // notification constants
     private final String notification = ""
@@ -177,9 +179,11 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
+        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -195,9 +199,11 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
+        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);
@@ -213,9 +219,11 @@ public class OrionKafkaSinkTest {
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
         headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_SERVICE, service);
-        headers.put(Constants.HEADER_SERVICE_PATH, servicePath);
-        headers.put(Constants.DESTINATION, destination);
+        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
+        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
+        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
             sink.persist(headers, notifyContextRequest);

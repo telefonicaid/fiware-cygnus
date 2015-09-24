@@ -138,6 +138,7 @@ public class OrionMySQLSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
+        super.configure(context);
     } // configure
 
     @Override
@@ -152,10 +153,18 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
 
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, false);
@@ -183,7 +192,7 @@ public class OrionMySQLSink extends OrionSink {
                     + entityType + ")");
             
             // build the table name
-            String tableName = buildTableName(fiwareServicePaths[i], destinations[i]);
+            String tableName = buildTableName(servicePaths[i], destinations[i]);
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be

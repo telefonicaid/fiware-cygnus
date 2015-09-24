@@ -64,6 +64,8 @@ cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -100,6 +102,8 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.con
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.ckan-sink.enable_grouping = false
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -119,6 +123,8 @@ cygnusagent.sinks.ckan-sink.ssl = false
 cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.mysql-sink.enable_grouping = false
 # the FQDN/IP address where the MySQL server runs
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listes for incomming connections
@@ -136,6 +142,8 @@ cygnusagent.sinks.mysql-sink.attr_persistence = column
 cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
 # channel name from where to read notification events
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.mongo-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
@@ -155,6 +163,8 @@ cygnusagent.sinks.mongo-sink.should_hash = false
 cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 # channel name from where to read notification events
 cygnusagent.sinks.sth-sink.channel = sth-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.sth-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)

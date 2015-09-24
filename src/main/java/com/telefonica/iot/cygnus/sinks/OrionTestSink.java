@@ -41,13 +41,12 @@ import org.apache.flume.Context;
 public class OrionTestSink extends OrionSink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionTestSink.class);
-
+    
     /**
      * Constructor.
      */
     public OrionTestSink() {
         super();
-        //cygnusLogger = new CygnusLogger(LoggerFactory.getLogger(OrionTestSink.class), true);
     } // OrionTestSink
 
     @Override
@@ -65,9 +64,9 @@ public class OrionTestSink extends OrionSink {
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+        String[] destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
 
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, true);
