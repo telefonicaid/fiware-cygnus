@@ -183,7 +183,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         
         try {
             // create the CKAN request JSON
-            String records ="\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
+            String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                     + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
                     + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
                     + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
