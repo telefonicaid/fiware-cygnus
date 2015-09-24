@@ -104,4 +104,4 @@ Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and 
 <br>
 Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
 <br>
-NoIván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
