@@ -49,12 +49,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
     flume-event={
         headers={
 	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         notified-service=vehicles,
+	         notified-servicepath=4wheels,
+	         default-destination=car1_car
+	         default-servicepaths=4wheels
+	         grouped-destination=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
@@ -161,6 +164,7 @@ NOTES:
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
 | channel | yes | N/A |
+| enable_grouping | no | false | <i>true</i> or <i>false</i> |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 |
 | mysql_username | yes | N/A |
@@ -174,6 +178,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
+    cygnusagent.sinks.mysql-sink.enable_grouping = false
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
     cygnusagent.sinks.mysql-sink.mysq_username = myuser

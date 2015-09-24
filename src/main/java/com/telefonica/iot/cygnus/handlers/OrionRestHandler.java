@@ -174,6 +174,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
             String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
+            LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
@@ -182,7 +183,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     contentType = headerValue;
                 } // if else
-            } else if (headerName.equals(Constants.HEADER_SERVICE)) {
+            } else if (headerName.equals(Constants.HEADER_NOTIFIED_SERVICE)) {
                 if (headerValue.length() > Constants.SERVICE_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
@@ -191,7 +192,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     service = Utils.encode(headerValue);
                 } // if else
-            } else if (headerName.equals(Constants.HEADER_SERVICE_PATH)) {
+            } else if (headerName.equals(Constants.HEADER_NOTIFIED_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
@@ -235,11 +236,12 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventHeaders.put(Constants.HEADER_CONTENT_TYPE, contentType);
         LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_CONTENT_TYPE + ", value=" + contentType
                 + ")");
-        eventHeaders.put(Constants.HEADER_SERVICE, service == null ? defaultService : service);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE
+        eventHeaders.put(Constants.HEADER_NOTIFIED_SERVICE, service == null ? defaultService : service);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_NOTIFIED_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
-        eventHeaders.put(Constants.HEADER_SERVICE_PATH, servicePath == null ? defaultServicePath : servicePath);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_SERVICE_PATH
+        eventHeaders.put(Constants.HEADER_NOTIFIED_SERVICE_PATH, servicePath == null
+                ? defaultServicePath : servicePath);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_NOTIFIED_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
         eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
         LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID + ", value=" + transId + ")");

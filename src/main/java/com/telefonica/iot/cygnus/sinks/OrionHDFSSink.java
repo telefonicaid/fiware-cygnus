@@ -325,6 +325,7 @@ public class OrionHDFSSink extends OrionSink {
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
+        super.configure(context);
     } // configure
 
     @Override
@@ -346,10 +347,18 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
         
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, true);
@@ -368,7 +377,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // build the effective HDFS stuff
             String firstLevel = buildFirstLevel(fiwareService);
-            String secondLevel = buildSecondLevel(fiwareServicePaths[i]);
+            String secondLevel = buildSecondLevel(servicePaths[i]);
             String thirdLevel = buildThirdLevel(destinations[i]);
             String hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
             String hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
