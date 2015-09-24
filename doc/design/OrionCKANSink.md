@@ -100,6 +100,14 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "id": "recvTime"
                 },
                 {
+                    "id": "entityId",
+                    "type": "text"
+                },
+                {
+                    "id": "entityType",
+                    "type": "text"
+                },
+                {
                     "type": "text",
                     "id": "attrName"
                 },

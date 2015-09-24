@@ -205,10 +205,11 @@ public class OrionCKANSink extends OrionSink {
 
                 if (rowAttrPersistence) {
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
-                            + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ", "
-                            + recvTime + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ")");
-                    persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType,
-                            attrValue, attrMd);
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ","
+                            + recvTime + "," + entityId + "," + entityType + "," + attrName + "," + attrType + ","
+                            + attrValue + "," + attrMd + ")");
+                    persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, entityId, entityType,
+                            attrName, attrType, attrValue, attrMd);
                 } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMd);
