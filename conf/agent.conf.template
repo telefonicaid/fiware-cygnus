@@ -135,6 +135,8 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+# select the table type from table-by-destination and table-by-service-path
+cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 
 # ============================================
 # OrionMongoSink configuration
