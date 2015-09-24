@@ -66,7 +66,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     @Override
     public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName,
-        String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+        String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
+        throws Exception {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, true);
@@ -77,7 +78,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } else {
             LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName/resId=" + resName + "/" + resId + ")");
-            insert(recvTimeTs, recvTime, resId, attrName, attrType, attrValue, attrMd);
+            insert(recvTimeTs, recvTime, resId, entityId, entityType, attrName, attrType, attrValue, attrMd);
         } // if else
     } // persist
 
@@ -167,14 +168,16 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * Insert record in datastore (row mode).
      * @param recvTimeTs timestamp.
      * @param recvTime timestamp (human readable)
-     * @param resId the resource in which datastore the record is going to be inserted.
+     * @param resourceId the resource in which datastore the record is going to be inserted.
+     * @param entityId entiyd id
+     * @param entityType entity type
      * @param attrName attribute CKANBackend.
      * @param attrType attribute type.
      * @param attrValue attribute value.
      * @throws Exception
      */
-    private void insert(long recvTimeTs, String recvTime, String resourceId, String attrName, String attrType,
-            String attrValue, String attrMd) throws Exception {
+    private void insert(long recvTimeTs, String recvTime, String resourceId, String entityId, String entityType,
+            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         String urlPath;
         String jsonString;
         
@@ -182,6 +185,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // create the CKAN request JSON
             String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                     + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
                     + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                     + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
                     + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
@@ -425,6 +430,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                     + "\", \"fields\": [ "
                     + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
                     + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                    + "{ \"id\": \"" + Constants.ENTITY_ID + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.ENTITY_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"},"
