@@ -29,7 +29,7 @@
 * [Reporting issues and contact information](#section9)
 
 ##<a name="section1"></a>What is Cygnus
-This project is part of [FIWARE](http://fiware.org).
+This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
 
 Cygnus is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus.
 
