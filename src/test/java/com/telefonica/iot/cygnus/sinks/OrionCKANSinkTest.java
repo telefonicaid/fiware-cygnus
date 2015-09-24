@@ -74,6 +74,8 @@ public class OrionCKANSinkTest {
     private final String multipleDestinationName = "sport1,urban1";
     private final String abnormalDestinationName =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private static final String ENTITYID = "car1";
+    private static final String ENTITYTYPE = "car";
     private static final String ATTRNAME = "speed";
     private static final String ATTRTYPE = "float";
     private static final String ATTRVALUE = "112.9";
@@ -182,7 +184,8 @@ public class OrionCKANSinkTest {
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTimeTs, recvTime, normalServiceName,
-                singleServicePathName, singleDestinationName, ATTRNAME, ATTRTYPE, ATTRVALUE, ATTRMD);
+                singleServicePathName, singleDestinationName, ENTITYID, ENTITYTYPE, ATTRNAME, ATTRTYPE, ATTRVALUE,
+                ATTRMD);
         doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTime, normalServiceName,
                 singleServicePathName, singleDestinationName, ATTRLIST, ATTRMDLIST);
     } // setUp
