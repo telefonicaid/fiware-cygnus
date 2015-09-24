@@ -22,6 +22,7 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.sinks.OrionMySQLSink.TableType;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.HashMap;
@@ -53,13 +54,16 @@ public class OrionMySQLSinkTest {
     @Mock
     private MySQLBackend mockMySQLBackend;
 
-    // constants
+    // configuration constants
     private final String mysqlHost = "localhost";
     private final String mysqlPort = "3306";
     private final String mysqlUsername = "user1";
     private final String mysqlPassword = "pass1234";
     private final String attrPersistence = "row";
     private final String enableGrouping = "true";
+    private final String tableType = "table-by-destination";
+    
+    // other constants
     private final long recvTimeTs = 123456789;
     private final String recvTime = "20140513T16:48:13";
     private final String normalServiceName = "vehicles";
@@ -179,6 +183,7 @@ public class OrionMySQLSinkTest {
         context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
         context.put("enable_grouping", enableGrouping);
+        context.put("table_type", tableType);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
@@ -204,6 +209,7 @@ public class OrionMySQLSinkTest {
         assertEquals(mysqlPassword, sink.getMySQLPassword());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
+        assertEquals(TableType.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getTableType());
     } // testConfigure
 
     /**
