@@ -1,0 +1,6 @@
+compiler:
+    build: ..
+    dockerfile: ./docker/0.Dockerfile.jar-compiler
+    volumes:
+        - ../.:/cygnus-compiler
+    command: /bin/bash -c ./docker/0.jar-compiler.sh

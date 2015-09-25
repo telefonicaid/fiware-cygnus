@@ -1,0 +1,48 @@
+FROM centos:7
+MAINTAINER Herman Junge <herman.junge@telefonica.com>
+
+###############################################################################
+#
+#  JAVA and other packages
+#
+###############################################################################
+
+
+RUN yum update -y
+RUN yum install -y wget tar git java-1.7.0-openjdk.x86_64
+
+
+###############################################################################
+#
+#  Apache Flume
+#
+###############################################################################
+
+
+RUN wget https://www.apache.org/dist/flume/1.5.2/apache-flume-1.5.2-bin.tar.gz && \
+	tar xvfz apache-flume-1.5.2-bin.tar.gz && \
+	rm apache-flume-1.5.2-bin.tar.gz && \
+	mv apache-flume-1.5.2-bin flume && \
+	mkdir -p /cygnusapp/flume/plugins.d/cygnus/ && \
+	mkdir /cygnusapp/flume/plugins.d/cygnus/lib && \
+	mkdir /cygnusapp/flume/plugins.d/cygnus/libext
+
+
+###############################################################################
+#
+#  Copy the jar from target to the plugins directory
+#
+###############################################################################
+
+
+RUN ln -s /cygnusapp/target/cygnus-0.8.2-jar-with-dependencies.jar /cygnusapp/flume/plugins.d/cygnus/lib/
+
+
+###############################################################################
+#
+#  Expose the Port
+#
+###############################################################################
+
+
+EXPOSE 5050

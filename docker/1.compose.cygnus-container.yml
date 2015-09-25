@@ -1,0 +1,8 @@
+cygnus:
+    image: tidchile/fiware-cygnus
+    volumes:
+        - ./conf/cygnus/cygnus.conf:/usr/cygnus/conf/cygnus.conf:ro
+        - ./conf/cygnus/matching_table.conf:/usr/cygnus/conf/matching_table.conf:ro
+    ports:
+        - "5050:5050"
+    command: /cygnusapp/flume/bin/flume-ng agent --conf /cygnusapp/flume/conf -f /usr/cygnus/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=DEBUG,console
