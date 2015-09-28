@@ -1,5 +1,5 @@
 cygnus:
-    image: tidchile/fiware-cygnus
+    image: telefonicaid/fiware-cygnus
     volumes:
         - ../conf:/flume/conf
     ports:
