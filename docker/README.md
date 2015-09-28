@@ -4,9 +4,9 @@ The process of building this application and packing it into a container could b
 
 ## Build the jar
 
-Run this command from the root of this repository
+Run this command from the root of this repository:
 
-	docker-compose -f ./docker/0.compose.jar-compiler.yml -p cygnus run --rm compiler
+    docker-compose -f ./docker/0.compose.jar-compiler.yml -p cygnus run --rm compiler
 
 This will create an image containing maven, then, call a script which will mount this directory into the container, retrieve the maven dependencies and start the compilation of the jar into the `target` directory.
 
@@ -27,12 +27,17 @@ Look into the `target` directory. Don't worry, though the container disappears, 
 
 OK. So we got our _jar_. And our configuration. Let's pack it into a container.
 
-We build the image `tidchile/fiware-cygnus` with this command
+We build the image `tidchile/fiware-cygnus` with this command:
 
-	docker build -f ./docker/Dockerfile -t tidchile/fiware-cygnus .
+    docker build -f ./docker/Dockerfile -t tidchile/fiware-cygnus .
 
-To execute the container use this command
+To execute the container use this command:
 
-	docker-compose -f ./docker/docker-compose.yml up
+    docker-compose -f ./docker/docker-compose.yml up
 
-Will mount your configuration files from `conf` and run the cygnus application. There are no databases setup _a_priori_ in this systems, nor linked systems. Everything should be specified in this repository `conf` directory.
+It will mount your configuration files from `conf` and run the Cygnus application. There are no databases setup _a_priori_ in this systems, nor linked systems. Everything should be specified in this repository `conf` directory.
+
+## Contact
+
+Herman Junge
+herman.junge@telefonica.com
