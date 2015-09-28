@@ -2,10 +2,6 @@
 
 The process of building this application and packing it into a container could be a little long in time terms. Addressing this issue, the process is separated in two steps: Building the jar and packing the cygnus container.
 
-## Run the two steps at once
-
-(TODO)
-
 ## Build the jar
 
 Run this command from the root of this repository
