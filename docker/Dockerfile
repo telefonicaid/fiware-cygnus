@@ -10,6 +10,7 @@ MAINTAINER Herman Junge <herman.junge@telefonica.com>
 
 RUN yum update -y
 RUN yum install -y wget tar git java-1.7.0-openjdk.x86_64
+ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-1.7.0.85-2.6.1.2.el7_1.x86_64/jre
 
 
 ###############################################################################
@@ -23,9 +24,8 @@ RUN wget https://www.apache.org/dist/flume/1.5.2/apache-flume-1.5.2-bin.tar.gz &
 	tar xvfz apache-flume-1.5.2-bin.tar.gz && \
 	rm apache-flume-1.5.2-bin.tar.gz && \
 	mv apache-flume-1.5.2-bin flume && \
-	mkdir -p /cygnusapp/flume/plugins.d/cygnus/ && \
-	mkdir /cygnusapp/flume/plugins.d/cygnus/lib && \
-	mkdir /cygnusapp/flume/plugins.d/cygnus/libext
+	mkdir -p /flume/plugins.d/cygnus/ && \
+	mkdir /flume/plugins.d/cygnus/lib
 
 
 ###############################################################################
@@ -35,7 +35,8 @@ RUN wget https://www.apache.org/dist/flume/1.5.2/apache-flume-1.5.2-bin.tar.gz &
 ###############################################################################
 
 
-RUN ln -s /cygnusapp/target/cygnus-0.8.2-jar-with-dependencies.jar /cygnusapp/flume/plugins.d/cygnus/lib/
+ADD ./target/*.jar /tmp/
+RUN cp $(ls /tmp/*.jar) /flume/plugins.d/cygnus/lib/.
 
 
 ###############################################################################
