@@ -5,3 +5,5 @@ target/
 nbactions.xml
 
 maven-deps/
+
+conf/cygnus.conf
