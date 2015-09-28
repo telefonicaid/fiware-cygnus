@@ -4,4 +4,4 @@ cygnus:
         - ../conf:/flume/conf
     ports:
         - "5050:5050"
-    command: /flume/bin/flume-ng agent --conf /flume/conf -f /flume/conf/cygnus.conf -n cygnusagent -Dflume.root.logger=DEBUG,console
+    command: flume/bin/cygnus-flume-ng agent --conf flume/conf -f flume/conf/agent_0.conf -n cygnusagent -Dflume.root.logger=INFO,console

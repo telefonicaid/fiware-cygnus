@@ -33,15 +33,21 @@ Look into the `target` directory. Don't worry, though the container disappears, 
 
 OK. So we got our _jar_. And our configuration. Let's pack it into a container.
 
-We build the image `tidchile/fiware-cygnus` with this command:
+We build the image `telefonicaid/fiware-cygnus` with this command:
 
-    docker build -f ./docker/Dockerfile -t tidchile/fiware-cygnus .
+    docker build -f ./docker/Dockerfile -t telefonicaid/fiware-cygnus .
 
 To execute the container use this command:
 
     docker-compose -f ./docker/docker-compose.yml up
 
 It will mount your configuration files from `conf` and run the Cygnus application. There are no databases setup _a_priori_ in this systems, nor linked systems. Everything should be specified in this repository `conf` directory.
+
+### Cygnus command
+
+Docker compose will run the following command. Feel free to modify it on your required circumstances:
+
+    flume/bin/cygnus-flume-ng agent --conf flume/conf -f flume/conf/agent_0.conf -n cygnusagent -Dflume.root.logger=INFO,console
 
 ## Contact
 

@@ -30,13 +30,29 @@ RUN wget https://www.apache.org/dist/flume/1.5.2/apache-flume-1.5.2-bin.tar.gz &
 
 ###############################################################################
 #
+#  Apache Thrift
+#
+###############################################################################
+
+
+RUN wget http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar && \
+	rm /flume/lib/libthrift-*.jar && \
+	mv libthrift-0.9.1.jar /flume/lib
+
+
+###############################################################################
+#
 #  Copy the jar from target to the plugins directory
+#
+#  And set cygnus-flume-ng into the flume directory
 #
 ###############################################################################
 
 
 ADD ./target/*.jar /tmp/
-RUN cp $(ls /tmp/*.jar) /flume/plugins.d/cygnus/lib/.
+ADD ./src/main/resources/cygnus-flume-ng /flume/bin/cygnus-flume-ng
+RUN cp $(ls /tmp/*.jar) /flume/plugins.d/cygnus/lib/. && \
+	chmod +x /flume/bin/cygnus-flume-ng
 
 
 ###############################################################################
