@@ -51,5 +51,5 @@ Docker compose will run the following command. Feel free to modify it on your re
 
 ## Contact
 
-Herman Junge
-herman.junge@telefonica.com
+	Herman Junge
+	herman.junge@telefonica.com
