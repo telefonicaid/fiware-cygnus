@@ -17,7 +17,7 @@
 ################################################################################
 
 cygnus:
-    image: telefonicaid/fiware-cygnus
+    image: fiware/cygnus
     volumes:
         - ../conf:/flume/conf
     ports:

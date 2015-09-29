@@ -33,9 +33,9 @@ Look into the `target` directory. Don't worry, though the container disappears, 
 
 OK. So we got our _jar_. And our configuration. Let's pack it into a container.
 
-We build the image `telefonicaid/fiware-cygnus` with this command:
+We build the image `fiware/cygnus` with this command:
 
-    docker build -f ./docker/Dockerfile -t telefonicaid/fiware-cygnus .
+    docker build -f ./docker/Dockerfile -t fiware/cygnus .
 
 To execute the container use this command:
 
