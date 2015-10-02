@@ -173,6 +173,27 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Oct 02 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.9.0
+- [FEATURE] Add support for multiple file formats in HDFS; JSON is maintained and CSV is added (#303)
+- [HARDENING] Add detailed information about reporting issues and contact information (#478)
+- [HARDENING] Update the Quick Start Guide in order is is aligned with latest features (#490)
+- [HARDENING] Remove patch supporting old versions of the CKAN API (<= 2.0) (#188)
+- [FEATURE] The notified user agent is not checked anymore (#493)
+- [FEATURE] Add OrionKafkaSink (#456)
+- [HARDENING] Add missing configuration and documentation regarding OrionMongoSink and OrionSTHSink (#505)
+- [FEATURE] Enable/disable grouping rules usage per sink (#447)
+- [FEATURE] Add HiveServer2 support to OrionHDFSSink (#513)
+- [FEATURE] Add Python-based clients both for HiveServer1 and HiveServer2 (#519)
+- [FEATURE] Add Java-based clients both for HiveServer1 and HiveServer2 (#518)
+- [HARDENING] Replace logs containing "HttpFS response" by "Server response" (#517)
+- [BUG] Use a testing version of Zookeeper in OrionKafkaSink (#514)
+- [BUG] Always create the Hive tables if not existing yet (#401)
+- [HARDENING] Add {headers,body} structure to messages sent to Kafka (#512)
+- [FEATURE] Allow selecting the table type (by service, servicePath or destination) (#540)
+- [BUG] A second CKAN resource may be added to an existeng dataset in row mode (#280)
+- [HARDENING] Add references to FIWARE and Cosmos Big Data Analysis GE in the README (#534)
+- [BUG] entityId and entityType are now added to the CKAN resources when using OrionCKANSink in row mode (#539)
+
 * Wed Jul 08 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.8.2
 - [BUG] Fix many errors in the docuemtnation (#435)
 - [BUG] Fix OrionMySQLLink in the README (#442)
