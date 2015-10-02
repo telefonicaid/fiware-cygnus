@@ -36,6 +36,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Channel;
+import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
@@ -66,6 +67,7 @@ import org.xml.sax.SAXException;
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
+    protected boolean enableGrouping;
     
     /**
      * Constructor.
@@ -74,6 +76,21 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // invoke the super class constructor
         super();
     } // OrionSink
+    
+    /**
+     * Gets if the grouping feature is enabled.
+     * @return True if the grouping feature is enabled, false otherwise.
+     */
+    public boolean getEnableGrouping() {
+        return enableGrouping;
+    } // getEnableGrouping
+    
+    @Override
+    public void configure(Context context) {
+        enableGrouping = context.getBoolean("enable_grouping", false);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
+                + (enableGrouping ? "true" : "false") + ")");
+    } // configure
 
     @Override
     public void stop() {

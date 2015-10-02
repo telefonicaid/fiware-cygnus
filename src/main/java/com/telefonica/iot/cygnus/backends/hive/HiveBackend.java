@@ -33,7 +33,9 @@ public class HiveBackend {
     
     // JDBC driver required for Hive connections
     private static final CygnusLogger LOGGER = new CygnusLogger(HiveBackend.class);
-    private static final String DRIVERNAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
+    private static final String DRIVERNAME1 = "org.apache.hadoop.hive.jdbc.HiveDriver";
+    private static final String DRIVERNAME2 = "org.apache.hive.jdbc.HiveDriver";
+    private final String hiveServerVersion;
     private final String hiveServer;
     private final String hivePort;
     private final String hadoopUser;
@@ -41,12 +43,15 @@ public class HiveBackend {
     
     /**
      * Constructor.
+     * @param hiveServerVersion
      * @param hiveServer
      * @param hivePort
      * @param hadoopUser
      * @param hadoopPassword
      */
-    public HiveBackend(String hiveServer, String hivePort, String hadoopUser, String hadoopPassword) {
+    public HiveBackend(String hiveServerVersion, String hiveServer, String hivePort, String hadoopUser,
+            String hadoopPassword) {
+        this.hiveServerVersion = hiveServerVersion;
         this.hiveServer = hiveServer;
         this.hivePort = hivePort;
         this.hadoopUser = hadoopUser;
@@ -72,7 +77,7 @@ public class HiveBackend {
             stmt = con.createStatement();
             
             // execute the query
-            rs = stmt.executeQuery(query);
+            stmt.execute(query);
         } catch (Throwable e) {
             LOGGER.error("Runtime error (The Hive table cannot be created. Hive query='" + query + "'. Details="
                     + e.getMessage() + ")");
@@ -130,17 +135,19 @@ public class HiveBackend {
      * @return True if the Hive objects have been closed, false otherwise.
      */
     private boolean closeHiveObjects(Connection con, Statement stmt, ResultSet rs) {
+        // result
         boolean res = true;
         
-        if (con != null) {
+        // the objects must be strictly closed in this order
+        if (rs != null) {
             try {
-                con.close();
+                rs.close();
             } catch (SQLException e) {
-                LOGGER.error("Runtime error (The Hive connection could not be closed. Details=" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (The Hive result set could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch // try catch
         } // if
-
+        
         if (stmt != null) {
             try {
                 stmt.close();
@@ -149,12 +156,12 @@ public class HiveBackend {
                 res = false;
             } // try catch // try catch
         } // if
-
-        if (rs != null) {
+        
+        if (con != null) {
             try {
-                rs.close();
+                con.close();
             } catch (SQLException e) {
-                LOGGER.error("Runtime error (The Hive result set could not be closed. Details=" + e.getMessage() + ")");
+                LOGGER.error("Runtime error (The Hive connection could not be closed. Details=" + e.getMessage() + ")");
                 res = false;
             } // try catch // try catch
         } // if
@@ -168,14 +175,28 @@ public class HiveBackend {
      * @throws Exception
      */
     private Connection getConnection() throws Exception {
-        // dynamically load the Hive JDBC driver
-        Class.forName(DRIVERNAME);
+        if (hiveServerVersion.equals("1")) {
+            // dynamically load the Hive JDBC driver
+            Class.forName(DRIVERNAME1);
 
-        // return a connection based on the Hive JDBC driver
-        LOGGER.debug("Connecting to jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
-                + "&password=XXXXXXXXXX");
-        return DriverManager.getConnection("jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
-                + "&password=" + hadoopPassword);
+            // return a connection based on the Hive JDBC driver
+            LOGGER.debug("Connecting to jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
+                    + "&password=XXXXXXXXXX");
+            return DriverManager.getConnection("jdbc:hive://" + hiveServer + ":" + hivePort + "/default?user="
+                    + hadoopUser + "&password=" + hadoopPassword);
+        } else if (hiveServerVersion.equals("2")) {
+            // dynamically load the Hive JDBC driver
+            Class.forName(DRIVERNAME2);
+
+            // return a connection based on the Hive JDBC driver
+            LOGGER.debug("Connecting to jdbc:hive2://" + hiveServer + ":" + hivePort + "/default?user=" + hadoopUser
+                    + "&password=XXXXXXXXXX");
+            return DriverManager.getConnection("jdbc:hive2://" + hiveServer + ":" + hivePort + "/default", hadoopUser,
+                    hadoopPassword);
+        } else {
+            LOGGER.error("No version for Hive server was given, the connection to Hive could not be done");
+            return null;
+        } // if else if
     } // getConnection
     
 } // HiveBackend

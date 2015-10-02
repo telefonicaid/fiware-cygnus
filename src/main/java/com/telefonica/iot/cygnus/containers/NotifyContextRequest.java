@@ -320,7 +320,6 @@ public class NotifyContextRequest {
         
         /**
          * Gets metadata value.
-         * @param asStringRepresentation
          * @return The metadata value for this metadata attribute in String format.
          */
         public String getValue() {

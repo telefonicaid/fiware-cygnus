@@ -20,6 +20,11 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVROW;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONROW;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -32,6 +37,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * 
@@ -79,8 +87,10 @@ public class OrionHDFSSink extends OrionSink {
     private String[] host;
     private String port;
     private String username;
+    private String password;
+    private FileFormat fileFormat;
     private String oauth2Token;
-    private boolean rowAttrPersistence;
+    private String hiveServerVersion;
     private String hiveHost;
     private String hivePort;
     private boolean krb5;
@@ -102,25 +112,34 @@ public class OrionHDFSSink extends OrionSink {
      * Gets the Cosmos host. It is protected due to it is only required for testing purposes.
      * @return The Cosmos host
      */
-    protected String[] getCosmosHost() {
+    protected String[] getHDFSHosts() {
         return host;
-    } // getCosmosHost
+    } // getHDFSHosts
     
     /**
      * Gets the Cosmos port. It is protected due to it is only required for testing purposes.
      * @return The Cosmos port
      */
-    protected String getCosmosPort() {
+    protected String getHDFSPort() {
         return port;
-    } // getCosmosPort
+    } // getHDFSPort
 
     /**
      * Gets the default Cosmos username. It is protected due to it is only required for testing purposes.
      * @return The default Cosmos username
      */
-    protected String getCosmosDefaultUsername() {
+    protected String getHDFSUsername() {
         return username;
-    } // getCosmosDefaultUsername
+    } // getHDFSUsername
+    
+    /**
+     * Gets the password for the default Cosmos username. It is protected due to it is only required for testing
+     * purposes.
+     * @return The password for the default Cosmos username
+     */
+    protected String getHDFSPassword() {
+        return password;
+    } // getHDFSPassword
     
     /**
      * Gets the OAuth2 token used for authentication and authorization. It is protected due to it is only required
@@ -132,6 +151,50 @@ public class OrionHDFSSink extends OrionSink {
     } // getOAuth2Token
     
     /**
+     * Returns if the service is used as HDFS namespace. It is protected due to it is only required for testing
+     * purposes.
+     * @return "true" if the service is used as HDFS namespace, "false" otherwise.
+     */
+    protected String getServiceAsNamespace() {
+        return (serviceAsNamespace ? "true" : "false");
+    } // getServiceAsNamespace
+    
+    /**
+     * Gets the file format. It is protected due to it is only required for testing purposes.
+     * @return The file format
+     */
+    protected String getFileFormat() {
+        switch (fileFormat) {
+            case JSONROW:
+                return "json-row";
+            case JSONCOLUMN:
+                return "json-column";
+            case CSVROW:
+                return "csv-row";
+            case CSVCOLUMN:
+                return "csv-column";
+            default:
+                return "";
+        } // switch;
+    } // getFileFormat
+    
+    /**
+     * Gets the Hive server version. It is protected due to it is only required for testing purposes.
+     * @return The Hive server version
+     */
+    protected String getHiveServerVersion() {
+        return hiveServerVersion;
+    } // getHiveServerVersion
+    
+    /**
+     * Gets the Hive host. It is protected due to it is only required for testing purposes.
+     * @return The Hive port
+     */
+    protected String getHiveHost() {
+        return hiveHost;
+    } // getHiveHost
+    
+    /**
      * Gets the Hive port. It is protected due to it is only required for testing purposes.
      * @return The Hive port
      */
@@ -139,6 +202,15 @@ public class OrionHDFSSink extends OrionSink {
         return hivePort;
     } // getHivePort
 
+    /**
+     * Returns if Kerberos is being used for authenticacion. It is protected due to it is only required for testing
+     * purposes.
+     * @return "true" if Kerberos is being used for authentication, otherwise "false"
+     */
+    protected String getKrb5Auth() {
+        return (krb5 ? "true" : "false");
+    } // getKrb5Auth
+    
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
@@ -212,9 +284,28 @@ public class OrionHDFSSink extends OrionSink {
                     + "authorization mechanism!");
         } // if else
         
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
+        password = context.getString("hdfs_password");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
+
+        boolean rowAttrPersistenceConfigured = context.getParameters().containsKey("attr_persistence");
+        boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
+        
+        if (fileFormatConfigured) {
+            fileFormat = FileFormat.valueOf(context.getString("file_format").replaceAll("-", "").toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
+        } else if (rowAttrPersistenceConfigured) {
+            boolean rowAttrPersistence = context.getString("attr_persistence").equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (rowAttrPersistence ? "row" : "column") + ") -- DEPRECATED, converting to file_format="
+                + (rowAttrPersistence ? "json-row" : "json-column"));
+            fileFormat = (rowAttrPersistence ? FileFormat.JSONROW : FileFormat.JSONCOLUMN);
+        } else {
+            fileFormat = FileFormat.JSONROW;
+            LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
+        } // if else if
+
+        hiveServerVersion = context.getString("hive_server_version", "2");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion + ")");
         hiveHost = context.getString("hive_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
         hivePort = context.getString("hive_port", "10000");
@@ -234,14 +325,16 @@ public class OrionHDFSSink extends OrionSink {
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
+        super.configure(context);
     } // configure
 
     @Override
     public void start() {
         try {
             // create the persistence backend
-            persistenceBackend = new HDFSBackendImpl(host, port, username, oauth2Token, hiveHost, hivePort, krb5,
-                    krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
+            persistenceBackend = new HDFSBackendImpl(host, port, username, password, oauth2Token, hiveServerVersion,
+                    hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile,
+                    serviceAsNamespace);
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -254,10 +347,18 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
         
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, true);
@@ -276,17 +377,13 @@ public class OrionHDFSSink extends OrionSink {
             
             // build the effective HDFS stuff
             String firstLevel = buildFirstLevel(fiwareService);
-            String secondLevel = buildSecondLevel(fiwareServicePaths[i]);
+            String secondLevel = buildSecondLevel(servicePaths[i]);
             String thirdLevel = buildThirdLevel(destinations[i]);
             String hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
             String hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
             
-            // check if the fileName exists in HDFS right now, i.e. when its attrName has been got
-            boolean fileExists = false;
-            
-            if (persistenceBackend.exists(hdfsFile)) {
-                fileExists = true;
-            } // if
+            // check if the file exists in HDFS
+            boolean dataFileExists = persistenceBackend.exists(hdfsFile);
             
             // iterate on all this entity's attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
@@ -300,7 +397,15 @@ public class OrionHDFSSink extends OrionSink {
             // this is used for storing the attribute's names and values in a Json-like way when dealing with a per
             // column attributes persistence; in that case the persistence is not done attribute per attribute, but
             // persisting all of them at the same time
-            String columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\",";
+            String columnLine;
+            
+            if (fileFormat == FileFormat.JSONCOLUMN) {
+                columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\"";
+            } else if (fileFormat == FileFormat.CSVCOLUMN) {
+                columnLine = recvTime;
+            } else {
+                columnLine = "";
+            } // if else
             
             // this is used for storing the attribute's names needed by Hive in order to create the table when dealing
             // with a per column attributes persistence; in that case the Hive table creation is not done using
@@ -315,58 +420,147 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
-                if (rowAttrPersistence) {
-                    // create a Json document to be persisted
-                    String rowLine = "{"
-                            + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
-                            + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                            + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
-                            + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
-                            + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
-                            + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
-                            + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
-                            + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
-                            + "}";
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
-                            + hdfsFile + "), Data (" + rowLine + ")");
-                    
-                    // if the fileName exists, append the Json document to it; otherwise, create it with initial content
-                    // and mark as existing (this avoids checking if the fileName exists each time a Json document is
-                    // going to be persisted)
-                    if (fileExists) {
-                        persistenceBackend.append(hdfsFile, rowLine);
-                    } else {
-                        persistenceBackend.createDir(hdfsFolder);
-                        persistenceBackend.createFile(hdfsFile, rowLine);
-                        persistenceBackend.provisionHiveTable(hdfsFolder);
-                        fileExists = true;
-                    } // if else
-                } else {
-                    columnLine += "\"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata
-                            + ",";
-                    hiveFields += "," + attrName + " string," + attrName + "_md array<string>";
-                } // if else
+                switch (fileFormat) {
+                    case JSONROW:
+                        // create a row and persist it right now
+                        String rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
+                                attrType, attrValue, attrMetadata);
+                        persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
+                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
+                        dataFileExists = true;
+                        break;
+                    case JSONCOLUMN:
+                        // "accumulate" the data for future persistence
+                        columnLine += createColumn(fileFormat, attrName, attrValue, attrMetadata);
+                        hiveFields += "," + attrName + " string," + attrName
+                                + "_md array<struct<name:string,type:string,value:string>>";
+                        break;
+                    case CSVROW:
+                        // build some metadata related stuff
+                        String thirdLevelMd = buildThirdLevelMd(destinations[i], attrName, attrType);
+                        String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                        String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                        String printableAttrMdFileName = "hdfs:///user/" + this.username + attrMdFileName;
+                        
+                        // create a row and persist it right now
+                        rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
+                                attrType, attrValue.replaceAll("\"", ""), printableAttrMdFileName);
+                        persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
+                        
+                        // metadata is persisted in a separated HDFS file
+                        boolean mdFileExists = persistenceBackend.exists(attrMdFileName);
+                        persistCSVMetadata(attrMetadata, recvTimeTs, attrMdFolder, attrMdFileName, mdFileExists);
+                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
+                        dataFileExists = true;
+                        break;
+                    case CSVCOLUMN:
+                        // build some metadata related stuff
+                        thirdLevelMd = buildThirdLevelMd(destinations[i], attrName, attrType);
+                        attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                        attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                        printableAttrMdFileName = "hdfs:///user/" + this.username + attrMdFileName;
+                        
+                        // "accumulate" the data for future persistence
+                        columnLine += createColumn(fileFormat, attrName, attrValue.replaceAll("\"", ""),
+                                printableAttrMdFileName);
+                        hiveFields += "," + attrName + " string," + attrName + "_md_file string";
+                        
+                        // metadata is persisted in a separated HDFS file
+                        mdFileExists = persistenceBackend.exists(attrMdFileName);
+                        persistCSVMetadata(attrMetadata, recvTimeTs, attrMdFolder, attrMdFileName, mdFileExists);
+                        break;
+                    default:
+                        break;
+                } // switch
             } // for
                  
             // if the attribute persistence mode is per column, now is the time to insert a new row containing full
             // attribute list
-            if (!rowAttrPersistence) {
-                // insert a new row containing full attribute list
-                columnLine = columnLine.subSequence(0, columnLine.length() - 1) + "}";
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file (" + hdfsFile
-                        + "), Data (" + columnLine + ")");
-                
-                if (fileExists) {
-                    persistenceBackend.append(hdfsFile, columnLine);
-                } else {
-                    persistenceBackend.createDir(hdfsFolder);
-                    persistenceBackend.createFile(hdfsFile, columnLine);
-                    persistenceBackend.provisionHiveTable(hdfsFolder, hiveFields);
-                    fileExists = true;
-                } // if else
-            } // if
+            switch (fileFormat) {
+                case JSONCOLUMN:
+                    persistData(columnLine + "}", hdfsFolder, hdfsFile, dataFileExists);
+                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
+                    break;
+                case CSVCOLUMN:
+                    persistData(columnLine, hdfsFolder, hdfsFile, dataFileExists);
+                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
+                    break;
+                default:
+                    break;
+            } // switch
         } // for
     } // persist
+
+    /**
+     * Persists String-based data (row or column like, JSON or CSV format) in the given HDFS file within the given
+     * HDFS folder. In any of the HDFS elements exists, it is created.
+     * @param data
+     * @param hdfsFolder
+     * @param hdfsFile
+     * @param hdfsFileExists
+     * @throws Exception
+     */
+    private void persistData(String data, String hdfsFolder, String hdfsFile, boolean hdfsFileExists)
+        throws Exception {
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
+                + hdfsFile + "), Data (" + data + ")");
+
+        if (hdfsFileExists) {
+            persistenceBackend.append(hdfsFile, data);
+        } else {
+            persistenceBackend.createDir(hdfsFolder);
+            persistenceBackend.createFile(hdfsFile, data);
+        } // if else
+    } // persistData
+
+    /**
+     * Persists String-based metadata in CSV format in the given HDFS file within the given HDFS folder. In any of the
+     * HDFS elements exists, it is created.
+     * @param attrMetadata
+     * @param recvTimeTs
+     * @param hdfsFolder
+     * @param hdfsFile
+     * @param hdfsFileExists
+     * @throws Exception
+     */
+    private void persistCSVMetadata(String attrMetadata, long recvTimeTs, String hdfsFolder, String hdfsFile,
+            boolean hdfsFileExists) throws Exception {
+        // this should never occur, but just in case...
+        if (attrMetadata == null || attrMetadata.length() == 0) {
+            return;
+        } // if
+        
+        if (attrMetadata.equals("[]")) {
+            if (!hdfsFileExists) {
+                // create an empty file for metadata
+                persistenceBackend.createDir(hdfsFolder);
+                persistenceBackend.createFile(hdfsFile, "");
+            } // if
+            
+            return;
+        } // if
+        
+        // metadata is in JSON format, decode it
+        JSONParser jsonParser = new JSONParser();
+        JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+
+        // iterate on the metadata
+        for (Object mdObject : attrMetadataJSON) {
+            JSONObject mdJSONObject = (JSONObject) mdObject;
+            String mdCSV = recvTimeTs + "," + mdJSONObject.get("name") + "," + mdJSONObject.get("type") + ","
+                    + mdJSONObject.get("value");
+            LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
+                + "), Data (" + mdCSV + ")");
+
+            if (hdfsFileExists) {
+                persistenceBackend.append(hdfsFile, mdCSV);
+            } else {
+                persistenceBackend.createDir(hdfsFolder);
+                persistenceBackend.createFile(hdfsFile, mdCSV);
+                hdfsFileExists = true;
+            } // if else
+        } // for
+    } // persistCSVMetadata
     
     /**
      * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
@@ -423,4 +617,80 @@ public class OrionHDFSSink extends OrionSink {
         return thirdLevel;
     } // buildThirdLevel
     
+    /**
+     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
+     * violated.
+     * @param destination
+     * @return
+     * @throws Exception
+     */
+    private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
+        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
+        
+        if (thirdLevelMd.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
+                    + "greater than " + Constants.MAX_NAME_LEN);
+        } // if
+
+        return thirdLevelMd;
+    } // buildThirdLevelMd
+    
+    /**
+     * Creates a String-based row in the given format.
+     * @param fileFormat
+     * @param recvTimeTs
+     * @param recvTime
+     * @param entityId
+     * @param entityType
+     * @param attrName
+     * @param attrType
+     * @param attrValue
+     * @param attrMetadata
+     * @return A string-based row
+     */
+    private String createRow(FileFormat fileFormat, long recvTimeTs, String recvTime, String entityId,
+            String entityType, String attrName, String attrType, String attrValue, String attrMetadata) {
+        if (fileFormat == FileFormat.JSONROW) {
+            return "{"
+                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
+                    + "}";
+        } else if (fileFormat == FileFormat.CSVROW) {
+            return recvTimeTs / 1000 + ","
+                    + recvTime + ","
+                    + entityId + ","
+                    + entityType + ","
+                    + attrName + ","
+                    + attrType + ","
+                    + attrValue + ","
+                    + attrMetadata;
+        } else {
+            return "";
+        } // if else
+    } // createRow
+
+    /**
+     * Creates a String-based column in the given format.
+     * @param fileFormat
+     * @param attrName
+     * @param attrValue
+     * @param attrMetadata
+     * @return A String-based column
+     */
+    private String createColumn(FileFormat fileFormat, String attrName, String attrValue, String attrMetadata) {
+        if (fileFormat == FileFormat.JSONCOLUMN) {
+            return ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
+        } else if (fileFormat == FileFormat.CSVCOLUMN) {
+            return "," + attrValue + "," + attrMetadata;
+        } else {
+            return "";
+        } // if else
+    } // createJSONColumn
+
 } // OrionHDFSSink
