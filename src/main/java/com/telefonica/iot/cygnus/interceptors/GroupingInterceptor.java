@@ -238,7 +238,7 @@ public class GroupingInterceptor implements Interceptor {
         String body = new String(event.getBody());
         
         // get some original header values
-        String fiwareServicePath = headers.get(Constants.HEADER_SERVICE_PATH);
+        String fiwareServicePath = headers.get(Constants.HEADER_NOTIFIED_SERVICE_PATH);
         
         // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
         // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
@@ -279,8 +279,10 @@ public class GroupingInterceptor implements Interceptor {
         } // if else if
         
         // iterate on the contextResponses
-        ArrayList<String> destinations = new ArrayList<String>();
-        ArrayList<String> fiwareServicePaths = new ArrayList<String>();
+        ArrayList<String> defaultDestinations = new ArrayList<String>();
+        ArrayList<String> defaultServicePaths = new ArrayList<String>();
+        ArrayList<String> groupedDestinations = new ArrayList<String>();
+        ArrayList<String> groupedServicePaths = new ArrayList<String>();
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
         
         if (contextResponses == null || contextResponses.isEmpty()) {
@@ -300,8 +302,8 @@ public class GroupingInterceptor implements Interceptor {
                     Matcher matcher = rule.pattern.matcher(concat);
 
                     if (matcher.matches()) {
-                        destinations.add((String) rule.getDestination());
-                        fiwareServicePaths.add((String) rule.getNewFiwareServicePath());
+                        groupedDestinations.add((String) rule.getDestination());
+                        groupedServicePaths.add((String) rule.getNewFiwareServicePath());
                         added = true;
                         break;
                     } // if
@@ -311,16 +313,23 @@ public class GroupingInterceptor implements Interceptor {
             // check if no matching was found, in that case the default destination ('<entityId>_<entityType>') and the
             // notified fiware-servicePath are used
             if (!added) {
-                destinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
-                fiwareServicePaths.add(fiwareServicePath);
+                groupedDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+                groupedServicePaths.add(fiwareServicePath);
             } // if
+            
+            defaultDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+            defaultServicePaths.add(fiwareServicePath);
         } // for
  
         // set the final header values
-        headers.put(Constants.DESTINATION,
-                destinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
-        headers.put(Constants.HEADER_SERVICE_PATH,
-                fiwareServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS,
+                defaultDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS,
+                defaultServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+        headers.put(Constants.HEADER_GROUPED_DESTINATIONS,
+                groupedDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS,
+                groupedServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
         event.setHeaders(headers);
         return event;
     } // intercept

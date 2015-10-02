@@ -47,6 +47,7 @@ public class OrionMongoBaseSinkTest {
     private final String dataModel = "collection-per-entity";
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
+    private final String enableGrouping = "true";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -67,6 +68,7 @@ public class OrionMongoBaseSinkTest {
         context.put("data_model", dataModel);
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
+        context.put("enable_grouping", enableGrouping);
     } // setUp
     
     /**
@@ -82,6 +84,7 @@ public class OrionMongoBaseSinkTest {
         assertEquals(sink.getDataModel(dataModel), sink.getDataModel());
         assertEquals(dbPrefix, sink.getDbPrefix());
         assertEquals(collectionPrefix, sink.getCollectionPrefix());
+        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
     } // testConfigure
 
     /**

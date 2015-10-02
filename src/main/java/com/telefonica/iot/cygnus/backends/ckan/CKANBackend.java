@@ -35,14 +35,16 @@ public interface CKANBackend {
      * @param orgName Organization name
      * @param pkgName Package/dataset name
      * @param resName Resource name
+     * @param entityId Entity id
+     * @param entityType Entity type
      * @param attrName Attribute name
      * @param attrType Attribute type
      * @param attrValue Attribute value
      * @param attrMd Attribute metadata string serialization
      * @throws Exception
      */
-    void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String attrName,
-            String attrType, String attrValue, String attrMd) throws Exception;
+    void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String entityId,
+            String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
     /**
      * Persist data in the CKAN datastore associated with the entity in a given organization (column mode).

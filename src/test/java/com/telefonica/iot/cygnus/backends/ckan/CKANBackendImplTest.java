@@ -65,6 +65,8 @@ public class CKANBackendImplTest {
     private final String resName = "room1-room";
     private final String recvTime = "2014-09-23T11:26:45";
     private final long recvTimeTs = Long.parseLong("123456789");
+    private final String entityId = "room1";
+    private final String entityType = "room";
     private final String attrName = "temperature";
     private final String attrType = "centigrade";
     private final String attrValue = "26.5";
@@ -105,7 +107,8 @@ public class CKANBackendImplTest {
         try {
             backend.setCache(mockCache);
             backend.setHttpClient(mockHttpClient);
-            backend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType, attrValue, attrMd);
+            backend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, entityId, entityType, attrName, attrType,
+                    attrValue, attrMd);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

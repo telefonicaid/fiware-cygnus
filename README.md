@@ -12,6 +12,7 @@
         * [MySQL persistence](#section3.4.3)
         * [MongoDB persistence](#section3.4.4)
         * [STH persistence](#section3.4.5)
+        * [Kafka persistence](#section3.4.6)
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
@@ -25,9 +26,10 @@
     * [log4j configuration](#section7.1)
     * [Message types](#section7.2)
 * [Advanced topics](#section8)
-* [Contact](#section9)
+* [Reporting issues and contact information](#section9)
 
 ##<a name="section1"></a>What is Cygnus
+This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
 
 Cygnus is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus.
 
@@ -42,6 +44,7 @@ Current stable release is able to persist Orion context data in:
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
 * [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+* [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 
 You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
 
@@ -65,6 +68,9 @@ There exists a wide collection of already developed sources, channels and sinks.
 * `OrionHDFSSink`. A custom sink that persists Orion content data in a [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment under a HDFS path structure. There already exists a native Flume HDFS sink persisting each event in a new file, but this is not suitable for Cygnus. Check for specific details [here](doc/design/OrionHDFSSink.md).
 * `OrionCKANSink`. A custom sink that persists Orion context data in [CKAN](http://ckan.org/) server instances under a organization, package, resource and Datastore structure. Check for specific details [here](doc/design/OrionCKANSink.md).
 * `OrionMySQLSink`. A custom sink for persisting Orion context data in [MySQL](https://www.mysql.com/) server instances under a database and table structure. Check for specific details [here](doc/design/OrionMySQLSink.md).
+* `OrionMongoSink`. A custom sink that persists Orion context data in [MongoDB](https://www.mongodb.org/) server instances under a database and collection structure. Check for specific details [here](doc/design/OrionMongoSink.md).
+* `OrionSTHSink`. A custom sink for persisting Orion context data in a [STH](https://github.com/telefonicaid/IoT-STH) deployment. Check for specific details [here](doc/design/OrionSTHSink.md).
+* `OrionKafkaSink`. A custom sink that persists Orion context data in a [Kafka](http://kafka.apache.org/) broker under certain topics. Check for specific details [here](doc/design/OrionKafkasink.md).
 * `DestinationExtractorInterceptor`. A custom Flume interceptor in charge of modifying the default behaviour of Cygnus when deciding the destination (HDFS file, MySQL table or CKAN resource) for the context data.
 
 All these new components (`OrionRestHandler`, `OrionHDFSSink`, etc) are combined with other native ones included in Flume itself (e.g. `HTTPSource` or `MemoryChannel`), with the purpose of implementing the following basic data flow:
@@ -126,7 +132,6 @@ Let's supose the 'speed' of the 'car1' entity changes to '112.9'; then the follo
     ngsi-event={
         http-headers={
             Content-Length: 492
-            User-Agent: orion/0.9.0
             Host: localhost:1028
             Accept: application/xml, application/json
             Content-Type: application/json
@@ -221,16 +226,27 @@ The body simply contains a byte representation of the HTTP payload that will be 
 
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by [`OrionHDFSSink`](doc/design/OrionHDFSSink.md) each time a Flume event is taken from its channel.
 
-Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `attr_persistence=row` as configuration parameters, then the data within the body will be persisted as:
+Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"float","attrValue":"74.6","attrMd":[]}
 
-If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
+If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
+    
+If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
+
+    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+
+If `file_format=csv-column` then `OrionHDFSSink` will persist the data within the body as:
+
+    $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
+    2015-04-20T12:13:22.41.124Z,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
@@ -260,6 +276,14 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                 {
                     "type": "timestamp",
                     "id": "recvTime"
+                },
+                {
+                    "id": "entityId",
+                    "type": "text"
+                },
+                {
+                    "id": "entityType",
+                    "type": "text"
                 },
                 {
                     "type": "text",
@@ -366,7 +390,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by [`OrionMySQLSink`](doc/design/OrionMySQLSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
+Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -402,8 +426,8 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
     +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
-    
-If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
+
+If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -438,6 +462,8 @@ If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within th
     | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
+    
+You can explore more parameter combinations and their output at [`OrionMySQLSink.md`](./doc/OrionMySQLSink.md).
 
 NOTES:
 
@@ -604,6 +630,18 @@ NOTES:
 
 [Top](#top)
 
+####<a name="section3.4.6"></a>Kafka persistence
+Kafka organizes the data in topics (a category or feed name to which messages are published). Such organization is exploited by [`OrionKafkaSink`](doc/desing/OrionKafkaSink.md) each time a Flume event is taken from its channel.
+
+Assuming `topic_type=topic-per-destination` as configuration parameter, then `OrionKafkaSink` will persist the data within the body as:
+
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    
+NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
+
+[Top](#top)
+
 ##<a name="section4"></a>Installing Cygnus
 ###<a name="section4.1"></a>RPM install (recommended)
 Simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
@@ -678,13 +716,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -715,6 +753,8 @@ cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -722,10 +762,14 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# OAuth2 token
-cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxxxxxxx
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.hdfs-sink.attr_persistence = column
+# password for the above username; this is only required for Hive authentication
+cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
+# OAuth2 token for HDFS authentication
+cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+# how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
+cygnusagent.sinks.hdfs-sink.file_format = json-column
+# Hive server version (1 or 2)
+cygnusagent.sinks.hdfs-sink.hive_server_version = 2
 # Hive FQDN/IP address of the Hive server
 cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
 # Hive port for Hive external table provisioning
@@ -747,6 +791,8 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.con
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.ckan-sink.enable_grouping = false
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -766,6 +812,8 @@ cygnusagent.sinks.ckan-sink.ssl = false
 cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.mysql-sink.enable_grouping = false
 # the FQDN/IP address where the MySQL server runs 
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listens for incomming connections
@@ -776,6 +824,8 @@ cygnusagent.sinks.mysql-sink.mysql_username = root
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
+# select the table type from table-by-destination and table-by-service-path
+cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 
 # ============================================
 # OrionMongoSink configuration
@@ -783,6 +833,8 @@ cygnusagent.sinks.mysql-sink.attr_persistence = column
 cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
 # channel name from where to read notification events
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.mongo-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
@@ -802,6 +854,8 @@ cygnusagent.sinks.mongo-sink.should_hash = false
 cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 # channel name from where to read notification events
 cygnusagent.sinks.sth-sink.channel = sth-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.sth-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
@@ -814,6 +868,19 @@ cygnusagent.sinks.sth-sink.db_prefix = sth_
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.sth-sink.should_hash = false
+
+#=============================================
+# OrionKafkaSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+# channel name from where to read notification events
+cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
+cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+# comma-separated list of Kafka brokers (a broker is defined as host:port)
+cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# Zookeeper endpoint needed to create Kafka topics, in the form of host:port
+cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 
 #=============================================
 # hdfs-channel configuration
@@ -859,6 +926,15 @@ cygnusagent.channels.sth-channel.type = memory
 cygnusagent.channels.sth-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.sth-channel.transactionCapacity = 100
+
+#=============================================
+# kafka-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.kafka-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.kafka-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
@@ -971,14 +1047,17 @@ Please refer to the linked specific documents when looking for information regar
 
 [Top](#top)
 
-##<a name="section9"></a>Contact
+##<a name="section9"></a>Reporting issues and contact information
+There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com) **[Main contributor]**
-<br>
-Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) **[Contributor and Orion Context Broker owner]**
-<br>
-Germán Toro del Valle (german.torodelvalle@telefonica.com) **[Contributor]**
-<br>
-Iván Arias León (ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
+* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
+* Personal email:
+    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
+    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
+    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
+    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+
+**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
 
 [Top](#top)

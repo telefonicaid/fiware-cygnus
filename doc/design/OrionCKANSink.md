@@ -50,12 +50,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
     flume-event={
         headers={
 	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         notified-service=vehicles,
+	         notified-servicepath=4wheels,
+	         default-destination=car1_car
+	         default-servicepaths=4wheels
+	         grouped-destination=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
@@ -95,6 +98,14 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                 {
                     "type": "timestamp",
                     "id": "recvTime"
+                },
+                {
+                    "id": "entityId",
+                    "type": "text"
+                },
+                {
+                    "id": "entityType",
+                    "type": "text"
                 },
                 {
                     "type": "text",
@@ -204,6 +215,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionCKANSink</i> |
 | channel | yes | N/A |
+| enable_grouping | no | false | <i>true</i> or <i>false</i> |
 | ckan_host | no | localhost | FQDN/IP address where the CKAN server runs |
 | ckan_port | no | 80 |
 | ssl | no | false |
@@ -218,6 +230,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
+    cygnusagent.sinks.ckan-sink.enable_grouping = false
     cygnusagent.sinks.ckan-sink.ckan_host = 192.168.80.34
     cygnusagent.sinks.ckan-sink.ckan_port = 80
     cygnusagent.sinks.ckan-sink.ssl = false

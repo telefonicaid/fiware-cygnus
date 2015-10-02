@@ -52,11 +52,17 @@ import org.apache.flume.Context;
  */
 public class OrionMySQLSink extends OrionSink {
     
+    /**
+     * Available table types.
+     */
+    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
+    
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionMySQLSink.class);
     private String mysqlHost;
     private String mysqlPort;
     private String mysqlUsername;
     private String mysqlPassword;
+    private TableType tableType;
     private boolean rowAttrPersistence;
     private MySQLBackend persistenceBackend;
     
@@ -107,6 +113,14 @@ public class OrionMySQLSink extends OrionSink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+    
+    /**
+     * Returns the table type. It is protected due to it is only required for testing purposes.
+     * @return The table type
+     */
+    protected TableType getTableType() {
+        return tableType;
+    } // getTableType
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -132,12 +146,15 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         mysqlUsername = context.getString("mysql_username", "opendata");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
-        // FIXME: cosmosPassword should be read as a SHA1 and decoded here
+        // FIXME: mysqlPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
+        String tableTypeStr = context.getString("table_type", "table-per-destination");
+        tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
+        super.configure(context);
     } // configure
 
     @Override
@@ -152,10 +169,18 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
 
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, false);
@@ -183,7 +208,7 @@ public class OrionMySQLSink extends OrionSink {
                     + entityType + ")");
             
             // build the table name
-            String tableName = buildTableName(fiwareServicePaths[i], destinations[i]);
+            String tableName = buildTableName(servicePaths[i], destinations[i], tableType);
             
             // if the attribute persistence is based in rows, create the table where the data will be persisted, since
             // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
@@ -270,15 +295,26 @@ public class OrionMySQLSink extends OrionSink {
      * @return
      * @throws Exception
      */
-    private String buildTableName(String fiwareServicePath, String destination) throws Exception {
+    private String buildTableName(String fiwareServicePath, String destination, TableType tableType) throws Exception {
         String tableName;
-                
-        if (fiwareServicePath.length() == 0) {
-            tableName = destination;
-        } else {
-            tableName = fiwareServicePath + '_' + destination;
-        } // if else
+        
+        switch(tableType) {
+            case TABLEBYDESTINATION:
+                if (fiwareServicePath.length() == 0) {
+                    tableName = destination;
+                } else {
+                    tableName = fiwareServicePath + '_' + destination;
+                } // if else
 
+                break;
+            case TABLEBYSERVICEPATH:
+                tableName = fiwareServicePath;
+                break;
+            default:
+                throw new CygnusBadConfiguration("Unknown table type (" + tableType.toString() + " in OrionMySQLSink, "
+                        + "cannot build the table name. Please, use TABLEBYSERVICEPATH or TABLEBYDESTINATION");
+        } // switch
+                
         if (tableName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName
                     + ") and its length is greater than " + Constants.MAX_NAME_LEN);

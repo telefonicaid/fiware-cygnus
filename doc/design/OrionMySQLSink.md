@@ -21,7 +21,9 @@ MySQL organizes the data in databases that contain tables of data rows. Such org
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
 2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
-3. The context responses/entities within the container are iterated, and a table called as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing) for each unit data.
+3. The context responses/entities within the container are iterated, and a table is created depending on the configured table type:
+    * `table-by-destination`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
+    * `table-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing). 
 4. The context attributes within each context response/entity are iterated, and a new data row (or rows) is inserted in the current table. The format for this row depends on the configured persistence mode:
     * `row`: A data row is added for each notified context attribute. This kind of row will always contain 8 fields:
         * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -33,6 +35,15 @@ MySQL organizes the data in databases that contain tables of data rows. Such org
         * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
         * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
     * `column`: A single data row is added for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
+
+[Top](#top)
+
+####Important notes regarding the table type and its relation with the grouping rules
+The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same MySQL table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same MySQL table).
+
+The [Grouping feature](./interceptors.md) is another aggregation mechanims, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
+
+For instance, if the chosen table type is by destination and the grouping feature is not enabled then two different entities data, `car1` and `car2` both of type `car` will be persisted in two different MySQL tables, according to their <i>default</i> destination, i.e. `car1_car` and `car2_car`, respectively. However, if a grouping rule saying "all cars of type `car` will have a modified destination named `cars`" is enabled then both entities data will be persisted in a single table named `cars`. In this example, the direct aggregation is determined by the table type (by destination), but inderectly we have been deciding the aggregation as well through a grouping rule.
 
 [Top](#top)
 
@@ -49,12 +60,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
     flume-event={
         headers={
 	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         notified-service=vehicles,
+	         notified-servicepath=4wheels,
+	         default-destination=car1_car
+	         default-servicepaths=4wheels
+	         grouped-destination=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
@@ -74,7 +88,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
+Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -111,7 +125,7 @@ Assuming `mysql_username=myuser` and `attr_persistence=row` as configuration par
     +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
-If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within the body as:
+If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -147,6 +161,79 @@ If `attr_persistence=colum` then `OrionHDFSSink` will persist the data within th
     +----------------------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
     
+If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
+
+    $ mysql -u myuser -p
+    Enter password: 
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    ...
+    mysql> show databases;
+    +-----------------------+
+    | Database              |
+    +-----------------------+
+    | information_schema    |
+    | vehicles              |
+    | mysql                 |
+    | test                  |
+    +-----------------------+
+    4 rows in set (0.05 sec)
+
+    mysql> use vehicles;
+    ...
+    Database changed
+    mysql> show tables;
+    +--------------------+
+    | Tables_in_vehicles |
+    +--------------------+
+    | 4wheels            |
+    +--------------------+
+    1 row in set (0.00 sec)
+
+    mysql> select * from 4wheels;
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                   | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    2 row in set (0.00 sec)
+    
+If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
+
+    $ mysql -u myuser -p
+    Enter password: 
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    ...
+    mysql> show databases;
+    +-----------------------+
+    | Database              |
+    +-----------------------+
+    | information_schema    |
+    | vehicles              |
+    | mysql                 |
+    | test                  |
+    +-----------------------+
+    4 rows in set (0.05 sec)
+
+    mysql> use vehicles;
+    ...
+    Database changed
+    mysql> show tables;
+    +--------------------+
+    | Tables_in_vehicles |
+    +--------------------+
+    | 4wheels            |
+    +--------------------+
+    1 row in set (0.00 sec)
+
+    mysql> select * from 4wheels;
+    +----------------------------+-------+----------+-----------+--------------+
+    | recvTime                   | speed | speed_md | oil_level | oil_level_md |
+    +----------------------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
+    +----------------------------+-------+----------+-----------+--------------+
+    1 row in set (0.00 sec)
+    
 NOTES:
 
 * `mysql` is the MySQL CLI for querying the data.
@@ -161,10 +248,12 @@ NOTES:
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
 | channel | yes | N/A |
+| enable_grouping | no | false | <i>true</i> or <i>false</i> |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 |
 | mysql_username | yes | N/A |
 | mysql_password | yes | N/A |
+| table_type | no | table-by-destination | <i>table-by-destination</i> or <i>table-by-service-path</i> |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 
 A configuration example could be:
@@ -174,10 +263,12 @@ A configuration example could be:
     ...
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
+    cygnusagent.sinks.mysql-sink.enable_grouping = false
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
     cygnusagent.sinks.mysql-sink.mysq_username = myuser
     cygnusagent.sinks.mysql-sink.mysql_password = mypassword
+    cygnusagent.sinks.mysql-sink.table_type = table-by-destination
     cygnusagent.sinks.mysql-sink.attr_persistence = column
     
 [Top](#top)
