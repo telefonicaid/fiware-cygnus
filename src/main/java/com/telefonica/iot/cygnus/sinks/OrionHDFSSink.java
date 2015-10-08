@@ -400,9 +400,12 @@ public class OrionHDFSSink extends OrionSink {
             String columnLine;
             
             if (fileFormat == FileFormat.JSONCOLUMN) {
-                columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\"";
+                columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                        + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePaths[i] + "\","
+                        + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                        + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             } else if (fileFormat == FileFormat.CSVCOLUMN) {
-                columnLine = recvTime;
+                columnLine = recvTime + "," + servicePaths[i] + "," + entityId + "," + entityType;
             } else {
                 columnLine = "";
             } // if else
@@ -424,7 +427,7 @@ public class OrionHDFSSink extends OrionSink {
                     case JSONROW:
                         // create a row and persist it right now
                         String rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
-                                attrType, attrValue, attrMetadata);
+                                attrType, attrValue, attrMetadata, servicePaths[i]);
                         persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
                         persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
                         dataFileExists = true;
@@ -444,7 +447,7 @@ public class OrionHDFSSink extends OrionSink {
                         
                         // create a row and persist it right now
                         rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
-                                attrType, attrValue.replaceAll("\"", ""), printableAttrMdFileName);
+                                attrType, attrValue.replaceAll("\"", ""), printableAttrMdFileName, servicePaths[i]);
                         persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
                         
                         // metadata is persisted in a separated HDFS file
@@ -646,14 +649,17 @@ public class OrionHDFSSink extends OrionSink {
      * @param attrType
      * @param attrValue
      * @param attrMetadata
+     * @param servicePath
      * @return A string-based row
      */
     private String createRow(FileFormat fileFormat, long recvTimeTs, String recvTime, String entityId,
-            String entityType, String attrName, String attrType, String attrValue, String attrMetadata) {
+            String entityType, String attrName, String attrType, String attrValue, String attrMetadata,
+            String servicePath) {
         if (fileFormat == FileFormat.JSONROW) {
             return "{"
                     + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                     + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
                     + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
@@ -664,6 +670,7 @@ public class OrionHDFSSink extends OrionSink {
         } else if (fileFormat == FileFormat.CSVROW) {
             return recvTimeTs / 1000 + ","
                     + recvTime + ","
+                    + servicePath + ","
                     + entityId + ","
                     + entityType + ","
                     + attrName + ","
