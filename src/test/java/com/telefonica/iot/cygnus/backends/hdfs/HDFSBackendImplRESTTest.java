@@ -37,10 +37,10 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class HDFSBackendImplTest {
+public class HDFSBackendImplRESTTest {
     
     // instance to be tested
-    private HDFSBackendImpl backend;
+    private HDFSBackendImplREST backend;
     
     // mocks
     // the DefaultHttpClient class cannot be mocked:
@@ -73,7 +73,7 @@ public class HDFSBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost, hivePort,
+        backend = new HDFSBackendImplREST(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost, hivePort,
                 false, null, null, null, null, false);
         
         // set up other instances
@@ -89,7 +89,7 @@ public class HDFSBackendImplTest {
     } // setUp
     
     /**
-     * Test of createDir method, of class HDFSBackendImpl.
+     * Test of createDir method, of class HDFSBackendImplREST.
      */
     @Test
     public void testCreateDir() {
@@ -106,7 +106,7 @@ public class HDFSBackendImplTest {
     } // testCreateDir
     
     /**
-     * Test of createFile method, of class HDFSBackendImpl.
+     * Test of createFile method, of class HDFSBackendImplREST.
      */
     @Test
     public void testCreateFile() {
@@ -123,7 +123,7 @@ public class HDFSBackendImplTest {
     } // testCreateFile
     
     /**
-     * Test of append method, of class HDFSBackendImpl.
+     * Test of append method, of class HDFSBackendImplREST.
      */
     @Test
     public void testAppend() {
@@ -140,7 +140,7 @@ public class HDFSBackendImplTest {
     } // testAppend
     
     /**
-     * Test of exists method, of class HDFSBackendImpl.
+     * Test of exists method, of class HDFSBackendImplREST.
      */
     @Test
     public void testExists() {
@@ -156,4 +156,4 @@ public class HDFSBackendImplTest {
         } // try catch finally
     } // testExists
     
-} // HDFSBackendImplTest
+} // HDFSBackendImplRESTTest
