@@ -37,21 +37,15 @@ import org.apache.http.message.BasicHeader;
  * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implementation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
-public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
-    
-    /**
-     * Supported file formats when writting to HDFS.
-     */
-    public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
+public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
     private final String hdfsUser;
     private final String hdfsPassword;
-    private final String oauth2Token;
     private final String hiveServerVersion;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
-    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImplREST.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
     private ArrayList<Header> headers;
     
@@ -72,14 +66,13 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+    public HDFSBackendImplREST(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
             String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
             String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
             boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
         this.hdfsPassword = hdfsPassword;
-        this.oauth2Token = oauth2Token;
         this.hiveServerVersion = hiveServerVersion;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
@@ -92,7 +85,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } else {
             headers = null;
         } // if else
-    } // HDFSBackendImpl
+    } // HDFSBackendImplREST
    
     @Override
     public void createDir(String dirPath) throws Exception {
@@ -251,4 +244,4 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } // if
     } // provisionHiveTable
 
-} // HDFSBackendImpl
+} // HDFSBackendImplREST
