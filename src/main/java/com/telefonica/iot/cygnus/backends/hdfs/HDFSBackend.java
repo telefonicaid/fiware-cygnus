@@ -26,6 +26,11 @@ package com.telefonica.iot.cygnus.backends.hdfs;
 public interface HDFSBackend {
     
     /**
+     * Supported file formats when writting to HDFS.
+     */
+    public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
+    
+    /**
      * Creates a directory in HDFS given its relative path. The absolute path will be built as:
      * hdfs:///user/\<hdfsUser\>/\<dirPath\>
      * 
@@ -61,5 +66,24 @@ public interface HDFSBackend {
      * @throws Exception
      */
     boolean exists(String filePath) throws Exception;
+    
+    /**
+     * Provisions a Hive external table. The fields are automatically generated.
+     * @param fileFormat
+     * @param dirPath
+     * @param tag
+     * @throws Exception
+     */
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception;
+    
+    /**
+     * Provisions a Hive external table given its fields.
+     * @param fileFormat
+     * @param dirPath
+     * @param fields
+     * @param tag
+     * @throws Exception
+     */
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
     
 } // HDFSBackend
