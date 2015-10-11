@@ -19,9 +19,11 @@
 package com.telefonica.iot.cygnus.backends.hdfs;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import java.security.PrivilegedExceptionAction;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
 
 /**
  *
@@ -100,14 +102,10 @@ public class HDFSBackendImplBinary implements HDFSBackend {
 
     @Override
     public boolean exists(String filePath) throws Exception {
-        String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
-        LOGGER.debug("----- " + effectiveDirPath);
-        FileSystem fileSystem = FileSystem.get(hadoopConf);
-        Path path = new Path(effectiveDirPath);
-        boolean exists = fileSystem.exists(path);
-        fileSystem.close();
-        LOGGER.debug("----- exists: " + (exists ? "true" : "false"));
-        return exists;
+        PEA pea = new PEA(filePath);
+        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        ugi.doAs(pea);
+        return pea.exists();
     } // exists
 
     @Override
@@ -119,5 +117,29 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
         throw new UnsupportedOperationException("Not supported yet 4."); //To change body of generated methods, choose Tools | Templates.
     } // provisionHiveTable
+    
+    private class PEA implements PrivilegedExceptionAction {
+        
+        private String filePath;
+        private boolean exists;
+        
+        public PEA(String filePath) {
+            this.filePath = filePath;
+        } // PEA
+
+        public Void run() throws Exception {
+            String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
+            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            Path path = new Path(effectiveDirPath);
+            exists = fileSystem.exists(path);
+            fileSystem.close();
+            return null;
+        } // run
+            
+        public boolean exists() {
+            return exists;
+        } // exists
+    
+    } // PEA
     
 } // HDFSBackendImplBinary
