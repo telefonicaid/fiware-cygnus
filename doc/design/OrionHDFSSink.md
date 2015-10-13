@@ -160,9 +160,10 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
 | cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
-| hdfs_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS |
+| hdfs_port | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS, <i>8020</i> if using the Hadoop API |
 | cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS, <i>50070</i> if using WebHDFS.<br>Still usable; if both are configured, `hdfs_port` is preferred |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
 | cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
@@ -187,6 +188,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
+    cygnusagent.sinks.hdfs-sink.backend_impl = rest
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
