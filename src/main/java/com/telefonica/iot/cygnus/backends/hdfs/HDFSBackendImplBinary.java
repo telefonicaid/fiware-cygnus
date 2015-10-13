@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.security.PrivilegedExceptionAction;
 import org.apache.hadoop.conf.Configuration;
@@ -45,7 +46,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
-    private final Configuration hadoopConf;
+    private FSGetter fsGetter;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImplREST.class);
     
     /**
@@ -76,10 +77,12 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
-        this.hadoopConf = new Configuration();
-        hadoopConf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/core-site.xml"));
-        hadoopConf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/hdfs-site.xml"));
+        this.fsGetter = new FSGetter(hdfsHosts, hdfsPort);
     } // HDFSBackendImplBinary
+    
+    protected void setFSGetter(FSGetter fsGetter) {
+        this.fsGetter = fsGetter;
+    } // setFSGetter
 
     @Override
     public void createDir(String dirPath) throws Exception {
@@ -177,7 +180,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         @Override
         public Void run() throws Exception {
             String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath;
-            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            FileSystem fileSystem = fsGetter.get();
             Path path = new Path(effectiveDirPath);
         
             if (!fileSystem.mkdirs(path)) {
@@ -208,7 +211,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         @Override
         public Void run() throws Exception {
             String effectiveFilePath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
-            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            FileSystem fileSystem = fsGetter.get();
             Path path = new Path(effectiveFilePath);
             FSDataOutputStream out = fileSystem.create(path);
         
@@ -243,7 +246,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         @Override
         public Void run() throws Exception {
             String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
-            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            FileSystem fileSystem = fsGetter.get();
             Path path = new Path(effectiveDirPath);
             FSDataOutputStream out = fileSystem.append(path);
         
@@ -277,7 +280,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         @Override
         public Void run() throws Exception {
             String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
-            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            FileSystem fileSystem = fsGetter.get();
             Path path = new Path(effectiveDirPath);
             exists = fileSystem.exists(path);
             fileSystem.close();
@@ -289,5 +292,43 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         } // exists
     
     } // ExistsPEA
+    
+    /**
+     * Hadoop FileSystem getter method. By creating a protected class, this can be mocked.
+     */
+    protected class FSGetter {
+        
+        private final String[] hdfsHosts;
+        private final String hdfsPort;
+        
+        /**
+         * Constructor.
+         * @param hdfsHosts
+         * @param hdfsPort
+         */
+        public FSGetter(String[] hdfsHosts, String hdfsPort) {
+            this.hdfsHosts = hdfsHosts;
+            this.hdfsPort = hdfsPort;
+        } // FSGetter
+        
+        /**
+         * Gets a Hadoop FileSystem.
+         * @return
+         * @throws java.io.IOException
+         */
+        public FileSystem get() throws IOException {
+            for (String hdfsHost: hdfsHosts) {
+                Configuration conf = new Configuration();
+                //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/core-site.xml"));
+                //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/hdfs-site.xml"));
+                conf.set("fs.default.name", "hdfs://" + hdfsHost + ":" + hdfsPort);
+                return FileSystem.get(conf);
+            } // for
+            
+            LOGGER.error("No HDFS file system could be got, the sink will not work!");
+            return null;
+        } // get
+        
+    } // FSGetter
     
 } // HDFSBackendImplBinary
