@@ -178,13 +178,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         return (response.getStatusCode() == 200);
     } // exists
     
-    /**
-     * Provisions a Hive external table. The fields are automatically generated.
-     * @param fileFormat
-     * @param dirPath
-     * @param tag
-     * @throws Exception
-     */
+    @Override
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
         // create the standard 8-fields
         String fields = Constants.RECV_TIME_TS + " bigint, "
@@ -200,14 +194,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         provisionHiveTable(fileFormat, dirPath, fields, tag);
     } // provisionHiveTable
     
-    /**
-     * Provisions a Hive external table given its fields.
-     * @param fileFormat
-     * @param dirPath
-     * @param fields
-     * @param tag
-     * @throws Exception
-     */
+    @Override
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
