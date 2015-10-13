@@ -18,9 +18,13 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 import java.security.PrivilegedExceptionAction;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -76,33 +80,28 @@ public class HDFSBackendImplBinary implements HDFSBackend {
 
     @Override
     public void createDir(String dirPath) throws Exception {
-        String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath;
-        LOGGER.debug("----- " + effectiveDirPath);
-        FileSystem fileSystem = FileSystem.get(hadoopConf);
-        Path path = new Path(effectiveDirPath);
-        
-        if (fileSystem.mkdirs(path)) {
-            LOGGER.debug("----- success");
-        } else {
-            LOGGER.debug("----- fail");
-        } // if else
-        
-        fileSystem.close();
+        CreateDirPEA pea = new CreateDirPEA(dirPath);
+        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        ugi.doAs(pea);
     } // createDir
 
     @Override
     public void createFile(String filePath, String data) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet 1."); //To change body of generated methods, choose Tools | Templates.
+        CreateFilePEA pea = new CreateFilePEA(filePath, data);
+        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        ugi.doAs(pea);
     } // createFile
 
     @Override
     public void append(String filePath, String data) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet 2."); //To change body of generated methods, choose Tools | Templates.
+        AppendPEA pea = new AppendPEA(filePath, data);
+        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        ugi.doAs(pea);
     } // append
 
     @Override
     public boolean exists(String filePath) throws Exception {
-        PEA pea = new PEA(filePath);
+        ExistsPEA pea = new ExistsPEA(filePath);
         UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
         ugi.doAs(pea);
         return pea.exists();
@@ -118,15 +117,118 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         throw new UnsupportedOperationException("Not supported yet 4."); //To change body of generated methods, choose Tools | Templates.
     } // provisionHiveTable
     
-    private class PEA implements PrivilegedExceptionAction {
+    /**
+     * Privileged Exception Action for creating a new HDFS directory.
+     */
+    private class CreateDirPEA implements PrivilegedExceptionAction {
         
-        private String filePath;
+        private final String dirPath;
+        
+        public CreateDirPEA(String dirPath) {
+            this.dirPath = dirPath;
+        } // CreateDirPEA
+
+        @Override
+        public Void run() throws Exception {
+            String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath;
+            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            Path path = new Path(effectiveDirPath);
+        
+            if (!fileSystem.mkdirs(path)) {
+                fileSystem.close();
+                throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                        + dirPath + " directory could not be created in HDFS");
+            } // if
+        
+            fileSystem.close();
+            return null;
+        } // run
+    
+    } // CreateDirPEA
+    
+    /**
+     * Privileged Exception Action for creating a new HDFS file with initial content.
+     */
+    private class CreateFilePEA implements PrivilegedExceptionAction {
+        
+        private final String filePath;
+        private final String data;
+        
+        public CreateFilePEA(String filePath, String data) {
+            this.filePath = filePath;
+            this.data = data;
+        } // CreateFilePEA
+
+        @Override
+        public Void run() throws Exception {
+            String effectiveFilePath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
+            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            Path path = new Path(effectiveFilePath);
+            FSDataOutputStream out = fileSystem.create(path);
+        
+            if (out == null) {
+                fileSystem.close();
+                throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                        + filePath + " file could not be created in HDFS");
+            } // if
+        
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+            writer.write(data);
+            writer.close();
+            fileSystem.close();
+            return null;
+        } // run
+    
+    } // CreateFilePEA
+    
+    /**
+     * Privileged Exception Action for appending data to an existing HDFS file.
+     */
+    private class AppendPEA implements PrivilegedExceptionAction {
+        
+        private final String filePath;
+        private final String data;
+        
+        public AppendPEA(String filePath, String data) {
+            this.filePath = filePath;
+            this.data = data;
+        } // AppendPEA
+
+        @Override
+        public Void run() throws Exception {
+            String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
+            FileSystem fileSystem = FileSystem.get(hadoopConf);
+            Path path = new Path(effectiveDirPath);
+            FSDataOutputStream out = fileSystem.append(path);
+        
+            if (out == null) {
+                fileSystem.close();
+                throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                        + filePath + " file could not be created in HDFS");
+            } // if
+        
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+            writer.append(data);
+            writer.close();
+            fileSystem.close();
+            return null;
+        } // run
+    
+    } // AppendPEA
+    
+    /**
+     * Privileged Exception Action for finding out wether a file exists or not.
+     */
+    private class ExistsPEA implements PrivilegedExceptionAction {
+        
+        private final String filePath;
         private boolean exists;
         
-        public PEA(String filePath) {
+        public ExistsPEA(String filePath) {
             this.filePath = filePath;
-        } // PEA
+        } // ExistsPEA
 
+        @Override
         public Void run() throws Exception {
             String effectiveDirPath = "/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath;
             FileSystem fileSystem = FileSystem.get(hadoopConf);
@@ -140,6 +242,6 @@ public class HDFSBackendImplBinary implements HDFSBackend {
             return exists;
         } // exists
     
-    } // PEA
+    } // ExistsPEA
     
 } // HDFSBackendImplBinary
