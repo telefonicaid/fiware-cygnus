@@ -66,6 +66,8 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
+# rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
+cygnusagent.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
