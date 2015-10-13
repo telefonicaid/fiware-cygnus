@@ -18,8 +18,11 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
+import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.security.PrivilegedExceptionAction;
@@ -81,40 +84,83 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     @Override
     public void createDir(String dirPath) throws Exception {
         CreateDirPEA pea = new CreateDirPEA(dirPath);
-        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
         ugi.doAs(pea);
     } // createDir
 
     @Override
     public void createFile(String filePath, String data) throws Exception {
         CreateFilePEA pea = new CreateFilePEA(filePath, data);
-        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
         ugi.doAs(pea);
     } // createFile
 
     @Override
     public void append(String filePath, String data) throws Exception {
         AppendPEA pea = new AppendPEA(filePath, data);
-        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
         ugi.doAs(pea);
     } // append
 
     @Override
     public boolean exists(String filePath) throws Exception {
         ExistsPEA pea = new ExistsPEA(filePath);
-        UserGroupInformation ugi = UserGroupInformation.createProxyUser(hdfsUser, UserGroupInformation.getLoginUser());
+        UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
         ugi.doAs(pea);
         return pea.exists();
     } // exists
 
     @Override
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet 3."); //To change body of generated methods, choose Tools | Templates.
+        // create the standard 8-fields
+        String fields = Constants.RECV_TIME_TS + " bigint, "
+                + Constants.RECV_TIME + " string, "
+                + Constants.ENTITY_ID + " string, "
+                + Constants.ENTITY_TYPE + " string, "
+                + Constants.ATTR_NAME + " string, "
+                + Constants.ATTR_TYPE + " string, "
+                + Constants.ATTR_VALUE + " string, "
+                + (fileFormat == FileFormat.JSONROW
+                        ? Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>"
+                        : Constants.ATTR_MD_FILE + " string");
+        provisionHiveTable(fileFormat, dirPath, fields, tag);
     } // provisionHiveTable
 
     @Override
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet 4."); //To change body of generated methods, choose Tools | Templates.
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
+        LOGGER.info("Creating Hive external table=" + tableName);
+        
+        // get a Hive client
+        HiveBackend hiveClient = new HiveBackend(hiveServerVersion, hiveHost, hivePort, hdfsUser, hdfsPassword);
+        
+        // create the query
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
+                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
+                        + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
+
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
     } // provisionHiveTable
     
     /**
@@ -173,7 +219,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
             } // if
         
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-            writer.write(data);
+            writer.write(data + "\n");
             writer.close();
             fileSystem.close();
             return null;
@@ -208,7 +254,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
             } // if
         
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-            writer.append(data);
+            writer.append(data + "\n");
             writer.close();
             fileSystem.close();
             return null;
