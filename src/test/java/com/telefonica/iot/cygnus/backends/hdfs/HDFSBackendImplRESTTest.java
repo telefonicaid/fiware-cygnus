@@ -73,8 +73,8 @@ public class HDFSBackendImplRESTTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImplREST(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost, hivePort,
-                false, null, null, null, null, false);
+        backend = new HDFSBackendImplREST(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
+                hivePort, false, null, null, null, null, false);
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
@@ -93,7 +93,7 @@ public class HDFSBackendImplRESTTest {
      */
     @Test
     public void testCreateDir() {
-        System.out.println("Testing HDFSBackendImpl.createDir");
+        System.out.println("Testing HDFSBackendImplREST.createDir");
         
         try {
             backend.setHttpClient(mockHttpClientExistsCreateDir);
@@ -110,7 +110,7 @@ public class HDFSBackendImplRESTTest {
      */
     @Test
     public void testCreateFile() {
-        System.out.println("Testing HDFSBackendImpl.createFile");
+        System.out.println("Testing HDFSBackendImplREST.createFile");
         
         try {
             backend.setHttpClient(mockHttpClientCreateFile);
@@ -127,7 +127,7 @@ public class HDFSBackendImplRESTTest {
      */
     @Test
     public void testAppend() {
-        System.out.println("Testing HDFSBackendImpl.append");
+        System.out.println("Testing HDFSBackendImplREST.append");
         
         try {
             backend.setHttpClient(mockHttpClientAppend);
@@ -144,7 +144,7 @@ public class HDFSBackendImplRESTTest {
      */
     @Test
     public void testExists() {
-        System.out.println("Testing HDFSBackendImpl.exists");
+        System.out.println("Testing HDFSBackendImplREST.exists");
         
         try {
             backend.setHttpClient(mockHttpClientExistsCreateDir);
