@@ -19,12 +19,13 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVROW;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONROW;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVROW;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONROW;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -82,6 +83,11 @@ import org.json.simple.parser.JSONParser;
  * 
  */
 public class OrionHDFSSink extends OrionSink {
+    
+    /**
+     * Available backend implementation.
+     */
+    public enum BackendImpl { BINARY, REST }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] host;
@@ -99,7 +105,8 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5LoginConfFile;
     private String krb5ConfFile;
     private boolean serviceAsNamespace;
-    private HDFSBackendImpl persistenceBackend;
+    private BackendImpl backendImpl;
+    private HDFSBackend persistenceBackend;
     
     /**
      * Constructor.
@@ -223,7 +230,7 @@ public class OrionHDFSSink extends OrionSink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(HDFSBackendImpl persistenceBackend) {
+    protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
        
@@ -325,6 +332,9 @@ public class OrionHDFSSink extends OrionSink {
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
+        String backendImplStr = context.getString("backend_impl", "rest");
+        backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" + backendImplStr + ")");
         super.configure(context);
     } // configure
 
@@ -332,9 +342,20 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create the persistence backend
-            persistenceBackend = new HDFSBackendImpl(host, port, username, password, oauth2Token, hiveServerVersion,
-                    hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile,
-                    serviceAsNamespace);
+            if (backendImpl == BackendImpl.BINARY) {
+                persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
+                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile, serviceAsNamespace);
+            } else if (backendImpl == BackendImpl.REST) {
+                persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
+                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile, serviceAsNamespace);
+            } else {
+                LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
+                        + backendImpl.toString());
+                System.exit(-1);
+            } // if else
+            
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
