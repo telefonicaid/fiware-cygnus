@@ -1,1 +1,2 @@
 - [FEATURE] Add a binary implementation of the HDFS backend (#537)
+- [FEATURE] Add support to batch processing within a transaction (#554)
