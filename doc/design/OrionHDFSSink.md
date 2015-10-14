@@ -4,6 +4,7 @@
     * [Hive](#section1.2)
     * [Example](#section1.3)
 * [Configuration](#section2)
+    * [Important note regarding the binary backend](#section2.1)
 * [Use cases](#section3)
 * [Implementation details](#section4)
     * [`OrionHDFSSink` class](#section4.1)
@@ -199,6 +200,19 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive_port = 10000
     cygnusagent.sinks.hdfs-sink.krb5_auth = false
+
+[Top](#top)
+
+##<a name="section2.1"></a>Important note regarding the binary backend
+Current implementation of the HDFS binary backend does not support any authentication mechanism.
+
+A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currenty supported by the remote RPC server the binary backend accesses.
+
+Valid authentication mechanims are Kerberos and Hadoop Delegation Token, nevertheless none has been used and the backend simply requires a username (the one configured in `hdfs_username`) in order the `cygnus` user (the one running Cygnus) impersonates it.
+
+Thus, it is not recommended to use this backend in multi-user environment, or at least not without accepting the risk any user may impersonate any other one by simply specifying his/her username.
+
+There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111) about adding OAuth2 support to the Hadoop RPC mechanism, in the context of the [`fiware-cosmos`](https://github.com/telefonicaid/fiware-cosmos) project.
 
 [Top](#top)
 
