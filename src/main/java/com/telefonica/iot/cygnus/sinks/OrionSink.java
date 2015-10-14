@@ -68,6 +68,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
     protected boolean enableGrouping;
+    protected int transactionSize;
     
     /**
      * Constructor.
@@ -90,6 +91,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         enableGrouping = context.getBoolean("enable_grouping", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
+        transactionSize = context.getInteger("transaction_size", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (transaction_size="
+                + transactionSize + ")");
     } // configure
 
     @Override
@@ -99,118 +103,122 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
     @Override
     public Status process() throws EventDeliveryException {
-        Status status = null;
+        //Status status = null;
         Channel ch = null;
         Transaction txn = null;
         Event event = null;
 
+        // get the channel
         try {
-            // get the channel
             ch = getChannel();
         } catch (Exception e) {
             LOGGER.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
-        } // try catch // try catch
+        } // try catch
 
+        // start a Flume transaction (it is not the same than a Cygnus transaction!)
         try {
-            // start a Flume transaction (it is not the same than a Cygnus transaction!)
             txn = ch.getTransaction();
             txn.begin();
         } catch (Exception e) {
             LOGGER.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
-        } // try catch // try catch
+        } // try catch
 
-        try {
+        // get and process as many events as the transaction capacity
+        for (int i = 0; i < transactionSize; i++) {
             // get the event
-            event = ch.take();
+            try {
+                event = ch.take();
 
-            if (event == null) {
-                txn.commit();
-                txn.close();
-                return Status.READY;
-            } // if
-        } catch (Exception e) {
-            LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
-            throw new EventDeliveryException(e);
-        } // try catch // try catch
+                if (event == null) {
+                    txn.commit();
+                    txn.close();
+                    //return Status.READY;
+                    return Status.BACKOFF; // slow down the sink since no events are available
+                } // if
+            } catch (Exception e) {
+                LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
+                throw new EventDeliveryException(e);
+            } // try catch // try catch
 
-        try {
             // set the transactionId in MDC
-            MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
-        } catch (Exception e) {
-            LOGGER.error("Runtime error (" + e.getMessage() + ")");
-        } // catch // catch
+            try {
+                MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
+            } catch (Exception e) {
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
+            } // catch // catch
 
-        LOGGER.info("Event got from the channel (id=" + event.hashCode() + ", headers="
-                + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
+            LOGGER.info("Event got from the channel (id=" + event.hashCode() + ", headers="
+                    + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
 
-        try {
             // persist the event
-            persist(event);
+            try {
+                persist(event);
+                //txn.commit();
+                //status = Status.READY;
+            } catch (Exception e) {
+                LOGGER.debug(Arrays.toString(e.getStackTrace()));
+/*
+                // rollback only if the exception is about a persistence error
+                if (e instanceof CygnusPersistenceError) {
+                    LOGGER.error(e.getMessage());
 
-            // the transaction has succeded
-            txn.commit();
-            status = Status.READY;
-        } catch (Exception e) {
-            LOGGER.debug(Arrays.toString(e.getStackTrace()));
-            
-            // rollback only if the exception is about a persistence error
-            if (e instanceof CygnusPersistenceError) {
-                LOGGER.error(e.getMessage());
+                    // check the event HEADER_TTL
+                    int ttl;
+                    String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
 
-                // check the event HEADER_TTL
-                int ttl;
-                String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
-                
-                try {
-                    ttl = Integer.parseInt(ttlStr);
-                } catch (NumberFormatException nfe) {
-                    ttl = 0;
-                    LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
-                          +  ", " + nfe.getMessage() + ")");
-                } // try catch // try catch
-                
-                if (ttl == -1) {
-                    txn.rollback();
-                    ((CygnusChannel) ch).rollback();
-                    status = Status.BACKOFF;
-                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
-                } else if (ttl == 0) {
-                    LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
-                            + event.hashCode() + ", ttl=0)");
+                    try {
+                        ttl = Integer.parseInt(ttlStr);
+                    } catch (NumberFormatException nfe) {
+                        ttl = 0;
+                        LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                              +  ", " + nfe.getMessage() + ")");
+                    } // try catch // try catch
+
+                    if (ttl == -1) {
+                        txn.rollback();
+                        ((CygnusChannel) ch).rollback();
+                        status = Status.BACKOFF;
+                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                    } else if (ttl == 0) {
+                        LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
+                                + event.hashCode() + ", ttl=0)");
+                        txn.commit();
+                        status = Status.READY;
+                    } else {
+                        ttl--;
+                        String newTTLStr = Integer.toString(ttl);
+                        event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
+                        txn.rollback();
+                        status = Status.BACKOFF;
+                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
+                                + ")");
+                    } // if else
+                } else {
+                    if (e instanceof CygnusRuntimeError) {
+                        LOGGER.error(e.getMessage());
+                    } else if (e instanceof CygnusBadConfiguration) {
+                        LOGGER.warn(e.getMessage());
+                    } else if (e instanceof CygnusBadContextData) {
+                        LOGGER.warn(e.getMessage());
+                    } else {
+                        LOGGER.warn(e.getMessage());
+                    } // if else if
+
                     txn.commit();
                     status = Status.READY;
-                } else {
-                    ttl--;
-                    String newTTLStr = Integer.toString(ttl);
-                    event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
-                    txn.rollback();
-                    status = Status.BACKOFF;
-                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
-                            + ")");
                 } // if else
-            } else {
-                if (e instanceof CygnusRuntimeError) {
-                    LOGGER.error(e.getMessage());
-                } else if (e instanceof CygnusBadConfiguration) {
-                    LOGGER.warn(e.getMessage());
-                } else if (e instanceof CygnusBadContextData) {
-                    LOGGER.warn(e.getMessage());
-                } else {
-                    LOGGER.warn(e.getMessage());
-                } // if else if
+*/
+            } finally {
+                //txn.close();
+                LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+            } // try catch finally
+        } // for
 
-                txn.commit();
-                status = Status.READY;
-            } // if else
-        } finally {
-            // close the transaction
-            txn.close();
-            LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
-        } // try catch finally
-
-        return status;
+        txn.commit();
+        txn.close();
+        return Status.READY;
     } // process
 
     /**
