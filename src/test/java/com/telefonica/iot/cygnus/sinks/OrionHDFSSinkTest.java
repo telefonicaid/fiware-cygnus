@@ -18,7 +18,7 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
@@ -46,7 +46,7 @@ public class OrionHDFSSinkTest {
     @Mock
     private HttpClientFactory mockHttpClientFactory;
     @Mock
-    private HDFSBackendImpl mockWebHDFSBackend;
+    private HDFSBackendImplREST mockWebHDFSBackend;
     
     // instance to be tested
     private OrionHDFSSink sink;
