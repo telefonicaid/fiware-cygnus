@@ -228,7 +228,7 @@ public class OrionHDFSSinkTest {
     } // testStart
 
     /**
-     * Test of persist method, of class OrionHDFSSink. File formats are tested.
+     * Test of persistOne method, of class OrionHDFSSink. File formats are tested.
      * @throws java.lang.Exception
      */
     @Test
@@ -244,7 +244,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -262,7 +262,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -280,7 +280,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -298,7 +298,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -307,7 +307,7 @@ public class OrionHDFSSinkTest {
     } // testPersistFileFormats
     
     /**
-     * Test of persist method, of class OrionHDFSSink. Special resources length is tested.
+     * Test of persistOne method, of class OrionHDFSSink. Special resources length is tested.
      * @throws java.lang.Exception
      */
     @Test
@@ -322,7 +322,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -339,7 +339,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -355,7 +355,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -371,7 +371,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -379,7 +379,7 @@ public class OrionHDFSSinkTest {
     } // testPersistResourceLengths
     
     /**
-     * Test of persist method, of class OrionHDFSSink. Special service and service-path are tested.
+     * Test of persistOne method, of class OrionHDFSSink. Special service and service-path are tested.
      * @throws java.lang.Exception
      */
     @Test
@@ -394,7 +394,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -412,7 +412,7 @@ public class OrionHDFSSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
         
         try {
-            sink.persist(headers, multipleNotifyContextRequest);
+            sink.persistOne(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
