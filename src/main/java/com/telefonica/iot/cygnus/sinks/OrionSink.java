@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
-import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -31,7 +30,10 @@ import java.util.Map;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -50,31 +52,39 @@ import org.xml.sax.SAXException;
 /**
  *
  * @author frb
- * 
- * Abstract class containing the common code to all the sinks persisting data comming from Orion Context Broker.
- * 
- * The common attributes are:
- *  - there is no common attributes
- * The common methods are:
- *  - void stop()
- *  - Status process() throws EventDeliveryException
- *  - void persist(Event event) throws Exception
- * The non common parts, and therefore those that are sink dependant and must be implemented are:
- *  - void configure(Context context)
- *  - void start()
- *  - void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
+ 
+ Abstract class containing the common code to all the sinks persisting data comming from Orion Context Broker.
+ 
+ The common attributes are:
+  - there is no common attributes
+ The common methods are:
+  - void stop()
+  - Status process() throws EventDeliveryException
+  - void persistOne(Event event) throws Exception
+ The non common parts, and therefore those that are sink dependant and must be implemented are:
+  - void configure(Context context)
+  - void start()
+  - void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
 
+    // logger
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
+    // eventsPerDestination of events with default service path and destination
+    private Batch defaultBatch;
+    // eventsPerDestination of events with grouped service path and destination
+    private Batch groupedBatch;
+    // list of Flume events taken from the channel, it is necessary for an hipothetical massive decreasing of the
+    // ttl when rollbacking
+    private ArrayList<Event> flumeEvents;
+    // general parameters for all the sinks
     protected boolean enableGrouping;
-    protected int transactionSize;
+    protected int batchSize;
     
     /**
      * Constructor.
      */
     public OrionSink() {
-        // invoke the super class constructor
         super();
     } // OrionSink
     
@@ -91,9 +101,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         enableGrouping = context.getBoolean("enable_grouping", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
-        transactionSize = context.getInteger("transaction_size", 100);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (transaction_size="
-                + transactionSize + ")");
+        batchSize = context.getInteger("batch_size", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
+                + batchSize + ")");
     } // configure
 
     @Override
@@ -103,12 +113,13 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
     @Override
     public Status process() throws EventDeliveryException {
-        //Status status = null;
-        Channel ch = null;
-        Transaction txn = null;
-        Event event = null;
+        // initialize the batches for this run
+        defaultBatch = new Batch();
+        groupedBatch = new Batch();
 
         // get the channel
+        Channel ch = null;
+        
         try {
             ch = getChannel();
         } catch (Exception e) {
@@ -117,6 +128,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } // try catch
 
         // start a Flume transaction (it is not the same than a Cygnus transaction!)
+        Transaction txn = null;
+        
         try {
             txn = ch.getTransaction();
             txn.begin();
@@ -124,23 +137,29 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             LOGGER.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
             throw new EventDeliveryException(e);
         } // try catch
+        
+        // TBD: remove when all the sinks are migrated to persistBatch
+        NotifyContextRequest batch1Notification = null;
+        Map<String, String> batch1Headers = null;
+        int batch1Hash = 0;
 
-        // get and process as many events as the transaction capacity
-        for (int i = 0; i < transactionSize; i++) {
-            // get the event
+        // get and process as many defaultBatch as the eventsPerDestination size
+        for (int i = 0; i < batchSize; i++) {
+            Event event = null;
+            
             try {
                 event = ch.take();
-
-                if (event == null) {
-                    txn.commit();
-                    txn.close();
-                    //return Status.READY;
-                    return Status.BACKOFF; // slow down the sink since no events are available
-                } // if
             } catch (Exception e) {
                 LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
                 throw new EventDeliveryException(e);
             } // try catch // try catch
+            
+            // check if the event is null
+            if (event == null) {
+                txn.commit();
+                txn.close();
+                return Status.BACKOFF; // slow down the sink since no defaultBatch are available
+            } // if
 
             // set the transactionId in MDC
             try {
@@ -149,51 +168,70 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch // catch
 
-            LOGGER.info("Event got from the channel (id=" + event.hashCode() + ", headers="
+            LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
                     + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
 
-            // persist the event
+            // parse the event
             try {
-                persist(event);
-                //txn.commit();
-                //status = Status.READY;
+                NotifyContextRequest notification = parseEventBody(event);
+                
+                // TBD: remove when all the sinks are migrated to persistBatch
+                if (batchSize == 1) {
+                    batch1Notification = notification;
+                    batch1Headers = event.getHeaders();
+                    batch1Hash = event.hashCode();
+                } else {
+                    accumulateInBatch(event.getHeaders(), notification);
+                } // if else
+            } catch (Exception e) {
+                LOGGER.debug("There was some problem when parsing the notifed context element. Details="
+                        + e.getMessage());
+            } // try catch
+        } // for
+        
+        // TBD: remove when all the sinks are migrated to persistBatch
+        if (batchSize == 1 && batch1Notification != null && batch1Headers != null) {
+            try {
+                persistOne(batch1Headers, batch1Notification);
             } catch (Exception e) {
                 LOGGER.debug(Arrays.toString(e.getStackTrace()));
-/*
+            
                 // rollback only if the exception is about a persistence error
                 if (e instanceof CygnusPersistenceError) {
                     LOGGER.error(e.getMessage());
 
                     // check the event HEADER_TTL
                     int ttl;
-                    String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
+                    String ttlStr = batch1Headers.get(Constants.HEADER_TTL);
 
                     try {
                         ttl = Integer.parseInt(ttlStr);
                     } catch (NumberFormatException nfe) {
                         ttl = 0;
-                        LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                        LOGGER.error("Invalid TTL value (id=" + batch1Hash + ", ttl=" + ttlStr
                               +  ", " + nfe.getMessage() + ")");
                     } // try catch // try catch
 
                     if (ttl == -1) {
                         txn.rollback();
-                        ((CygnusChannel) ch).rollback();
-                        status = Status.BACKOFF;
-                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                        txn.commit();
+                        txn.close();
+                        LOGGER.info("An event was put again in the channel (id=" + batch1Hash + ", ttl=-1)");
+                        return Status.BACKOFF;
                     } else if (ttl == 0) {
                         LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
-                                + event.hashCode() + ", ttl=0)");
+                                + batch1Hash + ", ttl=0)");
                         txn.commit();
-                        status = Status.READY;
+                        txn.close();
+                        return Status.READY;
                     } else {
                         ttl--;
                         String newTTLStr = Integer.toString(ttl);
-                        event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
+                        batch1Headers.put(Constants.HEADER_TTL, newTTLStr);
                         txn.rollback();
-                        status = Status.BACKOFF;
-                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
+                        LOGGER.info("An event was put again in the channel (id=" + batch1Hash + ", ttl=" + ttl
                                 + ")");
+                        return Status.BACKOFF;
                     } // if else
                 } else {
                     if (e instanceof CygnusRuntimeError) {
@@ -205,16 +243,39 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } else {
                         LOGGER.warn(e.getMessage());
                     } // if else if
-
-                    txn.commit();
-                    status = Status.READY;
                 } // if else
-*/
             } finally {
-                //txn.close();
                 LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
             } // try catch finally
-        } // for
+        } else {
+            try {
+                persistBatch(defaultBatch, groupedBatch);
+            } catch (Exception e) {
+                LOGGER.debug(Arrays.toString(e.getStackTrace()));
+
+                // rollback only if the exception is about a persistence error
+                if (e instanceof CygnusPersistenceError) {
+                    LOGGER.error(e.getMessage());
+                    doBatchRollback();
+                    txn.commit();
+                    txn.close();
+                    // slow down the sink since there are problems with the persistence backend
+                    return Status.BACKOFF;
+                } else {
+                    if (e instanceof CygnusRuntimeError) {
+                        LOGGER.error(e.getMessage());
+                    } else if (e instanceof CygnusBadConfiguration) {
+                        LOGGER.warn(e.getMessage());
+                    } else if (e instanceof CygnusBadContextData) {
+                        LOGGER.warn(e.getMessage());
+                    } else {
+                        LOGGER.warn(e.getMessage());
+                    } // if else if
+                } // if else
+            } finally {
+                LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+            } // try catch finally
+        } // if else
 
         txn.commit();
         txn.close();
@@ -222,13 +283,13 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     } // process
 
     /**
-     * Given an event, it is preprocessed before it is persisted. Depending on the content type, it is appropriately
+     * Given an event, it is parsed before it is persisted. Depending on the content type, it is appropriately
      * parsed (Json or XML) in order to obtain a NotifyContextRequest instance.
      * 
-     * @param event A Flume event containing the data to be persisted and certain metadata (headers).
+     * @param event A Flume event containing the data to be persistedDestinations and certain metadata (headers).
      * @throws Exception
      */
-    private void persist(Event event) throws Exception {
+    private NotifyContextRequest parseEventBody(Event event) throws Exception {
         String eventData = new String(event.getBody());
         Map<String, String> eventHeaders = event.getHeaders();
 
@@ -263,16 +324,197 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // notification
             throw new Exception("Unrecognized content type (not Json nor XML)");
         } // if else if
+        
+        return notification;
+    } // parseEventBody
+    
+    private void accumulateInBatch(Map<String, String> headers, NotifyContextRequest notification) {
+        Long recvTimeTs = new Long(headers.get(Constants.HEADER_TIMESTAMP));
+        String service = headers.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] defaultServicePaths = headers.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+        String[] defaultDestinations = headers.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        
+        for (int i = 0; i < defaultDestinations.length; i++) {
+            String destination = defaultDestinations[i];
+            ArrayList<CygnusEvent> list = defaultBatch.getEvents(destination);
+            
+            if (list == null) {
+                list = new ArrayList<CygnusEvent>();
+                defaultBatch.addEvents(destination, list);
+            } // if
+            
+            CygnusEvent cygnusEvent = new CygnusEvent(
+                    recvTimeTs, service, defaultServicePaths[i], destination,
+                    notification.getContextResponses().get(i).getContextElement());
+            list.add(cygnusEvent);
+        } // for
+        
+        String[] groupedServicePaths = headers.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+        String[] groupedDestinations = headers.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
 
-        persist(eventHeaders, notification);
-    } // persist
+        for (int i = 0; i < groupedDestinations.length; i++) {
+            String destination = defaultDestinations[i];
+            ArrayList<CygnusEvent> list = groupedBatch.getEvents(destination);
+            
+            if (list == null) {
+                list = new ArrayList<CygnusEvent>();
+                groupedBatch.addEvents(destination, list);
+            } // if
+            
+            CygnusEvent cygnusEvent = new CygnusEvent(
+                    recvTimeTs, service, groupedServicePaths[i], destination,
+                    notification.getContextResponses().get(i).getContextElement());
+            list.add(cygnusEvent);
+        } // for
+    } // accumulateInBatch
+    
+    private void doBatchRollback() {
+        // TBD: tech debt
+    } // doBatchRollback
 
+    // TDB: to be removed once all the sinks migrate to persistBatch method
     /**
-     * This is the method the classes extending this class must implement when dealing with persistence.
+     * This is the method the classes extending this class must implement when dealing with a single event to be
+     * persisted.
      * @param eventHeaders Event headers
      * @param notification Notification object (already parsed) regarding an event body
      * @throws Exception
      */
-    abstract void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
+    abstract void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception;
+    
+    /**
+     * This is the method the classes extending this class must implement when dealing with a batch of events to be
+     * persisted.
+     * @param events
+     * @throws Exception
+     */
+    abstract void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
 
+    /**
+     * Class representing a eventsPerDestination of Cygnus events.
+     */
+    protected class Batch {
+        
+        private final HashMap<String, Boolean> persistedDestinations;
+        private final HashMap<String, ArrayList<CygnusEvent>> eventsPerDestination;
+        
+        /**
+         * Constructor.
+         */
+        public Batch() {
+            persistedDestinations = new HashMap<String, Boolean>();
+            eventsPerDestination = new HashMap<String, ArrayList<CygnusEvent>>();
+        } // Batch
+        
+        public Set<String> getDestinations() {
+            return eventsPerDestination.keySet();
+        } // getDestinations
+        
+        /**
+         * Get the list of events regarding a destination.
+         * @param destination
+         * @return The list of events regarding the given destination
+         */
+        public ArrayList<CygnusEvent> getEvents(String destination) {
+            return eventsPerDestination.get(destination);
+        } // getEvents
+        
+        /**
+         * Adds a events of events to a given destination.
+         * @param destination
+         * @param events
+         */
+        public void addEvents(String destination, ArrayList<CygnusEvent> events) {
+            eventsPerDestination.put(destination, events);
+        } // addEvents
+        
+        /**
+         * Sets a destination has been persistedDestinations.
+         * @param destination
+         */
+        public void setPersisted(String destination) {
+            persistedDestinations.put(destination, true);
+        } // setPersisted;
+        
+        /**
+         * Gets is a destination has been persistedDestinations.
+         * @param destination
+         * @return True if the given destination has been persistedDestinations, false otherwise
+         */
+        public boolean isPersisted(String destination) {
+            return persistedDestinations.get(destination);
+        } // isPersisted
+        
+    } // Batch
+    
+    /**
+     * Cygnus event.
+     */
+    public class CygnusEvent {
+    
+        private final long recvTimeTs;
+        private final String service;
+        private final String servicePath;
+        private final String destination;
+        private final NotifyContextRequest.ContextElement contextElement;
+
+        /**
+         * Constructor.
+         * @param recvTimeTs
+         * @param service
+         * @param servicePath
+         * @param destination
+         * @param contextElement
+         */
+        public CygnusEvent(long recvTimeTs, String service, String servicePath, String destination,
+                NotifyContextRequest.ContextElement contextElement) {
+            this.recvTimeTs = recvTimeTs;
+            this.service = service;
+            this.servicePath = servicePath;
+            this.destination = destination;
+            this.contextElement = contextElement;
+        } // CygnusEvent
+
+        /**
+         * Gets the reception time.
+         * @return The receptcion time
+         */
+        public long getRecvTimeTs() {
+            return recvTimeTs;
+        } // getRecvTimeTs
+
+        /**
+         * Gets the service.
+         * @return The service
+         */
+        public String getService() {
+            return service;
+        } // getService
+
+        /**
+         * Gets the service path.
+         * @return The servive path
+         */
+        public String getServicePath() {
+            return servicePath;
+        } // getServicePath
+
+        /**
+         * Gets the destination.
+         * @return The destination
+         */
+        public String getDestination() {
+            return destination;
+        } // getDestination
+
+        /**
+         * Gets the context element.
+         * @return The context elemtn
+         */
+        public NotifyContextRequest.ContextElement getContextElement() {
+            return contextElement;
+        } // getContextElement
+    
+    } // CygnusEvent
+    
 } // OrionSink
