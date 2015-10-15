@@ -22,7 +22,9 @@ import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import org.apache.flume.Event;
 
 /**
  *
@@ -38,7 +40,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     } // OrionSTHSink
     
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values; they are not null nor empty thanks to OrionRESTHandler
         Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
@@ -133,6 +135,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                         entityId, entityType, attrName, attrType, attrValue, attrMetadata);
             } // for
         } // for
-    } // persist
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
     
 } // OrionSTHSink
