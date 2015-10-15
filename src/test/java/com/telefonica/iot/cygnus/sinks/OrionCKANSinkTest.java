@@ -232,7 +232,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -249,7 +249,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -265,7 +265,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -281,7 +281,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -297,7 +297,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -315,7 +315,7 @@ public class OrionCKANSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
         
         try {
-            sink.persist(headers, multipleNotifyContextRequest);
+            sink.persistOne(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
