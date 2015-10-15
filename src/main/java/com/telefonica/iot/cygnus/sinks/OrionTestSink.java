@@ -28,13 +28,15 @@ import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.apache.flume.Event;
 
 /**
- * Sink for testing purposes. It does not persist the notified context data but
- * prints logs about it. This can configured by the users in order to test the
- * connectivity with Orion Context Broker.
+ * Sink for testing purposes. It does not persistOne the notified context data but
+ prints logs about it. This can configured by the users in order to test the
+ connectivity with Orion Context Broker.
  *
  * @author frb
  */
@@ -61,7 +63,7 @@ public class OrionTestSink extends OrionSink {
     } // start
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
@@ -108,6 +110,11 @@ public class OrionTestSink extends OrionSink {
                         + attrType + ", value=" + attrValue + ", metadata=" + attrMetadata + ")");
             } // for
         } // for
-    } // persist
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
 
 } // OrionTestSink
