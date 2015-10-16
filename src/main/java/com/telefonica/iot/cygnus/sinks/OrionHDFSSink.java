@@ -332,9 +332,10 @@ public class OrionHDFSSink extends OrionSink {
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
+    // TBD: to be removed once all the sinks have been migrated to persistBatch method
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        throw new Exception("Not yet supoported");
+        throw new Exception("Not yet supoported. You should be using persistBatch method.");
     } // persistOne
     
     @Override
@@ -361,7 +362,6 @@ public class OrionHDFSSink extends OrionSink {
             // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
-            LOGGER.debug("[" + this.getName() + "] Persisting batch: " + aggregator.getAggregation());
             
             // persist the metadata aggregations only in CSV-like file formats
             if (fileFormat == FileFormat.CSVROW || fileFormat == FileFormat.CSVCOLUMN) {
@@ -394,6 +394,7 @@ public class OrionHDFSSink extends OrionSink {
         
         public Aggregator() {
             aggregation = "";
+            mdAggregations = new HashMap<String, String>();
         } // Aggregator
         
         public String getAggregation() {
@@ -463,15 +464,15 @@ public class OrionHDFSSink extends OrionSink {
             ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-//            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
-//                    + entityType + ")");
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-//                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-//                        + ", type=" + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 return;
             } // if
             
@@ -480,8 +481,8 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-//                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-//                        + attrType + ")");
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
                 
                 // create a line and aggregate it
                 String line = "{"
@@ -536,15 +537,15 @@ public class OrionHDFSSink extends OrionSink {
             ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-//            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
-//                    + entityType + ")");
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-//                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-//                        + ", type=" + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 return;
             } // if
             
@@ -555,8 +556,8 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-//                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-//                        + attrType + ")");
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
                 
                 // create part of the line with the current attribute (a.k.a. a column)
                 line += ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
@@ -576,7 +577,6 @@ public class OrionHDFSSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            mdAggregations = new HashMap<String, String>();
             hiveFields = Constants.RECV_TIME_TS + " bigint, "
                     + Constants.RECV_TIME + " string, "
                     + Constants.ENTITY_ID + " string, "
@@ -597,15 +597,15 @@ public class OrionHDFSSink extends OrionSink {
             ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-//            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
-//                    + entityType + ")");
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-//                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-//                        + ", type=" + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 return;
             } // if
             
@@ -614,25 +614,25 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-//                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-//                        + attrType + ")");
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
                 String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
                 String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
-                String mdAggregation = this.mdAggregations.get(attrMdFileName);
-                
+                String mdAggregation = mdAggregations.get(attrMdFileName);
+                                
                 if (mdAggregation == null) {
                     mdAggregation = new String();
-                    this.mdAggregations.put(attrMdFileName, mdAggregation);
                 } // if
                 
                 // aggregate the metadata
-                mdAggregation += getCSVMetadata(attrMetadata, recvTimeTs);
-
-                // aggreaget the data
+                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                mdAggregations.put(attrMdFileName, concatMdAggregation);
+                
+                // aggreagate the data
                 aggregation += recvTimeTs / 1000 + ","
                     + recvTime + ","
                     + entityId + ","
@@ -658,8 +658,6 @@ public class OrionHDFSSink extends OrionSink {
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value") + "\n";
-//                LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
-//                    + "), Data (" + mdCSV + ")");
             } // for
             
             return csvMd;
@@ -672,15 +670,11 @@ public class OrionHDFSSink extends OrionSink {
      */
     private class CSVColumnAggregator extends Aggregator {
         
-        // map containing the HDFS files holding the attribute metadata, one per attribute
-        private Map<String, String> attrMetadataAggregation;
-        
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
             
             // particular initialization
-            attrMetadataAggregation = new HashMap<String, String>();
             hiveFields = Constants.RECV_TIME + " string";
             
             // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
@@ -696,7 +690,7 @@ public class OrionHDFSSink extends OrionSink {
                 String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
                 String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
-                attrMetadataAggregation.put(attrMdFileName, new String());
+                mdAggregations.put(attrMdFileName, new String());
                 hiveFields += "," + attrName + " string," + attrName + "_md_file string";
             } // for
         } // initialize
@@ -711,15 +705,15 @@ public class OrionHDFSSink extends OrionSink {
             ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-//            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
-//                    + entityType + ")");
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
-//                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-//                        + ", type=" + entityType + ")");
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
                 return;
             } // if
             
@@ -730,8 +724,8 @@ public class OrionHDFSSink extends OrionSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-//                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-//                        + attrType + ")");
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
                 
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
@@ -739,15 +733,15 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
-                String mdAggregation = attrMetadataAggregation.get(attrMdFileName);
+                String mdAggregation = mdAggregations.get(attrMdFileName);
                 
                 if (mdAggregation == null) {
                     mdAggregation = new String();
-                    attrMetadataAggregation.put(attrMdFileName, mdAggregation);
                 } // if
                 
                 // agregate the metadata
-                mdAggregation += getCSVMetadata(attrMetadata, recvTimeTs);
+                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
                 line += "," + attrValue.replaceAll("\"", "") + "," + printableAttrMdFileName;
@@ -771,8 +765,6 @@ public class OrionHDFSSink extends OrionSink {
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value") + "\n";
-//                LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
-//                    + "), Data (" + mdCSV + ")");
             } // for
             
             return csvMd;
