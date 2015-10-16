@@ -68,22 +68,12 @@ public interface HDFSBackend {
     boolean exists(String filePath) throws Exception;
     
     /**
-     * Provisions a Hive external table. The fields are automatically generated.
-     * @param fileFormat
-     * @param dirPath
-     * @param tag
-     * @throws Exception
-     */
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception;
-    
-    /**
      * Provisions a Hive external table given its fields.
      * @param fileFormat
      * @param dirPath
      * @param fields
-     * @param tag
      * @throws Exception
      */
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception;
     
 } // HDFSBackend
