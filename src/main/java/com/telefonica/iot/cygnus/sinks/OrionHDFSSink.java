@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -335,55 +336,6 @@ public class OrionHDFSSink extends OrionSink {
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         throw new Exception("Not yet supoported");
     } // persistOne
-
-    /**
-     * Persists String-based metadata in CSV format in the given HDFS file within the given HDFS folder. In any of the
-     * HDFS elements exists, it is created.
-     * @param attrMetadata
-     * @param recvTimeTs
-     * @param hdfsFolder
-     * @param hdfsFile
-     * @param hdfsFileExists
-     * @throws Exception
-     */
-    private void persistCSVMetadata(String attrMetadata, long recvTimeTs, String hdfsFolder, String hdfsFile,
-            boolean hdfsFileExists) throws Exception {
-        // this should never occur, but just in case...
-        if (attrMetadata == null || attrMetadata.length() == 0) {
-            return;
-        } // if
-        
-        if (attrMetadata.equals("[]")) {
-            if (!hdfsFileExists) {
-                // create an empty file for metadata
-                persistenceBackend.createDir(hdfsFolder);
-                persistenceBackend.createFile(hdfsFile, "");
-            } // if
-            
-            return;
-        } // if
-        
-        // metadata is in JSON format, decode it
-        JSONParser jsonParser = new JSONParser();
-        JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
-
-        // iterate on the metadata
-        for (Object mdObject : attrMetadataJSON) {
-            JSONObject mdJSONObject = (JSONObject) mdObject;
-            String mdCSV = recvTimeTs + "," + mdJSONObject.get("name") + "," + mdJSONObject.get("type") + ","
-                    + mdJSONObject.get("value");
-            LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
-                + "), Data (" + mdCSV + ")");
-
-            if (hdfsFileExists) {
-                persistenceBackend.append(hdfsFile, mdCSV);
-            } else {
-                persistenceBackend.createDir(hdfsFolder);
-                persistenceBackend.createFile(hdfsFile, mdCSV);
-                hdfsFileExists = true;
-            } // if else
-        } // for
-    } // persistCSVMetadata
     
     @Override
     void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
@@ -407,15 +359,17 @@ public class OrionHDFSSink extends OrionSink {
             } // for
             
             // persist the aggregation
-            //persistAggregation(aggregator);
+            persistAggregation(aggregator);
             batch.setPersisted(destination);
-            LOGGER.error(aggregator.getAggregation());
-            LOGGER.error(aggregator.getFolder());
-            LOGGER.error(aggregator.getFile());
+            LOGGER.debug("[" + this.getName() + "] Persisting batch: " + aggregator.getAggregation());
+            
+            // persist the metadata aggregations only in CSV-like file formats
+            if (fileFormat == FileFormat.CSVROW || fileFormat == FileFormat.CSVCOLUMN) {
+                persistMDAggregations(aggregator);
+            } // if
             
             // create the Hive table
-            //createHiveTable(aggregator);
-            LOGGER.error(aggregator.getHiveFields());
+            createHiveTable(aggregator);
         } // for
     } // persistBatch
 
@@ -424,7 +378,10 @@ public class OrionHDFSSink extends OrionSink {
      */
     private abstract class Aggregator {
         
+        // string containing the data aggregation
         protected String aggregation;
+        // map containing the HDFS files holding the attribute metadata, one per attribute
+        protected Map<String, String> mdAggregations;
         protected String service;
         protected String servicePath;
         protected String destination;
@@ -442,6 +399,14 @@ public class OrionHDFSSink extends OrionSink {
         public String getAggregation() {
             return aggregation;
         } // getAggregation
+        
+        public Set<String> getAggregatedAttrMDFiles() {
+            return mdAggregations.keySet();
+        } // getAggregatedAttrMDFiles
+        
+        public String getMDAggregation(String attrMDFile) {
+            return mdAggregations.get(attrMDFile);
+        } // getMDAggregation
         
         public String getFolder() {
             return hdfsFolder;
@@ -611,6 +576,7 @@ public class OrionHDFSSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
+            mdAggregations = new HashMap<String, String>();
             hiveFields = Constants.RECV_TIME_TS + " bigint, "
                     + Constants.RECV_TIME + " string, "
                     + Constants.ENTITY_ID + " string, "
@@ -650,15 +616,24 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
 //                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
 //                        + attrType + ")");
-                
-                // build some metadata related stuff
+                // this has to be done notification by notification and not at initialization since in row mode not all
+                // the notifications contain all the attributes
                 String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
                 String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                String mdAggregation = this.mdAggregations.get(attrMdFileName);
+                
+                if (mdAggregation == null) {
+                    mdAggregation = new String();
+                    this.mdAggregations.put(attrMdFileName, mdAggregation);
+                } // if
+                
+                // aggregate the metadata
+                mdAggregation += getCSVMetadata(attrMetadata, recvTimeTs);
 
-                // create a line and aggregate it
-                String line = recvTimeTs / 1000 + ","
+                // aggreaget the data
+                aggregation += recvTimeTs / 1000 + ","
                     + recvTime + ","
                     + entityId + ","
                     + entityType + ","
@@ -666,9 +641,29 @@ public class OrionHDFSSink extends OrionSink {
                     + attrType + ","
                     + attrValue.replaceAll("\"", "") + ","
                     + printableAttrMdFileName + "\n";
-                aggregation += line;
             } // for
         } // aggregate
+        
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+            String csvMd = "";
+            
+            // metadata is in JSON format, decode it
+            JSONParser jsonParser = new JSONParser();
+            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+
+            // iterate on the metadata
+            for (Object mdObject : attrMetadataJSON) {
+                JSONObject mdJSONObject = (JSONObject) mdObject;
+                csvMd += recvTimeTs + ","
+                        + mdJSONObject.get("name") + ","
+                        + mdJSONObject.get("type") + ","
+                        + mdJSONObject.get("value") + "\n";
+//                LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
+//                    + "), Data (" + mdCSV + ")");
+            } // for
+            
+            return csvMd;
+        } // getCSVMetadata
         
     } // CSVRowAggregator
     
@@ -677,14 +672,18 @@ public class OrionHDFSSink extends OrionSink {
      */
     private class CSVColumnAggregator extends Aggregator {
         
+        // map containing the HDFS files holding the attribute metadata, one per attribute
+        private Map<String, String> attrMetadataAggregation;
+        
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
             
             // particular initialization
+            attrMetadataAggregation = new HashMap<String, String>();
             hiveFields = Constants.RECV_TIME + " string";
             
-            // iterate on all this context element attributes, if there are attributes
+            // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
@@ -693,6 +692,11 @@ public class OrionHDFSSink extends OrionSink {
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
+                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                attrMetadataAggregation.put(attrMdFileName, new String());
                 hiveFields += "," + attrName + " string," + attrName + "_md_file string";
             } // for
         } // initialize
@@ -729,11 +733,21 @@ public class OrionHDFSSink extends OrionSink {
 //                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
 //                        + attrType + ")");
                 
-                // build some metadata related stuff
+                // this has to be done notification by notification and not at initialization since in row mode not all
+                // the notifications contain all the attributes
                 String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
                 String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                String mdAggregation = attrMetadataAggregation.get(attrMdFileName);
+                
+                if (mdAggregation == null) {
+                    mdAggregation = new String();
+                    attrMetadataAggregation.put(attrMdFileName, mdAggregation);
+                } // if
+                
+                // agregate the metadata
+                mdAggregation += getCSVMetadata(attrMetadata, recvTimeTs);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
                 line += "," + attrValue.replaceAll("\"", "") + "," + printableAttrMdFileName;
@@ -742,6 +756,27 @@ public class OrionHDFSSink extends OrionSink {
             // now, aggregate the line
             aggregation += line + "\n";
         } // aggregate
+        
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+            String csvMd = "";
+            
+            // metadata is in JSON format, decode it
+            JSONParser jsonParser = new JSONParser();
+            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+
+            // iterate on the metadata
+            for (Object mdObject : attrMetadataJSON) {
+                JSONObject mdJSONObject = (JSONObject) mdObject;
+                csvMd += recvTimeTs + ","
+                        + mdJSONObject.get("name") + ","
+                        + mdJSONObject.get("type") + ","
+                        + mdJSONObject.get("value") + "\n";
+//                LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
+//                    + "), Data (" + mdCSV + ")");
+            } // for
+            
+            return csvMd;
+        } // getCSVMetadata
         
     } // CSVColumnAggregator
     
@@ -774,12 +809,29 @@ public class OrionHDFSSink extends OrionSink {
             persistenceBackend.createDir(hdfsFolder);
             persistenceBackend.createFile(hdfsFile, aggregation);
         } // if else
-        
     } // persistAggregation
     
+    private void persistMDAggregations(Aggregator aggregator) throws Exception {
+        Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
+        
+        for (String hdfsMDFile : attrMDFiles) {
+            String hdfsMdFolder = hdfsMDFile.substring(0, hdfsMDFile.lastIndexOf("/"));
+            String mdAggregation = aggregator.getMDAggregation(hdfsMDFile);
+            
+            LOGGER.info("[" + this.getName() + "] Persisting metadata at OrionHDFSSink. HDFS file ("
+                    + hdfsMDFile + "), Data (" + mdAggregation + ")");
+
+            if (persistenceBackend.exists(hdfsMDFile)) {
+                persistenceBackend.append(hdfsMDFile, mdAggregation);
+            } else {
+                persistenceBackend.createDir(hdfsMdFolder);
+                persistenceBackend.createFile(hdfsMDFile, mdAggregation);
+            } // if else
+        } // for
+    } // persistMDAggregations
+    
     private void createHiveTable(Aggregator aggregator) throws Exception {
-        String tag = "";
-        persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields(), tag);
+        persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields());
     } // createHiveTable
     
     /**
