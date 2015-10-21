@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.backends.hdfs;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary.FSGetter;
-import java.io.IOException;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
