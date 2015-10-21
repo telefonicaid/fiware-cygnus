@@ -114,23 +114,22 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     } // exists
 
     @Override
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
-        // create the standard 8-fields
-        String fields = Constants.RECV_TIME_TS + " bigint, "
-                + Constants.RECV_TIME + " string, "
-                + Constants.ENTITY_ID + " string, "
-                + Constants.ENTITY_TYPE + " string, "
-                + Constants.ATTR_NAME + " string, "
-                + Constants.ATTR_TYPE + " string, "
-                + Constants.ATTR_VALUE + " string, "
-                + (fileFormat == FileFormat.JSONROW
-                        ? Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>"
-                        : Constants.ATTR_MD_FILE + " string");
-        provisionHiveTable(fileFormat, dirPath, fields, tag);
-    } // provisionHiveTable
-
-    @Override
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception {
+        String tag;
+        
+        switch (fileFormat) {
+            case JSONROW:
+            case CSVROW:
+                tag = "_row";
+                break;
+            case JSONCOLUMN:
+            case CSVCOLUMN:
+                tag = "_column";
+                break;
+            default:
+                tag = "";
+        } // switch
+        
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;

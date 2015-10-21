@@ -176,7 +176,7 @@ public class OrionSTHSinkTest {
     } // setUp
     
     /**
-     * Test of persist method, of class OrionMongoSink.
+     * Test of persistOne method, of class OrionMongoSink.
      */
     @Test
     public void testProcessContextResponses() {
@@ -190,7 +190,7 @@ public class OrionSTHSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationHeader);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -208,7 +208,7 @@ public class OrionSTHSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationHeader);
         
         try {
-            sink.persist(headers, multipleNotifyContextRequest);
+            sink.persistOne(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
