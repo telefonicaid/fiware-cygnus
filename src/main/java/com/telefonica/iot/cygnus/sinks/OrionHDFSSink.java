@@ -342,6 +342,11 @@ public class OrionHDFSSink extends OrionSink {
     void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
         // select batch depending on the enable grouping parameter
         Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
+        
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
  
         // iterate on the destinations, for each one a single create / append will be performed
         for (String destination : batch.getDestinations()) {
