@@ -23,12 +23,14 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementR
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
+import org.apache.flume.Event;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -140,7 +142,7 @@ public class OrionKafkaSink extends OrionSink {
     } // start
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
         String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
@@ -209,7 +211,7 @@ public class OrionKafkaSink extends OrionSink {
                 persistenceBackend.send(record);
             } // if
         } // for
-    } // persist
+    } // persistOne
     
     private String buildMessage(ContextElementResponse contextElementResponse, String fiwareService,
             String fiwareServicePath, long recvTimeTs) {
@@ -249,5 +251,10 @@ public class OrionKafkaSink extends OrionSink {
         } // createTopic
         
     } // TopicAPI
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
 
 } // OrionKafkaSink

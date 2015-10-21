@@ -37,21 +37,15 @@ import org.apache.http.message.BasicHeader;
  * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implementation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
-public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
-    
-    /**
-     * Supported file formats when writting to HDFS.
-     */
-    public enum FileFormat { JSONROW, CSVROW, JSONCOLUMN, CSVCOLUMN };
+public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
     private final String hdfsUser;
     private final String hdfsPassword;
-    private final String oauth2Token;
     private final String hiveServerVersion;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
-    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImplREST.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
     private ArrayList<Header> headers;
     
@@ -72,14 +66,13 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+    public HDFSBackendImplREST(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
             String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
             String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
             boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
         this.hdfsPassword = hdfsPassword;
-        this.oauth2Token = oauth2Token;
         this.hiveServerVersion = hiveServerVersion;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
@@ -92,7 +85,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } else {
             headers = null;
         } // if else
-    } // HDFSBackendImpl
+    } // HDFSBackendImplREST
    
     @Override
     public void createDir(String dirPath) throws Exception {
@@ -185,37 +178,23 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         return (response.getStatusCode() == 200);
     } // exists
     
-    /**
-     * Provisions a Hive external table. The fields are automatically generated.
-     * @param fileFormat
-     * @param dirPath
-     * @param tag
-     * @throws Exception
-     */
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception {
-        // create the standard 8-fields
-        String fields = Constants.RECV_TIME_TS + " bigint, "
-                + Constants.RECV_TIME + " string, "
-                + Constants.ENTITY_ID + " string, "
-                + Constants.ENTITY_TYPE + " string, "
-                + Constants.ATTR_NAME + " string, "
-                + Constants.ATTR_TYPE + " string, "
-                + Constants.ATTR_VALUE + " string, "
-                + (fileFormat == FileFormat.JSONROW
-                        ? Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>"
-                        : Constants.ATTR_MD_FILE + " string");
-        provisionHiveTable(fileFormat, dirPath, fields, tag);
-    } // provisionHiveTable
-    
-    /**
-     * Provisions a Hive external table given its fields.
-     * @param fileFormat
-     * @param dirPath
-     * @param fields
-     * @param tag
-     * @throws Exception
-     */
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception {
+    @Override
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception {
+        String tag;
+        
+        switch (fileFormat) {
+            case JSONROW:
+            case CSVROW:
+                tag = "_row";
+                break;
+            case JSONCOLUMN:
+            case CSVCOLUMN:
+                tag = "_column";
+                break;
+            default:
+                tag = "";
+        } // switch
+        
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
@@ -251,4 +230,4 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } // if
     } // provisionHiveTable
 
-} // HDFSBackendImpl
+} // HDFSBackendImplREST

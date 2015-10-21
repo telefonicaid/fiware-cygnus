@@ -226,7 +226,7 @@ public class OrionMySQLSinkTest {
     } // testStart
 
     /**
-     * Test of persist method, of class OrionMySQLSink.
+     * Test of persistOne method, of class OrionMySQLSink.
      * @throws java.lang.Exception
      */
     @Test
@@ -241,7 +241,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -258,7 +258,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -274,7 +274,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -290,7 +290,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -306,7 +306,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistOne(headers, singleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -324,7 +324,7 @@ public class OrionMySQLSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
         
         try {
-            sink.persist(headers, multipleNotifyContextRequest);
+            sink.persistOne(headers, multipleNotifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

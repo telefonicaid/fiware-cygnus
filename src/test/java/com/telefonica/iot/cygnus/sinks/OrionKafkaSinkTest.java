@@ -169,7 +169,7 @@ public class OrionKafkaSinkTest {
     } // testStart
     
     /**
-     * Test of persist method, of class OrionKafkaSink. Topic types are tested.
+     * Test of persistOne method, of class OrionKafkaSink. Topic types are tested.
      */
     @Test
     public void testPersistTopicTypes() {
@@ -186,7 +186,7 @@ public class OrionKafkaSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persistOne(headers, notifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -206,7 +206,7 @@ public class OrionKafkaSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persistOne(headers, notifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -226,7 +226,7 @@ public class OrionKafkaSinkTest {
         headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persist(headers, notifyContextRequest);
+            sink.persistOne(headers, notifyContextRequest);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

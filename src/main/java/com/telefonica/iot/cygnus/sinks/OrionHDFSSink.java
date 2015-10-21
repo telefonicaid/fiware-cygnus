@@ -19,69 +19,42 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.CSVROW;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl.FileFormat.JSONROW;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVROW;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONCOLUMN;
+import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONROW;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
 /**
  * 
  * @author frb
  * 
- * Custom HDFS sink for Orion Context Broker. There exists a default HDFS sink in Flume which serializes the data in
- * files, a file per event. This is not suitable for Orion, where the persisted files and its content must have specific
- * formats:
- *  - Row-like persistence:
- *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
- *    -- File lines format: {"recvTimeTs":"XXX", "recvTime":"XXX", "entityId":"XXX", "entityType":"XXX",
- *                          "attrName":"XXX", "attrType":"XXX", "attrValue":"XXX"|{...}|[...],
- *                          "attrMd":[{"attrName":"XXX", "entityType":"XXX", "value":"XXX"}...]}
- * - Column-like persistence:
- *    -- File names format: hdfs:///user/<default_username>/<organization>/<entityDescriptor>/<entityDescriptor>.txt
- *    -- File lines format: {"recvTime":"XXX", "<attr_name_1>":<attr_value_1>, "<attr_name_1>_md":<attr_md_1>,...,
- *                          <attr_name_N>":<attr_value_N>, "<attr_name_N>_md":<attr_md_N>}
- * 
- * Being <entityDescriptor>=<prefix_name><entity_id>-<entity_type>
- * 
- * As can be seen, in both persistence modes a fileName is created per each entity, containing all the historical values
- * this entity's attributes have had.
- * 
- * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
- * channel, i.e. an event is not removed from the channel until it is not appropriately persisted.
- * 
- * In addition, Hive tables are created for each entity taking the data from:
- * 
- * hdfs:///user/<default_username>/<organization>/<entityDescriptor>/
- * 
- * The Hive tables have the following attrName:
- *  - Row-like persistence:
- *    -- Table names format: <default_username>_<organization>_<entitydescriptor>_row
- *    -- Column types: recvTimeTs string, recvType string, entityId string, entityType string, attrName string,
- *                     attrType string, attrValue string, attrMd array<string>
- * - Column-like persistence:
- *    -- Table names format: <default_username>_<organization>_<entitydescriptor>_column
- *    -- Column types: recvTime string, <attr_name_1> string, <attr_name_1>_md array<string>,...,
- *                     <attr_name_N> string, <attr_name_N>_md array<string>
- * 
+ * Detailed documentation can be found at:
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionHDFSSink.md
  */
 public class OrionHDFSSink extends OrionSink {
+
+    /**
+     * Available backend implementation.
+     */
+    public enum BackendImpl { BINARY, REST }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] host;
@@ -99,7 +72,8 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5LoginConfFile;
     private String krb5ConfFile;
     private boolean serviceAsNamespace;
-    private HDFSBackendImpl persistenceBackend;
+    private BackendImpl backendImpl;
+    private HDFSBackend persistenceBackend;
     
     /**
      * Constructor.
@@ -223,7 +197,7 @@ public class OrionHDFSSink extends OrionSink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(HDFSBackendImpl persistenceBackend) {
+    protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
        
@@ -325,6 +299,9 @@ public class OrionHDFSSink extends OrionSink {
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
+        String backendImplStr = context.getString("backend_impl", "rest");
+        backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" + backendImplStr + ")");
         super.configure(context);
     } // configure
 
@@ -332,9 +309,20 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create the persistence backend
-            persistenceBackend = new HDFSBackendImpl(host, port, username, password, oauth2Token, hiveServerVersion,
-                    hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile,
-                    serviceAsNamespace);
+            if (backendImpl == BackendImpl.BINARY) {
+                persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
+                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile, serviceAsNamespace);
+            } else if (backendImpl == BackendImpl.REST) {
+                persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
+                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        krb5ConfFile, serviceAsNamespace);
+            } else {
+                LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
+                        + backendImpl.toString());
+                System.exit(-1);
+            } // if else
+            
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -344,223 +332,509 @@ public class OrionHDFSSink extends OrionSink {
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
+    // TBD: to be removed once all the sinks have been migrated to persistBatch method
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        throw new Exception("Not yet supoported. You should be using persistBatch method.");
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        // select batch depending on the enable grouping parameter
+        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
         
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-        } // if else
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            Aggregator aggregator = getAggregator(fileFormat);
+            aggregator.initialize(subBatch.get(0));
+
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the aggregation
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+            
+            // persist the metadata aggregations only in CSV-like file formats
+            if (fileFormat == FileFormat.CSVROW || fileFormat == FileFormat.CSVCOLUMN) {
+                persistMDAggregations(aggregator);
+            } // if
+            
+            // create the Hive table
+            createHiveTable(aggregator);
+        } // for
+    } // persistBatch
+
+    /**
+     * Class for aggregating aggregation.
+     */
+    private abstract class Aggregator {
         
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+        // string containing the data aggregation
+        protected String aggregation;
+        // map containing the HDFS files holding the attribute metadata, one per attribute
+        protected Map<String, String> mdAggregations;
+        protected String service;
+        protected String servicePath;
+        protected String destination;
+        protected String firstLevel;
+        protected String secondLevel;
+        protected String thirdLevel;
+        protected String hdfsFolder;
+        protected String hdfsFile;
+        protected String hiveFields;
         
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
+        public Aggregator() {
+            aggregation = "";
+            mdAggregations = new HashMap<String, String>();
+        } // Aggregator
         
-        for (int i = 0; i < contextResponses.size(); i++) {
-            // get the i-th contextElement
-            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            ContextElement contextElement = contextElementResponse.getContextElement();
+        public String getAggregation() {
+            return aggregation;
+        } // getAggregation
+        
+        public Set<String> getAggregatedAttrMDFiles() {
+            return mdAggregations.keySet();
+        } // getAggregatedAttrMDFiles
+        
+        public String getMDAggregation(String attrMDFile) {
+            return mdAggregations.get(attrMDFile);
+        } // getMDAggregation
+        
+        public String getFolder() {
+            return hdfsFolder;
+        } // getFolder
+        
+        public String getFile() {
+            return hdfsFile;
+        } // getFile
+        
+        public String getHiveFields() {
+            return hiveFields;
+        } // getHiveFields
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            destination = cygnusEvent.getDestination();
+            firstLevel = buildFirstLevel(service);
+            secondLevel = buildSecondLevel(servicePath);
+            thirdLevel = buildThirdLevel(destination);
+            hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
+            hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
+        } // initialize
+        
+        public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
+        
+    } // Aggregator
+    
+    /**
+     * Class for aggregating aggregation in JSON row mode.
+     */
+    private class JSONRowAggregator extends Aggregator {
+        
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            hiveFields = Constants.RECV_TIME_TS + " bigint, "
+                    + Constants.RECV_TIME + " string, "
+                    + Constants.ENTITY_ID + " string, "
+                    + Constants.ENTITY_TYPE + " string, "
+                    + Constants.ATTR_NAME + " string, "
+                    + Constants.ATTR_TYPE + " string, "
+                    + Constants.ATTR_VALUE + " string, "
+                    + Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>";
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // build the effective HDFS stuff
-            String firstLevel = buildFirstLevel(fiwareService);
-            String secondLevel = buildSecondLevel(servicePaths[i]);
-            String thirdLevel = buildThirdLevel(destinations[i]);
-            String hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
-            String hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
-            
-            // check if the file exists in HDFS
-            boolean dataFileExists = persistenceBackend.exists(hdfsFile);
-            
-            // iterate on all this entity's attributes, if there are attributes
+            // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
+
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
-                continue;
+                return;
             } // if
             
-            // this is used for storing the attribute's names and values in a Json-like way when dealing with a per
-            // column attributes persistence; in that case the persistence is not done attribute per attribute, but
-            // persisting all of them at the same time
-            String columnLine;
-            
-            if (fileFormat == FileFormat.JSONCOLUMN) {
-                columnLine = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\"";
-            } else if (fileFormat == FileFormat.CSVCOLUMN) {
-                columnLine = recvTime;
-            } else {
-                columnLine = "";
-            } // if else
-            
-            // this is used for storing the attribute's names needed by Hive in order to create the table when dealing
-            // with a per column attributes persistence; in that case the Hive table creation is not done using
-            // standard 8-fields but a variable number of them
-            String hiveFields = Constants.RECV_TIME + " string";
-
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
-                switch (fileFormat) {
-                    case JSONROW:
-                        // create a row and persist it right now
-                        String rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
-                                attrType, attrValue, attrMetadata);
-                        persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
-                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
-                        dataFileExists = true;
-                        break;
-                    case JSONCOLUMN:
-                        // "accumulate" the data for future persistence
-                        columnLine += createColumn(fileFormat, attrName, attrValue, attrMetadata);
-                        hiveFields += "," + attrName + " string," + attrName
-                                + "_md array<struct<name:string,type:string,value:string>>";
-                        break;
-                    case CSVROW:
-                        // build some metadata related stuff
-                        String thirdLevelMd = buildThirdLevelMd(destinations[i], attrName, attrType);
-                        String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
-                        String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
-                        String printableAttrMdFileName = "hdfs:///user/" + this.username + attrMdFileName;
-                        
-                        // create a row and persist it right now
-                        rowLine = createRow(fileFormat, recvTimeTs, recvTime, entityId, entityType, attrName,
-                                attrType, attrValue.replaceAll("\"", ""), printableAttrMdFileName);
-                        persistData(rowLine, hdfsFolder, hdfsFile, dataFileExists);
-                        
-                        // metadata is persisted in a separated HDFS file
-                        boolean mdFileExists = persistenceBackend.exists(attrMdFileName);
-                        persistCSVMetadata(attrMetadata, recvTimeTs, attrMdFolder, attrMdFileName, mdFileExists);
-                        persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, "_row");
-                        dataFileExists = true;
-                        break;
-                    case CSVCOLUMN:
-                        // build some metadata related stuff
-                        thirdLevelMd = buildThirdLevelMd(destinations[i], attrName, attrType);
-                        attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
-                        attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
-                        printableAttrMdFileName = "hdfs:///user/" + this.username + attrMdFileName;
-                        
-                        // "accumulate" the data for future persistence
-                        columnLine += createColumn(fileFormat, attrName, attrValue.replaceAll("\"", ""),
-                                printableAttrMdFileName);
-                        hiveFields += "," + attrName + " string," + attrName + "_md_file string";
-                        
-                        // metadata is persisted in a separated HDFS file
-                        mdFileExists = persistenceBackend.exists(attrMdFileName);
-                        persistCSVMetadata(attrMetadata, recvTimeTs, attrMdFolder, attrMdFileName, mdFileExists);
-                        break;
-                    default:
-                        break;
-                } // switch
+                // create a line and aggregate it
+                String line = "{"
+                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
+                    + "}\n";
+                aggregation += line;
             } // for
-                 
-            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
-            // attribute list
-            switch (fileFormat) {
-                case JSONCOLUMN:
-                    persistData(columnLine + "}", hdfsFolder, hdfsFile, dataFileExists);
-                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
-                    break;
-                case CSVCOLUMN:
-                    persistData(columnLine, hdfsFolder, hdfsFile, dataFileExists);
-                    persistenceBackend.provisionHiveTable(fileFormat, hdfsFolder, hiveFields, "_column");
-                    break;
-                default:
-                    break;
-            } // switch
-        } // for
-    } // persist
+        } // aggregate
 
+    } // JSONRowAggregator
+    
     /**
-     * Persists String-based data (row or column like, JSON or CSV format) in the given HDFS file within the given
-     * HDFS folder. In any of the HDFS elements exists, it is created.
-     * @param data
-     * @param hdfsFolder
-     * @param hdfsFile
-     * @param hdfsFileExists
-     * @throws Exception
+     * Class for aggregating aggregation in JSON column mode.
      */
-    private void persistData(String data, String hdfsFolder, String hdfsFile, boolean hdfsFileExists)
-        throws Exception {
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
-                + hdfsFile + "), Data (" + data + ")");
+    private class JSONColumnAggregator extends Aggregator {
 
-        if (hdfsFileExists) {
-            persistenceBackend.append(hdfsFile, data);
-        } else {
-            persistenceBackend.createDir(hdfsFolder);
-            persistenceBackend.createFile(hdfsFile, data);
-        } // if else
-    } // persistData
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            
+            // particular initialization
+            hiveFields = Constants.RECV_TIME + " string";
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
 
-    /**
-     * Persists String-based metadata in CSV format in the given HDFS file within the given HDFS folder. In any of the
-     * HDFS elements exists, it is created.
-     * @param attrMetadata
-     * @param recvTimeTs
-     * @param hdfsFolder
-     * @param hdfsFile
-     * @param hdfsFileExists
-     * @throws Exception
-     */
-    private void persistCSVMetadata(String attrMetadata, long recvTimeTs, String hdfsFolder, String hdfsFile,
-            boolean hdfsFileExists) throws Exception {
-        // this should never occur, but just in case...
-        if (attrMetadata == null || attrMetadata.length() == 0) {
-            return;
-        } // if
-        
-        if (attrMetadata.equals("[]")) {
-            if (!hdfsFileExists) {
-                // create an empty file for metadata
-                persistenceBackend.createDir(hdfsFolder);
-                persistenceBackend.createFile(hdfsFile, "");
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                return;
             } // if
             
-            return;
-        } // if
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                hiveFields += "," + attrName + " string," + attrName
+                        + "_md array<struct<name:string,type:string,value:string>>";
+            } // for
+        } // initialize
         
-        // metadata is in JSON format, decode it
-        JSONParser jsonParser = new JSONParser();
-        JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
 
-        // iterate on the metadata
-        for (Object mdObject : attrMetadataJSON) {
-            JSONObject mdJSONObject = (JSONObject) mdObject;
-            String mdCSV = recvTimeTs + "," + mdJSONObject.get("name") + "," + mdJSONObject.get("type") + ","
-                    + mdJSONObject.get("value");
-            LOGGER.info("[" + this.getName() + "] Persisting metadadata at OrionHDFSSink. HDFS file (" + hdfsFile
-                + "), Data (" + mdCSV + ")");
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
-            if (hdfsFileExists) {
-                persistenceBackend.append(hdfsFile, mdCSV);
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
+            } // if
+            
+            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                
+                // create part of the line with the current attribute (a.k.a. a column)
+                line += ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
+            } // for
+            
+            // now, aggregate the line
+            aggregation += line + "}\n";
+        } // aggregate
+        
+    } // JSONColumnAggregator
+    
+    /**
+     * Class for aggregating aggregation in CSV row mode.
+     */
+    private class CSVRowAggregator extends Aggregator {
+        
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            hiveFields = Constants.RECV_TIME_TS + " bigint, "
+                    + Constants.RECV_TIME + " string, "
+                    + Constants.ENTITY_ID + " string, "
+                    + Constants.ENTITY_TYPE + " string, "
+                    + Constants.ATTR_NAME + " string, "
+                    + Constants.ATTR_TYPE + " string, "
+                    + Constants.ATTR_VALUE + " string, "
+                    + Constants.ATTR_MD_FILE + " string";
+        } // initialize
+
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
+            } // if
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                // this has to be done notification by notification and not at initialization since in row mode not all
+                // the notifications contain all the attributes
+                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
+                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                String mdAggregation = mdAggregations.get(attrMdFileName);
+                                
+                if (mdAggregation == null) {
+                    mdAggregation = new String();
+                } // if
+                
+                // aggregate the metadata
+                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                mdAggregations.put(attrMdFileName, concatMdAggregation);
+                
+                // aggreagate the data
+                aggregation += recvTimeTs / 1000 + ","
+                    + recvTime + ","
+                    + servicePath + ","
+                    + entityId + ","
+                    + entityType + ","
+                    + attrName + ","
+                    + attrType + ","
+                    + attrValue.replaceAll("\"", "") + ","
+                    + printableAttrMdFileName + "\n";
+            } // for
+        } // aggregate
+        
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+            String csvMd = "";
+            
+            // metadata is in JSON format, decode it
+            JSONParser jsonParser = new JSONParser();
+            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+
+            // iterate on the metadata
+            for (Object mdObject : attrMetadataJSON) {
+                JSONObject mdJSONObject = (JSONObject) mdObject;
+                csvMd += recvTimeTs + ","
+                        + mdJSONObject.get("name") + ","
+                        + mdJSONObject.get("type") + ","
+                        + mdJSONObject.get("value") + "\n";
+            } // for
+            
+            return csvMd;
+        } // getCSVMetadata
+        
+    } // CSVRowAggregator
+    
+    /**
+     * Class for aggregating aggregation in CSV column mode.
+     */
+    private class CSVColumnAggregator extends Aggregator {
+        
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            
+            // particular initialization
+            hiveFields = Constants.RECV_TIME + " string";
+            
+            // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
+            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                return;
+            } // if
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
+                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                mdAggregations.put(attrMdFileName, new String());
+                hiveFields += "," + attrName + " string," + attrName + "_md_file string";
+            } // for
+        } // initialize
+
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
+            } // if
+            
+            String line = recvTime + "," + servicePath + "," + entityId + "," + entityType;
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                
+                // this has to be done notification by notification and not at initialization since in row mode not all
+                // the notifications contain all the attributes
+                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
+                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
+                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                String mdAggregation = mdAggregations.get(attrMdFileName);
+                
+                if (mdAggregation == null) {
+                    mdAggregation = new String();
+                } // if
+                
+                // agregate the metadata
+                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                mdAggregations.put(attrMdFileName, concatMdAggregation);
+                
+                // create part of the line with the current attribute (a.k.a. a column)
+                line += "," + attrValue.replaceAll("\"", "") + "," + printableAttrMdFileName;
+            } // for
+            
+            // now, aggregate the line
+            aggregation += line + "\n";
+        } // aggregate
+        
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+            String csvMd = "";
+            
+            // metadata is in JSON format, decode it
+            JSONParser jsonParser = new JSONParser();
+            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+
+            // iterate on the metadata
+            for (Object mdObject : attrMetadataJSON) {
+                JSONObject mdJSONObject = (JSONObject) mdObject;
+                csvMd += recvTimeTs + ","
+                        + mdJSONObject.get("name") + ","
+                        + mdJSONObject.get("type") + ","
+                        + mdJSONObject.get("value") + "\n";
+            } // for
+            
+            return csvMd;
+        } // getCSVMetadata
+        
+    } // CSVColumnAggregator
+    
+    private Aggregator getAggregator(FileFormat fileFormat) {
+        switch (fileFormat) {
+            case JSONROW:
+                return new JSONRowAggregator();
+            case JSONCOLUMN:
+                return new JSONColumnAggregator();
+            case CSVROW:
+                return new CSVRowAggregator();
+            case CSVCOLUMN:
+                return new CSVColumnAggregator();
+            default:
+                return null;
+        } // switch
+    } // getAggregator
+    
+    private void persistAggregation(Aggregator aggregator) throws Exception {
+        String aggregation = aggregator.getAggregation();
+        String hdfsFolder = aggregator.getFolder();
+        String hdfsFile = aggregator.getFile();
+        
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
+                + hdfsFile + "), Data (" + aggregation + ")");
+
+        if (persistenceBackend.exists(hdfsFile)) {
+            persistenceBackend.append(hdfsFile, aggregation);
+        } else {
+            persistenceBackend.createDir(hdfsFolder);
+            persistenceBackend.createFile(hdfsFile, aggregation);
+        } // if else
+    } // persistAggregation
+    
+    private void persistMDAggregations(Aggregator aggregator) throws Exception {
+        Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
+        
+        for (String hdfsMDFile : attrMDFiles) {
+            String hdfsMdFolder = hdfsMDFile.substring(0, hdfsMDFile.lastIndexOf("/"));
+            String mdAggregation = aggregator.getMDAggregation(hdfsMDFile);
+            
+            LOGGER.info("[" + this.getName() + "] Persisting metadata at OrionHDFSSink. HDFS file ("
+                    + hdfsMDFile + "), Data (" + mdAggregation + ")");
+
+            if (persistenceBackend.exists(hdfsMDFile)) {
+                persistenceBackend.append(hdfsMDFile, mdAggregation);
             } else {
-                persistenceBackend.createDir(hdfsFolder);
-                persistenceBackend.createFile(hdfsFile, mdCSV);
-                hdfsFileExists = true;
+                persistenceBackend.createDir(hdfsMdFolder);
+                persistenceBackend.createFile(hdfsMDFile, mdAggregation);
             } // if else
         } // for
-    } // persistCSVMetadata
+    } // persistMDAggregations
+    
+    private void createHiveTable(Aggregator aggregator) throws Exception {
+        persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields());
+    } // createHiveTable
     
     /**
      * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
@@ -634,63 +908,5 @@ public class OrionHDFSSink extends OrionSink {
 
         return thirdLevelMd;
     } // buildThirdLevelMd
-    
-    /**
-     * Creates a String-based row in the given format.
-     * @param fileFormat
-     * @param recvTimeTs
-     * @param recvTime
-     * @param entityId
-     * @param entityType
-     * @param attrName
-     * @param attrType
-     * @param attrValue
-     * @param attrMetadata
-     * @return A string-based row
-     */
-    private String createRow(FileFormat fileFormat, long recvTimeTs, String recvTime, String entityId,
-            String entityType, String attrName, String attrType, String attrValue, String attrMetadata) {
-        if (fileFormat == FileFormat.JSONROW) {
-            return "{"
-                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
-                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
-                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
-                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
-                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
-                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
-                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
-                    + "}";
-        } else if (fileFormat == FileFormat.CSVROW) {
-            return recvTimeTs / 1000 + ","
-                    + recvTime + ","
-                    + entityId + ","
-                    + entityType + ","
-                    + attrName + ","
-                    + attrType + ","
-                    + attrValue + ","
-                    + attrMetadata;
-        } else {
-            return "";
-        } // if else
-    } // createRow
-
-    /**
-     * Creates a String-based column in the given format.
-     * @param fileFormat
-     * @param attrName
-     * @param attrValue
-     * @param attrMetadata
-     * @return A String-based column
-     */
-    private String createColumn(FileFormat fileFormat, String attrName, String attrValue, String attrMetadata) {
-        if (fileFormat == FileFormat.JSONCOLUMN) {
-            return ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
-        } else if (fileFormat == FileFormat.CSVCOLUMN) {
-            return "," + attrValue + "," + attrMetadata;
-        } else {
-            return "";
-        } // if else
-    } // createJSONColumn
 
 } // OrionHDFSSink
