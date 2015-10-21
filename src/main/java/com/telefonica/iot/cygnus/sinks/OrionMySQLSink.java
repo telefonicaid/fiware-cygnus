@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.apache.flume.Event;
 
 /**
  *
@@ -167,7 +168,7 @@ public class OrionMySQLSink extends OrionSink {
     } // start
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
@@ -268,7 +269,7 @@ public class OrionMySQLSink extends OrionSink {
                 persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
             } // if
         } // for
-    } // persist
+    } // persistOne
     
     /**
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
@@ -322,5 +323,10 @@ public class OrionMySQLSink extends OrionSink {
         
         return tableName;
     } // buildTableName
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
 
 } // OrionMySQLSink
