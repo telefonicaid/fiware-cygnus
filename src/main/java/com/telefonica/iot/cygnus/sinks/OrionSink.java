@@ -112,6 +112,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     @Override
     public Status process() throws EventDeliveryException {
         // initialize the batches for this run
+        // what happens if Cygnus falls down while accumulating the batch?
+        // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
         defaultBatch = new Batch();
         groupedBatch = new Batch();
 
@@ -141,7 +143,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         Map<String, String> batch1Headers = null;
         int batch1Hash = 0;
 
-        // get and process as many defaultBatch as the eventsPerDestination size
+        // get and process as many events as the batch size
         for (int i = 0; i < batchSize; i++) {
             Event event = null;
             
@@ -154,6 +156,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
             // check if the event is null
             if (event == null) {
+                // at this poing it could be checked the time for batching has been reached or not
+                // TDB: https://github.com/telefonicaid/fiware-cygnus/issues/562
                 txn.commit();
                 txn.close();
                 return Status.BACKOFF; // slow down the sink since no defaultBatch are available
@@ -367,7 +371,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     } // accumulateInBatch
     
     private void doBatchRollback() {
-        // TBD: tech debt
+        // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/563
     } // doBatchRollback
 
     // TDB: to be removed once all the sinks migrate to persistBatch method
@@ -383,7 +387,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     /**
      * This is the method the classes extending this class must implement when dealing with a batch of events to be
      * persisted.
-     * @param events
+     * @param defaultEvents
+     * @param groupedEvents
      * @throws Exception
      */
     abstract void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;

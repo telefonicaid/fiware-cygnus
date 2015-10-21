@@ -6,17 +6,18 @@ Content:
     * [Mapping Flume events to HDFS data structures](#section1.2)
     * [Hive](#section1.3)
     * [Example](#section1.4)
-* [Configuration](#section2)
-* [Use cases](#section3)
-* [Implementation details](#section4)
-    * [`OrionHDFSSink` class](#section4.1)
-    * [`HDFSBackendImpl` class](#section4.2)
-    * [Authentication and authorization](#section4.3)
-* [Important notes](#section5)
-    * [About the persistence mode](#section5.1)
-    * [About the binary backend](#section5.2)
-    * [About the batch size](#section5.3)
-* [Reporting issues and contact information](#section6)
+* [User guide](#section2)
+    * [Configuration](#section2.1)
+    * [Use cases](#section2.2)
+    * [Important notes](#section2.3)
+        * [About the persistence mode](#section2.3.1)
+        * [About the binary backend](#section2.3.2)
+        * [About the batch size](#section2.3.3)
+* [Programmers guide](#section3)
+    * [`OrionHDFSSink` class](#section3.1)
+    * [`HDFSBackendImpl` class](#section3.2)
+    * [Authentication and authorization](#section3.3)
+* [Reporting issues and contact information](#section4)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionHDFSSink`, or simply `OrionHDFSSink` is a sink designed to persist NGSI-like context data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -169,7 +170,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 
 [Top](#top)
 
-##<a name="section2"></a>Configuration
+##<a name="section2"></a>User guide
+###<a name="section2.1"></a>Configuration
 `OrionHDFSSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -221,15 +223,44 @@ A configuration example could be:
 
 [Top](#top)
 
-##<a name="section3"></a>Use cases
+###<a name="section2.2"></a>Use cases
 Use `OrionHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
 
-For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB or MySQL (Cygnus provides sinks for them, as well).
+For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, STH or MySQL (Cygnus provides sinks for them, as well).
 
 [Top](#top)
 
-##<a name="section4"></a>Implementation details
-###<a name="section4.1"></a>`OrionHDFSSink` class
+###<a name="section2.3"></a>Important notes
+
+####<a name="section2.3.1"></a>About the persistence mode
+Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `*-row` persistence mode, since fixed 8-fields JSON/CSV documents are appended for each notified attribute. Nevertheless, the `*-column` mode may be affected by several JSON documents/CSV records of different lengths (in term of fields). Thus, the `*-column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
+
+[Top](#top)
+
+####<a name="section2.3.2"></a>About the binary backend
+Current implementation of the HDFS binary backend does not support any authentication mechanism.
+
+A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currenty supported by the remote RPC server the binary backend accesses.
+
+Valid authentication mechanims are Kerberos and Hadoop Delegation Token, nevertheless none has been used and the backend simply requires a username (the one configured in `hdfs_username`) in order the `cygnus` user (the one running Cygnus) impersonates it.
+
+Thus, it is not recommended to use this backend in multi-user environment, or at least not without accepting the risk any user may impersonate any other one by simply specifying his/her username.
+
+There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111) about adding OAuth2 support to the Hadoop RPC mechanism, in the context of the [`fiware-cosmos`](https://github.com/telefonicaid/fiware-cosmos) project.
+
+[Top](#top)
+
+####<a name="section2.3.3"></a>About the batch size
+As seen in the [implementation section](#section4), `OrionHDFSSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
+
+By default, `OrionHDFSSink` has a configured batch size of one, but as explained above, it is highly recommended to increase the batch size for performance purposes. Which is the optimal value? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+
+[Top](#top)
+
+##<a name="section3"></a>Programmers guide
+###<a name="section3.1"></a>`OrionHDFSSink` class
 As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
@@ -246,7 +277,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section4.2"></a>`HDFSBackendImpl` class
+###<a name="section3.2"></a>`HDFSBackendImpl` class
 This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement). Relevant methods are:
 
     public void createDir(String dirPath) throws Exception;
@@ -275,7 +306,7 @@ Provisions a Hive table with data stored using the given variable length fields.
 
 [Top](#top)
 
-###<a name="section4.3"></a>Authentication and authorization
+###<a name="section3.3"></a>Authentication and authorization
 [OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
 
 A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
@@ -294,36 +325,7 @@ As you can see, your FIWARE Lab credentials are required in the payload, in the 
 
 [Top](#top)
 
-##<a name="section5"></a>Important notes
-
-###<a name="section5.1"></a>About the persistence mode
-Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `*-row` persistence mode, since fixed 8-fields JSON/CSV documents are appended for each notified attribute. Nevertheless, the `*-column` mode may be affected by several JSON documents/CSV records of different lengths (in term of fields). Thus, the `*-column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
-
-[Top](#top)
-
-###<a name="section5.2"></a>About the binary backend
-Current implementation of the HDFS binary backend does not support any authentication mechanism.
-
-A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currenty supported by the remote RPC server the binary backend accesses.
-
-Valid authentication mechanims are Kerberos and Hadoop Delegation Token, nevertheless none has been used and the backend simply requires a username (the one configured in `hdfs_username`) in order the `cygnus` user (the one running Cygnus) impersonates it.
-
-Thus, it is not recommended to use this backend in multi-user environment, or at least not without accepting the risk any user may impersonate any other one by simply specifying his/her username.
-
-There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111) about adding OAuth2 support to the Hadoop RPC mechanism, in the context of the [`fiware-cosmos`](https://github.com/telefonicaid/fiware-cosmos) project.
-
-[Top](#top)
-
-###<a name="section5.3"></a>About the batch size
-As seen in the [implementation section](#section4), `OrionHDFSSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
-
-What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
-
-By default, `OrionHDFSSink` has a configured batch size of one, but as explained above, it is highly recommended to increase the batch size for performance purposes. Which is the optimal value? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
-
-[Top](#top)
-
-##<a name="section6"></a>Reporting issues and contact information
+##<a name="section4"></a>Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
