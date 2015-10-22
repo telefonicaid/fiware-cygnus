@@ -16,6 +16,7 @@
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
+    * [Create and use a Docker container](#section4.3)
 * [Cygnus configuration](#section5)
     * [`cygnus_instance_<id>.conf`](#section5.1)
     * [`agent_<id>.conf`](#section5.2)
@@ -659,6 +660,11 @@ Simply configure the FIWARE repository if not yet configured and use your applic
 
 ###<a name="section4.2"></a>Installing from sources (advanced)
 Please, refer to [this](doc/installation/src_install.md) document if your aim is to install Cygnus from sources.
+
+[Top](#top)
+
+###<a name="section4.3"></a>Create and use a Docker container
+Please, refer to [this](docker/README.md) document if you want to build Cygnus as a docker application.
 
 [Top](#top)
 
