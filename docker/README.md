@@ -1,10 +1,19 @@
 # Cygnus Containerization
 
-The process of building this application and packing it into a container could be a little long in time terms. Addressing this issue, the process is separated in two steps: Building the jar and packing the cygnus container.
+The process of building this application and packing it into a container could be a little long in time terms. Addressing this issue the process is separated in two steps: Building the _jar_ and packing the cygnus container.
+
+## System requirements
+
+Besides this source code, of course, all you need to build the application inside a container are the applications `Docker` and `Docker Compose`. The benefits in this approach are enormous, since you don't need to install any other software to have Cygnus running.
+
+Please, refer to the links below to get them:
+
+* [Docker](https://docs.docker.com/installation/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 
 ## Maven settings template
 
-In order to improve your chances, should `maven` have any error downloading your dependencies, and you need to restart, or should you need to do this compilation process many times, `maven` is configured to put the downloaded dependencies in this repository's directory `maven-deps`, whis is `.gitignore`d. To accomplish that, we overwrite maven's settings file with our own `docker/0.maven-settings.xml`. The only change being the following line added:
+In order to improve your chances, should `maven` have any error downloading your dependencies and you need to restart, or should you need to do this compilation process many times, `maven` is configured to leave the downloaded dependencies in this repository's directory `maven-deps`, which is `.gitignore`'d. To accomplish that we overwrite maven's settings file with our own `docker/0.maven-settings.xml`. The only change being the following line added:
 
     <localRepository>/cygnus-compiler/maven-deps</localRepository>
 

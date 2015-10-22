@@ -16,6 +16,7 @@
 * [Installing Cygnus](#section4)
     * [RPM install (recommended)](#section4.1)
     * [Installing from sources (advanced)](#section4.2)
+    * [Create and use a Docker container](#section4.3)
 * [Cygnus configuration](#section5)
     * [`cygnus_instance_<id>.conf`](#section5.1)
     * [`agent_<id>.conf`](#section5.2)
@@ -662,6 +663,11 @@ Please, refer to [this](doc/installation/src_install.md) document if your aim is
 
 [Top](#top)
 
+###<a name="section4.3"></a>Create and use a Docker container
+Please, refer to [this](docker/README.md) document if you want to build Cygnus as a docker application.
+
+[Top](#top)
+
 ##<a name="section5"></a>Cygnus configuration
 Cygnus is configured through two different files:
 
@@ -755,6 +761,8 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
+# rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
+cygnusagent.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -768,6 +776,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.hdfs-sink.batch_size = 100
 # Hive server version (1 or 2)
 cygnusagent.sinks.hdfs-sink.hive_server_version = 2
 # Hive FQDN/IP address of the Hive server

@@ -21,7 +21,9 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import org.apache.flume.Event;
 
 /**
  * OrionMongoSink will be in charge of persisting Orion context data in a historic fashion within a MongoDB deployment.
@@ -47,7 +49,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     } // OrionMongoSink
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
         Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
@@ -137,6 +139,11 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                         entityId, entityType, attrName, attrType, attrValue, attrMetadata);
             } // for
         } // for
-    } // persist
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
 
 } // OrionMongoSink

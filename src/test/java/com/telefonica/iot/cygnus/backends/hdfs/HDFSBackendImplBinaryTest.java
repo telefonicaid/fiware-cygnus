@@ -18,39 +18,36 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
-import org.apache.http.message.BasicHeader;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.mockito.Mockito;
-import org.apache.http.client.HttpClient;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.message.BasicHttpResponse;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary.FSGetter;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
+import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
 
 /**
  *
  * @author frb
  */
 @RunWith(MockitoJUnitRunner.class)
-public class HDFSBackendImplTest {
+public class HDFSBackendImplBinaryTest {
     
     // instance to be tested
-    private HDFSBackendImpl backend;
+    private HDFSBackendImplBinary backend;
     
     // mocks
-    // the DefaultHttpClient class cannot be mocked:
-    // http://stackoverflow.com/questions/4547852/why-does-my-mockito-mock-object-use-real-the-implementation
     @Mock
-    private HttpClient mockHttpClientCreateFile;
+    private FSGetter mockFSGetter;
     @Mock
-    private HttpClient mockHttpClientAppend;
+    private FileSystem mockFileSystem;
     @Mock
-    private HttpClient mockHttpClientExistsCreateDir;
+    private FSDataOutputStream fsDataOutputStreamMock;
     
     // constants
     private final String[] hdfsHosts = {"1.2.3.4", "5.6.7.8."};
@@ -73,30 +70,26 @@ public class HDFSBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImpl(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost, hivePort,
-                false, null, null, null, null, false);
-        
-        // set up other instances
-        BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
-        BasicHttpResponse resp201 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 201, "Created");
-        BasicHttpResponse resp307 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 307, "Temporary Redirect");
-        resp307.addHeader(new BasicHeader("Location", "http://localhost:14000/"));
+        backend = new HDFSBackendImplBinary(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
+                hivePort, false, null, null, null, null, false);
         
         // set up the behaviour of the mocked classes
-        when(mockHttpClientExistsCreateDir.execute(Mockito.any(HttpUriRequest.class))).thenReturn(resp200);
-        when(mockHttpClientCreateFile.execute(Mockito.any(HttpUriRequest.class))).thenReturn(resp307, resp201);
-        when(mockHttpClientAppend.execute(Mockito.any(HttpUriRequest.class))).thenReturn(resp307, resp200);
+        when(mockFSGetter.get()).thenReturn(mockFileSystem);
+        when(mockFileSystem.mkdirs(Mockito.any(Path.class))).thenReturn(true);
+        when(mockFileSystem.create(Mockito.any(Path.class))).thenReturn(fsDataOutputStreamMock);
+        when(mockFileSystem.append(Mockito.any(Path.class))).thenReturn(fsDataOutputStreamMock);
+        when(mockFileSystem.exists(Mockito.any(Path.class))).thenReturn(true);
     } // setUp
     
     /**
-     * Test of createDir method, of class HDFSBackendImpl.
+     * Test of createDir method, of class HDFSBackendImplBinary.
      */
     @Test
     public void testCreateDir() {
-        System.out.println("Testing HDFSBackendImpl.createDir");
+        System.out.println("Testing HDFSBackendImplBinary.createDir");
         
         try {
-            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.setFSGetter(mockFSGetter);
             backend.createDir(dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -106,14 +99,14 @@ public class HDFSBackendImplTest {
     } // testCreateDir
     
     /**
-     * Test of createFile method, of class HDFSBackendImpl.
+     * Test of createFile method, of class HDFSBackendImplREST.
      */
     @Test
     public void testCreateFile() {
         System.out.println("Testing HDFSBackendImpl.createFile");
         
         try {
-            backend.setHttpClient(mockHttpClientCreateFile);
+            backend.setFSGetter(mockFSGetter);
             backend.createFile(dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -123,14 +116,14 @@ public class HDFSBackendImplTest {
     } // testCreateFile
     
     /**
-     * Test of append method, of class HDFSBackendImpl.
+     * Test of append method, of class HDFSBackendImplREST.
      */
     @Test
     public void testAppend() {
         System.out.println("Testing HDFSBackendImpl.append");
         
         try {
-            backend.setHttpClient(mockHttpClientAppend);
+            backend.setFSGetter(mockFSGetter);
             backend.append(dirPath, data);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -140,14 +133,14 @@ public class HDFSBackendImplTest {
     } // testAppend
     
     /**
-     * Test of exists method, of class HDFSBackendImpl.
+     * Test of exists method, of class HDFSBackendImplREST.
      */
     @Test
     public void testExists() {
         System.out.println("Testing HDFSBackendImpl.exists");
         
         try {
-            backend.setHttpClient(mockHttpClientExistsCreateDir);
+            backend.setFSGetter(mockFSGetter);
             backend.exists(dirPath);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -156,4 +149,4 @@ public class HDFSBackendImplTest {
         } // try catch finally
     } // testExists
     
-} // HDFSBackendImplTest
+} // HDFSBackendImplRESTTest

@@ -4,7 +4,7 @@
 
   <groupId>com.telefonica.iot</groupId>
   <artifactId>cygnus</artifactId>
-  <version>0.9.0</version>
+  <version>0.9.0_SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>cygnus</name>
@@ -68,9 +68,9 @@
       <version>1.2.17</version>
     </dependency>
     <dependency>
-      <groupId>com.facebook.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>0.20.0</version>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>0.20.2-cdh3u6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
