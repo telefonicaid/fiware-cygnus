@@ -1,1 +1,1 @@
-Issue #548 : added functionality: persist attribute persistence in column using mongo-sink
+- [FEATURE] Column-like persistence in OrionMongoSink (#548)
