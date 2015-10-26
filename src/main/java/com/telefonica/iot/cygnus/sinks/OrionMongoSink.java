@@ -81,9 +81,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         } // if
         
         // iterate on the contextResponses
-
         ArrayList contextResponses = notification.getContextResponses();
-        
         for (int i = 0; i < contextResponses.size(); i++) {
             NotifyContextRequest.ContextElementResponse contextElementResponse;
             contextElementResponse = (NotifyContextRequest.ContextElementResponse) contextResponses.get(i);
