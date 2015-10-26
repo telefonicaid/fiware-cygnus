@@ -48,7 +48,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected MongoBackend backend;
     protected boolean rowAttrPersistence;
 
-    
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
      * @return
