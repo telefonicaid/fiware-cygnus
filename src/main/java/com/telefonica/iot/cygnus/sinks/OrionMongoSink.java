@@ -82,10 +82,6 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         // iterate on the contextResponses
 
-
-
-
-
         ArrayList contextResponses = notification.getContextResponses();
         
         for (int i = 0; i < contextResponses.size(); i++) {
@@ -125,7 +121,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                         + attrType + ")");
 
                 // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE && rowAttrPersistence) {
                     collectionName = buildCollectionName(dbName, fiwareServicePaths[i], destinations[i], attrName,
                             false, entityId, entityType, fiwareService);
                     backend.createCollection(dbName, collectionName);
@@ -139,30 +135,24 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                     this.backend.insertContextDataRaw(
                             dbName, collectionName, recvTimeTs.longValue() / 1000L, recvTime,
                             entityId, entityType, attrName, attrType, attrValue, attrMetadata);
-                } else if (this.dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
-                    HashMap singleAttrs = new HashMap();
-                    singleAttrs.put(attrName, attrValue);
-                    HashMap singleMds = new HashMap();
-                    singleMds.put(attrName + "_md", attrMetadata);
-                    this.backend.insertContextDataRaw(
-                            dbName, collectionName, recvTimeTs.longValue() / 1000L, recvTime,
-                            entityId, entityType, singleAttrs, singleMds);
                 } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMetadata);
                 }
+
             } // for
-            if (!this.rowAttrPersistence && this.dataModel != DataModel.COLLECTIONPERATTRIBUTE) {
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
-                        + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
-                        + "," + recvTime + "," + entityId + "," + entityType + ","
-                        + attrs.toString() + "," + mds.toString() + "]");
-                this.backend.insertContextDataRaw(
-                        dbName, collectionName, recvTimeTs.longValue() / 1000L,
-                        recvTime, entityId, entityType, attrs, mds);
-            } else {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id="
-                        + entityId + ", type=" + entityType + ")");
+            if (!this.rowAttrPersistence) {
+                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                    LOGGER.warn("Persisting data by columns is useless for collection-per-attribute data model");
+                } else {
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
+                            + "," + recvTime + "," + entityId + "," + entityType + ","
+                            + attrs.toString() + "," + mds.toString() + "]");
+                    this.backend.insertContextDataRaw(
+                            dbName, collectionName, recvTimeTs.longValue() / 1000L,
+                            recvTime, entityId, entityType, attrs, mds);
+                }
             }
         } // for
     } // persist

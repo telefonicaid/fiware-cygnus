@@ -408,13 +408,7 @@ public class MongoBackend {
                 }
                 break;
             case COLLECTIONPERATTRIBUTE:
-                it = attrs.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    String attrName = (String) pair.getKey();
-                    String attrValue = (String) pair.getValue();
-                    doc.append(attrName, attrValue);
-                }
+                LOGGER.warn("Persistence by column is useless for Collection per attribute data model");
                 break;
             default:
                 // this will never be reached
