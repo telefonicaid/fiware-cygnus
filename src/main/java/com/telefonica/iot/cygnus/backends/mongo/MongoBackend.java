@@ -366,7 +366,7 @@ public class MongoBackend {
         return prepopulatedData;
     } // buildPrepopulatedPoints
     
-  /**
+    /**
      * Inserts a new document in the given raw collection within the given database (column-like mode).
      * changes.
      * @param dbName
