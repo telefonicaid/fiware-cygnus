@@ -157,7 +157,7 @@ public class CKANCache extends HttpBackend {
         LOGGER.debug("Organization not found in the cache, querying CKAN for it (orgName=" + orgName + ")");
         
         // query CKAN for the organization information
-        String ckanURL = "/api/3/action/organization_show?id=" + orgName;
+        String ckanURL = "/api/3/action/organization_show?id=" + orgName + "&include_datasets=true";
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
