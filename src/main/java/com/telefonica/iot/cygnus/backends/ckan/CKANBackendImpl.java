@@ -388,6 +388,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + resourceName + "\", "
                     + "\"url\": \"none\", "
+                    + "\"format\": \"\", "
                     + "\"package_id\": \"" + pkgId + "\" }";
             
             // create the CKAN request URL
