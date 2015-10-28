@@ -168,11 +168,9 @@ public class OrionMySQLSinkTest {
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(Mockito.anyString());
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(null);
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(null, null, null);
+        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, null, null);
     } // setUp
     
     /**
@@ -320,7 +318,7 @@ public class OrionMySQLSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
-/*        
+
         System.out.println("Testing OrionMySQLSinkTest.persistBatch (multiple destinations and "
                 + "fiware-servicePaths)");
         sink.configure(context);
@@ -329,7 +327,7 @@ public class OrionMySQLSinkTest {
                 multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
+
         try {
             sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
@@ -337,7 +335,6 @@ public class OrionMySQLSinkTest {
         } finally {
             assertTrue(true);
         } // try catch finally
-*/
     } // testPersistServiceServicePath
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
