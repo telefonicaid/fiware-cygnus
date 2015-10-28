@@ -5,7 +5,7 @@ Content:
 * [`cygnus_translator_0.1_to_0.2.sh`](#section1)
 * [`cygnus_translator_0.1_to_0.3.sh`](#section2)
 * [`cygnus_translator_0.2_to_0.3.sh`](#section3)
-* [`cygnus_translator_x.y.z_to_0.10.0_hdfs.sh`](#section4)
+* [`cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh`](#section4)
 * [Reporting issues and contact information](#section5)
 
 ##<a name="section1"></a>`cygnus_translator_0.1_to_0.2.sh`
@@ -76,7 +76,7 @@ As you may observe, this script has not been developed given it is not a relevan
 
 [Top](#top)
 
-##<a name="section4"></a>`cygnus_translator_x.y.z_to_0.10.0_hdfs.sh`
+##<a name="section4"></a>`cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh`
 This scripts adds certain fields not available in previous versions to 0.10.0 to the HDFS files potentially containing historical context data. Specifically:
 
 * Files written in `json-row` format will have a new Json fields named `fiware-servicePath`.
@@ -87,8 +87,8 @@ This scripts adds certain fields not available in previous versions to 0.10.0 to
 Usage:
 
 ```
-$ ./cygnus_translator_x.y.z_to_0.10.0_hdfs.sh 
-Usage: cygnus_translator_x.y.z_to_0.10.0_hdfs.sh hdfs_folder file_format null_value backup
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh 
+Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh hdfs_folder file_format null_value backup
 where hdfs_folder: a valid HDFS folder path
       file_format: a value within json-row|json-column|csv-row|csv-column
       null_value : string to be inserted as null value, use the keyword "empty" for an empty value
@@ -100,7 +100,7 @@ As can be seen, a HDFS folder must be given; this folder is recursively iterated
 Example assuming the file format is `json-row`, a custom value of `null` describing the emptyness and not backing the original data:
 
 ```
-$ ./cygnus_translator_x.y.z_to_0.10.0_hdfs.sh /user/johndoe/dataset json-row null false
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh /user/johndoe/dataset json-row null false
 ```
 
 Assuming the content of a file within `/user/johndoe/dataset` as:
