@@ -643,7 +643,14 @@ public class OrionHDFSSink extends OrionSink {
                 } // if
                 
                 // aggregate the metadata
-                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                String concatMdAggregation;
+                
+                if (mdAggregation.isEmpty()) {
+                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                } else {
+                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                } // if else
+                
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // aggreagate the data
@@ -674,10 +681,16 @@ public class OrionHDFSSink extends OrionSink {
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
                 JSONObject mdJSONObject = (JSONObject) mdObject;
-                csvMd += recvTimeTs + ","
+                String line = recvTimeTs + ","
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value");
+                
+                if (csvMd.isEmpty()) {
+                    csvMd = line;
+                } else {
+                    csvMd += "\n" + line;
+                } // if else
             } // for
             
             return csvMd;
@@ -760,7 +773,14 @@ public class OrionHDFSSink extends OrionSink {
                 } // if
                 
                 // agregate the metadata
-                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                String concatMdAggregation;
+                
+                if (mdAggregation.isEmpty()) {
+                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                } else {
+                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                } // if else
+                
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
@@ -785,10 +805,16 @@ public class OrionHDFSSink extends OrionSink {
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
                 JSONObject mdJSONObject = (JSONObject) mdObject;
-                csvMd += recvTimeTs + ","
+                String line = recvTimeTs + ","
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value");
+                
+                if (csvMd.isEmpty()) {
+                    csvMd = line;
+                } else {
+                    csvMd += "\n" + line;
+                } // if else
             } // for
             
             return csvMd;
