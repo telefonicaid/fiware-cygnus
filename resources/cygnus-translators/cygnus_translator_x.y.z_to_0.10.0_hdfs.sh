@@ -21,7 +21,7 @@
 
 # Show the usage
 if [ $# -ne 4 ]; then
-	echo "Usage: cygnus_translator_0.9.0_to_0.10.0_hdfs.sh hdfs_folder file_format null_value backup"
+	echo "Usage: cygnus_translator_x.y.z_to_0.10.0_hdfs.sh hdfs_folder file_format null_value backup"
 	echo "where hdfs_folder: a valid HDFS folder path"
 	echo "      file_format: a value within json-row|json-column|csv-row|csv-column"
 	echo "      null_value : string to be inserted as null value, use the keyword \"empty\" for an empty value"
