@@ -295,7 +295,7 @@ public class OrionMySQLSink extends OrionSink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
+                String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
@@ -379,13 +379,13 @@ public class OrionMySQLSink extends OrionSink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
+                String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
                 // create part of the column with the current attribute (a.k.a. a column)
-                column += "','" + attrValue + "','"  + attrMetadata + "'";
+                column += ",'" + attrValue + "','"  + attrMetadata + "'";
             } // for
             
             // now, aggregate the column
@@ -416,9 +416,10 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
                 + dbName + "), Table (" + tableName + "), Data (" + fieldValues + ")");
         
-        persistenceBackend.createDatabase(dbName);
-        
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
         if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createDatabase(dbName);
             persistenceBackend.createTable(dbName, tableName, typedFieldNames);
         } // if
         
