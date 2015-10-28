@@ -1,3 +1,4 @@
 - [HARDENING] Cygnus user creation added to the from the sources installation guide (#558)
 - [FEATURE] Add a binary implementation of the HDFS backend (#537)
+- [HARDENING] Add docker as an option in the README for installing Cygnus (#552)
 - [FEATURE] Add support to batch processing within a transaction in OrionHDFSSink (#554)
