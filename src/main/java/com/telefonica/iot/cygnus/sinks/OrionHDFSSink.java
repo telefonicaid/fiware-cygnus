@@ -493,6 +493,7 @@ public class OrionHDFSSink extends OrionSink {
                 String line = "{"
                     + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                     + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
                     + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
@@ -554,7 +555,10 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\"";
+            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -640,6 +644,7 @@ public class OrionHDFSSink extends OrionSink {
                 // aggreagate the data
                 aggregation += recvTimeTs / 1000 + ","
                     + recvTime + ","
+                    + servicePath + ","
                     + entityId + ","
                     + entityType + ","
                     + attrName + ","
@@ -722,7 +727,7 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = recvTime;
+            String line = recvTime + "," + servicePath + "," + entityId + "," + entityType;
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
