@@ -26,8 +26,6 @@ import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
-import com.telefonica.iot.cygnus.utils.Constants;
 import java.sql.SQLTimeoutException;
 import java.util.HashMap;
 
@@ -38,16 +36,11 @@ import java.util.HashMap;
  * MySQL related operations (database and table creation, context data insertion) when dealing with a MySQL
  * persistence backend.
  */
-public class MySQLBackend {
+public class MySQLBackendImpl implements MySQLBackend {
     
     private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private final String mysqlHost;
-    private final String mysqlPort;
-    private final String mysqlUsername;
-    private final String mysqlPassword;
-    private final HashMap<String, Connection> connections;
     private MySQLDriver driver;
-    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
             
     /**
      * Constructor.
@@ -56,22 +49,9 @@ public class MySQLBackend {
      * @param mysqlUsername
      * @param mysqlPassword
      */
-    public MySQLBackend(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
-        this.mysqlHost = mysqlHost;
-        this.mysqlPort = mysqlPort;
-        this.mysqlUsername = mysqlUsername;
-        this.mysqlPassword = mysqlPassword;
-        connections = new HashMap<String, Connection>();
-        driver = new MySQLDriver();
-    } // MySQLBackend
-    
-    /**
-     * Gets the map of database name-connection. It is protected since it is only used by the tests.
-     * @return The mao of database name-connection.
-     */
-    protected HashMap<String, Connection> getConnections() {
-        return connections;
-    } // getCnnections
+    public MySQLBackendImpl(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
+        driver = new MySQLDriver(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+    } // MySQLBackendImpl
     
     /**
      * Sets the MySQL driver. It is protected since it is only used by the tests.
@@ -81,16 +61,21 @@ public class MySQLBackend {
         this.driver = driver;
     } // setDriver
     
+    protected MySQLDriver getDriver() {
+        return driver;
+    } // getDriver
+    
     /**
      * Creates a database, given its name, if not exists.
      * @param dbName
      * @throws Exception
      */
+    @Override
     public void createDatabase(String dbName) throws Exception {
         Statement stmt = null;
         
         // get a connection to an empty database
-        Connection con = getConnection("");
+        Connection con = driver.getConnection("");
         
         try {
             stmt = con.createStatement();
@@ -115,11 +100,12 @@ public class MySQLBackend {
      * @param tableName
      * @throws Exception
      */
-    public void createTable(String dbName, String tableName) throws Exception {
+    @Override
+    public void createTable(String dbName, String tableName, String typedFieldNames) throws Exception {
         Statement stmt = null;
         
         // get a connection to the given database
-        Connection con = getConnection(dbName);
+        Connection con = driver.getConnection(dbName);
         
         try {
             stmt = con.createStatement();
@@ -128,15 +114,7 @@ public class MySQLBackend {
         } // try catch
         
         try {
-            String query = "create table if not exists `" + tableName + "` ("
-                    + Constants.RECV_TIME_TS + " long, "
-                    + Constants.RECV_TIME + " text, "
-                    + Constants.ENTITY_ID + " text, "
-                    + Constants.ENTITY_TYPE + " text, "
-                    + Constants.ATTR_NAME + " text, "
-                    + Constants.ATTR_TYPE + " text, "
-                    + Constants.ATTR_VALUE + " text, "
-                    + Constants.ATTR_MD + " text)";
+            String query = "create table if not exists `" + tableName + "` " + typedFieldNames;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
@@ -146,26 +124,13 @@ public class MySQLBackend {
         closeMySQLObjects(con, stmt);
     } // createTable
     
-    /**
-     * Inserts a new row in the given table within the given database representing a unique attribute change.
-     * @param dbName
-     * @param tableName
-     * @param recvTimeTs
-     * @param recvTime
-     * @param entityId
-     * @param entityType
-     * @param attrName
-     * @param attrType
-     * @param attrValue
-     * @param attrMd
-     * @throws Exception
-     */
-    public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId,
-            String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+    @Override
+    public void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues)
+        throws Exception {
         Statement stmt = null;
         
         // get a connection to the given database
-        Connection con = getConnection(dbName);
+        Connection con = driver.getConnection(dbName);
             
         try {
             stmt = con.createStatement();
@@ -174,9 +139,7 @@ public class MySQLBackend {
         } // try catch
         
         try {
-            String query = "insert into `" + tableName + "` values ('" + recvTimeTs + "', '" + recvTime + "', '"
-                    + entityId + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue
-                    + "', '" + attrMd + "')";
+            String query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
@@ -184,92 +147,7 @@ public class MySQLBackend {
         } catch (SQLException e) {
             throw new CygnusBadContextData(e.getMessage());
         } // try catch
-        
-        closeMySQLObjects(con, stmt);
     } // insertContextData
-    
-    /**
-     * Inserts a new row in the given table within the given database representing full attribute list changes.
-     * @param dbName
-     * @param tableName
-     * @param recvTime
-     * @param attrs
-     * @param mds
-     * @throws Exception
-     */
-    public void insertContextData(String dbName, String tableName, String recvTime,
-            Map<String, String> attrs, Map<String, String> mds) throws Exception {
-        Statement stmt = null;
-        String columnNames = null;
-        String columnValues = null;
-        
-        // get a connection to the MySQL server and get a statement
-        Connection con = getConnection(dbName);
-        
-        try {
-            
-            stmt = con.createStatement();
-
-            // for query building purposes
-            columnNames = Constants.RECV_TIME;
-            columnValues = "'" + recvTime + "'";
-
-            for (String attrName : attrs.keySet()) {
-                columnNames += "," + attrName;
-                String attrValue = attrs.get(attrName);
-                columnValues += ",'" + attrValue + "'";
-            } // for
-            
-            for (String attrMdName : mds.keySet()) {
-                columnNames += "," + attrMdName;
-                String md = mds.get(attrMdName);
-                columnValues += ",'" + md + "'";
-            } // for
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-                
-        try {
-            // finish creating the query and execute it
-            String query = "insert into `" + tableName + "` (" + columnNames + ") values (" + columnValues + ")";
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
-        } // try catch
-        
-        closeMySQLObjects(con, stmt);
-    } // insertContextData
-    
-    /**
-     * Gets a connection to the MySQL server.
-     * @return
-     * @throws Exception
-     */
-    private Connection getConnection(String dbName) throws Exception {
-        try {
-            // FIXME: the number of cached connections should be limited to a certain number; with such a limit
-            //        number, if a new connection is needed, the oldest one is closed
-            Connection con = connections.get(dbName);
-
-            if (con == null || !con.isValid(0)) {
-                if (con != null) {
-                    con.close();
-                } // if
-                
-                con = driver.getConnection(mysqlHost, mysqlPort, dbName, mysqlUsername, mysqlPassword);
-                connections.put(dbName, con);
-            } // if
-
-            return con;
-        } catch (ClassNotFoundException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } // try catch
-    } // getConnection
     
     /**
      * Close all the MySQL objects previously opened by doCreateTable and doQuery.
@@ -298,13 +176,80 @@ public class MySQLBackend {
     } // closeMySQLObjects
     
     /**
-     * This code has been extracted from MySQLBackend.getConnection() for testing purposes. By extracting it into a
+     * This code has been extracted from MySQLBackendImpl.getConnection() for testing purposes. By extracting it into a
      * class then it can be mocked.
      */
     protected class MySQLDriver {
         
+        private final HashMap<String, Connection> connections;
+        private final String mysqlHost;
+        private final String mysqlPort;
+        private final String mysqlUsername;
+        private final String mysqlPassword;
+        
         /**
-         * Gets a MySQL connection.
+         * Constructor.
+         * @param mysqlHost
+         * @param mysqlPort
+         * @param mysqlUsername
+         * @param mysqlPassword
+         */
+        public MySQLDriver(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
+            connections = new HashMap<String, Connection>();
+            this.mysqlHost = mysqlHost;
+            this.mysqlPort = mysqlPort;
+            this.mysqlUsername = mysqlUsername;
+            this.mysqlPassword = mysqlPassword;
+        } // MySQLDriver
+        
+        /**
+         * Gets a connection to the MySQL server.
+         * @param dbName
+         * @return
+         * @throws Exception
+         */
+        public Connection getConnection(String dbName) throws Exception {
+            try {
+                // FIXME: the number of cached connections should be limited to a certain number; with such a limit
+                //        number, if a new connection is needed, the oldest one is closed
+                Connection con = connections.get(dbName);
+
+                if (con == null || !con.isValid(0)) {
+                    if (con != null) {
+                        con.close();
+                    } // if
+
+                    con = createConnection(dbName);
+                    connections.put(dbName, con);
+                } // if
+
+                return con;
+            } catch (ClassNotFoundException e) {
+                throw new CygnusPersistenceError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusPersistenceError(e.getMessage());
+            } // try catch
+        } // getConnection
+        
+        /**
+         * Gets if a connection is created for the given database. It is protected since it is only used in the tests.
+         * @param dbName
+         * @return True if the connection exists, false other wise
+         */
+        protected boolean isConnectionCreated(String dbName) {
+            return connections.containsKey(dbName);
+        } // isConnectionCreated
+        
+        /**
+         * Gets the number of connections created.
+         * @return The number of connections created
+         */
+        protected int numConnectionsCreated() {
+            return connections.size();
+        } // numConnectionsCreated
+        
+        /**
+         * Creates a MySQL connection.
          * @param host
          * @param port
          * @param dbName
@@ -313,7 +258,7 @@ public class MySQLBackend {
          * @return A MySQL connection
          * @throws Exception
          */
-        Connection getConnection(String host, String port, String dbName, String user, String password)
+        private Connection createConnection(String dbName)
             throws Exception {
             // dynamically load the MySQL JDBC driver
             Class.forName(DRIVER_NAME);
@@ -323,8 +268,8 @@ public class MySQLBackend {
                     + mysqlUsername + "&password=XXXXXXXXXX");
             return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
                     mysqlUsername, mysqlPassword);
-        } // getConnection
+        } // createConnection
         
     } // MySQLDriver
     
-} // MySQLBackend
+} // MySQLBackendImpl
