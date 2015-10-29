@@ -772,6 +772,8 @@ cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 cygnusagent.sinks.hdfs-sink.file_format = json-column
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.hdfs-sink.batch_timeout = 30
 # Hive server version (1 or 2)
 cygnusagent.sinks.hdfs-sink.hive_server_version = 2
 # Hive FQDN/IP address of the Hive server
