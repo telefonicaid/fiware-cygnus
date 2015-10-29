@@ -88,7 +88,8 @@ If the dependencies are included in the built Cygnus package, then nothing has t
 
 In addition:
 
-* Observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
+* Please have into account from Cygnus 0.10.0 the version of `hadoop-core` within the `pom.xml` must match the Hadoop version you are going to use; on the contrary, the HDFS sink will not work. Of course, if you are not going to use the HDFS sink, simply use the default `hadoop-core` version (1.2.1) within the downloaded `pom.xml` for correct compilation purposes.
+* Also observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
 * libthrift-0.9.1.jar must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
 
 [Top](#top)
