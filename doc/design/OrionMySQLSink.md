@@ -15,6 +15,7 @@ Content:
 * [Programmers guide](#section3)
     * [`OrionMySQLSink` class](#section3.1)
     * [`MySQLBackendImpl` class](#section3.2)
+    * [Authentication and authorization](#section3.3)
 * [Reporting issues and contact information](#section4)
 
 ##<a name="section1"></a>Functionality
@@ -262,6 +263,8 @@ NOTES:
 | mysql_password | yes | N/A |
 | table_type | no | table-by-destination | <i>table-by-destination</i> or <i>table-by-service-path</i> |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
 
@@ -277,6 +280,8 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.mysql_password = mypassword
     cygnusagent.sinks.mysql-sink.table_type = table-by-destination
     cygnusagent.sinks.mysql-sink.attr_persistence = column
+    cygnusagent.sinks.mysql-sink.batch_size = 100
+    cygnusagent.sinks.mysql-sink.batch_timeout = 30
     
 [Top](#top)
 
@@ -303,6 +308,13 @@ In addition, when running in `column` mode, due to the number of notified attrib
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
+As explained in the [programmers guide](#section3), `OrionMySQLSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MySQL table. If processing the events one by one, we would need 100 inserts into MySQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MySQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different MySQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+
+The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+By default, `OrionMySQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
@@ -310,13 +322,13 @@ In addition, when running in `column` mode, due to the number of notified attrib
 ###<a name="section3.1"></a>`OrionMySQLSink` class
 As any other NGSI-like sink, `OrionMySQLSink` extends the base `OrionSink`. The methods that are extended are:
 
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
     
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MySQL backend by means of a `MySQLBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
+A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MySQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MySQLBackend` implementation. There are two sets of events, default and grouped ones, because depending on the sink configuration the default or the grouped notified destination and fiware servicePath are used.
     
     public void start();
 
-`MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMySQLSink()` (contructor), `configure()` and `start()`.
+An implementation of `MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMySQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
     
@@ -325,23 +337,24 @@ A complete configuration as the described above is read from the given `Context`
 [Top](#top)
 
 ###<a name="section3.2"></a>`MySQLBackendImpl` class
-This is a convenience backend class for MysQL that provides methods to persist the context data both in row and column format. Relevant methods are:
+This is a convenience backend class for MySQL that implements the `MySQLBackend` interface (provides the methods that any MySQL backend must implement). Relevant methods are:
 
     public void createDatabase(String dbName) throws Exception;
     
 Creates a database, given its name, if not existing.
     
-    public void createTable(String dbName, String tableName) throws Exception;
+    public void createTable(String dbName, String tableName, String fieldNames) throws Exception;
     
-Creates a table, given its name, if not existing within the given database.
+Creates a table, given its name, if not existing within the given database. The field names are given as well.
     
-    public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
+    void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
     
-Persists the context data regarding a single entity's attribute within the table. This table belongs to the given database. Other notified attributes will be persisted by using this method, next to current one. This method creates the database or the table if any of them is missing (row-like mode).
-    
-    public void insertContextData(String dbName, String tableName, String recvTime, Map<String, String> attrs, Map<String, String> mds) throws Exception
-    
-Persists the context data regarding all an entity's attributes within the table. This table belongs to the given database. Since all the attributes are stored with this operation, no other one is required. This method does not create the database nor the table, and all of them must be provisioned in advanced (column-like)
+Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
+
+[Top](#top)
+
+###<a name="section3.3"></a>Authentication and authorization
+Current implementation of `OrionMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
 
 [Top](#top)
 
