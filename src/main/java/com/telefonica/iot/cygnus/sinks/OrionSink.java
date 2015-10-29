@@ -101,7 +101,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         batchSize = context.getInteger("batch_size", 1);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
                 + batchSize + ")");
-        batchTimeout = context.getInteger("batchTimeout", 30);
+        batchTimeout = context.getInteger("batch_timeout", 30);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_timeout="
                 + batchTimeout + ")");
     } // configure
