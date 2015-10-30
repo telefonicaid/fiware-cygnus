@@ -357,7 +357,7 @@ public class OrionHDFSSink extends OrionSink {
             ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
             
             // get an aggregator for this destination and initialize it
-            Aggregator aggregator = getAggregator(fileFormat);
+            HDFSAggregator aggregator = getAggregator(fileFormat);
             aggregator.initialize(subBatch.get(0));
 
             for (CygnusEvent cygnusEvent : subBatch) {
@@ -381,7 +381,7 @@ public class OrionHDFSSink extends OrionSink {
     /**
      * Class for aggregating aggregation.
      */
-    private abstract class Aggregator {
+    private abstract class HDFSAggregator {
         
         // string containing the data aggregation
         protected String aggregation;
@@ -397,10 +397,10 @@ public class OrionHDFSSink extends OrionSink {
         protected String hdfsFile;
         protected String hiveFields;
         
-        public Aggregator() {
+        public HDFSAggregator() {
             aggregation = "";
             mdAggregations = new HashMap<String, String>();
-        } // Aggregator
+        } // HDFSAggregator
         
         public String getAggregation() {
             return aggregation;
@@ -439,12 +439,12 @@ public class OrionHDFSSink extends OrionSink {
         
         public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
         
-    } // Aggregator
+    } // HDFSAggregator
     
     /**
-     * Class for aggregating aggregation in JSON row mode.
+     * Class for aggregating batches in JSON row mode.
      */
-    private class JSONRowAggregator extends Aggregator {
+    private class JSONRowAggregator extends HDFSAggregator {
         
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -493,23 +493,29 @@ public class OrionHDFSSink extends OrionSink {
                 String line = "{"
                     + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                     + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
                     + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
                     + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
                     + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                     + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
-                    + "}\n";
-                aggregation += line;
+                    + "}";
+                
+                if (aggregation.isEmpty()) {
+                    aggregation = line;
+                } else {
+                    aggregation += "\n" + line;
+                } // if else
             } // for
         } // aggregate
 
     } // JSONRowAggregator
     
     /**
-     * Class for aggregating aggregation in JSON column mode.
+     * Class for aggregating batches in JSON column mode.
      */
-    private class JSONColumnAggregator extends Aggregator {
+    private class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -554,7 +560,10 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\"";
+            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -569,15 +578,19 @@ public class OrionHDFSSink extends OrionSink {
             } // for
             
             // now, aggregate the line
-            aggregation += line + "}\n";
+            if (aggregation.isEmpty()) {
+                aggregation = line + "}";
+            } else {
+                aggregation += "\n" + line + "}";
+            } // if else
         } // aggregate
         
     } // JSONColumnAggregator
     
     /**
-     * Class for aggregating aggregation in CSV row mode.
+     * Class for aggregating batches in CSV row mode.
      */
-    private class CSVRowAggregator extends Aggregator {
+    private class CSVRowAggregator extends HDFSAggregator {
         
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -634,18 +647,32 @@ public class OrionHDFSSink extends OrionSink {
                 } // if
                 
                 // aggregate the metadata
-                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                String concatMdAggregation;
+                
+                if (mdAggregation.isEmpty()) {
+                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                } else {
+                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                } // if else
+                
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // aggreagate the data
-                aggregation += recvTimeTs / 1000 + ","
+                String line = recvTimeTs / 1000 + ","
                     + recvTime + ","
+                    + servicePath + ","
                     + entityId + ","
                     + entityType + ","
                     + attrName + ","
                     + attrType + ","
                     + attrValue.replaceAll("\"", "") + ","
-                    + printableAttrMdFileName + "\n";
+                    + printableAttrMdFileName;
+                
+                if (aggregation.isEmpty()) {
+                    aggregation = line;
+                } else {
+                    aggregation += "\n" + line;
+                } // if else
             } // for
         } // aggregate
         
@@ -659,10 +686,16 @@ public class OrionHDFSSink extends OrionSink {
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
                 JSONObject mdJSONObject = (JSONObject) mdObject;
-                csvMd += recvTimeTs + ","
+                String line = recvTimeTs + ","
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
-                        + mdJSONObject.get("value") + "\n";
+                        + mdJSONObject.get("value");
+                
+                if (csvMd.isEmpty()) {
+                    csvMd = line;
+                } else {
+                    csvMd += "\n" + line;
+                } // if else
             } // for
             
             return csvMd;
@@ -673,7 +706,7 @@ public class OrionHDFSSink extends OrionSink {
     /**
      * Class for aggregating aggregation in CSV column mode.
      */
-    private class CSVColumnAggregator extends Aggregator {
+    private class CSVColumnAggregator extends HDFSAggregator {
         
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -722,7 +755,7 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = recvTime;
+            String line = recvTime + "," + servicePath + "," + entityId + "," + entityType;
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -745,7 +778,14 @@ public class OrionHDFSSink extends OrionSink {
                 } // if
                 
                 // agregate the metadata
-                String concatMdAggregation = mdAggregation.concat(getCSVMetadata(attrMetadata, recvTimeTs));
+                String concatMdAggregation;
+                
+                if (mdAggregation.isEmpty()) {
+                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                } else {
+                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                } // if else
+                
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
@@ -753,7 +793,11 @@ public class OrionHDFSSink extends OrionSink {
             } // for
             
             // now, aggregate the line
-            aggregation += line + "\n";
+            if (aggregation.isEmpty()) {
+                aggregation = line;
+            } else {
+                aggregation += "\n" + line;
+            } // if else
         } // aggregate
         
         private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
@@ -766,10 +810,16 @@ public class OrionHDFSSink extends OrionSink {
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
                 JSONObject mdJSONObject = (JSONObject) mdObject;
-                csvMd += recvTimeTs + ","
+                String line = recvTimeTs + ","
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
-                        + mdJSONObject.get("value") + "\n";
+                        + mdJSONObject.get("value");
+                
+                if (csvMd.isEmpty()) {
+                    csvMd = line;
+                } else {
+                    csvMd += "\n" + line;
+                } // if else
             } // for
             
             return csvMd;
@@ -777,7 +827,7 @@ public class OrionHDFSSink extends OrionSink {
         
     } // CSVColumnAggregator
     
-    private Aggregator getAggregator(FileFormat fileFormat) {
+    private HDFSAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
                 return new JSONRowAggregator();
@@ -792,7 +842,7 @@ public class OrionHDFSSink extends OrionSink {
         } // switch
     } // getAggregator
     
-    private void persistAggregation(Aggregator aggregator) throws Exception {
+    private void persistAggregation(HDFSAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder();
         String hdfsFile = aggregator.getFile();
@@ -808,7 +858,7 @@ public class OrionHDFSSink extends OrionSink {
         } // if else
     } // persistAggregation
     
-    private void persistMDAggregations(Aggregator aggregator) throws Exception {
+    private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
         
         for (String hdfsMDFile : attrMDFiles) {
@@ -827,7 +877,7 @@ public class OrionHDFSSink extends OrionSink {
         } // for
     } // persistMDAggregations
     
-    private void createHiveTable(Aggregator aggregator) throws Exception {
+    private void createHiveTable(HDFSAggregator aggregator) throws Exception {
         persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields());
     } // createHiveTable
     
