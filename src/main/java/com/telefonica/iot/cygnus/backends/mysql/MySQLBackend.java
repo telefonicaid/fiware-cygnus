@@ -18,313 +18,42 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
-import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
-import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
-import com.telefonica.iot.cygnus.log.CygnusLogger;
-import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Map;
-import com.telefonica.iot.cygnus.utils.Constants;
-import java.sql.SQLTimeoutException;
-import java.util.HashMap;
-
 /**
- *
- * @author frb
+ * Interface for those backends implementing the persistence in MySQL.
  * 
- * MySQL related operations (database and table creation, context data insertion) when dealing with a MySQL
- * persistence backend.
+ * @author frb
  */
-public class MySQLBackend {
-    
-    private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private final String mysqlHost;
-    private final String mysqlPort;
-    private final String mysqlUsername;
-    private final String mysqlPassword;
-    private final HashMap<String, Connection> connections;
-    private MySQLDriver driver;
-    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
-            
-    /**
-     * Constructor.
-     * @param mysqlHost
-     * @param mysqlPort
-     * @param mysqlUsername
-     * @param mysqlPassword
-     */
-    public MySQLBackend(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
-        this.mysqlHost = mysqlHost;
-        this.mysqlPort = mysqlPort;
-        this.mysqlUsername = mysqlUsername;
-        this.mysqlPassword = mysqlPassword;
-        connections = new HashMap<String, Connection>();
-        driver = new MySQLDriver();
-    } // MySQLBackend
+public interface MySQLBackend {
     
     /**
-     * Gets the map of database name-connection. It is protected since it is only used by the tests.
-     * @return The mao of database name-connection.
+     * Available table types.
      */
-    protected HashMap<String, Connection> getConnections() {
-        return connections;
-    } // getCnnections
-    
-    /**
-     * Sets the MySQL driver. It is protected since it is only used by the tests.
-     * @param driver The MySQL driver to be set.
-     */
-    protected void setDriver(MySQLDriver driver) {
-        this.driver = driver;
-    } // setDriver
+    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
     
     /**
      * Creates a database, given its name, if not exists.
      * @param dbName
      * @throws Exception
      */
-    public void createDatabase(String dbName) throws Exception {
-        Statement stmt = null;
-        
-        // get a connection to an empty database
-        Connection con = getConnection("");
-        
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-        
-        try {
-            String query = "create database if not exists `" + dbName + "`";
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-        
-        closeMySQLObjects(con, stmt);
-    } // createDatabase
+    void createDatabase(String dbName) throws Exception;
     
     /**
      * Creates a table, given its name, if not exists in the given database.
      * @param dbName
      * @param tableName
+     * @param fieldNames
      * @throws Exception
      */
-    public void createTable(String dbName, String tableName) throws Exception {
-        Statement stmt = null;
-        
-        // get a connection to the given database
-        Connection con = getConnection(dbName);
-        
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-        
-        try {
-            String query = "create table if not exists `" + tableName + "` ("
-                    + Constants.RECV_TIME_TS + " long, "
-                    + Constants.RECV_TIME + " text, "
-                    + Constants.ENTITY_ID + " text, "
-                    + Constants.ENTITY_TYPE + " text, "
-                    + Constants.ATTR_NAME + " text, "
-                    + Constants.ATTR_TYPE + " text, "
-                    + Constants.ATTR_VALUE + " text, "
-                    + Constants.ATTR_MD + " text)";
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-        
-        closeMySQLObjects(con, stmt);
-    } // createTable
+    void createTable(String dbName, String tableName, String fieldNames) throws Exception;
     
     /**
-     * Inserts a new row in the given table within the given database representing a unique attribute change.
+     * Insert already processed context data into the given table within the given database.
      * @param dbName
      * @param tableName
-     * @param recvTimeTs
-     * @param recvTime
-     * @param entityId
-     * @param entityType
-     * @param attrName
-     * @param attrType
-     * @param attrValue
-     * @param attrMd
+     * @param fieldNames
+     * @param fieldValues
      * @throws Exception
      */
-    public void insertContextData(String dbName, String tableName, long recvTimeTs, String recvTime, String entityId,
-            String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception {
-        Statement stmt = null;
-        
-        // get a connection to the given database
-        Connection con = getConnection(dbName);
-            
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-        
-        try {
-            String query = "insert into `" + tableName + "` values ('" + recvTimeTs + "', '" + recvTime + "', '"
-                    + entityId + "', '" + entityType + "', '" + attrName + "', '" + attrType + "', '" + attrValue
-                    + "', '" + attrMd + "')";
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
-        } // try catch
-        
-        closeMySQLObjects(con, stmt);
-    } // insertContextData
-    
-    /**
-     * Inserts a new row in the given table within the given database representing full attribute list changes.
-     * @param dbName
-     * @param tableName
-     * @param recvTime
-     * @param attrs
-     * @param mds
-     * @throws Exception
-     */
-    public void insertContextData(String dbName, String tableName, String recvTime,
-            Map<String, String> attrs, Map<String, String> mds) throws Exception {
-        Statement stmt = null;
-        String columnNames = null;
-        String columnValues = null;
-        
-        // get a connection to the MySQL server and get a statement
-        Connection con = getConnection(dbName);
-        
-        try {
-            
-            stmt = con.createStatement();
-
-            // for query building purposes
-            columnNames = Constants.RECV_TIME;
-            columnValues = "'" + recvTime + "'";
-
-            for (String attrName : attrs.keySet()) {
-                columnNames += "," + attrName;
-                String attrValue = attrs.get(attrName);
-                columnValues += ",'" + attrValue + "'";
-            } // for
-            
-            for (String attrMdName : mds.keySet()) {
-                columnNames += "," + attrMdName;
-                String md = mds.get(attrMdName);
-                columnValues += ",'" + md + "'";
-            } // for
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-                
-        try {
-            // finish creating the query and execute it
-            String query = "insert into `" + tableName + "` (" + columnNames + ") values (" + columnValues + ")";
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
-        } // try catch
-        
-        closeMySQLObjects(con, stmt);
-    } // insertContextData
-    
-    /**
-     * Gets a connection to the MySQL server.
-     * @return
-     * @throws Exception
-     */
-    private Connection getConnection(String dbName) throws Exception {
-        try {
-            // FIXME: the number of cached connections should be limited to a certain number; with such a limit
-            //        number, if a new connection is needed, the oldest one is closed
-            Connection con = connections.get(dbName);
-
-            if (con == null || !con.isValid(0)) {
-                if (con != null) {
-                    con.close();
-                } // if
-                
-                con = driver.getConnection(mysqlHost, mysqlPort, dbName, mysqlUsername, mysqlPassword);
-                connections.put(dbName, con);
-            } // if
-
-            return con;
-        } catch (ClassNotFoundException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } // try catch
-    } // getConnection
-    
-    /**
-     * Close all the MySQL objects previously opened by doCreateTable and doQuery.
-     * @param con
-     * @param stmt
-     * @return True if the MySQL objects have been closed, false otherwise.
-     */
-    private void closeMySQLObjects(Connection con, Statement stmt) throws Exception {
-        if (con != null) {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive connection could not be closed. Details="
-                        + e.getMessage());
-            } // try catch
-        } // if
-
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive statement could not be closed. Details="
-                        + e.getMessage());
-            } // try catch
-        } // if
-    } // closeMySQLObjects
-    
-    /**
-     * This code has been extracted from MySQLBackend.getConnection() for testing purposes. By extracting it into a
-     * class then it can be mocked.
-     */
-    protected class MySQLDriver {
-        
-        /**
-         * Gets a MySQL connection.
-         * @param host
-         * @param port
-         * @param dbName
-         * @param user
-         * @param password
-         * @return A MySQL connection
-         * @throws Exception
-         */
-        Connection getConnection(String host, String port, String dbName, String user, String password)
-            throws Exception {
-            // dynamically load the MySQL JDBC driver
-            Class.forName(DRIVER_NAME);
-
-            // return a connection based on the MySQL JDBC driver
-            LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
-                    + mysqlUsername + "&password=XXXXXXXXXX");
-            return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
-                    mysqlUsername, mysqlPassword);
-        } // getConnection
-        
-    } // MySQLDriver
+    void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
     
 } // MySQLBackend
