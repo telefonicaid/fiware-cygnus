@@ -376,10 +376,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         return notification;
     } // parseEventBody
     
+    // TBD: this class must be private once all the sinks migrate to persistsBatch
     /**
      * Utility class for batch-like event accumulation purposes.
      */
-    private class Accumulator {
+    protected class Accumulator {
         
         // eventsPerDestination of events with default service path and destination
         private Batch defaultBatch;
@@ -463,7 +464,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             } // for
         } // accumulate
 
-        private void initializeBatching(long startDateMs) {
+        public void initializeBatching(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
             // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
             defaultBatch = new Batch();
