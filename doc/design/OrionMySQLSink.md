@@ -50,7 +50,7 @@ The context attributes within each context response/entity are iterated, and a n
 
 * `row`: A data row is added for each notified context attribute. This kind of row will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
