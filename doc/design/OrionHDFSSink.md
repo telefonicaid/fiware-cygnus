@@ -12,7 +12,7 @@ Content:
     * [Important notes](#section2.3)
         * [About the persistence mode](#section2.3.1)
         * [About the binary backend](#section2.3.2)
-        * [About the batch size](#section2.3.3)
+        * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
     * [`OrionHDFSSink` class](#section3.1)
     * [`HDFSBackendImpl` class](#section3.2)
@@ -49,23 +49,33 @@ The context attributes within each context response/entity are iterated, and a o
 * `json-row`: A JSON line is added for each notified context attribute. This kind of line will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `servicePath`: Notified fiware-servicePath, or the default configured one if not notified.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
     * `attrMd`: It contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, an empty array `[]` is inserted).
-* `json-column`: A single JSON line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
+* `json-column`: A single JSON line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`), plus four additional fields:
+    * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `servicePath`: The notified one or default one.
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
 * `csv-row`: A CSV line is added for each notified context attribute. As `json-row`, this kind of line will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `servicePath`: Notified fiware-servicePath, or the default configured one if not notified.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 this can be a JSON object or JSON array.
     * `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field sepator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
-* `csv-column`: A single CSV line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md_file` and containing the name of the HDFS file storing such metadata as explained above), plus an additional field about the reception time of the data (`recvTime`).
+* `csv-column`: A single CSV line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md_file` and containing the name of the HDFS file storing such metadata as explained above), plus four additional fields:
+    * `recvTime`: UTC timestamp in human-redable format ([ISO 6801](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `servicePath`: The notified one or default one.
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
 
 [Top](#top)
 
@@ -113,24 +123,24 @@ Assuming the following Flume event is created from a notified NGSI context data 
 Assuming `batch_size=1`, `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
 
 If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
+    {"recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
     
 If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
 
 If `file_format=csv-column` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    2015-04-20T12:13:22.41.124Z,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
+    2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
     
@@ -155,16 +165,16 @@ With respect to Hive, the content of the tables in the `json-row`, `json-column`
     Hive history file=/tmp/root/hive_job_log_root_201504201213_821987796.txt
     hive> select * from myuser_vehicles_4wheels_car1_car_row;
     OK
-    1429535775	2015-04-20T12:13:22.41.124Z	car1	car	speed		float	112.9	[]
-    1429535775	2015-04-20T12:13:22.41.124Z	car1	car	oil_level	float	74.6	[]
+    1429535775	2015-04-20T12:13:22.41.124Z	4wheels	car1	car	speed		float	112.9	[]
+    1429535775	2015-04-20T12:13:22.41.124Z	4wheels	car1	car	oil_level	float	74.6	[]
     hive> select * from myuser_vehicles_4wheels_car1_car_column;
-    2015-04-20T12:13:22.41.124Z		112.9	[]	74.6	[]
+    2015-04-20T12:13:22.41.124Z		4wheels	car1	car	112.9	[]	74.6	[]
     hive> select * from myuser_vehicles_4wheels_car1_car_row;
     OK
-    1429535775	2015-04-20T12:13:22.41.124Z	car1	car	speed		float	112.9	hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+    1429535775	2015-04-20T12:13:22.41.124Z	4wheels	car1	car	speed		float	112.9	hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
     1429535775	2015-04-20T12:13:22.41.124Z	car1	car	oil_level	float	74.6	hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
     hive> select * from myuser_vehicles_4wheels_car1_car_column;
-    2015-04-20T12:13:22.41.124Z		112.9	hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt	74.6	hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+    2015-04-20T12:13:22.41.124Z		4wheels	car1	car	112.9	hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt	74.6	hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
 
 NOTE: `hive` is the Hive CLI for locally querying the data.
 
@@ -190,7 +200,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
-| batch_size | no | 1 |
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 | hive\_server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
 | hive_host | no | localhost |
 | hive_port | no | 10000 |
@@ -216,6 +227,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
+    cygnusagent.sinks.hdfs-sink.batch_timeout = 30
     cygnusagent.sinks.hdfs-sink.hive_server_version = 2
     cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive_port = 10000
@@ -250,12 +262,14 @@ There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About the batch size
+####<a name="section2.3.3"></a>About batching
 As seen in the [implementation section](#section4), `OrionHDFSSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
 
-By default, `OrionHDFSSink` has a configured batch size of one, but as explained above, it is highly recommended to increase the batch size for performance purposes. Which is the optimal value? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+By default, `OrionHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
