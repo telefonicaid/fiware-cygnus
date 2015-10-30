@@ -253,18 +253,20 @@ public class OrionMySQLSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
             typedFieldNames = "("
-                    + Constants.RECV_TIME_TS + " long, "
-                    + Constants.RECV_TIME + " text, "
-                    + Constants.ENTITY_ID + " text, "
-                    + Constants.ENTITY_TYPE + " text, "
-                    + Constants.ATTR_NAME + " text, "
-                    + Constants.ATTR_TYPE + " text, "
-                    + Constants.ATTR_VALUE + " text, "
+                    + Constants.RECV_TIME_TS + " long,"
+                    + Constants.RECV_TIME + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + " text,"
+                    + Constants.ENTITY_ID + " text,"
+                    + Constants.ENTITY_TYPE + " text,"
+                    + Constants.ATTR_NAME + " text,"
+                    + Constants.ATTR_TYPE + " text,"
+                    + Constants.ATTR_VALUE + " text,"
                     + Constants.ATTR_MD + " text"
                     + ")";
             fieldNames = "("
                     + Constants.RECV_TIME_TS + ","
                     + Constants.RECV_TIME + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE + ","
                     + Constants.ATTR_NAME + ","
@@ -308,6 +310,7 @@ public class OrionMySQLSink extends OrionSink {
                 String row = "('"
                     + recvTimeTs + "','"
                     + recvTime + "','"
+                    + servicePath + "','"
                     + entityId + "','"
                     + entityType + "','"
                     + attrName + "','"
@@ -336,8 +339,14 @@ public class OrionMySQLSink extends OrionSink {
             super.initialize(cygnusEvent);
             
             // particulat initialization
-            typedFieldNames = "(" + Constants.RECV_TIME + " text";
-            fieldNames = "(" + Constants.RECV_TIME;
+            typedFieldNames = "(" + Constants.RECV_TIME + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + " text,"
+                    + Constants.ENTITY_ID + " text,"
+                    + Constants.ENTITY_TYPE + " text";
+            fieldNames = "(" + Constants.RECV_TIME + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + ","
+                    + Constants.ENTITY_ID + ","
+                    + Constants.ENTITY_TYPE;
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
