@@ -7,3 +7,4 @@
 - [BUG] Remove final line feed in the HDFS aggregation (#575)
 - [FEATURE] Add some interesting fields to HDFS persisted data, including migration scripts (#544)
 - [HARDENING] Add a batching timeout and accumulate the transaction IDs for right tracing (#562)
+- [FEATURE] Add some interesting fields to MySQL persisted data, including migration scripts (#501)
