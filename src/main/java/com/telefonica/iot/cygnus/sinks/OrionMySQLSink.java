@@ -30,6 +30,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import org.apache.flume.Context;
 
@@ -153,7 +154,10 @@ public class OrionMySQLSink extends OrionSink {
 
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        throw new Exception("Not yet supoported. You should be using persistBatch method.");
+        Accumulator accumulator = new Accumulator();
+        accumulator.initializeBatching(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
     } // persistOne
     
     @Override
