@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.json.simple.JSONArray;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -115,6 +116,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -135,6 +137,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -152,6 +155,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -463,6 +467,74 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } // if else
         } // try catch
     } // createResource
+    
+    /**
+     * Creates a view for a given resource in CKAN.
+     * @param resId Identifies the resource whose view is going to be created.
+     * @throws Exception
+     */
+    private void createView(String resourceId) throws Exception {
+        if (!existsView(resourceId)) {
+            try {
+                // create the CKAN request JSON
+                String jsonString = "{ \"resource_id\": \"" + resourceId + "\","
+                        + "\"view_type\": \"recline_grid_view\","
+                        + "\"title\": \"Recline grid view\" }";
+
+                // create the CKAN request URL
+                String urlPath = "/api/3/action/resource_view_create";
+
+                // do the CKAN request
+                JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+                // check the status
+                if (res.getStatusCode() == 200) {
+                    LOGGER.debug("Successful view creation (resourceId=" + resourceId + ")");
+                } else {
+                    throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
+                            + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+                } // if else if else
+            } catch (Exception e) {
+                if (e instanceof CygnusRuntimeError
+                        || e instanceof CygnusPersistenceError
+                        || e instanceof CygnusBadConfiguration) {
+                    throw e;
+                } else {
+                    throw new CygnusRuntimeError(e.getMessage());
+                } // if else
+            } // try catch
+        } // if
+    } // createView
+    
+    private boolean existsView(String resourceId) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{ \"id\": \"" + resourceId + "\" }";
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/resource_view_list";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful view listing (resourceId=" + resourceId + ")");
+                return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
+                        + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // existsView
     
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
