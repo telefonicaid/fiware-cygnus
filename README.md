@@ -832,6 +832,10 @@ cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 # select the table type from table-by-destination and table-by-service-path
 cygnusagent.sinks.mysql-sink.table_type = table-by-destination
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.mysql-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.mysql-sink.batch_timeout = 30
 
 # ============================================
 # OrionMongoSink configuration
