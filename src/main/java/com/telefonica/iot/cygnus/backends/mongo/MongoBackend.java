@@ -26,7 +26,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.DataModel;
@@ -56,7 +56,7 @@ public class MongoBackend {
     private final String mongoUsername;
     private final String mongoPassword;
     private final DataModel dataModel;
-    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackend.class);
             
     /**
      * Constructor.
