@@ -53,6 +53,7 @@ $ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
 In order to do it permanently, edit `/root/.bash_profile` (root user) or `/etc/profile` (other users).
 
 ##Configuring a test agent
+
 This kind of agent is the simplest one you can configure with Cygnus. It is based on a standard `HTTPSource`, a `MemoryChannel` and a `OrionTestSink`. Don't worry about the configuration details, specially those about the source; simply think on a Http listener waiting for Orion notifications on port TCP/5050 and sending that notifications in the form of Flume events to a testing purpose sink that will not really persist anything in a third-party storage, but will log the notified context data.
 
 (1) Create and edit a `/usr/cygnus/conf/agent_test.conf` file (as a sudoer):
