@@ -255,7 +255,7 @@ public class OrionMySQLSink extends OrionSink {
             typedFieldNames = "("
                     + Constants.RECV_TIME_TS + " long,"
                     + Constants.RECV_TIME + " text,"
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text,"
                     + Constants.ATTR_NAME + " text,"
@@ -266,7 +266,7 @@ public class OrionMySQLSink extends OrionSink {
             fieldNames = "("
                     + Constants.RECV_TIME_TS + ","
                     + Constants.RECV_TIME + ","
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE + ","
                     + Constants.ATTR_NAME + ","
@@ -340,11 +340,11 @@ public class OrionMySQLSink extends OrionSink {
             
             // particulat initialization
             typedFieldNames = "(" + Constants.RECV_TIME + " text,"
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text";
             fieldNames = "(" + Constants.RECV_TIME + ","
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE;
             
