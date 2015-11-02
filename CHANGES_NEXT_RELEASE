@@ -6,5 +6,7 @@
 - [BUG] Add support to CKAN 2.4 API changes (#546)
 - [BUG] Remove final line feed in the HDFS aggregation (#575)
 - [FEATURE] Add some interesting fields to HDFS persisted data (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes), including migration scripts (#544)
+- [FEATURE] Add some interesting fields to HDFS persisted data, including migration scripts (#544)
+- [HARDENING] Document how to choose the hadoop-core dependency for compilation purposes (#559)
 - [HARDENING] Add a batching timeout and accumulate the transaction IDs for right tracing (#562)
 - [FEATURE] Add some interesting fields to MySQL persisted data (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes), including migration scripts (#501)
