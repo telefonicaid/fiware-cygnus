@@ -51,13 +51,18 @@ The context attributes within each context response/entity are iterated, and a n
 * `row`: A data row is added for each notified context attribute. This kind of row will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `fiwareservicePath`: Notified fiware-servicePath, or the default configured one if not notified.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
     * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
-* `column`: A single data row is added for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and other for the metadata, named `<attrName>_md`), plus an additional field about the reception time of the data (`recvTime`).
+* `column`: A single data row is added for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and other for the metadata, named `<attrName>_md`), plus four additional fields:
+    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `fiwareservicePath`: The notified one or the default one.
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
 
 [Top](#top)
 
@@ -124,12 +129,12 @@ Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_pe
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                   | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  speed      | float     | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
 If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
@@ -161,11 +166,11 @@ If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMyS
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +----------------------------+-------+----------+-----------+--------------+
-    | recvTime                   | speed | speed_md | oil_level | oil_level_md |
-    +----------------------------+-------+----------+-----------+--------------+
-    | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
-    +----------------------------+-------+----------+-----------+--------------+
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
     
 If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
@@ -197,12 +202,12 @@ If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQ
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels;
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                   | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  speed      | float     | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
     
 If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
@@ -234,11 +239,11 @@ If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionMy
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels;
-    +----------------------------+-------+----------+-----------+--------------+
-    | recvTime                   | speed | speed_md | oil_level | oil_level_md |
-    +----------------------------+-------+----------+-----------+--------------+
-    | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
-    +----------------------------+-------+----------+-----------+--------------+
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
     
 NOTES:
