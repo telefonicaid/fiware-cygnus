@@ -387,7 +387,7 @@ public class OrionMySQLSink extends OrionSink {
                 return;
             } // if
             
-            String column = "('" + recvTime + "'";
+            String column = "('" + recvTime + "','" + servicePath + "','" + entityId + "','" + entityType + "'";
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -427,7 +427,8 @@ public class OrionMySQLSink extends OrionSink {
         String tableName = aggregator.getTableName();
         
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
-                + dbName + "), Table (" + tableName + "), Data (" + fieldValues + ")");
+                + dbName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
+                + fieldValues + ")");
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
