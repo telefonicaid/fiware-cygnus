@@ -276,8 +276,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildResName(String destination) throws Exception {
-        boolean isDefDestination = destination.startsWith("def_");
-        String resName = isDefDestination ? destination.substring(4) : destination;
+        String resName = destination;
         
         if (resName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
