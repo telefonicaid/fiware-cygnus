@@ -457,7 +457,7 @@ If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMyS
 
     mysql> select * from 4wheels_car1_car;
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
-    | recvTime                   | fiwareServicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
