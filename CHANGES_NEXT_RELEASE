@@ -8,3 +8,4 @@
 - [FEATURE] Add some interesting fields to HDFS persisted data, including migration scripts (#544)
 - [HARDENING] Document how to choose the hadoop-core dependency for compilation purposes (#559)
 - [HARDENING] Add a batching timeout and accumulate the transaction IDs for right tracing (#562)
+- [BUG] Ask for CKAN resources when populating a package cache after calling organization_show (#589)
