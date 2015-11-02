@@ -6,7 +6,8 @@ Content:
 * [`cygnus_translator_0.1_to_0.3.sh`](#section2)
 * [`cygnus_translator_0.2_to_0.3.sh`](#section3)
 * [`cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh`](#section4)
-* [Reporting issues and contact information](#section5)
+* [`cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh`](#section5)
+* [Reporting issues and contact information](#section6)
 
 ##<a name="section1"></a>`cygnus_translator_0.1_to_0.2.sh`
 Input parameters:
@@ -95,7 +96,7 @@ where hdfs_folder: a valid HDFS folder path
       backup     : a value within true|false
 ```
 
-As can be seen, a HDFS folder must be given; this folder is recursively iterated in order to find all the HDFS files within all the HDFS sub-folders. The format of the files must be give as well, since this will imply specific additions of fields (see above). Since the HDFS folder is recursively iterated, all the files within that folder and its sub-folders must be written in the same file format. Finally, a customizable null value must be given, in addition to the decission of backing or not the existent data into `.bak` files within the same path than the original one. Please observe that backing data within a HDFS backend may consume large resources (in average, the original data is duplicated when backing it).
+As can be seen, a HDFS folder must be given; this folder is recursively iterated in order to find all the HDFS files within all the HDFS sub-folders. The format of the files must be given as well, since this will imply specific addition of fields (see above). Since the HDFS folder is recursively iterated, all the files within that folder and its sub-folders must be written in the same file format. Finally, a customizable null value must be given, in addition to the decission of backing or not the existent data into `.bak` files within the same path than the original one. Please observe that backing data within a HDFS backend may consume large resources (in average, the original data is duplicated when backing it).
 
 Example assuming the file format is `json-row`, a custom value of `null` describing the emptyness and not backing the original data:
 
@@ -132,7 +133,59 @@ $ hadoop fs -cat /user/johndoe/dataset/data.txt
 
 [Top](#top)
 
-##<a name="section5"></a>Reporting issues and contact information
+##<a name="section5"></a>`cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh`
+This scripts adds certain fields not available in previous versions to 0.10.0 to the MySQL tables potentially containing historical context data. Specifically:
+
+* Tables written in `row` format will have a new fields named `fiwareservicePath`.
+* Tables written in `column` format will have new fields named `fiwareservicePath`, `entityId` and `entityType`.
+* 
+Usage:
+
+```
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh 
+Usage: cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh user password database tableFormat backup
+where user        : a valid user in the MySQL server granted to modify the below database
+      password    : password for the above user
+      database    : a valid database name
+      table_format: a value within row|column
+      backup      : a value within true|false
+```
+
+As can be seen, a MySQL database must be given; this database is iterated in order to find all the MySQL tables. The format of the tables must be given as well, since this will imply specific addition of fields (see above). Since the MySQL database is iterated, all the tables within that database must be created in the same table format. Finally, the decission of backing or not the existent data into `_bak` tables within the same database than the original one is an option. Please observe that backing data within a MySQL database may consume large resources (in average, the original data is duplicated when backing it).
+
+Example assuming the table format is `row` and not backing the original data:
+
+```
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh root pass johndoe row false
+```
+
+Assuming the content of a table within `johndoe` as:
+
+```
+$ mysql -u cb -pcbpass -e "select * from johndoe.dataset";
++------------+--------------------------+----------+------------+----------+-----------+--------+
+| recvTimeTs | recvTime                 | entityId | entityType | attrName | attrValue | attrMd |
++------------+--------------------------+----------+------------+----------+-----------+--------+
+| 1429535775 | 2015-04-20T12:13:22.124Z | car1     | car        | speed    | 120       | []     |
+| 1429535776 | 2015-04-20T12:13:22.125Z | car1     | car        | speed    | 121       | []     |
++------------+--------------------------+----------+------------+----------+-----------+--------+
+```
+
+Then the translation will be:
+
+```
+# mysql -u cb -pcbpass -e "select * from johndoe.dataset";
++------------+----------------------------+-------------------+----------+------------+----------+-----------+--------+
+| recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName | attrValue | attrMd |
++------------+----------------------------+-------------------+----------+------------+----------+-----------+--------+
+| 1429535775   | 2015-04-20T12:13:22.124Z | NULL              | car1     | car        | speed    | 120       | []     |
+| 1429535776   | 2015-04-20T12:13:22.124Z | NULL              | car1     | car        | speed    | 121       | []     |
++------------+----------------------------+-------------------+----------+------------+----------+-----------+--------+
+```
+
+[Top](#top)
+
+##<a name="section6"></a>Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
