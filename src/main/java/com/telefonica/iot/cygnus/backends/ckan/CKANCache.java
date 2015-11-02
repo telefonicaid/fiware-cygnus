@@ -210,7 +210,7 @@ public class CKANCache extends HttpBackend {
         LOGGER.debug("Package not found in the cache, querying CKAN for it (orgName=" + orgName + ", pkgName="
                 + pkgName + ")");
         
-        // query CKAN for the organization information
+        // query CKAN for the package information
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
@@ -325,7 +325,7 @@ public class CKANCache extends HttpBackend {
      */
     private void populatePackagesMap(JSONArray packages, String orgName) throws Exception {
         // this check is for debuging purposes
-        if (packages.size() == 0) {
+        if (packages == null || packages.size() == 0) {
             LOGGER.debug("The pacakges list is empty, nothing to cache");
             return;
         } // if
@@ -355,8 +355,8 @@ public class CKANCache extends HttpBackend {
             LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + " -> pkgName/pkgId=" + pkgName
                     + "/" + pkgId + ")");
             
-            // get the resources
-            JSONArray resources = (JSONArray) pkg.get("resources");
+            // from CKAN 2.4, the organization_show method does not return the per-package list of resources
+            JSONArray resources = getResources(pkgName);
 
             // populate the resources map
             LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
@@ -374,7 +374,7 @@ public class CKANCache extends HttpBackend {
      */
     private void populateResourcesMap(JSONArray resources, String orgName, String pkgName, boolean checkExistence) {
         // this check is for debuging purposes
-        if (resources.size() == 0) {
+        if (resources == null || resources.size() == 0) {
             LOGGER.debug("The resources list is empty, nothing to cache");
             return;
         } // if
@@ -404,6 +404,23 @@ public class CKANCache extends HttpBackend {
                     + " -> " + "resourceName/resourceId=" + resourceName + "/" + resourceId + ")");
         } // while
     } // populateResourcesMap
+    
+    private JSONArray getResources(String pkgName) throws Exception {
+        LOGGER.debug("Going to get the resources list from package " + pkgName);
+        String ckanURL = "/api/3/action/package_show?id=" + pkgName;
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Authorization", apiKey));
+        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+
+        if (res.getStatusCode() == 200) {
+            // get the resource and populate the resource map
+            JSONObject result = (JSONObject) res.getJsonObject().get("result");
+            JSONArray resources = (JSONArray) result.get("resources");
+            return resources;
+        } else {
+            return null;
+        } // if else
+    } // getResources
     
     /**
      * Sets the organizations map. This is protected since it is only used by the tests.
