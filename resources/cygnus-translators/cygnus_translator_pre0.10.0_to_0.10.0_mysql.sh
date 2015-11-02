@@ -25,8 +25,8 @@ if [ $# -ne 5 ]; then
         echo "where user        : a valid user in the MySQL server granted to modify the below database"
         echo "      password    : password for the above user"
         echo "      database    : a valid database name"
-        echo "      table_format: a value within row|column"
-        echo "      backup      : a value within true|false"
+        echo "      table_format: either row or column"
+        echo "      backup      : either true or false"
         exit 1;
 fi
 
