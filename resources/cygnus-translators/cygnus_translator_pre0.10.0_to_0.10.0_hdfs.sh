@@ -25,7 +25,7 @@ if [ $# -ne 4 ]; then
 	echo "where hdfs_folder: a valid HDFS folder path"
 	echo "      file_format: a value within json-row|json-column|csv-row|csv-column"
 	echo "      null_value : string to be inserted as null value, use the keyword \"empty\" for an empty value"
-	echo "      backup     : a value within true|false"
+	echo "      backup     : either true or false"
 	exit 1;
 fi
 
@@ -167,13 +167,13 @@ function translate_folder {
 			translate_folder $entry
 		else
 			if [ "$fileFormat" == "json-row" ]; then
-				translate_file_json_row $entry $backup
+				translate_file_json_row $entry
 			elif [ "$fileFormat" == "json-column" ]; then
-				translate_file_json_column $entry $backup
+				translate_file_json_column $entry
 			elif [ "$fileFormat" == "csv-row" ]; then
-				translate_file_csv_row $entry $backup
+				translate_file_csv_row $entry
 			elif [ "$fileFormat" == "csv-column" ]; then
-				translate_file_csv_column $entry $backup
+				translate_file_csv_column $entry
 			else
 				echo "Unknown file format: $fileFormat"
 			fi
