@@ -355,8 +355,6 @@ public class CKANCache extends HttpBackend {
             LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + " -> pkgName/pkgId=" + pkgName
                     + "/" + pkgId + ")");
             
-//            // get the resources
-//            JSONArray resources = (JSONArray) pkg.get("resources");
             // from CKAN 2.4, the organization_show method does not return the per-package list of resources
             JSONArray resources = getResources(pkgName);
 
