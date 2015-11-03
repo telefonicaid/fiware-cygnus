@@ -64,10 +64,11 @@ public class OrionHDFSSink extends OrionSink {
     private String password;
     private FileFormat fileFormat;
     private String oauth2Token;
+    private boolean enableHive;
     private String hiveServerVersion;
     private String hiveHost;
     private String hivePort;
-    private boolean krb5;
+    private boolean enableKrb5;
     private String krb5User;
     private String krb5Password;
     private String krb5LoginConfFile;
@@ -153,6 +154,10 @@ public class OrionHDFSSink extends OrionSink {
         } // switch;
     } // getFileFormat
     
+    protected boolean getEnableHive() {
+        return enableHive;
+    } // getEnableHive
+    
     /**
      * Gets the Hive server version. It is protected due to it is only required for testing purposes.
      * @return The Hive server version
@@ -182,9 +187,9 @@ public class OrionHDFSSink extends OrionSink {
      * purposes.
      * @return "true" if Kerberos is being used for authentication, otherwise "false"
      */
-    protected String getKrb5Auth() {
-        return (krb5 ? "true" : "false");
-    } // getKrb5Auth
+    protected String getEnableKrb5Auth() {
+        return (enableKrb5 ? "true" : "false");
+    } // getEnableKrb5Auth
     
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -278,15 +283,63 @@ public class OrionHDFSSink extends OrionSink {
             fileFormat = FileFormat.JSONROW;
             LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
         } // if else if
-
-        hiveServerVersion = context.getString("hive_server_version", "2");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion + ")");
-        hiveHost = context.getString("hive_host", "localhost");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")");
-        hivePort = context.getString("hive_port", "10000");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")");
-        krb5 = context.getBoolean("krb5_auth", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (krb5 ? "true" : "false")
+        
+        // Hive configuration
+        String enableHiveStr = context.getString("hive", "true");
+        enableHive = enableHiveStr.equals("true");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive=" + (enableHive ? "true" : "false")
+                + ")");
+        
+        String hiveHostOld = context.getString("hive_host");
+        String hiveHostNew = context.getString("hive.host");
+        
+        if (hiveHostNew != null && hiveHostNew.length() > 0) {
+            hiveHost = hiveHostNew;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.host=" + hiveHost + ")");
+        } else if (hiveHostOld != null && hiveHostOld.length() > 0) {
+            hiveHost = hiveHostOld;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")"
+                    + " -- DEPRECATED, use hive.host instead");
+        } else {
+            hiveHost = "localhost";
+            LOGGER.debug("[" + this.getName() + "] Defaulting to hive.host=localhost");
+        } // if else
+        
+        String hivePortOld = context.getString("hive_port");
+        String hivePortNew = context.getString("hive.port");
+        
+        if (hivePortNew != null && hivePortNew.length() > 0) {
+            hivePort = hivePortNew;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
+        } else if (hivePortOld != null && hivePortOld.length() > 0) {
+            hivePort = hivePortOld;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")"
+                    + " -- DEPRECATED, use hive.port instead");
+        } else {
+            hivePort = "10000";
+            LOGGER.debug("[" + this.getName() + "] Defaulting to hive.port=10000");
+        } // if else
+        
+        String hiveServerVersionOld = context.getString("hive_server_version");
+        String hiveServerVersionNew = context.getString("hive.server_version");
+        
+        if (hiveServerVersionNew != null && hiveServerVersionNew.length() > 0) {
+            hiveServerVersion = hiveServerVersionNew;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version=" + hiveServerVersion
+                    + ")");
+        } else if (hiveServerVersionOld != null && hiveServerVersionOld.length() > 0) {
+            hiveServerVersion = hiveServerVersionOld;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion
+                    + ")"
+                    + " -- DEPRECATED, use hive.server_version instead");
+        } else {
+            hiveServerVersion = "2";
+            LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
+        } // if else
+        
+        // Kerberos configuration
+        enableKrb5 = context.getBoolean("krb5_auth", false);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (enableKrb5 ? "true" : "false")
                 + ")");
         krb5User = context.getString("krb5_auth.krb5_user", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_user=" + krb5User + ")");
@@ -297,6 +350,7 @@ public class OrionHDFSSink extends OrionSink {
                 + ")");
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
+        
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
@@ -312,11 +366,11 @@ public class OrionHDFSSink extends OrionSink {
             // create the persistence backend
             if (backendImpl == BackendImpl.BINARY) {
                 persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
-                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
                         krb5ConfFile, serviceAsNamespace);
             } else if (backendImpl == BackendImpl.REST) {
                 persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
-                        hiveServerVersion, hiveHost, hivePort, krb5, krb5User, krb5Password, krb5LoginConfFile,
+                        hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
                         krb5ConfFile, serviceAsNamespace);
             } else {
                 LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
@@ -378,7 +432,9 @@ public class OrionHDFSSink extends OrionSink {
             } // if
             
             // create the Hive table
-            createHiveTable(aggregator);
+            if (enableHive) {
+                createHiveTable(aggregator);
+            } // if
         } // for
     } // persistBatch
 
