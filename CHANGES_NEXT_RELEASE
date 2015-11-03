@@ -12,3 +12,4 @@
 - [FEATURE] Add some interesting fields to MySQL persisted data (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes), including migration script (#501)
 - [BUG] Fix the CKAN resource name building, removing references to old default destination (#592)
 - [FEATURE] Allow enabling/disabling Hive in OrionHDFSSink (#555)
+- [HARDENING] Explain the batching mechanism in the performance document (#564)
