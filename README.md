@@ -534,7 +534,25 @@ If `data_model=collection-per-attribute` and `attr_persistence=row` then `OrionM
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels_car1_car_speed
+    sth_/4wheels_car1_car_oil_level
+    system.indexes
+    > db['sth_/4wheels_car1_car_speed'].find()
+     { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "112.9" }
+    > db['sth_/4wheels_car1_oil_level'].find()
+     { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
 
+Finally, the pair of parameters `data_model=collection-per-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. 
+In this case, in fact, `OrionMongoSink` will not persist anything; only a warning will be logged.
 
 NOTES:
 
