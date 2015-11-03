@@ -202,10 +202,14 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
-| hive\_server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
-| hive_host | no | localhost |
-| hive_port | no | 10000 |
-| krb5_auth | no | false |
+| hive | no | true | <i>true</i> or <i>false</i> |
+| hive\_server\_version<br>(**deprecated**) | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2.<br>Still usable; if both are configured, `hive.server_version` is preferred |
+| hive.server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
+| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred |
+| hive.host | no | localhost |
+| hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred |
+| hive.port | no | 10000 |
+| krb5_auth | no | false | <i>true</i> or <i>false</i> |
 | krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
 | krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false` |
@@ -228,9 +232,10 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
-    cygnusagent.sinks.hdfs-sink.hive_server_version = 2
-    cygnusagent.sinks.hdfs-sink.hive_host = 192.168.80.35
-    cygnusagent.sinks.hdfs-sink.hive_port = 10000
+    cygnusagent.sinks.hdfs-sink.hive = true
+    cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+    cygnusagent.sinks.hdfs-sink.hive.host = 192.168.80.35
+    cygnusagent.sinks.hdfs-sink.hive.port = 10000
     cygnusagent.sinks.hdfs-sink.krb5_auth = false
 
 [Top](#top)
