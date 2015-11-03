@@ -44,6 +44,7 @@ import org.bson.Document;
 /**
  *
  * @author frb
+ * @author xdelox
  */
 public class MongoBackend {
     
