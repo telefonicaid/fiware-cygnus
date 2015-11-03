@@ -37,6 +37,7 @@ import java.util.Map;
  * such aggregated measures based on the stored raw data; in that case the usage of OrionSTHSink becomes deprecated.
  * 
  * @author frb
+ * @author xdelox
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
 

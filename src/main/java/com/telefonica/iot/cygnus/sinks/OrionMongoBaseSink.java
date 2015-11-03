@@ -29,6 +29,7 @@ import org.apache.flume.Context;
 /**
  *
  * @author frb
+ * @author xdelox
  */
 public abstract class OrionMongoBaseSink extends OrionSink {
     
