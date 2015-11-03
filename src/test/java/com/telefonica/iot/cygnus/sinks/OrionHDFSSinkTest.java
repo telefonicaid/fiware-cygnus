@@ -188,7 +188,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testConfigureDeprecatedParams() {
-        System.out.println("configure");
+        System.out.println("Testing OrionHDFSSinkTest.configure (deprecated parameters are used)");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = true;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -213,7 +213,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testConfigure() {
-        System.out.println("configure");
+        System.out.println("Testing OrionHDFSSinkTest.configure");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -238,7 +238,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("start");
+        System.out.println("Testing OrionHDFSSinkTest.start");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
