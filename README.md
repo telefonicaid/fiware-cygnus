@@ -776,21 +776,23 @@ cygnusagent.sinks.hdfs-sink.file_format = json-column
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.hdfs-sink.batch_timeout = 30
-# Hive server version (1 or 2)
-cygnusagent.sinks.hdfs-sink.hive_server_version = 2
-# Hive FQDN/IP address of the Hive server
-cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
-# Hive port for Hive external table provisioning
-cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# Hive enabling
+cygnusagent.sinks.hdfs-sink.hive = true
+# Hive server version, 1 or 2 (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+# Hive FQDN/IP address of the Hive server (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
+# Hive port for Hive external table provisioning (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.port = 10000
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
-# Kerberos username
+# Kerberos username (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
-# Kerberos password
+# Kerberos password (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
-# Kerberos login file
+# Kerberos login file (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
-# Kerberos configuration file
+# Kerberos configuration file (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
