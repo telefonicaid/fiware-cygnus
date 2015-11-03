@@ -1,6 +1,35 @@
-# Tuning tips for increasing the performance
+#<a name="top"></a>Tuning tips for increasing the performance
+Content:
 
-## Sink parallelization
+* [Batching](#section1)
+* [Sink parallelization](#section2)
+    * [Multiple sinks, single channel](#section2.1)
+    * [Multiple sinks, multiple channels](#section2.2)
+    * [Why the `LoadBalancingSinkProcessor` is not suitable](#section2.3)
+* [Channel considerations](#section3)
+    * [Channel type](#section3.1)
+    * [Channel capacity](#section3.2)
+* [Events TTL](#section4)
+* [Grouping rules](#section5)
+* [Writing logs](#section6)
+* [Reporting issues and contact information](#section7)
+
+##<a name="section1"></a>Batching
+<i>NOTE: The batching mechanism is currently only available for `OrionHDFSSink` and `OrionMySQLSink`.</i>
+
+Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `OrionSink`,  the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
+
+What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
+
+Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
+
+Nevertheless, a risk when using batches is the last batch never gets built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be preocessed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+By default, all the sinks have a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage.
+
+[Top](#top)
+
+##<a name="section2"></a>Sink parallelization
 Most of the processing effort done by Cygnus is located at the sinks, and these elements can be a bottleneck if not configured appropriately.
 
 Basic Cygnus configuration is about a source writting Flume events into a single channel where a single sink consumes those events:
@@ -22,7 +51,9 @@ Basic Cygnus configuration is about a source writting Flume events into a single
 
 This can be clearly moved to a multiple sink configuration running in parallel. But there is not a single configuration but many:
 
-### Multiple sinks, single channel
+[Top](#top)
+
+###<a name="section2.1"></a>Multiple sinks, single channel
 You can simply add more sinks consuming events from the same single channel. This configuration theoretically increases the processing capabilities in the sink side, but usually shows an important drawback, specially if the events are consumed by the sinks very fast: the sinks have to compete for the single channel. Thus, some times you can find that adding more sinks in this way simply turns the system slower than a single sink configuration. This configuration is only recommended when the sinks require a lot of time to process a single event, ensuring few collisions when accessing the channel.
 
     cygnusagent.sources = mysource
@@ -49,8 +80,10 @@ You can simply add more sinks consuming events from the same single channel. Thi
     ... other sink configurations...
 
     ... other sinks configurations...
+    
+[Top](#top)
 
-### Multiple sinks, multiple channels
+###<a name="section2.2"></a>Multiple sinks, multiple channels
 The above mentioned drawback can be solved by configuring a channel per each sink, avoiding the competition for the single channel.
 
 However, when multiple channels are used for a same storage, then some kind of <i>dispatcher</i> deciding which channels will receive a copy of the events is required. This is the goal of the Flume <i>Channel Selectors</i>, a piece of software selecting the appropriate set of channels the Flume events will be put in. The default one is [`Replicating Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default), i.e. each time a Flume event is generated at the sources, it is replicated in all the channels connected to those sources. There is another selector, the [`Multiplexing Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector), which puts the events in a channel given certain matching-like criteria. Nevertheless:
@@ -100,19 +133,24 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
 Basically, the custom <i>Channel Selector</i> type must be configured, together with the mapping of channels per storage. This mapping is configured in the form of:
 
 * Total number of different storages. E.g. if we have a MySQL storage, a CKAN storage and a HDFS storage then `cygnusagent.sources.mysource.selector.storages = 3`. Please observe this apply to different storages of the same type, e.g. if we have a MySQL storage and two different HDFS storages (i.e. different HDFS endpoints), then `cygnusagent.sources.mysource.selector.storages = 3` as well.
-* Subset of channels associated to each storage. The union of all the subsets must be equal to all the channels configured for the source. E.g. if `cygnusagent.sources.mysource.channels = ch1 ch2 ch3 ch4 ch5 ch6` and if `ch1` is associated to a MySQL storage, `ch2` and `ch3` are associated to a CKAN storage and `ch4`, `ch5` and `ch6` are associated to a HDFS storage then `cygnusagent.sources.mysource.selector.storages.storage1 = ch1`, `cygnusagent.sources.mysource.selector.storages.storage2 = ch2,ch3` and `cygnusagent.sources.mysource.selector.storages.storage3 = ch4,ch5,ch6`. 
+* Subset of channels associated to each storage. The union of all the subsets must be equal to all the channels configured for the source. E.g. if `cygnusagent.sources.mysource.channels = ch1 ch2 ch3 ch4 ch5 ch6` and if `ch1` is associated to a MySQL storage, `ch2` and `ch3` are associated to a CKAN storage and `ch4`, `ch5` and `ch6` are associated to a HDFS storage then `cygnusagent.sources.mysource.selector.storages.storage1 = ch1`, `cygnusagent.sources.mysource.selector.storages.storage2 = ch2,ch3` and `cygnusagent.sources.mysource.selector.storages.storage3 = ch4,ch5,ch6`.
 
-### Why the `LoadBalancingSinkProcessor` is not suitable
+[Top](#top)
+
+###<a name="section2.3"></a>Why the `LoadBalancingSinkProcessor` is not suitable
 [This](http://flume.apache.org/FlumeUserGuide.html#load-balancing-sink-processor) Flume <i>Sink Processor</i> is not suitable for our parallelization purposes due to the load balancing is done in a sequential way. I.e. either in a round robin-like configuration of the load balancer either in a ramdom way, the sinks are used one by one and not at the same time.
 
-## Channel considerations
+[Top](#top)
 
-### Channel type
+##<a name="section3"></a>Channel considerations
+###<a name="section3.1"></a>Channel type
 The most important thing when designing a channel for Cygnus (in general, a Flume-based application) is the tradeoff between speed and reliability. This applies especialy to the channels.
 
 On the one hand, the `MemoryChannel` is a very fast channel since it is implemented directly in memory, but it is not reliable at all if, for instance, Cygnus crashes for any reason and it is recovered by a third party system (let's say <i>Monit</i>): in that case the Flume events put into the memory-based channel before the crash are lost. On the other hand, the `FileChannel` and `JDBCChannel` are very reliable since there is a permanent support for the data in terms of OS files or RDBM tables, respectively. Nevertheless, they are slower than a `MemoryChannel` sice the I/O is done against the HDD and not against the memory.
 
-### Channel capacity
+[Top](#top)
+
+###<a name="section3.2"></a>Channel capacity
 There are no empirical tests showing a decrease of the performance if the channel capacity is configured with a large number, let's say 1 million of Flume events. The `MemoryChannel` is supposed to be designed as a chained FIFO queue, and the persistent channels only manage a list of pointers to the real data, which should not be hard to iterate.
 
 Such large capacities are only required when the Flume sources are faster than the Flume sinks (and even in that case, sooner or later, the channels will get full) or a lot of processing retries are expected within the sinks (see next section).
@@ -123,22 +161,47 @@ In order to calculate the appropiate capacity, just have in consideration the fo
 * The amount of events to be gotten from the channel by the sinks per unit time.
 * An estimation of the amount of events that could not be processed per unit time, and thus to be reinjected into the channel (see next section).
 
-## Events TTL
+[Top](#top)
+
+##<a name="section4"></a>Events TTL
 Every Flume event managed by Cygnus has associated a <i>Time-To-Live</i> (TTL), a number specifying how many times that event can be reinjected in the channel the sink got it from. Events are reinjected when a processing error occurs (for instance, the persistence system is not available, there has been a communication breakdown, etc.). This TTL has to be configured very carefully since large TTLs may lead to a quick channel capacity exhaustion, and once reached that capacity new events cannot be put into the channel. In addition, the more large is the TTL, the more will decrease the performance of the Cygnus instance since both new fresh events will have to coexist with old not processed events in the queue. 
 
 If you don't care about not processed events, you may configure a 0 TTL, obtaining the maximum performance regarding this aspect.
 
-## `DestinationExtractor` matching rules 
-The destination extraction feature is a powerful tool for <i>routing</i> your data, i.e. deciding the right destination (HDFS file, MySQL table, CKAN resource) for your context data; on the contrary, the default destination is used, i.e. the concatenation of the entity identifier and the entity type.
+[Top](#top)
 
-As you may suppose, the usage of the destination extractor is slower than using the default. This is because the destination is decided after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many matching rules as you want/need.
+##<a name="section5"></a>Grouping rules
+The grouping rules feature is a powerful tool for <i>routing</i> your data, i.e. deciding the right destination (HDFS file, MySQL table, CKAN resource) for your context data; on the contrary, the default destination is used, i.e. the concatenation of the entity identifier and the entity type.
 
-Nevertheless, you may write your matching rules in a smart way:
+As you may suppose, the usage of the grouping rules is slower than using the default. This is because the destination is decided after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many groupin rules as you want/need.
 
-* Place the most probably matching rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
+Nevertheless, you may write your grouping rules in a smart way:
+
+* Place the most probably grouping rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
 * The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belog to (see [doc/design/interceptors.md](doc/design/interceptors.md) for more details on these concepts). Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
-## Contact information
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
-<br>
-Fermín Galán Márquez (fermin.galanmarquez@telefonica.com) 
+[Top](#top)
+
+##<a name="section6"></a>Writing logs
+Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debuging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level.
+
+Logging level Cygnus run with is configured in `/usr/cugnus/conf/log4.properties`. `INFO` is configured by dafault:
+
+     flume.root.logger=INFO,LOGFILE
+
+[Top](#top)
+
+##<a name="section7"></a>Reporting issues and contact information
+There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
+
+* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
+* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
+* Personal email:
+    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
+    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
+    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
+    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+
+**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
+
+[Top](#top)
