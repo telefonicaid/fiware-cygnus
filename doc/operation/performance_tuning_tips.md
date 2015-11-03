@@ -23,14 +23,17 @@ What is important regarding the batch mechanism is it largely increases the perf
 
 Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
 
-Nevertheless, a risk when using batches is the last batch never gets built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be preocessed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+Nevertheless, a couple of risks arise when using batches:
+
+* The first one is the last batch may never get built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be preocessed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+* The second one is the data within the batch may be lost if Cygnus crashes or it is stopped while accumulating it. Please observe until the batch size (or the timeout) is reached the data within the batch is not persisted and it exists nowhere in the data workflow (the NGSI source -typically Orion Context Broker- most probably will not have a copy of the data anymore once it has been notified). There is an under study [issue](https://github.com/telefonicaid/fiware-cygnus/issues/566) regarding this.
 
 By default, all the sinks have a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. These are the parameters all the sinks have for these purpose:
 
     <agent_name>.sinks.<sink_name>.batch_size = 1
     <agent_name>.sinks.<sink_name>.batch_timeout = 30
 
-Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage.
+Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. On the contrary, very large batch sizes and timeouts may have impact on your data persistence if Cygnus crashes or it is stopped in the meantime.
 
 [Top](#top)
 
@@ -188,7 +191,7 @@ Nevertheless, you may write your grouping rules in a smart way:
 [Top](#top)
 
 ##<a name="section6"></a>Writing logs
-Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debuging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level.
+Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debuging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level. Logs are totaly disabled by using the `OFF` level.
 
 Logging level Cygnus run with is configured in `/usr/cugnus/conf/log4.properties`. `INFO` is configured by dafault:
 
