@@ -14,3 +14,4 @@
 - [FEATURE] Allow enabling/disabling Hive in OrionHDFSSink (#555)
 - [HARDENING] Explain the batching mechanism in the performance document (#564)
 - [HARDENING] Fix the documentation regarding the installation from sources (#596)
+- [BUG] Add extra fields (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes) to Hive tables (#598)
