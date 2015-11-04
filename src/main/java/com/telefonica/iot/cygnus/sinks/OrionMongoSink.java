@@ -38,6 +38,7 @@ import org.apache.flume.Event;
  * such aggregated measures based on the stored raw data; in that case the usage of OrionSTHSink becomes deprecated.
  * 
  * @author frb
+ * @author xdelox
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
 
@@ -116,6 +117,9 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                 continue;
             } // if
 
+            HashMap attrs = new HashMap();
+            HashMap mds = new HashMap();
+
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -125,19 +129,39 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                         + attrType + ")");
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE  && rowAttrPersistence) {
                     collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], attrName,
                             false, entityId, entityType, fiwareService);
                     backend.createCollection(dbName, collectionName);
                 } // if
 
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: " + dbName
-                        + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
-                        + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
-                        + attrMetadata);
-                backend.insertContextDataRaw(dbName, collectionName, recvTimeTs / 1000, recvTime,
-                        entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                if (this.rowAttrPersistence) {
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
+                            + "," + recvTime + "," + entityId + "," + entityType + ","
+                            + attrName + "," + attrType + "," + attrValue + "," + attrMetadata);
+                    this.backend.insertContextDataRaw(
+                            dbName, collectionName, recvTimeTs.longValue() / 1000L, recvTime,
+                            entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                } else {
+                    attrs.put(attrName, attrValue);
+                    mds.put(attrName + "_md", attrMetadata);
+                }
+
             } // for
+            if (!this.rowAttrPersistence) {
+                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                    LOGGER.warn("Persisting data by columns is useless for collection-per-attribute data model");
+                } else {
+                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
+                            + "," + recvTime + "," + entityId + "," + entityType + ","
+                            + attrs.toString() + "," + mds.toString() + "]");
+                    this.backend.insertContextDataRaw(
+                            dbName, collectionName, recvTimeTs.longValue() / 1000L,
+                            recvTime, entityId, entityType, attrs, mds);
+                }
+            }
         } // for
     } // persistOne
     
