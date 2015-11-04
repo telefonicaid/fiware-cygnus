@@ -509,13 +509,14 @@ public class OrionHDFSSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            hiveFields = Constants.RECV_TIME_TS + " bigint, "
-                    + Constants.RECV_TIME + " string, "
-                    + Constants.ENTITY_ID + " string, "
-                    + Constants.ENTITY_TYPE + " string, "
-                    + Constants.ATTR_NAME + " string, "
-                    + Constants.ATTR_TYPE + " string, "
-                    + Constants.ATTR_VALUE + " string, "
+            hiveFields = Constants.RECV_TIME_TS + " bigint,"
+                    + Constants.RECV_TIME + " string,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " string,"
+                    + Constants.ENTITY_ID + " string,"
+                    + Constants.ENTITY_TYPE + " string,"
+                    + Constants.ATTR_NAME + " string,"
+                    + Constants.ATTR_TYPE + " string,"
+                    + Constants.ATTR_VALUE + " string,"
                     + Constants.ATTR_MD + " array<struct<name:string,type:string,value:string>>";
         } // initialize
         
@@ -553,7 +554,7 @@ public class OrionHDFSSink extends OrionSink {
                 String line = "{"
                     + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                     + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
                     + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
@@ -582,7 +583,10 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             
             // particular initialization
-            hiveFields = Constants.RECV_TIME + " string";
+            hiveFields = Constants.RECV_TIME + " string,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " string,"
+                    + Constants.ENTITY_ID + " string,"
+                    + Constants.ENTITY_TYPE + " string";
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -621,7 +625,7 @@ public class OrionHDFSSink extends OrionSink {
             } // if
             
             String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
-                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             
@@ -655,13 +659,14 @@ public class OrionHDFSSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            hiveFields = Constants.RECV_TIME_TS + " bigint, "
-                    + Constants.RECV_TIME + " string, "
-                    + Constants.ENTITY_ID + " string, "
-                    + Constants.ENTITY_TYPE + " string, "
-                    + Constants.ATTR_NAME + " string, "
-                    + Constants.ATTR_TYPE + " string, "
-                    + Constants.ATTR_VALUE + " string, "
+            hiveFields = Constants.RECV_TIME_TS + " bigint,"
+                    + Constants.RECV_TIME + " string,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " string,"
+                    + Constants.ENTITY_ID + " string,"
+                    + Constants.ENTITY_TYPE + " string,"
+                    + Constants.ATTR_NAME + " string,"
+                    + Constants.ATTR_TYPE + " string,"
+                    + Constants.ATTR_VALUE + " string,"
                     + Constants.ATTR_MD_FILE + " string";
         } // initialize
 
@@ -773,7 +778,10 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             
             // particular initialization
-            hiveFields = Constants.RECV_TIME + " string";
+            hiveFields = Constants.RECV_TIME + " string,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " string,"
+                    + Constants.ENTITY_ID + " string,"
+                    + Constants.ENTITY_TYPE + " string";
             
             // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
