@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.json.simple.JSONArray;
 
 /**
  * Interface for those backends implementing the persistence in CKAN.
@@ -66,7 +67,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     @Override
     public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName,
-        String attrName, String attrType, String attrValue, String attrMd) throws Exception {
+        String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
+        throws Exception {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, true);
@@ -77,7 +79,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } else {
             LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName/resId=" + resName + "/" + resId + ")");
-            insert(recvTimeTs, recvTime, resId, attrName, attrType, attrValue, attrMd);
+            insert(recvTimeTs, recvTime, resId, entityId, entityType, attrName, attrType, attrValue, attrMd);
         } // if else
     } // persist
 
@@ -114,6 +116,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -134,6 +137,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -151,6 +155,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.addRes(orgName, pkgName, resName);
                 cache.setResId(resName, resId);
                 createDataStore(resId);
+                createView(resId);
                 return resId;
             } else {
                 return null;
@@ -167,14 +172,16 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * Insert record in datastore (row mode).
      * @param recvTimeTs timestamp.
      * @param recvTime timestamp (human readable)
-     * @param resId the resource in which datastore the record is going to be inserted.
+     * @param resourceId the resource in which datastore the record is going to be inserted.
+     * @param entityId entiyd id
+     * @param entityType entity type
      * @param attrName attribute CKANBackend.
      * @param attrType attribute type.
      * @param attrValue attribute value.
      * @throws Exception
      */
-    private void insert(long recvTimeTs, String recvTime, String resourceId, String attrName, String attrType,
-            String attrValue, String attrMd) throws Exception {
+    private void insert(long recvTimeTs, String recvTime, String resourceId, String entityId, String entityType,
+            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
         String urlPath;
         String jsonString;
         
@@ -182,6 +189,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // create the CKAN request JSON
             String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                     + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
                     + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
                     + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
                     + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
@@ -383,6 +392,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // create the CKAN request JSON
             String jsonString = "{ \"name\": \"" + resourceName + "\", "
                     + "\"url\": \"none\", "
+                    + "\"format\": \"\", "
                     + "\"package_id\": \"" + pkgId + "\" }";
             
             // create the CKAN request URL
@@ -425,6 +435,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                     + "\", \"fields\": [ "
                     + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
                     + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                    + "{ \"id\": \"" + Constants.ENTITY_ID + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.ENTITY_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"},"
@@ -455,6 +467,74 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } // if else
         } // try catch
     } // createResource
+    
+    /**
+     * Creates a view for a given resource in CKAN.
+     * @param resId Identifies the resource whose view is going to be created.
+     * @throws Exception
+     */
+    private void createView(String resourceId) throws Exception {
+        if (!existsView(resourceId)) {
+            try {
+                // create the CKAN request JSON
+                String jsonString = "{ \"resource_id\": \"" + resourceId + "\","
+                        + "\"view_type\": \"recline_grid_view\","
+                        + "\"title\": \"Recline grid view\" }";
+
+                // create the CKAN request URL
+                String urlPath = "/api/3/action/resource_view_create";
+
+                // do the CKAN request
+                JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+                // check the status
+                if (res.getStatusCode() == 200) {
+                    LOGGER.debug("Successful view creation (resourceId=" + resourceId + ")");
+                } else {
+                    throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
+                            + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+                } // if else if else
+            } catch (Exception e) {
+                if (e instanceof CygnusRuntimeError
+                        || e instanceof CygnusPersistenceError
+                        || e instanceof CygnusBadConfiguration) {
+                    throw e;
+                } else {
+                    throw new CygnusRuntimeError(e.getMessage());
+                } // if else
+            } // try catch
+        } // if
+    } // createView
+    
+    private boolean existsView(String resourceId) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{ \"id\": \"" + resourceId + "\" }";
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/resource_view_list";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful view listing (resourceId=" + resourceId + ")");
+                return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
+            } else {
+                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
+                        + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // existsView
     
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
