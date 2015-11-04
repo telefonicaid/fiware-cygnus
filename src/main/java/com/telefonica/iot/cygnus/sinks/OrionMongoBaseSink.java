@@ -29,6 +29,7 @@ import org.apache.flume.Context;
 /**
  *
  * @author frb
+ * @author xdelox
  */
 public abstract class OrionMongoBaseSink extends OrionSink {
     
@@ -46,7 +47,8 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String collectionPrefix;
     protected boolean shouldHash;
     protected MongoBackend backend;
-    
+    protected boolean rowAttrPersistence;
+
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
      * @return
@@ -110,6 +112,14 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected MongoBackend getBackend() {
         return backend;
     } // getBackend
+
+    /**
+     * Gets the rowAttrPersistence. It is protected since it is used by the tests.
+     * @return
+     */
+    protected boolean getRowAttrPersistence() {
+        return this.rowAttrPersistence;
+    }
     
     @Override
     public void configure(Context context) {
@@ -129,6 +139,9 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         shouldHash = context.getBoolean("should_hash", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
         super.configure(context);
+        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (this.rowAttrPersistence ? "row" : "column") + ")");
     } // configure
     
     @Override
