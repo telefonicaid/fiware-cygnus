@@ -18,17 +18,19 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType;
+import static com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType.TABLEBYDESTINATION;
+import static com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType.TABLEBYSERVICEPATH;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Map;
 import org.apache.flume.Context;
 
@@ -36,26 +38,10 @@ import org.apache.flume.Context;
  *
  * @author frb
  * 
- * Custom MySQL sink for Orion Context Broker. The MySQL design for this sink is:
- *  - There is a database per user, being its attrName:
- *    cygnus_<username>
- *  - Each entity has its data stored in a specific table, being its attrName:
- *    cygnus_<entity_id>_<entity_type>
- *  - Each event data is stored in the appropriate table as a new row, having each row the following fields:
- *    recvTimeTs, recvTime, entityId, entityType, attrName, attrType, attrValue
- * 
- * As can be seen, a table is created per each entity, containing all the historical values this entity's attributes
- * have had.
- * 
- * It is important to note that certain degree of reliability is achieved by using a rolling back mechanism in the
- * channel, i.e. an event is not removed from the channel until it is not appropriately persisted.
+ * Detailed documentation can be found at:
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionMySQLSink.md
  */
 public class OrionMySQLSink extends OrionSink {
-    
-    /**
-     * Available table types.
-     */
-    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
     
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionMySQLSink.class);
     private String mysqlHost;
@@ -64,7 +50,7 @@ public class OrionMySQLSink extends OrionSink {
     private String mysqlPassword;
     private TableType tableType;
     private boolean rowAttrPersistence;
-    private MySQLBackend persistenceBackend;
+    private MySQLBackendImpl persistenceBackend;
     
     /**
      * Constructor.
@@ -126,7 +112,7 @@ public class OrionMySQLSink extends OrionSink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected MySQLBackend getPersistenceBackend() {
+    protected MySQLBackendImpl getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
     
@@ -134,7 +120,7 @@ public class OrionMySQLSink extends OrionSink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(MySQLBackend persistenceBackend) {
+    protected void setPersistenceBackend(MySQLBackendImpl persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
@@ -161,115 +147,299 @@ public class OrionMySQLSink extends OrionSink {
     public void start() {
         // create the persistence backend
         LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
-        persistenceBackend = new MySQLBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+        persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+        Accumulator accumulator = new Accumulator();
+        accumulator.initializeBatching(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        // select batch depending on the enable grouping parameter
+        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
         
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-        } // if else
-
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, false);
-
-        // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
-        // than checking if it exits and then creating it
-        String dbName = buildDbName(fiwareService);
-        
-        // the database can be automatically created both in the per-column or per-row mode; anyway, it has no sense to
-        // create it in the per-column mode because there will not be any table within the database
-        if (rowAttrPersistence) {
-            persistenceBackend.createDatabase(dbName);
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
         } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            MySQLAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.initialize(subBatch.get(0));
+
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the fieldValues
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+        } // for
+    } // persistBatch
+    
+    /**
+     * Class for aggregating fieldValues.
+     */
+    private abstract class MySQLAggregator {
         
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
+        // string containing the data fieldValues
+        protected String aggregation;
+
+        protected String service;
+        protected String servicePath;
+        protected String destination;
+        protected String dbName;
+        protected String tableName;
+        protected String typedFieldNames;
+        protected String fieldNames;
         
-        for (int i = 0; i < contextResponses.size(); i++) {
-            // get the i-th contextElement
-            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            ContextElement contextElement = contextElementResponse.getContextElement();
+        public MySQLAggregator() {
+            aggregation = "";
+        } // MySQLAggregator
+        
+        public String getAggregation() {
+            return aggregation;
+        } // getAggregation
+        
+        public String getDbName() {
+            return dbName;
+        } // getDbName
+        
+        public String getTableName() {
+            return tableName;
+        } // getTableName
+        
+        public String getTypedFieldNames() {
+            return typedFieldNames;
+        } // getTypedFieldNames
+        
+        public String getFieldNames() {
+            return fieldNames;
+        } // getFieldNames
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            destination = cygnusEvent.getDestination();
+            dbName = buildDbName(service);
+            tableName = buildTableName(servicePath, destination, tableType);
+        } // initialize
+        
+        public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
+        
+    } // MySQLAggregator
+    
+    /**
+     * Class for aggregating batches in row mode.
+     */
+    private class RowAggregator extends MySQLAggregator {
+        
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            typedFieldNames = "("
+                    + Constants.RECV_TIME_TS + " long,"
+                    + Constants.RECV_TIME + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.ENTITY_ID + " text,"
+                    + Constants.ENTITY_TYPE + " text,"
+                    + Constants.ATTR_NAME + " text,"
+                    + Constants.ATTR_TYPE + " text,"
+                    + Constants.ATTR_VALUE + " text,"
+                    + Constants.ATTR_MD + " text"
+                    + ")";
+            fieldNames = "("
+                    + Constants.RECV_TIME_TS + ","
+                    + Constants.RECV_TIME + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.ENTITY_ID + ","
+                    + Constants.ENTITY_TYPE + ","
+                    + Constants.ATTR_NAME + ","
+                    + Constants.ATTR_TYPE + ","
+                    + Constants.ATTR_VALUE + ","
+                    + Constants.ATTR_MD
+                    + ")";
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // build the table name
-            String tableName = buildTableName(servicePaths[i], destinations[i], tableType);
-            
-            // if the attribute persistence is based in rows, create the table where the data will be persisted, since
-            // these tables are fixed 7-field row ones; otherwise, the size of the table is unknown and cannot be
-            // created in execution time, it must be previously provisioned
-            if (rowAttrPersistence) {
-                // create the table for this entity if not existing yet... the cost of trying yo create it is the same
-                // than checking if it exits and then creating it
-                persistenceBackend.createTable(dbName, tableName);
-            } // if
-            
-            // iterate on all this entity's attributes, if there are attributes
+            // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
+
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
-                continue;
+                return;
             } // if
             
-            // this is used for storing the attribute's names and values when dealing with a per column attributes
-            // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
-            // at the same time
-            HashMap<String, String> attrs = new HashMap<String, String>();
-            
-            // this is used for storing the attribute's names (sufixed with "-md") and metadata when dealing with a per
-            // column attributes persistence; in that case the persistence is not done attribute per attribute, but
-            // persisting all of them at the same time
-            HashMap<String, String> mds = new HashMap<String, String>();
-
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
-                if (rowAttrPersistence) {
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
-                            + ", Table: " + tableName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
-                            + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
-                            + attrMetadata);
-                    persistenceBackend.insertContextData(dbName, tableName, recvTimeTs / 1000, recvTime,
-                            entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                // create a column and aggregate it
+                String row = "('"
+                    + recvTimeTs + "','"
+                    + recvTime + "','"
+                    + servicePath + "','"
+                    + entityId + "','"
+                    + entityType + "','"
+                    + attrName + "','"
+                    + attrType + "','"
+                    + attrValue + "','"
+                    + attrMetadata
+                    + "')";
+                
+                if (aggregation.isEmpty()) {
+                    aggregation += row;
                 } else {
-                    attrs.put(attrName, attrValue);
-                    mds.put(attrName + "_md", attrMetadata);
+                    aggregation += "," + row;
                 } // if else
             } // for
-            
-            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
-            // attribute list of attrName-values.
-            if (!rowAttrPersistence) {
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database: " + dbName
-                        + ", Table: " + tableName + ", Timestamp: " + recvTime + ", Data (attrs): " + attrs.toString()
-                        + ", (metadata): " + mds.toString());
-                persistenceBackend.insertContextData(dbName, tableName, recvTime, attrs, mds);
-            } // if
-        } // for
-    } // persist
+        } // aggregate
+
+    } // RowAggregator
     
+    /**
+     * Class for aggregating batches in column mode.
+     */
+    private class ColumnAggregator extends MySQLAggregator {
+
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+            
+            // particulat initialization
+            typedFieldNames = "(" + Constants.RECV_TIME + " text,"
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.ENTITY_ID + " text,"
+                    + Constants.ENTITY_TYPE + " text";
+            fieldNames = "(" + Constants.RECV_TIME + ","
+                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.ENTITY_ID + ","
+                    + Constants.ENTITY_TYPE;
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                return;
+            } // if
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                typedFieldNames += "," + attrName + " text," + attrName + "_md text";
+                fieldNames += "," + attrName + "," + attrName + "_md";
+            } // for
+            
+            typedFieldNames += ")";
+            fieldNames += ")";
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
+            } // if
+            
+            String column = "('" + recvTime + "','" + servicePath + "','" + entityId + "','" + entityType + "'";
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(false);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                
+                // create part of the column with the current attribute (a.k.a. a column)
+                column += ",'" + attrValue + "','"  + attrMetadata + "'";
+            } // for
+            
+            // now, aggregate the column
+            if (aggregation.isEmpty()) {
+                aggregation += column + ")";
+            } else {
+                aggregation += "," + column + ")";
+            } // if else
+        } // aggregate
+        
+    } // ColumnAggregator
+    
+    private MySQLAggregator getAggregator(boolean rowAttrPersistence) {
+        if (rowAttrPersistence) {
+            return new RowAggregator();
+        } else {
+            return new ColumnAggregator();
+        } // if else
+    } // getAggregator
+    
+    private void persistAggregation(MySQLAggregator aggregator) throws Exception {
+        String typedFieldNames = aggregator.getTypedFieldNames();
+        String fieldNames = aggregator.getFieldNames();
+        String fieldValues = aggregator.getAggregation();
+        String dbName = aggregator.getDbName();
+        String tableName = aggregator.getTableName();
+        
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
+                + dbName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
+                + fieldValues + ")");
+        
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createDatabase(dbName);
+            persistenceBackend.createTable(dbName, tableName, typedFieldNames);
+        } // if
+        
+        persistenceBackend.insertContextData(dbName, tableName, fieldNames, fieldValues);
+    } // persistAggregation
+
     /**
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService

@@ -18,14 +18,14 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImpl;
+import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
-import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.HashMap;
+import java.util.ArrayList;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -46,13 +46,12 @@ public class OrionHDFSSinkTest {
     @Mock
     private HttpClientFactory mockHttpClientFactory;
     @Mock
-    private HDFSBackendImpl mockWebHDFSBackend;
+    private HDFSBackendImplREST mockWebHDFSBackend;
     
     // instance to be tested
     private OrionHDFSSink sink;
     
-    // other instances
-    private Context context;
+    // other inmutable instances
     private NotifyContextRequest singleNotifyContextRequest;
     private NotifyContextRequest multipleNotifyContextRequest;
     
@@ -63,26 +62,30 @@ public class OrionHDFSSinkTest {
     private final String hdfsPassword = "12345";
     private final String oauth2Token = "tokenabcdefghijk";
     private final String serviceAsNamespace = "false";
-    private final String fileFormat = "json-row";
+    private final String enableHive = "true";
     private final String hiveServerVersion = "2";
     private final String hiveHost = "localhost";
     private final String hivePort = "10000";
-    private final String krb5Auth = "false";
+    private final String enableKrb5Auth = "false";
     private final String enableGrouping = "true";
     
-    // header contants
-    private final String timestamp = "123456789";
-    private final String normalServiceName = "vehicles";
-    private final String abnormalServiceName =
+    // batches constants
+    private final Long recvTimeTs = 123456789L;
+    private final String normalService = "vehicles";
+    private final String abnormalService =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String singleServicePathName = "4wheels";
-    private final String multipleServicePathName = "4wheelsSport,4wheelsUrban";
-    private final String abnormalServicePathName =
+    private final String normalDefaultServicePath = "4wheels";
+    private final String rootServicePath = "";
+    private final String abnormalDefaultServicePath =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String rootServicePathName = "";
-    private final String singleDestinationName = "car1_car";
-    private final String multipleDestinationName = "sport1,urban1";
-    private final String abnormalDestinationName =
+    private final String normalGroupedServicePath = "cars";
+    private final String abnormalGroupedServicePath =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+    private final String normalDefaultDestination = "car1_car";
+    private final String abnormalDefaultDestination =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private final String normalGroupedDestination = "my_cars";
+    private final String abnormalGroupedDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
     
     // notification constants
@@ -167,20 +170,7 @@ public class OrionHDFSSinkTest {
         sink = new OrionHDFSSink();
         sink.setPersistenceBackend(mockWebHDFSBackend);
         
-        // set up other instances
-        context = new Context();
-        context.put("hdfs_host", cosmosHost[0]);
-        context.put("hdfs_port", cosmosPort);
-        context.put("hdfs_username", hdfsUsername);
-        context.put("hdfs_password", hdfsPassword);
-        context.put("oauth2_token", oauth2Token);
-        context.put("service_as_namespace", serviceAsNamespace);
-        context.put("file_format", fileFormat);
-        context.put("hive_server_version", hiveServerVersion);
-        context.put("hive_host", hiveHost);
-        context.put("hive_port", hivePort);
-        context.put("krb5_auth", krb5Auth);
-        context.put("enable_grouping", enableGrouping);
+        // set up other immutable instances
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
@@ -194,11 +184,14 @@ public class OrionHDFSSinkTest {
     } // setUp
 
     /**
-     * Test of configure method, of class OrionHDFSSink.
+     * Test of configure method, of class OrionHDFSSink. Deprecated parameters are used.
      */
     @Test
-    public void testConfigure() {
-        System.out.println("configure");
+    public void testConfigureDeprecatedParams() {
+        System.out.println("Testing OrionHDFSSinkTest.configure (deprecated parameters are used)");
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = true;
+        Context context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
         assertEquals(cosmosPort, sink.getHDFSPort());
@@ -207,10 +200,36 @@ public class OrionHDFSSinkTest {
         assertEquals(oauth2Token, sink.getOAuth2Token());
         assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
         assertEquals(fileFormat, sink.getFileFormat());
+        assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
         assertEquals(hiveServerVersion, sink.getHiveServerVersion());
         assertEquals(hiveHost, sink.getHiveHost());
         assertEquals(hivePort, sink.getHivePort());
-        assertEquals(krb5Auth, sink.getKrb5Auth());
+        assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
+        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
+    } // testConfigureDeprecatedParams
+    
+    /**
+     * Test of configure method, of class OrionHDFSSink. No deprecated parameters are used.
+     */
+    @Test
+    public void testConfigure() {
+        System.out.println("Testing OrionHDFSSinkTest.configure");
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
+        sink.configure(context);
+        assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
+        assertEquals(cosmosPort, sink.getHDFSPort());
+        assertEquals(hdfsUsername, sink.getHDFSUsername());
+        assertEquals(hdfsPassword, sink.getHDFSPassword());
+        assertEquals(oauth2Token, sink.getOAuth2Token());
+        assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
+        assertEquals(fileFormat, sink.getFileFormat());
+        assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
+        assertEquals(hiveServerVersion, sink.getHiveServerVersion());
+        assertEquals(hiveHost, sink.getHiveHost());
+        assertEquals(hivePort, sink.getHivePort());
+        assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
     } // testConfigure
 
@@ -219,7 +238,10 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("start");
+        System.out.println("Testing OrionHDFSSinkTest.start");
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -228,23 +250,46 @@ public class OrionHDFSSinkTest {
     } // testStart
 
     /**
-     * Test of persist method, of class OrionHDFSSink. File formats are tested.
-     * @throws java.lang.Exception
+     * Test of persistBatch method, of class OrionHDFSSink. Null batches are tested.
      */
     @Test
-    public void testPersistFileFormats() throws Exception {
-        System.out.println("Testing OrionHDFSSinkTest.persist (json-row file format)");
-        context.put("file_format", "json-row");
+    public void testPersistNullBatches() {
+        System.out.println("Testing OrionHDFSSinkTest.persist (null batches)");
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(null, null);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+    } // testPersistNullBatches
+    
+    /**
+     * Test of persistBatch method, of class OrionHDFSSink. File formats are tested.
+     */
+    @Test
+    public void testPersistFileFormats() {
+        // common objects
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        System.out.println("Testing OrionHDFSSinkTest.persist (json-row file format)");
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -252,17 +297,14 @@ public class OrionHDFSSinkTest {
         } // try catch finally
         
         System.out.println("Testing OrionHDFSSinkTest.persist (json-column file format)");
-        context.put("file_format", "json-column");
+        fileFormat = "json-column";
+        useDeprecatedParams = false;
+        context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -270,17 +312,14 @@ public class OrionHDFSSinkTest {
         } // try catch finally
         
         System.out.println("Testing OrionHDFSSinkTest.persist (csv-row file format)");
-        context.put("file_format", "csv-row");
+        fileFormat = "csv-row";
+        useDeprecatedParams = false;
+        context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -288,17 +327,14 @@ public class OrionHDFSSinkTest {
         } // try catch finally
         
         System.out.println("Testing OrionHDFSSinkTest.persist (csv-column file format)");
-        context.put("file_format", "csv-column");
+        fileFormat = "csv-column";
+        useDeprecatedParams = false;
+        context = createContext(useDeprecatedParams, fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -307,22 +343,26 @@ public class OrionHDFSSinkTest {
     } // testPersistFileFormats
     
     /**
-     * Test of persist method, of class OrionHDFSSink. Special resources length is tested.
+     * Test of persistBatch method, of class OrionHDFSSink. Special resources length is tested.
      * @throws java.lang.Exception
      */
     @Test
     public void testPersistResourceLengths() throws Exception {
+        // common objects
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
+        
         System.out.println("Testing OrionHDFSSinkTest.persist (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -332,14 +372,13 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSinkTest.persist (too long service name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
+        defaultBatch = createBatch(recvTimeTs, abnormalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -348,14 +387,13 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSinkTest.persist (too long servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, abnormalServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
+        defaultBatch = createBatch(recvTimeTs, normalService, abnormalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -364,14 +402,13 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSinkTest.persist (too long destination name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
+        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, abnormalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -379,22 +416,26 @@ public class OrionHDFSSinkTest {
     } // testPersistResourceLengths
     
     /**
-     * Test of persist method, of class OrionHDFSSink. Special service and service-path are tested.
+     * Test of persistOne method, of class OrionHDFSSink. Special service and service-path are tested.
      * @throws java.lang.Exception
      */
     @Test
     public void testPersistServiceServicePath() throws Exception {
+        // common objects
+        String fileFormat = "json-row";
+        boolean useDeprecatedParams = false;
+        Context context = createContext(useDeprecatedParams, fileFormat);
+        
         System.out.println("Testing OrionHDFSSinkTest.persist (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, rootServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -405,19 +446,63 @@ public class OrionHDFSSinkTest {
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, multipleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
+        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persist(headers, multipleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
     } // testPersistServiceServicePath
+    
+    private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
+            ContextElement contextElement) {
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+            contextElement);
+        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
+        groupedBatchEvents.add(groupedEvent);
+        Batch batch = new Batch();
+        batch.addEvents(destination, groupedBatchEvents);
+        return batch;
+    } // createBatch
+    
+    private Context createContext(boolean useDeprecatedParams, String fileFormat) {
+        Context context = new Context();
+        context.put("hdfs_password", hdfsPassword);
+        
+        if (useDeprecatedParams) {
+            context.put("cosmos_host", cosmosHost[0]);
+            context.put("cosmos_port", cosmosPort);
+            context.put("cosmos_default_username", hdfsUsername);
+        } else {
+            context.put("hdfs_host", cosmosHost[0]);
+            context.put("hdfs_port", cosmosPort);
+            context.put("hdfs_username", hdfsUsername);
+        } // if else
+        
+        context.put("oauth2_token", oauth2Token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("file_format", fileFormat);
+        
+        if (useDeprecatedParams) {
+            context.put("hive_server_version", hiveServerVersion);
+            context.put("hive_host", hiveHost);
+            context.put("hive_port", hivePort);
+        } else {
+            context.put("hive", enableHive);
+            context.put("hive.server_version", hiveServerVersion);
+            context.put("hive.host", hiveHost);
+            context.put("hive.port", hivePort);
+        } // if else
+        
+        context.put("krb5_auth", enableKrb5Auth);
+        context.put("enable_grouping", enableGrouping);
+        return context;
+    } // createContext
     
 } // OrionHDFSSinkTest
