@@ -38,12 +38,11 @@ import org.json.simple.JSONObject;
 public class CKANCache extends HttpBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANCache.class);
-    private String apiKey;
+    private final String apiKey;
     private HashMap<String, HashMap<String, ArrayList<String>>> tree; // this cache only contain human readable names
     private HashMap<String, String> orgMap; // this cache contains the translation from organization name to identifier
     private HashMap<String, String> pkgMap; // this cache contains the translation from package name to identifier
     private HashMap<String, String> resMap; // this cache contains the translation from resource name to identifier
-    private String ckanVersion;
     
     /**
      * Constructor.
@@ -59,15 +58,6 @@ public class CKANCache extends HttpBackend {
         orgMap = new HashMap<String, String>();
         pkgMap = new HashMap<String, String>();
         resMap = new HashMap<String, String>();
-        
-        // get the CKAN version (just once)
-        LOGGER.debug("Going to get the CKAN version");
-        
-        try {
-            ckanVersion = getCKANVersion();
-        } catch (Exception e) {
-            LOGGER.error("Could not get the CKAN version. Details=" + e.getMessage());
-        } // try catch // try catch // try catch // try catch
     } // CKANCache
     
     /**
@@ -167,7 +157,7 @@ public class CKANCache extends HttpBackend {
         LOGGER.debug("Organization not found in the cache, querying CKAN for it (orgName=" + orgName + ")");
         
         // query CKAN for the organization information
-        String ckanURL = "/api/3/action/organization_show?id=" + orgName;
+        String ckanURL = "/api/3/action/organization_show?id=" + orgName + "&include_datasets=true";
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
@@ -220,7 +210,7 @@ public class CKANCache extends HttpBackend {
         LOGGER.debug("Package not found in the cache, querying CKAN for it (orgName=" + orgName + ", pkgName="
                 + pkgName + ")");
         
-        // query CKAN for the organization information
+        // query CKAN for the package information
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
@@ -307,7 +297,17 @@ public class CKANCache extends HttpBackend {
                 LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
                         + ")");
                 populateResourcesMap(resources, orgName, pkgName, true);
-                return true;
+                
+                // check if the resource is within the resources cache, once populated
+                if (tree.get(orgName).get(pkgName).contains(resName)) {
+                    LOGGER.debug("Resource found in the cache, once queried CKAN " + "(orgName=" + orgName
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                    return true;
+                } else {
+                    LOGGER.debug("Resource not found in the cache, once queried CKAN " + "(orgName=" + orgName
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                    return false;
+                } // if else
             } // if else
         } else if (res.getStatusCode() == 404) {
             throw new CygnusRuntimeError("Unexpected package error when updating its resources... the package was "
@@ -325,7 +325,7 @@ public class CKANCache extends HttpBackend {
      */
     private void populatePackagesMap(JSONArray packages, String orgName) throws Exception {
         // this check is for debuging purposes
-        if (packages.size() == 0) {
+        if (packages == null || packages.size() == 0) {
             LOGGER.debug("The pacakges list is empty, nothing to cache");
             return;
         } // if
@@ -355,22 +355,8 @@ public class CKANCache extends HttpBackend {
             LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + " -> pkgName/pkgId=" + pkgName
                     + "/" + pkgId + ")");
             
-            // get the resources
-            JSONArray resources;
-
-            // this piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show"
-            // method returns no resource lists for its packages! (not in CKAN 2.2)
-            // more info --> https://github.com/telefonicaid/fiware-cygnus/issues/153
-            // if the resources list is null we must try to get it package by package
-            if (ckanVersion.equals("2.0")) {
-                LOGGER.debug("CKAN version is 2.0, try to discover the resources for this package (pkgName="
-                        + pkgName + ")");
-                resources = discoverResources(pkgName);
-            } else { // 2.2 or higher
-                LOGGER.debug("CKAN version is 2.2 (or higher), the resources list can be obtained from the "
-                        + "organization information (pkgName=" + pkgName + ")");
-                resources = (JSONArray) pkg.get("resources");
-            } // if else
+            // from CKAN 2.4, the organization_show method does not return the per-package list of resources
+            JSONArray resources = getResources(pkgName);
 
             // populate the resources map
             LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
@@ -388,7 +374,7 @@ public class CKANCache extends HttpBackend {
      */
     private void populateResourcesMap(JSONArray resources, String orgName, String pkgName, boolean checkExistence) {
         // this check is for debuging purposes
-        if (resources.size() == 0) {
+        if (resources == null || resources.size() == 0) {
             LOGGER.debug("The resources list is empty, nothing to cache");
             return;
         } // if
@@ -418,50 +404,23 @@ public class CKANCache extends HttpBackend {
                     + " -> " + "resourceName/resourceId=" + resourceName + "/" + resourceId + ")");
         } // while
     } // populateResourcesMap
-
-    /**
-     * This piece of code tries to make the code compatible with CKAN 2.0, whose "organization_show" method returns
-     * no resource lists for its packages! (not in CKAN 2.2)
-     * More info --> https://github.com/telefonicaid/fiware-cygnus/issues/153
-     * @param pkgName
-     * @return The discovered resources for the given package.
-     * @throws Exception
-     */
-    private JSONArray discoverResources(String pkgName) throws Exception {
-        // query CKAN for the resources within the given package
-        String urlPath = "/api/3/action/package_show?id=" + pkgName;
+    
+    private JSONArray getResources(String pkgName) throws Exception {
+        LOGGER.debug("Going to get the resources list from package " + pkgName);
+        String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", urlPath, true, headers, null);
-        
+        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+
         if (res.getStatusCode() == 200) {
+            // get the resource and populate the resource map
             JSONObject result = (JSONObject) res.getJsonObject().get("result");
             JSONArray resources = (JSONArray) result.get("resources");
-            LOGGER.debug("Resources successfully discovered (pkgName=" + pkgName + ", numResources="
-                    + resources.size() + ")");
             return resources;
-        } else {
-            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
-        } // if else
-    } // discoverResources
-    
-    /**
-     * Gets the CKAN version.
-     * @return The CKAN version
-     * @throws Exception
-     */
-    private String getCKANVersion() throws Exception {
-        String urlPath = "/api/util/status";
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", urlPath, true, headers, null);
-        
-        if (res.getStatusCode() == 200) {
-            return res.getJsonObject().get("ckan_version").toString();
         } else {
             return null;
         } // if else
-    } // getCKANVersion
+    } // getResources
     
     /**
      * Sets the organizations map. This is protected since it is only used by the tests.

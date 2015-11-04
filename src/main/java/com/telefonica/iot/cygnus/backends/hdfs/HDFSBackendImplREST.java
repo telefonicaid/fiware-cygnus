@@ -37,14 +37,15 @@ import org.apache.http.message.BasicHeader;
  * HDFS persistence based on the HttpFS service (TCP/14000). HttpFS is an alternative implementation of the WebHDFS
  * API which hides the cluster details by forwarding directly to the Master node instead of to the Data node.
  */
-public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
+public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
     private final String hdfsUser;
-    private final String oauth2Token;
+    private final String hdfsPassword;
+    private final String hiveServerVersion;
     private final String hiveHost;
     private final String hivePort;
     private final boolean serviceAsNamespace;
-    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImpl.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImplREST.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
     private ArrayList<Header> headers;
     
@@ -53,8 +54,10 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param hdfsHosts
      * @param hdfsPort
      * @param hdfsUser
-     * @param hiveHost
+     * @param hdfsPassword
      * @param oauth2Token
+     * @param hiveServerVersion
+     * @param hiveHost
      * @param hivePort
      * @param krb5
      * @param krb5User
@@ -63,12 +66,14 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImpl(String[] hdfsHosts, String hdfsPort, String hdfsUser, String oauth2Token, String hiveHost,
-            String hivePort, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile,
-            String krb5ConfFile, boolean serviceAsNamespace) {
+    public HDFSBackendImplREST(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+            String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
+            String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
+            boolean serviceAsNamespace) {
         super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         this.hdfsUser = hdfsUser;
-        this.oauth2Token = oauth2Token;
+        this.hdfsPassword = hdfsPassword;
+        this.hiveServerVersion = hiveServerVersion;
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
@@ -80,7 +85,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } else {
             headers = null;
         } // if else
-    } // HDFSBackendImpl
+    } // HDFSBackendImplREST
    
     @Override
     public void createDir(String dirPath) throws Exception {
@@ -91,7 +96,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + dirPath + " directory could not be created in HDFS. HttpFS response: "
+                    + dirPath + " directory could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createDir
@@ -106,7 +111,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file could not be created in HDFS. HttpFS response: "
+                    + filePath + " file could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
         
@@ -125,7 +130,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 201) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file created in HDFS, but could not write the data. HttpFS response: "
+                    + filePath + " file created in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // createFile
@@ -139,7 +144,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 307) {
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file seems to not exist in HDFS. HttpFS response: "
+                    + filePath + " file seems to not exist in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
 
@@ -158,7 +163,7 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         // check the status
         if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                    + filePath + " file exists in HDFS, but could not write the data. HttpFS response: "
+                    + filePath + " file exists in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
     } // append
@@ -173,64 +178,50 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         return (response.getStatusCode() == 200);
     } // exists
     
-    /**
-     * Provisions a Hive external table (row mode).
-     * @param dirPath
-     * @throws Exception
-     */
-    public void provisionHiveTable(String dirPath) throws Exception {
+    @Override
+    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception {
+        String tag;
+        
+        switch (fileFormat) {
+            case JSONROW:
+            case CSVROW:
+                tag = "_row";
+                break;
+            case JSONCOLUMN:
+            case CSVCOLUMN:
+                tag = "_column";
+                break;
+            default:
+                tag = "";
+        } // switch
+        
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_row";
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
         LOGGER.info("Creating Hive external table=" + tableName);
         
         // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
-
-        // create the standard 8-fields
-        String fields = "("
-                + Constants.RECV_TIME_TS + " bigint, "
-                + Constants.RECV_TIME + " string, "
-                + Constants.ENTITY_ID + " string, "
-                + Constants.ENTITY_TYPE + " string, "
-                + Constants.ATTR_NAME + " string, "
-                + Constants.ATTR_TYPE + " string, "
-                + Constants.ATTR_VALUE + " string, "
-                + Constants.ATTR_MD + " array<string>"
-                + ")";
-
-        // create the query
-        
-        String query = "create external table " + tableName + " " + fields + " row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
-
-        // execute the query
-        if (!hiveClient.doCreateTable(query)) {
-            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
-                    + "Check your Hive/Shark installation");
-        } // if
-    } // provisionHiveTable
-    
-    /**
-     * Provisions a Hive external table (column mode).
-     * @param dirPath
-     * @param fields
-     * @throws Exception
-     */
-    public void provisionHiveTable(String dirPath, String fields) throws Exception {
-        // get the table name to be created
-        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + "_column";
-        LOGGER.info("Creating Hive external table=" + tableName);
-        
-        // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveHost, hivePort, hdfsUser, oauth2Token);
+        HiveBackend hiveClient = new HiveBackend(hiveServerVersion, hiveHost, hivePort, hdfsUser, hdfsPassword);
         
         // create the query
-        String query = "create external table " + tableName + " (" + fields + ") row format serde "
-                + "'org.openx.data.jsonserde.JsonSerDe' location '/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
-                + dirPath + "'";
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
+                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
+                        + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
 
         // execute the query
         if (!hiveClient.doCreateTable(query)) {
@@ -239,4 +230,4 @@ public class HDFSBackendImpl extends HttpBackend implements HDFSBackend {
         } // if
     } // provisionHiveTable
 
-} // HDFSBackendImpl
+} // HDFSBackendImplREST

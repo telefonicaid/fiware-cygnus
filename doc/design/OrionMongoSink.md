@@ -33,12 +33,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
     flume-event={
         headers={
 	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         notified-service=vehicles,
+	         notified-servicepath=4wheels,
+	         default-destination=car1_car
+	         default-servicepaths=4wheels
+	         grouped-destination=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
@@ -179,6 +182,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
+| enable_grouping | no | false | <i>true</i> or <i>false</i> |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
@@ -193,6 +197,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
     cygnusagent.sinks.mongo-sink.channel = mongo-channel
+    cygnusagent.sinks.mongo-sink.enable_grouping = false
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.mongo-sink.mongo_username = myuser
     cygnusagent.sinks.mongo-sink.mongo_password = mypassword

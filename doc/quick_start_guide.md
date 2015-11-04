@@ -13,14 +13,16 @@ Cygnus uses the subscription/notification feature of Orion. A subscription is ma
 ###Which storages is it able to integrate?
 Current stable release is able to persist Orion context data in:
 
-* HDFS, the Hadoop distributed file system.
-* MySQL, the well-know relational database manager.
-* CKAN, an Open Data platform.
+* [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
+* [MySQL](https://www.mysql.com/), the well-known relational database manager.
+* [CKAN](http://ckan.org/), an Open Data platform.
+* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
+* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 
 ###Which is its basic architecture?
 Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/). In fact, Cygnus is a Flume agent, which is basically composed of a <i>source</i> in charge of receiving the data, a <i>channel</i> where the source puts the data once it has been transformed into a Flume event, and a <i>sink</i>, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
 
-As said, Cygnus is able to persist in HDFS, MySQL and CKAN, thus there exists a sink for each one of those storages.
+As said, Cygnus is able to persist in HDFS, MySQL, CKAN, MongoDB and STH, thus there exists a [sink](design/) for each one of those storages.
 
 ##Installing Cygnus
 Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cy	gnus (CentOS/RedHat example):
@@ -71,10 +73,10 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 2
-cygnusagent.sources.http-source.interceptors = ts de
+cygnusagent.sources.http-source.interceptors = ts gi
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.de.type = com.telefonica.iot.cygnus.interceptors.DestinationExtractor$Builder
-cygnusagent.sources.http-source.interceptors.de.matching_table = /Applications/apache-flume-1.4.0-bin/conf/matching_table.conf
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+cygnusagent.sources.http-source.interceptors.gi.gropuing_rules_conf_file = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
 
 cygnusagent.channels.test-channel.type = memory
 cygnusagent.channels.test-channel.capacity = 1000
@@ -95,7 +97,7 @@ $ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/
 ```
 URL=$1
 
-curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: testsink" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: testsink" -d @- <<EOF
 {
 	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
 	"originator" : "localhost",
@@ -105,7 +107,7 @@ curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: a
 				"attributes" : [
 					{
 						"name" : "temperature",
-						"type" : "centigrade",
+						"type" : "float",
 						"value" : "26.5"
 					}
 				],
@@ -123,7 +125,7 @@ curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: a
 EOF
 ```
 
-This script will emulate the sending of an Orion notification to the URL endpoint passed as argument.
+This script will emulate the sending of an Orion notification to the URL endpoint passed as argument. The above notification is about and entity named `Room1` of type `Room` belonging to the FIWARE service `qsg` and the FIWARE service path `testsink`; it has a single attribute named `temperature` of type `float`. 
 
 (4) Give execution permissions to `notification.sh` and run it, pasing as argument the URL of the listening `HTTPSource`:
 
@@ -137,7 +139,7 @@ $ ./notification.sh http://localhost:5050/notify
 
 ```
 2015-03-06T08:54:20.696CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[153] : Starting transaction (1425628437-99-0000000000)
-2015-03-06T08:54:20.699CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[239] : Received data ({	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",	"originator" : "localhost",	"contextResponses" : [		{			"contextElement" : {"attributes" : [					{						"name" : "temperature",						"type" : "centigrade",						"value" : "26.5"					}				],				"type" : "Room",				"isPattern" : "false",				"id" : "Room1"			},			"statusCode" : {				"code" : "200",				"reasonPhrase" : "OK"			}		}	]})
+2015-03-06T08:54:20.699CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[239] : Received data ({	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",	"originator" : "localhost",	"contextResponses" : [		{			"contextElement" : {"attributes" : [					{						"name" : "temperature",						"type" : "float",						"value" : "26.5"					}				],				"type" : "Room",				"isPattern" : "false",				"id" : "Room1"			},			"statusCode" : {				"code" : "200",				"reasonPhrase" : "OK"			}		}	]})
 2015-03-06T08:54:20.704CET | lvl=INFO | trans=1425628437-99-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[261] : Event put in the channel (id=1621938227, ttl=2)
 2015-03-06T08:54:20.799CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[126] : Event got from the channel (id=1621938227, headers={fiware-servicepath=testsink, destination=room1_room, content-type=application/json, fiware-service=qsg, ttl=2, transactionId=1425628437-99-0000000000, timestamp=1425628460704}, bodyLength=384)
 2015-03-06T08:54:20.803CET | lvl=INFO | trans=1425628437-99-0000000000 | function=persist | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[77] : [test-sink] Processing headers (recvTimeTs=1425628460704 (2015-03-06T08:54:20.704), fiwareService=qsg, fiwareServicePath=testsink, destinations=[room1_room])
@@ -157,9 +159,15 @@ Of special interest are:
 
 Apache Flume [web site](http://flume.apache.org/) is also another interesting pointer to learn more about the base technlogy used by Cygnus.
 
-##Contact
-Fermín Galán Marquez (fermin.galanmarquez@telefonica.com)
-<br>
-Francisco Romero Bueno (francisco.romerobueno@telefonica.com)
-<br>
-Germán Toro del Valle (german.torodelvalle@telefonica.com)
+##Reporting issues and contact information
+There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
+
+* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
+* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
+* Personal email:
+    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
+    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
+    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
+    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+
+**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.

@@ -120,8 +120,9 @@ public class OrionCKANSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
                 + ")");
-        ssl = context.getString("ssl", "false").equals("true");
+        ssl = context.getBoolean("ssl", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
+        super.configure(context);
     } // configure
 
     @Override
@@ -138,12 +139,20 @@ public class OrionCKANSink extends OrionSink {
     } // start
     
     @Override
-    void persist(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
+    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_SERVICE_PATH).split(",");
-        String[] destinations = eventHeaders.get(Constants.DESTINATION).split(",");
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        String[] servicePaths;
+        String[] destinations;
+        
+        if (enableGrouping) {
+            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+        } else {
+            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+        } // if else
         
         // human readable version of the reception time
         String recvTime = Utils.getHumanReadable(recvTimeTs, true);
@@ -164,7 +173,7 @@ public class OrionCKANSink extends OrionSink {
                     + entityType + ")");
             
             // build the pavkage and resource name
-            String pkgName = buildPkgName(fiwareService, fiwareServicePaths[i]);
+            String pkgName = buildPkgName(fiwareService, servicePaths[i]);
             String resName = buildResName(destinations[i]);
 
             // iterate on all this CKANBackend's attributes, if there are attributes
@@ -196,10 +205,11 @@ public class OrionCKANSink extends OrionSink {
 
                 if (rowAttrPersistence) {
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
-                            + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ", "
-                            + recvTime + ", " + attrName + ", " + attrType + ", " + attrValue + ", " + attrMd + ")");
-                    persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, attrName, attrType,
-                            attrValue, attrMd);
+                            + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ","
+                            + recvTime + "," + entityId + "," + entityType + "," + attrName + "," + attrType + ","
+                            + attrValue + "," + attrMd + ")");
+                    persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, entityId, entityType,
+                            attrName, attrType, attrValue, attrMd);
                 } else {
                     attrs.put(attrName, attrValue);
                     mds.put(attrName + "_md", attrMd);
@@ -215,7 +225,7 @@ public class OrionCKANSink extends OrionSink {
                 persistenceBackend.persist(recvTime, orgName, pkgName, resName, attrs, mds);
             } // if
         } // for
-    } // persist
+    } // persistOne
     
     /**
      * Builds an organization name given a fiwareService. It throws an exception if the naming conventions are violated.
@@ -266,8 +276,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildResName(String destination) throws Exception {
-        boolean isDefDestination = destination.startsWith("def_");
-        String resName = isDefDestination ? destination.substring(4) : destination;
+        String resName = destination;
         
         if (resName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
@@ -276,5 +285,10 @@ public class OrionCKANSink extends OrionSink {
 
         return resName;
     } // buildResName
+
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    } // persistBatch
     
 } // OrionCKANSink
