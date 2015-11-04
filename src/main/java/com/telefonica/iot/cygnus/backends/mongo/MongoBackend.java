@@ -26,7 +26,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.DataModel;
@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -43,6 +44,7 @@ import org.bson.Document;
 /**
  *
  * @author frb
+ * @author xdelox
  */
 public class MongoBackend {
     
@@ -56,7 +58,7 @@ public class MongoBackend {
     private final String mongoUsername;
     private final String mongoPassword;
     private final DataModel dataModel;
-    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackend.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackend.class);
             
     /**
      * Constructor.
@@ -192,7 +194,7 @@ public class MongoBackend {
      * (row-like mode).
      * @param dbName
      * @param collectionName
-     * @param recvTimeTs
+     * @param calendar
      * @param entityId
      * @param entityType
      * @param attrName
@@ -200,7 +202,8 @@ public class MongoBackend {
      * @param attrValue
      * @param resolution
      */
-    private void insertContextDataAggregatedForResoultion(String dbName, String collectionName, GregorianCalendar calendar,
+    private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
+                                                          GregorianCalendar calendar,
             String entityId, String entityType, String attrName, String attrType, double attrValue,
             Resolution resolution) {
         // get database and collection
@@ -228,11 +231,10 @@ public class MongoBackend {
 
     /**
      * Builds the Json query used both to prepopulate and update an aggregated collection.
-     * @param recvTimeTs
+     * @param calendar
      * @param entityId
      * @param entityType
      * @param attrName
-     * @param attrType
      * @param resolution
      * @return
      */
@@ -375,9 +377,46 @@ public class MongoBackend {
      * @param mds
      * @throws Exception
      */
-    public void insertContextDataRaw(String dbName, String collectionName, String recvTime,
-            Map<String, String> attrs, Map<String, String> mds) throws Exception {
-        // FIXME: the row-like column insertion mode is not currently available for Mongo
+    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
+                                     String entityId, String entityType, Map<String, String> attrs,
+                                     Map<String, String> mds) throws Exception {
+
+        MongoDatabase db = getDatabase(dbName);
+        MongoCollection collection = db.getCollection(collectionName);
+        Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+
+        switch (dataModel) {
+            case COLLECTIONPERSERVICEPATH:
+                doc.append("entityId", entityId)
+                        .append("entityType", entityType);
+
+                Iterator it = attrs.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    String attrName = (String) pair.getKey();
+                    String attrValue = (String) pair.getValue();
+                    doc.append(attrName, attrValue);
+                }
+
+                break;
+            case COLLECTIONPERENTITY:
+                it = attrs.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    String attrName = (String) pair.getKey();
+                    String attrValue = (String) pair.getValue();
+                    doc.append(attrName, attrValue);
+                }
+                break;
+            case COLLECTIONPERATTRIBUTE:
+                LOGGER.warn("Persistence by column is useless for Collection per attribute data model");
+                break;
+            default:
+                // this will never be reached
+        } // switch
+
+        LOGGER.debug("Inserting data=" + doc.toString() + " within collection=" + collectionName);
+        collection.insertOne(doc);
     } // insertContextDataRaw
     
     /**

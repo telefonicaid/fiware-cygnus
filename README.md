@@ -229,24 +229,24 @@ The body simply contains a byte representation of the HTTP payload that will be 
 Assuming `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then the data within the body will be persisted as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","entityId":"car1","entityType":"car","attrName":"oil","attrType":"float","attrValue":"74.6","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
+    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
 
 If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTime":"2015-04-20T12:13:22.41.124Z","speed":"112.9","speed_md":[],"oil":"74.6","oil_md":[]} 
+    {"recvTime":"2015-04-20T12:13:22.41.124Z","fiware-servicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]} 
     
 If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
 
 If `file_format=csv-column` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    2015-04-20T12:13:22.41.124Z,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
+    2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
     
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
 
@@ -419,12 +419,12 @@ Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_pe
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                   | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  speed      | float     | 112.9     | []     |
-    | 1429535775 | 2015-04-20T12:13:22.41.124 | car1     | car        |  oil_level  | float     | 74.6      | []     |
-    +------------+----------------------------+----------+------------+-------------+-----------+-----------+--------+
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  speed      | float     | 112.9     | []     |
+    | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
+    +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
 If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
@@ -456,11 +456,11 @@ If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMyS
     1 row in set (0.00 sec)
 
     mysql> select * from 4wheels_car1_car;
-    +----------------------------+-------+----------+-----------+--------------+
-    | recvTime                   | speed | speed_md | oil_level | oil_level_md |
-    +----------------------------+-------+----------+-----------+--------------+
-    | 2015-04-20T12:13:22.41.124 | 112.9 | []       |  74.6     | []           |
-    +----------------------------+-------+----------+-----------+--------------+
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
+    | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
+    +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
     
 You can explore more parameter combinations and their output at [`OrionMySQLSink.md`](./doc/OrionMySQLSink.md).
@@ -476,7 +476,8 @@ NOTES:
 
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by [`OrionMongoSink`](doc/desing/OrionMongoSink.md) each time a Flume event is taken from its channel.
 
-Assuming `mongo_username=myuser` and `should_hash=false` as configuration parameters, the data within the body will be persisted as:
+According to different combinations of the parameters `datamodel` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
+Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=collection-per-entity` and `attr_persistence=row` as configuration parameters, then `OrionMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -484,15 +485,100 @@ Assuming `mongo_username=myuser` and `should_hash=false` as configuration parame
     > show databases
     admin              (empty)
     local              0.031GB
-    vehicles           0.031GB
+    sth_vehicles       0.031GB
     test               0.031GB
     > use vehicles
     switched to db vehicles
     > show collections
-    4wheels_car1_car
+    sth_/4wheels_car1_car
     system.indexes
-    > db.4wheels_car1_car.find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTime" : ISODate("2015-04-20T12:13:22.41Z"), "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
+    > db['sth_/4wheels_car1_car'].find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
+    
+If `data_model=collection-per-entity` and `attr_persistence=column` then `OrionMongoSink` will persist the data within the body as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels_car1_car
+    system.indexes
+    > db['sth_/4wheels_car1_car'].find()
+    {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
+    
+If `data_model=collection-per-service-path` and `attr_persistence=row` then `OrionMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
+   
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels
+    system.indexes
+    > db['sth_/4wheels'].find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
+    { "_id" : ObjectId("5534d143fa701f0be751db84"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car2", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "123.0" }
+    { "_id" : ObjectId("5534d143fa701f0be751db85"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car2", "entityType" : "car", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "40.9" }
+
+Note: The first two documents were generated by the above flume-event, while the last two documents (`"entityId" : "car2"`) were originated by another event (not shown here).
+We have left these documents in order to show that the same collection stores data of different entities, unlike what it happens with other value of `data_model` parameter.
+
+Similarly, if `data_model=collection-per-service-path` and `attr_persistence=column` then `OrionMongoSink` will persist the data as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels
+    system.indexes
+    > db['sth_/4wheels'].find()
+    { "_id" : ObjectId("5534d143fa701f0be751db86"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "speed" : "112.9", "oil_level" : "74.6" }
+    
+If `data_model=collection-per-attribute` and `attr_persistence=row` then `OrionMongoSink` will persist the data as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels_car1_car_speed
+    sth_/4wheels_car1_car_oil_level
+    system.indexes
+    > db['sth_/4wheels_car1_car_speed'].find()
+     { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "112.9" }
+    > db['sth_/4wheels_car1_oil_level'].find()
+     { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
+
+Finally, the pair of parameters `data_model=collection-per-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. 
+In this case, in fact, `OrionMongoSink` will not persist anything; only a warning will be logged.
 
 NOTES:
 
@@ -654,6 +740,8 @@ Simply configure the FIWARE repository if not yet configured and use your applic
     enabled=1
     EOL
     $ yum install cygnus
+    
+NOTE: The available RPM is compiled for Hadoop 0.20.2-cdh3u6, since this is the version run at [FIWARE Lab](https://cosmos.lab.fiware.org/). If you aim is to use Cygnus with a different Hadoop version, then you will have to install from sources (see next section) after editing the `pom.xml` file and adapting the `hadoop-core` dependency to your specific needs. Of course, if you are not going to use the HDFS sink then the available RPM will be perfectly valid for you.
 
 [Top](#top)
 
@@ -755,6 +843,8 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
+# rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
+cygnusagent.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -768,21 +858,27 @@ cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
-# Hive server version (1 or 2)
-cygnusagent.sinks.hdfs-sink.hive_server_version = 2
-# Hive FQDN/IP address of the Hive server
-cygnusagent.sinks.hdfs-sink.hive_host = x.y.z.w
-# Hive port for Hive external table provisioning
-cygnusagent.sinks.hdfs-sink.hive_port = 10000
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.hdfs-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.hdfs-sink.batch_timeout = 30
+# Hive enabling
+cygnusagent.sinks.hdfs-sink.hive = true
+# Hive server version, 1 or 2 (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+# Hive FQDN/IP address of the Hive server (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
+# Hive port for Hive external table provisioning (ignored if hive is false)
+cygnusagent.sinks.hdfs-sink.hive.port = 10000
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
-# Kerberos username
+# Kerberos username (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
-# Kerberos password
+# Kerberos password (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
-# Kerberos login file
+# Kerberos login file (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
-# Kerberos configuration file
+# Kerberos configuration file (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
@@ -826,6 +922,10 @@ cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 # select the table type from table-by-destination and table-by-service-path
 cygnusagent.sinks.mysql-sink.table_type = table-by-destination
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.mysql-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.mysql-sink.batch_timeout = 30
 
 # ============================================
 # OrionMongoSink configuration
@@ -847,6 +947,10 @@ cygnusagent.sinks.mongo-sink.db_prefix = sth_
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.mongo-sink.should_hash = false
+# specify if the sink will use a single collection for each service path, for each entity or for each attribute
+cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.mongo-sink.attr_persistence = column
 
 # ============================================
 # OrionSTHSink configuration
