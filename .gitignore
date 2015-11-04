@@ -4,6 +4,4 @@ target/
 *.iml
 nbactions.xml
 
-maven-deps/
-
 conf/agent_0.conf
