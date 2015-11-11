@@ -24,6 +24,7 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -48,8 +49,7 @@ public class OrionCKANSinkTest {
     // instance to be tested
     private OrionCKANSink sink;
     
-    // other instances
-    private Context context;
+    // other inmutable instances
     private NotifyContextRequest singleNotifyContextRequest;
     private NotifyContextRequest multipleNotifyContextRequest;
     
@@ -58,31 +58,27 @@ public class OrionCKANSinkTest {
     private final String ckanPort = "3306";
     private final String apiKey = "xyzwxyzwxyzw";
     private final String enableGrouping = "true";
+    private final String orionURL = "http://localhost:1026";
+    private final String ssl = "true";
     
-    // header constants
-    private final long recvTimeTs = 123456789;
-    private final String recvTime = "20140513T16:48:13";
-    private final String normalServiceName = "vehicles";
-    private final String abnormalServiceName =
+    // batches constants
+    private final Long recvTimeTs = 123456789L;
+    private final String normalService = "vehicles";
+    private final String abnormalService =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String singleServicePathName = "4wheels";
-    private final String multipleServicePathName = "4wheelsSport,4wheelsUrban";
-    private final String abnormalServicePathName =
+    private final String normalDefaultServicePath = "4wheels";
+    private final String rootServicePath = "";
+    private final String abnormalDefaultServicePath =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String rootServicePathName = "";
-    private final String singleDestinationName = "car1-car";
-    private final String multipleDestinationName = "sport1,urban1";
-    private final String abnormalDestinationName =
+    private final String normalGroupedServicePath = "cars";
+    private final String abnormalGroupedServicePath =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+    private final String normalDefaultDestination = "car1_car";
+    private final String abnormalDefaultDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    private static final String ENTITYID = "car1";
-    private static final String ENTITYTYPE = "car";
-    private static final String ATTRNAME = "speed";
-    private static final String ATTRTYPE = "float";
-    private static final String ATTRVALUE = "112.9";
-    private static final String ATTRMD =
-            "{\"name\":\"measureTime\", \"type\":\"timestamp\", \"value\":\"20140513T16:47:59\"}";
-    private static final HashMap<String, String> ATTRLIST;
-    private static final HashMap<String, String> ATTRMDLIST;
+    private final String normalGroupedDestination = "my_cars";
+    private final String abnormalGroupedDestination =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
     
     // notification constants
     private final String singleContextElementNotification = ""
@@ -153,13 +149,6 @@ public class OrionCKANSinkTest {
             + "        }\n"
             + "    ]\n"
             + "}";
-    
-    static {
-        ATTRLIST = new HashMap<String, String>();
-        ATTRLIST.put(ATTRNAME, ATTRVALUE);
-        ATTRMDLIST = new HashMap<String, String>();
-        ATTRMDLIST.put(ATTRNAME + "_md", ATTRMD);
-    } // static
 
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -173,21 +162,12 @@ public class OrionCKANSinkTest {
         sink = new OrionCKANSink();
         sink.setPersistenceBackend(mockCKANBackend);
         
-        // set up other instances
-        context = new Context();
-        context.put("ckan_host", ckanHost);
-        context.put("ckan_port", ckanPort);
-        context.put("api_key", apiKey);
-        context.put("enable_grouping", enableGrouping);
+        // set up other immutable instances
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
-        
+
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTimeTs, recvTime, normalServiceName,
-                singleServicePathName, singleDestinationName, ENTITYID, ENTITYTYPE, ATTRNAME, ATTRTYPE, ATTRVALUE,
-                ATTRMD);
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(recvTime, normalServiceName,
-                singleServicePathName, singleDestinationName, ATTRLIST, ATTRMDLIST);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(null, null, null, null);
     } // setUp
 
     /**
@@ -196,11 +176,16 @@ public class OrionCKANSinkTest {
     @Test
     public void testConfigure() {
         System.out.println("Testing OrionCKANSink.configure");
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
         sink.configure(context);
         assertEquals(ckanHost, sink.getCKANHost());
         assertEquals(ckanPort, sink.getCKANPort());
         assertEquals(apiKey, sink.getAPIKey());
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
+        assertEquals(apiKey, sink.getAPIKey());
+        assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
+        assertEquals(ssl, sink.getSSL() ? "true" : "false");
     } // testConfigure
 
     /**
@@ -209,118 +194,210 @@ public class OrionCKANSinkTest {
     @Test
     public void testStart() {
         System.out.println("Testing OrionCKANSink.start");
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
         assertTrue(sink.getPersistenceBackend() != null);
         assertEquals(LifecycleState.START, sink.getLifecycleState());
     } // testStart
-
+    
     /**
-     * Test of processContextResponses method, of class OrionCKANSink.
-     * @throws java.lang.Exception
+     * Test of persistBatch method, of class OrionCKANSink. Null batches are tested.
      */
     @Test
-    public void testProcessContextResponses() throws Exception {
-        System.out.println("Testing OrionCKANSink.processContextResponses (normal resource lengths)");
+    public void testPersistNullBatches() {
+        System.out.println("Testing OrionCKANSinkTest.persistBatch (null batches)");
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persistOne(headers, singleNotifyContextRequest);
+            sink.persistBatch(null, null);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+    } // testPersistNullBatches
+
+    /**
+     * Test of persistBatch method, of class OrionCKANSink. Attribute persistence modes are tested.
+     */
+    @Test
+    public void testPersistAttrPersistence() {
+        // common objects
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        System.out.println("Testing OrionCKANSinkTest.persistBatch (row attr persistence)");
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionCKANSink.processContextResponses (too long service name)");
+        System.out.println("Testing OrionCKANSinkTest.persistBatch (column attr persistence)");
+        attrPersistence = "column";
+        context = createContext(attrPersistence);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, abnormalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
         
         try {
-            sink.persistOne(headers, singleNotifyContextRequest);
-            assertTrue(false);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
             assertTrue(true);
-        } // try catch
+        } // try catch finally
+    } // testPersistAttrPersistence
+    
+    /**
+     * Test of persistBatch method, of class OrionCKANSink. Attribute persistence modes are tested.
+     */
+    @Test
+    public void testPersistResourceLengths() {
+        // common objects
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
         
-        System.out.println("Testing OrionCKANSink.processContextResponses (too long servicePath name)");
+        System.out.println("Testing OrionCKANSink.persisBatch (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, abnormalServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistOne(headers, singleNotifyContextRequest);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionCKANSink.processContextResponses (too long destination name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, abnormalDestinationName);
-        
-        try {
-            sink.persistOne(headers, singleNotifyContextRequest);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionCKANSink.processContextResponses (\"root\" servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, rootServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationName);
-        
-        try {
-            sink.persistOne(headers, singleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionCKANSink.processContextResponses (multiple destinations and "
+        System.out.println("Testing OrionCKANSink.persistBatch (too long service name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        defaultBatch = createBatch(recvTimeTs, abnormalService, normalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSink.persistBatch (too long servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        defaultBatch = createBatch(recvTimeTs, normalService, abnormalDefaultServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionCKANSink.persistBatch (too long destination name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, abnormalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+    } // testPersistResourceLengths
+    
+    /**
+     * Test of persistBatch method, of class OrionCKANSink. Special service and service-path are tested.
+     */
+    @Test
+    public void testPersistServiceServicePath() {
+        // common objects
+        String attrPersistence = "row";
+        Context context = createContext(attrPersistence);
+        
+        System.out.println("Testing OrionCKANSink.persistBatch (\"root\" servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        Batch defaultBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalDefaultDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(defaultBatch, groupedBatch);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionCKANSink.persistBatch (multiple destinations and "
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, normalServiceName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, multipleServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationName);
+        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistOne(headers, multipleNotifyContextRequest);
+            sink.persistBatch(defaultBatch, groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testProcessContextResponses
+    } // testPersistServiceServicePath
+    
+    private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
+            NotifyContextRequest.ContextElement contextElement) {
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+            contextElement);
+        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
+        groupedBatchEvents.add(groupedEvent);
+        Batch batch = new Batch();
+        batch.addEvents(destination, groupedBatchEvents);
+        return batch;
+    } // createBatch
+    
+    private Context createContext(String attrPersistence) {
+        Context context = new Context();
+        context.put("ckan_host", ckanHost);
+        context.put("ckan_port", ckanPort);
+        context.put("api_key", apiKey);
+        context.put("enable_grouping", enableGrouping);
+        context.put("orion_url", orionURL);
+        context.put("attr_persistence", attrPersistence);
+        context.put("ssl", ssl);
+        return context;
+    } // createContext
     
 } // OrionCKANSinkTest
