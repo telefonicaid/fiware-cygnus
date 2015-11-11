@@ -22,7 +22,6 @@ import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.backends.http.HttpClientFactory;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
@@ -43,8 +42,6 @@ import org.junit.runner.RunWith;
 public class OrionHDFSSinkTest {
     
     // mocks
-    @Mock
-    private HttpClientFactory mockHttpClientFactory;
     @Mock
     private HDFSBackendImplREST mockWebHDFSBackend;
     
@@ -175,8 +172,6 @@ public class OrionHDFSSinkTest {
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
-        when(mockHttpClientFactory.getHttpClient(true, false)).thenReturn(null);
-        when(mockHttpClientFactory.getHttpClient(false, false)).thenReturn(null);
         when(mockWebHDFSBackend.exists(null)).thenReturn(true);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null);
         doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, null);
@@ -188,7 +183,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testConfigureDeprecatedParams() {
-        System.out.println("Testing OrionHDFSSinkTest.configure (deprecated parameters are used)");
+        System.out.println("Testing OrionHDFSSink.configure (deprecated parameters are used)");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = true;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -238,7 +233,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("Testing OrionHDFSSinkTest.start");
+        System.out.println("Testing OrionHDFSSink.start");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -254,7 +249,7 @@ public class OrionHDFSSinkTest {
      */
     @Test
     public void testPersistNullBatches() {
-        System.out.println("Testing OrionHDFSSinkTest.persist (null batches)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (null batches)");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -281,7 +276,7 @@ public class OrionHDFSSinkTest {
         Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (json-row file format)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (json-row file format)");
         String fileFormat = "json-row";
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
@@ -296,7 +291,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (json-column file format)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (json-column file format)");
         fileFormat = "json-column";
         useDeprecatedParams = false;
         context = createContext(useDeprecatedParams, fileFormat);
@@ -311,7 +306,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (csv-row file format)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (csv-row file format)");
         fileFormat = "csv-row";
         useDeprecatedParams = false;
         context = createContext(useDeprecatedParams, fileFormat);
@@ -326,7 +321,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (csv-column file format)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (csv-column file format)");
         fileFormat = "csv-column";
         useDeprecatedParams = false;
         context = createContext(useDeprecatedParams, fileFormat);
@@ -353,7 +348,7 @@ public class OrionHDFSSinkTest {
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (normal resource lengths)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
@@ -369,7 +364,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (too long service name)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (too long service name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         defaultBatch = createBatch(recvTimeTs, abnormalService, normalDefaultServicePath, normalDefaultDestination,
@@ -384,7 +379,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (too long servicePath name)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (too long servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         defaultBatch = createBatch(recvTimeTs, normalService, abnormalDefaultServicePath, normalDefaultDestination,
@@ -399,7 +394,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (too long destination name)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (too long destination name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, abnormalDefaultDestination,
@@ -416,7 +411,7 @@ public class OrionHDFSSinkTest {
     } // testPersistResourceLengths
     
     /**
-     * Test of persistOne method, of class OrionHDFSSink. Special service and service-path are tested.
+     * Test of persistBatch method, of class OrionHDFSSink. Special service and service-path are tested.
      * @throws java.lang.Exception
      */
     @Test
@@ -426,7 +421,7 @@ public class OrionHDFSSinkTest {
         boolean useDeprecatedParams = false;
         Context context = createContext(useDeprecatedParams, fileFormat);
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (\"root\" servicePath name)");
+        System.out.println("Testing OrionHDFSSink.persistBatch (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         Batch defaultBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalDefaultDestination,
@@ -442,7 +437,7 @@ public class OrionHDFSSinkTest {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionHDFSSinkTest.persist (multiple destinations and "
+        System.out.println("Testing OrionHDFSSink.persistBatch (multiple destinations and "
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
