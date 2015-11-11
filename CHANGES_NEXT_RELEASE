@@ -1,0 +1,1 @@
+- [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
