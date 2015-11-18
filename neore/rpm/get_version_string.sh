@@ -1,26 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2013 Telefonica Investigacion y Desarrollo, S.A.U
-#
-# This file is part of fiware-cygnus (FI-WARE project).
-#
-# fiware-cygnus is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# fiware-cygnus is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-# General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with fiware-cygnus. If not, see http://www.gnu.org/licenses/.
-#
-# For those usages not covered by this license please contact with
-# iot_support at tid dot es
-
-# Bash lib to know the RPM version and revision from a PDIHub repository
+# Bash lib to know the RPM version and revision from a GitHub repository
 # Call method get_rpm_version_string to obtain them for rpmbuild
 #
 shopt -s extglob
@@ -30,7 +10,7 @@ get_branch()
     git rev-parse --abbrev-ref HEAD
 }
 
-## Specific functions according the TID workflow
+## Github specific functions according the github workflow
 get_branch_type()
 {
     local branch="$(get_branch)"
@@ -46,7 +26,7 @@ get_branch_type()
 
 get_version_string()
 {
-    if [[ $(is_pdi_compliant) -eq 0 ]]; then # Not TID compliant, return a dummy version
+    if [[ $(is_github_compliant) -eq 0 ]]; then # Not GitHub compliant, return a dummy version
         echo "HEAD-0-g$(git log --pretty=format:'%h' -1)"
         return
     fi
@@ -62,18 +42,18 @@ get_version_string()
         ;;
         develop)
            ## if we are in develop use the total count of commits
-           version=$(git describe --tags --long --match *-KO)
-           echo "${version%-KO*}-${version#*KO-}"
+           version=$(git describe --tags --long --match */KO)
+           echo "${version%/*}-${version#*KO-}"
         ;;
         release)
            version=$(get_branch)
-           version=$(git describe --tags --long --match ${version#release/*}-KO)
-           echo "${version%-KO*}-${version#*KO-}"
-  ;;
+           version=$(git describe --tags --long --match ${version#release/*}/KO)
+           echo "${version%/*}-${version#*KO-}"
+        ;;
         other)
             ## We are in detached mode, use the last KO tag
-            version=$(git describe --tags --long --match *-KO)
-            echo "${version%-KO*}-${version#*KO-}"
+            version=$(git describe --tags --long --match */KO)
+            echo "${version%/*}-${version#*KO-}"
         ;;
         *)
            # RMs don't stablish any standard here, we use branch name as version
@@ -106,13 +86,13 @@ get_pdi_version_string()
     get_rpm_version_string
 }
 
-is_pdi_compliant()
+is_github_compliant()
 {
     case $(get_branch_type) in
     "other")
        # Maybe we are on detached mode but also are compliant
        # See if there's a tag (annotated or not) describing a Kick Off
-        git describe --tags --match *-KO >/dev/null 2>/dev/null
+        git describe --tags --match */KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -124,7 +104,7 @@ is_pdi_compliant()
         # remove the leading release/ if necessary
         ver=${ver#release/*}
         # see if there's a tag (annotated or not) describing its Kick Off
-        git describe --tags --match ${ver}-KO >/dev/null 2>/dev/null
+        git describe --tags --match ${ver}/KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -133,7 +113,7 @@ is_pdi_compliant()
     ;;
     "develop")
         # see if there's a tag (annotated or not) describing a Kick Off
-        git describe --tags --match *-KO >/dev/null 2>/dev/null
+        git describe --tags --match */KO >/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo 1
         else
@@ -143,3 +123,4 @@ is_pdi_compliant()
     *)  echo 1 ;;
    esac
 }
+
