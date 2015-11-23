@@ -23,14 +23,12 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementR
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -254,7 +252,7 @@ public class OrionKafkaSink extends OrionSink {
     
     @Override
     void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     } // persistBatch
 
 } // OrionKafkaSink

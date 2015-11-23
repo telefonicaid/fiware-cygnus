@@ -981,6 +981,8 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.kafka-sink.enable_grouping = false
 # select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
