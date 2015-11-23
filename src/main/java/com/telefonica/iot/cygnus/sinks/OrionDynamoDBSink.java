@@ -48,7 +48,7 @@ public class OrionDynamoDBSink extends OrionSink {
     private String region;
     private TableType tableType;
     private boolean attrPersistenceRow;
-    private long id = 0;
+    private long id = new Date().getTime();
     
     @Override
     public void configure(Context context) {
