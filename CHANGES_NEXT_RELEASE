@@ -1,1 +1,2 @@
 - [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
+- [HARDENING] Add enable_grouping parameter for OrionKafkaSink in agent.conf.template (#615)
