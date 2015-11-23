@@ -42,7 +42,7 @@ import java.util.ArrayList;
 public class DynamoDBBackendImpl implements DynamoDBBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(DynamoDBBackendImpl.class);
-    private final DynamoDB dynamoDB;
+    private DynamoDB dynamoDB;
     
     /**
      * Constructor.
@@ -57,6 +57,22 @@ public class DynamoDBBackendImpl implements DynamoDBBackend {
         dynamoDB = new DynamoDB(client);
     } // DynamoDBBackendImpl
 
+    /**
+     * Gets the dynamo DB object. It is protected since it is only used by the tests.
+     * @return 
+     */
+    protected DynamoDB getDynamoDB() {
+        return dynamoDB;
+    } // getDynamoDB
+    
+    /**
+     * Sets the dynamo DB object. It is protected since it is only used by the tests.
+     * @param dynamoDB
+     */
+    protected void setDynamoDB(DynamoDB dynamoDB) {
+        this.dynamoDB = dynamoDB;
+    } // setDynamoDB
+    
     @Override
     public void createTable(String tableName, String primaryKey) throws Exception {
         try {
