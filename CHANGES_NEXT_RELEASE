@@ -1,1 +1,2 @@
 - [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
+- [HARDENING] Trace the table_type parameter in OrionMySQLSink (#614)
