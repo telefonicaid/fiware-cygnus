@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackend;
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
@@ -49,6 +50,34 @@ public class OrionDynamoDBSink extends OrionSink {
     private TableType tableType;
     private boolean attrPersistenceRow;
     private long id = new Date().getTime();
+    
+    protected DynamoDBBackend getPersistenceBackend() {
+        return persistenceBackend;
+    } // getPersistenceBackend
+    
+    protected void setPersistenceBackend(DynamoDBBackend persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    } // setPersistenceBackend
+    
+    protected String getAccessKeyId() {
+        return accessKeyId;
+    } // getAccessKeyId
+    
+    protected String getSecretAccessKey() {
+        return secretAccessKey;
+    } // getSecretAccessKey
+    
+    protected String getRegion() {
+        return region;
+    } // getRegion
+    
+    protected boolean getRowAttrPersistence() {
+        return attrPersistenceRow;
+    } // getRowAttrPersistence
+    
+    protected TableType getTableType() {
+        return tableType;
+    } // getTableType
     
     @Override
     public void configure(Context context) {
@@ -296,15 +325,29 @@ public class OrionDynamoDBSink extends OrionSink {
         persistenceBackend.putItems(tableName, aggregation);
     } // persistAggregation
     
-    private String buildTableName(String service, String servicePath, String destination, TableType tableType) {
+    private String buildTableName(String service, String servicePath, String destination, TableType tableType)
+        throws Exception {
+        String tableName;
+        
         switch (tableType) {
             case TABLEBYDESTINATION:
-                return service + "_" + servicePath + "_" + destination;
+                tableName = service + "_" + servicePath + "_" + destination;
+                break;
             case TABLEBYSERVICEPATH:
-                return service + "_" + servicePath;
+                tableName = service + "_" + servicePath;
+                break;
             default:
-                return null;
+                throw new CygnusBadConfiguration("Unknown table type (" + tableType.toString()
+                        + " in OrionDynamoDBSink, cannot build the table name. Please, use "
+                        + "TABLEBYSERVICEPATH or TABLEBYDESTINATION");
         } // switch
+        
+        if (tableName.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName
+                    + ") and its length is greater than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return tableName;
     } // buildTableName
     
 } // OrionDynamoDBSink
