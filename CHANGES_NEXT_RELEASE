@@ -1,1 +1,4 @@
 - [FEATURE] Add support to batch processing within a transaction in OrionMySQLSink (#567)
+- [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
+- [HARDENING] Trace the table_type parameter in OrionMySQLSink (#614)
+- [HARDENING] Add enable_grouping parameter for OrionKafkaSink in agent.conf.template (#615)
