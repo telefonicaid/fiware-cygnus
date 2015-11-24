@@ -61,6 +61,11 @@ Apache Flume can be easily installed by downloading its latests version from [fl
 
 The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
 
+Before continuing with the installation of Cygnus, some tuning must be done on Flume:
+
+* Please observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` (`httpclient-4.3.1.jar and httpcore-4.3.1.jar`) don't match match the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). In order the most recent version of the libraries, the ones within the Flume bundle must be removed (or renamed).
+* libthrift-0.9.1.jar must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
+
 [Top](#top)
 
 ##<a name="installcygnus"></a>Installing Cygnus
@@ -69,6 +74,9 @@ Then, the developed classes must be packaged in a Java jar file; this can be don
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus
     $ git checkout <branch>
+
+Edit the `pom.xml` if necessary (*), then continue:
+
     $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
@@ -79,6 +87,9 @@ or not:
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus
     $ git checkout <branch>
+    
+Edit the `pom.xml` if necessary (*), then continue:
+
     $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
@@ -88,11 +99,7 @@ where `<branch>` is `develop` if you are trying to install the latest features o
 
 If the dependencies are included in the built Cygnus package, then nothing has to be done. If not, and depending on the Cygnus components you are going to use, you may need to install additional .jar files under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/`. Typically, you can get the .jar file from your Maven repository (under `.m2` in your user home directory) and use the `cp` command.
 
-In addition:
-
-* Please have into account from Cygnus 0.10.0 the version of `hadoop-core` within the `pom.xml` must match the Hadoop version you are going to use; on the contrary, the HDFS sink will not work. Of course, if you are not going to use the HDFS sink, simply use the default `hadoop-core` version (1.2.1) within the downloaded `pom.xml` for correct compilation purposes.
-* Also observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` are matching the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). These are not the newest versions of such packages, but trying to build Cygnus with such newest libraries has shown incompatibilities with Flume's ones.
-* libthrift-0.9.1.jar must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
+(*) Please have into account from Cygnus 0.10.0 the version of `hadoop-core` within the `pom.xml` must match the Hadoop version you are going to use; on the contrary, the HDFS sink will not work. Of course, if you are not going to use the HDFS sink, simply use the default `hadoop-core` version (1.2.1) within the downloaded `pom.xml` for correct compilation purposes.
 
 [Top](#top)
 
@@ -114,11 +121,8 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 * hive-service-0.12.0.jar
 * hive-common-0.12.0.jar
 * hive-shims-0.12.0.jar
-
-These packages are not necessary to be installed since they are already included in the Flume bundle (they have been listed just for informative purposes):
-
-* httpclient-4.2.1.jar
-* httpcore-4.2.2.jar
+* httpclient-4.3.1.jar
+* httpcore-4.3.1.jar
 
 In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
 
