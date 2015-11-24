@@ -93,7 +93,7 @@ Next sections will consider an example NGSI entity called 'car1' of type 'car', 
 ###<a name="section3.1"></a>Subscription to the NGSI-like source
 Cygnus takes advantage of the subscription-notification mechanism of NGSI. Specifically, Cygnus needs to be notified each time certain entity's attributes change, and in order to do that, Cygnus must subscribe to those entity's attribute changes.
 
-As long as the typical NGSI-like source is Orion Context Broker, you can make a subscription about the example NGSI entity ('car1' of type 'car') by using the `curl` command in this [way](https://forge.fi-ware.eu/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE) (assuming Orion runs in localhost and listens on the TCP/1026 port):
+As long as the typical NGSI-like source is Orion Context Broker, you can make a subscription about the example NGSI entity ('car1' of type 'car') by using the `curl` command in this [way](http://fiware-orion.readthedocs.org/en/develop/user/walkthrough_apiv1/index.html#onchange) (assuming Orion runs in localhost and listens on the TCP/1026 port):
 
     (curl localhost:1026/v1/subscribeContext -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Fiware-Service: vehicles' --header 'Fiware-ServicePath: /4wheels' -d @- | python -mjson.tool) <<EOF
     {
@@ -122,7 +122,9 @@ As long as the typical NGSI-like source is Orion Context Broker, you can make a 
     }
     EOF
 
-Which means: <i>Each time the the 'car1' entity, of type 'car', which is registered under the [service/tenant](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Multi_service_tenancy) 'vehicles', [subservice](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#Entity_service_paths) '/4wheels', changes its value of 'speed' then send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than once per second</i>.
+Which means: <i>Each time the the 'car1' entity, of type 'car', which is registered under the [service/tenant](http://fiware-orion.readthedocs.org/en/develop/user/multitenancy/index.html) 'vehicles', [subservice](http://fiware-orion.readthedocs.org/en/develop/user/service_path/index.html) '/4wheels', changes its value of 'speed' then send a notification to http://localhost:5050/notify (where Cygnus will be listening) with the 'speed' and 'oil_level' values. This subscription will have a duration of one month, and please, do not send me notifications more than once per second</i>.
+
+Note that in order this example to work the entity has to be "covered" by the subscription, e.g. entity belongs to the '/4wheels' service path in the 'vehicles' service. If the entity belongs to '/' service path in the 'vehicles' service or to a completely different service (no matter if service path) then updates on the entity will not trigger the notifications that Cygnus needs to work.
 
 [Top](#top)
 
@@ -983,6 +985,8 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.kafka-sink.enable_grouping = false
 # select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
