@@ -19,6 +19,7 @@
 * [Cygnus configuration](#section5)
     * [`cygnus_instance_<id>.conf`](#section5.1)
     * [`agent_<id>.conf`](#section5.2)
+    * [`flume-env.sh`](#section5.3)
 * [Running Cygnus](#section6)
     * [As a service (recommended)](#section6.1)
     * [As standalone application (advanced)](#section6.2)
@@ -760,6 +761,8 @@ Cygnus is configured through two different files:
 
 Please observe there may exist several Cygnus instances identified by `<id>`, which must be the same for both configuration files regarding the same Cygnus instance.
 
+In addition, a `flume-env.sh` file can be created, containing some parameters tuning the Flume run.
+
 [Top](#top)
 
 ###<a name="section5.1"></a>`cygnus_instance_<id>.conf`
@@ -1044,6 +1047,19 @@ cygnusagent.channels.kafka-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 ```
+
+[Top](#top)
+
+###<a name="section5.3"></a>`fume-env.sh`
+This is a file included in the Flume bundle, and it is addressed for setting up all those paramters required for tuning Flume.
+
+Typically, this file is used for setting up the following parameters:
+
+* `JAVA_HOME`: Used to set the Java home if Flume is not able to find it by itself.
+* `JAVA_OPTS`: Used to provide Java options, such as `-Xms`, `-Xmx`, etc. 
+* `FLUME_CLASSPATH`: Used to provide an additional Java classpath different than the default ones.
+
+The file `flume-env.sh` can be instantiated from a template given in the Cygnus repository, `conf/flume-env.sh.template`.
 
 [Top](#top)
 
