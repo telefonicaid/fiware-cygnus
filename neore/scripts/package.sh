@@ -67,7 +67,7 @@ function download_flume(){
     rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
     mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
 
-    _log "### Disable http-client and http-core libraries distributed with apache-flume... ###"
+    _log "### Disable httpclient and httpcore libraries distributed within apache-flume bundle... ###"
     mv ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar.old
     mv ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar.old
 
