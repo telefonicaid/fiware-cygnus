@@ -67,6 +67,10 @@ function download_flume(){
     rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
     mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
 
+    _log "### Disable http-client and http-core libraries distributed with apache-flume... ###"
+    mv ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar.old
+    mv ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar.old
+
     _log "#### Cleaning the temporal folders... ####"
     rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
     rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
