@@ -32,7 +32,7 @@ Maven is installed by downloading it from [maven.apache.org](http://maven.apache
 [Top](#top)
 
 ##<a name="usercreation"></a>Cygnus user creation
-It is highly recommended to create a `cygnus` Unix user, under which Cygnus will be installed and run. By the way, this is how the [RPM](./src_rpm.md) proceeds.
+It is highly recommended to create a `cygnus` Unix user, under which Cygnus will be installed and run. By the way, this is how the [RPM](./install_with_rpm.md) proceeds.
 
 Creating such a user is quite simple. As a sudoer user (root or any other allowed), type the following:
 
