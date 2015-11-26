@@ -1014,7 +1014,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
-        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
+        String thirdLevelMd = destination + "_" + Utils.encodeHive(attrName) + "_" + Utils.encodeHive(attrType);
         
         if (thirdLevelMd.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
