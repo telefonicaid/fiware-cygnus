@@ -27,7 +27,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
 import org.json.simple.JSONObject;
-import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
@@ -36,7 +35,7 @@ import org.json.simple.JSONArray;
 /**
  * Interface for those backends implementing the persistence in CKAN.
  *
- * @author fermin
+ * @author fermin, frb
  */
 public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
@@ -66,9 +65,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // CKANBackendImpl
 
     @Override
-    public void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName,
-        String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
-        throws Exception {
+    public void persist(String orgName, String pkgName, String resName, String records) throws Exception {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, true);
@@ -79,24 +76,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } else {
             LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName/resId=" + resName + "/" + resId + ")");
-            insert(recvTimeTs, recvTime, resId, entityId, entityType, attrName, attrType, attrValue, attrMd);
-        } // if else
-    } // persist
-
-    @Override
-    public void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList,
-        Map<String, String> attrMdList) throws Exception {
-        LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
-                + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
-        String resId = resourceLookupOrCreate(orgName, pkgName, resName, false);
-                
-        if (resId == null) {
-            throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
-                    + ", resName=" + resName + ")");
-        } else {
-            LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
-                    + ", resName/resId=" + resName + "/" + resId + ")");
-            insert(recvTime, resId, attrList, attrMdList);
+            insert(resId, records);
         } // if else
     } // persist
     
@@ -169,43 +149,19 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // resourceLookupOrCreate
 
     /**
-     * Insert record in datastore (row mode).
-     * @param recvTimeTs timestamp.
-     * @param recvTime timestamp (human readable)
-     * @param resourceId the resource in which datastore the record is going to be inserted.
-     * @param entityId entiyd id
-     * @param entityType entity type
-     * @param attrName attribute CKANBackend.
-     * @param attrType attribute type.
-     * @param attrValue attribute value.
+     * Insert records in the datastore.
+     * @param resId The resource in which datastore the record is going to be inserted
+     * @param records Records to be inserted in Json format
      * @throws Exception
      */
-    private void insert(long recvTimeTs, String recvTime, String resourceId, String entityId, String entityType,
-            String attrName, String attrType, String attrValue, String attrMd) throws Exception {
-        String urlPath;
-        String jsonString;
-        
-        try {
-            // create the CKAN request JSON
-            String records = "\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
-                    + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
-                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
-                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
-                    + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
-                    + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
-                    + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
-
-            // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-            // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-            if (!attrMd.equals(Constants.EMPTY_MD)) {
-                records += ", \"" + Constants.ATTR_MD + "\": " + attrMd;
-            } // if
-
-            jsonString = "{ \"resource_id\": \"" + resourceId
-                    + "\", \"records\": [ { " + records + " } ], "
+    private void insert(String resId, String records) throws Exception {
+        String jsonString = "{ \"resource_id\": \"" + resId
+                    + "\", \"records\": [ " + records + " ], "
                     + "\"method\": \"insert\", "
                     + "\"force\": \"true\" }";
-            
+        String urlPath;
+        
+        try {
             // create the CKAN request URL
             urlPath = "/api/3/action/datastore_upsert";
         
@@ -214,66 +170,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             
             // check the status
             if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful insert (resource/datastore id=" + resourceId + ")");
-            } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
-    } // insert
-
-    /**
-     * Insert record in datastore (column mode).
-     * @param recvTime timestamp (human readable)
-     * @param resId the resource in which datastore the record is going to be inserted.
-     * @param attrList map with the attributes to persist
-     * @throws Exception
-     */
-    private void insert(String recvTime, String resourceId, Map<String, String> attrList,
-            Map<String, String> attrMdList) throws Exception {
-        String urlPath;
-        String jsonString;
-        
-        try {
-            // create the CKAN request JSON
-            String records = "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
-
-            for (String attrName : attrList.keySet()) {
-                String attrValue = attrList.get(attrName);
-                records += ", \"" + attrName + "\": " + attrValue;
-            } // for
-            
-            for (String attrName : attrMdList.keySet()) {
-                String attrMd = attrMdList.get(attrName);
-
-                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMd.equals(Constants.EMPTY_MD)) {
-                    records += ", \"" + attrName + "\": " + attrMd;
-                } // if
-            } // for
-
-            jsonString = "{ \"resource_id\": \"" + resourceId
-                    + "\", \"records\": [ { " + records + " } ], "
-                    + "\"method\": \"insert\", "
-                    + "\"force\": \"true\" }";
-            
-            // create the CKAN request URL
-            urlPath = "/api/3/action/datastore_upsert";
-        
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
-
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful insert (resource/datastore id=" + resourceId + ")");
+                LOGGER.debug("Successful insert (resource/datastore id=" + resId + ")");
             } else {
                 throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
             } // if else
