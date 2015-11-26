@@ -30,7 +30,7 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `OrionCKANSink` each time a Flume event is taken, by performing the following workflow:
 
 1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
-2. According to the [naming conventions](naming_convetions.md), an organization called as the `fiware-service` header values is created (if not existing yet). The same occurs with a package/dataset called as the `fiware-servicePath` header value.
+2. According to the [naming conventions](naming_conventions.md), an organization called as the `fiware-service` header values is created (if not existing yet). The same occurs with a package/dataset called as the `fiware-servicePath` header value.
 3. The context responses/entities within the container are iterated, and a resource called as the `destination` header value is created (if not yet existing). A datastore associated to the resource is created as well.
 4. The context attributes within each context response/entity are iterated, and a new data row is upserted in the datastore related to the resource. The format for this append depends on the configured persistence mode:
     * `row`: A data row is upserted for each notified context attribute. This kind of row will always contain 8 fields:

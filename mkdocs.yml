@@ -34,7 +34,7 @@ pages:
       - 'Naming conventions': 'flume_extensions_catalogue/naming_conventions.md'
       - 'OrionRESTHandler': 'flume_extensions_catalogue/orion_rest_handler.md'
       - 'OrionCKANSink': 'flume_extensions_catalogue/orion_ckan_sink.md'
-      - 'OrionDynamoDBSink': 'flume_extensions_catalogue/prion_dynamodb_sink.md'
+      - 'OrionDynamoDBSink': 'flume_extensions_catalogue/orion_dynamodb_sink.md'
       - 'OrionKafkaSink': 'flume_extensions_catalogue/orion_kafka_sink.md'
       - 'OrionHDFSSink': 'flume_extensions_catalogue/orion_hdfs_sink.md'
       - 'OrionMongoSink': 'flume_extensions_catalogue/orion_mongo_sink.md'
