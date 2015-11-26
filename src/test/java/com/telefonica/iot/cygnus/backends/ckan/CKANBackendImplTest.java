@@ -52,8 +52,7 @@ public class CKANBackendImplTest {
     private CKANCache mockCache;
     @Mock
     private HttpClient mockHttpClient;
-    
-    
+      
     // constants
     private final String apiKey = "1a2b3c4d5e6f7g8h9i0j";
     private final String host = "localhost";
@@ -64,13 +63,7 @@ public class CKANBackendImplTest {
     private final String pkgName = "numeric-rooms";
     private final String resName = "room1-room";
     private final String recvTime = "2014-09-23T11:26:45";
-    private final long recvTimeTs = Long.parseLong("123456789");
-    private final String entityId = "room1";
-    private final String entityType = "room";
-    private final String attrName = "temperature";
-    private final String attrType = "centigrade";
-    private final String attrValue = "26.5";
-    private final String attrMd = "[]";
+    private final String data = "this is a lot of data";
     private final HashMap<String, String> attrList = new HashMap<String, String>();
     private final HashMap<String, String> attrMdList = new HashMap<String, String>();
     
@@ -98,47 +91,21 @@ public class CKANBackendImplTest {
     } // setUp
 
     /**
-     * Test of persist (row) method, of class CKANBackendImpl.
+     * Test of persist method, of class CKANBackendImpl.
      */
     @Test
-    public void testPersistRow() {
-        System.out.println("Testing CKANBackendImpl.persist (row)");
+    public void testPersis() {
+        System.out.println("Testing CKANBackendImpl.persist");
         
         try {
             backend.setCache(mockCache);
             backend.setHttpClient(mockHttpClient);
-            backend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, entityId, entityType, attrName, attrType,
-                    attrValue, attrMd);
+            backend.persist(orgName, pkgName, resName, data);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testPersistRow
-    
-    /**
-     * Test of persist (column) method, of class CKANBackendImpl.
-     */
-    @Test
-    public void testPersistColumn() {
-        System.out.println("Testing CKANBackendImpl.persist (column)");
-        
-        try {
-            backend.setCache(mockCache);
-            backend.setHttpClient(mockHttpClient);
-            backend.persist(recvTime, orgName, pkgName, resName, attrList, attrMdList);
-        } catch (Exception e) {
-            // Check if the raised exception type is CygnusBadConfiguration. This exception means the resource does not
-            // exist in CKAN and, due to we are running in "column" mode, it cannot be created. By checking this
-            // exception is the most far we can go with this test.
-            if (e instanceof CygnusBadConfiguration) {
-                assertTrue(true);
-            } else {
-                fail(e.getMessage());
-            } // if else
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistColumn
+    } // testPersis
     
 } // CKANBackendImplTest

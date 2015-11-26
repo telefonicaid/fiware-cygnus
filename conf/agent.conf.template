@@ -124,6 +124,10 @@ cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
 cygnusagent.sinks.ckan-sink.ssl = false
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.ckan-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.ckan-sink.batch_timeout = 30
 
 # ============================================
 # OrionMySQLSink configuration
