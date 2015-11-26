@@ -8,7 +8,7 @@ Content:
     * [Coding style](#section2.2)
 * [New sink development](#section3)
     * [`OrionSink` class](#section3.1)
-    * [Sink configuration](#section3.2))
+    * [Sink configuration](#section3.2)
     * [Naming and placing the new sink](#section3.3)
     * [Backend convenience classes](#section3.4)
 * [Reporting issues and contact information](#section4)

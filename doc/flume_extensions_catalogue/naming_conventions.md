@@ -12,7 +12,7 @@ The way Cygnus organizes the data derives from the way Orion Context Broker does
 
 An example of how these headers are used could be found in a Smart City having different public services such as gardens maintenance or garbage collection. If for instance a sensor measure regarding a park's grass humidity has to be notified, then the city name will be given in the `fiware-service` header, while the `fiware-servicePath` will contain a path such as <i>/gardens/parks/south_park</i>.   
 
-As can be seen, this way of organizing the data composes some kind of three-level hierarchical structure, being the first level the service, then being the second level the servicePath and finally the notified entity (which will be named according to the [`DestinationExtractor` interceptor](interceptors.md)). This structure will be translated to all the sinks within Cygnus.
+As can be seen, this way of organizing the data composes some kind of three-level hierarchical structure, being the first level the service, then being the second level the servicePath and finally the notified entity. This structure will be translated to all the sinks within Cygnus.
 
 ### HDFS data organization
 HDFS, like any other file system, organizes the data in files within directories. Thus, it seems obvious how the notified context data can be organized in HDFS:
