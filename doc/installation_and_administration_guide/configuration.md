@@ -1,21 +1,65 @@
-# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
-# 
-# This file is part of fiware-cygnus (FI-WARE project).
-# 
-# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
-# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
-# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-# details.
-# 
-# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
-# http://www.gnu.org/licenses/.
-# 
-# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#<a name="top"></a>Cygnus configuration
+Content:
 
+* [Introduction](#section1)
+* [`cygnus_instance_<id>.conf`](#section2)
+* [`agent_<id>.conf`](#section3)
+* [`log4j.properties`](#section4)
+* [Configuration examples](#section5)
+    * [Single source, single storage (basic configuration)](#section5.1)
+    * [Single source, multiple storages](#section5.2)
+    * [Single source, single storage, parallel sinking](#section5.3)
+    * [Single source, multiple storages, parallel sinking](#section5.4)
+    * [Multiple sources](#section5.5)
+    * [Using interceptors](#section5.6)
+
+##<a name="section1"></a>Introduction
+Cygnus is configured through two different files:
+
+* A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standlalone application (see later), bt it is mandatory if run as a service (see later).
+* An `agent_<id>.conf` file addressing all those Flume parameters, i.e. how to configure the different sources, channels, sinks, etc. that compose the Flume agent behind the Cygnus instance. always mandatory.
+
+Please observe there may exist several Cygnus instances identified by `<id>`, and this `<id>` must be the same for both configuration files regarding the same Cygnus instance. This is necessary if wanting to run several instances of Cygnus as a service in the same machine. E.g. running two different instances of Cygnus will require:
+
+* First instance:
+    * `cygnus_instance_1.conf`
+    * `agent_1.conf`
+* Second instance:
+    * `cygnus_instance_2.conf`
+    * `agent_2.conf`
+
+In addition, (a unique) `log4j.properties` controls how Cygnus logs its traces.
+
+[Top](#top)
+
+##<a name="section2"></a>`cygnus_instance_<id>.conf`
+The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
+
+```
+# The OS user that will be running Cygnus. Note this must be `root` if you want to run cygnus in a privileged port (<1024), either the admin port or the port in which Cygnus receives Orion notifications
+CYGNUS_USER=cygnus
+# Which is the config folder
+CONFIG_FOLDER=/usr/cygnus/conf
+# Which is the config file
+CONFIG_FILE=/usr/cygnus/conf/agent_<id>.conf
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters naming conventions, e.g. it appears in <AGENT_NAME>.sources.http-source.channels=...
+AGENT_NAME=cygnusagent
+# Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081
+# Polling interval (seconds) for the configuration reloading
+POLLING_INTERVAL=30
+```
+
+[Top](#top)
+
+##<a name="section3"></a>`agent_<id>.conf`
+The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent.conf.template`.
+
+```Java
 #=============================================
-# To be put in APACHE_FLUME_HOME/conf/agent.conf
+# To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
 # General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
 
@@ -27,8 +71,8 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
 
 #=============================================
 # source configuration
@@ -52,9 +96,9 @@ cygnusagent.sources.http-source.handler.events_ttl = 10
 cygnusagent.sources.http-source.interceptors = ts gi
 # TimestampInterceptor, do not change
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-# GroupinInterceptor, do not change
+# GroupingInterceptor, do not change
 cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
-# Grouping rules for the GroupingInterceptor, put the right absolute path to the file if necessary
+# Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
 # See the doc/design/interceptors document for more details
 cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
@@ -64,7 +108,7 @@ cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
-# true if the grouping feature is enabled for this sink, false otherwise
+# true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
 cygnusagent.sinks.hdfs-sink.backend_impl = rest
@@ -75,13 +119,13 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# password for the above username; this is only required for Hive authentication
+# password for the above username; this is only required for Hive authentication
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
-# number of notifications to be included within a processing batch
+# number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.hdfs-sink.batch_timeout = 30
@@ -110,7 +154,7 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.con
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
-# true if the grouping feature is enabled for this sink, false otherwise
+# true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.ckan-sink.enable_grouping = false
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
@@ -124,10 +168,6 @@ cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
 cygnusagent.sinks.ckan-sink.ssl = false
-# number of notifications to be included within a processing batch
-cygnusagent.sinks.ckan-sink.batch_size = 100
-# timeout for batch accumulation
-cygunsagent.sinks.ckan-sink.batch_timeout = 30
 
 # ============================================
 # OrionMySQLSink configuration
@@ -135,21 +175,21 @@ cygunsagent.sinks.ckan-sink.batch_timeout = 30
 cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
-# true if the grouping feature is enabled for this sink, false otherwise
+# true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mysql-sink.enable_grouping = false
-# the FQDN/IP address where the MySQL server runs
+# the FQDN/IP address where the MySQL server runs 
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
-# the port where the MySQL server listes for incomming connections
+# the port where the MySQL server listens for incomming connections
 cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
+cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 # select the table type from table-by-destination and table-by-service-path
 cygnusagent.sinks.mysql-sink.table_type = table-by-destination
-# number of notifications to be included within a processing batch
+# number of notifications to be included within a processing batch
 cygnusagent.sinks.mysql-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.mysql-sink.batch_timeout = 30
@@ -160,7 +200,7 @@ cygunsagent.sinks.mysql-sink.batch_timeout = 30
 cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
 # channel name from where to read notification events
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
-# true if the grouping feature is enabled for this sink, false otherwise
+# true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mongo-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
@@ -170,12 +210,12 @@ cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
 cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 # prefix for the MongoDB databases
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
-# prefix pro the MongoDB collections
+# prefix for the MongoDB collections
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.mongo-sink.should_hash = false
 # specify if the sink will use a single collection for each service path, for each entity or for each attribute
-cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mongo-sink.attr_persistence = column
 
@@ -185,7 +225,7 @@ cygnusagent.sinks.mongo-sink.attr_persistence = column
 cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 # channel name from where to read notification events
 cygnusagent.sinks.sth-sink.channel = sth-channel
-# true if the grouping feature is enabled for this sink, false otherwise
+# true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.sth-sink.enable_grouping = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
@@ -206,46 +246,12 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
-# true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.kafka-sink.enable_grouping = false
 # select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
-# comma-separated list of Kafka brokers (a broker is defined as host:port)
+# comma-separated list of Kafka brokers (a broker is defined as host:port)
 cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
-
-# ============================================
-# OrionDynamoDBSink configuration
-# sink class, must not be changed
-cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
-# channel name from where to read notification events
-cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
-# AWS Access Key Id
-cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
-# AWS Secret Access Key
-cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
-# AWS region where the tables will be created (link)
-cygnusagent.sinks.dynamodb-sink.region = eu-central-1
-# true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.dynamo-sink.enable_grouping = false
-# how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.dynamo-sink.attr_persistence = column
-# select the table type from table-by-destination and table-by-service-path
-cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
-# number of notifications to be included within a processing batch
-cygnusagent.sinks.dynamo-sink.batch_size = 100
-# timeout for batch accumulation
-cygunsagent.sinks.dynamo-sink.batch_timeout = 30
-
-#=============================================
-# dynamo-channel configuration
-# channel type (must not be changed)
-cygnusagent.channels.dynamo-channel.type = memory
-# capacity of the channel
-cygnusagent.channels.dynamo-channel.capacity = 1000
-# amount of bytes that can be sent per transaction
-cygnusagent.channels.dynamo-channel.transactionCapacity = 100
 
 #=============================================
 # hdfs-channel configuration
@@ -300,3 +306,102 @@ cygnusagent.channels.kafka-channel.type = memory
 cygnusagent.channels.kafka-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mkafka-channel.transactionCapacity = 100
+```
+
+[Top](#top)
+
+##<a name="section4"></a>`log4j.properties`
+The file `log4j.properties` can be instantiated from a template given in the Cygnus repository, `conf/log4j.properties.template`.
+
+Its content should not be edited unless some of the default values for log path, file name, logging level or appender are wanted to be changed.
+
+```
+# Define some default values.
+# These can be overridden by system properties, e.g. the following logs in the standard output, which is very useful
+# for testing purposes:
+# -Dflume.root.logger=DEBUG,console
+flume.root.logger=INFO,LOGFILE
+#flume.root.logger=DEBUG,console
+flume.log.dir=/var/log/cygnus/
+flume.log.file=flume.log
+
+# Logging levels for certain components.
+log4j.logger.org.apache.flume.lifecycle = INFO
+log4j.logger.org.jboss = WARN
+log4j.logger.org.mortbay = INFO
+log4j.logger.org.apache.avro.ipc.NettyTransceiver = WARN
+log4j.logger.org.apache.hadoop = INFO
+
+# Define the root logger to the system property "flume.root.logger".
+log4j.rootLogger=${flume.root.logger}
+
+# Stock log4j rolling file appender.
+# Default log rotation configuration.
+log4j.appender.LOGFILE=org.apache.log4j.RollingFileAppender
+log4j.appender.LOGFILE.MaxFileSize=100MB
+log4j.appender.LOGFILE.MaxBackupIndex=10
+log4j.appender.LOGFILE.File=${flume.log.dir}/${flume.log.file}
+log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+
+# Warning: If you enable the following appender it will fill up your disk if you don't have a cleanup job!
+# cleanup job example: find /var/log/cygnus -type f -mtime +30 -exec rm -f {} \;
+# This uses the updated rolling file appender from log4j-extras that supports a reliable time-based rolling policy.
+# See http://logging.apache.org/log4j/companions/extras/apidocs/org/apache/log4j/rolling/TimeBasedRollingPolicy.html
+# Add "DAILY" to flume.root.logger above if you want to use this.
+log4j.appender.DAILY=org.apache.log4j.rolling.RollingFileAppender
+log4j.appender.DAILY.rollingPolicy=org.apache.log4j.rolling.TimeBasedRollingPolicy
+log4j.appender.DAILY.rollingPolicy.ActiveFileName=${flume.log.dir}/${flume.log.file}
+log4j.appender.DAILY.rollingPolicy.FileNamePattern=${flume.log.dir}/${flume.log.file}.%d{yyyy-MM-dd}
+log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
+log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+
+# Console appender, i.e. printing logs in the standar output.
+# Add "console" to flume.root.logger above if you want to use this.
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.target=System.err
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+```
+
+[Top](#top)
+
+##<a name="section5"></a>Configuration examples
+###<a name="section5.1"></a>Single source, single storage (basic configuration)
+To be done
+
+[Top](#top)
+
+###<a name="section5.2"></a>Single source, multiple storages
+To be done
+
+[Top](#top)
+
+###<a name="section5.3"></a>Single source, single storage, parallel sinking
+To be done
+
+[Top](#top)
+
+###<a name="section5.4"></a>Single source, multiple storages, parallel sinking
+To be done
+
+[Top](#top)
+
+###<a name="section5.5"></a>Multiple sources 
+To be done
+
+[Top](#top)
+
+###<a name="section5.6"></a>Using interceptors
+Interceptors are components of the Flume agent architecture. Typically, such an agent is based on a source dealing with the input, a sink dealing with the output and a channel communicating them. The source processes the input, producing Flume events (an object based on a set of headers and a byte-based body) that are put in the channel; then the sink consumes the events by getting them from the channel. This basic architecture may be enriched by the addition of Interceptors, a chained sequence of Flume events preprocessors that <i>intercept</i> the events before they are put into the channel and performing one of these operations:
+
+* Drop the event.
+* Modify an existent header of the Flume event.
+* Add a new header to the Flume event.
+
+Interceptors should never modify the body part. Once an event is preprocessed, it is put in the channel as usual.
+
+As can be seen, this mechanism allows for very useful ways of enriching the basic Flume events a certain Flume source may generate. Let's see how Cygnus makes use of this concept in order to add certain information to the Flume events created from the Orion notifications.
+
+[Top](#top)
+
