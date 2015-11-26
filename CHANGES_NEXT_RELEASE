@@ -4,3 +4,4 @@
 - [HARDENING] Add flume-env.sh.template file to the configuration folder (#613)
 - [HARDENING] Documentation refactoring (#611)
 - [HARDENING] Change the name of the default log file, from flume.log to cygnus.log (#622)
+- [BUG] Escape all the non-alphanumeric characters in Hive fields of column-like tables (#619)
