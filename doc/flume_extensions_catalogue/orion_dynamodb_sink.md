@@ -183,7 +183,7 @@ By default, `OrionDynamoDBSink` has a configured batch size and batch accumulati
 [Top](#top)
 
 ####<a name="section2.3.4"></a>Throughput in DynamoDB
-Please observe DynamoDB is a cloud-based storage whoose throughput may be seriously affected by how far are the region the tables are going to be created and the amount of information per write.
+Please observe DynamoDB is a cloud-based storage whose throughput may be seriously affected by how far are the region the tables are going to be created and the amount of information per write.
 
 Regarding the region, always choose the closest one to the host running Cygnus and `OrionDynamoDBSink`.
 
