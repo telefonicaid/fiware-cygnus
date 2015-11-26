@@ -1,4 +1,4 @@
-# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
@@ -18,13 +18,11 @@
 
 # Define some default values.
 # These can be overridden by system properties, e.g. the following logs in the standard output, which is very useful
-# for testing purposes:
-# -Dflume.root.logger=DEBUG,console
-#flume.root.logger=DEBUG,console
-
+# for testing purposes (-Dflume.root.logger=DEBUG,console)
 flume.root.logger=INFO,LOGFILE
+#flume.root.logger=DEBUG,console
 flume.log.dir=/var/log/cygnus/
-flume.log.file=flume.log
+flume.log.file=cygnus.log
 
 # Logging levels for certain components.
 log4j.logger.org.apache.flume.lifecycle = INFO
