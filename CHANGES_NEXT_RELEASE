@@ -2,3 +2,4 @@
 - [HARDENING] Trace the table_type parameter in OrionMySQLSink (#614)
 - [HARDENING] Add enable_grouping parameter for OrionKafkaSink in agent.conf.template (#615)
 - [HARDENING] Add flume-env.sh.template file to the configuration folder (#613)
+- [HARDENING] Documentation refactoring (#611)
