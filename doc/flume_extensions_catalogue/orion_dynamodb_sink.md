@@ -5,7 +5,7 @@ Content:
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to DynamoDB data structures](#section1.2)
     * [Example](#section1.3)
-* [User guide](#section2)
+* [Administrator guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
@@ -116,7 +116,7 @@ If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionDy
     
 [Top](#top)
 
-##<a name="section2"></a>User guide
+##<a name="section2"></a>Administrator guide
 ###<a name="section2.1"></a>Configuration
 `OrionDynamoDBSink` is configured through the following parameters:
 
