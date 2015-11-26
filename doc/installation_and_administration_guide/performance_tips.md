@@ -185,7 +185,7 @@ As you may suppose, the usage of the grouping rules is slower than using the def
 Nevertheless, you may write your grouping rules in a smart way:
 
 * Place the most probably grouping rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
-* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belog to (see [doc/design/interceptors.md](doc/design/interceptors.md) for more details on these concepts). Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
+* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belog to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
 [Top](#top)
 
