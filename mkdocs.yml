@@ -1,0 +1,46 @@
+site_name: fiware-cygnus
+site_url: https://fiware-cygnus.readthedocs.org
+repo_url: https://github.com/telefonicaid/fiware-cygnus.git
+site_description: Cygnus Documentation
+docs_dir: doc
+site_dir: html
+markdown_extensions: [toc,fenced_code]
+use_directory_urls: false
+theme: readthedocs
+extra_css: ["http://fiware.org/style/monokai_sublime.css"]
+pages:
+  - Home: index.md
+  - 'Installation and Administration Guide':
+      - 'Introduction': 'installation_and_administration_guide/introduction.md'
+      - 'Installation via RPM': 'installation_and_administration_guide/install_with_rpm.md'
+      - 'Installation via docker': 'installation_and_administration_guide/install_with_docker.md'
+      - 'Installation from sources': 'installation_and_administration_guide/install_from_sources.md'
+      - 'Configuration': 'installation_and_administration_guide/configuration.md'
+      - 'Running as a service': 'installation_and_administration_guide/running_as_service.md'
+      - 'Running as a process': 'installation_and_administration_guide/running_as_process.md'
+      - 'Testing': 'installation_and_administration_guide/testing.md'
+      - 'Logs and alarms': 'installation_and_administration_guide/logs_and_alarms.md'
+      - 'Management interface': 'installation_and_administration_guide/management_interface.md'
+      - 'Performance tips': 'installation_and_administration_guide/performance_tips.md'
+      - 'Sanity checks': 'installation_and_administration_guide/sanity_checks.md'
+      - 'Diagnosis procedures': 'installation_and_administration_guide/diagnosis_procedures.md'
+      - 'Reporting issues and contact information': 'installation_and_administration_guide/issues_and_contact.md'
+  - 'User and Programmer Guide':
+      - 'Introduction': 'user_and_programmer_guide/introduction.md'
+      - 'Adding a new sink': 'user_and_programmer_guide/adding_new_sink.md'
+      - 'Reporting issues and contact information': 'user_and_programmer_guide/issues_and_contact.md'
+  - 'Flume extensions catalogue':
+      - 'Introduction': 'flume_extensions_catalogue/introduction.md'
+      - 'Naming conventions': 'flume_extensions_catalogue/naming_conventions.md'
+      - 'OrionRESTHandler': 'flume_extensions_catalogue/orion_rest_handler.md'
+      - 'OrionCKANSink': 'flume_extensions_catalogue/orion_ckan_sink.md'
+      - 'OrionDynamoDBSink': 'flume_extensions_catalogue/orion_dynamodb_sink.md'
+      - 'OrionKafkaSink': 'flume_extensions_catalogue/orion_kafka_sink.md'
+      - 'OrionHDFSSink': 'flume_extensions_catalogue/orion_hdfs_sink.md'
+      - 'OrionMongoSink': 'flume_extensions_catalogue/orion_mongo_sink.md'
+      - 'OrionMySQLSink': 'flume_extensions_catalogue/orion_mysql_sink.md'
+      - 'OrionSTHSink': 'flume_extensions_catalogue/orion_sth_sink.md'
+      - 'OrionTestSink': 'flume_extensions_catalogue/orion_test_sink.md'
+      - 'GroupingInterceptor': 'flume_extensions_catalogue/grouping_interceptor.md'
+      - 'RoundRobinChannelSelector': 'flume_extensions_catalogue/round_robin_channel_selector.md'
+      - 'Reporting issues and contact information': 'flume_extensions_catalogue/issues_and_contact.md'
