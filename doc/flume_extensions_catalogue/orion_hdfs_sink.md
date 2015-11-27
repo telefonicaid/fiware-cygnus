@@ -6,7 +6,7 @@ Content:
     * [Mapping Flume events to HDFS data structures](#section1.2)
     * [Hive](#section1.3)
     * [Example](#section1.4)
-* [User guide](#section2)
+* [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
@@ -178,7 +178,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 
 [Top](#top)
 
-##<a name="section2"></a>User guide
+##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
 `OrionHDFSSink` is configured through the following parameters:
 
