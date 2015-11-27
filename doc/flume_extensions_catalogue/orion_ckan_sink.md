@@ -5,7 +5,7 @@ Content:
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to CKAN data structures](#section1.2)
     * [Example](#section1.3)
-* [Users guide](#section2)
+* [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
@@ -222,7 +222,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 [Top](#top)
 
-##<a name="section2"></a>Users guide
+##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
 `OrionCKANSink` is configured through the following parameters:
 
