@@ -5,16 +5,17 @@ Content:
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to MongoDB data structures](#section1.2)
     * [Example](#section1.3)
-* [Configuration](#section2)
-    * [Hashing based collections](#section2.1)
-* [Use cases](#section3)
+* [Administration guide](#section2)
+    * [Configuration](#section2.1)
+    * [Use cases](#section2.2)
+    * [Important notes](#section2.3)
+        * [Hashing based collections](#section2.3.1)
 * [Implementation details](#section4)
     * [`OrionSTHSink` class](#section4.1)
     * [`MongoBackend` class](#section4.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
-
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
@@ -30,12 +31,13 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
-MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionSTHSink` each time a Flume event is taken, by performing the following workflow:
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionSTHSink` each time a Flume event is going to be persisted.
 
-1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
-2. A database called as the `fiware-service` header value within the event is created (if not existing yet).
-3. The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
-4. The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
+A database called as the `fiware-service` header value within the event is created (if not existing yet).
+
+The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+
+The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
 [Top](#top)
 
@@ -198,7 +200,8 @@ NOTES:
 
 [Top](#top)
 
-##<a name="section2"></a>Configuration
+##<a name="section2"></a>Administration guide
+###<a name="section2.1"></a>Configuration
 `OrionSTHSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -230,19 +233,20 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.1"></a>Hashing based collections
+###<a name="section2.2"></a>Use cases
+Use `OrionSTHSink` if you are looking for a Json-based document storage about aggregated data not growing so much in the mid-long term.
+
+[Top](#top)
+
+###<a name="section2.3"></a>Important notes
+###<a name="section2.3.1"></a>Hashing based collections
 In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
 
 In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
 
 [Top](#top)
 
-##<a name="section3"></a>Use cases
-Use `OrionSTHSink` if you are looking for a Json-based document storage about aggregated data not growing so much in the mid-long term.
-
-[Top](#top)
-
-##<a name="section4"></a>Implementation details
+##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionSTHSink` class
 `OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink extends the base `OrionSink`. The methods that are extended are by `OrionMongoBaseSink` are:
 
