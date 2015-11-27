@@ -7,3 +7,4 @@
 - [HARDENING] Change the name of the default log file, from flume.log to cygnus.log (#622)
 - [BUG] Escape all the non-alphanumeric characters in Hive fields of column-like tables (#619)
 - [BUG] OrionTestSink now inherits the configuration from OrionSink base class (#632)
+- [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
