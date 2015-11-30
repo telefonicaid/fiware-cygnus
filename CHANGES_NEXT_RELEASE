@@ -6,3 +6,4 @@
 - [HARDENING] Documentation refactoring (#611)
 - [HARDENING] Change the name of the default log file, from flume.log to cygnus.log (#622)
 - [BUG] Escape all the non-alphanumeric characters in Hive fields of column-like tables (#619)
+- [FEATURE] The package name now has the Hadoop Core version in wich Cygnus is compatible (#565)

@@ -109,6 +109,15 @@ function clean_up_previous_builds() {
     return 0
 }
 
+function get_name_suffix() {
+    # At this moment Cygnus package name only has a Hadoop core version
+    HADOOP_VERSION=$(grep -A1 "hadoop-core" ${BASE_DIR}/pom.xml | tail -1 | tr -d "</version> ")
+    if [[ -z "${HADOOP_VERSION}" || ${HADOOP_VERSION} == "" ]]; then
+        return 1
+    fi
+    NAME_SUFFIX="_hadoopcore_${HADOOP_VERSION}"
+}
+
 function usage() {
     SCRIPT=$(basename $0)
 
@@ -224,6 +233,10 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	copy_cygnus_conf
 	[[ $? -ne 0 ]] && exit 1
 
+    get_name_suffix
+    [[ $? -ne 0 ]] && _logError "Can't get the name suffix" && exit 1
+ 
+
 	_logStage "######## Executing the rpmbuild ... ########"
 	rm -rf ${RPM_BASE_DIR}/BUILD
 	rm -rf ${RPM_BASE_DIR}/BUILDROOT
@@ -231,9 +244,9 @@ if [[ -d "${RPM_BASE_DIR}" ]]; then
 	do
 		_log "#### Packaging using: ${SPEC_FILE}... ####"
 		# Execute command to create RPM
-		RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} "
+		RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX} "
 		_log "Rpm construction command: ${RPM_BUILD_COMMAND}"
-		rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} 
+        rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX} 
 		_logStage "######## rpmbuild finished! ... ########"
 	done
 
