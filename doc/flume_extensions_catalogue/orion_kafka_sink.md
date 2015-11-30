@@ -8,6 +8,8 @@ Content:
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
+    * [Important notes](#section2.3)
+        * [About batching](#section2.3.1)
 * [Programmers guide](#section3)
     * [`OrionKafkaSink` class](#section3.1)
     * [`KafkaProducer` class (backend)](#section3.2)
@@ -15,7 +17,7 @@ Content:
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionKafkaSink`, or simply `OrionKafkaSink` is a sink designed to persist NGSI-like context data events within a [Apache Kafka](http://kafka.apache.org/) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
+Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific Kafka data structures at the Cygnus sinks.
 
 Next sections will explain this in detail.
 
@@ -99,6 +101,8 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
 | topic_type | no | topic-by-destination | <i>topic-by-destination</i>, <i>topic-by-service-path</i> or <i>topic-by-service</i> |
 | broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>) |
 | zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i> |
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
 
@@ -111,11 +115,25 @@ A configuration example could be:
     cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
     cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
     cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
+    cygnusagent.sinks.kafka-sink.batch_size = 100
+    cygnusagent.sinks.kafka-sink.batch_timeout = 30
 
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
 Use `OrionKafkaSink` if you want to integrate OrionContextBroker with a Kafka-based consumer, as a Storm real-time application.
+
+[Top](#top)
+
+###<a name="section2.3"></a>Important notes
+####<a name="section2.3.3"></a>About batching
+As explained in the [programmers guide](#section3), `OrionKafkaSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Kafka topic. If processing the events one by one, we would need 100 writes to Kafka; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Kafka topic. In the worst case, the whole 100 entities will be about 100 different entities (100 different Kafka topics), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
+
+The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+By default, `OrionKafkaSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
