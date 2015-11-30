@@ -5,11 +5,12 @@ Content:
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to Kafka data structures](#section1.2)
     * [Example](#section1.3)
-* [Configuration](#section2)
-* [Use cases](#section3)
-* [Implementation details](#section4)
-    * [`OrionKafkaSink` class](#section4.1)
-    * [`KafkaProducer` class (backend)](#section4.2)
+* [Administration guide](#section2)
+    * [Configuration](#section2.1)
+    * [Use cases](#section2.2)
+* [Programmers guide](#section3)
+    * [`OrionKafkaSink` class](#section3.1)
+    * [`KafkaProducer` class (backend)](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionKafkaSink`, or simply `OrionKafkaSink` is a sink designed to persist NGSI-like context data events within a [Apache Kafka](http://kafka.apache.org/) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -28,10 +29,9 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to Kafka data structures
-[Apache Kafka organizes](http://kafka.apache.org/documentation.html#introduction) the data in topics (a category or feed name to which messages are published). Such organization is exploited by `OrionKafkaSink` each time a Flume event is taken, by performing the following workflow:
+[Apache Kafka organizes](http://kafka.apache.org/documentation.html#introduction) the data in topics (a category or feed name to which messages are published). Such organization is exploited by `OrionKafkaSink` each time a Flume event is going to be persisted.
 
-1. The bytes within the event's body are parsed and a `NotifyContextRequest` object container is created.
-2. A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured topic type:
+A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured topic type:
     * `topic-per-destination`. A topic named `<destination>` is created, where `<destination>` value is got from the event headers.
     * `topic-per-service-path`. A topic named `<fiware-servicePath>` is created, where `<fiware-servicePath>` value is got from the event headers.
     * `topic-per-service`. A topic named `<fiware-service>` is created, where `<fiware-service>` value is got from the event headers.
@@ -87,7 +87,8 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
     
 [Top](#top)
 
-##<a name="section2"></a>Configuration
+##<a name="section2"></a>Administration guide
+###<a name="section2.1"></a>Configuration
 `OrionKafkaSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -113,12 +114,12 @@ A configuration example could be:
 
 [Top](#top)
 
-##<a name="section3"></a>Use cases
+###<a name="section2.2"></a>Use cases
 Use `OrionKafkaSink` if you want to integrate OrionContextBroker with a Kafka-based consumer, as a Storm real-time application.
 
 [Top](#top)
 
-##<a name="section4"></a>Implementation details
+##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionKafkaSink` class
 As any other NGSI-like sink, `OrionKafkaSink` extends the base `OrionSink`. The methods that are extended are:
 
