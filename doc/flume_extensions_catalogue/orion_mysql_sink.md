@@ -5,7 +5,7 @@ Content:
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to MySQL data structures](#section1.2)
     * [Example](#section1.3)
-* [User guide](#section2)
+* [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
@@ -250,7 +250,7 @@ NOTES:
 
 [Top](#top)
 
-##<a name="section2"></a>User guide
+##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
 `OrionMySQLSink` is configured through the following parameters:
 

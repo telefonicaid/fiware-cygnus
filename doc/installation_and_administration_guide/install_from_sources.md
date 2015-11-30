@@ -54,16 +54,19 @@ Apache Flume can be easily installed by downloading its latests version from [fl
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
+    $ mv APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar.old
+    $ mv APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar.old
+    $ wget http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar -P APACHE_FLUME_HOME/lib
+    $ mv APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar.old
     $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
 
-The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
+Some remarks:
 
-Before continuing with the installation of Cygnus, some tuning must be done on Flume:
-
+* The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
 * Please observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` (`httpclient-4.3.1.jar and httpcore-4.3.1.jar`) don't match match the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). In order the most recent version of the libraries, the ones within the Flume bundle must be removed (or renamed).
-* libthrift-0.9.1.jar must overwrite `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
+* libthrift-0.9.1.jar must overwrite the 0.7.0 budled with Flume (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
 
 [Top](#top)
 
