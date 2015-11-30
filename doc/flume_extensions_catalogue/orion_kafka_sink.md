@@ -126,7 +126,7 @@ Use `OrionKafkaSink` if you want to integrate OrionContextBroker with a Kafka-ba
 [Top](#top)
 
 ###<a name="section2.3"></a>Important notes
-####<a name="section2.3.3"></a>About batching
+####<a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `OrionKafkaSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Kafka topic. If processing the events one by one, we would need 100 writes to Kafka; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Kafka topic. In the worst case, the whole 100 entities will be about 100 different entities (100 different Kafka topics), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
@@ -137,8 +137,8 @@ By default, `OrionKafkaSink` has a configured batch size and batch accumulation 
 
 [Top](#top)
 
-##<a name="section4"></a>Programmers guide
-###<a name="section4.1"></a>`OrionKafkaSink` class
+##<a name="section3"></a>Programmers guide
+###<a name="section3.1"></a>`OrionKafkaSink` class
 As any other NGSI-like sink, `OrionKafkaSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persist(Map<String, String>, NotifyContextRequest) throws Exception;
@@ -155,7 +155,7 @@ A complete configuration as the one described above is read from the given `Cont
 
 [Top](#top)
 
-###<a name="section4.2"></a>`KafkaProducer` class (backend)
+###<a name="section3.2"></a>`KafkaProducer` class (backend)
 The implementation of a class dealing with the details of the backend is given by Kafka itself through the [`KafkaProducer`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html) class. Thus, the sink has been developed by invoking the methods within that class, specially:
 
     public send(ProducerRecord<K,V>);
