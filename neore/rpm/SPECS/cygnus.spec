@@ -15,7 +15,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 Summary:          Package for cygnus component
-Name:             cygnus
+Name:             cygnus%{_name_suffix}
 Version:          %{_product_version}
 Release:          %{_product_release}
 License:          AGPLv3
