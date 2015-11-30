@@ -20,7 +20,9 @@ package com.telefonica.iot.cygnus.sinks;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -243,37 +245,43 @@ public class OrionKafkaSink extends OrionSink {
 
         switch (topicType) {
             case TOPICBYDESTINATION:
-                if (!topicAPI.topicExists(zookeeperClient, destination)) {
-                    LOGGER.info("[" + this.getName() + "] Creating topic " + destination
+                String topicName = buildTopicName(destination);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
                             + " at OrionKafkaSink");
-                    topicAPI.createTopic(zookeeperClient, destination, new Properties());
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
                 } // if
 
                 LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                        + destination + "), Data (" + aggregation + ")");
-                record = new ProducerRecord<String, String>(destination, aggregation);
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
                 break;
             case TOPICBYSERVICEPATH:
-                if (!topicAPI.topicExists(zookeeperClient, servicePath)) {
-                    LOGGER.info("[" + this.getName() + "] Creating topic " + servicePath
+                topicName = buildTopicName(servicePath);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
                             + " at OrionKafkaSink");
-                    topicAPI.createTopic(zookeeperClient, servicePath, new Properties());
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
                 } // if
 
                 LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                        + servicePath + "), Data (" + aggregation + ")");
-                record = new ProducerRecord<String, String>(servicePath, aggregation);
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
                 break;
             case TOPICBYSERVICE:
-                if (!topicAPI.topicExists(zookeeperClient, service)) {
-                    LOGGER.info("[" + this.getName() + "] Creating topic " + service
+                topicName = buildTopicName(service);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
                             + " at OrionKafkaSink");
-                    topicAPI.createTopic(zookeeperClient, service, new Properties());
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
                 } // if
 
                 LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                        + service + "), Data (" + aggregation + ")");
-                record = new ProducerRecord<String, String>(service, aggregation);
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
                 break;
             default:
                 record = null;
@@ -295,6 +303,15 @@ public class OrionKafkaSink extends OrionSink {
         message += contextElementResponseStr + "}";
         return message;
     } // buildMessage
+    
+    private String buildTopicName(String topic) throws Exception {
+        if (topic.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building topic " + topic + " and its length is greater "
+                    + "than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return topic;
+    } // buildTopicFromDestination
     
     /**
      * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
