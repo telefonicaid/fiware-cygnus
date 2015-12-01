@@ -137,6 +137,7 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         String tableTypeStr = context.getString("table_type", "table-per-destination");
         tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
