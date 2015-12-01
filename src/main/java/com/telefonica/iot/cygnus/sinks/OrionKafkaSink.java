@@ -19,10 +19,12 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
@@ -141,86 +143,175 @@ public class OrionKafkaSink extends OrionSink {
 
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
-        
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-        } // if else
-
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
-        
-        for (int i = 0; i < contextResponses.size(); i++) {
-            // get the i-th contextElement
-            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            
-            // build the message/record to be sent to Kafka
-            String message = buildMessage(contextElementResponse, fiwareService, servicePaths[i], recvTimeTs);
-            ProducerRecord<String, String> record;
-            
-            switch (topicType) {
-                case TOPICBYDESTINATION:
-                    if (!topicAPI.topicExists(zookeeperClient, destinations[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + destinations[i]
-                                + " at OrionKafkaSink");
-                        topicAPI.createTopic(zookeeperClient, destinations[i], new Properties());
-                    } // if
-                    
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + destinations[i] + "), Data (" + message + ")");
-                    record = new ProducerRecord<String, String>(destinations[i], message);
-                    break;
-                case TOPICBYSERVICEPATH:
-                    if (!topicAPI.topicExists(zookeeperClient, servicePaths[i])) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + servicePaths[i]
-                                + " at OrionKafkaSink");
-                        topicAPI.createTopic(zookeeperClient, servicePaths[i], new Properties());
-                    } // if
-                    
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + servicePaths[i] + "), Data (" + message + ")");
-                    record = new ProducerRecord<String, String>(servicePaths[i], message);
-                    break;
-                case TOPICBYSERVICE:
-                    if (!topicAPI.topicExists(zookeeperClient, fiwareService)) {
-                        LOGGER.info("[" + this.getName() + "] Creating topic " + fiwareService
-                                + " at OrionKafkaSink");
-                        topicAPI.createTopic(zookeeperClient, fiwareService, new Properties());
-                    } // if
-                    
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
-                            + fiwareService + "), Data (" + message + ")");
-                    record = new ProducerRecord<String, String>(fiwareService, message);
-                    break;
-                default:
-                    record = null;
-                    break;
-            } // switch
-            
-            if (record != null) {
-                persistenceBackend.send(record);
-            } // if
-        } // for
-    } // persistOne
+        Accumulator accumulator = new Accumulator();
+        accumulator.initializeBatching(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
+    } // persitOne
     
-    private String buildMessage(ContextElementResponse contextElementResponse, String fiwareService,
+    @Override
+    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
+        // select batch depending on the enable grouping parameter
+        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
+        
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            KafkaAggregator aggregator = new KafkaAggregator();
+            aggregator.initialize(subBatch.get(0));
+
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the aggregation
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+        } // for
+    } // persistBatch
+    
+    /**
+     * Class for aggregating aggregation.
+     */
+    private class KafkaAggregator {
+        
+        // string containing the data aggregation
+        protected String aggregation;
+        protected String service;
+        protected String servicePath;
+        protected String destination;
+        
+        public KafkaAggregator() {
+            aggregation = "";
+        } // KafkaAggregator
+        
+        public String getAggregation() {
+            return aggregation;
+        } // getAggregation
+        
+        public String getService() {
+            return service;
+        } // getService
+        
+        public String getServicePath() {
+            return servicePath;
+        } // servicePath
+        
+        public String getDestination() {
+            return destination;
+        } // getDestination
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            destination = cygnusEvent.getDestination();
+        } // initialize
+        
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            
+            if (aggregation.isEmpty()) {
+                aggregation = buildMessage(contextElement, service, servicePath, recvTimeTs);
+            } else {
+                aggregation += "\n" + buildMessage(contextElement, service, servicePath, recvTimeTs);
+            } // if else
+        } // aggregate
+
+    } // KafkaAggregator
+    
+    private void persistAggregation(KafkaAggregator aggregator) throws Exception {
+        String aggregation = aggregator.getAggregation();
+        String service = aggregator.getService();
+        String servicePath = aggregator.getServicePath();
+        String destination = aggregator.getDestination();
+        
+        // build the message/record to be sent to Kafka
+        ProducerRecord<String, String> record;
+
+        switch (topicType) {
+            case TOPICBYDESTINATION:
+                String topicName = buildTopicName(destination);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
+                            + " at OrionKafkaSink");
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
+                } // if
+
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
+                break;
+            case TOPICBYSERVICEPATH:
+                topicName = buildTopicName(servicePath);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
+                            + " at OrionKafkaSink");
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
+                } // if
+
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
+                break;
+            case TOPICBYSERVICE:
+                topicName = buildTopicName(service);
+                
+                if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+                    LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
+                            + " at OrionKafkaSink");
+                    topicAPI.createTopic(zookeeperClient, topicName, new Properties());
+                } // if
+
+                LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
+                        + topicName + "), Data (" + aggregation + ")");
+                record = new ProducerRecord<String, String>(topicName, aggregation);
+                break;
+            default:
+                record = null;
+                break;
+        } // switch
+
+        if (record != null) {
+            persistenceBackend.send(record);
+        } // if
+    } // persistAggregation
+
+    private String buildMessage(ContextElement contextElement, String fiwareService,
             String fiwareServicePath, long recvTimeTs) {
         String message = "{\"headers\":[{\"fiware-service\":\"" + fiwareService + "\"},"
                 + "{\"fiware-servicePath\":\"" + fiwareServicePath + "\"},"
                 + "{\"timestamp\":" + recvTimeTs + "}" + "],\"body\":";
         Gson gson = new Gson();
-        String contextElementResponseStr = gson.toJson(contextElementResponse);
+        String contextElementResponseStr = gson.toJson(contextElement);
         message += contextElementResponseStr + "}";
         return message;
     } // buildMessage
+    
+    private String buildTopicName(String topic) throws Exception {
+        if (topic.length() > Constants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building topic " + topic + " and its length is greater "
+                    + "than " + Constants.MAX_NAME_LEN);
+        } // if
+        
+        return topic;
+    } // buildTopicFromDestination
     
     /**
      * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
@@ -249,10 +340,5 @@ public class OrionKafkaSink extends OrionSink {
         } // createTopic
         
     } // TopicAPI
-    
-    @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    } // persistBatch
 
 } // OrionKafkaSink
