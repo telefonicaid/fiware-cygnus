@@ -276,6 +276,7 @@ public class OrionCKANSink extends OrionSink {
                 // create a column and aggregate it
                 String record = "{\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
                     + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\": \"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
                     + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
                     + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
@@ -332,7 +333,10 @@ public class OrionCKANSink extends OrionSink {
                 return;
             } // if
             
-            String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
+            String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\"";
             
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();

@@ -44,6 +44,7 @@ The context attributes within each context response/entity are iterated, and a n
 * `row`: A data row is upserted for each notified context attribute. This kind of row will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `fiwareservicePath`: Notified fiware-servicePath, or the default configured one if not notified.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
@@ -53,6 +54,8 @@ The context attributes within each context response/entity are iterated, and a n
 * `column`: A single row is upserted for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus four additional fields:
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `fiwareservicePath`: The notified one or the default one.
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
 
@@ -114,6 +117,10 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "id": "recvTime"
                 },
                 {
+                    "type": "text",
+                    "id": "fiwareservicePath"
+                },
+                {
                     "id": "entityId",
                     "type": "text"
                 },
@@ -140,6 +147,9 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
             ],
             "records": [
                 {
+                    "entityId": "car1",
+                    "entityType": "car",
+                    "fiwareservicePath": "4wheels",
                     "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
@@ -149,6 +159,9 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
                     "_id": 1
                 },
                 {
+                    "entityId": "car1",
+                    "entityType": "car",
+                    "fiwareservicePath": "4wheels",
                     "attrType": "float",
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
                     "recvTimeTs": 1429535775,
@@ -184,6 +197,18 @@ If `attr_persistence=colum` then `OrionCKANSink` will persist the data within th
                     "id": "recvTime"
                 },
                 {
+                    "type": "text",
+                    "fiwareservicePath": "4wheels"
+                },
+                {
+                    "type": "text",
+                    "entityId": "car1"
+                },
+                {
+                    "type": "text",
+                    "entityType": "car"
+                },
+                {
                     "type": "json",
                     "id": "speed"
                 },
@@ -203,6 +228,9 @@ If `attr_persistence=colum` then `OrionCKANSink` will persist the data within th
             "records": [
                 {
                     "recvTime": "2015-04-20T12:13:22.41.124Z",
+                    "fiwareservicePath": "4wheels",
+                    "entityId": "car1",
+                    "entityType": "car",
                     "speed": "112.9",
                     "speed_md": null,
                     "oil_level": "74.6",
