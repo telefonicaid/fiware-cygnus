@@ -7,6 +7,7 @@
 - [HARDENING] Documentation refactoring (#611)
 - [HARDENING] Change the name of the default log file, from flume.log to cygnus.log (#622)
 - [BUG] Escape all the non-alphanumeric characters in Hive fields of column-like tables (#619)
+- [FEATURE] The package name now has the Hadoop Core version Cygnus is compatible with (#565)
 - [BUG] OrionTestSink now inherits the configuration from OrionSink base class (#632)
 - [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
 - [FEATURE] Add batching support to OrionKafkaSink (#569)
