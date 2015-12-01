@@ -53,7 +53,7 @@ public class OrionTestSink extends OrionSink {
 
     @Override
     public void configure(Context context) {
-        // nothing to configure... this is a testing sink and should be simple!
+        super.configure(context);
     } // configure
 
     @Override

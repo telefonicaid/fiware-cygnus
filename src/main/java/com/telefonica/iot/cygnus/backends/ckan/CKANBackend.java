@@ -18,46 +18,22 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
-import java.util.Map;
-
 /**
  * Interface for those backends implementing the persistence in CKAN.
  * 
- * @author fermin
+ * @author fermin, frb
  */
 public interface CKANBackend {
 
     /**
-     * Persist data in the CKAN datastore associated with the entity in a given organization (row mode).
+     * Persist data in the CKAN datastore associated with the entity in a given organization.
      * 
-     * @param recvTimeTs Reception time in milliseconds
-     * @param recvTime Reception time (human readable)
      * @param orgName Organization name
      * @param pkgName Package/dataset name
      * @param resName Resource name
-     * @param entityId Entity id
-     * @param entityType Entity type
-     * @param attrName Attribute name
-     * @param attrType Attribute type
-     * @param attrValue Attribute value
-     * @param attrMd Attribute metadata string serialization
+     * @param records Recods to be added to the resource
      * @throws Exception
      */
-    void persist(long recvTimeTs, String recvTime, String orgName, String pkgName, String resName, String entityId,
-            String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
-
-    /**
-     * Persist data in the CKAN datastore associated with the entity in a given organization (column mode).
-     *
-     * @param recvTime Reception time (human readable)
-     * @param orgName Organization name
-     * @param pkgName Package/dataset name
-     * @param resName Resource name
-     * @param attrList Hashmap containing the attributes to persist
-     * @param attrMdList Hashmap containing the metadata string serialization to persist
-     * @throws Exception
-     */
-    void persist(String recvTime, String orgName, String pkgName, String resName, Map<String, String> attrList,
-            Map<String, String> attrMdList) throws Exception;
+    void persist(String orgName, String pkgName, String resName, String records) throws Exception;
     
 } // CKANBackend
