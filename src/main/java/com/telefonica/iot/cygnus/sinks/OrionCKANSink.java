@@ -352,7 +352,7 @@ public class OrionCKANSink extends OrionSink {
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
                 if (!attrMetadata.equals(Constants.EMPTY_MD)) {
-                    record += ", \"" + attrName + "_md\": " + attrMetadata;
+                    record += ",\"" + attrName + "_md\": " + attrMetadata;
                 } // if
             } // for
             
