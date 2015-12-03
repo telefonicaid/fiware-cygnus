@@ -1,3 +1,4 @@
+- [RELEASE] Maintenance tasks in fiware-cygnus Git repository (#402)
 - [FEATURE] Add support to batch processing within a transaction in OrionCKANSink (#567)
 - [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
 - [HARDENING] Trace the table_type parameter in OrionMySQLSink (#614)
@@ -12,3 +13,4 @@
 - [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
 - [FEATURE] Add batching support to OrionKafkaSink (#569)
 - [HARDENING] Add the Quick Start Guide to readthedocs (#645)
+- [HARDENING] Add a document containing a table in charge of relating features and Cygnus version (#638)
