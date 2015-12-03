@@ -214,6 +214,10 @@ cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.kafka-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.kafka-sink.batch_timeout = 30
 
 # ============================================
 # OrionDynamoDBSink configuration
