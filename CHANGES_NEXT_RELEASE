@@ -12,4 +12,5 @@
 - [BUG] OrionTestSink now inherits the configuration from OrionSink base class (#632)
 - [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
 - [FEATURE] Add batching support to OrionKafkaSink (#569)
+- [HARDENING] Add the Quick Start Guide to readthedocs (#645)
 - [HARDENING] Add a document containing a table in charge of relating features and Cygnus version (#638)

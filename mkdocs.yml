@@ -10,6 +10,7 @@ theme: readthedocs
 extra_css: ["http://fiware.org/style/monokai_sublime.css"]
 pages:
   - Home: index.md
+  - 'Quick Start Guide': 'quick_start_guide.md'
   - 'Installation and Administration Guide':
       - 'Introduction': 'installation_and_administration_guide/introduction.md'
       - 'Installation via RPM': 'installation_and_administration_guide/install_with_rpm.md'

@@ -1,5 +1,5 @@
 #Cygnus Quick Start Guide
-This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md).
+This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](i./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
 
 ##Installing Cygnus
 Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
@@ -61,6 +61,8 @@ cygnusagent.channels.test-channel.transactionCapacity = 100
 
 cygnusagent.sinks.test-sink.channel = test-channel
 cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
+cygnusagent.sinks.test-sink.batch_size = 1
+cygnusagent.sinks.test_sink.batch_timeout = 10
 ```
 
 (2) Start Cygnus from the command line; Cygnus will be printing logs on the standard output (i.e. your screen):
