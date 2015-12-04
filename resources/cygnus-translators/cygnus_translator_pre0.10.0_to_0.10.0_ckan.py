@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
+#
+# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FI-WARE project).
+#
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+# General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 # Author: frb
 
@@ -17,7 +34,6 @@ if len(sys.argv) < 7:
    print('      api_key')
    print('      org_name')
    print('      attr_persistence')
-   print('      null_value : string to be inserted as null value, use the keyword \"empty\" for an empty value')
    print('      backup     : either true or false')
    sys.exit(0)
 
@@ -27,17 +43,12 @@ ckan_port=sys.argv[2]
 api_key=sys.argv[3]
 org_name=sys.argv[4]
 attr_persistence=sys.argv[5]
-null_value=sys.argv[6]
-backup=sys.argv[7]
-
-# Check for the empty value
-if null_value == 'empty':
-   null_value=''
+backup=sys.argv[6]
 
 # Process an organization, given its name
 def process_org(org_name):
    print('Processing organization ' + org_name)
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/organization_show'
+   url = 'http://%s:%s/api/3/action/organization_show' % (ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':org_name,'include_datasets':'true'}
    req = requests.post(url, headers=headers, json=payload)
@@ -49,7 +60,7 @@ def process_org(org_name):
 # Process a package, given its id
 def process_pkg(pkg_id):
    print(' |_Processing package ' + pkg_id)
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/package_show'
+   url = 'http://%s:%s/api/3/action/package_show' % (ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':pkg_id}
    req = requests.post(url, headers=headers, json=payload)
@@ -61,7 +72,7 @@ def process_pkg(pkg_id):
 # Process a resource, given its id
 def process_res(res_id, res_name, pkg_id):
    print('    |_Processing resource ' + res_id)
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/datastore_search'
+   url = 'http://%s:%s/api/3/action/datastore_search' % (ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':res_id}
    req = requests.post(url, headers=headers, json=payload)
@@ -89,24 +100,24 @@ def do_backup(fields, records, res_name, pkg_id):
    headers = {'Authorization': api_key}
 
    # Create the backup resource
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/resource_create'
+   url = 'http://%s:%s/api/3/action/resource_create' % (ckan_host, ckan_port)
    payload = {'name':res_name + '_bak','url':'none','format':'','package_id':pkg_id}
    req = requests.post(url, headers=headers, json=payload)
    dictionary = req.json()
    res_id = dictionary['result']['id']
 
    # Create the datastore for the backup resource
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/datastore_create'
+   url = 'http://%s:%s/api/3/action/datastore_create' % (ckan_host, ckan_port)
    payload = {'fields':fields,'force':'true','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
 
    # Create the backup resource view
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/resource_view_create'
+   url = 'http://%s:%s/api/3/action/resource_view_create' % (ckan_host, ckan_port)
    payload = {'view_type':'recline_grid_view','title':'Backup','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
 
    # Upsert the records in the backup resource
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/datastore_upsert'
+   url = 'http://%s:%s/api/3/action/datastore_upsert' % (ckan_host, ckan_port)
    payload = {'records':records,'force':'true','method':'insert','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
 
@@ -119,7 +130,7 @@ def add_new_fields(fields, res_id):
       fields.append({'id':'entityId','type':'text'})
       fields.append({'id':'entityType','type':'text'})
 
-   url = 'http://' + ckan_host + ':' + ckan_port + '/api/3/action/datastore_create'
+   url = 'http://%s:%s/api/3/action/datastore_create' % (ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'resource_id':res_id,'force':'true','fields':fields}
    req = requests.post(url, headers=headers, json=payload)
