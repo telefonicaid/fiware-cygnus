@@ -4,7 +4,7 @@
 
   <groupId>com.telefonica.iot</groupId>
   <artifactId>cygnus</artifactId>
-  <version>0.10.0_SNAPSHOT</version>
+  <version>0.11.0</version>
   <packaging>jar</packaging>
 
   <name>cygnus</name>
