@@ -29,12 +29,12 @@ import pprint
 # Show the usage
 if len(sys.argv) < 7:
    print('Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port api_key org_name attr_persistence null_value backup')
-   print('where ckan_host')
-   print('      ckan_port')
-   print('      api_key')
-   print('      org_name')
-   print('      attr_persistence')
-   print('      backup     : either true or false')
+   print('where ckan_host       : IP address or FQDN of the host running the CKAN server')
+   print('      ckan_port       : port where the above CKAN server is listening')
+   print('      api_key         : API key for a user allowed to update the given organization')
+   print('      org_name        : organization name to be translated')
+   print('      attr_persistence: either row or column')
+   print('      backup          : either true or false')
    sys.exit(0)
 
 # Input parameters
@@ -89,7 +89,9 @@ def process_res(res_id, res_name, pkg_id):
    for i in range(0, len(records)):
       del records[i]['_id']
 
-   do_backup(fields, records, res_name, pkg_id)
+   if backup == 'true':
+      do_backup(fields, records, res_name, pkg_id)
+
    add_new_fields(fields, res_id)
 
 # Do backup of a resource given its fields, its records and its id
@@ -134,8 +136,6 @@ def add_new_fields(fields, res_id):
    headers = {'Authorization': api_key}
    payload = {'resource_id':res_id,'force':'true','fields':fields}
    req = requests.post(url, headers=headers, json=payload)
-   print(req.status_code)
-   print(req.text)
 
 # Main function
 def main():
