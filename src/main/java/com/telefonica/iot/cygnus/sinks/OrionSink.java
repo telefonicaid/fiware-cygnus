@@ -196,7 +196,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         ttl = 0;
                         LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
                               +  ", " + nfe.getMessage() + ")");
-                    } // try catch // try catch
+                    } // try catch
 
                     if (ttl == -1) {
                         txn.rollback();
@@ -239,7 +239,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } else {
             // get and process as many events as the batch size
             int currentIndex;
-            
+
             for (currentIndex = accumulator.getAccIndex(); currentIndex < batchSize; currentIndex++) {
                 // check if the batch accumulation timeout has been reached
                 if ((new Date().getTime() - accumulator.getAccStartDate()) > (batchTimeout * 1000)) {
@@ -270,7 +270,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
                 } catch (Exception e) {
                     LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                } // catch // catch
+                } // catch
 
                 // parse the event and accumulate it
                 try {

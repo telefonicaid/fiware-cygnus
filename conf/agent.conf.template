@@ -27,8 +27,8 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
 
 #=============================================
 # source configuration
@@ -124,6 +124,10 @@ cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
 cygnusagent.sinks.ckan-sink.ssl = false
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.ckan-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.ckan-sink.batch_timeout = 30
 
 # ============================================
 # OrionMySQLSink configuration
@@ -202,12 +206,50 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.kafka-sink.enable_grouping = false
 # select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
 cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.kafka-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.kafka-sink.batch_timeout = 30
+
+# ============================================
+# OrionDynamoDBSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
+# channel name from where to read notification events
+cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
+# AWS Access Key Id
+cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
+# AWS Secret Access Key
+cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
+# AWS region where the tables will be created (link)
+cygnusagent.sinks.dynamodb-sink.region = eu-central-1
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.dynamo-sink.enable_grouping = false
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.dynamo-sink.attr_persistence = column
+# select the table type from table-by-destination and table-by-service-path
+cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.dynamo-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.dynamo-sink.batch_timeout = 30
+
+#=============================================
+# dynamo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.dynamo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.dynamo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.dynamo-channel.transactionCapacity = 100
 
 #=============================================
 # hdfs-channel configuration

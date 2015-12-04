@@ -1,31 +1,8 @@
 #Cygnus Quick Start Guide
-This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-cygnus).
-
-##Basic knowlegde about Cygnus
-Previous to installing and using it, you should know a couple of things about Cygnus.
-
-###What is is for?
-Cygnus is a connector in charge of persisting Orion context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus.
-
-###How does it receives context data from Orion Context Broker?
-Cygnus uses the subscription/notification feature of Orion. A subscription is made in Orion on behalf of Cygnus, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
-
-###Which storages is it able to integrate?
-Current stable release is able to persist Orion context data in:
-
-* [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
-* [MySQL](https://www.mysql.com/), the well-known relational database manager.
-* [CKAN](http://ckan.org/), an Open Data platform.
-* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
-
-###Which is its basic architecture?
-Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/). In fact, Cygnus is a Flume agent, which is basically composed of a <i>source</i> in charge of receiving the data, a <i>channel</i> where the source puts the data once it has been transformed into a Flume event, and a <i>sink</i>, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
-
-As said, Cygnus is able to persist in HDFS, MySQL, CKAN, MongoDB and STH, thus there exists a [sink](design/) for each one of those storages.
+This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](i./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
 
 ##Installing Cygnus
-Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cy	gnus (CentOS/RedHat example):
+Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
 
 ```
 $ sudo cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -84,6 +61,8 @@ cygnusagent.channels.test-channel.transactionCapacity = 100
 
 cygnusagent.sinks.test-sink.channel = test-channel
 cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
+cygnusagent.sinks.test-sink.batch_size = 1
+cygnusagent.sinks.test_sink.batch_timeout = 10
 ```
 
 (2) Start Cygnus from the command line; Cygnus will be printing logs on the standard output (i.e. your screen):
@@ -148,16 +127,6 @@ $ ./notification.sh http://localhost:5050/notify
 2015-03-06T08:54:20.804CET | lvl=INFO | trans=1425628437-99-0000000000 | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[187] : Finishing transaction (1425628437-99-0000000000)
 
 ```
-
-##Further reading
-This Quick Start Guide is just an initial approach to Cygnus. In order to understand all its power and how to play with sinks persisting data in real third-party storages, please refer to the [Cygnus GitHub](https://github.com/telefonicaid/fiware-cygnus) repository.
-
-Of special interest are:
-
-* The `README.md`, containing an expanded version of this guide.
-* The `doc/` section, containing advanced and detailed documentation.
-
-Apache Flume [web site](http://flume.apache.org/) is also another interesting pointer to learn more about the base technlogy used by Cygnus.
 
 ##Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
