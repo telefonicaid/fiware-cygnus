@@ -27,6 +27,7 @@ import json
 import pprint
 
 # Show the usage
+# FIXME: the getopt library should be used instead
 if len(sys.argv) < 7:
    print('Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port api_key org_name attr_persistence null_value backup')
    print('where ckan_host       : IP address or FQDN of the host running the CKAN server')
