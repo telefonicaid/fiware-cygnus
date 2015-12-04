@@ -274,18 +274,19 @@ public class OrionCKANSink extends OrionSink {
                         + attrType + ")");
                 
                 // create a column and aggregate it
-                String record = "{\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\", "
-                    + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\", "
-                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\", "
-                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\", "
-                    + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\", "
-                    + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\", "
+                String record = "{\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\","
                     + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
                 
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
                 if (!attrMetadata.equals(Constants.EMPTY_MD)) {
-                    record += ", \"" + Constants.ATTR_MD + "\": " + attrMetadata + "}";
+                    record += ",\"" + Constants.ATTR_MD + "\": " + attrMetadata + "}";
                 } else {
                     record += "}";
                 } // if else
@@ -332,7 +333,10 @@ public class OrionCKANSink extends OrionSink {
                 return;
             } // if
             
-            String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\"";
+            String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
+                    + "\"" + Constants.HEADER_NOTIFIED_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\"";
             
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -343,12 +347,12 @@ public class OrionCKANSink extends OrionSink {
                         + attrType + ")");
                 
                 // create part of the column with the current attribute (a.k.a. a column)
-                record += ", \"" + attrName + "\": " + attrValue;
+                record += ",\"" + attrName + "\": " + attrValue;
                 
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
                 if (!attrMetadata.equals(Constants.EMPTY_MD)) {
-                    record += ", \"" + attrName + "_md\": " + attrMetadata;
+                    record += ",\"" + attrName + "_md\": " + attrMetadata;
                 } // if
             } // for
             

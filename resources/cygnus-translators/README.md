@@ -7,7 +7,8 @@ Content:
 * [`cygnus_translator_0.2_to_0.3.sh`](#section3)
 * [`cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh`](#section4)
 * [`cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh`](#section5)
-* [Reporting issues and contact information](#section6)
+* [`cygnus_translator_pre0.10.0_to_0.10.0_ckan.py`](#section6)
+* [Reporting issues and contact information](#section7)
 
 ##<a name="section1"></a>`cygnus_translator_0.1_to_0.2.sh`
 Input parameters:
@@ -104,7 +105,7 @@ Example assuming the file format is `json-row`, a custom value of `null` describ
 $ ./cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh /user/johndoe/dataset json-row null false
 ```
 
-Assuming the content of a file within `/user/johndoe/dataset` as:
+Assuming the content of a file within `/user/johndoe/dataset` folder as:
 
 ```
 $ hadoop fs -cat /user/johndoe/dataset/data.txt
@@ -159,7 +160,7 @@ Example assuming the table format is `row` and not backing the original data:
 $ ./cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh root pass johndoe row false
 ```
 
-Assuming the content of a table within `johndoe` as:
+Assuming the content of a table within `johndoe` database as:
 
 ```
 $ mysql -u cb -pcbpass -e "select * from johndoe.dataset";
@@ -185,7 +186,44 @@ Then the translation will be:
 
 [Top](#top)
 
-##<a name="section6"></a>Reporting issues and contact information
+##<a name="section6"></a>`cygnus_translator_pre0.10.0_to_0.10.0_ckan.py`
+This scripts adds certain fields not available in previous versions to 0.10.0 to the CKAN resources potentially containing historical context data. Specifically:
+
+* Resources written in `row` format will have a new fields named `fiwareservicePath`.
+* Resources written in `column` format will have new fields named `fiwareservicePath`, `entityId` and `entityType`.
+* 
+Usage:
+
+```
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_ckan.py 
+Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port api_key org_name attr_persistence null_value backup
+where ckan_host       : IP address or FQDN of the host running the CKAN server
+      ckan_port       : port where the above CKAN server is listening
+      api_key         : API key for a user allowed to update the given organization
+      org_name        : organization name to be translated
+      attr_persistence: either row or column
+      backup          : either true or false
+```
+
+As can be seen, a CKAN organization must be given; this organization is recursively iterated in order to find all the CKAN resources within CKAN packages/datasets. The format of the resources must be given as well, since this will imply specific addition of fields (see above). Since the CKAN organization is iterated, all the resources within that organization must be created in the same resource format. Finally, the decission of backing or not the existent data into `_bak` resources within the same organization than the original one is an option. Please observe that backing data within a CKAN organization may consume large resources (in average, the original data is duplicated when backing it).
+
+Example assuming the resource format is `row` and not backing the original data:
+
+```
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_ckan.py demo.ckan.org 80 b4f6cd71-b592-49a3-bb85-9cd5a0f2eb68 demo_upv_1 column false
+```
+
+Assuming the content of a resource within `johndoe` organization and `dataset` package as:
+
+![](./ckan_translation_before.png)
+
+Then the translation will be:
+
+![](./ckan_translation_after.png)
+
+[Top](#top)
+
+##<a name="section7"></a>Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.

@@ -11,6 +11,7 @@
 - [FEATURE] The package name now has the Hadoop Core version Cygnus is compatible with (#565)
 - [BUG] OrionTestSink now inherits the configuration from OrionSink base class (#632)
 - [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
+- [FEATURE] Add some interesting fields to CKAN persisted data (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes), including migration script (#543)
 - [FEATURE] Add batching support to OrionKafkaSink (#569)
 - [HARDENING] Add the Quick Start Guide to readthedocs (#645)
 - [HARDENING] Add a document containing a table in charge of relating features and Cygnus version (#638)
