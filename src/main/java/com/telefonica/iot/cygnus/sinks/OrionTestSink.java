@@ -22,16 +22,11 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
-import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 
 /**
  * Sink for testing purposes. It does not persistOne the notified context data but
@@ -62,59 +57,123 @@ public class OrionTestSink extends OrionSink {
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
+    // TBD: to be removed once all the sinks have been migrated to persistBatch method
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get("timestamp"));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
-        String[] fiwareServicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-        String[] destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
-        
-        // log about the event headers with deliberated INFO level
-        LOGGER.info("[" + this.getName() + "] Processing headers (recvTimeTs=" + recvTimeTs + " (" + recvTime
-                + "), fiwareService=" + fiwareService + ", fiwareServicePath=" + Arrays.toString(fiwareServicePaths)
-                + ", destinations=" + Arrays.toString(destinations) + ")");
-        
-        // iterate on the contextResponses
-        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
-
-        for (ContextElementResponse contextElementResponse: contextResponses) {
-            ContextElement contextElement = contextElementResponse.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            
-            // log about the context element with deliberated INFO level
-            LOGGER.info("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
-                    + entityType + ")");
-
-            // iterate on all this entity's attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                continue;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                
-                // log about the context attribute with deliberated INFO level
-                LOGGER.info("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ", value=" + attrValue + ", metadata=" + attrMetadata + ")");
-            } // for
-        } // for
+        Accumulator accumulator = new Accumulator();
+        accumulator.initializeBatching(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
     } // persistOne
     
     @Override
     void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // select batch depending on the enable grouping parameter
+        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
+        
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            TestAggregator aggregator = new TestAggregator();
+            aggregator.initialize(subBatch.get(0));
+
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the aggregation
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+        } // for
     } // persistBatch
+    
+    /**
+     * Class for aggregating aggregation.
+     */
+    private class TestAggregator {
+        
+        // string containing the data aggregation
+        private String aggregation;
+        private String service;
+        private String servicePath;
+        private String destination;
+        
+        public TestAggregator() {
+            aggregation = "";
+        } // TestAggregator
+        
+        public String getAggregation() {
+            return aggregation;
+        } // getAggregation
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            destination = cygnusEvent.getDestination();
+        } // initialize
+        
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            String line = "Processing event={";
+            
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            
+            line += "Processing headers={recvTimeTs=" + recvTimeTs
+                    + ", fiwareService=" + service
+                    + ", fiwareServicePath=" + servicePath
+                    + ", destinations=" + destination + "}";
+            
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            line += ", Processing context element={id=" + entityId
+                    + ", type=" + entityType + "}";
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                line += ", Processing attribute={no attributes within the notified entity}";
+            } else {
+                for (ContextAttribute contextAttribute : contextAttributes) {
+                    String attrName = contextAttribute.getName();
+                    String attrType = contextAttribute.getType();
+                    String attrValue = contextAttribute.getContextValue(true);
+                    String attrMetadata = contextAttribute.getContextMetadata();
+                    line += ", Processing attribute={name=" + attrName
+                            + ", type=" + attrType
+                            + ", value=" + attrValue
+                            + ", metadata=" + attrMetadata + "}";
+                } // for
+            } // if else
+            
+            line += "}";
+                
+            if (aggregation.isEmpty()) {
+                aggregation = line;
+            } else {
+                aggregation += "," + line;
+            } // if else
+        } // aggregate
+        
+    } // TestAggregator
+    
+    private void persistAggregation(TestAggregator aggregator) throws Exception {
+        String aggregation = aggregator.getAggregation();
+        
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionTestSink. Data (" + aggregation + ")");
+    } // persistAggregation
 
 } // OrionTestSink
