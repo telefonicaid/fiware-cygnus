@@ -1,1 +1,2 @@
 - [FEATURE] Add batching support to OrionTestSink (#572)
+- [HARDENING] Add the minimum HW requirements (#640)
