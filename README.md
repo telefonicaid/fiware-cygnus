@@ -39,8 +39,8 @@ You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) b
 
 ##<a name="section2"></a>Basic operation
 ###<a name="section2.1"></a>Hardware requirements 
-*  RAM: 1 GB, specially if abusing of the batching mechanism.
-*  HDD: A few GB may be enough unless the channel types are configured as FileChannel type.
+* RAM: 1 GB, specially if abusing of the batching mechanism.
+* HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
 [Top](#top)
 
