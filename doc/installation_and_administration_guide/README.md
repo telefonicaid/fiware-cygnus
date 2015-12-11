@@ -1,6 +1,7 @@
 #Installation and Administration Guide
 
 * [Introduction](./introduction.md)
+* [Hardware requirements](./hw_requirements.md)
 * Installation
     * [Installation via RPM](./install_with_rpm.md)
     * [Installation via docker](./install_with_docker.md)

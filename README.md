@@ -4,10 +4,11 @@
 
 * [Welcome to Cygnus](#section1)
 * [Basic operation](#section2)
-    * [Installation (CentOS/RedHat)](#section2.1)
-    * [Configuration](#section2.2)
-    * [Running](#section2.3)
-    * [Testing](#section2.4)
+    * [Hardware requirements](#section2.1) 
+    * [Installation (CentOS/RedHat)](#section2.2)
+    * [Configuration](#section2.3)
+    * [Running](#section2.4)
+    * [Testing](#section2.5)
 * [Advanced topics and further reading](#section3)
 * [Features summary](#section4)
 * [Licensing](#section5)
@@ -37,7 +38,13 @@ You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) b
 [Top](#top)
 
 ##<a name="section2"></a>Basic operation
-###<a name="section2.1"></a>Installation (CentOS/RedHat)
+###<a name="section2.1"></a>Hardware requirements 
+*  RAM: 1 GB, specially if abusing of the batching mechanism.
+*  HDD: A few GB may be enough unless the channel types are configured as FileChannel type.
+
+[Top](#top)
+
+###<a name="section2.2"></a>Installation (CentOS/RedHat)
 Simply configure the FIWARE repository if not yet configured:
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -56,7 +63,7 @@ The above will install Cygnus in `/usr/cygnus/`.
 
 [Top](#top)
 
-###<a name="section2.2"></a>Configuration
+###<a name="section2.3"></a>Configuration
 Cygnus is a tool with a high degree of configuration required for properly running it. The reason is the configuration describes the Flume-based agent choosen to be run.
 
 So, the starting point is choosing the internal architecture of the Cygnus agent. Let's assume the simplest one:
@@ -112,7 +119,7 @@ POLLING_INTERVAL=30
 
 [Top](#top)
 
-###<a name="section2.3"></a>Running
+###<a name="section2.4"></a>Running
 Cygnus can be run as a service by simply typing:
 
     $ service cygnus start
@@ -121,7 +128,7 @@ Logs are written in `/var/log/cygnus/cygnus.log`, and the PID of the process wil
 
 [Top](#top)
 
-###<a name="section2.4"></a>Testing
+###<a name="section2.5"></a>Testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
