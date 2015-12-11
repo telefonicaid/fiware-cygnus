@@ -2,6 +2,7 @@
 
 * [Introduction](./introduction.md)
 * Installation
+    * [Hardware requirements](./hw_requirements.md)
     * [Installation via RPM](./install_with_rpm.md)
     * [Installation via docker](./install_with_docker.md)
     * [Installation from sources](./install_from_sources.md)

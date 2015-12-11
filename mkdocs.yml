@@ -13,6 +13,7 @@ pages:
   - 'Quick Start Guide': 'quick_start_guide.md'
   - 'Installation and Administration Guide':
       - 'Introduction': 'installation_and_administration_guide/introduction.md'
+      - 'Hardware requirements': 'installation_and_administration_guide/hw_requirements.md'
       - 'Installation via RPM': 'installation_and_administration_guide/install_with_rpm.md'
       - 'Installation via docker': 'installation_and_administration_guide/install_with_docker.md'
       - 'Installation from sources': 'installation_and_administration_guide/install_from_sources.md'
