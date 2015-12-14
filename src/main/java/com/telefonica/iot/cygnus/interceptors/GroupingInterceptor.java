@@ -238,7 +238,7 @@ public class GroupingInterceptor implements Interceptor {
         String body = new String(event.getBody());
         
         // get some original header values
-        String fiwareServicePath = headers.get(Constants.HEADER_NOTIFIED_SERVICE_PATH);
+        String fiwareServicePath = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH);
         
         // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
         // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
@@ -322,13 +322,13 @@ public class GroupingInterceptor implements Interceptor {
         } // for
  
         // set the final header values
-        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS,
+        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES,
                 defaultDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
-        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS,
+        headers.put(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS,
                 defaultServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS,
+        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES,
                 groupedDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS,
+        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS,
                 groupedServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
         event.setHeaders(headers);
         return event;

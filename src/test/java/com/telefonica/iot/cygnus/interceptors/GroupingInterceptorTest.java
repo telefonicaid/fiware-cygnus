@@ -181,8 +181,8 @@ public class GroupingInterceptorTest {
         // set up other instances
         notifiedHeaders = new HashMap<String, String>();
         notifiedHeaders.put(Constants.HEADER_CONTENT_TYPE, "application/xml");
-        notifiedHeaders.put(Constants.HEADER_NOTIFIED_SERVICE, notifiedService);
-        notifiedHeaders.put(Constants.HEADER_NOTIFIED_SERVICE_PATH, notifiedServicePath);
+        notifiedHeaders.put(Constants.HTTP_HEADER_FIWARE_SERVICE, notifiedService);
+        notifiedHeaders.put(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH, notifiedServicePath);
         
         // create a temporal grouping rules file
         PrintWriter writer = new PrintWriter(groupingRulesFileName, "UTF-8");
@@ -252,13 +252,13 @@ public class GroupingInterceptorTest {
         assertTrue(interceptedEvents.size() == 1);
         Event interceptedEvent = interceptedEvents.get(0);
         Map<String, String> interceptedHeaders = interceptedEvent.getHeaders();
-        String groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        String groupedDests = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES);
         assertEquals(groupedDestinations, groupedDests);
-        String groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        String groupedServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS);
         assertEquals(groupedServicePaths, groupedServPaths);
-        String defaultDests = interceptedHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS);
+        String defaultDests = interceptedHeaders.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES);
         assertEquals(defaultDestinations, defaultDests);
-        String defaultServPaths = interceptedHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS);
+        String defaultServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS);
         assertEquals(defaultServicePaths, defaultServPaths);
         
         System.out.println("Testing GroupingInterceptor.intercept (grouping_rules.conf is not set)");
@@ -280,14 +280,14 @@ public class GroupingInterceptorTest {
         interceptedEvent = interceptedEvents.get(0);
         interceptedHeaders = interceptedEvent.getHeaders();
         // gropued destinations must match the default destinations since there are no rules
-        groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        groupedDests = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES);
         assertEquals(defaultDestinations, groupedDests);
         // gropued service paths must match the default destinations since there are no rules
-        groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        groupedServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS);
         assertEquals(defaultServicePaths, groupedServPaths);
-        defaultDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        defaultDests = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES);
         assertEquals(defaultDestinations, defaultDests);
-        defaultServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        defaultServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS);
         assertEquals(defaultServicePaths, defaultServPaths);
         
         System.out.println("Testing GroupingInterceptor.intercept (grouping_rules.conf does not exist)");
@@ -309,14 +309,14 @@ public class GroupingInterceptorTest {
         interceptedEvent = interceptedEvents.get(0);
         interceptedHeaders = interceptedEvent.getHeaders();
         // gropued destinations must match the default destinations since there are no rules
-        groupedDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        groupedDests = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES);
         assertEquals(defaultDestinations, groupedDests);
         // gropued service paths must match the default destinations since there are no rules
-        groupedServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        groupedServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS);
         assertEquals(defaultServicePaths, groupedServPaths);
-        defaultDests = interceptedHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS);
+        defaultDests = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES);
         assertEquals(defaultDestinations, defaultDests);
-        defaultServPaths = interceptedHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS);
+        defaultServPaths = interceptedHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS);
         assertEquals(defaultServicePaths, defaultServPaths);
     } // testIntercept
 
