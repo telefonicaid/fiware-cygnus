@@ -77,7 +77,7 @@ public class HttpClientFactory {
         } // if else
         
         LOGGER.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
-        LOGGER.info("Settubg default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
+        LOGGER.info("Setting default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
