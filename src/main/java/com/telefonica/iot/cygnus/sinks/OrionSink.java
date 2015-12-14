@@ -155,7 +155,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             // set the transactionId in MDC
             try {
-                MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
+                MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
+                        event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
             } catch (Exception e) {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch // catch
@@ -175,7 +176,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
             try {
                 persistOne(event.getHeaders(), notification);
-                LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+                LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
                 txn.commit();
                 txn.close();
                 return Status.READY;
@@ -188,7 +189,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                     // check the event HEADER_TTL
                     int ttl;
-                    String ttlStr = event.getHeaders().get(Constants.HEADER_TTL);
+                    String ttlStr = event.getHeaders().get(Constants.FLUME_HEADER_TTL);
 
                     try {
                         ttl = Integer.parseInt(ttlStr);
@@ -213,7 +214,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } else {
                         ttl--;
                         String newTTLStr = Integer.toString(ttl);
-                        event.getHeaders().put(Constants.HEADER_TTL, newTTLStr);
+                        event.getHeaders().put(Constants.FLUME_HEADER_TTL, newTTLStr);
                         txn.rollback();
                         LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
                                 + ")");
@@ -230,7 +231,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         LOGGER.warn(e.getMessage());
                     } // if else if
                     
-                    LOGGER.info("Finishing transaction (" + MDC.get(Constants.HEADER_TRANSACTION_ID) + ")");
+                    LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
                     txn.commit();
                     txn.close();
                     return Status.READY;
@@ -267,7 +268,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 // set the transactionId in MDC
                 try {
-                    MDC.put(Constants.HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
+                    MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
+                            event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
                 } catch (Exception e) {
                     LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 } // catch
@@ -418,11 +420,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } // getAccTransactionIds
         
         public void accumulate(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(Constants.HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HEADER_NOTIFIED_SERVICE);
-            String[] defaultServicePaths = headers.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            String[] defaultDestinations = headers.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-            String transactionId = headers.get(Constants.HEADER_TRANSACTION_ID);
+            Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
+            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String[] defaultServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+            String[] defaultDestinations = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
+            String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             
             if (accTransactionIds.isEmpty()) {
                 accTransactionIds = transactionId;
@@ -445,8 +447,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 list.add(cygnusEvent);
             } // for
 
-            String[] groupedServicePaths = headers.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            String[] groupedDestinations = headers.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+            String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
+            String[] groupedDestinations = headers.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
 
             for (int i = 0; i < groupedDestinations.length; i++) {
                 String destination = defaultDestinations[i];
