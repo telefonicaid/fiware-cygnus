@@ -191,14 +191,15 @@ This scripts adds certain fields not available in previous versions to 0.10.0 to
 
 * Resources written in `row` format will have a new fields named `fiwareservicePath`.
 * Resources written in `column` format will have new fields named `fiwareservicePath`, `entityId` and `entityType`.
-* 
+ 
 Usage:
 
 ```
 $ ./cygnus_translator_pre0.10.0_to_0.10.0_ckan.py 
-Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port api_key org_name attr_persistence null_value backup
+Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port ssl api_key org_name attr_persistence null_value backup
 where ckan_host       : IP address or FQDN of the host running the CKAN server
       ckan_port       : port where the above CKAN server is listening
+      ssl             : either true or false
       api_key         : API key for a user allowed to update the given organization
       org_name        : organization name to be translated
       attr_persistence: either row or column
@@ -220,6 +221,10 @@ Assuming the content of a resource within `johndoe` organization and `dataset` p
 Then the translation will be:
 
 ![](./ckan_translation_after.png)
+
+**NOTE**: This script requires `requests` package is installed:
+
+    $ pip install packages
 
 [Top](#top)
 
