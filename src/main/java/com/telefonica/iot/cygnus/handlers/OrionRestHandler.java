@@ -100,7 +100,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     } // getDefaultServicePath
     
     /**
-     * Gets the events FLUME_HEADER_TTL. It is protected due to it is only required for testing purposes.
+     * Gets the events TTL. It is protected due to it is only required for testing purposes.
      * @return
      */
     protected String getEventsTTL() {
