@@ -184,10 +184,10 @@ public class OrionSTHSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, serviceHeader);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, singleServicePathHeader);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, singleDestinationHeader);
+        headers.put(Constants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(Constants.HTTP_HEADER_FIWARE_SERVICE, serviceHeader);
+        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, singleServicePathHeader);
+        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, singleDestinationHeader);
         
         try {
             sink.persistOne(headers, singleNotifyContextRequest);
@@ -202,10 +202,10 @@ public class OrionSTHSinkTest {
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, serviceHeader);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, multipleServicePathHeader);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, multipleDestinationHeader);
+        headers.put(Constants.FLUME_HEADER_TIMESTAMP, Long.toString(recvTimeTs));
+        headers.put(Constants.HTTP_HEADER_FIWARE_SERVICE, serviceHeader);
+        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, multipleServicePathHeader);
+        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, multipleDestinationHeader);
         
         try {
             sink.persistOne(headers, multipleNotifyContextRequest);

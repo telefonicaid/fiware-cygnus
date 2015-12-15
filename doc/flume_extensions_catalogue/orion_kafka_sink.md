@@ -44,13 +44,16 @@ Assuming the following Flume event is created from a notified NGSI context data 
 
     flume-event={
         headers={
-	        content-type=application/json,
-	        fiware-service=vehicles,
-	        fiware-servicepath=4wheels,
-	        timestamp=1429535775,
-	        transactionId=1429535775-308-0000000000,
-	        ttl=10,
-	        destination=car1_car
+	         content-type=application/json,
+	         timestamp=1429535775,
+	         transactionId=1429535775-308-0000000000,
+	         ttl=10,
+	         fiware-service=vehicles,
+	         fiware-servicepath=4wheels,
+	         notified-entities=car1_car
+	         notified-servicepaths=4wheels
+	         grouped-entities=car1_car
+	         grouped-servicepath=4wheels
         },
         body={
 	        entityId=car1,
