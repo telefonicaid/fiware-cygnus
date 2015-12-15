@@ -54,11 +54,11 @@ Flume events are not much more different than the above representation: there is
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
-	         notified-service=vehicles,
-	         notified-servicepath=4wheels,
-	         default-destination=car1_car
-	         default-servicepaths=4wheels
-	         grouped-destination=car1_car
+	         fiware-service=vehicles,
+	         fiware-servicepath=4wheels,
+	         notified-entities=car1_car
+	         notified-servicepaths=4wheels
+	         grouped-entities=car1_car
 	         grouped-servicepath=4wheels
         },
         body={
@@ -85,14 +85,13 @@ The headers are a subset of the notified HTTP headers and others added by Cygnus
 * The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
 * The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. -1 means inifinite retries.
-* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property of `OrionRESTHandler`. Please observe the notified `Fiware-Service` is transformed following the rules described at the [naming conventions](./naming_conventions.md). This NGSI header is used for building this header:
-    * It is directly added as the `notified-service`. 
-* Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization. Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property of `OrionRESTHandler`. Please observe the notified `Fiware-ServicePath` is transformed following the rules described at the [naming conventions](./naming_conventions.md). This NGSI header is used for building several Flume headers:
-    * It is directly added as the `notified-servicepath`.
-    * It is replicated, per each notified context element, as the `default-servicespaths` array. This is used when the grouping feature is not enabled in the processing sink.
+* Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property of `OrionRESTHandler`. This NGSI header is directly added to the Flume event as `fiware-service`.
+* Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization. Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property of `OrionRESTHandler`. This NGSI header is used for building several Flume headers:
+    * It is directly added as the `fiware-servicepath`.
+    * It is replicated, per each notified context element, as the `notified-servicespaths` array. This is used when the grouping feature is not enabled in the processing sink.
     * It may also appear in the `grouped-servicepaths` array when, being enabled the grouping feature, there is no rule changing the default servicePath.
 * By the default, the final persistece element (file, table, collection, etc), also named as the <i>destination</i>, is composed as the concatenation of the entity ID and type. This can be changed by the grouping feature, if enabled, deciding a new detination per each notified context element. Thus, the following headers may appear in a Flume event:
-    * `default-destinations`, an array that can be used by those sinks not enabling the grouping feature.
-    * `grouped-destinations`, an array that can be used by those sinks enabling the grouping feature.
+    * `notified-entities`, an array that can be used by those sinks not enabling the grouping feature.
+    * `grouped-entities`, an array that can be used by those sinks enabling the grouping feature.
 
 The body simply contains a byte representation of the HTTP payload that will be parsed by the sinks.
