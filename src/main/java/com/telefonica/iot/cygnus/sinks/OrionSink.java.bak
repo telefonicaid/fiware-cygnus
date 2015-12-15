@@ -66,10 +66,13 @@ import org.xml.sax.SAXException;
   - void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
 public abstract class OrionSink extends AbstractSink implements Configurable {
+    
+    public enum DataModel { DMBYSERVICEPATH, DMBYENTITY, DMBYATTRIBUTE }
 
     // logger
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionSink.class);
     // general parameters for all the sinks
+    protected DataModel dataModel;
     protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
@@ -95,6 +98,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     
     @Override
     public void configure(Context context) {
+        String dataModelStr = context.getString("data_model", "dm-by-entity");
+        dataModel = DataModel.valueOf(dataModelStr.replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model="
+                + dataModelStr + ")");
         enableGrouping = context.getBoolean("enable_grouping", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
@@ -155,8 +162,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             // set the transactionId in MDC
             try {
-                MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
-                        event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
+                MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
             } catch (Exception e) {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch // catch
@@ -187,7 +193,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 if (e instanceof CygnusPersistenceError) {
                     LOGGER.error(e.getMessage());
 
-                    // check the event HEADER_TTL
+                    // check the event FLUME_HEADER_TTL
                     int ttl;
                     String ttlStr = event.getHeaders().get(Constants.FLUME_HEADER_TTL);
 
@@ -268,8 +274,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 // set the transactionId in MDC
                 try {
-                    MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
-                            event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
+                    MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
                 } catch (Exception e) {
                     LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 } // catch
@@ -291,7 +296,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
             try {
                 if (accumulator.getAccIndex() != 0) {
-                    persistBatch(accumulator.getBatch());
+                    persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
                 } // if
                 
                 LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
@@ -384,8 +389,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
      */
     protected class Accumulator {
         
-        // accumulated events
-        private Batch batch;
+        // eventsPerDestination of events with default service path and destination
+        private Batch defaultBatch;
+        // eventsPerDestination of events with grouped service path and destination
+        private Batch groupedBatch;
         // list of Flume events taken from the channel, it is necessary for an hipothetical massive decreasing of the
         // ttl when rollbacking
         private ArrayList<Event> flumeEvents;
@@ -405,17 +412,24 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             this.accIndex = accIndex;
         } // setAccIndex
         
-        public Batch getBatch() {
-            return batch;
-        } // getBatch
+        public Batch getDefaultBatch() {
+            return defaultBatch;
+        } // getDefaultBatch
+        
+        public Batch getGroupedBatch() {
+            return groupedBatch;
+        } // getGroupedBatch
         
         public String getAccTransactionIds() {
             return accTransactionIds;
         } // getAccTransactionIds
         
+        /**
+         * Accumulates the given notification. The accumulation is done based on the configured data model.
+         * @param headers
+         * @param notification
+         */
         public void accumulate(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
             String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             
             if (accTransactionIds.isEmpty()) {
@@ -424,49 +438,109 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 accTransactionIds += "," + transactionId;
             } // if else
             
-            if (!enableGrouping) {
-                String[] defaultServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
-                String[] defaultDestinations = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
-
-                for (int i = 0; i < defaultDestinations.length; i++) {
-                    String destination = defaultDestinations[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
-                    CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, defaultServicePaths[i], destination,
-                            notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
-                } // for
-            } else {
-                String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-                String[] groupedDestinations = headers.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
-
-                for (int i = 0; i < groupedDestinations.length; i++) {
-                    String destination = groupedDestinations[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
-                    CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, groupedServicePaths[i], destination,
-                            notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
-                } // for
-            } // else
+            switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    accumulateByServicePath(headers, notification);
+                    break;
+                case DMBYENTITY:
+                    accumulateByEntity(headers, notification);
+                    break;
+                case DMBYATTRIBUTE:
+                    accumulateByAttribute(headers, notification);
+                    break;
+                default:
+                    LOGGER.error("Unknown data model. Details=" + dataModel.toString());
+            } // switch
         } // accumulate
+        
+        private void accumulateByServicePath(Map<String, String> headers, NotifyContextRequest notification) {
+            Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
+            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+            
+            for (int i = 0; i < notifiedServicePaths.length; i++) {
+                String destination = notifiedServicePaths[i];
+                ArrayList<CygnusEvent> list = defaultBatch.getEvents(destination);
+
+                if (list == null) {
+                    list = new ArrayList<CygnusEvent>();
+                    defaultBatch.addEvents(destination, list);
+                } // if
+
+                CygnusEvent cygnusEvent = new CygnusEvent(
+                        recvTimeTs, service, destination, null,
+                        notification.getContextResponses().get(i).getContextElement());
+                list.add(cygnusEvent);
+            } // for
+
+            String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
+
+            for (int i = 0; i < groupedServicePaths.length; i++) {
+                String destination = groupedServicePaths[i];
+                ArrayList<CygnusEvent> list = groupedBatch.getEvents(destination);
+
+                if (list == null) {
+                    list = new ArrayList<CygnusEvent>();
+                    groupedBatch.addEvents(destination, list);
+                } // if
+
+                CygnusEvent cygnusEvent = new CygnusEvent(
+                        recvTimeTs, service, destination, null,
+                        notification.getContextResponses().get(i).getContextElement());
+                list.add(cygnusEvent);
+            } // for
+        } // accumulateByServicePath
+        
+        private void accumulateByEntity(Map<String, String> headers, NotifyContextRequest notification) {
+            Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
+            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+            String[] notifiedDestinations = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
+            
+            for (int i = 0; i < notifiedDestinations.length; i++) {
+                String destination = notifiedDestinations[i];
+                ArrayList<CygnusEvent> list = defaultBatch.getEvents(destination);
+
+                if (list == null) {
+                    list = new ArrayList<CygnusEvent>();
+                    defaultBatch.addEvents(destination, list);
+                } // if
+
+                CygnusEvent cygnusEvent = new CygnusEvent(
+                        recvTimeTs, service, notifiedServicePaths[i], destination,
+                        notification.getContextResponses().get(i).getContextElement());
+                list.add(cygnusEvent);
+            } // for
+
+            String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
+            String[] groupedDestinations = headers.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
+
+            for (int i = 0; i < groupedDestinations.length; i++) {
+                String destination = notifiedDestinations[i];
+                ArrayList<CygnusEvent> list = groupedBatch.getEvents(destination);
+
+                if (list == null) {
+                    list = new ArrayList<CygnusEvent>();
+                    groupedBatch.addEvents(destination, list);
+                } // if
+
+                CygnusEvent cygnusEvent = new CygnusEvent(
+                        recvTimeTs, service, groupedServicePaths[i], destination,
+                        notification.getContextResponses().get(i).getContextElement());
+                list.add(cygnusEvent);
+            } // for
+        } // accumulateByEntity
+        
+        private void accumulateByAttribute(Map<String, String> headers, NotifyContextRequest notification) {
+            Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
+            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+        } // accumulateByAttribute
 
         public void initializeBatching(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
             // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
-            batch = new Batch();
+            defaultBatch = new Batch();
+            groupedBatch = new Batch();
             accStartDate = startDateMs;
             accIndex = 0;
             accTransactionIds = "";
@@ -491,9 +565,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     /**
      * This is the method the classes extending this class must implement when dealing with a batch of events to be
      * persisted.
-     * @param batch
+     * @param defaultEvents
+     * @param groupedEvents
      * @throws Exception
      */
-    abstract void persistBatch(Batch batch) throws Exception;
+    abstract void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
     
 } // OrionSink

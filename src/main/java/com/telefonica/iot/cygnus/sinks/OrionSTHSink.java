@@ -22,9 +22,7 @@ import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.flume.Event;
 
 /**
  *
@@ -138,8 +136,8 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     } // persistOne
     
     @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    void persistBatch(Batch batch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     } // persistBatch
     
 } // OrionSTHSink

@@ -115,14 +115,11 @@ public class OrionDynamoDBSink extends OrionSink {
         Accumulator accumulator = new Accumulator();
         accumulator.initializeBatching(new Date().getTime());
         accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
+        persistBatch(accumulator.getBatch());
     } // persistOne
     
     @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        // select batch depending on the enable grouping parameter
-        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
-        
+    void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
