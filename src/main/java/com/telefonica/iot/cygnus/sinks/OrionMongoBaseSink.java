@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.mongo.MongoBackend;
+import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
@@ -46,7 +46,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String dbPrefix;
     protected String collectionPrefix;
     protected boolean shouldHash;
-    protected MongoBackend backend;
+    protected MongoBackendImpl backend;
     protected boolean rowAttrPersistence;
 
     /**
@@ -101,7 +101,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * Sets the backend. It is protected since it is used by the tests.
      * @param backend
      */
-    protected void setBackend(MongoBackend backend) {
+    protected void setBackend(MongoBackendImpl backend) {
         this.backend = backend;
     } // setBackend
     
@@ -109,7 +109,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * Gets the backend. It is protected since it is used by the tests.
      * @return
      */
-    protected MongoBackend getBackend() {
+    protected MongoBackendImpl getBackend() {
         return backend;
     } // getBackend
 
@@ -147,7 +147,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     @Override
     public void start() {
         // create the persistence backend
-        backend = new MongoBackend(mongoHosts, mongoUsername, mongoPassword, dataModel);
+        backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, dataModel);
         LOGGER.debug("[" + this.getName() + "] Mongo persistence backend created");
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
