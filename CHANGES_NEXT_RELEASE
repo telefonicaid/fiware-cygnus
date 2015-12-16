@@ -1,4 +1,4 @@
 - [FEATURE] Add batching support to OrionTestSink (#572)
 - [HARDENING] Add the minimum HW requirements (#640)
 - [HARDENING] Rename the HTTP and Flume header constants (#662)
-- [HARDENIND] Add the maximum accepted batch size in DynamoSink (#672)
+- [HARDENING] Add the maximum accepted batch size in DynamoSink (#672)
