@@ -280,9 +280,9 @@ By default, `OrionHDFSSink` has a configured batch size and batch accumulation t
 ###<a name="section3.1"></a>`OrionHDFSSink` class
 As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The methods that are extended are:
 
-    void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
+    void persistBatch(Batch batch) throws Exception;
     
-A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the HDFS file where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `HDFSBackend` implementation (binary or rest). There are two sets of events, default and grouped ones, because depending on the sink configuration the default or the grouped notified destination and fiware servicePath are used.
+A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the HDFS file where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `HDFSBackend` implementation (binary or rest).
     
     public void start();
 

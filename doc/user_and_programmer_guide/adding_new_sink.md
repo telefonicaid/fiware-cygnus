@@ -54,8 +54,7 @@ You find this class at the following path:
 
     public abstract class OrionSink extends AbstractSink implements Configurable {
     
-    	Batch defaultBatch;
-    	Batch groupedBatch;
+    	Batch batch;
     	
 		/**
 		 * Constructor
@@ -77,7 +76,7 @@ You find this class at the following path:
 				accumulateInBatch(event.getHeaders(), notification);
 			} // for
 			
-			persistBatch(defaultBatch, groupedBatch);
+			persistBatch(batch);
 			txn.commit();
 			return Status.READY;
 		} // process
@@ -85,17 +84,14 @@ You find this class at the following path:
     	/**
      	 * This is the method the classes extending this class must implement when dealing with a batch of events to be
      	 * persisted.
-     	 * @param defaultEvents
-     	 * @param groupedEvents
+     	 * @param batch
      	 * @throws Exception
         */
-    	abstract void persistBatch(Batch defaultEvents, Batch groupedEvents) throws Exception;
+    	abstract void persistBatch(Batch batch) throws Exception;
     
     } // OrionSink   
 
-The `process` method is responsible for getting the channel, initiating a Flume transaction, taking as many events from the channel as necessary to build a couple of `Batch` objects and processing them by calling the `persistBatch` method. Such a `persistBatch` method is the only piece of code a developer must create according to the logic of his/her sink.
-
-There are two sets of events, default and grouped ones, because depending on the sink configuration the default or the grouped notified destination and fiware servicePath are used.
+The `process` method is responsible for getting the channel, initiating a Flume transaction, taking as many events from the channel as necessary to build a `Batch` object and processing it by calling the `persistBatch` method. Such a `persistBatch` method is the only piece of code a developer must create according to the logic of his/her sink.
 
 Please notice that the `process` method handles all the possible errors that may occur during a Flume transaction by catching exceptions, especially those thrown by the abstract `persistBatch` method. There exists a collection of Cygnus-related exceptions whose usage is mandatory located at:
 

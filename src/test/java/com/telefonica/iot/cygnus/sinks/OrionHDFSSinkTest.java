@@ -257,7 +257,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(null, null);
+            sink.persistBatch(null);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -271,8 +271,6 @@ public class OrionHDFSSinkTest {
     @Test
     public void testPersistFileFormats() {
         // common objects
-        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
@@ -284,7 +282,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -299,7 +297,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -314,7 +312,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -329,7 +327,7 @@ public class OrionHDFSSinkTest {
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -351,13 +349,11 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSink.persistBatch (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        Batch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -367,13 +363,11 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSink.persistBatch (too long service name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        defaultBatch = createBatch(recvTimeTs, abnormalService, normalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -382,13 +376,11 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSink.persistBatch (too long servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        defaultBatch = createBatch(recvTimeTs, normalService, abnormalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -397,13 +389,11 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSink.persistBatch (too long destination name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, abnormalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
@@ -424,13 +414,11 @@ public class OrionHDFSSinkTest {
         System.out.println("Testing OrionHDFSSink.persistBatch (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        Batch defaultBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -441,13 +429,11 @@ public class OrionHDFSSinkTest {
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
-                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
-            sink.persistBatch(defaultBatch, groupedBatch);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {

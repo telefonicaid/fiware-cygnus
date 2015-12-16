@@ -23,7 +23,6 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.flume.Event;
 
 /**
  * OrionMongoSink will be in charge of persisting Orion context data in a historic fashion within a MongoDB deployment.
@@ -137,11 +136,11 @@ public class OrionMongoSink extends OrionMongoBaseSink {
 
                 if (this.rowAttrPersistence) {
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
-                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
+                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000L
                             + "," + recvTime + "," + entityId + "," + entityType + ","
                             + attrName + "," + attrType + "," + attrValue + "," + attrMetadata);
                     this.backend.insertContextDataRaw(
-                            dbName, collectionName, recvTimeTs.longValue() / 1000L, recvTime,
+                            dbName, collectionName, recvTimeTs / 1000L, recvTime,
                             entityId, entityType, attrName, attrType, attrValue, attrMetadata);
                 } else {
                     attrs.put(attrName, attrValue);
@@ -154,11 +153,11 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                     LOGGER.warn("Persisting data by columns is useless for collection-per-attribute data model");
                 } else {
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
-                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs.longValue() / 1000L
+                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000L
                             + "," + recvTime + "," + entityId + "," + entityType + ","
                             + attrs.toString() + "," + mds.toString() + "]");
                     this.backend.insertContextDataRaw(
-                            dbName, collectionName, recvTimeTs.longValue() / 1000L,
+                            dbName, collectionName, recvTimeTs / 1000L,
                             recvTime, entityId, entityType, attrs, mds);
                 }
             }
@@ -166,8 +165,8 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     } // persistOne
     
     @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    void persistBatch(Batch batch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     } // persistBatch
 
 } // OrionMongoSink

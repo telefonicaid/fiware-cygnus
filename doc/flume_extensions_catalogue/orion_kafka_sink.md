@@ -144,9 +144,9 @@ By default, `OrionKafkaSink` has a configured batch size and batch accumulation 
 ###<a name="section3.1"></a>`OrionKafkaSink` class
 As any other NGSI-like sink, `OrionKafkaSink` extends the base `OrionSink`. The methods that are extended are:
 
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
+    void persistBatch(Batch batch) throws Exception;
     
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the Kafka backend by means of a `KafKaProducer` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the FIWARE service, the FIWARE service path or the destination.
+A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the Kafka topic where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to the `KafkaProducer`.
     
     public void start();
 
