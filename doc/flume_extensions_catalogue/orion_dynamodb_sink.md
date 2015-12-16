@@ -130,7 +130,7 @@ If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionDy
 | enable\_grouping | no | false | <i>true</i> or <i>false</i> |
 | table_type | no | table-by-destination | <i>table-by-destination</i> or <i>table-by-service-path</i> |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
-| batch\_size | no | 1 | Number of events accumulated before persistence (Max 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information) |
+| batch\_size | no | 1 | Number of events accumulated before persistence (Maximum 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information) |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
