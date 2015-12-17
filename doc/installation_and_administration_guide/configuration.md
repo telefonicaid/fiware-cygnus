@@ -4,14 +4,16 @@ Content:
 * [Introduction](#section1)
 * [`cygnus_instance_<id>.conf`](#section2)
 * [`agent_<id>.conf`](#section3)
-* [`log4j.properties`](#section4)
-* [Configuration examples](#section5)
-    * [Single source, single storage (basic configuration)](#section5.1)
-    * [Single source, multiple storages](#section5.2)
-    * [Single source, single storage, parallel sinking](#section5.3)
-    * [Single source, multiple storages, parallel sinking](#section5.4)
-    * [Multiple sources](#section5.5)
-    * [Using interceptors](#section5.6)
+* [`flume-env.sh`](#section4)
+* [`grouping_rules.conf`](#section5)
+* [`log4j.properties`](#section6)
+* [Configuration examples](#section7)
+    * [Single source, single storage (basic configuration)](#section7.1)
+    * [Single source, multiple storages](#section7.2)
+    * [Single source, single storage, parallel sinking](#section7.3)
+    * [Single source, multiple storages, parallel sinking](#section7.4)
+    * [Multiple sources](#section7.5)
+    * [Using interceptors](#section7.6)
 
 ##<a name="section1"></a>Introduction
 Cygnus is configured through two different files:
@@ -310,7 +312,59 @@ cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 
 [Top](#top)
 
-##<a name="section4"></a>`log4j.properties`
+##<a name="section4"></a>`flume-env.sh`
+The file `flume-env.sh`  can be instantiated from a template given in the Cygnus repository, `conf/flume-env.sh.template`. 
+
+```
+#=============================================
+# To be put in APACHE_FLUME_HOME/conf/flume-env.sh
+#=============================================
+
+#JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+# Give Flume more memory and pre-allocate, enable remote monitoring via JMX
+#JAVA_OPTS="-Xms100m -Xmx200m -Dcom.sun.management.jmxremote"
+
+# Note that the Flume conf directory is always included in the classpath.
+#FLUME_CLASSPATH="/path/to/the/flume/classpath"
+```
+`flume-env.sh` file has been inherited from Apache Flume, and it is used in order to configure certain Flume parameters such as the classpath, some Java opcions...
+
+[Top](#top)
+
+##<a name="section5"></a>`grouping_rules.conf`
+The file `grouping_rules.conf`  can be instantiated from a template given in the Cygnus repository, `conf/grouping_rules.conf.template`. 
+``` 
+{
+    "grouping_rules": [
+        {
+            "id": 1,
+            "fields": [
+                "entityId",
+                "entityType"
+            ],
+            "regex": "your_regular_expression",
+            "destination": "your_destination",
+            "fiware_service_path": "your_new_fiware_service_path"
+        },
+        {
+            "id": 2,
+            "fields": [
+                "entityId",
+                "entityType"
+            ],
+            "regex": "another_regular_expression",
+            "destination": "another_destination",
+            "fiware_service_path": "your_new_fiware_service_patch"
+        }
+    ]
+}
+```
+`grouping_rules.conf` must be put in  `APACHE_FLUME_HOME/conf/`  .
+
+[Top](#top)
+
+##<a name="section6"></a>`log4j.properties`
 The file `log4j.properties` can be instantiated from a template given in the Cygnus repository, `conf/log4j.properties.template`.
 
 Its content should not be edited unless some of the default values for log path, file name, logging level or appender are wanted to be changed.
@@ -366,33 +420,33 @@ log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.
 
 [Top](#top)
 
-##<a name="section5"></a>Configuration examples
-###<a name="section5.1"></a>Single source, single storage (basic configuration)
+##<a name="section7"></a>Configuration examples
+###<a name="section7.1"></a>Single source, single storage (basic configuration)
 To be done
 
 [Top](#top)
 
-###<a name="section5.2"></a>Single source, multiple storages
+###<a name="section7.2"></a>Single source, multiple storages
 To be done
 
 [Top](#top)
 
-###<a name="section5.3"></a>Single source, single storage, parallel sinking
+###<a name="section7.3"></a>Single source, single storage, parallel sinking
 To be done
 
 [Top](#top)
 
-###<a name="section5.4"></a>Single source, multiple storages, parallel sinking
+###<a name="section7.4"></a>Single source, multiple storages, parallel sinking
 To be done
 
 [Top](#top)
 
-###<a name="section5.5"></a>Multiple sources 
+###<a name="section7.5"></a>Multiple sources 
 To be done
 
 [Top](#top)
 
-###<a name="section5.6"></a>Using interceptors
+###<a name="section7.6"></a>Using interceptors
 Interceptors are components of the Flume agent architecture. Typically, such an agent is based on a source dealing with the input, a sink dealing with the output and a channel communicating them. The source processes the input, producing Flume events (an object based on a set of headers and a byte-based body) that are put in the channel; then the sink consumes the events by getting them from the channel. This basic architecture may be enriched by the addition of Interceptors, a chained sequence of Flume events preprocessors that <i>intercept</i> the events before they are put into the channel and performing one of these operations:
 
 * Drop the event.
