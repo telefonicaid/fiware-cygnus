@@ -6,3 +6,4 @@
 - [HARDENING] Allow SSL connections to CKAN servers in cygnus_translator_pre0.10.0_to_0.10.0_ckan.py (#666)
 - [HARDENING] Add the maximum accepted batch size in DynamoSink (#672)
 - [BUG] Fix the grouped destination when using batches (#675)
+- [HARDENING] Add interface and implementation to MongoBackend (#654)

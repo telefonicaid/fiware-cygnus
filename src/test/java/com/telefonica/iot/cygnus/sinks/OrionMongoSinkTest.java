@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.mongo.MongoBackend;
+import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
@@ -41,7 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class OrionMongoSinkTest {
     
     @Mock
-    private MongoBackend mockMongoBackend;
+    private MongoBackendImpl mockMongoBackend;
     
     // instance to be tested
     private OrionMongoSink sink;
