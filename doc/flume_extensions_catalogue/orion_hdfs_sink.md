@@ -187,6 +187,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
 | cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
@@ -197,7 +199,6 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
-| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 | hive | no | true | <i>true</i> or <i>false</i> |
@@ -221,13 +222,14 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
+    cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
+    cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.backend_impl = rest
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
     cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
-    cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
     cygnusagent.sinks.hdfs-sink.hive = true

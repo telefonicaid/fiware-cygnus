@@ -198,6 +198,8 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported |
+| attr_persistence | no | row | <i>row</i> or <i>column</i>
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
@@ -212,6 +214,8 @@ A configuration example could be:
     ...
     cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
     cygnusagent.sinks.mongo-sink.channel = mongo-channel
+    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
+    cygnusagent.sinks.mongo-sink.attr_persistence = column
     cygnusagent.sinks.mongo-sink.enable_grouping = false
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.mongo-sink.mongo_username = myuser
@@ -220,7 +224,6 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.should_hash = false
     cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
-    cygnusagent.sinks.mongo-sink.attr_persistence = column
 
 [Top](#top)
 
