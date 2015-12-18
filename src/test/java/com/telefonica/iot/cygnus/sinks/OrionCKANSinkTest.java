@@ -303,7 +303,7 @@ public class OrionCKANSinkTest {
         // common objects
         String attrPersistence = "row";
         String enableGrouping = "true";
-        Context context = createContext(attrPersistence,enableGrouping);
+        Context context = createContext(attrPersistence, enableGrouping);
         
         System.out.println("Testing OrionCKANSink.persisBatch (normal resource lengths)");
         sink.configure(context);
@@ -401,7 +401,7 @@ public class OrionCKANSinkTest {
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);
