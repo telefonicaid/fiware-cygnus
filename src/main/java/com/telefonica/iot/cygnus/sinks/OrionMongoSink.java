@@ -80,7 +80,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         String collectionName = null;
 
         // create the collection at this stage, if the data model is collection-per-service-path
-        if (dataModel == DataModel.COLLECTIONPERSERVICEPATH) {
+        if (dataModel == DataModel.DMBYSERVICEPATH) {
             for (String fiwareServicePath : servicePaths) {
                 collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, false, null, null,
                         fiwareService);
@@ -101,7 +101,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                     + entityType + ")");
             
             // create the collection at this stage, if the data model is collection-per-entity
-            if (dataModel == DataModel.COLLECTIONPERENTITY) {
+            if (dataModel == DataModel.DMBYENTITY) {
                 collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], null, false,
                         entityId, entityType, fiwareService);
                 backend.createCollection(dbName, collectionName);
@@ -128,7 +128,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                         + attrType + ")");
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE  && rowAttrPersistence) {
+                if (dataModel == DataModel.DMBYATTRIBUTE  && rowAttrPersistence) {
                     collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], attrName,
                             false, entityId, entityType, fiwareService);
                     backend.createCollection(dbName, collectionName);
@@ -149,7 +149,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
 
             } // for
             if (!this.rowAttrPersistence) {
-                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                if (dataModel == DataModel.DMBYATTRIBUTE) {
                     LOGGER.warn("Persisting data by columns is useless for collection-per-attribute data model");
                 } else {
                     LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "

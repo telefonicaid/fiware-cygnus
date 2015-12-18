@@ -129,6 +129,8 @@ public class OrionCKANSink extends OrionSink {
         ssl = context.getBoolean("ssl", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
         super.configure(context);
+        // Techdebt: allow this sink to work with all the data models
+        dataModel = DataModel.DMBYENTITY;
     } // configure
 
     @Override
@@ -220,7 +222,7 @@ public class OrionCKANSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
+            destination = cygnusEvent.getEntity();
             orgName = buildOrgName(service);
             pkgName = buildPkgName(service, servicePath);
             resName = buildResName(destination);

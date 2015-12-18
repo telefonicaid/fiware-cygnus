@@ -18,9 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType;
-import static com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType.TABLEBYDESTINATION;
-import static com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType.TABLEBYSERVICEPATH;
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
@@ -48,7 +45,6 @@ public class OrionMySQLSink extends OrionSink {
     private String mysqlPort;
     private String mysqlUsername;
     private String mysqlPassword;
-    private TableType tableType;
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
     
@@ -99,14 +95,6 @@ public class OrionMySQLSink extends OrionSink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
-    
-    /**
-     * Returns the table type. It is protected due to it is only required for testing purposes.
-     * @return The table type
-     */
-    protected TableType getTableType() {
-        return tableType;
-    } // getTableType
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -135,9 +123,6 @@ public class OrionMySQLSink extends OrionSink {
         // FIXME: mysqlPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
-        String tableTypeStr = context.getString("table_type", "table-per-destination");
-        tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
@@ -200,7 +185,8 @@ public class OrionMySQLSink extends OrionSink {
 
         protected String service;
         protected String servicePath;
-        protected String destination;
+        protected String entity;
+        protected String attribute;
         protected String dbName;
         protected String tableName;
         protected String typedFieldNames;
@@ -233,10 +219,48 @@ public class OrionMySQLSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
-            dbName = buildDbName(service);
-            tableName = buildTableName(servicePath, destination, tableType);
+            entity = cygnusEvent.getEntity();
+            attribute = cygnusEvent.getAttribute();
+            dbName = buildDbName();
+            tableName = buildTableName();
         } // initialize
+        
+        private String buildDbName() throws Exception {
+            String name = service;
+
+            if (name.length() > Constants.MAX_NAME_LEN) {
+                throw new CygnusBadConfiguration("Building database name '" + name
+                        + "' and its length is greater than " + Constants.MAX_NAME_LEN);
+            } // if
+
+            return name;
+        } // buildDbName
+        
+        private String buildTableName() throws Exception {
+            String name;
+
+            switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    name = servicePath;
+                    break;
+                case DMBYENTITY:
+                    name = servicePath + '_' + entity;
+                    break;
+                case DMBYATTRIBUTE:
+                    name = servicePath + '_' + entity + '_' + attribute;
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+            } // switch
+
+            if (name.length() > Constants.MAX_NAME_LEN) {
+                throw new CygnusBadConfiguration("Building table name '" + name
+                        + "' and its length is greater than " + Constants.MAX_NAME_LEN);
+            } // if
+
+            return name;
+        } // buildTableName
         
         public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
         
@@ -437,58 +461,5 @@ public class OrionMySQLSink extends OrionSink {
         
         persistenceBackend.insertContextData(dbName, tableName, fieldNames, fieldValues);
     } // persistAggregation
-
-    /**
-     * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
-     * @param fiwareService
-     * @return
-     * @throws Exception
-     */
-    private String buildDbName(String fiwareService) throws Exception {
-        String dbName = fiwareService;
-        
-        if (dbName.length() > Constants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
-                    + "than " + Constants.MAX_NAME_LEN);
-        } // if
-        
-        return dbName;
-    } // buildDbName
-    
-    /**
-     * Builds a package name given a fiwareServicePath and a destination. It throws an exception if the naming
-     * conventions are violated.
-     * @param fiwareServicePath
-     * @param destination
-     * @return
-     * @throws Exception
-     */
-    private String buildTableName(String fiwareServicePath, String destination, TableType tableType) throws Exception {
-        String tableName;
-        
-        switch(tableType) {
-            case TABLEBYDESTINATION:
-                if (fiwareServicePath.length() == 0) {
-                    tableName = destination;
-                } else {
-                    tableName = fiwareServicePath + '_' + destination;
-                } // if else
-
-                break;
-            case TABLEBYSERVICEPATH:
-                tableName = fiwareServicePath;
-                break;
-            default:
-                throw new CygnusBadConfiguration("Unknown table type (" + tableType.toString() + " in OrionMySQLSink, "
-                        + "cannot build the table name. Please, use TABLEBYSERVICEPATH or TABLEBYDESTINATION");
-        } // switch
-                
-        if (tableName.length() > Constants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName
-                    + ") and its length is greater than " + Constants.MAX_NAME_LEN);
-        } // if
-        
-        return tableName;
-    } // buildTableName
 
 } // OrionMySQLSink

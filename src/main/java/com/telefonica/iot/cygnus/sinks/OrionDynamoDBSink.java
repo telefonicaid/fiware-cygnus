@@ -94,6 +94,8 @@ public class OrionDynamoDBSink extends OrionSink {
         attrPersistenceRow = attrPersistRowStr.equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + attrPersistRowStr + ")");
         super.configure(context);
+        // Techdebt: allow this sink to work with all the data models
+        dataModel = DataModel.DMBYENTITY;
     } // configure
     
     @Override
@@ -170,7 +172,7 @@ public class OrionDynamoDBSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
+            destination = cygnusEvent.getEntity();
             tableName = buildTableName(service, servicePath, destination, tableType);
             aggregation = new ArrayList<Item>();
         } // initialize

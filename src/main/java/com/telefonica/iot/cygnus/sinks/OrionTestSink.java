@@ -49,6 +49,8 @@ public class OrionTestSink extends OrionSink {
     @Override
     public void configure(Context context) {
         super.configure(context);
+        // Techdebt: allow this sink to work with all the data models
+        dataModel = DataModel.DMBYENTITY;
     } // configure
 
     @Override
@@ -117,7 +119,7 @@ public class OrionTestSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
+            destination = cygnusEvent.getEntity();
         } // initialize
         
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
