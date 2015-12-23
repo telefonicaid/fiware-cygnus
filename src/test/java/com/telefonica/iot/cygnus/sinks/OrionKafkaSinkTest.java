@@ -20,9 +20,8 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.sinks.OrionKafkaSink.TopicAPI;
 import com.telefonica.iot.cygnus.sinks.OrionKafkaSink.TopicType;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.HashMap;
+import java.util.ArrayList;
 import org.apache.curator.test.TestingServer;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
@@ -59,27 +58,37 @@ public class OrionKafkaSinkTest {
     // instance to be tested
     private OrionKafkaSink sink;
     
-    // other instances
-    private Context context;
-    private NotifyContextRequest notifyContextRequest;
+    // other inmutable instances
+    private NotifyContextRequest singleNotifyContextRequest;
+    private NotifyContextRequest multipleNotifyContextRequest;
     
     // context constants
-    private final String topicType = "topic-by-destination";
     private final int brokerPort = 9092;
     private final String brokerList = "localhost:" + brokerPort;
     private final int zookeeperPort = 2181;
     private final String zookeeperEndpoint = "localhost:" + zookeeperPort;
     
-    // header contants
-    private final String timestamp = "123456789";
-    private final String service = "vehicles";
-    private final String defaultServicePathName = "4wheels";
-    private final String defaultDestinationName = "car1_car";
-    private final String groupedServicePathName = "4wheels_cars";
-    private final String groupedDestinationName = "numeric_cars";
+    // batches constants
+    private final Long recvTimeTs = 123456789L;
+    private final String normalService = "vehicles";
+    private final String abnormalService =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+    private final String normalDefaultServicePath = "4wheels";
+    private final String rootServicePath = "";
+    private final String abnormalDefaultServicePath =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+    private final String normalGroupedServicePath = "cars";
+    private final String abnormalGroupedServicePath =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+    private final String normalDefaultDestination = "car1_car";
+    private final String abnormalDefaultDestination =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private final String normalGroupedDestination = "my_cars";
+    private final String abnormalGroupedDestination =
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
     
     // notification constants
-    private final String notification = ""
+    private final String singleContextElementNotification = ""
             + "{\n"
             + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
             + "    \"originator\" : \"localhost\",\n"
@@ -104,6 +113,49 @@ public class OrionKafkaSinkTest {
             + "        }\n"
             + "    ]\n"
             + "}";
+    private final String multipleContextElementNotification = ""
+            + "{\n"
+            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
+            + "    \"originator\" : \"localhost\",\n"
+            + "    \"contextResponses\" : [\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"112.9\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car1\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"contextElement\" : {\n"
+            + "                \"attributes\" : [\n"
+            + "                    {\n"
+            + "                        \"name\" : \"speed\",\n"
+            + "                        \"type\" : \"float\",\n"
+            + "                        \"value\" : \"115.8\"\n"
+            + "                    }\n"
+            + "                ],\n"
+            + "                \"type\" : \"car\",\n"
+            + "                \"isPattern\" : \"false\",\n"
+            + "                \"id\" : \"car2\"\n"
+            + "            },\n"
+            + "            \"statusCode\" : {\n"
+            + "                \"code\" : \"200\",\n"
+            + "                \"reasonPhrase\" : \"OK\"\n"
+            + "            }\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -118,12 +170,9 @@ public class OrionKafkaSinkTest {
         sink.setPersistenceBackend(mockKafkaBackend);
         sink.setTopicAPI(mockTopicAPI);
         
-        // set up other instances
-        context = new Context();
-        context.put("topic_type", topicType);
-        context.put("broker_list", brokerList);
-        context.put("zookeeper_endpoint", zookeeperEndpoint);
-        notifyContextRequest = TestUtils.createJsonNotifyContextRequest(notification);
+        // set up other immutable instances
+        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
+        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
 
         // set up the behaviour of the mocked classes
         when(mockKafkaBackend.send(null)).thenReturn(null, null, null);
@@ -136,7 +185,7 @@ public class OrionKafkaSinkTest {
     
     /**
      * Shutdowns all necessary testing classes.
-     * @throws IOException
+     * @throws java.lang.Exception
      */
     @After
     public void shutdown() throws Exception {
@@ -149,6 +198,8 @@ public class OrionKafkaSinkTest {
     @Test
     public void testConfigure() {
         System.out.println("Testing OrionKafkaSink.configure");
+        String topicType = "topic-by-destination";
+        Context context = createContext(topicType);
         sink.configure(context);
         assertEquals(TopicType.valueOf(topicType.replaceAll("-", "").toUpperCase()), sink.getTopicType());
         assertEquals(brokerList, sink.getBrokerList());
@@ -161,6 +212,8 @@ public class OrionKafkaSinkTest {
     @Test
     public void testStart() {
         System.out.println("Testing OrionKafkaSink.start");
+        String topicType = "topic-by-destination";
+        Context context = createContext(topicType);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -169,69 +222,202 @@ public class OrionKafkaSinkTest {
     } // testStart
     
     /**
+     * Test of persistBatch method, of class OrionKafkaSink. Null batches are tested.
+     */
+    @Test
+    public void testPersistNullBatches() {
+        System.out.println("Testing OrionKafkaSink.persistBatch (null batches)");
+        String topicType = "topic-by-destination";
+        Context context = createContext(topicType);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        
+        try {
+            sink.persistBatch(null);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+    } // testPersistNullBatches
+    
+    /**
      * Test of persistOne method, of class OrionKafkaSink. Topic types are tested.
      */
     @Test
     public void testPersistTopicTypes() {
-        System.out.println("Testing OrionKafkaSink.persist (topic-per-service)");
-        context.put("topic_type", "topic-by-service");
+        // common objects
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        System.out.println("Testing OrionKafkaSink.persist (topic-by-service)");
+        String topicType = "topic-by-service";
+        Context context = createContext(topicType);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
-        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
-        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persistOne(headers, notifyContextRequest);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionKafkaSink.persist (topic-per-service-path)");
-        context.put("topic_type", "topic-by-service-path");
+        System.out.println("Testing OrionKafkaSink.persist (topic-by-service-path)");
+        topicType = "topic-by-servicePath";
+        context = createContext(topicType);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
-        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
-        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persistOne(headers, notifyContextRequest);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionKafkaSink.persist (topic-per-destination)");
-        context.put("topic_type", "topic-by-destination");
+        System.out.println("Testing OrionKafkaSink.persist (topic-by-destination)");
+        topicType = "topic-by-destination";
+        context = createContext(topicType);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HEADER_NOTIFIED_SERVICE, service);
-        headers.put(Constants.HEADER_DEFAULT_SERVICE_PATHS, defaultServicePathName);
-        headers.put(Constants.HEADER_DEFAULT_DESTINATIONS, defaultDestinationName);
-        headers.put(Constants.HEADER_GROUPED_SERVICE_PATHS, groupedServicePathName);
-        headers.put(Constants.HEADER_GROUPED_DESTINATIONS, groupedDestinationName);
         
         try {
-            sink.persistOne(headers, notifyContextRequest);
+            sink.persistBatch(groupedBatch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
     } // testPersistTopicTypes
+    
+    /**
+     * Test of persistBatch method, of class OrionKafkaSink. Special resources length is tested.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPersistResourceLengths() throws Exception {
+        System.out.println("Testing OrionKafkaSink.persistBatch (normal resource lengths)");
+        String topicType = "topic-by-destination";
+        Context context = createContext(topicType);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionKafkaSink.persistBatch (too long service name)");
+        topicType = "topic-by-service";
+        context = createContext(topicType);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionKafkaSink.persistBatch (too long servicePath name)");
+        topicType = "topic-by-service-path";
+        context = createContext(topicType);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+        
+        System.out.println("Testing OrionKAfkaSink.persistBatch (too long destination name)");
+        topicType = "topic-by-destination";
+        context = createContext(topicType);
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+        } // try catch
+    } // testPersistResourceLengths
+    
+    /**
+     * Test of persistBatch method, of class OrionKafkaSink. Special service and service-path are tested.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPersistServiceServicePath() throws Exception {
+        // common objects
+        String topicType = "topic-by-destination";
+        Context context = createContext(topicType);
+        
+        System.out.println("Testing OrionKafkaSink.persistBatch (\"root\" servicePath name)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
+                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+        
+        System.out.println("Testing OrionKafkaSink.persistBatch (multiple destinations and "
+                + "fiware-servicePaths)");
+        sink.configure(context);
+        sink.setChannel(new MemoryChannel());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        
+        try {
+            sink.persistBatch(groupedBatch);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(true);
+        } // try catch finally
+    } // testPersistServiceServicePath
+    
+    private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
+            NotifyContextRequest.ContextElement contextElement) {
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+            contextElement);
+        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
+        groupedBatchEvents.add(groupedEvent);
+        Batch batch = new Batch();
+        batch.addEvents(destination, groupedBatchEvents);
+        return batch;
+    } // createBatch
+    
+    private Context createContext(String topicType) {
+        Context context = new Context();
+        context.put("topic_type", topicType);
+        context.put("broker_list", brokerList);
+        context.put("zookeeper_endpoint", zookeeperEndpoint);
+        return context;
+    } // createContext
     
 } // OrionKafkaSinkTest

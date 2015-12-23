@@ -3,4 +3,5 @@ target/
 *.idea
 *.iml
 nbactions.xml
-
+.DS_Store
+archived/

@@ -21,15 +21,12 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Map;
 import org.apache.flume.Context;
 
@@ -107,6 +104,15 @@ public class OrionCKANSink extends OrionSink {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
     
+    /**
+     * Gets if the connections with CKAN is SSL-enabled. It is protected due to it is only required for testing
+     * purposes.
+     * @return True if the connection is SSL-enabled, false otherwise
+     */
+    protected boolean getSSL() {
+        return this.ssl;
+    } // getSSL
+    
     @Override
     public void configure(Context context) {
         apiKey = context.getString("api_key", "nokey");
@@ -137,95 +143,244 @@ public class OrionCKANSink extends OrionSink {
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
-    
+
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
-        
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
-        } // if else
-        
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+        Accumulator accumulator = new Accumulator();
+        accumulator.initializeBatching(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getBatch());
+    } // persistOne
+    
+    @Override
+    void persistBatch(Batch batch) throws Exception {        
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
 
-        // build the organization
-        String orgName = buildOrgName(fiwareService);
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
+            aggregator.initialize(subBatch.get(0));
 
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the aggregation
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+        } // for
+    } // persistBatch
+    
+    /**
+     * Class for aggregating fieldValues.
+     */
+    private abstract class CKANAggregator {
         
-        for (int i = 0; i < contextResponses.size(); i++) {
-            // get the i-th contextElement
-            ContextElementResponse contextElementResponse = (ContextElementResponse) contextResponses.get(i);
-            ContextElement contextElement = contextElementResponse.getContextElement();
+        // string containing the data records
+        protected String records;
+
+        protected String service;
+        protected String servicePath;
+        protected String destination;
+        protected String orgName;
+        protected String pkgName;
+        protected String resName;
+        protected String resId;
+        
+        public CKANAggregator() {
+            records = "";
+        } // CKANAggregator
+        
+        public String getAggregation() {
+            return records;
+        } // getAggregation
+        
+        public String getOrgName() {
+            return orgName;
+        } // getOrgName
+        
+        public String getPkgName() {
+            return pkgName;
+        } // getPkgName
+        
+        public String getResName() {
+            return resName;
+        } // getResName
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            destination = cygnusEvent.getDestination();
+            orgName = buildOrgName(service);
+            pkgName = buildPkgName(service, servicePath);
+            resName = buildResName(destination);
+        } // initialize
+        
+        public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
+        
+    } // CKANAggregator
+    
+    /**
+     * Class for aggregating batches in row mode.
+     */
+    private class RowAggregator extends CKANAggregator {
+        
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type="
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // build the pavkage and resource name
-            String pkgName = buildPkgName(fiwareService, servicePaths[i]);
-            String resName = buildResName(destinations[i]);
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
 
-            // iterate on all this CKANBackend's attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
-                continue;
+                return;
             } // if
             
-            // this is used for storing the attribute's names and values when dealing with a per column attributes
-            // persistence; in that case the persistence is not done attribute per attribute, but persisting all of them
-            // at the same time
-            HashMap<String, String> attrs = new HashMap<String, String>();
-
-            // this is used for storing the attribute's names (sufixed with "-md") and metadata when dealing with a per
-            // column attributes persistence; in that case the persistence is not done attribute per attribute, but
-            // persisting all of them at the same time
-            HashMap<String, String> mds = new HashMap<String, String>();
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
+            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(true);
-                String attrMd = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-
-                if (rowAttrPersistence) {
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
-                            + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTimeTs + ","
-                            + recvTime + "," + entityId + "," + entityType + "," + attrName + "," + attrType + ","
-                            + attrValue + "," + attrMd + ")");
-                    persistenceBackend.persist(recvTimeTs, recvTime, orgName, pkgName, resName, entityId, entityType,
-                            attrName, attrType, attrValue, attrMd);
+                
+                // create a column and aggregate it
+                String record = "{\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
+                    + "\"" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
+                
+                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+                if (!attrMetadata.equals(Constants.EMPTY_MD)) {
+                    record += ",\"" + Constants.ATTR_MD + "\": " + attrMetadata + "}";
                 } else {
-                    attrs.put(attrName, attrValue);
-                    mds.put(attrName + "_md", attrMd);
+                    record += "}";
+                } // if else
+
+                if (records.isEmpty()) {
+                    records += record;
+                } else {
+                    records += "," + record;
                 } // if else
             } // for
+        } // aggregate
 
-            // if the attribute persistence mode is per column, now is the time to insert a new row containing full
-            // attribute list of name-values.
-            if (!rowAttrPersistence) {
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
-                        + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + recvTime + ", "
-                        + attrs.toString() + ", " + mds.toString() + ")");
-                persistenceBackend.persist(recvTime, orgName, pkgName, resName, attrs, mds);
+    } // RowAggregator
+    
+    /**
+     * Class for aggregating batches in column mode.
+     */
+    private class ColumnAggregator extends CKANAggregator {
+
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+
+            // get the event body
+            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
             } // if
-        } // for
-    } // persistOne
+            
+            String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
+                    + "\"" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\"";
+            
+            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(true);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                
+                // create part of the column with the current attribute (a.k.a. a column)
+                record += ",\"" + attrName + "\": " + attrValue;
+                
+                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
+                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
+                if (!attrMetadata.equals(Constants.EMPTY_MD)) {
+                    record += ",\"" + attrName + "_md\": " + attrMetadata;
+                } // if
+            } // for
+            
+            // now, aggregate the column
+            if (records.isEmpty()) {
+                records += record + "}";
+            } else {
+                records += "," + record + "}";
+            } // if else
+        } // aggregate
+        
+    } // ColumnAggregator
+    
+    private CKANAggregator getAggregator(boolean rowAttrPersistence) {
+        if (rowAttrPersistence) {
+            return new RowAggregator();
+        } else {
+            return new ColumnAggregator();
+        } // if else
+    } // getAggregator
+    
+    private void persistAggregation(CKANAggregator aggregator) throws Exception {
+        String aggregation = aggregator.getAggregation();
+        String orgName = aggregator.getOrgName();
+        String pkgName = aggregator.getPkgName();
+        String resName = aggregator.getResName();
+        
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+                + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
+        persistenceBackend.persist(orgName, pkgName, resName, aggregation);
+    } // persistAggregation
     
     /**
      * Builds an organization name given a fiwareService. It throws an exception if the naming conventions are violated.
@@ -285,10 +440,5 @@ public class OrionCKANSink extends OrionSink {
 
         return resName;
     } // buildResName
-
-    @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    } // persistBatch
     
 } // OrionCKANSink

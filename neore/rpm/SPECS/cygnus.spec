@@ -15,7 +15,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 Summary:          Package for cygnus component
-Name:             cygnus
+Name:             cygnus%{_name_suffix}
 Version:          %{_product_version}
 Release:          %{_product_release}
 License:          AGPLv3
@@ -173,6 +173,25 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Dec 04 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.11.0
+- [RELEASE] Maintenance tasks in fiware-cygnus Git repository (#402)
+- [FEATURE] Add support to batch processing within a transaction in OrionCKANSink (#567)
+- [HARDENING] Remove unnecessary http mock in OrionHDFSSinkTest and fix some output messages (#605)
+- [HARDENING] Trace the table_type parameter in OrionMySQLSink (#614)
+- [HARDENING] Add enable_grouping parameter for OrionKafkaSink in agent.conf.template (#615)
+- [FEATURE] Add OrionDynamoSink (#584)
+- [HARDENING] Add flume-env.sh.template file to the configuration folder (#613)
+- [HARDENING] Documentation refactoring (#611)
+- [HARDENING] Change the name of the default log file, from flume.log to cygnus.log (#622)
+- [BUG] Escape all the non-alphanumeric characters in Hive fields of column-like tables (#619)
+- [FEATURE] The package name now has the Hadoop Core version Cygnus is compatible with (#565)
+- [BUG] OrionTestSink now inherits the configuration from OrionSink base class (#632)
+- [HARDENING] Add administration and programmers sections to all the sinks documentation (#631)
+- [FEATURE] Add some interesting fields to CKAN persisted data (servicePath in row-like modes, servicePath, entityId and entityType in column-like modes), including migration script (#543)
+- [FEATURE] Add batching support to OrionKafkaSink (#569)
+- [HARDENING] Add the Quick Start Guide to readthedocs (#645)
+- [HARDENING] Add a document containing a table in charge of relating features and Cygnus version (#638)
+
 * Wed Nov 04 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.10.0
 - [HARDENING] Cygnus user creation added to the from the sources installation guide (#558)
 - [FEATURE] Add a binary implementation of the HDFS backend (#537)

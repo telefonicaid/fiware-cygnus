@@ -30,22 +30,22 @@ public final class Constants {
     private Constants() {
     } // Constants
 
-    // HTTP and Flume header names
-    public static final String HEADER_NOTIFIED_SERVICE      = "fiware-service";
-    public static final String HEADER_NOTIFIED_SERVICE_PATH = "fiware-servicepath";
-    public static final String HEADER_DEFAULT_SERVICE_PATHS = "default-fiware-servicepaths";
-    public static final String HEADER_GROUPED_SERVICE_PATHS = "grouped-fiware-servicepaths";
-    public static final String HEADER_DEFAULT_DESTINATIONS  = "default-destinations";
-    public static final String HEADER_GROUPED_DESTINATIONS  = "grouped-destinations";
-    public static final String HEADER_CONTENT_TYPE = "content-type";
-    public static final String HEADER_USER_AGENT   = "user-agent";
-    public static final int SERVICE_HEADER_MAX_LEN = 50;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
+    // HTTP header names
+    public static final String HTTP_HEADER_FIWARE_SERVICE      = "fiware-service";
+    public static final String HTTP_HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
     
-    // Only Flume header names
-    public static final String HEADER_TRANSACTION_ID = "transactionId";
-    public static final String HEADER_TTL = "ttl";
-    public static final String HEADER_TIMESTAMP = "timestamp";
+    // Flume header names
+    public static final String FLUME_HEADER_NOTIFIED_SERVICE_PATHS = "notified-servicepaths";
+    public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
+    public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
+    public static final String FLUME_HEADER_GROUPED_ENTITIES       = "grouped-entities";
+    public static final String FLUME_HEADER_TRANSACTION_ID         = "transactionId";
+    public static final String FLUME_HEADER_TTL                    = "ttl";
+    public static final String FLUME_HEADER_TIMESTAMP              = "timestamp";
+    
+    // Both HTTP and Flume header names
+    public static final String HEADER_CONTENT_TYPE   = "content-type";
+    public static final String HEADER_USER_AGENT     = "user-agent";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS = "recvTimeTs";
@@ -59,21 +59,26 @@ public final class Constants {
     public static final String ATTR_MD_FILE = "attrMdFile";
 
     // Maximum values
-    public static final int MAX_CONNS = 500;
-    public static final int MAX_CONNS_PER_ROUTE = 100;
-    public static final int MAX_NAME_LEN = 64;
+    public static final int MAX_CONNS                   = 500;
+    public static final int MAX_CONNS_PER_ROUTE         = 100;
+    public static final int MAX_NAME_LEN                = 64;
+    public static final int SERVICE_HEADER_MAX_LEN      = 50;
+    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
     
     // Others
     public static final String EMPTY_MD = "[]";
 
     // Configuration parameter names
-    public static final String PARAM_DEFAULT_SERVICE = "default_service";
+    public static final String PARAM_DEFAULT_SERVICE      = "default_service";
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
-    public static final String PARAM_NOTIFICATION_TARGET = "notification_target";
-    public static final String PARAM_EVENTS_TTL = "events_ttl";
+    public static final String PARAM_NOTIFICATION_TARGET  = "notification_target";
+    public static final String PARAM_EVENTS_TTL           = "events_ttl";
     
     // OrionSTHSink specific headers
     public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 120;
-    public static final int STH_MIN_HASH_SIZE_IN_BYTES = 20;
+    public static final int STH_MIN_HASH_SIZE_IN_BYTES      = 20;
+    
+    // OrionDynamoDB specific headers
+    public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
 
 } // Constants

@@ -137,6 +137,7 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         String tableTypeStr = context.getString("table_type", "table-per-destination");
         tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
@@ -157,14 +158,11 @@ public class OrionMySQLSink extends OrionSink {
         Accumulator accumulator = new Accumulator();
         accumulator.initializeBatching(new Date().getTime());
         accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getDefaultBatch(), accumulator.getGroupedBatch());
+        persistBatch(accumulator.getBatch());
     } // persistOne
     
     @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        // select batch depending on the enable grouping parameter
-        Batch batch = (enableGrouping ? groupedBatch : defaultBatch);
-        
+    void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -255,7 +253,7 @@ public class OrionMySQLSink extends OrionSink {
             typedFieldNames = "("
                     + Constants.RECV_TIME_TS + " long,"
                     + Constants.RECV_TIME + " text,"
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text,"
                     + Constants.ATTR_NAME + " text,"
@@ -266,7 +264,7 @@ public class OrionMySQLSink extends OrionSink {
             fieldNames = "("
                     + Constants.RECV_TIME_TS + ","
                     + Constants.RECV_TIME + ","
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE + ","
                     + Constants.ATTR_NAME + ","
@@ -340,11 +338,11 @@ public class OrionMySQLSink extends OrionSink {
             
             // particulat initialization
             typedFieldNames = "(" + Constants.RECV_TIME + " text,"
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text";
             fieldNames = "(" + Constants.RECV_TIME + ","
-                    + Constants.HEADER_NOTIFIED_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE;
             

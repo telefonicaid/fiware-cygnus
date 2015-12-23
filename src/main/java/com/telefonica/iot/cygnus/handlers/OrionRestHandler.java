@@ -100,7 +100,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     } // getDefaultServicePath
     
     /**
-     * Gets the events HEADER_TTL. It is protected due to it is only required for testing purposes.
+     * Gets the events TTL. It is protected due to it is only required for testing purposes.
      * @return
      */
     protected String getEventsTTL() {
@@ -146,7 +146,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
         // accessible by the whole source code
         String transId = generateTransId();
-        MDC.put(Constants.HEADER_TRANSACTION_ID, transId);
+        MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
         LOGGER.info("Starting transaction (" + transId + ")");
         
         // check the method
@@ -183,7 +183,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     contentType = headerValue;
                 } // if else
-            } else if (headerName.equals(Constants.HEADER_NOTIFIED_SERVICE)) {
+            } else if (headerName.equals(Constants.HTTP_HEADER_FIWARE_SERVICE)) {
                 if (headerValue.length() > Constants.SERVICE_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
@@ -192,7 +192,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } else {
                     service = Utils.encode(headerValue);
                 } // if else
-            } else if (headerName.equals(Constants.HEADER_NOTIFIED_SERVICE_PATH)) {
+            } else if (headerName.equals(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
@@ -236,17 +236,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventHeaders.put(Constants.HEADER_CONTENT_TYPE, contentType);
         LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_CONTENT_TYPE + ", value=" + contentType
                 + ")");
-        eventHeaders.put(Constants.HEADER_NOTIFIED_SERVICE, service == null ? defaultService : service);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_NOTIFIED_SERVICE
+        eventHeaders.put(Constants.HTTP_HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
-        eventHeaders.put(Constants.HEADER_NOTIFIED_SERVICE_PATH, servicePath == null
+        eventHeaders.put(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH, servicePath == null
                 ? defaultServicePath : servicePath);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_NOTIFIED_SERVICE_PATH
+        LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID + ", value=" + transId + ")");
-        eventHeaders.put(Constants.HEADER_TTL, eventsTTL);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TTL + ", value=" + eventsTTL + ")");
+        eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID + ", value=" + transId + ")");
+        eventHeaders.put(Constants.FLUME_HEADER_TTL, eventsTTL);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TTL + ", value=" + eventsTTL + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();

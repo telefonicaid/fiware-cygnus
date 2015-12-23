@@ -22,9 +22,7 @@ import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.flume.Event;
 
 /**
  *
@@ -42,17 +40,17 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values; they are not null nor empty thanks to OrionRESTHandler
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HEADER_NOTIFIED_SERVICE);
+        Long recvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
+        String fiwareService = eventHeaders.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
         String[] servicePaths;
         String[] destinations;
         
         if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
+            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
         } else {
-            servicePaths = eventHeaders.get(Constants.HEADER_DEFAULT_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.HEADER_DEFAULT_DESTINATIONS).split(",");
+            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+            destinations = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
         } // if else
         
         for (int i = 0; i < servicePaths.length; i++) {
@@ -138,8 +136,8 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     } // persistOne
     
     @Override
-    void persistBatch(Batch defaultBatch, Batch groupedBatch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    void persistBatch(Batch batch) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     } // persistBatch
     
 } // OrionSTHSink
