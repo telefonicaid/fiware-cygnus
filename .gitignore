@@ -4,4 +4,3 @@ target/
 *.iml
 nbactions.xml
 
-conf/agent_0.conf
