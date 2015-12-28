@@ -20,7 +20,7 @@ package com.telefonica.iot.cygnus.backends.postgresql;
 
 /**
  * Interface for those backends implementing the persistence in PostgreSQL.
- * 
+ *
  * @author hermanjunge
  */
 public interface PostgreSQLBackend {
