@@ -33,9 +33,9 @@ _message(){
    isOk=$(echo "$1"|grep -i "\\[OK\\]")
    isUser=$(echo "$1"|grep -i "\\[USER\\]")
    isDash=`echo -en|grep "\-en"`
-   outLog="/dev/stdout"
+   outLog="/dev/tty"
    if ! [ -z "$isError" ]; then 
-      messageColor=${_error_color} && outLog="/dev/stderr" 
+      messageColor=${_error_color} && outLog="/dev/tty"
    else
       if ! [ -z "$isStage" ]; then 
          messageColor=${_stage_color}
