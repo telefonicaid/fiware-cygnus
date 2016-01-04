@@ -139,7 +139,7 @@ A configuration example could be:
     cygnusagent.sinks = dynamodb-sink
     cygnusagent.channels = dynamodb-channel
     ...
-    cygnusagent.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
+    cygnusagent.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
     cygnusagent.sinks.dynamodb-sink.channel = dynamodb-channel
     cygnusagent.sinks.dynamodb-sink.enable_grouping = false
     cygnusagent.sinks.dynamodb-sink.data_model = dm-by-entity
