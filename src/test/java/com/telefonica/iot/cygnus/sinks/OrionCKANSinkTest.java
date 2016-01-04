@@ -164,7 +164,7 @@ public class OrionCKANSinkTest {
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
 
         // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(null, null, null, null);
+        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(null, null, null, null, true);
     } // setUp
 
     /**

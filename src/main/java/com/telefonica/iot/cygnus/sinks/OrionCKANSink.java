@@ -381,7 +381,12 @@ public class OrionCKANSink extends OrionSink {
         
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
-        persistenceBackend.persist(orgName, pkgName, resName, aggregation);
+        
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
+        } else {
+            persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
+        } // if else
     } // persistAggregation
     
     /**

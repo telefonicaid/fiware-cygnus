@@ -65,10 +65,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // CKANBackendImpl
 
     @Override
-    public void persist(String orgName, String pkgName, String resName, String records) throws Exception {
+    public void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
+        throws Exception {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
-        String resId = resourceLookupOrCreate(orgName, pkgName, resName, true);
+        String resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
         
         if (resId == null) {
             throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
