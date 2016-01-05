@@ -98,19 +98,19 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-And assuming `table_type=table-by-destination` and `attr_persistence=row` as configuration parameters, then `OrionDynamoDBSink` will persist the data within the body as:
+And assuming `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionDynamoDBSink` will persist the data within the body as:
 
 ![](../images/dynamodb_row_destination.jpg)
 
-If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionDynamoDBSink` will persist the data within the body as:
+If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionDynamoDBSink` will persist the data within the body as:
 
 ![](../images/dynamodb_column_destination.jpg)
 
-If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionDynamoDBSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionDynamoDBSink` will persist the data within the body as:
 
 ![](../images/dynamodb_row_servicepath.jpg)
 
-If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionDynamoDBSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionDynamoDBSink` will persist the data within the body as:
 
 ![](../images/dynamodb_column_servicepath.jpg)
     
@@ -125,12 +125,11 @@ If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionDy
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink</i> |
 | channel | yes | N/A |
 | enable\_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
+| data_model | no | dm-by-entity |  <i>dm-by-entity</i> or <i>dm-by-service-path</i> |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | access\_key\_id | yes | N/A | Provided by AWS when creating an account |
 | secret\_access\_key | yes | N/A | Provided by AWS when creating an account |
 | region | no | eu-central-1 | [AWS regions](http://docs.aws.amazon.com/general/latest/gr/rande.html) |
-| table_type | no | table-by-destination | <i>table-by-destination</i> or <i>table-by-service-path</i> |
 | batch\_size | no | 1 | Number of events accumulated before persistence (Maximum 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information) |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
@@ -147,7 +146,6 @@ A configuration example could be:
     cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
     cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
     cygnusagent.sinks.dynamodb-sink.region = eu-central-1
-    cygnusagent.sinks.dybamodb-sink.table_type = table-by-destination
     cygnusagent.sinks.dynamodb-sink.batch_size = 25
     cygnusagent.sinks.dynamodb-sink.batch_timeout = 30
     
