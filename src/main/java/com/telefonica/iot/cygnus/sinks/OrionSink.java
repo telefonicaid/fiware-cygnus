@@ -601,18 +601,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ContextElement contextElement = contextElementResponses.get(i).getContextElement();
                     ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
                     
-                    for (int j = 0; j < attrs.size(); i++) {
-                        String destination = attrs.get(i).getName();
+                    for (ContextAttribute attr : attrs) {
+                        String destination = attr.getName();
                         ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
+                        
                         if (list == null) {
                             list = new ArrayList<CygnusEvent>();
                             batch.addEvents(destination, list);
                         } // if
-
+                        
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i], destination,
-                                notification.getContextResponses().get(i).getContextElement());
+                                contextElement);
                         list.add(cygnusEvent);
                     } // for
                 } // for
@@ -624,18 +624,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ContextElement contextElement = contextElementResponses.get(i).getContextElement();
                     ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
                     
-                    for (int j = 0; j < attrs.size(); i++) {
-                        String destination = attrs.get(i).getName();
+                    for (ContextAttribute attr : attrs) {
+                        String destination = attr.getName();
                         ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
+                        
                         if (list == null) {
                             list = new ArrayList<CygnusEvent>();
                             batch.addEvents(destination, list);
                         } // if
-
+                        
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, groupedServicePaths[i], groupedEntities[i], destination,
-                                notification.getContextResponses().get(i).getContextElement());
+                                contextElement);
                         list.add(cygnusEvent);
                     } // for
                 } // for

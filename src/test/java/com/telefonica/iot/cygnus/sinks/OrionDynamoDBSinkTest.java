@@ -59,7 +59,7 @@ public class OrionDynamoDBSinkTest {
     private final String region = "eu-west-1";
     private final String attrPersistence = "row";
     private final String enableGrouping = "true";
-    private final String tableType = "table-by-destination";
+    private final String tableType = "dm-by-entity";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
