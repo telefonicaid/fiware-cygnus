@@ -9,4 +9,3 @@
 - [HARDENING] Add grouping_rules.conf & flume-env.sh configuration files in the documentation (#657)
 - [HARDENING] Add a piece of documentation about multitenancy (#607)
 - [FEATURE] Add a general data_model parameter (#659)
-- [HARDENING] Add a piece of documentation about multi-tenancy support on Cygnus documentation (#607)
