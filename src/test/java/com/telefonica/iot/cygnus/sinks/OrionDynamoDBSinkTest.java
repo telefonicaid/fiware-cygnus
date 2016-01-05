@@ -19,7 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink.TableType;
+import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
@@ -184,7 +184,7 @@ public class OrionDynamoDBSinkTest {
         assertEquals(region, sink.getRegion());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-        assertEquals(TableType.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getTableType());
+        assertEquals(DataModel.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getDataModel());
     } // testConfigure
 
     /**
