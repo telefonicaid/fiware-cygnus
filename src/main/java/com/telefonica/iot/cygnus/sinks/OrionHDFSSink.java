@@ -26,6 +26,8 @@ import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSO
 import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONROW;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
+import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
+import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -56,6 +58,11 @@ public class OrionHDFSSink extends OrionSink {
      * Available backend implementation.
      */
     public enum BackendImpl { BINARY, REST }
+    
+    /**
+     * Available Hive database types.
+     */
+    public enum HiveDBType { DEFAULTDB, NAMESPACEDB }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] host;
@@ -75,7 +82,9 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5ConfFile;
     private boolean serviceAsNamespace;
     private BackendImpl backendImpl;
+    private HiveDBType hiveDBType;
     private HDFSBackend persistenceBackend;
+    private HiveBackend hiveBackend;
     
     /**
      * Constructor.
@@ -337,6 +346,10 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
         } // if else
         
+        String hiveDBTypeStr = context.getString("hive.db_type", "default-db");
+        hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" + hiveDBTypeStr);
+        
         // Kerberos configuration
         enableKrb5 = context.getBoolean("krb5_auth", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (enableKrb5 ? "true" : "false")
@@ -363,6 +376,9 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     public void start() {
         try {
+            // create Hive backend
+            hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+            
             // create the persistence backend
             if (backendImpl == BackendImpl.BINARY) {
                 persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
@@ -430,7 +446,8 @@ public class OrionHDFSSink extends OrionSink {
             
             // create the Hive table
             if (enableHive) {
-                createHiveTable(aggregator);
+                provisionHiveDatabase(aggregator);
+                provisionHiveTable(aggregator);
             } // if
         } // for
     } // persistBatch
@@ -944,9 +961,71 @@ public class OrionHDFSSink extends OrionSink {
         } // for
     } // persistMDAggregations
     
-    private void createHiveTable(HDFSAggregator aggregator) throws Exception {
-        persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields());
-    } // createHiveTable
+    private void provisionHiveDatabase(HDFSAggregator aggregator) throws Exception {
+        if (hiveDBType == HiveDBType.NAMESPACEDB) {
+            if (serviceAsNamespace) {
+                hiveBackend.doCreateDatabase(aggregator.service);
+            } else {
+                hiveBackend.doCreateDatabase(username);
+            } // if else
+        } // if
+        // else {
+            // nothing has to be done, the default database is created by default
+        // }
+    } // provisionHiveDatabase
+    
+    private void provisionHiveTable(HDFSAggregator aggregator) throws Exception {
+        String dirPath = aggregator.getFolder();
+        String fields = aggregator.getHiveFields();
+        String tag;
+        
+        switch (fileFormat) {
+            case JSONROW:
+            case CSVROW:
+                tag = "_row";
+                break;
+            case JSONCOLUMN:
+            case CSVCOLUMN:
+                tag = "_column";
+                break;
+            default:
+                tag = "";
+        } // switch
+        
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
+        LOGGER.info("Creating Hive external table=" + tableName);
+        
+        // get a Hive client
+        HiveBackendImpl hiveClient = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+        
+        // create the query
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
+                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
+                        + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
+
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
+    } // provisionHive
     
     /**
      * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are

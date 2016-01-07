@@ -139,6 +139,8 @@ cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
 cygnusagent.sinks.hdfs-sink.hive.port = 10000
+# Hive database type, available types are default-db and namespace-db
+cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)

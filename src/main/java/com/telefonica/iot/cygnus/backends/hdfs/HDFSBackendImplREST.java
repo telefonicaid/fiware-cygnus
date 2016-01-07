@@ -18,12 +18,11 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
-import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
+import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.apache.http.Header;
@@ -177,57 +176,5 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         // check the status
         return (response.getStatusCode() == 200);
     } // exists
-    
-    @Override
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception {
-        String tag;
-        
-        switch (fileFormat) {
-            case JSONROW:
-            case CSVROW:
-                tag = "_row";
-                break;
-            case JSONCOLUMN:
-            case CSVCOLUMN:
-                tag = "_column";
-                break;
-            default:
-                tag = "";
-        } // switch
-        
-        // get the table name to be created
-        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : hdfsUser + "_") + dirPath) + tag;
-        LOGGER.info("Creating Hive external table=" + tableName);
-        
-        // get a Hive client
-        HiveBackend hiveClient = new HiveBackend(hiveServerVersion, hiveHost, hivePort, hdfsUser, hdfsPassword);
-        
-        // create the query
-        String query;
-        
-        switch (fileFormat) {
-            case JSONCOLUMN:
-            case JSONROW:
-                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
-                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
-                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
-                break;
-            case CSVCOLUMN:
-            case CSVROW:
-                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
-                        + "delimited fields terminated by ',' location '/user/"
-                        + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
-                break;
-            default:
-                query = "";
-        } // switch
-
-        // execute the query
-        if (!hiveClient.doCreateTable(query)) {
-            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
-                    + "Check your Hive/Shark installation");
-        } // if
-    } // provisionHiveTable
 
 } // HDFSBackendImplREST
