@@ -446,8 +446,17 @@ public class OrionHDFSSink extends OrionSink {
             
             // create the Hive table
             if (enableHive) {
-                provisionHiveDatabase(aggregator);
-                provisionHiveTable(aggregator);
+                if (hiveDBType == HiveDBType.NAMESPACEDB) {
+                    if (serviceAsNamespace) {
+                        hiveBackend.doCreateDatabase(aggregator.service);
+                        provisionHiveTable(aggregator, aggregator.service);
+                    } else {
+                        hiveBackend.doCreateDatabase(username);
+                        provisionHiveTable(aggregator, username);
+                    } // if else
+                } else {
+                    provisionHiveTable(aggregator, "default");
+                } // if else
             } // if
         } // for
     } // persistBatch
@@ -961,20 +970,7 @@ public class OrionHDFSSink extends OrionSink {
         } // for
     } // persistMDAggregations
     
-    private void provisionHiveDatabase(HDFSAggregator aggregator) throws Exception {
-        if (hiveDBType == HiveDBType.NAMESPACEDB) {
-            if (serviceAsNamespace) {
-                hiveBackend.doCreateDatabase(aggregator.service);
-            } else {
-                hiveBackend.doCreateDatabase(username);
-            } // if else
-        } // if
-        // else {
-            // nothing has to be done, the default database is created by default
-        // }
-    } // provisionHiveDatabase
-    
-    private void provisionHiveTable(HDFSAggregator aggregator) throws Exception {
+    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
         String dirPath = aggregator.getFolder();
         String fields = aggregator.getHiveFields();
         String tag;
@@ -995,7 +991,7 @@ public class OrionHDFSSink extends OrionSink {
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
-        LOGGER.info("Creating Hive external table=" + tableName);
+        LOGGER.info("Creating Hive external table '" + tableName + "' in database '"  + dbName + "'");
         
         // get a Hive client
         HiveBackendImpl hiveClient = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
@@ -1006,14 +1002,14 @@ public class OrionHDFSSink extends OrionSink {
         switch (fileFormat) {
             case JSONCOLUMN:
             case JSONROW:
-                query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
-                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
+                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
                         + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
             case CSVROW:
-                query = "create external table if not exists " + tableName + " (" + fields + ") row format "
-                        + "delimited fields terminated by ',' location '/user/"
+                query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
+                        + ") row format " + "delimited fields terminated by ',' location '/user/"
                         + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
                 break;
             default:
