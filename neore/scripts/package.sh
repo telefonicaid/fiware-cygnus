@@ -75,6 +75,7 @@ function download_flume(){
     rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}
     rm -rf ${FLUME_WO_TAR}/docs # erase flume documentation
     rm ${FLUME_WO_TAR}/conf/flume-conf.properties.template # we will add our own templates
+    rm ${FLUME_WO_TAR}/conf/log4j.properties # we will add our own templates
     rm -rf ${RPM_PRODUCT_SOURCE_DIR}
     mkdir -p ${RPM_PRODUCT_SOURCE_DIR}
     cp -R ${FLUME_WO_TAR}/* ${RPM_PRODUCT_SOURCE_DIR}/
