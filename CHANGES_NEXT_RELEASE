@@ -8,3 +8,5 @@
 - [HARDENING] Add interface and implementation to MongoBackend (#654)
 - [HARDENING] Add grouping_rules.conf & flume-env.sh configuration files in the documentation (#657)
 - [FEATURE] Enable per-user or default Hive database creation in OrionHDFSSink(#516)
+- [HARDENING] Document the service_as_namespace OrionHDFSSink parameter (#692)
+- [HARDENING] Add a piece of documentation about multitenancy (#607)

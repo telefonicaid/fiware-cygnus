@@ -228,6 +228,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
     cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
+    cygnusagent.sinks.hdfs-sink.service_as_namespace = false
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
