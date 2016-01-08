@@ -207,6 +207,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hive.host | no | localhost |
 | hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred |
 | hive.port | no | 10000 |
+| hive.db_type | no | detault-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
 | krb5_auth | no | false | <i>true</i> or <i>false</i> |
 | krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
 | krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
@@ -227,6 +228,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
     cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
+    cygnusagent.sinks.hdfs-sink.service_as_namespace = false
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
@@ -234,6 +236,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hive.server_version = 2
     cygnusagent.sinks.hdfs-sink.hive.host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive.port = 10000
+    cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
     cygnusagent.sinks.hdfs-sink.krb5_auth = false
 
 [Top](#top)
