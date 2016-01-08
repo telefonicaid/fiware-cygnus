@@ -382,7 +382,7 @@ Its content should not be edited unless some of the default values for log path,
 flume.root.logger=INFO,LOGFILE
 #flume.root.logger=DEBUG,console
 flume.log.dir=/var/log/cygnus/
-flume.log.file=flume.log
+flume.log.file=cygnus.log
 
 # Logging levels for certain components.
 log4j.logger.org.apache.flume.lifecycle = INFO
