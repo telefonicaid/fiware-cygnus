@@ -23,6 +23,7 @@ pages:
       - 'Testing': 'installation_and_administration_guide/testing.md'
       - 'Logs and alarms': 'installation_and_administration_guide/logs_and_alarms.md'
       - 'Management interface': 'installation_and_administration_guide/management_interface.md'
+      - 'Multitenancy': 'installation_and_administration_guide/multitenancy.md'
       - 'Performance tips': 'installation_and_administration_guide/performance_tips.md'
       - 'Sanity checks': 'installation_and_administration_guide/sanity_checks.md'
       - 'Diagnosis procedures': 'installation_and_administration_guide/diagnosis_procedures.md'

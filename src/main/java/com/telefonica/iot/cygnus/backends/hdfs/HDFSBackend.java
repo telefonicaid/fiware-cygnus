@@ -67,13 +67,4 @@ public interface HDFSBackend {
      */
     boolean exists(String filePath) throws Exception;
     
-    /**
-     * Provisions a Hive external table given its fields.
-     * @param fileFormat
-     * @param dirPath
-     * @param fields
-     * @throws Exception
-     */
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields) throws Exception;
-    
 } // HDFSBackend

@@ -13,6 +13,7 @@
 * [Testing](./testing.md)
 * [Logs and alarm](./logs_and_alarms.md)
 * [Management interface](./management_interface.md)
+* [Multitenancy](./multitenancy.md)
 * [Performance tips](./performance_tips.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
