@@ -37,7 +37,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String mongoHosts;
     protected String mongoUsername;
     protected String mongoPassword;
-    protected DataModel dataModel;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected boolean shouldHash;
