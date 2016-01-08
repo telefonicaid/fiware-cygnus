@@ -7,4 +7,5 @@
 - [HARDENING] Add the maximum accepted batch size in DynamoSink (#672)
 - [HARDENING] Add interface and implementation to MongoBackend (#654)
 - [HARDENING] Add grouping_rules.conf & flume-env.sh configuration files in the documentation (#657)
+- [HARDENING] Document the service_as_namespace OrionHDFSSink parameter (#692)
 - [HARDENING] Add a piece of documentation about multitenancy (#607)

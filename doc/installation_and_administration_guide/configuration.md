@@ -125,6 +125,8 @@ cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+# true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
+cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
 # number of notifications to be included within a processing batch
