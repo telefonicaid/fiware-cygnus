@@ -65,6 +65,7 @@ public class OrionHDFSSinkTest {
     private final String hivePort = "10000";
     private final String enableKrb5Auth = "false";
     private final String enableGrouping = "true";
+    private final String defaultCsvSeparator = ",";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -466,6 +467,7 @@ public class OrionHDFSSinkTest {
             context.put("hdfs_username", hdfsUsername);
         } // if else
         
+        context.put("default_csv_separator",defaultCsvSeparator);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);

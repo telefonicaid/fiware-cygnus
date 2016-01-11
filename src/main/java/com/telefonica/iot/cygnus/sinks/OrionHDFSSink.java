@@ -85,6 +85,7 @@ public class OrionHDFSSink extends OrionSink {
     private HiveDBType hiveDBType;
     private HDFSBackend persistenceBackend;
     private HiveBackend hiveBackend;
+    private String separator;
     
     /**
      * Constructor.
@@ -262,6 +263,18 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.error("[" + this.getName() + "] No username provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
         } // if else
+        
+        String defaultCsvSeparator = context.getString("default_csv_separator");
+        String csvSeparator = context.getString("csv_separator");
+        if (csvSeparator != null && csvSeparator.length() > 0) {
+            separator = csvSeparator;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (csvSeparator=" + separator + ")");
+        } else if (defaultCsvSeparator != null && defaultCsvSeparator.length() > 0) {
+            separator = defaultCsvSeparator;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (default_csv_separator=" + separator + ")");
+        } else {
+            LOGGER.error("[" + this.getName() + "] No CSV separator provided. Using default separator ','.");
+        }
         
         oauth2Token = context.getString("oauth2_token");
         
@@ -575,14 +588,14 @@ public class OrionHDFSSink extends OrionSink {
                 
                 // create a line and aggregate it
                 String line = "{"
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","  
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\"," 
                     + "\"" + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + "\":\"" + servicePath + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\","
+                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"," 
                     + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
                     + "\"" + Utils.encodeHive(Constants.ATTR_TYPE) + "\":\"" + attrType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + ","
+                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + "," 
                     + "\"" + Utils.encodeHive(Constants.ATTR_MD) + "\":" + attrMetadata
                     + "}";
                 
@@ -747,16 +760,15 @@ public class OrionHDFSSink extends OrionSink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // aggreagate the data
-                String line = recvTimeTs / 1000 + ","
-                    + recvTime + ","
-                    + servicePath + ","
-                    + entityId + ","
-                    + entityType + ","
-                    + attrName + ","
-                    + attrType + ","
-                    + attrValue.replaceAll("\"", "") + ","
+                String line = recvTimeTs / 1000 + separator
+                    + recvTime + separator
+                    + servicePath + separator
+                    + entityId + separator
+                    + entityType + separator
+                    + attrName + separator
+                    + attrType + separator
+                    + attrValue.replaceAll("\"", "") + separator
                     + printableAttrMdFileName;
-                
                 if (aggregation.isEmpty()) {
                     aggregation = line;
                 } else {
@@ -848,7 +860,7 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = recvTime + "," + servicePath + "," + entityId + "," + entityType;
+            String line = recvTime + separator + servicePath + separator + entityId + separator + entityType;
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -882,7 +894,7 @@ public class OrionHDFSSink extends OrionSink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += "," + attrValue.replaceAll("\"", "") + "," + printableAttrMdFileName;
+                line += separator + attrValue.replaceAll("\"", "") + separator + printableAttrMdFileName;
             } // for
             
             // now, aggregate the line
