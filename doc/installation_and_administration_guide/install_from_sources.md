@@ -6,9 +6,15 @@ Content:
 * [Installing Apache Flume](#installflume)
 * [Installing Cygnus](#installcygnus)
 * [Installing dependencies](#installdeps)
+    * [Cygnus dependencies](#cygnusdeps)
     * [OrionCKANSink dependencies](#ckandeps)
     * [OrionHDFSSink dependencies](#hdfsdeps)
     * [OrionMySQLSink dependencies](#mysqldeps)
+    * [OrionDynamoDBSink dependencies](#dynamodbdeps)
+    * [OrionMongoSink dependencies](#mongodeps)
+    * [OrionSTHSink dependencies](#sthdeps)
+    * [OrionKafkaSink dependencies](#kafkadeps)
+    * [OrionTestSink dependencies](#testdeps)
 
 ##<a name="prerequisites"></a>Prerequisites
 Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install Cygnus.
@@ -106,25 +112,41 @@ If the dependencies are included in the built Cygnus package, then nothing has t
 [Top](#top)
 
 ##<a name="installdeps"></a>Installing dependencies
+###<a name="cygnusdeps"></a>Cygnus dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|       Cygnus dependencies        |
+|:---------------------------------------:|
+|       flume-ng-core-1.4.0.jar      |
+|       flume-ng-node-1.4.0.jar     |
+|              gson-2.2.4.jar              |
+|           json-simple-1.1.jar         |
+|           xml-apis-1.2.01.jar         |
+|              log4j-1.2.17.jar            |
+
+[Top](#top)
+
 ###<a name="ckandeps"></a>OrionCKANSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-* json-simple-1.1.jar
+|      OrionCKANSink         |
+|:-------------------------------:|
+|     httpclient-4.3.1.jar     |
+|      httpcore-4.3.1.jar      |
 
 [Top](#top)
 
 ###<a name="hdfsdeps"></a>OrionHDFSSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-* hadoop-core-0.20.0.jar (or higher)
-* hive-exec-0.12.0.jar
-* hive-jdbc-0.12.0.jar
-* hive-metastore-0.12.0.jar
-* hive-service-0.12.0.jar
-* hive-common-0.12.0.jar
-* hive-shims-0.12.0.jar
-* httpclient-4.3.1.jar
-* httpcore-4.3.1.jar
+|      OrionHDFSSink dependencies      |
+|:-----------------------------------------------:|
+|   hadoop-core-1.2.1.jar (or higher)   |
+|            hive-exec-0.13.0.jar                |
+|             hive-jdbc-0.13.0.jar                |
+|              httpclient-4.3.1.jar                 |
+|               httpcore-4.3.1.jar                  |
+|    jetty-server-7.2.0.v20101020.jar    |
 
 In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
 
@@ -135,7 +157,59 @@ In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/l
 ###<a name="mysqldeps"></a>OrionMysQLSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-* mysql-connector-java-5.1.31-bin.jar
+|                  OrionMySQLSink                     |
+|:---------------------------------------------------:|
+|    mysql-connector-java-5.1.31-bin.jar    |
 
 [Top](#top)
 
+###<a name="dynamodbdeps"></a>OrionDynamoDBSink dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|            OrionDynamoDBSink            |
+|:---------------------------------------------:|
+|               httpclient-4.3.1.jar             |
+|                httpcore-4.3.1.jar              |
+|  aws-java-sdk-dynamodb-1.10.32   |
+
+[Top](#top)
+
+###<a name="mongodeps"></a>OrionMongoSink dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|            OrionMongoSink            |
+|:---------------------------------------:|
+|        mongo-driver-3.0.0.jar      |
+
+[Top](#top)
+
+###<a name="sthdeps"></a>OrionSTHSink dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|              OrionSTHSink              |
+|:---------------------------------------:|
+|        mongo-driver-3.0.0.jar      |
+
+[Top](#top)
+
+###<a name="kafkadeps"></a>OrionKafkaSink dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|              OrionKafkaSink              |
+|:-----------------------------------------:|
+|       kafka-clients-0.8.2.0.jar        |
+|               zkclient-0.5.jar              |
+|          kafka_2.11-0.8.2.1.jar        |
+
+[Top](#top)
+
+###<a name="testdeps"></a>OrionTestSink dependencies
+These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
+
+|              OrionTestSink                |
+|:-----------------------------------------:|
+|          mockito-all-1.9.5.jar          |
+|               junit-4.11.jar                 |
+|          curator-test-2.8.0.jar         |
+
+[Top](#top)
