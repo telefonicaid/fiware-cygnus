@@ -54,6 +54,8 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
+As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](#section6) section.
+
 [Top](#top)
 
 ##<a name="section3"></a>`agent_<id>.conf`
@@ -382,7 +384,7 @@ Its content should not be edited unless some of the default values for log path,
 flume.root.logger=INFO,LOGFILE
 #flume.root.logger=DEBUG,console
 flume.log.dir=/var/log/cygnus/
-flume.log.file=flume.log
+flume.log.file=cygnus.log
 
 # Logging levels for certain components.
 log4j.logger.org.apache.flume.lifecycle = INFO
