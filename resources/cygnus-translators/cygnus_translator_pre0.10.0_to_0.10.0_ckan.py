@@ -80,6 +80,8 @@ def process_pkg(pkg_id):
 # Process a resource, given its id
 def process_res(res_id, res_name, pkg_id):
    print('    |_Processing resource ' + res_id)
+
+   # Get the page 0
    url = 'http%s://%s:%s/api/3/action/datastore_search' % (ssl, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':res_id}
@@ -92,12 +94,33 @@ def process_res(res_id, res_name, pkg_id):
          fields.pop(i)
          break
 
-   records = dictionary['result']['records']
-
-   for i in range(0, len(records)):
-      del records[i]['_id']
-
    if backup == 'true':
+      # Get the page 0 records
+      records = dictionary['result']['records']
+
+      for i in range(0, len(records)):
+         del records[i]['_id']
+
+      # Get next pages records
+      page = 1
+      
+      while True:
+         url = 'http%s://%s:%s/api/3/action/datastore_search' % (ssl, ckan_host, ckan_port)
+         headers = {'Authorization': api_key}
+         payload = {'id':res_id, 'offset':page * 100}
+         req = requests.post(url, headers=headers, json=payload)
+         dictionary = req.json()
+         page_records = dictionary['result']['records']
+
+         for i in range(0, len(page_records)):
+            del page_records[i]['_id']
+
+         if (len(page_records) > 0):
+            records += page_records
+            page += 1
+         else:
+            break
+
       do_backup(fields, records, res_name, pkg_id)
 
    add_new_fields(fields, res_id)
