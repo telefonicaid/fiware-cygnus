@@ -54,6 +54,8 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
+As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](#section6) section.
+
 [Top](#top)
 
 ##<a name="section3"></a>`agent_<id>.conf`
