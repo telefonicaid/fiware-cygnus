@@ -259,11 +259,12 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionCKANSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
+| attr_persistence | no | row | <i>row</i> or <i>column</i>
 | ckan_host | no | localhost | FQDN/IP address where the CKAN server runs |
 | ckan_port | no | 80 |
 | ssl | no | false |
 | api_key | yes | N/A |
-| attr_persistence | no | row | <i>row</i> or <i>column</i>
 | orion_url | no | http://localhost:1026 | To be put as the filestore URL |
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
@@ -276,11 +277,12 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
     cygnusagent.sinks.ckan-sink.enable_grouping = false
+    cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
+    cygnusagent.sinks.ckan-sink.attr_persistence = column
     cygnusagent.sinks.ckan-sink.ckan_host = 192.168.80.34
     cygnusagent.sinks.ckan-sink.ckan_port = 80
     cygnusagent.sinks.ckan-sink.ssl = false
     cygnusagent.sinks.ckan-sink.api_key = myapikey
-    cygnusagent.sinks.ckan-sink.attr_persistence = column
     cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
     cygnusagent.sinks.ckan-sink.batch_size = 100
     cygnusagent.sinks.ckan-sink.batch_timeout = 30

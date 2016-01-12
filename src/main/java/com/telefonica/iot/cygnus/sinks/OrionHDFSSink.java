@@ -375,6 +375,8 @@ public class OrionHDFSSink extends OrionSink {
         backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" + backendImplStr + ")");
         super.configure(context);
+        // Techdebt: allow this sink to work with all the data models
+        dataModel = DataModel.DMBYENTITY;
     } // configure
 
     @Override
@@ -516,7 +518,7 @@ public class OrionHDFSSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
+            destination = cygnusEvent.getEntity();
             firstLevel = buildFirstLevel(service);
             secondLevel = buildSecondLevel(servicePath);
             thirdLevel = buildThirdLevel(destination);

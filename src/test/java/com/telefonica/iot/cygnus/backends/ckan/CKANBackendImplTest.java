@@ -94,18 +94,18 @@ public class CKANBackendImplTest {
      * Test of persist method, of class CKANBackendImpl.
      */
     @Test
-    public void testPersis() {
+    public void testPersist() {
         System.out.println("Testing CKANBackendImpl.persist");
         
         try {
             backend.setCache(mockCache);
             backend.setHttpClient(mockHttpClient);
-            backend.persist(orgName, pkgName, resName, data);
+            backend.persist(orgName, pkgName, resName, data, true);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testPersis
+    } // testPersist
     
 } // CKANBackendImplTest

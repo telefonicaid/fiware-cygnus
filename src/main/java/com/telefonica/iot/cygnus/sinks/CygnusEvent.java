@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 
 /**
  *
@@ -32,7 +33,8 @@ public class CygnusEvent {
     private final long recvTimeTs;
     private final String service;
     private final String servicePath;
-    private final String destination;
+    private final String entity;
+    private final String attribute;
     private final NotifyContextRequest.ContextElement contextElement;
 
     /**
@@ -40,15 +42,17 @@ public class CygnusEvent {
      * @param recvTimeTs
      * @param service
      * @param servicePath
-     * @param destination
+     * @param entity
+     * @param attribute
      * @param contextElement
      */
-    public CygnusEvent(long recvTimeTs, String service, String servicePath, String destination,
-            NotifyContextRequest.ContextElement contextElement) {
+    public CygnusEvent(long recvTimeTs, String service, String servicePath, String entity, String attribute,
+            ContextElement contextElement) {
         this.recvTimeTs = recvTimeTs;
         this.service = service;
         this.servicePath = servicePath;
-        this.destination = destination;
+        this.entity = entity;
+        this.attribute = attribute;
         this.contextElement = contextElement;
     } // CygnusEvent
 
@@ -77,12 +81,20 @@ public class CygnusEvent {
     } // getServicePath
 
     /**
-     * Gets the destination.
-     * @return The destination
+     * Gets the entity.
+     * @return The entity
      */
-    public String getDestination() {
-        return destination;
-    } // getDestination
+    public String getEntity() {
+        return entity;
+    } // getEntity
+    
+    /**
+     * Gets the attribute.
+     * @return The attribute
+     */
+    public String getAttribute() {
+        return attribute;
+    } // getAttribute
 
     /**
      * Gets the context element.

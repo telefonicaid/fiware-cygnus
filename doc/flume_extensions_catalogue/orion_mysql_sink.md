@@ -38,10 +38,10 @@ MySQL organizes the data in databases that contain tables of data rows. Such org
 
 According to the [naming conventions](./naming_conventions.md), a database named as the `fiware-service` header value within the event is created (if not existing yet).
 
-Then, the context responses/entities within the container are iterated, and a table is created (if not yet existing) within the above database whose name depends on the configured table type:
+Then, the context responses/entities within the container are iterated, and a table is created (if not yet existing) within the above database whose name depends on the configured data model:
 
-* `table-by-destination`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
-* `table-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing). 
+* `dm-by-entity`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
+* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing). 
 
 The context attributes within each context response/entity are iterated, and a new data row (or rows) is inserted in the current table. The format for this row depends on the configured persistence mode:
 
@@ -97,7 +97,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
+Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -134,7 +134,7 @@ Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_pe
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
-If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -170,7 +170,7 @@ If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMyS
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
     
-If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -207,7 +207,7 @@ If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQ
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
     
-If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password: 
@@ -257,13 +257,13 @@ NOTES:
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
-| channel | yes | N/A |
+| channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
-| mysql_port | no | 3306 |
-| mysql_username | yes | N/A |
-| mysql_password | yes | N/A |
-| table_type | no | table-by-destination | <i>table-by-destination</i> or <i>table-by-service-path</i> |
+| mysql_port | no | 3306 ||
+| mysql_username | yes | N/A ||
+| mysql_password | yes | N/A ||
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
@@ -276,11 +276,11 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
     cygnusagent.sinks.mysql-sink.enable_grouping = false
+    cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
     cygnusagent.sinks.mysql-sink.mysq_username = myuser
     cygnusagent.sinks.mysql-sink.mysql_password = mypassword
-    cygnusagent.sinks.mysql-sink.table_type = table-by-destination
     cygnusagent.sinks.mysql-sink.attr_persistence = column
     cygnusagent.sinks.mysql-sink.batch_size = 100
     cygnusagent.sinks.mysql-sink.batch_timeout = 30

@@ -69,7 +69,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         String collectionName = null;
 
         // create the collection at this stage, if the data model is collection-per-service-path
-        if (dataModel == DataModel.COLLECTIONPERSERVICEPATH) {
+        if (dataModel == DataModel.DMBYSERVICEPATH) {
             for (String fiwareServicePath : servicePaths) {
                 collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
                         fiwareService) + ".aggr";
@@ -90,7 +90,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                     + entityType + ")");
             
             // create the collection at this stage, if the data model is collection-per-entity
-            if (dataModel == DataModel.COLLECTIONPERENTITY) {
+            if (dataModel == DataModel.DMBYENTITY) {
                 collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], null, true,
                         entityId, entityType, fiwareService) + ".aggr";
                 backend.createCollection(dbName, collectionName);
@@ -119,7 +119,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                 } // if
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.COLLECTIONPERATTRIBUTE) {
+                if (dataModel == DataModel.DMBYATTRIBUTE) {
                     collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], attrName,
                             true, entityId, entityType, fiwareService) + ".aggr";
                     backend.createCollection(dbName, collectionName);

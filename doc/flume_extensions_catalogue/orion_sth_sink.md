@@ -75,7 +75,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser` and  `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -209,6 +209,7 @@ NOTES:
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done |
@@ -224,6 +225,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
     cygnusagent.sinks.sth-sink.channel = sth-channel
     cygnusagent.sinks.sth-sink.enable_grouping = false
+    cygnusagent.sinks.sth-sink.data_model = dm-by-entity
     cygnusagent.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.sth-sink.mongo_username = myuser
     cygnusagent.sinks.sth-sink.mongo_password = mypassword

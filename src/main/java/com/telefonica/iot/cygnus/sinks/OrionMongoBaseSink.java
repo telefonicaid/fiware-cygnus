@@ -33,16 +33,10 @@ import org.apache.flume.Context;
  */
 public abstract class OrionMongoBaseSink extends OrionSink {
     
-    /**
-     * Available data models when persisting data at Mongo.
-     */
-    public enum DataModel { COLLECTIONPERSERVICEPATH, COLLECTIONPERENTITY, COLLECTIONPERATTRIBUTE }
-    
     protected static final CygnusLogger LOGGER = new CygnusLogger(OrionMongoBaseSink.class);
     protected String mongoHosts;
     protected String mongoUsername;
     protected String mongoPassword;
-    protected DataModel dataModel;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected boolean shouldHash;
@@ -72,14 +66,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getPassword() {
         return mongoPassword;
     } // getPassword
-    
-    /**
-     * Gets the mongo data model. It is protected since it is used by the tests.
-     * @return
-     */
-    protected DataModel getDataModel() {
-        return dataModel;
-    } // getDataModel
     
     /**
      * Gets the database prefix. It is protected since it is used by the tests.
@@ -130,18 +116,16 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dataModel = getDataModel(context.getString("data_model", "collection-per-entity"));
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model=" + dataModel + ")");
         dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
         collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         shouldHash = context.getBoolean("should_hash", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
-        super.configure(context);
         this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (this.rowAttrPersistence ? "row" : "column") + ")");
+        super.configure(context);
     } // configure
     
     @Override
@@ -159,30 +143,22 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @return
      */
     protected DataModel getDataModel(String dataModelStr) {
-        if (dataModelStr.equals("collection-per-service-path")) {
-            return DataModel.COLLECTIONPERSERVICEPATH;
-        } else if (dataModelStr.equals("collection-per-entity")) {
-            return DataModel.COLLECTIONPERENTITY;
-        } else if (dataModelStr.equals("collection-per-attribute")) {
-            return DataModel.COLLECTIONPERATTRIBUTE;
-        } else {
-            return null;
-        } // if else if
+        return DataModel.valueOf(dataModelStr.replaceAll("-", "").toUpperCase());
     } // getDataModel
     
     /**
-     * Gets a trng reprensentation of a given data model.
+     * Gets a string reprensentation of a given data model.
      * @param dataModel
      * @return The string representation of the given data model
      */
     public static String getStrDataModel(DataModel dataModel) {
         switch(dataModel) {
-            case COLLECTIONPERSERVICEPATH:
-                return "collection-per-service-path";
-            case COLLECTIONPERENTITY:
-                return "collection-per-entity";
-            case COLLECTIONPERATTRIBUTE:
-                return "collection-per-attribute";
+            case DMBYSERVICEPATH:
+                return "dm-by-service-path";
+            case DMBYENTITY:
+                return "dm-by-entity";
+            case DMBYATTRIBUTE:
+                return "dm-by-attribute";
             default:
                 return null;
         } // switch
@@ -210,8 +186,8 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * conventions are violated.
      * @param dbName
      * @param fiwareServicePath
-     * @param destination
-     * @param attrName
+     * @param entity
+     * @param attribute
      * @param isAggregated
      * @param entityId
      * @param entityType
@@ -219,20 +195,20 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String dbName, String fiwareServicePath, String destination, String attrName,
+    protected String buildCollectionName(String dbName, String fiwareServicePath, String entity, String attribute,
             boolean isAggregated, String entityId, String entityType, String fiwareService)
         throws Exception {
         String collectionName;
         
         switch (dataModel) {
-            case COLLECTIONPERSERVICEPATH:
+            case DMBYSERVICEPATH:
                 collectionName = fiwareServicePath;
                 break;
-            case COLLECTIONPERENTITY:
-                collectionName = fiwareServicePath + "_" + destination;
+            case DMBYENTITY:
+                collectionName = fiwareServicePath + "_" + entity;
                 break;
-            case COLLECTIONPERATTRIBUTE:
-                collectionName = fiwareServicePath + "_" + destination + "_" + attrName;
+            case DMBYATTRIBUTE:
+                collectionName = fiwareServicePath + "_" + entity + "_" + attribute;
                 break;
             default:
                 // this should never be reached
@@ -253,7 +229,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             String hash = generateHash(collectionName, limit);
             collectionName = collectionPrefix + hash;
             backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
-                    entityType, attrName, destination);
+                    entityType, attribute, entity);
         } else {
             collectionName = collectionPrefix + collectionName;
             

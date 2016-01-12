@@ -26,11 +26,6 @@ package com.telefonica.iot.cygnus.backends.mysql;
 public interface MySQLBackend {
     
     /**
-     * Available table types.
-     */
-    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
-    
-    /**
      * Creates a database, given its name, if not exists.
      * @param dbName
      * @throws Exception

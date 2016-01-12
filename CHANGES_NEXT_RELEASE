@@ -7,6 +7,7 @@
 - [BUG] Fix the grouped destination when using batches (#675)
 - [HARDENING] Add the maximum accepted batch size in OrionDynamoDBSink (#672)
 - [HARDENING] Add interface and implementation to MongoBackend (#654)
+- [FEATURE] Add a general data_model parameter (#659)
 - [HARDENING] Add grouping_rules.conf & flume-env.sh configuration files in the documentation (#657)
 - [BUG] Use pagination when retrieving all the records to backup in cygnus_translator_pre0.10.0_to_0.10.0_ckan.py (#665)
 - [FEATURE] Enable per-user or default Hive database creation in OrionHDFSSink(#516)

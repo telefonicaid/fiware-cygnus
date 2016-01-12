@@ -55,7 +55,7 @@ public class OrionMongoSinkTest {
     private final String mongoURI = "localhost:27017";
     private final String mongoUsername = "admin";
     private final String mongoPassword = "1a2b3c4d";
-    private final String dataModel = "collection-per-entity";
+    private final String dataModel = "dm-by-entity";
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
     private final String enableGrouping = "true";

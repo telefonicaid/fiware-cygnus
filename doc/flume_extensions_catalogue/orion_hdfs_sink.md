@@ -187,6 +187,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
 | cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
@@ -223,6 +225,8 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
+    cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
+    cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.backend_impl = rest
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000

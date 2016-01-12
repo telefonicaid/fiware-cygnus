@@ -444,7 +444,7 @@ public class OrionHDFSSinkTest {
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);
