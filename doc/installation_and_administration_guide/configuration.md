@@ -4,14 +4,16 @@ Content:
 * [Introduction](#section1)
 * [`cygnus_instance_<id>.conf`](#section2)
 * [`agent_<id>.conf`](#section3)
-* [`log4j.properties`](#section4)
-* [Configuration examples](#section5)
-    * [Single source, single storage (basic configuration)](#section5.1)
-    * [Single source, multiple storages](#section5.2)
-    * [Single source, single storage, parallel sinking](#section5.3)
-    * [Single source, multiple storages, parallel sinking](#section5.4)
-    * [Multiple sources](#section5.5)
-    * [Using interceptors](#section5.6)
+* [`flume-env.sh`](#section4)
+* [`grouping_rules.conf`](#section5)
+* [`log4j.properties`](#section6)
+* [Configuration examples](#section7)
+    * [Single source, single storage (basic configuration)](#section7.1)
+    * [Single source, multiple storages](#section7.2)
+    * [Single source, single storage, parallel sinking](#section7.3)
+    * [Single source, multiple storages, parallel sinking](#section7.4)
+    * [Multiple sources](#section7.5)
+    * [Using interceptors](#section7.6)
 
 ##<a name="section1"></a>Introduction
 Cygnus is configured through two different files:
@@ -51,6 +53,8 @@ ADMIN_PORT=8081
 # Polling interval (seconds) for the configuration reloading
 POLLING_INTERVAL=30
 ```
+
+As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](#section6) section.
 
 [Top](#top)
 
@@ -123,8 +127,12 @@ cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+# true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
+cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
+# character used for separating the values when using CSV file formats
+cygnusagent.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
@@ -137,6 +145,8 @@ cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
 cygnusagent.sinks.hdfs-sink.hive.port = 10000
+# Hive database type, available types are default-db and namespace-db
+cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
@@ -310,7 +320,60 @@ cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 
 [Top](#top)
 
-##<a name="section4"></a>`log4j.properties`
+##<a name="section4"></a>`flume-env.sh`
+The file `flume-env.sh` can be instantiated from a template given in the Cygnus repository, `conf/flume-env.sh.template`. 
+
+```
+#=============================================
+# To be put in APACHE_FLUME_HOME/conf/flume-env.sh
+#=============================================
+
+#JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+# Give Flume more memory and pre-allocate, enable remote monitoring via JMX
+#JAVA_OPTS="-Xms100m -Xmx200m -Dcom.sun.management.jmxremote"
+
+# Note that the Flume conf directory is always included in the classpath.
+#FLUME_CLASSPATH="/path/to/the/flume/classpath"
+```
+
+`flume-env.sh` file has been inherited from Apache Flume, and it is used in order to configure certain Flume parameters such as an alternative classpath, some Java options etc.
+
+[Top](#top)
+
+##<a name="section5"></a>`grouping_rules.conf`
+The file `grouping_rules.conf` can be instantiated from a template given in the Cygnus repository, `conf/grouping_rules.conf.template`. 
+
+The rules are writting in Json format. The following Json code is just an example:
+
+```
+{
+    "grouping_rules": [
+        {
+            "id": 1,
+            "fields": [
+                ...
+            ],
+            "regex": "...",
+            "destination": "...",
+            "fiware_service_path": "..."
+        },
+        ...
+    ]
+}
+```
+
+Being:
+
+* <b>id</b>: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful in the future.
+* <b>fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important since the concatenation is made from left to right.
+* <b>regex</b>: Java-like regular expression to be applied on the concatenated fields. Special characters like '\' must be escaped ('\' is escaped as "\\\\").
+* <b>destination</b>: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of MySQL, Mongo and STH this sufixes the table/collection name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
+* <b>fiware\_service\_path</b>: New `fiware-servicePath` replacing the notified one. The sinks will translate this into the name of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, Mongo and STH this prefixes the table/collection name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
+
+[Top](#top)
+
+##<a name="section6"></a>`log4j.properties`
 The file `log4j.properties` can be instantiated from a template given in the Cygnus repository, `conf/log4j.properties.template`.
 
 Its content should not be edited unless some of the default values for log path, file name, logging level or appender are wanted to be changed.
@@ -323,7 +386,7 @@ Its content should not be edited unless some of the default values for log path,
 flume.root.logger=INFO,LOGFILE
 #flume.root.logger=DEBUG,console
 flume.log.dir=/var/log/cygnus/
-flume.log.file=flume.log
+flume.log.file=cygnus.log
 
 # Logging levels for certain components.
 log4j.logger.org.apache.flume.lifecycle = INFO
@@ -366,33 +429,33 @@ log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.
 
 [Top](#top)
 
-##<a name="section5"></a>Configuration examples
-###<a name="section5.1"></a>Single source, single storage (basic configuration)
+##<a name="section7"></a>Configuration examples
+###<a name="section7.1"></a>Single source, single storage (basic configuration)
 To be done
 
 [Top](#top)
 
-###<a name="section5.2"></a>Single source, multiple storages
+###<a name="section7.2"></a>Single source, multiple storages
 To be done
 
 [Top](#top)
 
-###<a name="section5.3"></a>Single source, single storage, parallel sinking
+###<a name="section7.3"></a>Single source, single storage, parallel sinking
 To be done
 
 [Top](#top)
 
-###<a name="section5.4"></a>Single source, multiple storages, parallel sinking
+###<a name="section7.4"></a>Single source, multiple storages, parallel sinking
 To be done
 
 [Top](#top)
 
-###<a name="section5.5"></a>Multiple sources 
+###<a name="section7.5"></a>Multiple sources 
 To be done
 
 [Top](#top)
 
-###<a name="section5.6"></a>Using interceptors
+###<a name="section7.6"></a>Using interceptors
 Interceptors are components of the Flume agent architecture. Typically, such an agent is based on a source dealing with the input, a sink dealing with the output and a channel communicating them. The source processes the input, producing Flume events (an object based on a set of headers and a byte-based body) that are put in the channel; then the sink consumes the events by getting them from the channel. This basic architecture may be enriched by the addition of Interceptors, a chained sequence of Flume events preprocessors that <i>intercept</i> the events before they are put into the channel and performing one of these operations:
 
 * Drop the event.

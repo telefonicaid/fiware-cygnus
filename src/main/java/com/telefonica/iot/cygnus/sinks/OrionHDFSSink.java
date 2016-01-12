@@ -26,6 +26,8 @@ import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSO
 import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONROW;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
+import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
+import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -56,6 +58,11 @@ public class OrionHDFSSink extends OrionSink {
      * Available backend implementation.
      */
     public enum BackendImpl { BINARY, REST }
+    
+    /**
+     * Available Hive database types.
+     */
+    public enum HiveDBType { DEFAULTDB, NAMESPACEDB }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionHDFSSink.class);
     private String[] host;
@@ -75,7 +82,10 @@ public class OrionHDFSSink extends OrionSink {
     private String krb5ConfFile;
     private boolean serviceAsNamespace;
     private BackendImpl backendImpl;
+    private HiveDBType hiveDBType;
     private HDFSBackend persistenceBackend;
+    private HiveBackend hiveBackend;
+    private String csvSeparator;
     
     /**
      * Constructor.
@@ -254,6 +264,9 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
+        csvSeparator = context.getString("csv_separator", ",");        
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (csvSeparator=" + csvSeparator + ")");
+        
         oauth2Token = context.getString("oauth2_token");
         
         if (oauth2Token != null && oauth2Token.length() > 0) {
@@ -337,6 +350,10 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
         } // if else
         
+        String hiveDBTypeStr = context.getString("hive.db_type", "default-db");
+        hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" + hiveDBTypeStr);
+        
         // Kerberos configuration
         enableKrb5 = context.getBoolean("krb5_auth", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (enableKrb5 ? "true" : "false")
@@ -365,6 +382,9 @@ public class OrionHDFSSink extends OrionSink {
     @Override
     public void start() {
         try {
+            // create Hive backend
+            hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+            
             // create the persistence backend
             if (backendImpl == BackendImpl.BINARY) {
                 persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
@@ -432,7 +452,17 @@ public class OrionHDFSSink extends OrionSink {
             
             // create the Hive table
             if (enableHive) {
-                createHiveTable(aggregator);
+                if (hiveDBType == HiveDBType.NAMESPACEDB) {
+                    if (serviceAsNamespace) {
+                        hiveBackend.doCreateDatabase(aggregator.service);
+                        provisionHiveTable(aggregator, aggregator.service);
+                    } else {
+                        hiveBackend.doCreateDatabase(username);
+                        provisionHiveTable(aggregator, username);
+                    } // if else
+                } else {
+                    provisionHiveTable(aggregator, "default");
+                } // if else
             } // if
         } // for
     } // persistBatch
@@ -551,14 +581,14 @@ public class OrionHDFSSink extends OrionSink {
                 
                 // create a line and aggregate it
                 String line = "{"
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","  
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\"," 
                     + "\"" + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + "\":\"" + servicePath + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\","
+                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"," 
                     + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
                     + "\"" + Utils.encodeHive(Constants.ATTR_TYPE) + "\":\"" + attrType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + ","
+                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + "," 
                     + "\"" + Utils.encodeHive(Constants.ATTR_MD) + "\":" + attrMetadata
                     + "}";
                 
@@ -723,16 +753,15 @@ public class OrionHDFSSink extends OrionSink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // aggreagate the data
-                String line = recvTimeTs / 1000 + ","
-                    + recvTime + ","
-                    + servicePath + ","
-                    + entityId + ","
-                    + entityType + ","
-                    + attrName + ","
-                    + attrType + ","
-                    + attrValue.replaceAll("\"", "") + ","
+                String line = recvTimeTs / 1000 + csvSeparator
+                    + recvTime + csvSeparator
+                    + servicePath + csvSeparator
+                    + entityId + csvSeparator
+                    + entityType + csvSeparator
+                    + attrName + csvSeparator
+                    + attrType + csvSeparator
+                    + attrValue.replaceAll("\"", "") + csvSeparator
                     + printableAttrMdFileName;
-                
                 if (aggregation.isEmpty()) {
                     aggregation = line;
                 } else {
@@ -824,7 +853,7 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = recvTime + "," + servicePath + "," + entityId + "," + entityType;
+            String line = recvTime + csvSeparator + servicePath + csvSeparator + entityId + csvSeparator + entityType;
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -858,7 +887,7 @@ public class OrionHDFSSink extends OrionSink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
                 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += "," + attrValue.replaceAll("\"", "") + "," + printableAttrMdFileName;
+                line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
             } // for
             
             // now, aggregate the line
@@ -946,9 +975,58 @@ public class OrionHDFSSink extends OrionSink {
         } // for
     } // persistMDAggregations
     
-    private void createHiveTable(HDFSAggregator aggregator) throws Exception {
-        persistenceBackend.provisionHiveTable(fileFormat, aggregator.getFolder(), aggregator.getHiveFields());
-    } // createHiveTable
+    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
+        String dirPath = aggregator.getFolder();
+        String fields = aggregator.getHiveFields();
+        String tag;
+        
+        switch (fileFormat) {
+            case JSONROW:
+            case CSVROW:
+                tag = "_row";
+                break;
+            case JSONCOLUMN:
+            case CSVCOLUMN:
+                tag = "_column";
+                break;
+            default:
+                tag = "";
+        } // switch
+        
+        // get the table name to be created
+        // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
+        String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
+        LOGGER.info("Creating Hive external table '" + tableName + "' in database '"  + dbName + "'");
+        
+        // get a Hive client
+        HiveBackendImpl hiveClient = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+        
+        // create the query
+        String query;
+        
+        switch (fileFormat) {
+            case JSONCOLUMN:
+            case JSONROW:
+                query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
+                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
+                break;
+            case CSVCOLUMN:
+            case CSVROW:
+                query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
+                        + ") row format " + "delimited fields terminated by ',' location '/user/"
+                        + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
+                break;
+            default:
+                query = "";
+        } // switch
+
+        // execute the query
+        if (!hiveClient.doCreateTable(query)) {
+            LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
+                    + "Check your Hive/Shark installation");
+        } // if
+    } // provisionHive
     
     /**
      * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
