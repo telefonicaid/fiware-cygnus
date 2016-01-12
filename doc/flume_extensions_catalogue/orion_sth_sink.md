@@ -75,7 +75,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser` and  `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
