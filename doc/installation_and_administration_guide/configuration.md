@@ -131,6 +131,8 @@ cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
+# character used for separating the values when using CSV file formats
+cygnusagent.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
@@ -143,7 +145,7 @@ cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
 cygnusagent.sinks.hdfs-sink.hive.port = 10000
-# Hive database type, available types are default-db and namespace-db
+# Hive database type, available types are default-db and namespace-db
 cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
