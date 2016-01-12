@@ -467,7 +467,7 @@ public class OrionHDFSSinkTest {
             context.put("hdfs_username", hdfsUsername);
         } // if else
         
-        context.put("csv_separator",csvSeparator);
+        context.put("csv_separator", csvSeparator);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
