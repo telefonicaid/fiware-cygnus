@@ -81,8 +81,6 @@ public class OrionDynamoDBSink extends OrionSink {
         attrPersistenceRow = attrPersistRowStr.equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + attrPersistRowStr + ")");
         super.configure(context);
-        // Techdebt: allow this sink to work with all the data models
-        dataModel = DataModel.DMBYENTITY;
     } // configure
     
     @Override
