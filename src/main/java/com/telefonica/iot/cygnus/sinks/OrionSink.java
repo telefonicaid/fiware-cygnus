@@ -91,7 +91,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public OrionSink() {
         super();
         accumulator = new Accumulator();
-        accumulator.initializeBatching(new Date().getTime());
+        accumulator.initialize(new Date().getTime());
     } // OrionSink
     
     /**
@@ -312,7 +312,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 } // if
                 
                 LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
-                accumulator.initializeBatching(new Date().getTime());
+                accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
                 return Status.READY;
@@ -324,7 +324,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     LOGGER.error(e.getMessage());
                     doBatchRollback();
                     LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
-                    accumulator.initializeBatching(new Date().getTime());
+                    accumulator.initialize(new Date().getTime());
                     txn.commit();
                     txn.close();
                     return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
@@ -340,7 +340,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if else if
                     
                     LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
-                    accumulator.initializeBatching(new Date().getTime());
+                    accumulator.initialize(new Date().getTime());
                     txn.commit();
                     txn.close();
                     return Status.READY;
@@ -646,14 +646,14 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
          * Initialize the batch.
          * @param startDateMs
          */
-        public void initializeBatching(long startDateMs) {
+        public void initialize(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
             // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
             batch = new Batch();
             accStartDate = startDateMs;
             accIndex = 0;
             accTransactionIds = "";
-        } // initializeBatching
+        } // initialize
         
     } // Accumulator
     

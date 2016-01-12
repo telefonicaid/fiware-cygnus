@@ -141,7 +141,7 @@ public class OrionMySQLSink extends OrionSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         Accumulator accumulator = new Accumulator();
-        accumulator.initializeBatching(new Date().getTime());
+        accumulator.initialize(new Date().getTime());
         accumulator.accumulate(eventHeaders, notification);
         persistBatch(accumulator.getBatch());
     } // persistOne
