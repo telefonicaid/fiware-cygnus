@@ -264,17 +264,13 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
-        String defaultCsvSeparator = context.getString("default_csv_separator");
-        String csvSeparator = context.getString("csv_separator");
+        String csvSeparator = context.getString("csv_separator", ",");        
         if (csvSeparator != null && csvSeparator.length() > 0) {
             separator = csvSeparator;
             LOGGER.debug("[" + this.getName() + "] Reading configuration (csvSeparator=" + separator + ")");
-        } else if (defaultCsvSeparator != null && defaultCsvSeparator.length() > 0) {
-            separator = defaultCsvSeparator;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (default_csv_separator=" + separator + ")");
-        } else {
+        } else  {
             LOGGER.error("[" + this.getName() + "] No CSV separator provided. Using default separator ','.");
-        }
+        } 
         
         oauth2Token = context.getString("oauth2_token");
         

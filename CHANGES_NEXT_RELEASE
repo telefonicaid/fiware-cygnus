@@ -12,4 +12,4 @@
 - [HARDENING] Document the service_as_namespace OrionHDFSSink parameter (#692)
 - [HARDENING] Add a piece of documentation about multitenancy (#607)
 - [HARDENING] Add a piece of documentation about required dependencies to be manually installed when building and installing without dependencies (#635)
-- [HARDENING] Add a configurable value for csv_separator in OrionHDFSSink (#495)
+- [HARDENING] Add a configurable value for CSV separator in OrionHDFSSink (#495)
