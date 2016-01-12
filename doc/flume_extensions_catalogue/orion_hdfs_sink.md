@@ -210,7 +210,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hive.host | no | localhost |
 | hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred |
 | hive.port | no | 10000 |
-| hive.db_type | no | detault-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
+| hive.db_type | no | default-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
 | krb5_auth | no | false | <i>true</i> or <i>false</i> |
 | krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
 | krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
