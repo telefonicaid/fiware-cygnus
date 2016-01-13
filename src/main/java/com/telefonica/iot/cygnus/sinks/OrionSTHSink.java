@@ -23,6 +23,9 @@ import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Map;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -40,7 +43,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values; they are not null nor empty thanks to OrionRESTHandler
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
+        Long notifiedRecvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
         String[] servicePaths;
         String[] destinations;
@@ -58,7 +61,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         } // for
 
         // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+        String notifiedRecvTime = Utils.getHumanReadable(notifiedRecvTimeTs, true);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
@@ -113,10 +116,25 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                 LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
+                // check if the attribute is not numerical
                 if (!Utils.isANumber(attrValue)) {
                     LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
                     continue;
                 } // if
+
+                // check if the metadata contains a TimeInstant value; use the notified reception time instead
+                Long recvTimeTs;
+                String recvTime;
+                
+                Long timeInstant = getTimeInstant(attrMetadata);
+                
+                if (timeInstant != null) {
+                    recvTimeTs = timeInstant;
+                    recvTime = Utils.getHumanReadable(timeInstant, true);
+                } else {
+                    recvTimeTs = notifiedRecvTimeTs;
+                    recvTime = notifiedRecvTime;
+                } // if else
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
                 if (dataModel == DataModel.DMBYATTRIBUTE) {
@@ -125,6 +143,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                     backend.createCollection(dbName, collectionName);
                 } // if
 
+                // insert the data
                 LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
                         + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
                         + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
@@ -134,6 +153,25 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             } // for
         } // for
     } // persistOne
+    
+    private Long getTimeInstant(String metadata) throws Exception {
+        Long res = null;
+        JSONParser parser = new JSONParser();
+        JSONArray mds = (JSONArray) parser.parse(metadata);
+        
+        for (Object mdObject : mds) {
+            JSONObject md = (JSONObject) mdObject;
+            String mdName = (String) md.get("name");
+            
+            if (mdName.equals("TimeInstant")) {
+                String mdValue = (String) md.get("value");
+                res = new Long(mdValue);
+                break;
+            } // if
+        } // for
+        
+        return res;
+    } // getTimeInstant
     
     @Override
     void persistBatch(Batch batch) throws Exception {
