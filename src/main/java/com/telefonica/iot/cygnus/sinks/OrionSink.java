@@ -36,6 +36,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -46,6 +48,7 @@ import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
+import org.apache.flume.event.JSONEvent;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.MDC;
 import org.xml.sax.InputSource;
@@ -322,7 +325,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 // rollback only if the exception is about a persistence error
                 if (e instanceof CygnusPersistenceError) {
                     LOGGER.error(e.getMessage());
-                    doBatchRollback();
+                    doBatchRollback(ch);
                     LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                     accumulator.initialize(new Date().getTime());
                     txn.commit();
@@ -429,6 +432,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         public String getAccTransactionIds() {
             return accTransactionIds;
         } // getAccTransactionIds
+        
+        public ArrayList<Event> getFlumeEvents() {
+            return flumeEvents;
+        } // getFlumeEvents
         
         /**
          * Accumulates an event given its headers and context data.
@@ -657,8 +664,23 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
     } // Accumulator
     
-    private void doBatchRollback() {
-        // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/563
+    private void doBatchRollback(Channel channel) {
+        ArrayList<Event> flumeEvents = accumulator.getFlumeEvents();
+        Batch batch = accumulator.getBatch();
+        Set<String> destinations = batch.getDestinations();
+        
+        for (String destination : destinations) {
+            if (!batch.isPersisted(destination)) {
+                ArrayList<CygnusEvent> cygnusEvents = batch.getEvents(destination);
+                
+                for (CygnusEvent cygnusEvent : cygnusEvents) {
+                    Event flumeEvent = new JSONEvent();
+                    flumeEvent.setBody(cygnusEvent.getContextElement().toString().getBytes());
+                    flumeEvent.setHeaders(cygnusEvent.getHeaders());
+                    channel.put(flumeEvent);
+                } // for
+            } // if
+        } // for
     } // doBatchRollback
 
     // TDB: to be removed once all the sinks migrate to persistBatch method

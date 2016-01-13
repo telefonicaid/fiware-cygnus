@@ -18,3 +18,4 @@
 - [HARDENING] Add a configurable value for CSV separator in OrionHDFSSink (#495)
 - [HARDENING] Rename initializeBatching with initialize in all the sinks (#704)
 - [FEATURE] Use TimeInstant (when available) instead of the reception time in OrionSTHSink (#651)
+- [HARDENING] Do rollbacking of batches (#563)
