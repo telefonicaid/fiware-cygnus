@@ -54,22 +54,12 @@ function download_flume(){
         _logOk ".............. Done! .............."
     fi
 
-    _log "### Download libthrift patch... ###"
-    ARTIFACT_LIBTHRIFT_URL="http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/"
-    LIBTHRIFT_JAR=libthrift-0.9.1.jar 
-    curl -s -o ${LIBTHRIFT_JAR} ${ARTIFACT_LIBTHRIFT_URL}/${LIBTHRIFT_JAR}
-    if [[ $? -ne 0 ]]; then
-        _logError "cannot download libthrift jar (${LIBTHRIFT_JAR}) from ${ARTIFACT_LIBTHRIFT_URL}"
-        return 1
-    else
-        _logOk ".............. Done! .............."
-    fi
-    rm -f ${FLUME_WO_TAR}/lib/libthrift-*.jar
-    mv ${LIBTHRIFT_JAR} ${FLUME_WO_TAR}/lib
-
     _log "### Disable httpclient and httpcore libraries distributed within apache-flume bundle... ###"
     mv ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar ${FLUME_WO_TAR}/lib/httpclient-4.2.1.jar.old
     mv ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar ${FLUME_WO_TAR}/lib/httpcore-4.2.1.jar.old
+
+    _log "### Disable the bundled version of libthrift within Apache Flume... ###"
+    mv ${FLUME_WO_TAR}/lib/libthrift-0.9.1.jar ${FLUME_WO_TAR}/lib/libthrift-0.9.1.old
 
     _log "#### Cleaning the temporal folders... ####"
     rm -rf ${RPM_SOURCE_DIR}/${FLUME_WO_TAR}

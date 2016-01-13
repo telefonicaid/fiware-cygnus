@@ -62,8 +62,6 @@ Apache Flume can be easily installed by downloading its latests version from [fl
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
     $ mv APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar.old
     $ mv APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar.old
-    $ wget http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar -P APACHE_FLUME_HOME/lib
-    $ mv APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar.old
     $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
@@ -72,7 +70,6 @@ Some remarks:
 
 * The creation of the `plugins.d` directory is related to the installation of third-party software, like Cygnus.
 * Please observe the version of `httpcomponents-core` and `httpcomponents-client` in the `pom.xml` (`httpclient-4.3.1.jar and httpcore-4.3.1.jar`) don't match match the version of such packages within the Flume bundle (`httpclient-4.2.1.jar and httpcore-4.2.1.jar`). In order the most recent version of the libraries, the ones within the Flume bundle must be removed (or renamed).
-* libthrift-0.9.1.jar must overwrite the 0.7.0 budled with Flume (it can be got from the [this](http://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar) URL).
 
 [Top](#top)
 
@@ -147,10 +144,8 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 |          httpclient          |       4.3.1        |
 |          httpcore            |       4.3.1        |
 |         jetty-server         |   7.2.0.v20101020  |
+|          libthrift           |       0.9.1        |
 
-In addition, as already said, remember to overwrite the `APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar` package with this one:
-
-* libthrift-0.9.1.jar
 
 [Top](#top)
 

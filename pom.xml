@@ -122,6 +122,11 @@
       <artifactId>aws-java-sdk-dynamodb</artifactId>
       <version>1.10.32</version>
     </dependency>
+    <dependency>
+	<groupId>org.apache.thrift</groupId>
+	<artifactId>libthrift</artifactId>
+	<version>0.9.1</version>
+    </dependency>
   </dependencies>
 
   <build>
