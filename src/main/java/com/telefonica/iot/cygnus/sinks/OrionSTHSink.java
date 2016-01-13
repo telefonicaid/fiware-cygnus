@@ -43,7 +43,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         // get some header values; they are not null nor empty thanks to OrionRESTHandler
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
+        Long notifiedRecvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
         String fiwareService = eventHeaders.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
         String[] servicePaths;
         String[] destinations;
@@ -61,7 +61,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         } // for
 
         // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+        String notifiedRecvTime = Utils.getHumanReadable(notifiedRecvTimeTs, true);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
@@ -121,14 +121,20 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                     LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
                     continue;
                 } // if
+
+                // check if the metadata contains a TimeInstant value; use the notified reception time instead
+                Long recvTimeTs;
+                String recvTime;
                 
-                // check if the metadata contains a TimeInstant value
                 Long timeInstant = getTimeInstant(attrMetadata);
                 
                 if (timeInstant != null) {
                     recvTimeTs = timeInstant;
                     recvTime = Utils.getHumanReadable(timeInstant, true);
-                } // if
+                } else {
+                    recvTimeTs = notifiedRecvTimeTs;
+                    recvTime = notifiedRecvTime;
+                } // if else
                 
                 // create the collection at this stage, if the data model is collection-per-attribute
                 if (dataModel == DataModel.DMBYATTRIBUTE) {
