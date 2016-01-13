@@ -62,6 +62,7 @@ Apache Flume can be easily installed by downloading its latests version from [fl
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
     $ mv APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar.old
     $ mv APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar APACHE_FLUME_HOME/lib/httpcore-4.2.1.jar.old
+    $ mv APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar APACHE_FLUME_HOME/lib/libthrift-0.7.0.jar.old
     $ mkdir -p APACHE_FLUME_HOME/plugins.d/cygnus/
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/lib
     $ mkdir APACHE_FLUME_HOME/plugins.d/cygnus/libext
