@@ -19,3 +19,4 @@
 - [HARDENING] Rename initializeBatching with initialize in all the sinks (#704)
 - [FEATURE] Use TimeInstant (when available) instead of the reception time in OrionSTHSink (#651)
 - [HARDENING] Include service and servicePath in logs (#707)
+- [HARDENING] Fix libthrift installation (#706)
