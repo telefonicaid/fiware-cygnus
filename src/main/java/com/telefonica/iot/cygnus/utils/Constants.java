@@ -80,5 +80,9 @@ public final class Constants {
     
     // OrionDynamoDB specific headers
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
-
+    
+    // L4J specific constants
+    public static final String LOG4J_SVC = "service";
+    public static final String LOG4J_SUBSVC = "subservice";
+    
 } // Constants
