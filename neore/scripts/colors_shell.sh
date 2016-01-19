@@ -33,7 +33,7 @@ _message(){
    isOk=$(echo "$1"|grep -i "\\[OK\\]")
    isUser=$(echo "$1"|grep -i "\\[USER\\]")
    isDash=`echo -en|grep "\-en"`
-   outLog="/dev/tty"
+   outLog="/dev/stdout"
    if ! [ -z "$isError" ]; then 
       messageColor=${_error_color} && outLog="/dev/tty"
    else
