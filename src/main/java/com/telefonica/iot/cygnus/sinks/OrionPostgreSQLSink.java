@@ -123,8 +123,6 @@ public class OrionPostgreSQLSink extends OrionSink {
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
         postgresqlPassword = context.getString("postgresql_password", "unknown");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
-        String tableTypeStr = context.getString("table_type", "table-per-destination");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
