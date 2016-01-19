@@ -33,11 +33,14 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to Kafka data structures
 [Apache Kafka organizes](http://kafka.apache.org/documentation.html#introduction) the data in topics (a category or feed name to which messages are published). Such organization is exploited by `OrionKafkaSink` each time a Flume event is going to be persisted.
 
-A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured topic type:
-    * `topic-per-destination`. A topic named `<destination>` is created, where `<destination>` value is got from the event headers.
-    * `topic-per-service-path`. A topic named `<fiware-servicePath>` is created, where `<fiware-servicePath>` value is got from the event headers.
-    * `topic-per-service`. A topic named `<fiware-service>` is created, where `<fiware-service>` value is got from the event headers.
-3. The context responses/entities within the container are iterated, and they are serialized in the Kafka topic as JSON documents.
+A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured data model:
+
+* `dm-by-attribute`. A topic is created for each notified attribute.
+* `dm-by-entity`. A topic named `<destination>` is created, where `<destination>` value is got from the event headers.
+* `dm-by-service-path`. A topic named `<fiware-servicePath>` is created, where `<fiware-servicePath>` value is got from the event headers.
+* `dm-by-service`. A topic named `<fiware-service>` is created, where `<fiware-service>` value is got from the event headers.
+
+The context responses/entities within the container are iterated, and they are serialized in the Kafka topic as JSON documents.
 
 ###<a name="section1.3"></a>Example
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
@@ -73,17 +76,24 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `topic_type=topic-per-destination` as configuration parameter, then `OrionKafkaSink` will persist the data as:
+Assuming `data_model=dm-by-attribute` as configuration parameter, then `OrionKafkaSink` will persist the data as:
+
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic speed --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic oil_level --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+
+If `data_model=dm-by-entity` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     
-If `topic_type=topic-per-service-path` then `OrionKafkaSink` will persist the data as:
+If `data_model=dm-by-service-path` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic 4wheels --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     
-If `topic_type=topic-per-service` then `OrionKafkaSink` will persist the data as:
+If `data_model=dm-by-service` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
@@ -101,7 +111,7 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionKafkaSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| topic_type | no | topic-by-destination | <i>topic-by-destination</i>, <i>topic-by-service-path</i> or <i>topic-by-service</i> |
+| data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i> |
 | broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>) |
 | zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i> |
 | batch_size | no | 1 | Number of events accumulated before persistence |
@@ -115,7 +125,7 @@ A configuration example could be:
     cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
     cygnusagent.sinks.kafka-sink.channel = kafka-channel
     cygnusagent.sinks.kafka-sink.enable_grouping = false
-    cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+    cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
     cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
     cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
     cygnusagent.sinks.kafka-sink.batch_size = 100

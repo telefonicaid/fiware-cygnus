@@ -54,6 +54,8 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
+As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](#section6) section.
+
 [Top](#top)
 
 ##<a name="section3"></a>`agent_<id>.conf`
@@ -125,8 +127,12 @@ cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+# true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
+cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 cygnusagent.sinks.hdfs-sink.file_format = json-column
+# character used for separating the values when using CSV file formats
+cygnusagent.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
@@ -139,6 +145,8 @@ cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
 cygnusagent.sinks.hdfs-sink.hive.port = 10000
+# Hive database type, available types are default-db and namespace-db
+cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
 cygnusagent.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
@@ -378,7 +386,7 @@ Its content should not be edited unless some of the default values for log path,
 flume.root.logger=INFO,LOGFILE
 #flume.root.logger=DEBUG,console
 flume.log.dir=/var/log/cygnus/
-flume.log.file=flume.log
+flume.log.file=cygnus.log
 
 # Logging levels for certain components.
 log4j.logger.org.apache.flume.lifecycle = INFO
@@ -397,7 +405,7 @@ log4j.appender.LOGFILE.MaxFileSize=100MB
 log4j.appender.LOGFILE.MaxBackupIndex=10
 log4j.appender.LOGFILE.File=${flume.log.dir}/${flume.log.file}
 log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
-log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 # Warning: If you enable the following appender it will fill up your disk if you don't have a cleanup job!
 # cleanup job example: find /var/log/cygnus -type f -mtime +30 -exec rm -f {} \;
@@ -409,14 +417,14 @@ log4j.appender.DAILY.rollingPolicy=org.apache.log4j.rolling.TimeBasedRollingPoli
 log4j.appender.DAILY.rollingPolicy.ActiveFileName=${flume.log.dir}/${flume.log.file}
 log4j.appender.DAILY.rollingPolicy.FileNamePattern=${flume.log.dir}/${flume.log.file}.%d{yyyy-MM-dd}
 log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
-log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 
 # Console appender, i.e. printing logs in the standar output.
 # Add "console" to flume.root.logger above if you want to use this.
 log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.target=System.err
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
+log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
 ```
 
 [Top](#top)

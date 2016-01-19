@@ -19,7 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.sinks.OrionKafkaSink.TopicAPI;
-import com.telefonica.iot.cygnus.sinks.OrionKafkaSink.TopicType;
+import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
 import org.apache.curator.test.TestingServer;
@@ -83,9 +83,10 @@ public class OrionKafkaSinkTest {
     private final String normalDefaultDestination = "car1_car";
     private final String abnormalDefaultDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    private final String normalGroupedDestination = "my_cars";
+    private final String normalGroupedEntity = "my_cars";
     private final String abnormalGroupedDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+    private final String normalGroupedAttribute = "speed";
     
     // notification constants
     private final String singleContextElementNotification = ""
@@ -198,10 +199,10 @@ public class OrionKafkaSinkTest {
     @Test
     public void testConfigure() {
         System.out.println("Testing OrionKafkaSink.configure");
-        String topicType = "topic-by-destination";
-        Context context = createContext(topicType);
+        String dataModel = "dm-by-entity";
+        Context context = createContext(dataModel);
         sink.configure(context);
-        assertEquals(TopicType.valueOf(topicType.replaceAll("-", "").toUpperCase()), sink.getTopicType());
+        assertEquals(DataModel.valueOf(dataModel.replaceAll("-", "").toUpperCase()), sink.getDataModel());
         assertEquals(brokerList, sink.getBrokerList());
         assertEquals(zookeeperEndpoint, sink.getZookeeperEndpoint());
     } // testConfigure
@@ -212,8 +213,8 @@ public class OrionKafkaSinkTest {
     @Test
     public void testStart() {
         System.out.println("Testing OrionKafkaSink.start");
-        String topicType = "topic-by-destination";
-        Context context = createContext(topicType);
+        String dataModel = "dm-by-entity";
+        Context context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -227,8 +228,8 @@ public class OrionKafkaSinkTest {
     @Test
     public void testPersistNullBatches() {
         System.out.println("Testing OrionKafkaSink.persistBatch (null batches)");
-        String topicType = "topic-by-destination";
-        Context context = createContext(topicType);
+        String dataModel = "dm-by-entity";
+        Context context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -245,53 +246,55 @@ public class OrionKafkaSinkTest {
      * Test of persistOne method, of class OrionKafkaSink. Topic types are tested.
      */
     @Test
-    public void testPersistTopicTypes() {
-        // common objects
-        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        System.out.println("Testing OrionKafkaSink.persist (topic-by-service)");
-        String topicType = "topic-by-service";
-        Context context = createContext(topicType);
+    public void testPersistDataModels() {
+        System.out.println("Testing OrionKafkaSink.persist (dm-by-service-path)");
+        String dataModel = "dm-by-service-path";
+        Context context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
+        Batch batch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYSERVICEPATH);
         
         try {
-            sink.persistBatch(groupedBatch);
+            sink.persistBatch(batch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionKafkaSink.persist (topic-by-service-path)");
-        topicType = "topic-by-servicePath";
-        context = createContext(topicType);
+        System.out.println("Testing OrionKafkaSink.persist (dm-by-entity)");
+        dataModel = "dm-by-entity";
+        context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
+        batch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYENTITY);
         
         try {
-            sink.persistBatch(groupedBatch);
+            sink.persistBatch(batch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
         
-        System.out.println("Testing OrionKafkaSink.persist (topic-by-destination)");
-        topicType = "topic-by-destination";
-        context = createContext(topicType);
+        System.out.println("Testing OrionKafkaSink.persist (dm-by-attribute)");
+        dataModel = "dm-by-attribute";
+        context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
         try {
-            sink.persistBatch(groupedBatch);
+            sink.persistBatch(batch);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);
         } // try catch finally
-    } // testPersistTopicTypes
+    } // testPersistDataModels
     
     /**
      * Test of persistBatch method, of class OrionKafkaSink. Special resources length is tested.
@@ -300,12 +303,13 @@ public class OrionKafkaSinkTest {
     @Test
     public void testPersistResourceLengths() throws Exception {
         System.out.println("Testing OrionKafkaSink.persistBatch (normal resource lengths)");
-        String topicType = "topic-by-destination";
-        Context context = createContext(topicType);
+        String dataModel = "dm-by-entity";
+        Context context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYENTITY);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -316,12 +320,13 @@ public class OrionKafkaSinkTest {
         } // try catch finally
         
         System.out.println("Testing OrionKafkaSink.persistBatch (too long service name)");
-        topicType = "topic-by-service";
-        context = createContext(topicType);
+        dataModel = "dm-by-service";
+        context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYSERVICE);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -331,12 +336,13 @@ public class OrionKafkaSinkTest {
         } // try catch
         
         System.out.println("Testing OrionKafkaSink.persistBatch (too long servicePath name)");
-        topicType = "topic-by-service-path";
-        context = createContext(topicType);
+        dataModel = "dm-by-service-path";
+        context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYSERVICEPATH);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -346,12 +352,13 @@ public class OrionKafkaSinkTest {
         } // try catch
         
         System.out.println("Testing OrionKAfkaSink.persistBatch (too long destination name)");
-        topicType = "topic-by-destination";
-        context = createContext(topicType);
+        dataModel = "dm-by-entity";
+        context = createContext(dataModel);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYENTITY);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -368,14 +375,15 @@ public class OrionKafkaSinkTest {
     @Test
     public void testPersistServiceServicePath() throws Exception {
         // common objects
-        String topicType = "topic-by-destination";
-        Context context = createContext(topicType);
+        String dataModel = "dm-by-entity";
+        Context context = createContext(dataModel);
         
         System.out.println("Testing OrionKafkaSink.persistBatch (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        Batch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedEntity,
+                normalGroupedAttribute, singleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYENTITY);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -389,8 +397,9 @@ public class OrionKafkaSinkTest {
                 + "fiware-servicePaths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedEntity,
+                normalGroupedAttribute, multipleNotifyContextRequest.getContextResponses().get(0).getContextElement(),
+                DataModel.DMBYENTITY);
         
         try {
             sink.persistBatch(groupedBatch);
@@ -401,20 +410,39 @@ public class OrionKafkaSinkTest {
         } // try catch finally
     } // testPersistServiceServicePath
     
-    private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
-            NotifyContextRequest.ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+    private Batch createBatch(long recvTimeTs, String service, String servicePath, String entity, String attribute,
+            NotifyContextRequest.ContextElement contextElement, DataModel dataModel) {
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, entity, attribute,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);
         Batch batch = new Batch();
+        String destination;
+        
+        switch (dataModel) {
+            case DMBYSERVICE:
+                destination = service;
+                break;
+            case DMBYSERVICEPATH:
+                destination = servicePath;
+                break;
+            case DMBYENTITY:
+                destination = entity;
+                break;
+            case DMBYATTRIBUTE:
+                destination = attribute;
+                break;
+            default:
+                destination = null;
+        } // switch
+        
         batch.addEvents(destination, groupedBatchEvents);
         return batch;
     } // createBatch
     
-    private Context createContext(String topicType) {
+    private Context createContext(String dataModel) {
         Context context = new Context();
-        context.put("topic_type", topicType);
+        context.put("data_model", dataModel);
         context.put("broker_list", brokerList);
         context.put("zookeeper_endpoint", zookeeperEndpoint);
         return context;

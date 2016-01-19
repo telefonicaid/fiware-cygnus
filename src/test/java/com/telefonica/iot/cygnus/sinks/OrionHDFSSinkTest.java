@@ -65,6 +65,7 @@ public class OrionHDFSSinkTest {
     private final String hivePort = "10000";
     private final String enableKrb5Auth = "false";
     private final String enableGrouping = "true";
+    private final String csvSeparator = ",";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -443,7 +444,7 @@ public class OrionHDFSSinkTest {
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);
@@ -466,6 +467,7 @@ public class OrionHDFSSinkTest {
             context.put("hdfs_username", hdfsUsername);
         } // if else
         
+        context.put("csv_separator", csvSeparator);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);

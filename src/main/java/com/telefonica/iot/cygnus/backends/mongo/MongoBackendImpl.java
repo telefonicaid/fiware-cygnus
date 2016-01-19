@@ -26,10 +26,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink;
-import com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.DataModel;
+import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -81,6 +80,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @param dbName
      * @throws Exception
      */
+    @Override
     public void createDatabase(String dbName) throws Exception {
         LOGGER.debug("Creating Mongo database=" + dbName);
         getDatabase(dbName); // getting a non existent database automatically creates it
@@ -92,6 +92,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @param collectionName
      * @throws Exception
      */
+    @Override
     public void createCollection(String dbName, String collectionName) throws Exception {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
@@ -121,6 +122,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @param attrMd
      * @throws Exception
      */
+    @Override
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception {
@@ -129,19 +131,19 @@ public class MongoBackendImpl implements MongoBackend {
         Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
         
         switch (dataModel) {
-            case COLLECTIONPERSERVICEPATH:
+            case DMBYSERVICEPATH:
                 doc.append("entityId", entityId)
                         .append("entityType", entityType)
                         .append("attrName", attrName)
                         .append("attrType", attrType)
                         .append("attrValue", attrValue);
                 break;
-            case COLLECTIONPERENTITY:
+            case DMBYENTITY:
                 doc.append("attrName", attrName)
                         .append("attrType", attrType)
                         .append("attrValue", attrValue);
                 break;
-            case COLLECTIONPERATTRIBUTE:
+            case DMBYATTRIBUTE:
                 doc.append("attrType", attrType)
                         .append("attrValue", attrValue);
                 break;
@@ -167,6 +169,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @param attrMd
      * @throws Exception
      */
+    @Override
     public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String recvTime,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception {
@@ -265,7 +268,7 @@ public class MongoBackendImpl implements MongoBackend {
         BasicDBObject query = new BasicDBObject();
                 
         switch (dataModel) {
-            case COLLECTIONPERSERVICEPATH:
+            case DMBYSERVICEPATH:
                 query.append("_id", new BasicDBObject("entityId", entityId)
                             .append("entityType", entityType)
                             .append("attrName", attrName)
@@ -274,14 +277,14 @@ public class MongoBackendImpl implements MongoBackend {
                             .append("range", getRange(resolution)))
                         .append("points.offset", offset);
                 break;
-            case COLLECTIONPERENTITY:
+            case DMBYENTITY:
                 query.append("_id", new BasicDBObject("attrName", attrName)
                             .append("origin", getOrigin(calendar, resolution))
                             .append("resolution", resolution.toString().toLowerCase())
                             .append("range", getRange(resolution)))
                         .append("points.offset", offset);
                 break;
-            case COLLECTIONPERATTRIBUTE:
+            case DMBYATTRIBUTE:
                 query.append("_id", new BasicDBObject("origin", getOrigin(calendar, resolution))
                             .append("resolution", resolution.toString().toLowerCase())
                             .append("range", getRange(resolution)))
@@ -372,11 +375,15 @@ public class MongoBackendImpl implements MongoBackend {
      * changes.
      * @param dbName
      * @param collectionName
+     * @param recvTimeTs
      * @param recvTime
      * @param attrs
+     * @param entityId
      * @param mds
+     * @param entityType
      * @throws Exception
      */
+    @Override
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
                                      String entityId, String entityType, Map<String, String> attrs,
                                      Map<String, String> mds) throws Exception {
@@ -386,7 +393,7 @@ public class MongoBackendImpl implements MongoBackend {
         Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
 
         switch (dataModel) {
-            case COLLECTIONPERSERVICEPATH:
+            case DMBYSERVICEPATH:
                 doc.append("entityId", entityId)
                         .append("entityType", entityType);
 
@@ -399,7 +406,7 @@ public class MongoBackendImpl implements MongoBackend {
                 }
 
                 break;
-            case COLLECTIONPERENTITY:
+            case DMBYENTITY:
                 it = attrs.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
@@ -408,7 +415,7 @@ public class MongoBackendImpl implements MongoBackend {
                     doc.append(attrName, attrValue);
                 }
                 break;
-            case COLLECTIONPERATTRIBUTE:
+            case DMBYATTRIBUTE:
                 LOGGER.warn("Persistence by column is useless for Collection per attribute data model");
                 break;
             default:

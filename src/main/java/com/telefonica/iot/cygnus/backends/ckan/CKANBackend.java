@@ -32,8 +32,10 @@ public interface CKANBackend {
      * @param pkgName Package/dataset name
      * @param resName Resource name
      * @param records Recods to be added to the resource
+     * @param createEnabled
      * @throws Exception
      */
-    void persist(String orgName, String pkgName, String resName, String records) throws Exception;
+    void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
+        throws Exception;
     
 } // CKANBackend

@@ -187,6 +187,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
 | cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
@@ -197,16 +199,18 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
-| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>|
+| csv_separator | no | , | |
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 | hive | no | true | <i>true</i> or <i>false</i> |
 | hive\_server\_version<br>(**deprecated**) | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2.<br>Still usable; if both are configured, `hive.server_version` is preferred |
 | hive.server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
-| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred |
-| hive.host | no | localhost |
+| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred |
+| hive.host | no | localhost |
 | hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred |
 | hive.port | no | 10000 |
+| hive.db_type | no | default-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
 | krb5_auth | no | false | <i>true</i> or <i>false</i> |
 | krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
 | krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
@@ -221,12 +225,15 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
+    cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
+    cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.backend_impl = rest
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
     cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
+    cygnusagent.sinks.hdfs-sink.service_as_namespace = false
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
@@ -234,6 +241,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hive.server_version = 2
     cygnusagent.sinks.hdfs-sink.hive.host = 192.168.80.35
     cygnusagent.sinks.hdfs-sink.hive.port = 10000
+    cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
     cygnusagent.sinks.hdfs-sink.krb5_auth = false
 
 [Top](#top)

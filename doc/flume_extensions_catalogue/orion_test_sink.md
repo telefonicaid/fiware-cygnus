@@ -69,11 +69,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 Assuming the log appender is the console, then `OrionTestSink` will log the data within the body as:
 
 ```
-time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1429535775-308-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[150] : Starting transaction (1429535775-308-0000000000)
-time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1429535775-308-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "speed",            "type" : "float",            "value" : "112.9"          },          {            "name" : "oil_level",            "type" : "float",            "value" : "74.6"          }        ],        "type" : "car",        "isPattern" : "false",        "id" : "car1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
-time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1429535775-308-0000000000 | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
-time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1429535775-308-0000000000 | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[176] : [test-sink] Persisting data at OrionTestSink. Data (Processing event={Processing headers={recvTimeTs= 1429535775, fiwareService=vehicles, fiwareServicePath=4wheels, destinations=car1_car}, Processing context element={id=car1, type=car}, Processing attribute={name=speed, type=float, value="112.9", metadata=[]}, Processing attribute={name=oil_level, type=float, value="74.6", metadata=[]}})
-time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[178] : Finishing transaction (1429535775-308-0000000000)
+time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1429535775-308-0000000000 | srv=vehicles | subsrv=4wheels | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[150] : Starting transaction (1429535775-308-0000000000)
+time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1429535775-308-0000000000 | srv=vehicles | subsrv=4wheels | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "speed",            "type" : "float",            "value" : "112.9"          },          {            "name" : "oil_level",            "type" : "float",            "value" : "74.6"          }        ],        "type" : "car",        "isPattern" : "false",        "id" : "car1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1429535775-308-0000000000 | srv=vehicles | subsrv=4wheels | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
+time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1429535775-308-0000000000 | srv=vehicles | subsrv=4wheels | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[176] : [test-sink] Persisting data at OrionTestSink. Data (Processing event={Processing headers={recvTimeTs= 1429535775, fiwareService=vehicles, fiwareServicePath=4wheels, destinations=car1_car}, Processing context element={id=car1, type=car}, Processing attribute={name=speed, type=float, value="112.9", metadata=[]}, Processing attribute={name=oil_level, type=float, value="74.6", metadata=[]}})
+time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | srv=vehicles | subsrv=4wheels | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[178] : Finishing transaction (1429535775-308-0000000000)
 ```
 
 [Top](#top)
@@ -87,6 +87,7 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | f
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionTestSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i> |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
 | batch_size | no | 1 | Number of events accumulated before persistence |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
@@ -98,6 +99,7 @@ A configuration example could be:
     cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
     cygnusagent.sinks.test-sink.channel = ckan-channel
     cygnusagent.sinks.test-sink.enable_grouping = false
+    cygnusagent.sinks.test-sink.data_model = dm-by-entity
     cygnusagent.sinks.test-sink.batch_size = 100
     cygnusagent.sinks.test-sink.batch_timeout = 30
 

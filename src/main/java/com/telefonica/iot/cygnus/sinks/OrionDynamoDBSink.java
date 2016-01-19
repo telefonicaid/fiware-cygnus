@@ -37,17 +37,11 @@ import org.apache.flume.Context;
  */
 public class OrionDynamoDBSink extends OrionSink {
     
-    /**
-     * Available table types.
-     */
-    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
-    
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionDynamoDBSink.class);
     private DynamoDBBackend persistenceBackend;
     private String accessKeyId;
     private String secretAccessKey;
     private String region;
-    private TableType tableType;
     private boolean attrPersistenceRow;
     private long id = new Date().getTime();
     
@@ -75,10 +69,6 @@ public class OrionDynamoDBSink extends OrionSink {
         return attrPersistenceRow;
     } // getRowAttrPersistence
     
-    protected TableType getTableType() {
-        return tableType;
-    } // getTableType
-    
     @Override
     public void configure(Context context) {
         accessKeyId = context.getString("access_key_id");
@@ -87,9 +77,6 @@ public class OrionDynamoDBSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (secret_access_key=" + secretAccessKey + ")");
         region = context.getString("region", "eu-central-1");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (region=" + region + ")");
-        String tableTypeStr = context.getString("table_type", "table-per-destination");
-        tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         String attrPersistRowStr = context.getString("attr_persistence", "row");
         attrPersistenceRow = attrPersistRowStr.equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + attrPersistRowStr + ")");
@@ -113,7 +100,7 @@ public class OrionDynamoDBSink extends OrionSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         Accumulator accumulator = new Accumulator();
-        accumulator.initializeBatching(new Date().getTime());
+        accumulator.initialize(new Date().getTime());
         accumulator.accumulate(eventHeaders, notification);
         persistBatch(accumulator.getBatch());
     } // persistOne
@@ -170,8 +157,8 @@ public class OrionDynamoDBSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
-            tableName = buildTableName(service, servicePath, destination, tableType);
+            destination = cygnusEvent.getEntity();
+            tableName = buildTableName(service, servicePath, destination, dataModel);
             aggregation = new ArrayList<Item>();
         } // initialize
         
@@ -322,26 +309,25 @@ public class OrionDynamoDBSink extends OrionSink {
         persistenceBackend.putItems(tableName, aggregation);
     } // persistAggregation
     
-    private String buildTableName(String service, String servicePath, String destination, TableType tableType)
+    private String buildTableName(String service, String servicePath, String destination, DataModel dataModel)
         throws Exception {
         String tableName;
         
-        switch (tableType) {
-            case TABLEBYDESTINATION:
+        switch (dataModel) {
+            case DMBYENTITY:
                 tableName = service + "_" + servicePath + "_" + destination;
                 break;
-            case TABLEBYSERVICEPATH:
+            case DMBYSERVICEPATH:
                 tableName = service + "_" + servicePath;
                 break;
             default:
-                throw new CygnusBadConfiguration("Unknown table type (" + tableType.toString()
-                        + " in OrionDynamoDBSink, cannot build the table name. Please, use "
-                        + "TABLEBYSERVICEPATH or TABLEBYDESTINATION");
+                throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
         } // switch
         
         if (tableName.length() > Constants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building tableName=fiwareServicePath + '_' + destination (" + tableName
-                    + ") and its length is greater than " + Constants.MAX_NAME_LEN);
+            throw new CygnusBadConfiguration("Building tableName '" + tableName
+                    + "' and its length is greater than " + Constants.MAX_NAME_LEN);
         } // if
         
         return tableName;

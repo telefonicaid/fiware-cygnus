@@ -19,7 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink.TableType;
+import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
@@ -59,7 +59,7 @@ public class OrionDynamoDBSinkTest {
     private final String region = "eu-west-1";
     private final String attrPersistence = "row";
     private final String enableGrouping = "true";
-    private final String tableType = "table-by-destination";
+    private final String tableType = "dm-by-entity";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -184,7 +184,7 @@ public class OrionDynamoDBSinkTest {
         assertEquals(region, sink.getRegion());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-        assertEquals(TableType.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getTableType());
+        assertEquals(DataModel.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getDataModel());
     } // testConfigure
 
     /**
@@ -324,7 +324,7 @@ public class OrionDynamoDBSinkTest {
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);

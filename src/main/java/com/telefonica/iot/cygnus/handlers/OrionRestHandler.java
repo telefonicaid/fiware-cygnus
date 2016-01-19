@@ -143,12 +143,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
-        // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
-        // accessible by the whole source code
-        String transId = generateTransId();
-        MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.info("Starting transaction (" + transId + ")");
-        
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
@@ -202,8 +196,18 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     servicePath = Utils.encode(headerValue);
                 } // if else
             } // if else if
-        } // for
-
+        } // while
+        
+        // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
+        MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);
+        MDC.put(Constants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
+        
+        // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
+        // accessible by the whole source code
+        String transId = generateTransId();
+        MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
+        LOGGER.info("Starting transaction (" + transId + ")");
+        
         // get the data content
         String data = "";
         String line;

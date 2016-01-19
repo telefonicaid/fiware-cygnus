@@ -49,6 +49,8 @@ public class OrionTestSink extends OrionSink {
     @Override
     public void configure(Context context) {
         super.configure(context);
+        // Techdebt: allow this sink to work with all the data models
+        dataModel = DataModel.DMBYENTITY;
     } // configure
 
     @Override
@@ -61,7 +63,7 @@ public class OrionTestSink extends OrionSink {
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
         Accumulator accumulator = new Accumulator();
-        accumulator.initializeBatching(new Date().getTime());
+        accumulator.initialize(new Date().getTime());
         accumulator.accumulate(eventHeaders, notification);
         persistBatch(accumulator.getBatch());
     } // persistOne
@@ -117,7 +119,7 @@ public class OrionTestSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getDestination();
+            destination = cygnusEvent.getEntity();
         } // initialize
         
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {

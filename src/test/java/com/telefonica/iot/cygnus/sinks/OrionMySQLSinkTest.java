@@ -18,11 +18,11 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackend.TableType;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
@@ -59,7 +59,7 @@ public class OrionMySQLSinkTest {
     private final String mysqlPassword = "pass1234";
     private final String attrPersistence = "row";
     private final String enableGrouping = "true";
-    private final String tableType = "table-by-destination";
+    private final String dataModel = "dm-by-entity";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -186,7 +186,7 @@ public class OrionMySQLSinkTest {
         assertEquals(mysqlPassword, sink.getMySQLPassword());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-        assertEquals(TableType.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getTableType());
+        assertEquals(DataModel.valueOf(dataModel.replaceAll("-", "").toUpperCase()), sink.getDataModel());
     } // testConfigure
 
     /**
@@ -326,7 +326,7 @@ public class OrionMySQLSinkTest {
     
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);
@@ -343,7 +343,7 @@ public class OrionMySQLSinkTest {
         context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
         context.put("enable_grouping", enableGrouping);
-        context.put("table_type", tableType);
+        context.put("table_type", dataModel);
         return context;
     } // createContext
     

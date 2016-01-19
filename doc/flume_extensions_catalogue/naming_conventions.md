@@ -41,7 +41,7 @@ Within CKAN, the data is really stored within a <i>datastore</i>, but this is tr
 
 | Level        | Orion                       | HDFS                                                                                                                        | MySQL                                                | CKAN                                   |
 |--------------|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|----------------------------------------|
-| Servive      | `fiware-servive` header     | `hdfs:///user/<default_username>/<fiware_service>/`                                                                         | `<fiware-service>` database                          | `<fiware-service>` organization        |
+| Service      | `fiware-service` header     | `hdfs:///user/<default_username>/<fiware_service>/`                                                                         | `<fiware-service>` database                          | `<fiware-service>` organization        |
 | Service path | `fiware-servicePath` header | `hdfs:///user/<default_username>/<fiware-service>/<fiware-servicePath>/`                                                    | -                                                    | `<fiware-servicePath>` package/dataset |
 | Entity       | Certain context data fields | `hdfs:///user/<default_username>/<fiware-service>/<fiware-servicePath>/<extracted_entity_name>/<extracted_entity_name>.txt` | `<fiware-servicePath>_<extracted_entity_name>` table | <extracted_entity_name> resource       |
 
