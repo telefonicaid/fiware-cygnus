@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackend.TableType;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
@@ -186,7 +185,6 @@ public class OrionPostgreSQLSinkTest {
         assertEquals(postgresqlPassword, sink.getPostgreSQLPassword());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-        assertEquals(TableType.valueOf(tableType.replaceAll("-", "").toUpperCase()), sink.getTableType());
     } // testConfigure
 
     /**
@@ -326,7 +324,7 @@ public class OrionPostgreSQLSinkTest {
 
     private Batch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
-        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination,
+        CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
         ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
         groupedBatchEvents.add(groupedEvent);

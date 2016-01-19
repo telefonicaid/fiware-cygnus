@@ -26,11 +26,6 @@ package com.telefonica.iot.cygnus.backends.postgresql;
 public interface PostgreSQLBackend {
 
     /**
-     * Available table types.
-     */
-    public enum TableType { TABLEBYDESTINATION, TABLEBYSERVICEPATH }
-
-    /**
      * Creates a schema, given its name, if not exists.
      * @param schemaName
      * @throws Exception
