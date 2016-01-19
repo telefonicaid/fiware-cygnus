@@ -58,7 +58,6 @@ public class OrionPostgreSQLSinkTest {
     private final String postgresqlPassword = "pass1234";
     private final String attrPersistence = "row";
     private final String enableGrouping = "true";
-    private final String tableType = "table-by-destination";
 
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -341,7 +340,6 @@ public class OrionPostgreSQLSinkTest {
         context.put("postgresql_password", postgresqlPassword);
         context.put("attr_persistence", attrPersistence);
         context.put("enable_grouping", enableGrouping);
-        context.put("table_type", tableType);
         return context;
     } // createContext
 
