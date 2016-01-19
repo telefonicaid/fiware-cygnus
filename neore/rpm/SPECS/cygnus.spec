@@ -15,7 +15,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 Summary:          Package for cygnus component
-Name:             cygnus%{_name_suffix}
+Name:             cygnus
 Version:          %{_product_version}
 Release:          %{_product_release}
 License:          AGPLv3
@@ -26,6 +26,9 @@ Requires(preun):  /sbin/chkconfig, /sbin/service
 Requires(postun): /sbin/service
 Group:            Applications/cygnus
 Vendor:           Telefonica I+D
+Provides:         cygnus%{_name_suffix} = %{_product_version}-%{_product_release}
+
+%define _rpmfilename %%{ARCH}/%%{NAME}%{_name_suffix}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 %description
 This connector is a (conceptual) derivative work of ngsi2cosmos, and implements
