@@ -275,7 +275,7 @@ public class OrionPostgreSQLSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
             typedFieldNames = "("
-                    + Constants.RECV_TIME_TS + " long,"
+                    + Constants.RECV_TIME_TS + " bigint,"
                     + Constants.RECV_TIME + " text,"
                     + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + " text,"
                     + Constants.ENTITY_ID + " text,"

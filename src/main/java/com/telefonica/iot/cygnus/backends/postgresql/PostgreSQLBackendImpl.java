@@ -257,7 +257,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             Class.forName(DRIVER_NAME);
 
             // return a connection based on the PostgreSQL JDBC driver
-            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort +"/" + schemaName;
+            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort + "/";
             Properties props = new Properties();
             props.setProperty("user", this.postgresqlUsername);
             props.setProperty("password", this.postgresqlPassword);
