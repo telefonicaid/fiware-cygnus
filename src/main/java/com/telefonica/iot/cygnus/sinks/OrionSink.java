@@ -371,10 +371,14 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 return Status.BACKOFF; // slow down the sink since no events are available
             } // if
 
-            // set the transactionId in MDC
+            // set the transactionId, fiwareservice and fiwareservicepath in MDC
             try {
                 MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
                         event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
+                MDC.put(Constants.LOG4J_SVC,
+                        event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE));
+                MDC.put(Constants.LOG4J_SUBSVC,
+                        event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH));
             } catch (Exception e) {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch
