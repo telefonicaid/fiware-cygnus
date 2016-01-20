@@ -35,7 +35,7 @@ _message(){
    isDash=`echo -en|grep "\-en"`
    outLog="/dev/stdout"
    if ! [ -z "$isError" ]; then 
-      messageColor=${_error_color} && outLog="/dev/tty"
+      messageColor=${_error_color} && outLog="/dev/stderr" 
    else
       if ! [ -z "$isStage" ]; then 
          messageColor=${_stage_color}
