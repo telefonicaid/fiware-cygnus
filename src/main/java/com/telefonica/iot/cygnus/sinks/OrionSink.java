@@ -36,7 +36,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -302,6 +301,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
+                LOGGER.info("Rollbacking");
                 rollbackedAccumulations.add(rollbackedAccumulation.getAccumulatorForRollback());
                 LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
@@ -411,6 +411,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
+                LOGGER.info("Rollbacking");
                 rollbackedAccumulations.add(accumulator.getAccumulatorForRollback());
                 LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                 accumulator.initialize(new Date().getTime());
@@ -495,6 +496,16 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         private int accIndex;
         private String accTransactionIds;
         
+        /**
+         * Constructor.
+         */
+        public Accumulator() {
+            batch = new Batch();
+            accStartDate = 0;
+            accIndex = 0;
+            accTransactionIds = null;
+        } // Accumulator
+        
         public long getAccStartDate() {
             return accStartDate;
         } // getAccStartDate
@@ -549,7 +560,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
         private void accumulateByService(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
             String destination = service;
             
@@ -592,7 +602,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             
         private void accumulateByServicePath(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
 
             if (!enableGrouping) {
@@ -634,7 +643,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
         private void accumulateByEntity(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
       
             if (!enableGrouping) {
@@ -678,7 +686,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
         private void accumulateByAttribute(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String transactionId = headers.get(Constants.FLUME_HEADER_TRANSACTION_ID);
             String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
             ArrayList<ContextElementResponse> contextElementResponses = notification.getContextResponses();
             
