@@ -31,7 +31,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 public class CygnusEvent {
 
     private final long recvTimeTs;
-    private final String transactionId;
     private final String service;
     private final String servicePath;
     private final String entity;
@@ -41,17 +40,15 @@ public class CygnusEvent {
     /**
      * Constructor.
      * @param recvTimeTs
-     * @param transactionId
      * @param service
      * @param servicePath
      * @param entity
      * @param attribute
      * @param contextElement
      */
-    public CygnusEvent(long recvTimeTs, String transactionId, String service, String servicePath, String entity,
-            String attribute, ContextElement contextElement) {
+    public CygnusEvent(long recvTimeTs, String service, String servicePath, String entity, String attribute,
+            ContextElement contextElement) {
         this.recvTimeTs = recvTimeTs;
-        this.transactionId = transactionId;
         this.service = service;
         this.servicePath = servicePath;
         this.entity = entity;
@@ -66,14 +63,6 @@ public class CygnusEvent {
     public long getRecvTimeTs() {
         return recvTimeTs;
     } // getRecvTimeTs
-
-    /**
-     * Gets the transaction ID.
-     * @return The transaction ID
-     */
-    public String getTransactionId() {
-        return transactionId;
-    } // getTransactionId
     
     /**
      * Gets the service.

@@ -87,7 +87,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
-    private final RollbackQueues rollbackQueues;
+    private final ArrayList<Accumulator> rollbackedAccumulations;
     
     /**
      * Constructor.
@@ -100,7 +100,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         accumulator.initialize(new Date().getTime());
         
         // crete the rollbacking queue
-        rollbackQueues = new RollbackQueues();
+        rollbackedAccumulations = new ArrayList<Accumulator>();
     } // OrionSink
     
     /**
@@ -147,11 +147,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // TBD: remove the special case of batchSize=1 when all the sinks have migrated to persistBatch
         if (batchSize == 1) {
             return processOneByOne();
-        } else if (rollbackQueues.mustRollback()) {
-            // these rollbacked events have preference over new incoming events
-            return processRollbackBatches();
-        } else {
+        } else if (rollbackedAccumulations.isEmpty()) {
             return processNewBatches();
+        } else {
+            return processRollbackedBatches();
         } // if else
     } // process
     
@@ -281,9 +280,47 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } // try catch
     } // processOneByOne
     
-    private Status processRollbackBatches() throws EventDeliveryException {
-        return null;
-    } // processRollbackBatches
+    private Status processRollbackedBatches() throws EventDeliveryException {
+        Accumulator rollbackedAccumulation;
+        
+        // get a rollbacked accumulation
+        if (rollbackedAccumulations.isEmpty()) {
+            return Status.BACKOFF;
+        } else {
+            rollbackedAccumulation = rollbackedAccumulations.get(0);
+        } // if else
+        
+        // try persisting the rollbacked accumulation
+        try {
+            persistBatch(rollbackedAccumulation.getBatch());
+            LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+            rollbackedAccumulations.remove(0);
+            return Status.READY;
+        } catch (Exception e) {
+            LOGGER.debug(Arrays.toString(e.getStackTrace()));
+
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                LOGGER.error(e.getMessage());
+                rollbackedAccumulations.add(rollbackedAccumulation.getAccumulatorForRollback());
+                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
+            } else {
+                if (e instanceof CygnusRuntimeError) {
+                    LOGGER.error(e.getMessage());
+                } else if (e instanceof CygnusBadConfiguration) {
+                    LOGGER.warn(e.getMessage());
+                } else if (e instanceof CygnusBadContextData) {
+                    LOGGER.warn(e.getMessage());
+                } else {
+                    LOGGER.warn(e.getMessage());
+                } // if else if
+
+                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                return Status.READY;
+            } // if else
+        } // try catch
+    } // processRollbackedBatches
     
     private Status processNewBatches() throws EventDeliveryException {
         // get the channel
@@ -374,7 +411,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                rollbackQueues.add(accumulator.getBatch());
+                rollbackedAccumulations.add(accumulator.getAccumulatorForRollback());
                 LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
@@ -398,7 +435,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 return Status.READY;
             } // if else
         } // try catch
-    } // process
+    } // processNewBatches
 
     /**
      * Given an event, it is parsed before it is persisted. Depending on the content type, it is appropriately
@@ -529,7 +566,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, destination, servicePath, null, null,
+                            recvTimeTs, destination, servicePath, null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -546,7 +583,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, destination, servicePath, null, null,
+                            recvTimeTs, destination, servicePath, null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -571,7 +608,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, service, destination, null, null,
+                            recvTimeTs, service, destination, null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -588,7 +625,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, service, destination, null, null,
+                            recvTimeTs, service, destination, null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -614,7 +651,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, service, notifiedServicePaths[i], destination, null,
+                            recvTimeTs, service, notifiedServicePaths[i], destination, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -632,7 +669,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     } // if
 
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, transactionId, service, groupedServicePaths[i], destination, null,
+                            recvTimeTs, service, groupedServicePaths[i], destination, null,
                             notification.getContextResponses().get(i).getContextElement());
                     list.add(cygnusEvent);
                 } // for
@@ -663,7 +700,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         } // if
                         
                         CygnusEvent cygnusEvent = new CygnusEvent(
-                                recvTimeTs, transactionId, service, notifiedServicePaths[i], notifiedEntities[i],
+                                recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
                                 destination, contextElement);
                         list.add(cygnusEvent);
                     } // for
@@ -686,7 +723,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         } // if
                         
                         CygnusEvent cygnusEvent = new CygnusEvent(
-                                recvTimeTs, transactionId, service, groupedServicePaths[i], groupedEntities[i],
+                                recvTimeTs, service, groupedServicePaths[i], groupedEntities[i],
                                 destination, contextElement);
                         list.add(cygnusEvent);
                     } // for
@@ -707,39 +744,28 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             accTransactionIds = "";
         } // initialize
         
-    } // Accumulator
-    
-    /**
-     * Collection of queues in charge of holding not persisted Cygnus events (rollback mechanism).
-     */
-    private class RollbackQueues {
-        
-        private final HashMap<String, ArrayList<CygnusEvent>> rollbackQueues;
-        
-        public RollbackQueues() {
-            rollbackQueues = new HashMap<String, ArrayList<CygnusEvent>>();
-        } // RollbackQueues
-        
-        public boolean mustRollback() {
-            return true;
-        } // mustRollback
-        
-        public void add(Batch batch) {
-            Set<String> destinations = batch.getDestinations();
-
+        /**
+         * Gets a copy of this accumulator, except for the already persisted sub-batches.
+         * @return A copy of this accumulator, except for the already persisted sub-batches
+         */
+        public Accumulator getAccumulatorForRollback() {
+            Accumulator accumulatorForRollback = new Accumulator();
+            accumulatorForRollback.accIndex = this.accIndex;
+            accumulatorForRollback.accStartDate = this.accStartDate;
+            accumulatorForRollback.accTransactionIds = this.accTransactionIds;
+            Set<String> destinations = this.batch.getDestinations();
+            
             for (String destination : destinations) {
                 if (!batch.isPersisted(destination)) {
-                    ArrayList<CygnusEvent> cygnusEvents = batch.getEvents(destination);
-
-                    if (rollbackQueues.containsKey(destination)) {
-                        rollbackQueues.get(destination).addAll(cygnusEvents);
-                    } else {
-                        rollbackQueues.put(destination, cygnusEvents);
-                    } // if else
+                    ArrayList<CygnusEvent> events = batch.getEvents(destination);
+                    accumulatorForRollback.batch.addEvents(destination, events);
                 } // if
             } // for
-        } // add
-    } // RollbackQueues
+
+            return accumulatorForRollback;
+        } // getAccumulatorForRollback
+        
+    } // Accumulator
 
     // TDB: to be removed once all the sinks migrate to persistBatch method
     /**
