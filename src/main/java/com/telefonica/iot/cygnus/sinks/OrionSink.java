@@ -301,8 +301,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                LOGGER.info("Rollbacking");
-                rollbackedAccumulations.add(rollbackedAccumulation.getAccumulatorForRollback());
+                LOGGER.info("Rollbacking again");
                 LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
             } else {
@@ -763,8 +762,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             Set<String> destinations = this.batch.getDestinations();
             
             for (String destination : destinations) {
-                if (!batch.isPersisted(destination)) {
-                    ArrayList<CygnusEvent> events = batch.getEvents(destination);
+                if (!this.batch.isPersisted(destination)) {
+                    ArrayList<CygnusEvent> events = this.batch.getEvents(destination);
                     accumulatorForRollback.batch.addEvents(destination, events);
                 } // if
             } // for
