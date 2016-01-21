@@ -244,14 +244,13 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 } // try catch
 
                 if (ttl == -1) {
+                    LOGGER.info("Rollbacking (id=" + event.hashCode() + ", ttl=-1)");
                     txn.rollback();
                     txn.commit();
                     txn.close();
-                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
                     return Status.BACKOFF;
                 } else if (ttl == 0) {
-                    LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
-                            + event.hashCode() + ", ttl=0)");
+                    LOGGER.warn("The event TTL has expired, no more rollbacks (id=" + event.hashCode() + ", ttl=0)");
                     txn.commit();
                     txn.close();
                     return Status.READY;
@@ -259,9 +258,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ttl--;
                     String newTTLStr = Integer.toString(ttl);
                     event.getHeaders().put(Constants.FLUME_HEADER_TTL, newTTLStr);
+                    LOGGER.info("Rollbacking (id=" + event.hashCode() + ", ttl=" + ttl + ")");
                     txn.rollback();
-                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
-                            + ")");
                     return Status.BACKOFF;
                 } // if else
             } else {
@@ -275,7 +273,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     LOGGER.warn(e.getMessage());
                 } // if else if
 
-                LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
                 txn.commit();
                 txn.close();
                 return Status.READY;
@@ -305,8 +302,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                LOGGER.info("Rollbacking again");
-                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + ")");
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
             } else {
                 if (e instanceof CygnusRuntimeError) {
@@ -319,7 +315,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     LOGGER.warn(e.getMessage());
                 } // if else if
 
-                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
                 return Status.READY;
             } // if else
         } // try catch
@@ -418,9 +413,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                LOGGER.info("Rollbacking");
+                LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + ")");
                 rollbackedAccumulations.add(accumulator.getAccumulatorForRollback());
-                LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
@@ -436,7 +430,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     LOGGER.warn(e.getMessage());
                 } // if else if
 
-                LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
