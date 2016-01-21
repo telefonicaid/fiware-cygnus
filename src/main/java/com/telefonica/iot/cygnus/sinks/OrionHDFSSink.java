@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -50,7 +50,7 @@ import org.json.simple.parser.JSONParser;
  * @author frb
  * 
  * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionHDFSSink.md
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_hdfs_sink.md
  */
 public class OrionHDFSSink extends OrionSink {
 
