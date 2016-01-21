@@ -36,6 +36,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -84,14 +85,21 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     protected int batchTimeout;
     // accumulator utility
     private final Accumulator accumulator;
+    // rollback queues
+    private final ArrayList<Accumulator> rollbackedAccumulations;
     
     /**
      * Constructor.
      */
     public OrionSink() {
         super();
+        
+        // create the accuulator utility
         accumulator = new Accumulator();
         accumulator.initialize(new Date().getTime());
+        
+        // crete the rollbacking queue
+        rollbackedAccumulations = new ArrayList<Accumulator>();
     } // OrionSink
     
     /**
@@ -124,12 +132,29 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     } // configure
 
     @Override
+    public void start() {
+        super.start();
+    } // start
+    
+    @Override
     public void stop() {
         super.stop();
     } // stop
 
     @Override
     public Status process() throws EventDeliveryException {
+        // TBD: remove the special case of batchSize=1 when all the sinks have migrated to persistBatch
+        if (batchSize == 1) {
+            return processOneByOne();
+        } else if (rollbackedAccumulations.isEmpty()) {
+            return processNewBatches();
+        } else {
+            return processRollbackedBatches();
+        } // if else
+    } // process
+    
+    // TBD: remove this when all sinks have migrated to persistBatch
+    private Status processOneByOne() throws EventDeliveryException {
         // get the channel
         Channel ch = null;
         
@@ -151,8 +176,187 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             throw new EventDeliveryException(e);
         } // try catch
         
-        // TBD: remove the special case of batchSize=1 when all the sinks have migrated to persistBatch
-        if (batchSize == 1) {
+        // get an event
+        Event event = null;
+
+        try {
+            event = ch.take();
+        } catch (Exception e) {
+            LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
+
+        // check if the event is null
+        if (event == null) {
+            txn.commit();
+            txn.close();
+            return Status.BACKOFF; // slow down the sink since no defaultBatch are available
+        } // if
+
+        // set the transactionId in MDC
+        try {
+            MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
+                    event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
+            MDC.put(Constants.LOG4J_SVC,
+                    event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE));
+            MDC.put(Constants.LOG4J_SUBSVC,
+                    event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH));
+        } catch (Exception e) {
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
+        } // catch // catch
+
+        LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
+                + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
+
+        // parse the event
+        NotifyContextRequest notification = null;
+
+        try {
+            notification = parseEventBody(event);
+        } catch (Exception e) {
+            LOGGER.debug("There was some problem when parsing the notifed context element. Details="
+                    + e.getMessage());
+        } // try catch
+
+        try {
+            persistOne(event.getHeaders(), notification);
+            LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
+            txn.commit();
+            txn.close();
+            return Status.READY;
+        } catch (Exception e) {
+            LOGGER.debug(Arrays.toString(e.getStackTrace()));
+
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                LOGGER.error(e.getMessage());
+
+                // check the event HEADER_TTL
+                int ttl;
+                String ttlStr = event.getHeaders().get(Constants.FLUME_HEADER_TTL);
+
+                try {
+                    ttl = Integer.parseInt(ttlStr);
+                } catch (NumberFormatException nfe) {
+                    ttl = 0;
+                    LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
+                          +  ", " + nfe.getMessage() + ")");
+                } // try catch
+
+                if (ttl == -1) {
+                    txn.rollback();
+                    txn.commit();
+                    txn.close();
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
+                    return Status.BACKOFF;
+                } else if (ttl == 0) {
+                    LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
+                            + event.hashCode() + ", ttl=0)");
+                    txn.commit();
+                    txn.close();
+                    return Status.READY;
+                } else {
+                    ttl--;
+                    String newTTLStr = Integer.toString(ttl);
+                    event.getHeaders().put(Constants.FLUME_HEADER_TTL, newTTLStr);
+                    txn.rollback();
+                    LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
+                            + ")");
+                    return Status.BACKOFF;
+                } // if else
+            } else {
+                if (e instanceof CygnusRuntimeError) {
+                    LOGGER.error(e.getMessage());
+                } else if (e instanceof CygnusBadConfiguration) {
+                    LOGGER.warn(e.getMessage());
+                } else if (e instanceof CygnusBadContextData) {
+                    LOGGER.warn(e.getMessage());
+                } else {
+                    LOGGER.warn(e.getMessage());
+                } // if else if
+
+                LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
+                txn.commit();
+                txn.close();
+                return Status.READY;
+            } // if else
+        } // try catch
+    } // processOneByOne
+    
+    private Status processRollbackedBatches() throws EventDeliveryException {
+        Accumulator rollbackedAccumulation;
+        
+        // get a rollbacked accumulation
+        if (rollbackedAccumulations.isEmpty()) {
+            return Status.BACKOFF;
+        } else {
+            rollbackedAccumulation = rollbackedAccumulations.get(0);
+        } // if else
+        
+        // try persisting the rollbacked accumulation
+        try {
+            persistBatch(rollbackedAccumulation.getBatch());
+            LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+            rollbackedAccumulations.remove(0);
+            return Status.READY;
+        } catch (Exception e) {
+            LOGGER.debug(Arrays.toString(e.getStackTrace()));
+
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                LOGGER.error(e.getMessage());
+                LOGGER.info("Rollbacking again");
+                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
+            } else {
+                if (e instanceof CygnusRuntimeError) {
+                    LOGGER.error(e.getMessage());
+                } else if (e instanceof CygnusBadConfiguration) {
+                    LOGGER.warn(e.getMessage());
+                } else if (e instanceof CygnusBadContextData) {
+                    LOGGER.warn(e.getMessage());
+                } else {
+                    LOGGER.warn(e.getMessage());
+                } // if else if
+
+                LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                return Status.READY;
+            } // if else
+        } // try catch
+    } // processRollbackedBatches
+    
+    private Status processNewBatches() throws EventDeliveryException {
+        // get the channel
+        Channel ch = null;
+        
+        try {
+            ch = getChannel();
+        } catch (Exception e) {
+            LOGGER.error("Channel error (The channel could not be got. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
+
+        // start a Flume transaction (it is not the same than a Cygnus transaction!)
+        Transaction txn = null;
+        
+        try {
+            txn = ch.getTransaction();
+            txn.begin();
+        } catch (Exception e) {
+            LOGGER.error("Channel error (The Flume transaction could not be started. Details=" + e.getMessage() + ")");
+            throw new EventDeliveryException(e);
+        } // try catch
+
+        // get and process as many events as the batch size
+        int currentIndex;
+
+        for (currentIndex = accumulator.getAccIndex(); currentIndex < batchSize; currentIndex++) {
+            // check if the batch accumulation timeout has been reached
+            if ((new Date().getTime() - accumulator.getAccStartDate()) > (batchTimeout * 1000)) {
+                LOGGER.info("Batch accumulation time reached, the batch will be processed as it is");
+                break;
+            } // if
+
             // get an event
             Event event = null;
 
@@ -165,9 +369,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             // check if the event is null
             if (event == null) {
+                accumulator.setAccIndex(currentIndex);
                 txn.commit();
                 txn.close();
-                return Status.BACKOFF; // slow down the sink since no defaultBatch are available
+                return Status.BACKOFF; // slow down the sink since no events are available
             } // if
 
             // set the transactionId, fiwareservice and fiwareservicepath in MDC
@@ -180,182 +385,65 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH));
             } catch (Exception e) {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
-            } // catch // catch
+            } // catch
 
-            LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
-                    + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
-
-            // parse the event
-            NotifyContextRequest notification = null;
-            
+            // parse the event and accumulate it
             try {
-                notification = parseEventBody(event);
+                LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
+                        + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
+                NotifyContextRequest notification = parseEventBody(event);
+                accumulator.accumulate(event.getHeaders(), notification);
             } catch (Exception e) {
                 LOGGER.debug("There was some problem when parsing the notifed context element. Details="
                         + e.getMessage());
             } // try catch
-            
-            try {
-                persistOne(event.getHeaders(), notification);
-                LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
+        } // for
+
+        // save the current index for next run of the process() method
+        accumulator.setAccIndex(currentIndex);
+
+        try {
+            if (accumulator.getAccIndex() != 0) {
+                persistBatch(accumulator.getBatch());
+            } // if
+
+            LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+            accumulator.initialize(new Date().getTime());
+            txn.commit();
+            txn.close();
+            return Status.READY;
+        } catch (Exception e) {
+            LOGGER.debug(Arrays.toString(e.getStackTrace()));
+
+            // rollback only if the exception is about a persistence error
+            if (e instanceof CygnusPersistenceError) {
+                LOGGER.error(e.getMessage());
+                LOGGER.info("Rollbacking");
+                rollbackedAccumulations.add(accumulator.getAccumulatorForRollback());
+                LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+                accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
-                return Status.READY;
-            } catch (Exception e) {
-                LOGGER.debug(Arrays.toString(e.getStackTrace()));
-            
-                // rollback only if the exception is about a persistence error
-                if (e instanceof CygnusPersistenceError) {
+                return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
+            } else {
+                if (e instanceof CygnusRuntimeError) {
                     LOGGER.error(e.getMessage());
-
-                    // check the event HEADER_TTL
-                    int ttl;
-                    String ttlStr = event.getHeaders().get(Constants.FLUME_HEADER_TTL);
-
-                    try {
-                        ttl = Integer.parseInt(ttlStr);
-                    } catch (NumberFormatException nfe) {
-                        ttl = 0;
-                        LOGGER.error("Invalid TTL value (id=" + event.hashCode() + ", ttl=" + ttlStr
-                              +  ", " + nfe.getMessage() + ")");
-                    } // try catch
-
-                    if (ttl == -1) {
-                        txn.rollback();
-                        txn.commit();
-                        txn.close();
-                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=-1)");
-                        return Status.BACKOFF;
-                    } else if (ttl == 0) {
-                        LOGGER.warn("The event TTL has expired, it is no more re-injected in the channel (id="
-                                + event.hashCode() + ", ttl=0)");
-                        txn.commit();
-                        txn.close();
-                        return Status.READY;
-                    } else {
-                        ttl--;
-                        String newTTLStr = Integer.toString(ttl);
-                        event.getHeaders().put(Constants.FLUME_HEADER_TTL, newTTLStr);
-                        txn.rollback();
-                        LOGGER.info("An event was put again in the channel (id=" + event.hashCode() + ", ttl=" + ttl
-                                + ")");
-                        return Status.BACKOFF;
-                    } // if else
+                } else if (e instanceof CygnusBadConfiguration) {
+                    LOGGER.warn(e.getMessage());
+                } else if (e instanceof CygnusBadContextData) {
+                    LOGGER.warn(e.getMessage());
                 } else {
-                    if (e instanceof CygnusRuntimeError) {
-                        LOGGER.error(e.getMessage());
-                    } else if (e instanceof CygnusBadConfiguration) {
-                        LOGGER.warn(e.getMessage());
-                    } else if (e instanceof CygnusBadContextData) {
-                        LOGGER.warn(e.getMessage());
-                    } else {
-                        LOGGER.warn(e.getMessage());
-                    } // if else if
-                    
-                    LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
-                    txn.commit();
-                    txn.close();
-                    return Status.READY;
-                } // if else
-            } // try catch
-        } else {
-            // get and process as many events as the batch size
-            int currentIndex;
+                    LOGGER.warn(e.getMessage());
+                } // if else if
 
-            for (currentIndex = accumulator.getAccIndex(); currentIndex < batchSize; currentIndex++) {
-                // check if the batch accumulation timeout has been reached
-                if ((new Date().getTime() - accumulator.getAccStartDate()) > (batchTimeout * 1000)) {
-                    LOGGER.info("Batch accumulation time reached, the batch will be processed as it is");
-                    break;
-                } // if
-
-                // get an event
-                Event event = null;
-
-                try {
-                    event = ch.take();
-                } catch (Exception e) {
-                    LOGGER.error("Channel error (The event could not be got. Details=" + e.getMessage() + ")");
-                    throw new EventDeliveryException(e);
-                } // try catch
-
-                // check if the event is null
-                if (event == null) {
-                    accumulator.setAccIndex(currentIndex);
-                    txn.commit();
-                    txn.close();
-                    return Status.BACKOFF; // slow down the sink since no events are available
-                } // if
-
-                // set the transactionId, fiwareservice and fiwareservicepath in MDC
-                try {
-                    MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID,
-                            event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
-                    MDC.put(Constants.LOG4J_SVC,
-                            event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE));
-                    MDC.put(Constants.LOG4J_SUBSVC,
-                            event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH));
-                } catch (Exception e) {
-                    LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                } // catch
-
-                // parse the event and accumulate it
-                try {
-                    LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
-                            + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
-                    NotifyContextRequest notification = parseEventBody(event);
-                    accumulator.accumulate(event.getHeaders(), notification);
-                } catch (Exception e) {
-                    LOGGER.debug("There was some problem when parsing the notifed context element. Details="
-                            + e.getMessage());
-                } // try catch
-            } // for
-            
-            // save the current index for next run of the process() method
-            accumulator.setAccIndex(currentIndex);
-            
-            try {
-                if (accumulator.getAccIndex() != 0) {
-                    persistBatch(accumulator.getBatch());
-                } // if
-                
                 LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
                 return Status.READY;
-            } catch (Exception e) {
-                LOGGER.debug(Arrays.toString(e.getStackTrace()));
-
-                // rollback only if the exception is about a persistence error
-                if (e instanceof CygnusPersistenceError) {
-                    LOGGER.error(e.getMessage());
-                    doBatchRollback();
-                    LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    txn.close();
-                    return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
-                } else {
-                    if (e instanceof CygnusRuntimeError) {
-                        LOGGER.error(e.getMessage());
-                    } else if (e instanceof CygnusBadConfiguration) {
-                        LOGGER.warn(e.getMessage());
-                    } else if (e instanceof CygnusBadContextData) {
-                        LOGGER.warn(e.getMessage());
-                    } else {
-                        LOGGER.warn(e.getMessage());
-                    } // if else if
-                    
-                    LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    txn.close();
-                    return Status.READY;
-                } // if else
-            } // try catch
-        } // if else
-    } // process
+            } // if else
+        } // try catch
+    } // processNewBatches
 
     /**
      * Given an event, it is parsed before it is persisted. Depending on the content type, it is appropriately
@@ -411,12 +499,19 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         
         // accumulated events
         private Batch batch;
-        // list of Flume events taken from the channel, it is necessary for an hipothetical massive decreasing of the
-        // ttl when rollbacking
-        private ArrayList<Event> flumeEvents;
         private long accStartDate;
         private int accIndex;
         private String accTransactionIds;
+        
+        /**
+         * Constructor.
+         */
+        public Accumulator() {
+            batch = new Batch();
+            accStartDate = 0;
+            accIndex = 0;
+            accTransactionIds = null;
+        } // Accumulator
         
         public long getAccStartDate() {
             return accStartDate;
@@ -619,8 +714,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         } // if
                         
                         CygnusEvent cygnusEvent = new CygnusEvent(
-                                recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i], destination,
-                                contextElement);
+                                recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
+                                destination, contextElement);
                         list.add(cygnusEvent);
                     } // for
                 } // for
@@ -642,8 +737,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         } // if
                         
                         CygnusEvent cygnusEvent = new CygnusEvent(
-                                recvTimeTs, service, groupedServicePaths[i], groupedEntities[i], destination,
-                                contextElement);
+                                recvTimeTs, service, groupedServicePaths[i], groupedEntities[i],
+                                destination, contextElement);
                         list.add(cygnusEvent);
                     } // for
                 } // for
@@ -663,11 +758,28 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             accTransactionIds = "";
         } // initialize
         
+        /**
+         * Gets a copy of this accumulator, except for the already persisted sub-batches.
+         * @return A copy of this accumulator, except for the already persisted sub-batches
+         */
+        public Accumulator getAccumulatorForRollback() {
+            Accumulator accumulatorForRollback = new Accumulator();
+            accumulatorForRollback.accIndex = this.accIndex;
+            accumulatorForRollback.accStartDate = this.accStartDate;
+            accumulatorForRollback.accTransactionIds = this.accTransactionIds;
+            Set<String> destinations = this.batch.getDestinations();
+            
+            for (String destination : destinations) {
+                if (!this.batch.isPersisted(destination)) {
+                    ArrayList<CygnusEvent> events = this.batch.getEvents(destination);
+                    accumulatorForRollback.batch.addEvents(destination, events);
+                } // if
+            } // for
+
+            return accumulatorForRollback;
+        } // getAccumulatorForRollback
+        
     } // Accumulator
-    
-    private void doBatchRollback() {
-        // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/563
-    } // doBatchRollback
 
     // TDB: to be removed once all the sinks migrate to persistBatch method
     /**

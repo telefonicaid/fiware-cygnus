@@ -63,7 +63,7 @@ public class CygnusEvent {
     public long getRecvTimeTs() {
         return recvTimeTs;
     } // getRecvTimeTs
-
+    
     /**
      * Gets the service.
      * @return The service
