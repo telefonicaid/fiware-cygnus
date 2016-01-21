@@ -23,3 +23,4 @@
 - [HARDENING] Fix libthrift installation (#706)
 - [BUG] Fix of the Cygnus installation using yum (#652)
 - [HARDENING] Finish a transaction only when it is really persisted, not rollbacked (#715)
+- [FEATURE] Add batching support to OrionMongoSink (#570)

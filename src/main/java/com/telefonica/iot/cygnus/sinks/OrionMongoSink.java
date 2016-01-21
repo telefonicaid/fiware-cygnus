@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,26 +18,20 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.utils.Constants;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Map;
+import org.bson.Document;
 
 /**
- * OrionMongoSink will be in charge of persisting Orion context data in a historic fashion within a MongoDB deployment.
- * 
- * The way this sink will build the historics will be very similar to the already existent OrionHDFSSink,
- * OrionMySQLSink and OrionCKANSink, i.e. by appending ("to append" has several means, deppending on the final backend)
- * new raw data to the already existent one.
- * 
- * Because raw data is stored, this sinks differentiates from OrionSTHSink (issue #19), which is in charge of updating
- * already exitent data with new notified data since the goal is to offer aggregated measures to the end user.
- * Nevertheless, in the future most probably the usage of the Mongo Aggregation Framework will allow us to generate
- * such aggregated measures based on the stored raw data; in that case the usage of OrionSTHSink becomes deprecated.
- * 
  * @author frb
  * @author xdelox
+ * 
+ * Detailed documentation can be found at:
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
 
@@ -50,123 +44,240 @@ public class OrionMongoSink extends OrionMongoBaseSink {
 
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values
-        Long recvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
-        
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
-        } // if else
-        
-        for (int i = 0; i < servicePaths.length; i++) {
-            servicePaths[i] = "/" + servicePaths[i]; // this sink uses the removed initial slash
-        } // for
+        Accumulator accumulator = new Accumulator();
+        accumulator.initialize(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getBatch());
+    } // persistOne
 
-        // human readable version of the reception time
-        String recvTime = Utils.getHumanReadable(recvTimeTs, true);
-
-        // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
-        // than checking if it exits and then creating it
-        String dbName = buildDbName(fiwareService);
-        backend.createDatabase(dbName);
-        
-        // collection name container
-        String collectionName = null;
-
-        // create the collection at this stage, if the data model is collection-per-service-path
-        if (dataModel == DataModel.DMBYSERVICEPATH) {
-            for (String fiwareServicePath : servicePaths) {
-                collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, false, null, null,
-                        fiwareService);
-                backend.createCollection(dbName, collectionName);
-            } // for
+    @Override
+    void persistBatch(Batch batch) throws Exception {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
         } // if
+ 
+        // iterate on the destinations, for each one a single create / append will be performed
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // get an aggregator for this destination and initialize it
+            MongoDBAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.initialize(subBatch.get(0));
+
+            for (CygnusEvent cygnusEvent : subBatch) {
+                aggregator.aggregate(cygnusEvent);
+            } // for
+            
+            // persist the fieldValues
+            persistAggregation(aggregator);
+            batch.setPersisted(destination);
+        } // for
+    } // persistBatch
+    
+    /**
+     * Class for aggregating batches.
+     */
+    private abstract class MongoDBAggregator {
         
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
+        // string containing the data fieldValues
+        protected ArrayList<Document> aggregation;
+
+        protected String service;
+        protected String servicePath;
+        protected String entity;
+        protected String attribute;
+        protected String dbName;
+        protected String collectionName;
         
-        for (int i = 0; i < contextResponses.size(); i++) {
-            NotifyContextRequest.ContextElementResponse contextElementResponse;
-            contextElementResponse = (NotifyContextRequest.ContextElementResponse) contextResponses.get(i);
-            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
+        public MongoDBAggregator() {
+            aggregation = new ArrayList<Document>();
+        } // MongoDBAggregator
+        
+        public ArrayList<Document> getAggregation() {
+            return aggregation;
+        } // getAggregation
+        
+        public String getDbName() {
+            return dbName;
+        } // getDbName
+        
+        public String getCollectionName() {
+            return collectionName;
+        } // getCollectionName
+        
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            entity = cygnusEvent.getEntity();
+            attribute = cygnusEvent.getAttribute();
+            dbName = buildDbName(service);
+            collectionName = buildCollectionName(dbName, "/" + servicePath, entity, attribute, false, null, null,
+                    service);
+        } // initialize
+        
+        public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
+        
+    } // MongoDBAggregator
+    
+    /**
+     * Class for aggregating batches in row mode.
+     */
+    private class RowAggregator extends MongoDBAggregator {
+
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // create the collection at this stage, if the data model is collection-per-entity
-            if (dataModel == DataModel.DMBYENTITY) {
-                collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], null, false,
-                        entityId, entityType, fiwareService);
-                backend.createCollection(dbName, collectionName);
-            } // if
-            
-            // iterate on all this entity's attributes, if there are attributes
-            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                         + ", type=" + entityType + ")");
-                continue;
+                return;
             } // if
-
-            HashMap attrs = new HashMap();
-            HashMap mds = new HashMap();
-
-            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
-                // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.DMBYATTRIBUTE  && rowAttrPersistence) {
-                    collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], attrName,
-                            false, entityId, entityType, fiwareService);
-                    backend.createCollection(dbName, collectionName);
-                } // if
-
-                if (this.rowAttrPersistence) {
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
-                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000L
-                            + "," + recvTime + "," + entityId + "," + entityType + ","
-                            + attrName + "," + attrType + "," + attrValue + "," + attrMetadata);
-                    this.backend.insertContextDataRaw(
-                            dbName, collectionName, recvTimeTs / 1000L, recvTime,
-                            entityId, entityType, attrName, attrType, attrValue, attrMetadata);
-                } else {
-                    attrs.put(attrName, attrValue);
-                    mds.put(attrName + "_md", attrMetadata);
-                }
-
+                Document doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
+                aggregation.add(doc);
             } // for
-            if (!this.rowAttrPersistence) {
-                if (dataModel == DataModel.DMBYATTRIBUTE) {
-                    LOGGER.warn("Persisting data by columns is useless for collection-per-attribute data model");
-                } else {
-                    LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
-                            + dbName + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000L
-                            + "," + recvTime + "," + entityId + "," + entityType + ","
-                            + attrs.toString() + "," + mds.toString() + "]");
-                    this.backend.insertContextDataRaw(
-                            dbName, collectionName, recvTimeTs / 1000L,
-                            recvTime, entityId, entityType, attrs, mds);
-                }
-            }
-        } // for
-    } // persistOne
+        } // aggregate
+        
+        private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
+                String attrType, String attrValue) {
+            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+        
+            switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    doc.append("entityId", entityId)
+                            .append("entityType", entityType)
+                            .append("attrName", attrName)
+                            .append("attrType", attrType)
+                            .append("attrValue", attrValue);
+                    break;
+                case DMBYENTITY:
+                    doc.append("attrName", attrName)
+                            .append("attrType", attrType)
+                            .append("attrValue", attrValue);
+                    break;
+                case DMBYATTRIBUTE:
+                    doc.append("attrType", attrType)
+                            .append("attrValue", attrValue);
+                    break;
+                default:
+                    return null; // this will never be reached
+            } // switch
+            
+            return doc;
+        } // createDoc
+
+    } // RowAggregator
     
-    @Override
-    void persistBatch(Batch batch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    } // persistBatch
+    /**
+     * Class for aggregating batches in column mode.
+     */
+    private class ColumnAggregator extends MongoDBAggregator {
+
+        @Override
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            super.initialize(cygnusEvent);
+        } // initialize
+        
+        @Override
+        public void aggregate(CygnusEvent cygnusEvent) throws Exception {
+            // get the event headers
+            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+
+            // get the event body
+            ContextElement contextElement = cygnusEvent.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
+                    + entityType + ")");
+            
+            // iterate on all this context element attributes, if there are attributes
+            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+            if (contextAttributes == null || contextAttributes.isEmpty()) {
+                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                        + ", type=" + entityType + ")");
+                return;
+            } // if
+            
+            Document doc = createDoc(recvTimeTs, entityId, entityType);
+            
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(false);
+                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
+                        + attrType + ")");
+                doc.append(attrName, attrValue);
+            } // for
+            
+            aggregation.add(doc);
+        } // aggregate
+        
+        private Document createDoc(long recvTimeTs, String entityId, String entityType) {
+            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+
+            switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    doc.append("entityId", entityId).append("entityType", entityType);
+                    break;
+                case DMBYENTITY:
+                    break;
+                case DMBYATTRIBUTE:
+                    return null; // this will never be reached
+                default:
+                    return null; // this will never be reached
+            } // switch
+            
+            return doc;
+        } // createDoc
+        
+    } // ColumnAggregator
+    
+    private MongoDBAggregator getAggregator(boolean rowAttrPersistence) {
+        if (rowAttrPersistence) {
+            return new RowAggregator();
+        } else {
+            return new ColumnAggregator();
+        } // if else
+    } // getAggregator
+    
+    private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
+        ArrayList<Document> aggregation = aggregator.getAggregation();
+        String dbName = aggregator.getDbName();
+        String collectionName = aggregator.getCollectionName();
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+                + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
+        backend.createDatabase(dbName);
+        backend.createCollection(dbName, collectionName);
+        backend.insertContextDataRaw(dbName, collectionName, aggregation);
+    } // persistAggregation
 
 } // OrionMongoSink
