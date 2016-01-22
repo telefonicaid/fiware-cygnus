@@ -10,6 +10,7 @@ Content:
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
          * [Hashing based collections](#section2.3.1)
+         * [About batching](#section2.3.2)
 * [Programmers guide](#section4)
     * [`OrionMongoSink` class](#section4.1)
     * [`MongoBackend` class](#section4.2)
@@ -205,6 +206,8 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | should_hash | no | false | true for collection names based on a hash, false for human redable collections |
 | db_prefix | no | sth_ |
 | collection_prefix | no | sth_ |
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
 
@@ -223,6 +226,8 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.should_hash = false
     cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+    cygnusagent.sinks.mongo-sink.batch_size = 100
+    cygnusagent.sinks.mongo-sink.batch_timeout = 30
 
 [Top](#top)
 
@@ -236,6 +241,17 @@ Use `OrionMongoSink` if you are looking for a Json-based document storage not gr
 In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
 
 In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
+
+[Top](#top)
+
+####<a name="section2.3.2"></a>About batching
+As explained in the [programmers guide](#section3), `OrionMongoSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+
+The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+By default, `OrionMongoSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 

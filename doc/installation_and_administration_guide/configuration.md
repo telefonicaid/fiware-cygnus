@@ -228,6 +228,10 @@ cygnusagent.sinks.mongo-sink.should_hash = false
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mongo-sink.attr_persistence = column
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.mongo-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.mongo-sink.batch_timeout = 30
 
 # ============================================
 # OrionSTHSink configuration
