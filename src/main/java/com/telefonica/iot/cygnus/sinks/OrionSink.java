@@ -708,7 +708,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
-                                destination, contextElement);
+                                destination, contextElement.filter(destination));
                         list.add(cygnusEvent);
                     } // for
                 } // for
