@@ -1,19 +1,9 @@
-#<a name="top"></a>Cygnus configuration
+#<a name="top"></a>Cygnus agent configuration
 Content:
 
 * [Introduction](#section1)
 * [`cygnus_instance_<id>.conf`](#section2)
 * [`agent_<id>.conf`](#section3)
-* [`flume-env.sh`](#section4)
-* [`grouping_rules.conf`](#section5)
-* [`log4j.properties`](#section6)
-* [Configuration examples](#section7)
-    * [Single source, single storage (basic configuration)](#section7.1)
-    * [Single source, multiple storages](#section7.2)
-    * [Single source, single storage, parallel sinking](#section7.3)
-    * [Single source, multiple storages, parallel sinking](#section7.4)
-    * [Multiple sources](#section7.5)
-    * [Using interceptors](#section7.6)
 
 ##<a name="section1"></a>Introduction
 Cygnus is configured through two different files:
@@ -228,6 +218,10 @@ cygnusagent.sinks.mongo-sink.should_hash = false
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mongo-sink.attr_persistence = column
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.mongo-sink.batch_size = 100
+# timeout for batch accumulation
+cygunsagent.sinks.mongo-sink.batch_timeout = 30
 
 # ============================================
 # OrionSTHSink configuration
@@ -319,152 +313,3 @@ cygnusagent.channels.mkafka-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
-
-##<a name="section4"></a>`flume-env.sh`
-The file `flume-env.sh` can be instantiated from a template given in the Cygnus repository, `conf/flume-env.sh.template`. 
-
-```
-#=============================================
-# To be put in APACHE_FLUME_HOME/conf/flume-env.sh
-#=============================================
-
-#JAVA_HOME=/usr/lib/jvm/java-6-sun
-
-# Give Flume more memory and pre-allocate, enable remote monitoring via JMX
-#JAVA_OPTS="-Xms100m -Xmx200m -Dcom.sun.management.jmxremote"
-
-# Note that the Flume conf directory is always included in the classpath.
-#FLUME_CLASSPATH="/path/to/the/flume/classpath"
-```
-
-`flume-env.sh` file has been inherited from Apache Flume, and it is used in order to configure certain Flume parameters such as an alternative classpath, some Java options etc.
-
-[Top](#top)
-
-##<a name="section5"></a>`grouping_rules.conf`
-The file `grouping_rules.conf` can be instantiated from a template given in the Cygnus repository, `conf/grouping_rules.conf.template`. 
-
-The rules are writting in Json format. The following Json code is just an example:
-
-```
-{
-    "grouping_rules": [
-        {
-            "id": 1,
-            "fields": [
-                ...
-            ],
-            "regex": "...",
-            "destination": "...",
-            "fiware_service_path": "..."
-        },
-        ...
-    ]
-}
-```
-
-Being:
-
-* <b>id</b>: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful in the future.
-* <b>fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important since the concatenation is made from left to right.
-* <b>regex</b>: Java-like regular expression to be applied on the concatenated fields. Special characters like '\' must be escaped ('\' is escaped as "\\\\").
-* <b>destination</b>: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of MySQL, Mongo and STH this sufixes the table/collection name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
-* <b>fiware\_service\_path</b>: New `fiware-servicePath` replacing the notified one. The sinks will translate this into the name of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, Mongo and STH this prefixes the table/collection name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
-
-[Top](#top)
-
-##<a name="section6"></a>`log4j.properties`
-The file `log4j.properties` can be instantiated from a template given in the Cygnus repository, `conf/log4j.properties.template`.
-
-Its content should not be edited unless some of the default values for log path, file name, logging level or appender are wanted to be changed.
-
-```
-# Define some default values.
-# These can be overridden by system properties, e.g. the following logs in the standard output, which is very useful
-# for testing purposes:
-# -Dflume.root.logger=DEBUG,console
-flume.root.logger=INFO,LOGFILE
-#flume.root.logger=DEBUG,console
-flume.log.dir=/var/log/cygnus/
-flume.log.file=cygnus.log
-
-# Logging levels for certain components.
-log4j.logger.org.apache.flume.lifecycle = INFO
-log4j.logger.org.jboss = WARN
-log4j.logger.org.mortbay = INFO
-log4j.logger.org.apache.avro.ipc.NettyTransceiver = WARN
-log4j.logger.org.apache.hadoop = INFO
-
-# Define the root logger to the system property "flume.root.logger".
-log4j.rootLogger=${flume.root.logger}
-
-# Stock log4j rolling file appender.
-# Default log rotation configuration.
-log4j.appender.LOGFILE=org.apache.log4j.RollingFileAppender
-log4j.appender.LOGFILE.MaxFileSize=100MB
-log4j.appender.LOGFILE.MaxBackupIndex=10
-log4j.appender.LOGFILE.File=${flume.log.dir}/${flume.log.file}
-log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
-log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-
-# Warning: If you enable the following appender it will fill up your disk if you don't have a cleanup job!
-# cleanup job example: find /var/log/cygnus -type f -mtime +30 -exec rm -f {} \;
-# This uses the updated rolling file appender from log4j-extras that supports a reliable time-based rolling policy.
-# See http://logging.apache.org/log4j/companions/extras/apidocs/org/apache/log4j/rolling/TimeBasedRollingPolicy.html
-# Add "DAILY" to flume.root.logger above if you want to use this.
-log4j.appender.DAILY=org.apache.log4j.rolling.RollingFileAppender
-log4j.appender.DAILY.rollingPolicy=org.apache.log4j.rolling.TimeBasedRollingPolicy
-log4j.appender.DAILY.rollingPolicy.ActiveFileName=${flume.log.dir}/${flume.log.file}
-log4j.appender.DAILY.rollingPolicy.FileNamePattern=${flume.log.dir}/${flume.log.file}.%d{yyyy-MM-dd}
-log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
-log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-
-# Console appender, i.e. printing logs in the standar output.
-# Add "console" to flume.root.logger above if you want to use this.
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.target=System.err
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-```
-
-[Top](#top)
-
-##<a name="section7"></a>Configuration examples
-###<a name="section7.1"></a>Single source, single storage (basic configuration)
-To be done
-
-[Top](#top)
-
-###<a name="section7.2"></a>Single source, multiple storages
-To be done
-
-[Top](#top)
-
-###<a name="section7.3"></a>Single source, single storage, parallel sinking
-To be done
-
-[Top](#top)
-
-###<a name="section7.4"></a>Single source, multiple storages, parallel sinking
-To be done
-
-[Top](#top)
-
-###<a name="section7.5"></a>Multiple sources 
-To be done
-
-[Top](#top)
-
-###<a name="section7.6"></a>Using interceptors
-Interceptors are components of the Flume agent architecture. Typically, such an agent is based on a source dealing with the input, a sink dealing with the output and a channel communicating them. The source processes the input, producing Flume events (an object based on a set of headers and a byte-based body) that are put in the channel; then the sink consumes the events by getting them from the channel. This basic architecture may be enriched by the addition of Interceptors, a chained sequence of Flume events preprocessors that <i>intercept</i> the events before they are put into the channel and performing one of these operations:
-
-* Drop the event.
-* Modify an existent header of the Flume event.
-* Add a new header to the Flume event.
-
-Interceptors should never modify the body part. Once an event is preprocessed, it is put in the channel as usual.
-
-As can be seen, this mechanism allows for very useful ways of enriching the basic Flume events a certain Flume source may generate. Let's see how Cygnus makes use of this concept in order to add certain information to the Flume events created from the Orion notifications.
-
-[Top](#top)
-

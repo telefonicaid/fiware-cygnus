@@ -34,9 +34,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.bson.Document;
 
@@ -112,47 +110,15 @@ public class MongoBackendImpl implements MongoBackend {
      * Inserts a new document in the given raw collection within the given database (row-like mode).
      * @param dbName
      * @param collectionName
-     * @param recvTimeTs
-     * @param recvTime
-     * @param entityId
-     * @param entityType
-     * @param attrName
-     * @param attrType
-     * @param attrValue
-     * @param attrMd
+     * @param aggregation
      * @throws Exception
      */
     @Override
-    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
-            String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
+    public void insertContextDataRaw(String dbName, String collectionName, ArrayList<Document> aggregation)
         throws Exception {
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
-        Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
-        
-        switch (dataModel) {
-            case DMBYSERVICEPATH:
-                doc.append("entityId", entityId)
-                        .append("entityType", entityType)
-                        .append("attrName", attrName)
-                        .append("attrType", attrType)
-                        .append("attrValue", attrValue);
-                break;
-            case DMBYENTITY:
-                doc.append("attrName", attrName)
-                        .append("attrType", attrType)
-                        .append("attrValue", attrValue);
-                break;
-            case DMBYATTRIBUTE:
-                doc.append("attrType", attrType)
-                        .append("attrValue", attrValue);
-                break;
-            default:
-                // this will never be reached
-        } // switch
-
-        LOGGER.debug("Inserting data=" + doc.toString() + " within collection=" + collectionName);
-        collection.insertOne(doc);
+        collection.insertMany(aggregation);
     } // insertContextDataRaw
     
     /**
@@ -369,62 +335,6 @@ public class MongoBackendImpl implements MongoBackend {
         
         return prepopulatedData;
     } // buildPrepopulatedPoints
-    
-    /**
-     * Inserts a new document in the given raw collection within the given database (column-like mode).
-     * changes.
-     * @param dbName
-     * @param collectionName
-     * @param recvTimeTs
-     * @param recvTime
-     * @param attrs
-     * @param entityId
-     * @param mds
-     * @param entityType
-     * @throws Exception
-     */
-    @Override
-    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
-                                     String entityId, String entityType, Map<String, String> attrs,
-                                     Map<String, String> mds) throws Exception {
-
-        MongoDatabase db = getDatabase(dbName);
-        MongoCollection collection = db.getCollection(collectionName);
-        Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
-
-        switch (dataModel) {
-            case DMBYSERVICEPATH:
-                doc.append("entityId", entityId)
-                        .append("entityType", entityType);
-
-                Iterator it = attrs.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    String attrName = (String) pair.getKey();
-                    String attrValue = (String) pair.getValue();
-                    doc.append(attrName, attrValue);
-                }
-
-                break;
-            case DMBYENTITY:
-                it = attrs.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    String attrName = (String) pair.getKey();
-                    String attrValue = (String) pair.getValue();
-                    doc.append(attrName, attrValue);
-                }
-                break;
-            case DMBYATTRIBUTE:
-                LOGGER.warn("Persistence by column is useless for Collection per attribute data model");
-                break;
-            default:
-                // this will never be reached
-        } // switch
-
-        LOGGER.debug("Inserting data=" + doc.toString() + " within collection=" + collectionName);
-        collection.insertOne(doc);
-    } // insertContextDataRaw
     
     /**
      * Gets a Mongo database.

@@ -17,7 +17,8 @@
  */
 package com.telefonica.iot.cygnus.backends.mongo;
 
-import java.util.Map;
+import java.util.ArrayList;
+import org.bson.Document;
 
 /**
  * Interface for those backends implementing the persistence in MongoDB.
@@ -46,19 +47,10 @@ public interface MongoBackend {
      * Inserts a new document in the given raw collection within the given database (row-like mode).
      * @param dbName
      * @param collectionName
-     * @param recvTimeTs
-     * @param recvTime
-     * @param entityId
-     * @param entityType
-     * @param attrName
-     * @param attrType
-     * @param attrValue
-     * @param attrMd
+     * @param aggregation
      * @throws Exception
      */
-    void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
-            String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
-        throws Exception;
+    void insertContextDataRaw(String dbName, String collectionName, ArrayList<Document> aggregation) throws Exception;
     
     /**
      * Inserts a new document in the given aggregated collection within the given database (row-like mode).
@@ -77,20 +69,6 @@ public interface MongoBackend {
     void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String recvTime,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception;
-    
-    /**
-     * Inserts a new document in the given raw collection within the given database (column-like mode).
-     * changes.
-     * @param dbName
-     * @param collectionName
-     * @param recvTime
-     * @param attrs
-     * @param mds
-     * @throws Exception
-     */
-    void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime,
-                                     String entityId, String entityType, Map<String, String> attrs,
-                                     Map<String, String> mds) throws Exception;
     
     /**
      * Stores in per-service/database "collection_names" collection the matching between a hash and the fields used to

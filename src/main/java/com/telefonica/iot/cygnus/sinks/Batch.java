@@ -31,14 +31,14 @@ import java.util.Set;
  */
 public class Batch {
     
-    private final HashMap<String, Boolean> persistedDestinations;
+    private final ArrayList<String> persistedDestinations;
     private final HashMap<String, ArrayList<CygnusEvent>> eventsPerDestination;
 
     /**
      * Constructor.
      */
     public Batch() {
-        persistedDestinations = new HashMap<String, Boolean>();
+        persistedDestinations = new ArrayList<String>();
         eventsPerDestination = new HashMap<String, ArrayList<CygnusEvent>>();
     } // Batch
 
@@ -69,7 +69,7 @@ public class Batch {
      * @param destination
      */
     public void setPersisted(String destination) {
-        persistedDestinations.put(destination, true);
+        persistedDestinations.add(destination);
     } // setPersisted;
 
     /**
@@ -78,7 +78,7 @@ public class Batch {
      * @return True if the given destination has been persistedDestinations, false otherwise
      */
     public boolean isPersisted(String destination) {
-        return persistedDestinations.get(destination);
+        return persistedDestinations.contains(destination);
     } // isPersisted
         
 } // Batch

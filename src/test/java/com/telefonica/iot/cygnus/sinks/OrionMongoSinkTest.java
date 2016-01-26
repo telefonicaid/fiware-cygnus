@@ -171,8 +171,7 @@ public class OrionMongoSinkTest {
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName);
-        doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataRaw(dbName, collectionName,
-                recvTimeTs, recvTime, entityId, entityType, attrName, attrType, attrValue, attrMd);
+        doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataRaw(dbName, collectionName, null);
     } // setUp
 
     /**

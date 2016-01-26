@@ -164,6 +164,27 @@ public class NotifyContextRequest {
             this.id = id;
         } // setId
         
+        /**
+         * Gets a copy containing only the given attribute.
+         * @param attrName
+         * @return
+         */
+        public ContextElement filter(String attrName) {
+            ContextElement contextElement = new ContextElement();
+            contextElement.type = this.type;
+            contextElement.isPattern = this.isPattern;
+            contextElement.id = this.id;
+            
+            for (ContextAttribute contextAttribute : this.attributes) {
+                if (contextAttribute.getName().equals(attrName)) {
+                    contextElement.attributes.add(contextAttribute);
+                    break;
+                } // if
+            } // for
+            
+            return contextElement;
+        } // filter
+        
     } // ContextElement
     
     /**
