@@ -25,3 +25,4 @@
 - [BUG] Update links referring to sinks documentation (#713)
 - [HARDENING] Finish a transaction only when it is really persisted, not rollbacked (#715)
 - [FEATURE] Add batching support to OrionMongoSink (#570)
+- [HARDENING] Document the Grouping Rules in the Installation and Administration Guide (#658)
