@@ -17,7 +17,7 @@ pages:
       - 'Installation via RPM': 'installation_and_administration_guide/install_with_rpm.md'
       - 'Installation via docker': 'installation_and_administration_guide/install_with_docker.md'
       - 'Installation from sources': 'installation_and_administration_guide/install_from_sources.md'
-      - 'Cygnus agent Configuration': 'installation_and_administration_guide/cygnus_agent_conf.md'
+      - 'Cygnus agent configuration': 'installation_and_administration_guide/cygnus_agent_conf.md'
       - 'Flume environmnet configuration': 'installation_and_administration_guide/flume_env_conf.md'
       - 'Grouping Rules configuration': 'installation_and_administration_guide/grouping_rules_conf.md'
       - 'log4j configuration': 'installation_and_administration_guide/log4j_conf.md'
