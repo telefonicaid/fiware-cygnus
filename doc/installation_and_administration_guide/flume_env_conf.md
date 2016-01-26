@@ -1,4 +1,4 @@
-#<a name="top"></a>Flume environmnet configuration
+#<a name="top"></a>Flume environment configuration
 The file `flume-env.sh` can be instantiated from a template given in the Cygnus repository, `conf/flume-env.sh.template`. 
 
 ```
