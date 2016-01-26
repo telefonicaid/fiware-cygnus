@@ -1,4 +1,4 @@
-#<a name="top"></a>Cygnus configuration
+#<a name="top"></a>Grouping Rules configuration
 The file `grouping_rules.conf` can be instantiated from a template given in the Cygnus repository, `conf/grouping_rules.conf.template`. 
 
 The rules are writting in Json format. The following Json code is just an example:

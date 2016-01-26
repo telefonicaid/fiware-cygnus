@@ -1,4 +1,4 @@
-#<a name="top"></a>Cygnus configuration
+#<a name="top"></a>log4j configuration
 The file `log4j.properties` can be instantiated from a template given in the Cygnus repository, `conf/log4j.properties.template`.
 
 Its content should not be edited unless some of the default values for log path, file name, logging level or appender are wanted to be changed.
