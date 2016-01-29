@@ -43,6 +43,7 @@ public class OrionPostgreSQLSink extends OrionSink {
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionPostgreSQLSink.class);
     private String postgresqlHost;
     private String postgresqlPort;
+    private String postgresqlDatabase;
     private String postgresqlUsername;
     private String postgresqlPassword;
     private boolean rowAttrPersistence;
@@ -70,6 +71,14 @@ public class OrionPostgreSQLSink extends OrionSink {
     protected String getPostgreSQLPort() {
         return postgresqlPort;
     } // getPostgreSQLPort
+
+    /**
+     * Gets the PostgreSQL database. It is protected due to it is only required for testing purposes.
+     * @return The PostgreSQL database
+     */
+    protected String getPostgreSQLDatabase() {
+        return postgresqlDatabase;
+    } // getPostgreSQLDatabase
 
     /**
      * Gets the PostgreSQL username. It is protected due to it is only required for testing purposes.
@@ -118,6 +127,8 @@ public class OrionPostgreSQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
         postgresqlPort = context.getString("postgresql_port", "3306");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+        postgresqlDatabase = context.getString("postgresql_database", "postgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database="+ postgresqlDatabase + ")");
         postgresqlUsername = context.getString("postgresql_username", "opendata");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
@@ -133,7 +144,7 @@ public class OrionPostgreSQLSink extends OrionSink {
     public void start() {
         // create the persistence backend
         LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
-        persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword);
+        persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword);
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start

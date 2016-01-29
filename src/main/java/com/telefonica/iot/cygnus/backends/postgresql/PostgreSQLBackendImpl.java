@@ -50,8 +50,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param postgresqlUsername
      * @param postgresqlPassword
      */
-    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword) {
-        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword);
+    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, 
+                                 String postgresqlUsername, String postgresqlPassword) {
+        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword);
     } // PostgreSQLBackendImpl
 
     /**
@@ -115,7 +116,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // try catch
 
         try {
-            String query = "CREATE TABLE IF NOT EXISTS " + tableName + " " + typedFieldNames;
+            String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (Exception e) {
@@ -140,7 +141,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // try catch
 
         try {
-            String query = "INSERT INTO " + tableName + " " + fieldNames + " VALUES " + fieldValues;
+            String query = "INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
@@ -181,6 +182,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         private final HashMap<String, Connection> connections;
         private final String postgresqlHost;
         private final String postgresqlPort;
+        private final String postgresqlDatabase;
         private final String postgresqlUsername;
         private final String postgresqlPassword;
 
@@ -191,10 +193,12 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * @param postgresqlUsername
          * @param postgresqlPassword
          */
-        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword) {
+        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort,
+               String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword) {
             connections = new HashMap<String, Connection>();
             this.postgresqlHost = postgresqlHost;
             this.postgresqlPort = postgresqlPort;
+            this.postgresqlDatabase = postgresqlDatabase;
             this.postgresqlUsername = postgresqlUsername;
             this.postgresqlPassword = postgresqlPassword;
         } // PostgreSQLDriver
@@ -257,7 +261,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             Class.forName(DRIVER_NAME);
 
             // return a connection based on the PostgreSQL JDBC driver
-            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort + "/";
+            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort + "/" + this.postgresqlDatabase;
             Properties props = new Properties();
             props.setProperty("user", this.postgresqlUsername);
             props.setProperty("password", this.postgresqlPassword);
