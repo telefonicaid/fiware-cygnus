@@ -1,4 +1,10 @@
-#Testing
+#<a name="top"></a>Testing
+Content:
+
+* [Unit testing](#section1)
+* [e2e testing](#section2)
+
+##<a name="section1"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -464,3 +470,37 @@ Tests run: 60, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Final Memory: 9M/81M
 [INFO] ------------------------------------------------------------------------
 ```
+
+[Top](#top)
+
+##<a name="section2"></a>e2e testing
+Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compoung notifications, with or without metadata, even model entities and loops of continuous notifiers.
+
+For instance, if running the `notification-json-simple.sh`:
+
+```
+$ ./notification-json-simple.sh http://localhost:5050/notify myservice myservicepath
+*   Trying ::1...
+* Connected to localhost (::1) port 5050 (#0)
+> POST /notify HTTP/1.1
+> Host: localhost:5050
+> Content-Type: application/json
+> Accept: application/json
+> User-Agent: orion/0.10.0
+> Fiware-Service: myservice
+> Fiware-ServicePath: myservicepath
+> Content-Length: 460
+> 
+* upload completely sent off: 460 out of 460 bytes
+< HTTP/1.1 200 OK
+< Transfer-Encoding: chunked
+< Server: Jetty(6.1.26)
+< 
+* Connection #0 to host localhost left intact
+```
+
+You will see the server (Cygnus) is sending back a `200 OK` response.
+
+Of course, this is just a e2e test. For real e2e integration with a real NGSI-like source, such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion), please refer to the [User and Programmer Guide](../user_and_programmer_guide/connecting_orion.md).
+
+[Top](#top)
