@@ -34,6 +34,7 @@ pages:
       - 'Reporting issues and contact information': 'installation_and_administration_guide/issues_and_contact.md'
   - 'User and Programmer Guide':
       - 'Introduction': 'user_and_programmer_guide/introduction.md'
+      - 'Connecting Orion Context Broker and Cygnus': 'user_and_programmer_guide/connecting_orion.md'
       - 'Adding a new sink': 'user_and_programmer_guide/adding_new_sink.md'
       - 'Reporting issues and contact information': 'user_and_programmer_guide/issues_and_contact.md'
   - 'Flume extensions catalogue':

@@ -8,7 +8,8 @@
     * [Installation (CentOS/RedHat)](#section2.2)
     * [Configuration](#section2.3)
     * [Running](#section2.4)
-    * [Testing](#section2.5)
+    * [Unit testing](#section2.5)
+    * [e2e testing](#section2.6)
 * [Advanced topics and further reading](#section3)
 * [Features summary](#section4)
 * [Licensing](#section5)
@@ -128,12 +129,40 @@ Logs are written in `/var/log/cygnus/cygnus.log`, and the PID of the process wil
 
 [Top](#top)
 
-###<a name="section2.5"></a>Testing
+###<a name="section2.5"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus
     $ mvn test
+
+[Top](#top)
+
+###<a name="section2.6"></a>e2e testing
+Cygnus works by receiving NGSI-like notifications, which are finaly persisted. In order to test this, you can run any of the notificacion scripts located in the [resources folder](./resources/ngsi-examples) of this repo, which emulate certain notification types.
+
+```
+$ ./notification-json-simple.sh http://localhost:5050/notify myservice myservicepath
+*   Trying ::1...
+* Connected to localhost (::1) port 5050 (#0)
+> POST /notify HTTP/1.1
+> Host: localhost:5050
+> Content-Type: application/json
+> Accept: application/json
+> User-Agent: orion/0.10.0
+> Fiware-Service: myservice
+> Fiware-ServicePath: myservicepath
+> Content-Length: 460
+> 
+* upload completely sent off: 460 out of 460 bytes
+< HTTP/1.1 200 OK
+< Transfer-Encoding: chunked
+< Server: Jetty(6.1.26)
+< 
+* Connection #0 to host localhost left intact
+```
+
+Or you can connect a real NGSI source such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Please, check the [User and Programmer Guide](./doc/user_and_programmer_guide/connecting_orion.md) for further details.
 
 [Top](#top)
 
