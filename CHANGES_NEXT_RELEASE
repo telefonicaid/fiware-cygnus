@@ -1,3 +1,4 @@
+- [FEATURE] Add postgreSQL sink support (#511)
 - [FEATURE] Add batching support to OrionTestSink (#572)
 - [HARDENING] Add the minimum HW requirements (#640)
 - [HARDENING] Rename the HTTP and Flume header constants (#662)
@@ -26,4 +27,5 @@
 - [HARDENING] Finish a transaction only when it is really persisted, not rollbacked (#715)
 - [FEATURE] Add batching support to OrionMongoSink (#570)
 - [HARDENING] Document the Grouping Rules in the Installation and Administration Guide (#658)
+- [HARDENING] Update Java and Fix which in docker (#709)
 - [HARDENING] Document how to connect Orion and Cygnus (#726)

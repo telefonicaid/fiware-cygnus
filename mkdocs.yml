@@ -47,6 +47,7 @@ pages:
       - 'OrionHDFSSink': 'flume_extensions_catalogue/orion_hdfs_sink.md'
       - 'OrionMongoSink': 'flume_extensions_catalogue/orion_mongo_sink.md'
       - 'OrionMySQLSink': 'flume_extensions_catalogue/orion_mysql_sink.md'
+      - 'OrionPostgreSQLSink': 'flume_extensions_catalogue/orion_postgresql_sink.md'
       - 'OrionSTHSink': 'flume_extensions_catalogue/orion_sth_sink.md'
       - 'OrionTestSink': 'flume_extensions_catalogue/orion_test_sink.md'
       - 'GroupingInterceptor': 'flume_extensions_catalogue/grouping_interceptor.md'
