@@ -183,7 +183,7 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
 ##<a name="section4"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
-  <tr><td rowspan="10">OrionHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
+  <tr><td rowspan="11">OrionHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
   <tr><td>Multiple HDFS endpoint setup</td><td>0.4.1</td></tr>
   <tr><td>Kerberos support</td><td>0.7.0</td></tr>
   <tr><td>OAuth2 support</td><td>0.8.2</td></tr>
@@ -193,23 +193,29 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>enable/disable Hive</td><td>0.10.0</td></tr>
   <tr><td>HDFSBackendImplBinary</td><td>0.10.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
+  <tr><td>Per-user Hive databases</td><td>0.12.0</td></tr>
   <tr><td rowspan="3">OrionCKANSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Enable SSL</td><td>0.4.2</td></tr>
   <tr><td>Batching mechanism</td><td>0.11.0</td></tr>
   <tr><td>OrionDynamoDBSink</td><td>First implementation</td><td>0.11.0</td></tr>
   <tr><td rowspan="2">OrionKafkaSink</td><td>First implementation</td><td>0.9.0</td></tr>
   <tr><td>Batching mechanims</td><td>0.11.0</td></tr>
-  <tr><td rowspan="2">OrionMongoSink</td><td>First implementation</td><td>0.8.0</td></tr>
+  <tr><td rowspan="3">OrionMongoSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
+  <tr><td>Batching support</td><td>0.12.0</td></tr>
   <tr><td rowspan="2">OrionMySQLSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
-  <tr><td rowspan="2">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
+  <tr><td rowspan="3">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
-  <tr><td>OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
-  <tr><td rowspan="4">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>
+  <tr><td>TimeInstant metadata as reception time</td><td>0.12.0</td></tr>
+  <tr><td>OrionPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
+  <tr><td rowspan="2">OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
+  <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
+  <tr><td rowspan="5">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>
   <tr><td>Pattern-based grouping</td><td>0.5.0</td></tr>
   <tr><td>Infinite events TTL</td><td>0.7.0</td></tr>
   <tr><td>enable/disable Grouping Rules</td><td>0.9.0</td></tr>
+  <tr><td>Data model configuration</td><td>0.12.0</td></tr>
   <tr><td rowspan="7">General</td><td>RPM building framework</td><td>0.3.0</td></tr>
   <tr><td>TDAF-like logs</td><td>0.4.0</td></tr>
   <tr><td>RoundRobinChannelSelector</td><td>0.6.0</td></tr>
@@ -234,7 +240,8 @@ There are several channels suited for reporting issues and asking for doubts in 
 * Personal email:
     * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
     * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
-    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
+    * [german.torodelvalle@telefonica.com](mailto:german.torodelvalle@telefonica.com) **[Contributor]**
+    * [herman.junge@telefonica.com](mailto:herman.junge@telefonica.com) **[Contributor]**
     * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
 
 **NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
