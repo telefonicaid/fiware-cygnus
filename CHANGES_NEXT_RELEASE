@@ -29,3 +29,4 @@
 - [HARDENING] Document the Grouping Rules in the Installation and Administration Guide (#658)
 - [HARDENING] Update Java and Fix which in docker (#709)
 - [HARDENING] Document how to connect Orion and Cygnus (#726)
+- [BUG] Fix some typos in agent.conf.template and OrionMySQLSink.md (#729)

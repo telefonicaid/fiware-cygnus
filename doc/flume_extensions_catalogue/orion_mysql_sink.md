@@ -279,7 +279,7 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
-    cygnusagent.sinks.mysql-sink.mysq_username = myuser
+    cygnusagent.sinks.mysql-sink.mysql_username = myuser
     cygnusagent.sinks.mysql-sink.mysql_password = mypassword
     cygnusagent.sinks.mysql-sink.attr_persistence = column
     cygnusagent.sinks.mysql-sink.batch_size = 100

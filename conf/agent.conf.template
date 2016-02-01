@@ -86,7 +86,7 @@ cygnusagent.sinks.hdfs-sink.file_format = json-column
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.hdfs-sink.batch_timeout = 30
+cygnusagent.sinks.hdfs-sink.batch_timeout = 30
 # Hive enabling
 cygnusagent.sinks.hdfs-sink.hive = true
 # Hive server version, 1 or 2 (ignored if hive is false)
@@ -131,7 +131,7 @@ cygnusagent.sinks.ckan-sink.ssl = false
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.ckan-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.ckan-sink.batch_timeout = 30
+cygnusagent.sinks.ckan-sink.batch_timeout = 30
 
 # ============================================
 # OrionMySQLSink configuration
@@ -156,7 +156,7 @@ cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.mysql-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.mysql-sink.batch_timeout = 30
+cygnusagent.sinks.mysql-sink.batch_timeout = 30
 
 # ============================================
 # OrionPostgreSQLSink configuration
@@ -183,7 +183,7 @@ cygnusagent.sinks.postgresql-sink.data_model = by-service-path
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.postgresql-sink.batch_timeout = 30
+cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 
 # ============================================
 # OrionMongoSink configuration
@@ -212,7 +212,7 @@ cygnusagent.sinks.mongo-sink.attr_persistence = column
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.mongo-sink.batch_timeout = 30
+cygnusagent.sinks.mongo-sink.batch_timeout = 30
 
 # ============================================
 # OrionSTHSink configuration
@@ -252,7 +252,7 @@ cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.kafka-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.kafka-sink.batch_timeout = 30
+cygnusagent.sinks.kafka-sink.batch_timeout = 30
 
 # ============================================
 # OrionDynamoDBSink configuration
@@ -275,7 +275,7 @@ cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.dynamo-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.dynamo-sink.batch_timeout = 30
+cygnusagent.sinks.dynamo-sink.batch_timeout = 30
 
 #=============================================
 # dynamo-channel configuration
