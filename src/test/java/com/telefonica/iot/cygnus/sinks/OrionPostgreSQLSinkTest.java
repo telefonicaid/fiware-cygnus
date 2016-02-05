@@ -325,10 +325,8 @@ public class OrionPostgreSQLSinkTest {
             NotifyContextRequest.ContextElement contextElement) {
         CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
-        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
-        groupedBatchEvents.add(groupedEvent);
         Batch batch = new Batch();
-        batch.addEvents(destination, groupedBatchEvents);
+        batch.addEvent(destination, groupedEvent);
         return batch;
     } // createBatch
 

@@ -10,6 +10,7 @@
     * [Running](#section2.4)
     * [Unit testing](#section2.5)
     * [e2e testing](#section2.6)
+    * [Management API overview](#section2.7)
 * [Advanced topics and further reading](#section3)
 * [Features summary](#section4)
 * [Licensing](#section5)
@@ -166,6 +167,57 @@ Or you can connect a real NGSI source such as [Orion Context Broker](https://git
 
 [Top](#top)
 
+###<a name="section2.7"></a>Management API overview
+Run the following `curl` in order to get the version (assuming Cygnus runs on `localhost`):
+
+```
+$ curl -X GET "http://localhost:8081/version"
+{"version":"0.12.0.56eb400c2c50a87e34d6985326fc2c6eb044955c"}
+```
+
+Run the following `curl` in order to get certain Flume components statistics (assuming Cygnus runs on `localhost`):
+
+```
+$ curl -X GET "http://localhost:8081/stats" | python -m json.tool
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   489  100   489    0     0  81500      0 --:--:-- --:--:-- --:--:-- 97800
+{
+    "channels": [
+        {
+            "name": "mysql-channel",
+            "num_events": 0,
+            "num_puts_failed": 0,
+            "num_puts_ok": 11858,
+            "num_takes_failed": 1,
+            "num_takes_ok": 11858,
+            "setup_time": "2016-02-05T10:34:25.80Z",
+            "status": "START"
+        }
+    ],
+    "sinks": [
+        {
+            "name": "mysql-sink",
+            "num_persisted_events": 11800,
+            "num_processed_events": 11858,
+            "setup_time": "2016-02-05T10:34:24.978Z",
+            "status": "START"
+        }
+    ],
+    "sources": [
+        {
+            "name": "http-source",
+            "num_processed_events": 11858,
+            "num_received_events": 11858,
+            "setup_time": "2016-02-05T10:34:24.921Z",
+            "status": "START"
+        }
+    ]
+}
+```
+
+[Top](#top)
+
 ##<a name="section3"></a>Advanced topics and further reading
 Detailed information regarding Cygnus can be found in the [Installation and Administration Guide](./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](./user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](./flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
@@ -216,6 +268,8 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>Infinite events TTL</td><td>0.7.0</td></tr>
   <tr><td>enable/disable Grouping Rules</td><td>0.9.0</td></tr>
   <tr><td>Data model configuration</td><td>0.12.0</td></tr>
+  <tr><td rowspan="2">Management Interface</td><td>/version</td><td>0.5.0</td></tr>
+  <tr><td>/stats</td><td>0.12.0</td></tr>
   <tr><td rowspan="7">General</td><td>RPM building framework</td><td>0.3.0</td></tr>
   <tr><td>TDAF-like logs</td><td>0.4.0</td></tr>
   <tr><td>RoundRobinChannelSelector</td><td>0.6.0</td></tr>

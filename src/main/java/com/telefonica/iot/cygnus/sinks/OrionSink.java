@@ -87,6 +87,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     private final Accumulator accumulator;
     // rollback queues
     private final ArrayList<Accumulator> rollbackedAccumulations;
+    // statistics
+    private final long setupTime;
+    private long numProcessedEvents;
+    private long numPersistedEvents;
     
     /**
      * Constructor.
@@ -94,12 +98,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public OrionSink() {
         super();
         
-        // create the accuulator utility
+        // create the accumulator utility
         accumulator = new Accumulator();
         accumulator.initialize(new Date().getTime());
         
         // crete the rollbacking queue
         rollbackedAccumulations = new ArrayList<Accumulator>();
+        
+        // initialize the statistics
+        setupTime = new Date().getTime();
+        numProcessedEvents = 0;
+        numPersistedEvents = 0;
     } // OrionSink
     
     /**
@@ -110,9 +119,33 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         return enableGrouping;
     } // getEnableGrouping
     
+    /**
+     * Gets the data model.
+     * @return The data model
+     */
     public DataModel getDataModel() {
         return dataModel;
     } // getDataModel
+    
+    /**
+     * Gets the setup time.
+     * @return The setup time (in miliseconds)
+     */
+    public long getSetupTime() {
+        return setupTime;
+    } // getSetupTime
+    
+    /**
+     * Gets the number of processed events.
+     * @return The number of processed events
+     */
+    public long getNumProcessedEvents() {
+        return numProcessedEvents;
+    } // getNumProcessedEvents
+    
+    public long getNumPersistedEvents() {
+        return numPersistedEvents;
+    } // getNumPersistedEvents
     
     @Override
     public void configure(Context context) {
@@ -205,6 +238,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             LOGGER.error("Runtime error (" + e.getMessage() + ")");
         } // catch // catch
 
+        numProcessedEvents++;
         LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
                 + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
 
@@ -221,6 +255,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         try {
             persistOne(event.getHeaders(), notification);
             LOGGER.info("Finishing transaction (" + MDC.get(Constants.FLUME_HEADER_TRANSACTION_ID) + ")");
+            numPersistedEvents++;
             txn.commit();
             txn.close();
             return Status.READY;
@@ -295,6 +330,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             persistBatch(rollbackedAccumulation.getBatch());
             LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
             rollbackedAccumulations.remove(0);
+            numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
             return Status.READY;
         } catch (Exception e) {
             LOGGER.debug(Arrays.toString(e.getStackTrace()));
@@ -388,6 +424,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                         + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
                 NotifyContextRequest notification = parseEventBody(event);
                 accumulator.accumulate(event.getHeaders(), notification);
+                numProcessedEvents++;
             } catch (Exception e) {
                 LOGGER.debug("There was some problem when parsing the notifed context element. Details="
                         + e.getMessage());
@@ -403,6 +440,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             } // if
 
             LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+            numPersistedEvents += accumulator.getBatch().getNumEvents();
             accumulator.initialize(new Date().getTime());
             txn.commit();
             txn.close();
@@ -568,34 +606,20 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
                     String servicePath = notifiedServicePaths[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, destination, servicePath, null, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } else {
                 String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < groupedServicePaths.length; i++) {
                     String servicePath = groupedServicePaths[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, destination, servicePath, null, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } // if else
         } // accumulateByService
@@ -609,34 +633,20 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
                     String destination = notifiedServicePaths[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, service, destination, null, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } else {
                 String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < groupedServicePaths.length; i++) {
                     String destination = groupedServicePaths[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, service, destination, null, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } // if else
         } // accumulateByServicePath
@@ -651,17 +661,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 for (int i = 0; i < notifiedEntities.length; i++) {
                     String destination = notifiedEntities[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, service, notifiedServicePaths[i], destination, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } else {
                 String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
@@ -669,17 +672,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
                 for (int i = 0; i < groupedEntities.length; i++) {
                     String destination = groupedEntities[i];
-                    ArrayList<CygnusEvent> list = batch.getEvents(destination);
-
-                    if (list == null) {
-                        list = new ArrayList<CygnusEvent>();
-                        batch.addEvents(destination, list);
-                    } // if
-
                     CygnusEvent cygnusEvent = new CygnusEvent(
                             recvTimeTs, service, groupedServicePaths[i], destination, null,
                             notification.getContextResponses().get(i).getContextElement());
-                    list.add(cygnusEvent);
+                    batch.addEvent(destination, cygnusEvent);
                 } // for
             } // if else
         } // accumulateByEntity
@@ -699,17 +695,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     
                     for (ContextAttribute attr : attrs) {
                         String destination = attr.getName();
-                        ArrayList<CygnusEvent> list = batch.getEvents(destination);
-                        
-                        if (list == null) {
-                            list = new ArrayList<CygnusEvent>();
-                            batch.addEvents(destination, list);
-                        } // if
-                        
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
                                 destination, contextElement.filter(destination));
-                        list.add(cygnusEvent);
+                        batch.addEvent(destination, cygnusEvent);
                     } // for
                 } // for
             } else {
@@ -722,17 +711,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     
                     for (ContextAttribute attr : attrs) {
                         String destination = attr.getName();
-                        ArrayList<CygnusEvent> list = batch.getEvents(destination);
-                        
-                        if (list == null) {
-                            list = new ArrayList<CygnusEvent>();
-                            batch.addEvents(destination, list);
-                        } // if
-                        
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, groupedServicePaths[i], groupedEntities[i],
                                 destination, contextElement);
-                        list.add(cygnusEvent);
+                        batch.addEvent(destination, cygnusEvent);
                     } // for
                 } // for
             } // if else
@@ -765,7 +747,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             for (String destination : destinations) {
                 if (!this.batch.isPersisted(destination)) {
                     ArrayList<CygnusEvent> events = this.batch.getEvents(destination);
-                    accumulatorForRollback.batch.addEvents(destination, events);
+                    
+                    for (CygnusEvent event : events) {
+                        accumulatorForRollback.batch.addEvent(destination, event);
+                    } // for
                 } // if
             } // for
 

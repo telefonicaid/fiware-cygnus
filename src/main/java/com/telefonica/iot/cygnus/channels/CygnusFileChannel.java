@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -17,6 +17,7 @@
  */
 package com.telefonica.iot.cygnus.channels;
 
+import java.util.Date;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.channel.file.FileChannel;
@@ -29,8 +30,13 @@ import org.apache.flume.channel.file.FileChannel;
  */
 public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
-    private int numEvents;
-    private int capacity;
+    private long setupTime;
+    private long numEvents;
+    private long numPutsOK;
+    private long numPutsFail;
+    private long numTakesOK;
+    private long numTakesFail;
+    private long capacity;
     
     @Override
     public void configure(Context context) {
@@ -41,14 +47,22 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     @Override
     protected void initialize() {
         super.initialize();
+        setupTime = new Date().getTime();
         numEvents = 0;
+        numPutsOK = 0;
+        numPutsFail = 0;
+        numTakesOK = 0;
+        numTakesFail = 0;
     } // initialize
     
     @Override
     public void put(Event event) {
         if (numEvents != capacity) {
             numEvents++;
-        } // if
+            numPutsOK++;
+        } else {
+            numPutsFail++;
+        } // if else
         
         // independently of the remaining capacity, call the super version of the method in order to behave as a
         // FileChannel (exceptions, errors, etc)
@@ -61,15 +75,43 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
         
         if (event != null) {
             numEvents--;
-        } // if
+            numTakesOK++;
+        } else {
+            numTakesFail++;
+        } // if else
         
         return event;
     } // take
     
     @Override
-    public int getNumEvents() {
+    public long getSetupTime() {
+        return setupTime;
+    } // getSetupTime
+    
+    @Override
+    public long getNumEvents() {
         return numEvents;
     } // getNumEvents
+    
+    @Override
+    public long getNumPutsOK() {
+        return numPutsOK;
+    } // getNumPutsOK
+    
+    @Override
+    public long getNumPutsFail() {
+        return numPutsFail;
+    } // getNumPutsFail
+    
+    @Override
+    public long getNumTakesOK() {
+        return numTakesOK;
+    } // getNumTakesOK
+    
+    @Override
+    public long getNumTakesFail() {
+        return numTakesFail;
+    } // getNumTakesFail
     
     @Override
     public void rollback() {
