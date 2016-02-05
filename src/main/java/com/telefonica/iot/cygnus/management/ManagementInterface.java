@@ -174,7 +174,7 @@ public class ManagementInterface extends AbstractHandler {
                 jsonStr += "\"setup_time\":\"unknown\","
                         + "\"num_events\":-1,"
                         + "\"num_puts_ok\":-1,"
-                        + "\"num_puts_failed\":-1m"
+                        + "\"num_puts_failed\":-1,"
                         + "\"num_takes_ok\":-1,"
                         + "\"num_takes_failed\":-1}";
             } // if else
