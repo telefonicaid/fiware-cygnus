@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -19,14 +19,23 @@
 package com.telefonica.iot.cygnus.management;
 
 import com.google.common.collect.ImmutableMap;
+import com.telefonica.iot.cygnus.channels.CygnusChannel;
+import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.sinks.OrionSink;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.flume.Channel;
+import org.apache.flume.Sink;
+import org.apache.flume.SinkProcessor;
 import org.apache.flume.SinkRunner;
+import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
+import org.apache.flume.source.http.HTTPSourceHandler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
@@ -37,6 +46,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
  */
 public class ManagementInterface extends AbstractHandler {
     
+    private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
@@ -70,14 +80,155 @@ public class ManagementInterface extends AbstractHandler {
         String uri = request.getRequestURI();
         
         if (uri.equals("/version")) {
-            response.setContentType("json;charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("{\"version\":\"" + Utils.getCygnusVersion() + "." + Utils.getLastCommit()
-                    + "\"}");
+            handleVersion(response);
+        } else if (uri.equals("/stats")) {
+            handleStats(response);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("404 - Not found");
         } // if else
     } // handle
+    
+    
+    private void handleVersion(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"version\":\"" + Utils.getCygnusVersion()
+                + "." + Utils.getLastCommit() + "\"}");
+    } // handleVersion
+
+    private void handleStats(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        String jsonStr = "{\"sources\":[";
+        boolean first = true;
+
+        for (String key : sources.keySet()) {
+            if (first) {
+                first = false;
+            } else {
+                jsonStr += ",";
+            } // if else
+            
+            Source source;
+            HTTPSourceHandler handler;
+            
+            try {
+                SourceRunner sr = sources.get(key);
+                source = sr.getSource();
+                Field f = source.getClass().getDeclaredField("handler");
+                f.setAccessible(true);
+                handler = (HTTPSourceHandler) f.get(source);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+
+            jsonStr += "{\"name\":\"" + source.getName() + "\","
+                    + "\"status\":\"" + source.getLifecycleState().toString() + "\",";
+            
+            if (handler instanceof OrionRestHandler) {
+                OrionRestHandler orh = (OrionRestHandler) handler;
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(orh.getSetupTime(), true) + "\","
+                        + "\"num_received_events\":" + orh.getNumReceivedEvents() + ","
+                        + "\"num_processed_events\":" + orh.getNumProcessedEvents() + "}";
+            } else {
+                jsonStr += "\"setup_time\":\"unknown\","
+                        + "\"num_received_events\":-1,"
+                        + "\"num_processed_events\":-1}";
+            } // if else
+        } // for
+        
+        jsonStr += "],\"channels\":[";
+        first = true;
+
+        for (String key : channels.keySet()) {
+            if (first) {
+                first = false;
+            } else {
+                jsonStr += ",";
+            } // if else
+            
+            Channel channel = channels.get(key);
+            jsonStr += "{\"name\":\"" + channel.getName() + "\","
+                    + "\"status\":\"" + channel.getLifecycleState().toString() + "\",";
+            
+            if (channel instanceof CygnusChannel) {
+                CygnusChannel cc = (CygnusChannel) channel;
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(cc.getSetupTime(), true) + "\","
+                        + "\"num_events\":" + cc.getNumEvents() + ","
+                        + "\"num_puts_ok\":" + cc.getNumPutsOK() + ","
+                        + "\"num_puts_failed\":" + cc.getNumPutsFail() + ","
+                        + "\"num_takes_ok\":" + cc.getNumTakesOK() + ","
+                        + "\"num_takes_failed\":" + cc.getNumTakesFail() + "}";
+            } else {
+                jsonStr += "\"setup_time\":\"unknown\","
+                        + "\"num_events\":-1,"
+                        + "\"num_puts_ok\":-1,"
+                        + "\"num_puts_failed\":-1m"
+                        + "\"num_takes_ok\":-1,"
+                        + "\"num_takes_failed\":-1}";
+            } // if else
+        } // for
+        
+        jsonStr += "],\"sinks\":[";
+        first = true;
+
+        for (String key : sinks.keySet()) {
+            if (first) {
+                first = false;
+            } else {
+                jsonStr += ",";
+            } // if else
+            
+            Sink sink;
+            
+            try {
+                SinkRunner sr = sinks.get(key);
+                SinkProcessor sp = sr.getPolicy();
+                Field f = sp.getClass().getDeclaredField("sink");
+                f.setAccessible(true);
+                sink = (Sink) f.get(sp);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+
+            jsonStr += "{\"name\":\"" + sink.getName() + "\","
+                    + "\"status\":\"" + sink.getLifecycleState().toString() + "\",";
+            
+            if (sink instanceof OrionSink) {
+                OrionSink os = (OrionSink) sink;
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(os.getSetupTime(), true) + "\","
+                        + "\"num_processed_events\":" + os.getNumProcessedEvents() + ","
+                        + "\"num_persisted_events\":" + os.getNumPersistedEvents() + "}";
+            } else {
+                jsonStr += "\"setup_time\":\"unknown\","
+                        + "\"num_processed_events\":-1,"
+                        + "\"num_persisted_events\":-1}";
+            } // if else
+        } // for
+
+        jsonStr += "]}";
+        response.getWriter().println(jsonStr);
+    } // handleStats
     
 } // ManagementInterface

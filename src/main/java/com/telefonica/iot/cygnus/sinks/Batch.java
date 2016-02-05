@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -31,6 +31,7 @@ import java.util.Set;
  */
 public class Batch {
     
+    private long numEvents;
     private final ArrayList<String> persistedDestinations;
     private final HashMap<String, ArrayList<CygnusEvent>> eventsPerDestination;
 
@@ -38,6 +39,7 @@ public class Batch {
      * Constructor.
      */
     public Batch() {
+        numEvents = 0;
         persistedDestinations = new ArrayList<String>();
         eventsPerDestination = new HashMap<String, ArrayList<CygnusEvent>>();
     } // Batch
@@ -54,15 +56,23 @@ public class Batch {
     public ArrayList<CygnusEvent> getEvents(String destination) {
         return eventsPerDestination.get(destination);
     } // getEvents
-
+    
     /**
-     * Adds a events of events to a given destination.
+     * Adds an event to a sub-barch, given its destination.
      * @param destination
-     * @param events
+     * @param event
      */
-    public void addEvents(String destination, ArrayList<CygnusEvent> events) {
-        eventsPerDestination.put(destination, events);
-    } // addEvents
+    public void addEvent(String destination, CygnusEvent event) {
+        ArrayList<CygnusEvent> list = eventsPerDestination.get(destination);
+
+        if (list == null) {
+            list = new ArrayList<CygnusEvent>();
+            eventsPerDestination.put(destination, list);
+        } // if
+        
+        list.add(event);
+        numEvents++;
+    } // addEvent
 
     /**
      * Sets a destination has been persistedDestinations.
@@ -80,5 +90,13 @@ public class Batch {
     public boolean isPersisted(String destination) {
         return persistedDestinations.contains(destination);
     } // isPersisted
+    
+    /**
+     * Gets the total number of events within this batch.
+     * @return The total number of events within this batch
+     */
+    public long getNumEvents() {
+        return numEvents;
+    } // getNumEvents
         
 } // Batch

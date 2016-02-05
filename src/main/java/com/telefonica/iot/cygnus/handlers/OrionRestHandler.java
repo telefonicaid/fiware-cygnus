@@ -56,6 +56,10 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private long transactionCount;
     private final long bootTimeSeconds;
     private long bootTimeMilliseconds;
+    // statistics
+    private final long setupTime;
+    private long numReceivedEvents;
+    private long numProcessedEvents;
     
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
@@ -73,7 +77,36 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // print Cygnus version
         LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
+        
+        // initialize the statistics
+        setupTime = new Date().getTime();
+        numReceivedEvents = 0;
+        numProcessedEvents = 0;
     } // OrionRestHandler
+    
+    /**
+     * Gets the setup time.
+     * @return The setup time
+     */
+    public long getSetupTime() {
+        return setupTime;
+    } // getSetupTime
+    
+    /**
+     * Gets the number of received events.
+     * @return The number of received events
+     */
+    public long getNumReceivedEvents() {
+        return numReceivedEvents;
+    } // getNumReceivedEvents
+        
+    /**
+     * Gets the number of processed events.
+     * @return The number of processed events
+     */
+    public long getNumProcessedEvents() {
+        return numProcessedEvents;
+    } // getNumProcessedEvents
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
@@ -143,6 +176,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        numReceivedEvents++;
+        
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
@@ -248,7 +283,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
         eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID + ", value=" + transId + ")");
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
+                + ", value=" + transId + ")");
         eventHeaders.put(Constants.FLUME_HEADER_TTL, eventsTTL);
         LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TTL + ", value=" + eventsTTL + ")");
         
@@ -257,6 +293,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
         LOGGER.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
+        numProcessedEvents++;
         return eventList;
     } // getEvents
     
