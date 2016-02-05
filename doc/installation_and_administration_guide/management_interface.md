@@ -1,4 +1,4 @@
-#Management interface
+#<a name="top"></a>Management interface
 Content:
 
 * [GET `/version`](#section1)
@@ -16,6 +16,8 @@ Response:
 ```
 {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
 ```
+
+[Top](#top)
 
 ##<a neme="section2"></a>`GET /stats`
 Gets statistics about the configured Flume components.
@@ -88,3 +90,4 @@ Response:
 }
 ```
 
+[Top](#top)
