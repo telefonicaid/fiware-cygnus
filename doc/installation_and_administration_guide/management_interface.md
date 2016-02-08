@@ -1,14 +1,14 @@
 #<a name="top"></a>Management interface
 Content:
 
-* [GET `/version`](#section1)
-* [GET `/stats`](#section2)
+* [GET `/v1/version`](#section1)
+* [GET `/v1/stats`](#section2)
 
-##<a name="section1"></a>`GET /version`
+##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
 
 ```
-GET http://<cygnus_host>:<management_port>/version
+GET http://<cygnus_host>:<management_port>/v1/version
 ```
 
 Response:
@@ -19,8 +19,8 @@ Response:
 
 [Top](#top)
 
-##<a neme="section2"></a>`GET /stats`
-Gets statistics about the configured Flume components.
+##<a neme="section2"></a>`GET /v1/stats`
+Gets statistics about the configured Flume components. It is important to note <b>in order to gathering statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
 
 Regarding the sources, it returns:
 
@@ -50,7 +50,7 @@ Regarding the sinks, it returns:
 * Number of finally persisted events.
 
 ```
-GET http://<cygnus_host>:<management_port>/stats
+GET http://<cygnus_host>:<management_port>/v1/stats
 ```
 
 Response:
