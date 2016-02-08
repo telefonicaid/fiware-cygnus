@@ -48,7 +48,7 @@ public class ManagementInterfaceTest {
     private HttpServletResponse mockResponse;
     
     // constants
-    private final String requestURI = "/version";
+    private final String requestURI = "/v1/version";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
