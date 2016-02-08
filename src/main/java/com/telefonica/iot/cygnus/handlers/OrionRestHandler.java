@@ -34,7 +34,6 @@ import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.Date;
-import java.util.EventListener;
 import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
 
