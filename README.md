@@ -171,14 +171,14 @@ Or you can connect a real NGSI source such as [Orion Context Broker](https://git
 Run the following `curl` in order to get the version (assuming Cygnus runs on `localhost`):
 
 ```
-$ curl -X GET "http://localhost:8081/version"
+$ curl -X GET "http://localhost:8081/v1/version"
 {"version":"0.12.0.56eb400c2c50a87e34d6985326fc2c6eb044955c"}
 ```
 
 Run the following `curl` in order to get certain Flume components statistics (assuming Cygnus runs on `localhost`):
 
 ```
-$ curl -X GET "http://localhost:8081/stats" | python -m json.tool
+$ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   489  100   489    0     0  81500      0 --:--:-- --:--:-- --:--:-- 97800
