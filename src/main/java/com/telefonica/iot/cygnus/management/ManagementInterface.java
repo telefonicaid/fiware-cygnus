@@ -89,6 +89,9 @@ public class ManagementInterface extends AbstractHandler {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("404 - Not found");
             } // if else
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("404 - Not found");
         } // if else
     } // handle
     

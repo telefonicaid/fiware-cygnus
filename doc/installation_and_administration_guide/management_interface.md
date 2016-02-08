@@ -20,7 +20,7 @@ Response:
 [Top](#top)
 
 ##<a neme="section2"></a>`GET /stats`
-Gets statistics about the configured Flume components.
+Gets statistics about the configured Flume components. It is important to note <b>in order to gathering statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
 
 Regarding the sources, it returns:
 
