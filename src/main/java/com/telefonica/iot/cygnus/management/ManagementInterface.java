@@ -79,7 +79,7 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("text/html;charset=utf-8");
         String uri = request.getRequestURI();
         String method = request.getMethod();
-        LOGGER.info("Management interface request. Method: " + method + ", URI. " + uri);
+        LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
         
         if (method.equals("GET")) {
             if (uri.equals("/v1/version")) {
