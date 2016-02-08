@@ -24,7 +24,9 @@ import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionSink;
 import com.telefonica.iot.cygnus.utils.Utils;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import javax.servlet.ServletException;
@@ -62,7 +64,6 @@ public class ManagementInterface extends AbstractHandler {
      */
     public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
             Channel> channels, ImmutableMap<String, SinkRunner> sinks) {
-        // FIXME: these references are ready to be used for more advanced Management Interface operations
         this.configurationFile = configurationFile;
         this.sources = sources;
         this.channels = channels;
@@ -87,9 +88,11 @@ public class ManagementInterface extends AbstractHandler {
         
         if (method.equals("GET")) {
             if (uri.equals("/v1/version")) {
-                handleVersion(response);
+                handleGetVersion(response);
             } else if (uri.equals("/v1/stats")) {
-                handleStats(response);
+                handleGetStats(response);
+            } else if (uri.equals("/v1/groupingrules")) {
+                handleGetGroupingRules(response);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("404 - Not found");
@@ -101,14 +104,14 @@ public class ManagementInterface extends AbstractHandler {
     } // handle
     
     
-    private void handleVersion(HttpServletResponse response) throws IOException {
+    private void handleGetVersion(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"version\":\"" + Utils.getCygnusVersion()
                 + "." + Utils.getLastCommit() + "\"}");
-    } // handleVersion
+    } // handleGetVersion
 
-    private void handleStats(HttpServletResponse response) throws IOException {
+    private void handleGetStats(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         String jsonStr = "{\"sources\":[";
@@ -240,6 +243,56 @@ public class ManagementInterface extends AbstractHandler {
 
         jsonStr += "]}";
         response.getWriter().println(jsonStr);
-    } // handleStats
+    } // handleGetStats
+    
+    private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        
+        if (!configurationFile.exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("404 - Configuration file for Cygnus not found. Details: "
+                    + configurationFile.toString());
+            return;
+        } // if
+        
+        String groupingRulesConfFile = null;
+        BufferedReader reader = new BufferedReader(new FileReader(configurationFile));
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            if (!line.startsWith("#")) {
+                if (line.contains("grouping_rules_conf_file")) {
+                    String[] splits = line.split("=");
+                    groupingRulesConfFile = splits[1].replaceAll(" ", "");
+                    break;
+                } // if
+            } // if
+        } // while
+        
+        if (groupingRulesConfFile == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("404 - Missing configuration file for Grouping Rules");
+            return;
+        } // if
+        
+        if (!new File(groupingRulesConfFile).exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("404 - Configuration file for Grouing Rules not found. Details: "
+                    + groupingRulesConfFile);
+            return;
+        } // if
+        
+        String jsonStr = "";
+        reader = new BufferedReader(new FileReader(groupingRulesConfFile));
+        
+        while ((line = reader.readLine()) != null) {
+            if (!line.startsWith("#")) {
+                jsonStr += line;
+            } // if
+        } // while
+        
+        response.getWriter().println(jsonStr);
+    } // handleGetGroupingRules
     
 } // ManagementInterface
