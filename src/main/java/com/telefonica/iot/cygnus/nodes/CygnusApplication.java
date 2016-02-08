@@ -249,7 +249,8 @@ public class CygnusApplication extends Application {
             
             // start the Management Interface, passing references to Flume components
             LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
+            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(configurationFile,
+                    sourcesRef, channelsRef, sinksRef));
             mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)

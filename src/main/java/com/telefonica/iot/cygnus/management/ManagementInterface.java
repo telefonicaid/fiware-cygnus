@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionSink;
 import com.telefonica.iot.cygnus.utils.Utils;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import javax.servlet.ServletException;
@@ -47,19 +48,22 @@ import org.mortbay.jetty.handler.AbstractHandler;
 public class ManagementInterface extends AbstractHandler {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
+    private final File configurationFile;
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
     
     /**
      * Constructor.
+     * @param configurationFile
      * @param sources
      * @param channels
      * @param sinks
      */
-    public ManagementInterface(ImmutableMap<String, SourceRunner> sources, ImmutableMap<String, Channel> channels,
-            ImmutableMap<String, SinkRunner> sinks) {
+    public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
+            Channel> channels, ImmutableMap<String, SinkRunner> sinks) {
         // FIXME: these references are ready to be used for more advanced Management Interface operations
+        this.configurationFile = configurationFile;
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
