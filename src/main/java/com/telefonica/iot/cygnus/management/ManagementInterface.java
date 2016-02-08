@@ -78,11 +78,17 @@ public class ManagementInterface extends AbstractHandler {
         
         response.setContentType("text/html;charset=utf-8");
         String uri = request.getRequestURI();
+        String method = request.getMethod();
         
-        if (uri.equals("/version")) {
-            handleVersion(response);
-        } else if (uri.equals("/stats")) {
-            handleStats(response);
+        if (method.equals("GET")) {
+            if (uri.equals("/version")) {
+                handleVersion(response);
+            } else if (uri.equals("/stats")) {
+                handleStats(response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("404 - Not found");
+            } // if else
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("404 - Not found");
