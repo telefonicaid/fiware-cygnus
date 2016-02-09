@@ -176,7 +176,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
-* Mon Feb 01 2015 Francisco Romero <francisco.romerobueno@telefonica.com> 0.12.0
+* Mon Feb 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 0.12.0
 - [FEATURE] Add postgreSQL sink support (#511)
 - [FEATURE] Add batching support to OrionTestSink (#572)
 - [HARDENING] Add the minimum HW requirements (#640)
