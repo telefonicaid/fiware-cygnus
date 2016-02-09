@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
@@ -61,6 +64,7 @@ public class GroupingInterceptor implements Interceptor {
     private static final CygnusLogger LOGGER = new CygnusLogger(GroupingInterceptor.class);
     private final String groupingRulesFileName;
     private LinkedList<GroupingRule> groupingRules;
+    private ConfigurationReader configurationReader;
     
     /**
      * Constructor.
@@ -80,156 +84,9 @@ public class GroupingInterceptor implements Interceptor {
     
     @Override
     public void initialize() {
-        // read the grouping rules file; a JSONParse(Reader) method cannot be used since the file may contain comment
-        // lines starting by the '#' character
-        String jsonStr = readGroupingRulesFile(groupingRulesFileName);
-        
-        if (jsonStr == null) {
-            LOGGER.info("No grouping rules read");
-            return;
-        } // if
-        
-        LOGGER.info("Grouping rules read: " + jsonStr);
-        
-        // parse the Json containing the grouping rules
-        JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
-        
-        if (jsonGroupingRules == null) {
-            LOGGER.warn("Grouping rules syntax has errors");
-            return;
-        } // if
-        
-        LOGGER.info("Grouping rules syntax is OK");
-        
-        // create a list of grouping rules, with precompiled regex
-        groupingRules = createGroupingRules(jsonGroupingRules);
-        
-        if (groupingRules == null) {
-            LOGGER.warn("Grouping rules regex'es could not be compiled");
-        }
-        
-        LOGGER.info("Grouping rules regex'es have been compiled");
+        configurationReader = new ConfigurationReader(10000);
+        configurationReader.start();
     } // initialize
-    
-    /**
-     * Reads a file containing Json-based grouing rules. The file may contain lines representing comments, which start
-     * by the '#' character.
-     * @param fileName File to be read
-     * @return A string containing the Json, discarding the comment lines
-     */
-    private String readGroupingRulesFile(String fileName) {
-        String jsonStr = "";
-        
-        if (fileName == null) {
-            // despite configuring the interceptor, no table_matching.conf file has been specified
-            return null;
-        } // if
-        
-        BufferedReader reader;
-        
-        try {
-            reader = new BufferedReader(new FileReader(groupingRulesFileName));
-        } catch (FileNotFoundException e) {
-            LOGGER.error("File not found. Details=" + e.getMessage() + ")");
-            return null;
-        } // try catch
-        
-        String line;
-        
-        try {
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("#") || line.length() == 0) {
-                    continue;
-                } // if
-                
-                jsonStr += line;
-            } // while
-            
-            return jsonStr;
-        } catch (IOException e) {
-            LOGGER.error("Error while reading the Json-based grouping rules file. Details=" + e.getMessage() + ")");
-            return null;
-        } // try catch
-    } // readGroupingRulesFile
-    
-    private JSONArray parseGroupingRules(String jsonStr) {
-        if (jsonStr == null) {
-            return null;
-        } // if
-        
-        JSONParser jsonParser = new JSONParser();
-        
-        try {
-            return (JSONArray) ((JSONObject) jsonParser.parse(jsonStr)).get("grouping_rules");
-        } catch (ParseException e) {
-            LOGGER.error("Error while parsing the Json-based grouping rules file. Details=" + e.getMessage());
-            return null;
-        } // try catch
-    } // parseGroupingRules
-    
-    private LinkedList<GroupingRule> createGroupingRules(JSONArray jsonGroupingRules) {
-        if (jsonGroupingRules == null) {
-            return null;
-        } // if
-        
-        groupingRules = new LinkedList<GroupingRule>();
-        
-        for (Object jsonGroupingRule : jsonGroupingRules) {
-            JSONObject jsonRule = (JSONObject) jsonGroupingRule;
-            int err = isValid(jsonRule);
-            
-            if (err == 0) {
-                GroupingRule rule = new GroupingRule(jsonRule);
-                groupingRules.add(rule);
-            } else {
-                switch (err) {
-                    case 1:
-                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details="
-                                + jsonRule.toJSONString());
-                        break;
-                    case 2:
-                        LOGGER.warn("Invalid grouping rule, the id is not numeric or it is missing. It will be "
-                                + "discarded. Details=" + jsonRule.toJSONString());
-                        break;
-                    case 3:
-                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details="
-                                + jsonRule.toJSONString());
-                        break;
-                    default:
-                } // swtich
-            } // if else
-        } // for
-        
-        return groupingRules;
-    } // createGroupingRules
-    
-    private int isValid(JSONObject jsonRule) {
-        // check if the rule contains all the required fields
-        if (!jsonRule.containsKey("id")
-                || !jsonRule.containsKey("fields")
-                || !jsonRule.containsKey("regex")
-                || !jsonRule.containsKey("destination")
-                || !jsonRule.containsKey("fiware_service_path")) {
-            return 1;
-        } // if
-        
-        // check if the id is numeric
-        try {
-            Long l = (Long) jsonRule.get("id");
-        } catch (Exception e) {
-            return 2;
-        } // catch
-        
-        // check if the rule has any empty field
-        if (((JSONArray) jsonRule.get("fields")).size() == 0
-                || ((String) jsonRule.get("regex")).length() == 0
-                || ((String) jsonRule.get("destination")).length() == 0
-                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
-            return 3;
-        } // if
-        
-        return 0;
-    } // isValid
  
     @Override
     public Event intercept(Event event) {
@@ -460,5 +317,225 @@ public class GroupingInterceptor implements Interceptor {
         } // getNewFiwareServicePath
         
     } // GroupingRule
+    
+    /**
+     * Class in charge or periodically reading the GroupingInterceptor configuration file.
+     */
+    private class ConfigurationReader extends Thread {
+        
+        private final CygnusLogger logger = new CygnusLogger(ConfigurationReader.class);
+        private final int interval;
+        private long lastModified;
+        
+        public ConfigurationReader(int interval) {
+            this.interval = interval;
+            this.lastModified = 0;
+        } // ConfigurationReader
+        
+        @Override
+        public void run() {
+            while (true) {
+                // check if the configuration has changed
+                File groupingRulesFile = new File(groupingRulesFileName);
+                long modified = groupingRulesFile.lastModified();
+
+                if (lastModified != 0 && modified == lastModified) {
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        logger.error("There was a problem with the checking interval. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
+                    logger.debug("The configuration has not changed");
+                    continue;
+                } // if
+
+                lastModified = modified;
+
+                // read the grouping rules file; a JSONParse(Reader) method cannot be used since
+                // the file may contain comment lines starting by the '#' character
+                String jsonStr = readGroupingRulesFile(groupingRulesFileName);
+
+                if (jsonStr == null) {
+                    logger.info("No grouping rules have been read");
+                    
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        logger.error("There was a problem with the checking interval. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
+                    continue;
+                } // if
+
+                logger.info("Grouping rules read: " + jsonStr);
+
+                // parse the Json containing the grouping rules
+                JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
+
+                if (jsonGroupingRules == null) {
+                    logger.warn("Grouping rules syntax has errors");
+                    
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        logger.error("There was a problem with the checking interval. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
+                    continue;
+                } // if
+
+                logger.info("Grouping rules syntax is OK");
+
+                // create a list of grouping rules, with precompiled regex
+                groupingRules = createGroupingRules(jsonGroupingRules);
+
+                if (groupingRules == null) {
+                    logger.warn("Grouping rules regex'es could not be compiled");
+                    
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        logger.error("There was a problem with the checking interval. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
+                    continue;
+                } // if
+
+                logger.info("Grouping rules regex'es have been compiled");
+
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    logger.error("There was a problem with the checking interval. Details: " + e.getMessage());
+                } // try catch
+            } // while
+        } // run
+        
+        /**
+         * Reads a file containing Json-based grouing rules. The file may contain lines representing comments,
+         * which start with the '#' character.
+         * @param fileName File to be read
+         * @return A string containing the Json, discarding the comment lines
+         */
+        private String readGroupingRulesFile(String fileName) {
+            String jsonStr = "";
+
+            if (fileName == null) {
+                // despite configuring the interceptor, no table_matching.conf file has been specified
+                return null;
+            } // if
+
+            BufferedReader reader;
+
+            try {
+                reader = new BufferedReader(new FileReader(groupingRulesFileName));
+            } catch (FileNotFoundException e) {
+                LOGGER.error("File not found. Details=" + e.getMessage() + ")");
+                return null;
+            } // try catch
+
+            String line;
+
+            try {
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("#") || line.length() == 0) {
+                        continue;
+                    } // if
+
+                    jsonStr += line;
+                } // while
+
+                return jsonStr;
+            } catch (IOException e) {
+                LOGGER.error("Error while reading the Json-based grouping rules file. Details=" + e.getMessage() + ")");
+                return null;
+            } // try catch
+        } // readGroupingRulesFile
+
+        private JSONArray parseGroupingRules(String jsonStr) {
+            if (jsonStr == null) {
+                return null;
+            } // if
+
+            JSONParser jsonParser = new JSONParser();
+
+            try {
+                return (JSONArray) ((JSONObject) jsonParser.parse(jsonStr)).get("grouping_rules");
+            } catch (ParseException e) {
+                LOGGER.error("Error while parsing the Json-based grouping rules file. Details=" + e.getMessage());
+                return null;
+            } // try catch
+        } // parseGroupingRules
+
+        private LinkedList<GroupingRule> createGroupingRules(JSONArray jsonGroupingRules) {
+            if (jsonGroupingRules == null) {
+                return null;
+            } // if
+
+            groupingRules = new LinkedList<GroupingRule>();
+
+            for (Object jsonGroupingRule : jsonGroupingRules) {
+                JSONObject jsonRule = (JSONObject) jsonGroupingRule;
+                int err = isValid(jsonRule);
+
+                if (err == 0) {
+                    GroupingRule rule = new GroupingRule(jsonRule);
+                    groupingRules.add(rule);
+                } else {
+                    switch (err) {
+                        case 1:
+                            LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details="
+                                    + jsonRule.toJSONString());
+                            break;
+                        case 2:
+                            LOGGER.warn("Invalid grouping rule, the id is not numeric or it is missing. It will be "
+                                    + "discarded. Details=" + jsonRule.toJSONString());
+                            break;
+                        case 3:
+                            LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details="
+                                    + jsonRule.toJSONString());
+                            break;
+                        default:
+                    } // swtich
+                } // if else
+            } // for
+
+            return groupingRules;
+        } // createGroupingRules
+
+        private int isValid(JSONObject jsonRule) {
+            // check if the rule contains all the required fields
+            if (!jsonRule.containsKey("id")
+                    || !jsonRule.containsKey("fields")
+                    || !jsonRule.containsKey("regex")
+                    || !jsonRule.containsKey("destination")
+                    || !jsonRule.containsKey("fiware_service_path")) {
+                return 1;
+            } // if
+
+            // check if the id is numeric
+            try {
+                Long l = (Long) jsonRule.get("id");
+            } catch (Exception e) {
+                return 2;
+            } // catch
+
+            // check if the rule has any empty field
+            if (((JSONArray) jsonRule.get("fields")).size() == 0
+                    || ((String) jsonRule.get("regex")).length() == 0
+                    || ((String) jsonRule.get("destination")).length() == 0
+                    || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
+                return 3;
+            } // if
+
+            return 0;
+        } // isValid
+        
+    } // ConfigurationReader
   
-} // NotificationSpliter
+} // GroupingInterceptor
