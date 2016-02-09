@@ -48,6 +48,8 @@ public class OrionKafkaSink extends OrionSink {
     private String zookeeperEndpoint;
     private TopicAPI topicAPI;
     private ZkClient zookeeperClient;
+    private int topicPartitions;
+    private int topicReplicationFactor;
     
     /**
      * Gets the broker list.
@@ -96,6 +98,11 @@ public class OrionKafkaSink extends OrionSink {
         zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
                 + zookeeperEndpoint + ")");
+        topicPartitions = context.getInteger("partitions", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + topicPartitions + ")");
+        topicReplicationFactor = context.getInteger("replication_factor", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor=" 
+                + topicReplicationFactor + ")");
         super.configure(context);
     } // configure
     
@@ -173,6 +180,8 @@ public class OrionKafkaSink extends OrionSink {
         protected String entity;
         protected String attribute;
         protected String topic;
+        protected int partitions;
+        protected int replicationFactor;
         
         public KafkaAggregator() {
             aggregation = "";
@@ -190,6 +199,14 @@ public class OrionKafkaSink extends OrionSink {
             return servicePath;
         } // servicePath
         
+        public int getPartitions() {
+            return partitions;
+        } // partitions
+        
+        public int getReplicationFactor() {
+            return replicationFactor;
+        } // replicationFactor
+        
         public String getTopic() {
             return topic;
         } // getTopic
@@ -200,6 +217,8 @@ public class OrionKafkaSink extends OrionSink {
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
             topic = buildTopicName();
+            partitions = topicPartitions;
+            replicationFactor = topicReplicationFactor;
         } // initialize
         
         private String buildTopicName() throws Exception {
@@ -250,6 +269,8 @@ public class OrionKafkaSink extends OrionSink {
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String destination = aggregator.getTopic();
+        int partitions = aggregator.getPartitions();
+        int replicationFactor = aggregator.getReplicationFactor();
         
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
@@ -258,7 +279,9 @@ public class OrionKafkaSink extends OrionSink {
         if (!topicAPI.topicExists(zookeeperClient, topicName)) {
             LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
                     + " at OrionKafkaSink");
-            topicAPI.createTopic(zookeeperClient, topicName, new Properties());
+            LOGGER.info("[" + this.getName() + "] Partitions: " + partitions + ", "
+                    + "Replication factor = " + replicationFactor);
+            topicAPI.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
         } // if
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -308,9 +331,11 @@ public class OrionKafkaSink extends OrionSink {
          * @param zookeeperClient
          * @param topic
          * @param props
+         * @param partitions
+         * @param replicationFactor
          */
-        public void createTopic(ZkClient zookeeperClient, String topic, Properties props) {
-            AdminUtils.createTopic(zookeeperClient, topic, 1, 1, props);
+        public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
+            AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
         } // createTopic
         
     } // TopicAPI
