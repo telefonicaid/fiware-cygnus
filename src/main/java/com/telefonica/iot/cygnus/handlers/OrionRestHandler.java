@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -232,6 +232,12 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } // if else
             } // if else if
         } // while
+        
+        // check if received content type is null
+        if (contentType == null) {
+            LOGGER.warn("Missing content type. Required application/json or application/xml.");
+            throw new HTTPBadRequestException("Missing content type. Required application/json or application/xml.");
+        } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
         MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);

@@ -1,3 +1,4 @@
 - [FEATURE] Add /stats route to the Management Interface (#737)
 - [HARDENING] Check Http method in Management Interface API routes (#740)
 - [HARDENING] Add /v1 to Management Interface API routes (#739)
+- [HARDENING] Add check for null content-type in notifications (#743) 
