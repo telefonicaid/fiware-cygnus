@@ -2,3 +2,4 @@
 - [HARDENING] Check Http method in Management Interface API routes (#740)
 - [HARDENING] Add /v1 to Management Interface API routes (#739)
 - [BUG] Fix wrong spec date regarding release/0.12.0 (#750)
+- [HARDENING] Add check for null content-type in notifications (#743) 
