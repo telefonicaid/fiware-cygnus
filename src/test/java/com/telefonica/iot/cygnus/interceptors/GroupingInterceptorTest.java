@@ -29,6 +29,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -207,6 +209,17 @@ public class GroupingInterceptorTest {
         System.out.println("Testing GroupingInterceptor.initialize");
         groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
         groupingInterceptor.initialize();
+        
+        try {
+            // just wait a second until the configuration reader starts
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.out.println("There was an error while waiting until the configuration reader starts."
+                    + " Details: " + e.getMessage());
+            assertTrue(false);
+            return;
+        } // try catch
+        
         LinkedList<GroupingRule> groupingRules = groupingInterceptor.getGroupingRules().getRules();
         assertTrue(groupingRules.size() == 3); // there are 5 rules, but two are invalid
         GroupingRule firstRule = groupingRules.get(0);
