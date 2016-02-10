@@ -10,6 +10,7 @@ Content:
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
         * [Hashing based collections](#section2.3.1)
+        * [About batching](#section2.3.2)
 * [Implementation details](#section4)
     * [`OrionSTHSink` class](#section4.1)
     * [`MongoBackend` class](#section4.2)
@@ -216,6 +217,8 @@ NOTES:
 | should_hash | no | false | true for collection names based on a hash, false for human redable collections |
 | db_prefix | no | sth_ |
 | collection_prefix | no | sth_ |
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
 
@@ -232,6 +235,8 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
     cygnusagent.sinks.sth-sink.should_hash = false
+    cygnusagent.sinks.sth-sink.batch_size = 100
+    cygnusagent.sinks.sth-sink.batch_timeout = 30
 
 [Top](#top)
 
@@ -245,6 +250,17 @@ Use `OrionSTHSink` if you are looking for a Json-based document storage about ag
 In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
 
 In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
+
+[Top](#top)
+
+###<a name="section2.3.2"></a>About batching
+Despite `OrionSTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
+
+Nevertheless, STH storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of STH (sum, sum2, max and min).
+
+The problem with such an approach (updates versus inserts) is there is no operation in the Mongo API enabling the update of a batch. As much, there exists a `updateMany` operation, but it is about updating many collections with a single data (the updated collections are those matching the given query).
+
+Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Please observe the batching accumulation is still valid, since many events may be accumulated and processed at the same time, even in the case of configuring a batch size of 1, a single notification may include several context elements. The difference with regard to the other sinks is the events within the batch will be processed one by one after all.
 
 [Top](#top)
 

@@ -257,9 +257,10 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>Batching support</td><td>0.12.0</td></tr>
   <tr><td rowspan="2">OrionMySQLSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
-  <tr><td rowspan="3">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
+  <tr><td rowspan="4">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
   <tr><td>TimeInstant metadata as reception time</td><td>0.12.0</td></tr>
+  <tr><td>Batching mechanism</td><td>0.13.0</td></tr>
   <tr><td>OrionPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
   <tr><td rowspan="2">OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
