@@ -3,4 +3,4 @@
 - [HARDENING] Add /v1 to Management Interface API routes (#739)
 - [BUG] Fix wrong spec date regarding release/0.12.0 (#750)
 - [HARDENING] Add check for null content-type in notifications (#743) 
-- [HARDENING] Add check for partitions and replication_factor in OrionKafkaSink from agent (#736)
+- [HARDENING] Add support for configurable number of partitions and replication factor in OrionKafkaSink (#736)
