@@ -452,7 +452,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
                 LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + ")");
-                rollbackedAccumulations.add(accumulator.getAccumulatorForRollback());
+                rollbackedAccumulations.add(accumulator.clone());
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
@@ -526,7 +526,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     /**
      * Utility class for batch-like event accumulation purposes.
      */
-    protected class Accumulator {
+    protected class Accumulator implements Cloneable {
         
         // accumulated events
         private Batch batch;
@@ -756,6 +756,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             return accumulatorForRollback;
         } // getAccumulatorForRollback
+        
+        @Override
+        public Accumulator clone() {
+            try {
+                Accumulator acc = (Accumulator) super.clone();
+                return acc; 
+            }
+            catch (CloneNotSupportedException ce) {
+                return null;
+            }
+        } // clone
         
     } // Accumulator
 
