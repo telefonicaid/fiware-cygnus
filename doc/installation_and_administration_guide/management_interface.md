@@ -3,6 +3,8 @@ Content:
 
 * [GET `/v1/version`](#section1)
 * [GET `/v1/stats`](#section2)
+* [GET `/v1/groupingrules`](#section3)
+* [POST `/v1/groupingrules`](#section4)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -14,7 +16,7 @@ GET http://<cygnus_host>:<management_port>/v1/version
 Response:
 
 ```
-{"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
+{"version":"0.12.0.8a6c07054da894fc37ef30480cb091333e2fccfa"}
 ```
 
 [Top](#top)
@@ -88,6 +90,64 @@ Response:
         }
     ]
 }
+```
+
+[Top](#top)
+
+##<a neme="section3"></a>`GET /v1/groupingrules`
+Gets the configured grouping rules.
+
+```
+GET http://<cygnus_host>:<management_port>/v1/groupingrules
+```
+
+Response:
+
+```
+{
+    "grouping_rules": [
+        {
+            "destination": "allcars",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "cars",
+            "id": 1,
+            "regex": "Car"
+        },
+        {
+            "destination": "allrooms",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "rooms",
+            "id": 2,
+            "regex": "Room"
+        }
+    ]
+}
+```
+
+[Top](#top)
+
+##<a neme="section4"></a>`POST /v1/groupingrules`
+Adds a new rule, passed as a Json in the payload, to the grouping rules.
+
+```
+POST http://<cygnus_host>:<management_port>/v1/groupingrules
+{
+	"id": 2,
+	"regex": "Room",
+	"destination": "allrooms",
+	"fiware_service_path": "rooms",
+	"fields": ["entityType"]
+}
+```
+
+Response:
+
+```
+{"success":"true"}
 ```
 
 [Top](#top)

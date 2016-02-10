@@ -80,6 +80,7 @@ public class CygnusApplication extends Application {
     private static final int YAFS_CHECKING_INTERVAL = 1000;
     private static final int DEF_MGMT_IF_PORT = 8081;
     private static final int DEF_POLLING_INTERVAL = 30;
+    private boolean firstTime = true;
     
     /**
      * Constructor.
@@ -128,6 +129,17 @@ public class CygnusApplication extends Application {
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        if (firstTime) {
+            // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
+            // certain order
+            sourcesRef = conf.getSourceRunners();
+            channelsRef = conf.getChannels();
+            sinksRef = conf.getSinkRunners();
+            LOGGER.debug("References to Flume components have been taken");
+            firstTime = false;
+            return;
+        } // if
+        
         super.handleConfigurationEvent(conf);
         
         // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
@@ -249,7 +261,8 @@ public class CygnusApplication extends Application {
             
             // start the Management Interface, passing references to Flume components
             LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
+            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(configurationFile,
+                    sourcesRef, channelsRef, sinksRef));
             mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
