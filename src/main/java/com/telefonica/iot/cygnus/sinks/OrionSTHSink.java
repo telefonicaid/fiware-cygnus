@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,10 +18,11 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -42,23 +43,44 @@ public class OrionSTHSink extends OrionMongoBaseSink {
     
     @Override
     void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        // get some header values; they are not null nor empty thanks to OrionRESTHandler
-        Long notifiedRecvTimeTs = new Long(eventHeaders.get(Constants.FLUME_HEADER_TIMESTAMP));
-        String fiwareService = eventHeaders.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
-        String[] servicePaths;
-        String[] destinations;
-        
-        if (enableGrouping) {
-            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
-        } else {
-            servicePaths = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
-            destinations = eventHeaders.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
-        } // if else
-        
-        for (int i = 0; i < servicePaths.length; i++) {
-            servicePaths[i] = "/" + servicePaths[i]; // this sink uses the removed initial slash
+        Accumulator accumulator = new Accumulator();
+        accumulator.initialize(new Date().getTime());
+        accumulator.accumulate(eventHeaders, notification);
+        persistBatch(accumulator.getBatch());
+    } // persistOne
+    
+    @Override
+    public void persistBatch(Batch batch) throws Exception {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+ 
+        // iterate on the destinations
+        for (String destination : batch.getDestinations()) {
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
+                    + " destination");
+
+            // get the sub-batch for this destination
+            ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
+            
+            // iterate on the events within the sub-batch... events are not aggregated but directly persisted
+            for (CygnusEvent cygnusEvent : subBatch) {
+                persistOne(cygnusEvent);
+            } // for
+            
+            // set the sub-batch as persisted
+            batch.setPersisted(destination);
         } // for
+    } // persistBatch
+    
+    private void persistOne(CygnusEvent event) throws Exception {
+        // get some values from the event
+        Long notifiedRecvTimeTs = event.getRecvTimeTs();
+        String fiwareService = event.getService();
+        String fiwareServicePath = "/" + event.getServicePath(); // this sink uses the removed initial slash
+        String destination = event.getEntity();
+        ContextElement contextElement = event.getContextElement();
 
         // human readable version of the reception time
         String notifiedRecvTime = Utils.getHumanReadable(notifiedRecvTimeTs, true);
@@ -73,84 +95,74 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.DMBYSERVICEPATH) {
-            for (String fiwareServicePath : servicePaths) {
-                collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                        fiwareService) + ".aggr";
-                backend.createCollection(dbName, collectionName);
-            } // for
+            collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
+                    fiwareService) + ".aggr";
+            backend.createCollection(dbName, collectionName);
         } // if
         
-        // iterate on the contextResponses
-        ArrayList contextResponses = notification.getContextResponses();
-        
-        for (int i = 0; i < contextResponses.size(); i++) {
-            NotifyContextRequest.ContextElementResponse contextElementResponse;
-            contextElementResponse = (NotifyContextRequest.ContextElementResponse) contextResponses.get(i);
-            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
-                    + entityType + ")");
-            
-            // create the collection at this stage, if the data model is collection-per-entity
-            if (dataModel == DataModel.DMBYENTITY) {
-                collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], null, true,
-                        entityId, entityType, fiwareService) + ".aggr";
-                backend.createCollection(dbName, collectionName);
-            } // if
-            
-            // iterate on all this entity's attributes, if there are attributes
-            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-            
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
+        String entityId = contextElement.getId();
+        String entityType = contextElement.getType();
+        LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type= "
+                + entityType + ")");
+
+        // create the collection at this stage, if the data model is collection-per-entity
+        if (dataModel == DataModel.DMBYENTITY) {
+            collectionName = buildCollectionName(dbName, fiwareServicePath, destination, null, true,
+                    entityId, entityType, fiwareService) + ".aggr";
+            backend.createCollection(dbName, collectionName);
+        } // if
+
+        // iterate on all this entity's attributes, if there are attributes
+        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
+
+        if (contextAttributes == null || contextAttributes.isEmpty()) {
+            LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
+                    + ", type=" + entityType + ")");
+            return;
+        } // if
+
+        for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
+            String attrName = contextAttribute.getName();
+            String attrType = contextAttribute.getType();
+            String attrValue = contextAttribute.getContextValue(false);
+            String attrMetadata = contextAttribute.getContextMetadata();
+            LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
+                    + attrType + ")");
+
+            // check if the attribute is not numerical
+            if (!Utils.isANumber(attrValue)) {
+                LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
                 continue;
             } // if
 
-            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                
-                // check if the attribute is not numerical
-                if (!Utils.isANumber(attrValue)) {
-                    LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
-                    continue;
-                } // if
+            // check if the metadata contains a TimeInstant value; use the notified reception time instead
+            Long recvTimeTs;
+            String recvTime;
 
-                // check if the metadata contains a TimeInstant value; use the notified reception time instead
-                Long recvTimeTs;
-                String recvTime;
-                
-                Long timeInstant = getTimeInstant(attrMetadata);
-                
-                if (timeInstant != null) {
-                    recvTimeTs = timeInstant;
-                    recvTime = Utils.getHumanReadable(timeInstant, true);
-                } else {
-                    recvTimeTs = notifiedRecvTimeTs;
-                    recvTime = notifiedRecvTime;
-                } // if else
-                
-                // create the collection at this stage, if the data model is collection-per-attribute
-                if (dataModel == DataModel.DMBYATTRIBUTE) {
-                    collectionName = buildCollectionName(dbName, servicePaths[i], destinations[i], attrName,
-                            true, entityId, entityType, fiwareService) + ".aggr";
-                    backend.createCollection(dbName, collectionName);
-                } // if
+            Long timeInstant = getTimeInstant(attrMetadata);
 
-                // insert the data
-                LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                        + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
-                        + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
-                        + attrMetadata);
-                backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
-                        entityId, entityType, attrName, attrType, attrValue, attrMetadata);
-            } // for
+            if (timeInstant != null) {
+                recvTimeTs = timeInstant;
+                recvTime = Utils.getHumanReadable(timeInstant, true);
+            } else {
+                recvTimeTs = notifiedRecvTimeTs;
+                recvTime = notifiedRecvTime;
+            } // if else
+
+            // create the collection at this stage, if the data model is collection-per-attribute
+            if (dataModel == DataModel.DMBYATTRIBUTE) {
+                collectionName = buildCollectionName(dbName, fiwareServicePath, destination, attrName,
+                        true, entityId, entityType, fiwareService) + ".aggr";
+                backend.createCollection(dbName, collectionName);
+            } // if
+
+            // insert the data
+            LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
+                    + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
+                    + attrMetadata);
+            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
+                    entityId, entityType, attrName, attrType, attrValue, attrMetadata);
         } // for
     } // persistOne
     
@@ -172,10 +184,5 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         
         return res;
     } // getTimeInstant
-    
-    @Override
-    void persistBatch(Batch batch) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    } // persistBatch
     
 } // OrionSTHSink
