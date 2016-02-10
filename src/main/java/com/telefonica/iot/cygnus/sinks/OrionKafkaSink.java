@@ -48,8 +48,8 @@ public class OrionKafkaSink extends OrionSink {
     private String zookeeperEndpoint;
     private TopicAPI topicAPI;
     private ZkClient zookeeperClient;
-    private int topicPartitions;
-    private int topicReplicationFactor;
+    private int partitions;
+    private int replicationFactor;
     
     /**
      * Gets the broker list.
@@ -98,11 +98,11 @@ public class OrionKafkaSink extends OrionSink {
         zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
                 + zookeeperEndpoint + ")");
-        topicPartitions = context.getInteger("partitions", 1);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + topicPartitions + ")");
-        topicReplicationFactor = context.getInteger("replication_factor", 1);
+        partitions = context.getInteger("partitions", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
+        replicationFactor = context.getInteger("replication_factor", 1);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor=" 
-                + topicReplicationFactor + ")");
+                + replicationFactor + ")");
         super.configure(context);
     } // configure
     
@@ -180,8 +180,6 @@ public class OrionKafkaSink extends OrionSink {
         protected String entity;
         protected String attribute;
         protected String topic;
-        protected int partitions;
-        protected int replicationFactor;
         
         public KafkaAggregator() {
             aggregation = "";
@@ -199,14 +197,6 @@ public class OrionKafkaSink extends OrionSink {
             return servicePath;
         } // servicePath
         
-        public int getPartitions() {
-            return partitions;
-        } // partitions
-        
-        public int getReplicationFactor() {
-            return replicationFactor;
-        } // replicationFactor
-        
         public String getTopic() {
             return topic;
         } // getTopic
@@ -217,8 +207,6 @@ public class OrionKafkaSink extends OrionSink {
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
             topic = buildTopicName();
-            partitions = topicPartitions;
-            replicationFactor = topicReplicationFactor;
         } // initialize
         
         private String buildTopicName() throws Exception {
@@ -269,18 +257,15 @@ public class OrionKafkaSink extends OrionSink {
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String destination = aggregator.getTopic();
-        int partitions = aggregator.getPartitions();
-        int replicationFactor = aggregator.getReplicationFactor();
         
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
         String topicName = buildTopicName(destination);
 
         if (!topicAPI.topicExists(zookeeperClient, topicName)) {
-            LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
-                    + " at OrionKafkaSink");
-            LOGGER.info("[" + this.getName() + "] Partitions: " + partitions + ", "
-                    + "Replication factor = " + replicationFactor);
+            LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
+                    + "Topic: " + topicName + " , partitions: " + partitions + " , "
+                    + "replication factor: " + replicationFactor);
             topicAPI.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
         } // if
 
