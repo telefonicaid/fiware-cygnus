@@ -178,7 +178,8 @@ public class OrionKafkaSinkTest {
         // set up the behaviour of the mocked classes
         when(mockKafkaBackend.send(null)).thenReturn(null, null, null);
         when(mockTopicAPI.topicExists(null, null)).thenReturn(false, false, false);
-        doNothing().doNothing().doNothing().when(mockTopicAPI).createTopic(null, null, null);
+        doNothing().doNothing().doNothing().doNothing().doNothing().when(mockTopicAPI).
+                createTopic(null, null, 0, 0, null);
         
         // setup the testing purpose Zookeeper server
         zkServer = new TestingServer(zookeeperPort);
