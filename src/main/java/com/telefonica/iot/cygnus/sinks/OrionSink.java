@@ -733,30 +733,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             accTransactionIds = "";
         } // initialize
         
-        /**
-         * Gets a copy of this accumulator, except for the already persisted sub-batches.
-         * @return A copy of this accumulator, except for the already persisted sub-batches
-         */
-        public Accumulator getAccumulatorForRollback() {
-            Accumulator accumulatorForRollback = new Accumulator();
-            accumulatorForRollback.accIndex = this.accIndex;
-            accumulatorForRollback.accStartDate = this.accStartDate;
-            accumulatorForRollback.accTransactionIds = this.accTransactionIds;
-            Set<String> destinations = this.batch.getDestinations();
-            
-            for (String destination : destinations) {
-                if (!this.batch.isPersisted(destination)) {
-                    ArrayList<CygnusEvent> events = this.batch.getEvents(destination);
-                    
-                    for (CygnusEvent event : events) {
-                        accumulatorForRollback.batch.addEvent(destination, event);
-                    } // for
-                } // if
-            } // for
-
-            return accumulatorForRollback;
-        } // getAccumulatorForRollback
-        
         @Override
         public Accumulator clone() {
             try {
