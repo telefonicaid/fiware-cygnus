@@ -234,6 +234,10 @@ cygnusagent.sinks.sth-sink.db_prefix = sth_
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.sth-sink.should_hash = false
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.sth-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.sth-sink.batch_timeout = 30
 
 #=============================================
 # OrionKafkaSink configuration
