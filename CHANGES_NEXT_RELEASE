@@ -8,3 +8,4 @@
 - [HARDENING] Add support for configurable number of partitions and replication factor in OrionKafkaSink (#736)
 - [HARDENING] Replace method Accumulator.getAccumulatorForRollBack() with Accumulator.clone() (#746)
 - [BUG] Fix wrong section about STH implementation in orion_mongo_sink documentation (#761)
+- [BUG] Fix wrong 'dynamodb-sink' sink reference in agent.conf.template (#763)
