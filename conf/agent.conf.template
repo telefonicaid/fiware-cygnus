@@ -1,17 +1,17 @@
 # Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
-# 
+#
 # This file is part of fiware-cygnus (FI-WARE project).
-# 
+#
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
 # later version.
 # fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
 # details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
 # http://www.gnu.org/licenses/.
-# 
+#
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 #=============================================
@@ -148,7 +148,7 @@ cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
-cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx 
+cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mysql-sink.attr_persistence = column
 # select the table type from table-by-destination and table-by-service-path
@@ -179,7 +179,7 @@ cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.postgresql-sink.attr_persistence = column
 # select the table type
-cygnusagent.sinks.postgresql-sink.data_model = by-service-path
+cygnusagent.sinks.postgresql-sink.data_model = dm-by-service-path
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
@@ -234,6 +234,10 @@ cygnusagent.sinks.sth-sink.db_prefix = sth_
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.sth-sink.should_hash = false
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.sth-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.sth-sink.batch_timeout = 30
 
 #=============================================
 # OrionKafkaSink configuration
@@ -261,11 +265,11 @@ cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamo
 # channel name from where to read notification events
 cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
 # AWS Access Key Id
-cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
+cygnusagent.sinks.dynamo-sink.access_key_id = xxxxxxxx
 # AWS Secret Access Key
-cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
+cygnusagent.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 # AWS region where the tables will be created (link)
-cygnusagent.sinks.dynamodb-sink.region = eu-central-1
+cygnusagent.sinks.dynamo-sink.region = eu-central-1
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.dynamo-sink.enable_grouping = false
 # how the attributes are stored, either per row either per column (row, column)
