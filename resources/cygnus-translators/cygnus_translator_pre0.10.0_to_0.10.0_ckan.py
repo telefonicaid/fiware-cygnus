@@ -127,7 +127,7 @@ def do_backup(fields, records, res_name, pkg_id):
 # Add new fields to a resource, given its current fields and its id
 def add_new_fields(fields, res_id):
    print('       |_Adding new fields')
-   fields.append({'id':'fiware-servicepath','type':'text'})
+   fields.append({'id':'fiwareServicePath','type':'text'})
    
    if attr_persistence == 'column':
       fields.append({'id':'entityId','type':'text'})
