@@ -176,7 +176,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
     @Override
     public Status process() throws EventDeliveryException {
-        // TBD: remove the special case of batchSize=1 when all the sinks have migrated to persistBatch
         if (rollbackedAccumulations.isEmpty()) {
             return processNewBatches();
         } else {
@@ -391,11 +390,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         return notification;
     } // parseEventBody
     
-    // TBD: this class must be private once all the sinks migrate to persistsBatch
     /**
      * Utility class for batch-like event accumulation purposes.
      */
-    protected class Accumulator implements Cloneable {
+    private class Accumulator implements Cloneable {
         
         // accumulated events
         private Batch batch;
