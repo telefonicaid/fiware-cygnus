@@ -75,7 +75,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
-    
+
 According to different combinations of the parameters `datamodel` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
 Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionMongoSink` will persist the data within the body as:
 
@@ -95,7 +95,7 @@ Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-e
     > db['sth_/4wheels_car1_car'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
-    
+
 If `data_model=dm-by-entity` and `attr_persistence=column` then `OrionMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
@@ -113,9 +113,9 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `OrionMongoSink`
     system.indexes
     > db['sth_/4wheels_car1_car'].find()
     {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
-    
+
 If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
-   
+
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
     connecting to: test
@@ -155,7 +155,7 @@ Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then
     system.indexes
     > db['sth_/4wheels'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db86"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "speed" : "112.9", "oil_level" : "74.6" }
-    
+
 If `data_model=dm-by-attribute` and `attr_persistence=row` then `OrionMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
@@ -178,7 +178,7 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `OrionMongoSink`
      { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
 
 Finally, the pair of parameters `data_model=dm-by-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. In this case, in fact, `OrionMongoSink` will not persist anything; only a warning will be logged.
-                                                                                                                                              
+
 NOTES:
 
 * `mongo` is the MongoDB CLI for querying the data.
@@ -256,22 +256,20 @@ By default, `OrionMongoSink` has a configured batch size and batch accumulation 
 [Top](#top)
 
 ##<a name="section4"></a>Programmers guide
-###<a name="section4.1"></a>`OrionMongoSink` class
-`OrionMongoSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink extends the base `OrionSink`. The methods that are extended are by `OrionMongoBaseSink` are:
+###<a name="section4.1"></a>`OrionSTHSink` class
+`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
+
+    void persistBatch(Batch batch) throws Exception;
+
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
 
     public void start();
 
-`MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMongoSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
-
-The methods that are extended by `OrionMongoSink` are:
-
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
-    
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
 
 [Top](#top)
 
@@ -279,15 +277,15 @@ The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is it
 This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
 
     public void createDatabase(String dbName) throws Exception;
-    
+
 Creates a database, given its name, if not exists.
-    
+
     public void createCollection(String dbName, String collectionName) throws Exception;
-    
+
 Creates a collection, given its name, if not exists in the given database.
-    
+
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
-    
+
 Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for a single attribute. See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, Map<String, String> attrs, Map<String, String> mds) throws Exception
@@ -295,4 +293,3 @@ Inserts a new document in the given collection within the given database. Such a
 Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for multiple attributes. See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 [Top](#top)
-
