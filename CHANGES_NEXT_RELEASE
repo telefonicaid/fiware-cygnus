@@ -5,3 +5,4 @@
 - [BUG] Fix wrong spec date regarding release/0.12.0 (#750)
 - [HARDENING] Add check for null content-type in notifications (#743) 
 - [HARDENING] Add support for configurable number of partitions and replication factor in OrionKafkaSink (#736)
+- [BUG] Fix the name of the fiware service path field (#764)
