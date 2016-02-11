@@ -179,7 +179,7 @@ cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.postgresql-sink.attr_persistence = column
 # select the table type
-cygnusagent.sinks.postgresql-sink.data_model = by-service-path
+cygnusagent.sinks.postgresql-sink.data_model = dm-by-service-path
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
