@@ -10,6 +10,7 @@ Content:
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
         * [Hashing based collections](#section2.3.1)
+        * [About batching](#section2.3.2)
 * [Implementation details](#section4)
     * [`OrionSTHSink` class](#section4.1)
     * [`MongoBackend` class](#section4.2)
@@ -216,6 +217,8 @@ NOTES:
 | should_hash | no | false | true for collection names based on a hash, false for human redable collections |
 | db_prefix | no | sth_ |
 | collection_prefix | no | sth_ |
+| batch_size | no | 1 | Number of events accumulated before persistence |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
 
 A configuration example could be:
 
@@ -232,6 +235,8 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
     cygnusagent.sinks.sth-sink.should_hash = false
+    cygnusagent.sinks.sth-sink.batch_size = 100
+    cygnusagent.sinks.sth-sink.batch_timeout = 30
 
 [Top](#top)
 
@@ -248,23 +253,32 @@ In case of using hashes as part of the collection names and to let the user or d
 
 [Top](#top)
 
+###<a name="section2.3.2"></a>About batching
+Despite `OrionSTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
+
+Nevertheless, STH storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of STH (sum, sum2, max and min).
+
+The problem with such an approach (updates versus inserts) is there is no operation in the Mongo API enabling the update of a batch. As much, there exists a `updateMany` operation, but it is about updating many collections with a single data (the updated collections are those matching the given query).
+
+Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Please observe the batching accumulation is still valid, since many events may be accumulated and processed at the same time, even in the case of configuring a batch size of 1, a single notification may include several context elements. The difference with regard to the other sinks is the events within the batch will be processed one by one after all.
+
+[Top](#top)
+
 ##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionSTHSink` class
-`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink extends the base `OrionSink`. The methods that are extended are by `OrionMongoBaseSink` are:
+`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
+    void persistBatch(Batch batch) throws Exception;
+    
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
+    
     public void start();
 
-`MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
     
 A complete configuration as the described above is read from the given `Context` instance.
-
-The methods that are extended by `OrionSTHSink` are:
-
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
-    
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
 
 [Top](#top)
 
