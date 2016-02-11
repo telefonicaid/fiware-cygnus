@@ -1,1 +1,2 @@
 - [BUG] Fix wrong spec date regarding release/0.12.0 (#750)
+- [BUG] Fix the name of the fiware service path field in all the sinks (#764)

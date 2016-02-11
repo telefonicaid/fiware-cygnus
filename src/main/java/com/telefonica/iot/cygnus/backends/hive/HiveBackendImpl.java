@@ -74,6 +74,7 @@ public class HiveBackendImpl implements HiveBackend {
             
             // execute the query
             stmt.execute("create database " + dbName);
+            LOGGER.debug("Executing: 'create database " + dbName + "'");
         } catch (Throwable e) {
             LOGGER.error("Runtime error (The Hive database '" + dbName + "' cannot be created. Details="
                     + e.getMessage() + ")");
@@ -99,6 +100,7 @@ public class HiveBackendImpl implements HiveBackend {
             
             // execute the query
             stmt.execute(query);
+            LOGGER.debug("Executing: '" + query + "'");
         } catch (Throwable e) {
             LOGGER.error("Runtime error (The Hive table cannot be created. Hive query='" + query + "'. Details="
                     + e.getMessage() + ")");
@@ -124,6 +126,7 @@ public class HiveBackendImpl implements HiveBackend {
             
             // execute the query
             rs = stmt.executeQuery(query);
+            LOGGER.debug("Executing: '" + query + "'");
 
             // iterate on the result
             while (rs.next()) {
