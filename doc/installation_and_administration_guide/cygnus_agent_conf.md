@@ -65,13 +65,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -177,7 +177,7 @@ cygnusagent.sinks.mysql-sink.channel = mysql-channel
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mysql-sink.enable_grouping = false
-# the FQDN/IP address where the MySQL server runs 
+# the FQDN/IP address where the MySQL server runs
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listens for incomming connections
 cygnusagent.sinks.mysql-sink.mysql_port = 3306
@@ -261,6 +261,29 @@ cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,.
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 
+# ============================================
+# OrionDynamoDBSink configuration
+# sink class, must not be changed
+cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
+# channel name from where to read notification events
+cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
+# AWS Access Key Id
+cygnusagent.sinks.dynamo-sink.access_key_id = xxxxxxxx
+# AWS Secret Access Key
+cygnusagent.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
+# AWS region where the tables will be created (link)
+cygnusagent.sinks.dynamo-sink.region = eu-central-1
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.dynamo-sink.enable_grouping = false
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.dynamo-sink.attr_persistence = column
+# select the table type from table-by-destination and table-by-service-path
+cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.dynamo-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.dynamo-sink.batch_timeout = 30
+
 #=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
@@ -314,6 +337,15 @@ cygnusagent.channels.kafka-channel.type = memory
 cygnusagent.channels.kafka-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mkafka-channel.transactionCapacity = 100
+
+#=============================================
+# dynamo-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.dynamo-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.dynamo-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.dynamo-channel.transactionCapacity = 100
 ```
 
 [Top](#top)
