@@ -6,3 +6,4 @@
 - [HARDENING] Add check for null content-type in notifications (#743) 
 - [FEATURE] Add support for batching in OrionSTHSink (#571)
 - [HARDENING] Add support for configurable number of partitions and replication factor in OrionKafkaSink (#736)
+- [BUG] Fix wrong section about STH implementation in orion_mongo_sink documentation (#761)
