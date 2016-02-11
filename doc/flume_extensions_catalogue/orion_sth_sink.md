@@ -266,21 +266,19 @@ Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Plea
 
 ##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionSTHSink` class
-`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink extends the base `OrionSink`. The methods that are extended are by `OrionMongoBaseSink` are:
+`OrionSTHSink` extends `OrionMongoBaseSink`, which s any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
+    void persistBatch(Batch batch) throws Exception;
+    
+A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
+    
     public void start();
 
-`MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
     
 A complete configuration as the described above is read from the given `Context` instance.
-
-The methods that are extended by `OrionSTHSink` are:
-
-    void persist(Map<String, String>, NotifyContextRequest) throws Exception;
-    
-The context data, already parsed by `OrionSink` in `NotifyContextRequest`, is iterated and persisted in the MongoDB backend by means of a `MongoBackend` instance. Header information from the `Map<String, String>` is used to complete the persitence process, such as the timestamp or the destination.
 
 [Top](#top)
 
