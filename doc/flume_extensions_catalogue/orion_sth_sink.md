@@ -266,11 +266,11 @@ Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Plea
 
 ##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionSTHSink` class
-`OrionSTHSink` extends `OrionMongoBaseSink`, which s any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
+`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
     
-A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
     
     public void start();
 
