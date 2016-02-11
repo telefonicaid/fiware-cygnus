@@ -227,7 +227,7 @@ public class OrionDynamoDBSink extends OrionSink {
                         .withPrimaryKey(Constants.DYNAMO_DB_PRIMARY_KEY, id)
                         .withDouble(Constants.RECV_TIME_TS, recvTimeTs / 1000)
                         .withString(Constants.RECV_TIME, recvTime)
-                        .withString(Constants.HEADER_NOTIFIED_SERVICE_PATH, servicePath)
+                        .withString(Constants.FIWARE_SERVICE_PATH, servicePath)
                         .withString(Constants.ENTITY_ID, entityId)
                         .withString(Constants.ENTITY_TYPE, entityType)
                         .withString(Constants.ATTR_NAME, attrName)
@@ -279,7 +279,7 @@ public class OrionDynamoDBSink extends OrionSink {
             Item item = new Item()
                     .withPrimaryKey(Constants.DYNAMO_DB_PRIMARY_KEY, id)
                     .withString(Constants.RECV_TIME, recvTime)
-                    .withString(Constants.HEADER_NOTIFIED_SERVICE_PATH, servicePath)
+                    .withString(Constants.FIWARE_SERVICE_PATH, servicePath)
                     .withString(Constants.ENTITY_ID, entityId)
                     .withString(Constants.ENTITY_TYPE, entityType);
             
