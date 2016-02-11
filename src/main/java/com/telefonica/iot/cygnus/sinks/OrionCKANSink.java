@@ -145,14 +145,6 @@ public class OrionCKANSink extends OrionSink {
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
-
-    @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
     
     @Override
     void persistBatch(Batch batch) throws Exception {        

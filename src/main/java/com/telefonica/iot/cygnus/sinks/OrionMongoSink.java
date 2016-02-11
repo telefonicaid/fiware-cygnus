@@ -43,14 +43,6 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     } // OrionMongoSink
 
     @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
-
-    @Override
     void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");

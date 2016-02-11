@@ -14,3 +14,4 @@
 - [BUG] Add OrionPostgreSQLSink configuration template in cygnus_agent_conf.md (#769)
 - [BUG] Add missing sink types in agent.conf.templates (#773)
 - [BUG] Fix wrong data_model configured for OrionPostgreSQLSink in agent.conf.template (#774)
+- [HARDENING] Remove the persistOne method from all the sinks (#609)
