@@ -55,7 +55,7 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
-# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL).
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL, PostgreSQL, Mongo, STH, Kafka, DynamoDB).
 
 #=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
