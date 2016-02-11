@@ -101,7 +101,7 @@ public class OrionKafkaSink extends OrionSink {
         partitions = context.getInteger("partitions", 1);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
         replicationFactor = context.getInteger("replication_factor", 1);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor=" 
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor="
                 + replicationFactor + ")");
         super.configure(context);
     } // configure

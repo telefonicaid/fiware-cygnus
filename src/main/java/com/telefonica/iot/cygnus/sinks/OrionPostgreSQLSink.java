@@ -128,7 +128,7 @@ public class OrionPostgreSQLSink extends OrionSink {
         postgresqlPort = context.getString("postgresql_port", "3306");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
         postgresqlDatabase = context.getString("postgresql_database", "postgres");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database="+ postgresqlDatabase + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
         postgresqlUsername = context.getString("postgresql_username", "opendata");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
@@ -144,7 +144,8 @@ public class OrionPostgreSQLSink extends OrionSink {
     public void start() {
         // create the persistence backend
         LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
-        persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword);
+        persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
+                postgresqlUsername, postgresqlPassword);
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
@@ -288,7 +289,7 @@ public class OrionPostgreSQLSink extends OrionSink {
             typedFieldNames = "("
                     + Constants.RECV_TIME_TS + " bigint,"
                     + Constants.RECV_TIME + " text,"
-                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.FIWARE_SERVICE_PATH + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text,"
                     + Constants.ATTR_NAME + " text,"
@@ -299,7 +300,7 @@ public class OrionPostgreSQLSink extends OrionSink {
             fieldNames = "("
                     + Constants.RECV_TIME_TS + ","
                     + Constants.RECV_TIME + ","
-                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.FIWARE_SERVICE_PATH + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE + ","
                     + Constants.ATTR_NAME + ","
@@ -373,11 +374,11 @@ public class OrionPostgreSQLSink extends OrionSink {
 
             // particulat initialization
             typedFieldNames = "(" + Constants.RECV_TIME + " text,"
-                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + " text,"
+                    + Constants.FIWARE_SERVICE_PATH + " text,"
                     + Constants.ENTITY_ID + " text,"
                     + Constants.ENTITY_TYPE + " text";
             fieldNames = "(" + Constants.RECV_TIME + ","
-                    + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH.replaceAll("-", "") + ","
+                    + Constants.FIWARE_SERVICE_PATH + ","
                     + Constants.ENTITY_ID + ","
                     + Constants.ENTITY_TYPE;
 
