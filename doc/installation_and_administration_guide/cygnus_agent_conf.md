@@ -65,13 +65,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
