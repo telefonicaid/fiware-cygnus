@@ -65,13 +65,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
+cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink postgresql-sink
+cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
+cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
 # source class, must not be changed
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -168,6 +168,33 @@ cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
 cygnusagent.sinks.ckan-sink.ssl = false
+
+# ============================================
+# OrionPostgreSQLSink configuration
+# channel name from where to read notification events
+cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
+# sink class, must not be changed
+cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.postgresql-sink.enable_grouping = false
+# the FQDN/IP address where the PostgreSQL server runs
+cygnusagent.sinks.postgresql-sink.postgresql_host = x.y.z.w
+# the port where the PostgreSQL server listens for incomming connections
+cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
+# the name of the postgresql database
+cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
+# a valid user in the PostgreSQL server
+cygnusagent.sinks.postgresql-sink.postgresql_username = root
+# password for the user above
+cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
+# how the attributes are stored, either per row either per column (row, column)
+cygnusagent.sinks.postgresql-sink.attr_persistence = column
+# select the table type
+cygnusagent.sinks.postgresql-sink.data_model = by-service-path
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.postgresql-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 
 # ============================================
 # OrionMySQLSink configuration
@@ -310,6 +337,15 @@ cygnusagent.channels.mysql-channel.type = memory
 cygnusagent.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnusagent.channels.mysql-channel.transactionCapacity = 100
+
+#=============================================
+# postgresql-channel configuration
+# channel type (must not be changed)
+cygnusagent.channels.postgresql-channel.type = memory
+# capacity of the channel
+cygnusagent.channels.postgresql-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnusagent.channels.postgresql-channel.transactionCapacity = 100
 
 #=============================================
 # mongo-channel configuration
