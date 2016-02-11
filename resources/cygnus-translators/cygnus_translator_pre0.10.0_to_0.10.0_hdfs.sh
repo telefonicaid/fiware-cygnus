@@ -72,7 +72,7 @@ function translate_file_json_row {
                 index=$(nth_index_of "$jsonLine" "$delimiter" 2)
                 leftPart=$(echo ${jsonLine:0:$index})
                 rightPart=$(echo ${jsonLine:$index})
-                newJsonLine=$(echo $leftPart\"fiware-servicePath\":\"$null_value\",$rightPart)
+                newJsonLine=$(echo $leftPart\"fiwareServicePath\":\"$null_value\",$rightPart)
                 echo $newJsonLine >> $tempFile
         done < <(hadoop fs -cat $file)
 
@@ -96,7 +96,7 @@ function translate_file_json_column {
                 index=$(nth_index_of "$jsonLine" "$delimiter" 2)
                 leftPart=$(echo ${jsonLine:0:$index})
                 rightPart=$(echo ${jsonLine:$index})
-                newJsonLine=$(echo $leftPart\"fiware-servicePath\":\"$null_value\",\"entityId\":\"$null_value\",\"entityType\":\"$null_value\",$rightPart)
+                newJsonLine=$(echo $leftPart\"fiwareServicePath\":\"$null_value\",\"entityId\":\"$null_value\",\"entityType\":\"$null_value\",$rightPart)
                 echo $newJsonLine >> $tempFile
         done < <(hadoop fs -cat $file)
 

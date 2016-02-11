@@ -6,6 +6,7 @@
 - [HARDENING] Add check for null content-type in notifications (#743) 
 - [FEATURE] Add support for batching in OrionSTHSink (#571)
 - [HARDENING] Add support for configurable number of partitions and replication factor in OrionKafkaSink (#736)
+- [BUG] Fix the name of the fiware service path field in all the sinks (#764)
 - [HARDENING] Replace method Accumulator.getAccumulatorForRollBack() with Accumulator.clone() (#746)
 - [BUG] Fix wrong section about STH implementation in orion_mongo_sink documentation (#761)
 - [BUG] Fix wrong 'dynamodb-sink' sink reference in agent.conf.template (#763)

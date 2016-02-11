@@ -531,7 +531,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + " string,"
+                    + Constants.FIWARE_SERVICE_PATH + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -574,7 +574,7 @@ public class OrionHDFSSink extends OrionSink {
                 String line = "{"
                     + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","  
                     + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\"," 
-                    + "\"" + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"," 
                     + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
@@ -604,7 +604,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + " string,"
+                    + Constants.FIWARE_SERVICE_PATH + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
@@ -645,7 +645,7 @@ public class OrionHDFSSink extends OrionSink {
             } // if
             
             String line = "{\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
-                    + "\"" + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + "\":\"" + servicePath + "\","
+                    + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"";
             
@@ -682,7 +682,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH) + " string,"
+                    + Constants.FIWARE_SERVICE_PATH + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -799,7 +799,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Utils.encodeHive(Utils.encodeHive(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH)) + " string,"
+                    + Constants.FIWARE_SERVICE_PATH + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
