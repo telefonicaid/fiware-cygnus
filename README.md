@@ -216,6 +216,8 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
+Many other operations, like getting/updating/deleting the grouping rules can be found in Management Interface [documentation](./doc/installation_and_administration_guide/management_interface.md).
+
 [Top](#top)
 
 ##<a name="section3"></a>Advanced topics and further reading
@@ -269,8 +271,10 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>Infinite events TTL</td><td>0.7.0</td></tr>
   <tr><td>enable/disable Grouping Rules</td><td>0.9.0</td></tr>
   <tr><td>Data model configuration</td><td>0.12.0</td></tr>
-  <tr><td rowspan="2">Management Interface</td><td>/version</td><td>0.5.0</td></tr>
-  <tr><td>/stats</td><td>0.12.0</td></tr>
+  <tr><td rowspan="4">Management Interface</td><td>GET /version</td><td>0.5.0</td></tr>
+  <tr><td>GET /stats</td><td>0.12.0</td></tr>
+  <tr><td>GET /groupingrules</td><td>0.12.0</td></tr>
+  <tr><td>POST /groupingrules</td><td>0.12.0</td></tr>
   <tr><td rowspan="7">General</td><td>RPM building framework</td><td>0.3.0</td></tr>
   <tr><td>TDAF-like logs</td><td>0.4.0</td></tr>
   <tr><td>RoundRobinChannelSelector</td><td>0.6.0</td></tr>

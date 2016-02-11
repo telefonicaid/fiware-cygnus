@@ -48,6 +48,8 @@ public class OrionKafkaSink extends OrionSink {
     private String zookeeperEndpoint;
     private TopicAPI topicAPI;
     private ZkClient zookeeperClient;
+    private int partitions;
+    private int replicationFactor;
     
     /**
      * Gets the broker list.
@@ -96,6 +98,11 @@ public class OrionKafkaSink extends OrionSink {
         zookeeperEndpoint = context.getString("zookeeper_endpoint", "localhost:2181");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
                 + zookeeperEndpoint + ")");
+        partitions = context.getInteger("partitions", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
+        replicationFactor = context.getInteger("replication_factor", 1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor=" 
+                + replicationFactor + ")");
         super.configure(context);
     } // configure
     
@@ -256,9 +263,10 @@ public class OrionKafkaSink extends OrionSink {
         String topicName = buildTopicName(destination);
 
         if (!topicAPI.topicExists(zookeeperClient, topicName)) {
-            LOGGER.info("[" + this.getName() + "] Creating topic " + topicName
-                    + " at OrionKafkaSink");
-            topicAPI.createTopic(zookeeperClient, topicName, new Properties());
+            LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
+                    + "Topic: " + topicName + " , partitions: " + partitions + " , "
+                    + "replication factor: " + replicationFactor);
+            topicAPI.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
         } // if
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -308,9 +316,11 @@ public class OrionKafkaSink extends OrionSink {
          * @param zookeeperClient
          * @param topic
          * @param props
+         * @param partitions
+         * @param replicationFactor
          */
-        public void createTopic(ZkClient zookeeperClient, String topic, Properties props) {
-            AdminUtils.createTopic(zookeeperClient, topic, 1, 1, props);
+        public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
+            AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
         } // createTopic
         
     } // TopicAPI
