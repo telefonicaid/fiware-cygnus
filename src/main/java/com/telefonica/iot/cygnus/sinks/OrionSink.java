@@ -738,8 +738,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             try {
                 Accumulator acc = (Accumulator) super.clone();
                 return acc; 
-            }
-            catch (CloneNotSupportedException ce) {
+            } catch (CloneNotSupportedException ce) {
                 return null;
             }
         } // clone
