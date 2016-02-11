@@ -48,7 +48,7 @@ The context attributes within each context response/entity are iterated, and a n
 * `row`: A data row is added for each notified context attribute. This kind of row will always contain 8 fields:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareservicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
     * `attrName`: Notified attribute name.
@@ -57,7 +57,7 @@ The context attributes within each context response/entity are iterated, and a n
     * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
 * `column`: A single data row is added for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and other for the metadata, named `<attrName>_md`), plus four additional fields:
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareservicePath`: The notified one or the default one.
+    * `fiwareServicePath`: The notified one or the default one.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
 
@@ -127,7 +127,7 @@ Assuming `mysql_username=myuser`, `table_type=table-by-destination` and `attr_pe
 
     mysql> select * from 4wheels_car1_car;
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    | recvTimeTs | recvTime                   | fiwareServicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  speed      | float     | 112.9     | []     |
     | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
@@ -164,7 +164,7 @@ If `table_type=table-by-destination` and `attr_persistence=colum` then `OrionMyS
 
     mysql> select * from 4wheels_car1_car;
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
-    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    | recvTime                   | fiwareServicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
@@ -200,7 +200,7 @@ If `table_type=table-by-service-path` and `attr_persistence=row` then `OrionMySQ
 
     mysql> select * from 4wheels;
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
-    | recvTimeTs | recvTime                   | fiwareservicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
+    | recvTimeTs | recvTime                   | fiwareServicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  speed      | float     | 112.9     | []     |
     | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
@@ -237,7 +237,7 @@ If `table_type=table-by-service-path` and `attr_persistence=colum` then `OrionMy
 
     mysql> select * from 4wheels;
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
-    | recvTime                   | fiwareservicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
+    | recvTime                   | fiwareServicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
