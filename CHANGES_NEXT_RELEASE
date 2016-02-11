@@ -10,3 +10,4 @@
 - [BUG] Fix wrong section about STH implementation in orion_mongo_sink documentation (#761)
 - [BUG] Fix wrong 'dynamodb-sink' sink reference in agent.conf.template (#763)
 - [BUG] Add OrionDynamoDBSink configuration template in cygnus_agent_conf.md (#762)
+- [BUG] Add OrionPostgreSQLSink configuration template in cygnus_agent_conf.md (#769)
