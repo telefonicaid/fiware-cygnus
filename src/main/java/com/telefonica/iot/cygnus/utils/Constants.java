@@ -48,15 +48,16 @@ public final class Constants {
     public static final String HEADER_TIMESTAMP = "timestamp";
 
     // Common fields for sinks/backends
-    public static final String RECV_TIME_TS = "recvTimeTs";
-    public static final String RECV_TIME    = "recvTime";
-    public static final String ENTITY_ID    = "entityId";
-    public static final String ENTITY_TYPE  = "entityType";
-    public static final String ATTR_NAME    = "attrName";
-    public static final String ATTR_TYPE    = "attrType";
-    public static final String ATTR_VALUE   = "attrValue";
-    public static final String ATTR_MD      = "attrMd";
-    public static final String ATTR_MD_FILE = "attrMdFile";
+    public static final String RECV_TIME_TS        = "recvTimeTs";
+    public static final String RECV_TIME           = "recvTime";
+    public static final String FIWARE_SERVICE_PATH = "fiwareServicePath";
+    public static final String ENTITY_ID           = "entityId";
+    public static final String ENTITY_TYPE         = "entityType";
+    public static final String ATTR_NAME           = "attrName";
+    public static final String ATTR_TYPE           = "attrType";
+    public static final String ATTR_VALUE          = "attrValue";
+    public static final String ATTR_MD             = "attrMd";
+    public static final String ATTR_MD_FILE        = "attrMdFile";
 
     // Maximum values
     public static final int MAX_CONNS = 500;
