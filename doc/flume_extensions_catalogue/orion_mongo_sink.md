@@ -257,7 +257,7 @@ By default, `OrionMongoSink` has a configured batch size and batch accumulation 
 
 ##<a name="section4"></a>Programmers guide
 ###<a name="section4.1"></a>`OrionSTHSink` class
-`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
+`OrionMongoSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -265,7 +265,7 @@ A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsi
 
     public void start();
 
-An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMongoSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
