@@ -28,7 +28,6 @@ import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -37,7 +36,6 @@ import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -264,7 +262,7 @@ public class OrionHDFSSink extends OrionSink {
                     + "properly work!");
         } // if else
         
-        csvSeparator = context.getString("csv_separator", ",");        
+        csvSeparator = context.getString("csv_separator", ",");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (csvSeparator=" + csvSeparator + ")");
         
         oauth2Token = context.getString("oauth2_token");
@@ -384,6 +382,7 @@ public class OrionHDFSSink extends OrionSink {
         try {
             // create Hive backend
             hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+            LOGGER.debug("[" + this.getName() + "] Hive persistence backend created");
             
             // create the persistence backend
             if (backendImpl == BackendImpl.BINARY) {
@@ -402,11 +401,11 @@ public class OrionHDFSSink extends OrionSink {
             
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-        } // try catch // try catch
+            LOGGER.error("Error while creating the HDFS persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
         
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
@@ -572,14 +571,14 @@ public class OrionHDFSSink extends OrionSink {
                 
                 // create a line and aggregate it
                 String line = "{"
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","  
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\"," 
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"," 
+                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\","
                     + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
                     + "\"" + Utils.encodeHive(Constants.ATTR_TYPE) + "\":\"" + attrType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + "," 
+                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + ","
                     + "\"" + Utils.encodeHive(Constants.ATTR_MD) + "\":" + attrMetadata
                     + "}";
                 

@@ -18,14 +18,11 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
 import kafka.utils.ZKStringSerializer$;
@@ -119,7 +116,7 @@ public class OrionKafkaSink extends OrionSink {
         } catch (Exception e) {
             LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
                     + e.getMessage());
-        } // try catch // try catch
+        } // try catch
         
         // creat the name API
         topicAPI = new TopicAPI();
@@ -128,7 +125,6 @@ public class OrionKafkaSink extends OrionSink {
         zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override

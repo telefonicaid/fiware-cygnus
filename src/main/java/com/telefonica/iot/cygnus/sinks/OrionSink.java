@@ -36,7 +36,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -83,6 +82,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
+    private boolean invalidConfiguration;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -97,6 +97,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
      */
     public OrionSink() {
         super();
+        
+        // configuration is supposed to be valid
+        invalidConfiguration = false;
         
         // create the accumulator utility
         accumulator = new Accumulator();
@@ -150,9 +153,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     @Override
     public void configure(Context context) {
         String dataModelStr = context.getString("data_model", "dm-by-entity");
-        dataModel = DataModel.valueOf(dataModelStr.replaceAll("-", "").toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model="
-                + dataModelStr + ")");
+        
+        try {
+            dataModel = DataModel.valueOf(dataModelStr.replaceAll("-", "").toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (data_model="
+                    + dataModelStr + ")");
+        } catch (Exception e) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (data_model="
+                    + dataModelStr + ")");
+        } // catch
+        
         enableGrouping = context.getBoolean("enable_grouping", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
@@ -167,6 +178,13 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     @Override
     public void start() {
         super.start();
+        
+        if (invalidConfiguration) {
+            LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
+                    + "in the configuration, thus this sink will not run the expected logic");
+        } else {
+            LOGGER.info("[" + this.getName() + "] Startup completed");
+        } // if else
     } // start
     
     @Override
@@ -176,12 +194,14 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
     @Override
     public Status process() throws EventDeliveryException {
-        if (rollbackedAccumulations.isEmpty()) {
+        if (invalidConfiguration) {
+            return Status.BACKOFF;
+        } else if (rollbackedAccumulations.isEmpty()) {
             return processNewBatches();
         } else {
             return processRollbackedBatches();
         } // if else
-    } // process 
+    } // process
     
     private Status processRollbackedBatches() throws EventDeliveryException {
         Accumulator rollbackedAccumulation;
@@ -604,10 +624,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         public Accumulator clone() {
             try {
                 Accumulator acc = (Accumulator) super.clone();
-                return acc; 
+                return acc;
             } catch (CloneNotSupportedException ce) {
                 return null;
-            }
+            } // clone
         } // clone
         
     } // Accumulator

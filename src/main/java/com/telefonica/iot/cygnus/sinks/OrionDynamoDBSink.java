@@ -28,7 +28,6 @@ import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -89,11 +88,11 @@ public class OrionDynamoDBSink extends OrionSink {
             persistenceBackend = new DynamoDBBackendImpl(accessKeyId, secretAccessKey, region);
             LOGGER.debug("[" + this.getName() + "] DynamoDB persistence backend created");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error while creating the DynamoDB persistence backend. Details="
+                    + e.getMessage());
         } // try catch
         
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override

@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -27,8 +26,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -131,11 +128,15 @@ public class OrionMySQLSink extends OrionSink {
 
     @Override
     public void start() {
-        // create the persistence backend
-        LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
-        persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+        try {
+            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+            LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+        } catch (Exception e) {
+            LOGGER.error("Error while creating the MySQL persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
+        
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
