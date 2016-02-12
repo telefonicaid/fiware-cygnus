@@ -17,7 +17,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-# Author: frb
+# Author: María A. Gª Sopo
 
 # Show the usage
 if [ $# -ne 6 ]; then
@@ -60,31 +60,17 @@ function translate_table_column {
         mysql -u $user -p$password -e "use $database;alter table $table add entityType varchar(255) default null after entityId"
 }
 
-# Function to translate a database
-# $1 --> database to be translated (input)
-function translate_database {
-        local dbName=$1
+if [ "$backup" == "yes" ]; then
+   bak='_bak'
+   tablebak=$table$bak
+   mysql -u $user -p$password -e "use $database;create table $tablebak like $table"
+   mysql -u $user -p$password -e "use $database;insert $tablebak select * from $table"
+fi
 
-        while read -r entry; do
-                echo "Translating $database.$entry"
-
-                if [ "$backup" == "yes" ]; then
-                        bak='_bak'
-                        entrybak=$entry$bak
-                        mysql -u $user -p$password -e "use $database;create table $entrybak like $entry"
-                        mysql -u $user -p$password -e "use $database;insert $entrybak select * from $entry"
-                fi
-
-                if [ "$tableFormat" == "row" ]; then
-                        translate_table_row $entry
-                elif [ "$tableFormat" == "column" ]; then
-                        translate_table_column $entry
-                else
-                        echo "Unknown table format: $tableFormat"
-                fi
-        done < <(mysql -u $user -p$password -e "use $database;show tables" | grep -v Tables_in)
-}
-
-# Main function
-translate_table_column $database $table
-
+if [ "$tableFormat" == "row" ]; then
+   translate_table_row $table
+elif [ "$tableFormat" == "column" ]; then
+   translate_table_column $table
+else
+   echo "Unknown table format: $tableFormat"
+fi
