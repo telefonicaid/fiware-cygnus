@@ -19,13 +19,10 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -56,7 +53,6 @@ public class OrionTestSink extends OrionSink {
     @Override
     public void start() {
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override

@@ -130,11 +130,15 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     
     @Override
     public void start() {
-        // create the persistence backend
-        backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, dataModel);
-        LOGGER.debug("[" + this.getName() + "] Mongo persistence backend created");
+        try {
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, dataModel);
+            LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
+        } catch (Exception e) {
+            LOGGER.error("Error while creating the MongoDB persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
+        
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     /**

@@ -22,8 +22,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -39,7 +37,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
      */
     public OrionSTHSink() {
         super();
-    } // OrionSTHSink    
+    } // OrionSTHSink
     
     @Override
     public void persistBatch(Batch batch) throws Exception {

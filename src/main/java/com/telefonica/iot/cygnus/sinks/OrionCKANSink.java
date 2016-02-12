@@ -26,8 +26,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -136,18 +134,18 @@ public class OrionCKANSink extends OrionSink {
     @Override
     public void start() {
         try {
-            // create persistenceBackend backend
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl);
-        } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-        } // try catch // try catch // try catch // try catch
+            LOGGER.debug("[" + this.getName() + "] CKAN persistence backend created");
+        } catch (Exception e) {
+            LOGGER.error("Error while creating the CKAN persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
 
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
     
     @Override
-    void persistBatch(Batch batch) throws Exception {        
+    void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
