@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import javax.servlet.ServletException;
@@ -117,6 +118,20 @@ public class ManagementInterface extends AbstractHandler {
         } else if (method.equals("POST")) {
             if (uri.equals("/v1/groupingrules")) {
                 handlePostGroupingRules(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+            } // if else
+        } else if (method.equals("PUT")) {
+            if (uri.equals("/v1/groupingrules")) {
+                handlePutGroupingRules(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+            } // if else
+        } else if (method.equals("DELETE")) {
+            if (uri.equals("/v1/groupingrules")) {
+                handleDeleteGroupingRules(request, response);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("404 - " + method + " " + uri + " Not found");
@@ -373,6 +388,124 @@ public class ManagementInterface extends AbstractHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"}");
     } // handlePostGroupingRules
+    
+    private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String ruleStr = "";
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            ruleStr += line;
+        } // while
+        
+        reader.close();
+        
+        // get the rule ID to be updated
+        long id = new Long(request.getParameter("id"));
+        
+        LOGGER.debug("Grouping rule with id " + id + " will be updated with: " + ruleStr);
+
+        // check the Json syntax of the new rule
+        JSONParser jsonParser = new JSONParser();
+        JSONObject rule;
+
+        try {
+            rule = (JSONObject) jsonParser.parse(ruleStr);
+        } catch (ParseException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("400 - Parse error, invalid Json syntax. Details: " + e.getMessage());
+            LOGGER.error("Parse error, invalid Json syntax. Details: " + e.getMessage());
+            return;
+        } // try catch
+
+        // check if the rule is valid (it could be a valid Json document,
+        // but not a Json document describing a rule)
+        int err = GroupingRule.isValid(rule);
+        
+        if (err > 0) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            
+            switch (err) {
+                case 1:
+                    response.getWriter().println("400 - Invalid grouping rule, some field is missing");
+                    LOGGER.warn("Invalid grouping rule, some field is missing");
+                    return;
+                case 2:
+                    response.getWriter().println("400 - Invalid grouping rule, some field is empty");
+                    LOGGER.warn("Invalid grouping rule, some field is empty");
+                    return;
+                default:
+                    response.getWriter().println("400 - Invalid grouping rule");
+                    LOGGER.warn("Invalid grouping rule");
+                    return;
+            } // swtich
+        } // if
+        
+        if (groupingRulesConfFile == null) {
+            response.getWriter().println("404 - Missing configuration file for Grouping Rules");
+            LOGGER.error("Missing configuration file for Grouping Rules");
+            return;
+        } // if
+        
+        if (!new File(groupingRulesConfFile).exists()) {
+            response.getWriter().println("404 - Configuration file for Grouing Rules not found. Details: "
+                    + groupingRulesConfFile);
+            LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
+            return;
+        } // if
+        
+        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        
+        if (groupingRules.updateRule(id, new GroupingRule(rule))) {
+            PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
+            writer.println(groupingRules.toString());
+            writer.flush();
+            writer.close();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"true\"}");
+        } else {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"false\"}");
+        } // if else
+    } // handlePutGroupingRules
+    
+    private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        // get the rule ID to be deleted
+        long id = new Long(request.getParameter("id"));
+        
+        if (groupingRulesConfFile == null) {
+            response.getWriter().println("404 - Missing configuration file for Grouping Rules");
+            LOGGER.error("Missing configuration file for Grouping Rules");
+            return;
+        } // if
+        
+        if (!new File(groupingRulesConfFile).exists()) {
+            response.getWriter().println("404 - Configuration file for Grouing Rules not found. Details: "
+                    + groupingRulesConfFile);
+            LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
+            return;
+        } // if
+        
+        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        
+        if (groupingRules.deleteRule(id)) {
+            PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
+            writer.println(groupingRules.toString());
+            writer.flush();
+            writer.close();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"true\"}");
+        } else {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"false\"}");
+        } // if else
+    } // handleDeleteGroupingRules
     
     private String getGroupingRulesConfFile() throws IOException {
         if (!configurationFile.exists()) {
