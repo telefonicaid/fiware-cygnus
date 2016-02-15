@@ -124,14 +124,16 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
         this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence");
-        if (persistence.equals("row") || persistence.equals("column")) {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + persistence + ")");
-        } else {
+        try {
+            if (persistence.equals("row") || persistence.equals("column")) {
+                 LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                    + persistence + ")");
+            }
+        } catch (Exception e) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") must be 'row' or 'column'");
-        }  // if else
+        }  // try catch
         super.configure(context);
     } // configure
     
