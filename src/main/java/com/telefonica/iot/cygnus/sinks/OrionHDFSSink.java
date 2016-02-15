@@ -530,7 +530,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -571,15 +571,15 @@ public class OrionHDFSSink extends OrionSink {
                 
                 // create a line and aggregate it
                 String line = "{"
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_TYPE) + "\":\"" + attrType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + ","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_MD) + "\":" + attrMetadata
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                     + "}";
                 
                 if (aggregation.isEmpty()) {
@@ -603,7 +603,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
@@ -643,10 +643,10 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = "{\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"";
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -657,8 +657,7 @@ public class OrionHDFSSink extends OrionSink {
                         + attrType + ")");
                 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += ", \"" + Utils.encodeHive(attrName) + "\":" + attrValue + ", \""
-                        + Utils.encodeHive(attrName) + "_md\":" + attrMetadata;
+                line += ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
             } // for
             
             // now, aggregate the line
@@ -681,7 +680,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -798,7 +797,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
@@ -1081,7 +1080,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
-        String thirdLevelMd = destination + "_" + Utils.encodeHive(attrName) + "_" + Utils.encodeHive(attrType);
+        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
         
         if (thirdLevelMd.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
