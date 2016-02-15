@@ -114,7 +114,7 @@ It is <b>very important</b> to configure the <b>absolute path to the grouping ru
 
 ##<a name="section4"></a>Management Interface related operations
 
-The Management Interface of Cygnus exposes a set of operations under the `/v1/groupingrules` path related to the groupiong rules feature, allowing listing/updating/removing the rules. For instance:
+The Management Interface of Cygnus exposes a set of operations under the `/v1/groupingrules` path related to the grouping rules feature, allowing listing/updating/removing the rules. For instance:
 
 ```
 GET http://<cygnus_host>:<management_port>/v1/groupingrules
