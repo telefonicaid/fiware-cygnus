@@ -111,6 +111,45 @@ public class GroupingRules {
     } // GroupingRule
     
     /**
+     * Deletes a rule given its ID.
+     * @param id
+     * @return True, if the rule was deleted, otherwise false
+     */
+    public boolean deleteRule(long id) {
+        for (int i = 0; i < groupingRules.size(); i++) {
+            GroupingRule groupingRule = groupingRules.get(i);
+            
+            if (groupingRule.getId() == id) {
+                groupingRules.remove(i);
+                return true;
+            } // if
+        } // for
+        
+        return false;
+    } // deleteRule
+    
+    /**
+     * Updates a rule given its ID.
+     * @param id
+     * @param rule
+     * @return True, if the rule was updated, otherwise false
+     */
+    public boolean updateRule(long id, GroupingRule rule) {
+        for (int i = 0; i < groupingRules.size(); i++) {
+            GroupingRule groupingRule = groupingRules.get(i);
+            
+            if (groupingRule.getId() == id) {
+                groupingRules.remove(i);
+                rule.setId(id);
+                groupingRules.add(i, rule);
+                return true;
+            } // if
+        } // for
+        
+        return false;
+    } // updateRule
+    
+    /**
      * Gets a stringified version of the grouping rules.
      * @return A stringified version of the grouping rules
      */
