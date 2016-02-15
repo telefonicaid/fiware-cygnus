@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.management;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -59,7 +60,7 @@ public class ManagementInterfaceTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        managementInterface = new ManagementInterface(null, null, null, null);
+        managementInterface = new ManagementInterface(new File(""), null, null, null);
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getRequestURI()).thenReturn(requestURI);

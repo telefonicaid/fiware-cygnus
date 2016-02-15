@@ -21,6 +21,8 @@ package com.telefonica.iot.cygnus.management;
 import com.google.common.collect.ImmutableMap;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
+import com.telefonica.iot.cygnus.interceptors.GroupingRule;
+import com.telefonica.iot.cygnus.interceptors.GroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionSink;
 import com.telefonica.iot.cygnus.utils.Utils;
@@ -41,7 +43,6 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -72,6 +73,15 @@ public class ManagementInterface extends AbstractHandler {
     public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
             Channel> channels, ImmutableMap<String, SinkRunner> sinks) {
         this.configurationFile = configurationFile;
+        
+        try {
+            this.groupingRulesConfFile = getGroupingRulesConfFile();
+        } catch (IOException e) {
+            this.groupingRulesConfFile = null;
+            LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
+                    + e.getMessage());
+        } // try catch
+            
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
@@ -259,34 +269,37 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetStats
     
     private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
-        String configStr = readGroupingRules();
         response.setContentType("json;charset=utf-8");
         
-        if (configStr.startsWith("404")) {
+        if (groupingRulesConfFile == null) {
+            response.getWriter().println("404 - Missing configuration file for Grouping Rules");
+            LOGGER.error("Missing configuration file for Grouping Rules");
+            return;
+        } // if
+        
+        if (!new File(groupingRulesConfFile).exists()) {
+            response.getWriter().println("404 - Configuration file for Grouing Rules not found. Details: "
+                    + groupingRulesConfFile);
+            LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
+            return;
+        } // if
+        
+        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        String rulesStr = groupingRules.toString();
+        
+        if (rulesStr.startsWith("404")) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
             response.setStatus(HttpServletResponse.SC_OK);
         } // if else
         
-        response.getWriter().println(configStr);
+        response.getWriter().println(rulesStr);
     } // handleGetGroupingRules
     
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
-        
-        // read the grouing rules we want to modify
-        String configStr = readGroupingRules();
-        
-        // check if there was an error while reading the grouping rules
-        if (configStr.startsWith("404")) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().println(configStr);
-            LOGGER.error("Grouping rules not found... but they are supposed to be there!!!");
-            return;
-        } // if
 
-        // there was no error, and the syntax of the already configured grouping rules should be OK...
-        // thus read the new rule wanted to be added
+        // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
         String ruleStr = "";
         String line;
@@ -313,7 +326,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
-        int err = isValid(rule);
+        int err = GroupingRule.isValid(rule);
         
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -321,56 +334,53 @@ public class ManagementInterface extends AbstractHandler {
             switch (err) {
                 case 1:
                     response.getWriter().println("400 - Invalid grouping rule, some field is missing");
-                    LOGGER.error("Invalid grouping rule, some field is missing");
+                    LOGGER.warn("Invalid grouping rule, some field is missing");
                     return;
                 case 2:
-                    response.getWriter().println("400 - Invalid grouping rule, the id is not numeric or it is missing");
-                    LOGGER.error("Invalid grouping rule, the id is not numeric or it is missing");
-                    return;
-                case 3:
                     response.getWriter().println("400 - Invalid grouping rule, some field is empty");
-                    LOGGER.error("Invalid grouping rule, some field is empty");
+                    LOGGER.warn("Invalid grouping rule, some field is empty");
                     return;
                 default:
                     response.getWriter().println("400 - Invalid grouping rule");
-                    LOGGER.error("Invalid grouping rule");
+                    LOGGER.warn("Invalid grouping rule");
                     return;
             } // swtich
         } // if
         
-        // add the rule to the already existent configuration... the easiest way is parsing the configuration
-        JSONObject config;
-        
-        try {
-            config = (JSONObject) jsonParser.parse(configStr);
-        } catch (ParseException e) {
-            LOGGER.error("Grouping rules syntax is wrong... but it is supposed to be OK!!! Details: "
-                    + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("500 - Internal server error");
+        if (groupingRulesConfFile == null) {
+            response.getWriter().println("404 - Missing configuration file for Grouping Rules");
+            LOGGER.error("Missing configuration file for Grouping Rules");
             return;
-        } // try catch
+        } // if
         
-        JSONArray rules = (JSONArray) config.get("grouping_rules");
-        rules.add(rule);
-        LOGGER.debug("Grouping rules after adding the new rule: " + rules.toJSONString());
+        if (!new File(groupingRulesConfFile).exists()) {
+            response.getWriter().println("404 - Configuration file for Grouing Rules not found. Details: "
+                    + groupingRulesConfFile);
+            LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
+            return;
+        } // if
+        
+        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        groupingRules.addRule(new GroupingRule(rule));
+        String rulesStr = groupingRules.toString();
+        LOGGER.debug("Grouping rules after adding the new rule: " + rulesStr);
         
         // write the configuration
         PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
-        writer.println("{\"grouping_rules\":" + rules.toJSONString() + "}");
+        writer.println(rulesStr);
         writer.flush();
         writer.close();
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"}");
     } // handlePostGroupingRules
     
-    private String readGroupingRules() throws IOException {
+    private String getGroupingRulesConfFile() throws IOException {
         if (!configurationFile.exists()) {
             return "404 - Configuration file for Cygnus not found. Details: "
                     + configurationFile.toString();
         } // if
         
-        groupingRulesConfFile = null;
+        String groupingRulesConfFile = null;
         BufferedReader reader = new BufferedReader(new FileReader(configurationFile));
         String line;
         
@@ -385,56 +395,7 @@ public class ManagementInterface extends AbstractHandler {
         } // while
         
         reader.close();
-        
-        if (groupingRulesConfFile == null) {
-            return "404 - Missing configuration file for Grouping Rules";
-        } // if
-        
-        if (!new File(groupingRulesConfFile).exists()) {
-            return "404 - Configuration file for Grouing Rules not found. Details: "
-                    + groupingRulesConfFile;
-        } // if
-        
-        String jsonStr = "";
-        reader = new BufferedReader(new FileReader(groupingRulesConfFile));
-        
-        while ((line = reader.readLine()) != null) {
-            if (!line.startsWith("#")) {
-                jsonStr += line;
-            } // if
-        } // while
-        
-        reader.close();
-        
-        return jsonStr;
-    } // readGroupingRules
-    
-    private int isValid(JSONObject jsonRule) {
-        // check if the rule contains all the required fields
-        if (!jsonRule.containsKey("id")
-                || !jsonRule.containsKey("fields")
-                || !jsonRule.containsKey("regex")
-                || !jsonRule.containsKey("destination")
-                || !jsonRule.containsKey("fiware_service_path")) {
-            return 1;
-        } // if
-        
-        // check if the id is numeric
-        try {
-            Long l = (Long) jsonRule.get("id");
-        } catch (Exception e) {
-            return 2;
-        } // catch
-        
-        // check if the rule has any empty field
-        if (((JSONArray) jsonRule.get("fields")).size() == 0
-                || ((String) jsonRule.get("regex")).length() == 0
-                || ((String) jsonRule.get("destination")).length() == 0
-                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
-            return 3;
-        } // if
-        
-        return 0;
-    } // isValid
-    
+        return groupingRulesConfFile;
+    } // getGroupingRulesConfFile
+
 } // ManagementInterface
