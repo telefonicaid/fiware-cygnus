@@ -99,14 +99,18 @@ public class OrionKafkaSink extends OrionSink {
         if (partitions <= 0) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (partitions=" + partitions 
-                    + ") must be upper than 1");
+                    + ") must be upper than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
         }
         replicationFactor = context.getInteger("replication_factor", 1);
-        // TBD: Get the number of brokers for check this parameter
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (replication factor="
-                + replicationFactor + ")");
+        if (replicationFactor <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor=" 
+                    + replicationFactor + ") must be upper than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor=" + replicationFactor + ")");
+        }
         super.configure(context);
     } // configure
     
