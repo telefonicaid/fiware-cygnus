@@ -135,7 +135,7 @@ public class OrionMySQLSink extends OrionSink {
         // FIXME: mysqlPassword should be read as a SHA1 and decoded here
         mysqlPassword = context.getString("mysql_password", "unknown");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
-        String tableTypeStr = context.getString("table_type", "table-per-destination");
+        String tableTypeStr = context.getString("table_type", "table-by-destination");
         tableType = TableType.valueOf(tableTypeStr.replaceAll("-", "").toUpperCase());
         LOGGER.debug("[" + this.getName() + "] Reading configuration (table_type=" + tableTypeStr + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");

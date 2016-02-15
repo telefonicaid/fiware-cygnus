@@ -449,7 +449,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             String[] groupedDestinations = headers.get(Constants.HEADER_GROUPED_DESTINATIONS).split(",");
 
             for (int i = 0; i < groupedDestinations.length; i++) {
-                String destination = defaultDestinations[i];
+                String destination = groupedDestinations[i];
                 ArrayList<CygnusEvent> list = groupedBatch.getEvents(destination);
 
                 if (list == null) {
