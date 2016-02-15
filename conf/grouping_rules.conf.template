@@ -1,4 +1,4 @@
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
@@ -37,8 +37,7 @@
 # }
 #
 # Being:
-# - id: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful
-#   in the future.
+# - id: A unique unsigned integer-based identifier.
 # - fields: These are the fields that will be concatenated for regular expression matching. The available dictionary of
 #   fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important
 #   since the concatenation is made from left to right.
