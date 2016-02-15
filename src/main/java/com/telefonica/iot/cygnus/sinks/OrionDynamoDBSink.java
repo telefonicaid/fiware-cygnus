@@ -78,7 +78,15 @@ public class OrionDynamoDBSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (region=" + region + ")");
         String attrPersistRowStr = context.getString("attr_persistence", "row");
         attrPersistenceRow = attrPersistRowStr.equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + attrPersistRowStr + ")");
+        String persistence = context.getString("attr_persistence");
+        if (persistence.equals("row") || persistence.equals("column")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + persistence + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + persistence + ") must be 'row' or 'column'");
+        }  // if else
         super.configure(context);
     } // configure
     

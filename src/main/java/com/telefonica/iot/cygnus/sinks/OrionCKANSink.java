@@ -118,12 +118,26 @@ public class OrionCKANSink extends OrionSink {
         ckanHost = context.getString("ckan_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
+        int intPort = Integer.parseInt(ckanPort);
+        if ((intPort <= 0) || (intPort > 65535)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ckan_port=" + ckanPort + ") "
+                    + "must be between 0 and 65535");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + ckanPort + ")");
+        }  // if else
         orionUrl = context.getString("orion_url", "http://localhost:1026");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
-                + ")");
+        String persistence = context.getString("attr_persistence");
+        if (persistence.equals("row") || persistence.equals("column")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + persistence + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + persistence + ") must be 'row' or 'column'");
+        }  // if else
         ssl = context.getBoolean("ssl", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
         super.configure(context);

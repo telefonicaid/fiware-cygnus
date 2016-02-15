@@ -16,3 +16,4 @@
 - [BUG] Fix wrong data_model configured for OrionPostgreSQLSink in agent.conf.template (#774)
 - [HARDENING] Remove the persistOne method from all the sinks (#609)
 - [HARDENING] Invalidate the sink if the data_model parameter is wrong (and prepare the code for further parameter checks) (#718)
+- [HARDENING] Check for input parameters validity (#752)

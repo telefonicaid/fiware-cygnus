@@ -82,7 +82,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
-    private boolean invalidConfiguration;
+    protected boolean invalidConfiguration;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -167,12 +167,25 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         enableGrouping = context.getBoolean("enable_grouping", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
+        
         batchSize = context.getInteger("batch_size", 1);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
-                + batchSize + ")");
+        if (batchSize <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_size="
+                    + batchSize + ") must be upper than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
+                    + batchSize + ")");
+        } // if
         batchTimeout = context.getInteger("batch_timeout", 30);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_timeout="
-                + batchTimeout + ")");
+        if (batchTimeout <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_timeout="
+                    + batchTimeout + ") must be upper than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_timeout="
+                    + batchTimeout + ")");
+        } // if
     } // configure
 
     @Override
