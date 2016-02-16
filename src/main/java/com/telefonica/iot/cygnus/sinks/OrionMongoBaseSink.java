@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -42,6 +42,9 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
     protected boolean rowAttrPersistence;
+    protected int truncationTimeout;
+    protected int truncationSize;
+    protected int truncationMax;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -125,6 +128,12 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (this.rowAttrPersistence ? "row" : "column") + ")");
+        truncationTimeout = context.getInteger("truncation_timeout", 1000);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation_timeout=" + truncationTimeout + ")");
+        truncationSize = context.getInteger("truncation_size", 1000);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation_size=" + truncationSize + ")");
+        truncationMax = context.getInteger("truncation_max", 1000);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation_max=" + truncationMax + ")");
         super.configure(context);
     } // configure
     
