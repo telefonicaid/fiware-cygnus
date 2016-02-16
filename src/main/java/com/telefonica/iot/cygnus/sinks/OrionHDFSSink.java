@@ -15,7 +15,7 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
- 
+
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
@@ -44,9 +44,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 /**
- * 
+ *
  * @author frb
- * 
+ *
  * Detailed documentation can be found at:
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_hdfs_sink.md
  */
@@ -56,7 +56,7 @@ public class OrionHDFSSink extends OrionSink {
      * Available backend implementation.
      */
     public enum BackendImpl { BINARY, REST }
-    
+
     /**
      * Available Hive database types.
      */
@@ -84,14 +84,14 @@ public class OrionHDFSSink extends OrionSink {
     private HDFSBackend persistenceBackend;
     private HiveBackend hiveBackend;
     private String csvSeparator;
-    
+
     /**
      * Constructor.
      */
     public OrionHDFSSink() {
         super();
     } // OrionHDFSSink
-    
+
     /**
      * Gets the Cosmos host. It is protected due to it is only required for testing purposes.
      * @return The Cosmos host
@@ -99,7 +99,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String[] getHDFSHosts() {
         return host;
     } // getHDFSHosts
-    
+
     /**
      * Gets the Cosmos port. It is protected due to it is only required for testing purposes.
      * @return The Cosmos port
@@ -115,7 +115,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getHDFSUsername() {
         return username;
     } // getHDFSUsername
-    
+
     /**
      * Gets the password for the default Cosmos username. It is protected due to it is only required for testing
      * purposes.
@@ -124,7 +124,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getHDFSPassword() {
         return password;
     } // getHDFSPassword
-    
+
     /**
      * Gets the OAuth2 token used for authentication and authorization. It is protected due to it is only required
      * for testing purposes.
@@ -133,7 +133,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getOAuth2Token() {
         return oauth2Token;
     } // getOAuth2Token
-    
+
     /**
      * Returns if the service is used as HDFS namespace. It is protected due to it is only required for testing
      * purposes.
@@ -142,7 +142,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getServiceAsNamespace() {
         return (serviceAsNamespace ? "true" : "false");
     } // getServiceAsNamespace
-    
+
     /**
      * Gets the file format. It is protected due to it is only required for testing purposes.
      * @return The file format
@@ -161,11 +161,11 @@ public class OrionHDFSSink extends OrionSink {
                 return "";
         } // switch;
     } // getFileFormat
-    
+
     protected boolean getEnableHive() {
         return enableHive;
     } // getEnableHive
-    
+
     /**
      * Gets the Hive server version. It is protected due to it is only required for testing purposes.
      * @return The Hive server version
@@ -173,7 +173,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getHiveServerVersion() {
         return hiveServerVersion;
     } // getHiveServerVersion
-    
+
     /**
      * Gets the Hive host. It is protected due to it is only required for testing purposes.
      * @return The Hive port
@@ -181,7 +181,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getHiveHost() {
         return hiveHost;
     } // getHiveHost
-    
+
     /**
      * Gets the Hive port. It is protected due to it is only required for testing purposes.
      * @return The Hive port
@@ -198,7 +198,7 @@ public class OrionHDFSSink extends OrionSink {
     protected String getEnableKrb5Auth() {
         return (enableKrb5 ? "true" : "false");
     } // getEnableKrb5Auth
-    
+
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
@@ -206,7 +206,7 @@ public class OrionHDFSSink extends OrionSink {
     protected HDFSBackend getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
-    
+
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
@@ -214,12 +214,12 @@ public class OrionHDFSSink extends OrionSink {
     protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
-       
+
     @Override
     public void configure(Context context) {
         String cosmosHost = context.getString("cosmos_host");
         String hdfsHost = context.getString("hdfs_host");
-        
+
         if (hdfsHost != null && hdfsHost.length() > 0) {
             host = hdfsHost.split(",");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
@@ -230,19 +230,19 @@ public class OrionHDFSSink extends OrionSink {
         } else {
             host = new String[]{"localhost"};
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_host=localhost");
-        } // if else 
-        
+        } // if else
+
         String cosmosPort = context.getString("cosmos_port");
         String hdfsPort = context.getString("hdfs_port");
-        
         int intPort;
+
         if (hdfsPort != null && hdfsPort.length() > 0) {
             port = hdfsPort;
             intPort = Integer.parseInt(port);
             if ((intPort <= 0) || (intPort > 65535)) {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port 
-                        + ") must be between 0 and 65535");
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
+                        + ") -- Must be between 0 and 65535");
             } else {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             }  // if else
@@ -251,8 +251,8 @@ public class OrionHDFSSink extends OrionSink {
             intPort = Integer.parseInt(port);
             if ((intPort <= 0) || (intPort > 65535)) {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (cosmos_port=" + port 
-                        + ") must be between 0 and 65535  -- DEPRECATED, use hdfs_port instead");
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (cosmos_port=" + port
+                        + ") -- Must be between 0 and 65535  -- DEPRECATED, use hdfs_port instead");
             } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
                     + " -- DEPRECATED, use hdfs_port instead");
@@ -261,10 +261,10 @@ public class OrionHDFSSink extends OrionSink {
             port = "14000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_port=14000");
         }  // if else
-        
+
         String cosmosDefaultUsername = context.getString("cosmos_default_username");
         String hdfsUsername = context.getString("hdfs_username");
-        
+
         if (hdfsUsername != null && hdfsUsername.length() > 0) {
             username = hdfsUsername;
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_username=" + username + ")");
@@ -276,12 +276,12 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.error("[" + this.getName() + "] No username provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
         } // if else
-        
+
         csvSeparator = context.getString("csv_separator", ",");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (csvSeparator=" + csvSeparator + ")");
-        
+
         oauth2Token = context.getString("oauth2_token");
-        
+
         if (oauth2Token != null && oauth2Token.length() > 0) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (oauth2_token=" + this.oauth2Token + ")");
         } else {
@@ -289,13 +289,13 @@ public class OrionHDFSSink extends OrionSink {
                     + "not properly work if WebHDFS service is protected with such an authentication and "
                     + "authorization mechanism!");
         } // if else
-        
+
         password = context.getString("hdfs_password");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_password=" + password + ")");
 
         boolean rowAttrPersistenceConfigured = context.getParameters().containsKey("attr_persistence");
         boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
-        
+
         if (fileFormatConfigured) {
             fileFormat = FileFormat.valueOf(context.getString("file_format").replaceAll("-", "").toUpperCase());
             LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
@@ -309,16 +309,16 @@ public class OrionHDFSSink extends OrionSink {
             fileFormat = FileFormat.JSONROW;
             LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
         } // if else if
-        
+
         // Hive configuration
         String enableHiveStr = context.getString("hive", "true");
         enableHive = enableHiveStr.equals("true");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive=" + (enableHive ? "true" : "false")
                 + ")");
-        
+
         String hiveHostOld = context.getString("hive_host");
         String hiveHostNew = context.getString("hive.host");
-        
+
         if (hiveHostNew != null && hiveHostNew.length() > 0) {
             hiveHost = hiveHostNew;
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.host=" + hiveHost + ")");
@@ -330,18 +330,18 @@ public class OrionHDFSSink extends OrionSink {
             hiveHost = "localhost";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.host=localhost");
         } // if else
-        
+
         String hivePortOld = context.getString("hive_port");
         String hivePortNew = context.getString("hive.port");
-        
         int intHivePort;
+
         if (hivePortNew != null && hivePortNew.length() > 0) {
             hivePort = hivePortNew;
             intHivePort = Integer.parseInt(hivePort);
             if ((intHivePort <= 0) && (intHivePort > 65535)) {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort 
-                        + ") must be between 0 and 65535");
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
+                        + ") -- Must be between 0 and 65535");
             } else {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
             }  // if else
@@ -351,7 +351,7 @@ public class OrionHDFSSink extends OrionSink {
             if ((intHivePort <= 0) && (intHivePort > 65535)) {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive_port=" + hivePort + ")"
-                    + " must be between 0 and 65535  -- DEPRECATED, use hive.port instead");
+                    + " -- Must be between 0 and 65535 -- DEPRECATED, use hive.port instead");
             } else {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")"
                         + " -- DEPRECATED, use hive.port instead");
@@ -360,10 +360,10 @@ public class OrionHDFSSink extends OrionSink {
             hivePort = "10000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.port=10000");
         } // if else
-        
+
         String hiveServerVersionOld = context.getString("hive_server_version");
         String hiveServerVersionNew = context.getString("hive.server_version");
-        
+
         if (hiveServerVersionNew != null && hiveServerVersionNew.length() > 0) {
             hiveServerVersion = hiveServerVersionNew;
             if ((hiveServerVersion.equals("1")) || (hiveServerVersion.equals("2"))) {
@@ -372,7 +372,7 @@ public class OrionHDFSSink extends OrionSink {
             } else {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
-                    + ") must be '1' for HiveServer1 or '2' for HiveServer2");
+                    + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2");
             }  // if else
         } else if (hiveServerVersionOld != null && hiveServerVersionOld.length() > 0) {
             hiveServerVersion = hiveServerVersionOld;
@@ -383,18 +383,18 @@ public class OrionHDFSSink extends OrionSink {
             } else {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive_server_version=" + hiveServerVersion
-                    + ") must be '1' for HiveServer1 or '2' for HiveServer2"
+                    + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2"
                     + " -- DEPRECATED, use hive.server_version instead");
             }  // if else
         } else {
             hiveServerVersion = "2";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
         } // if else
-        
+
         String hiveDBTypeStr = context.getString("hive.db_type", "default-db");
         hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" + hiveDBTypeStr);
-        
+
         // Kerberos configuration
         enableKrb5 = context.getBoolean("krb5_auth", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (enableKrb5 ? "true" : "false")
@@ -408,7 +408,7 @@ public class OrionHDFSSink extends OrionSink {
                 + ")");
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
-        
+
         serviceAsNamespace = context.getBoolean("service_as_namespace", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
                 + ")");
@@ -426,7 +426,7 @@ public class OrionHDFSSink extends OrionSink {
             // create Hive backend
             hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
             LOGGER.debug("[" + this.getName() + "] Hive persistence backend created");
-            
+
             // create the persistence backend
             if (backendImpl == BackendImpl.BINARY) {
                 persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
@@ -441,23 +441,23 @@ public class OrionHDFSSink extends OrionSink {
                         + backendImpl.toString());
                 System.exit(-1);
             } // if else
-            
+
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the HDFS persistence backend. Details="
                     + e.getMessage());
         } // try catch
-        
+
         super.start();
     } // start
-    
+
     @Override
     void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
- 
+
         // iterate on the destinations, for each one a single create / append will be performed
         for (String destination : batch.getDestinations()) {
             LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
@@ -465,7 +465,7 @@ public class OrionHDFSSink extends OrionSink {
 
             // get the sub-batch for this destination
             ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
-            
+
             // get an aggregator for this destination and initialize it
             HDFSAggregator aggregator = getAggregator(fileFormat);
             aggregator.initialize(subBatch.get(0));
@@ -473,16 +473,16 @@ public class OrionHDFSSink extends OrionSink {
             for (CygnusEvent cygnusEvent : subBatch) {
                 aggregator.aggregate(cygnusEvent);
             } // for
-            
+
             // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
-            
+
             // persist the metadata aggregations only in CSV-like file formats
             if (fileFormat == FileFormat.CSVROW || fileFormat == FileFormat.CSVCOLUMN) {
                 persistMDAggregations(aggregator);
             } // if
-            
+
             // create the Hive table
             if (enableHive) {
                 if (hiveDBType == HiveDBType.NAMESPACEDB) {
@@ -504,7 +504,7 @@ public class OrionHDFSSink extends OrionSink {
      * Class for aggregating aggregation.
      */
     private abstract class HDFSAggregator {
-        
+
         // string containing the data aggregation
         protected String aggregation;
         // map containing the HDFS files holding the attribute metadata, one per attribute
@@ -518,36 +518,36 @@ public class OrionHDFSSink extends OrionSink {
         protected String hdfsFolder;
         protected String hdfsFile;
         protected String hiveFields;
-        
+
         public HDFSAggregator() {
             aggregation = "";
             mdAggregations = new HashMap<String, String>();
         } // HDFSAggregator
-        
+
         public String getAggregation() {
             return aggregation;
         } // getAggregation
-        
+
         public Set<String> getAggregatedAttrMDFiles() {
             return mdAggregations.keySet();
         } // getAggregatedAttrMDFiles
-        
+
         public String getMDAggregation(String attrMDFile) {
             return mdAggregations.get(attrMDFile);
         } // getMDAggregation
-        
+
         public String getFolder() {
             return hdfsFolder;
         } // getFolder
-        
+
         public String getFile() {
             return hdfsFile;
         } // getFile
-        
+
         public String getHiveFields() {
             return hiveFields;
         } // getHiveFields
-        
+
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
@@ -558,16 +558,16 @@ public class OrionHDFSSink extends OrionSink {
             hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
             hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
         } // initialize
-        
+
         public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
-        
+
     } // HDFSAggregator
-    
+
     /**
      * Class for aggregating batches in JSON row mode.
      */
     private class JSONRowAggregator extends HDFSAggregator {
-        
+
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
@@ -581,7 +581,7 @@ public class OrionHDFSSink extends OrionSink {
                     + Utils.encodeHive(Constants.ATTR_VALUE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_MD) + " array<struct<name:string,type:string,value:string>>";
         } // initialize
-        
+
         @Override
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
@@ -594,7 +594,7 @@ public class OrionHDFSSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -603,7 +603,7 @@ public class OrionHDFSSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -611,7 +611,7 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
+
                 // create a line and aggregate it
                 String line = "{"
                     + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
@@ -624,7 +624,7 @@ public class OrionHDFSSink extends OrionSink {
                     + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
                     + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                     + "}";
-                
+
                 if (aggregation.isEmpty()) {
                     aggregation = line;
                 } else {
@@ -634,7 +634,7 @@ public class OrionHDFSSink extends OrionSink {
         } // aggregate
 
     } // JSONRowAggregator
-    
+
     /**
      * Class for aggregating batches in JSON column mode.
      */
@@ -643,27 +643,27 @@ public class OrionHDFSSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            
+
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
                     + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 return;
             } // if
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 hiveFields += "," + Utils.encodeHive(attrName) + " string," + Utils.encodeHive(attrName)
                         + "_md array<struct<name:string,type:string,value:string>>";
             } // for
         } // initialize
-        
+
         @Override
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
@@ -676,7 +676,7 @@ public class OrionHDFSSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -685,12 +685,12 @@ public class OrionHDFSSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -698,11 +698,11 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
+
                 // create part of the line with the current attribute (a.k.a. a column)
                 line += ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
             } // for
-            
+
             // now, aggregate the line
             if (aggregation.isEmpty()) {
                 aggregation = line + "}";
@@ -710,14 +710,14 @@ public class OrionHDFSSink extends OrionSink {
                 aggregation += "\n" + line + "}";
             } // if else
         } // aggregate
-        
+
     } // JSONColumnAggregator
-    
+
     /**
      * Class for aggregating batches in CSV row mode.
      */
     private class CSVRowAggregator extends HDFSAggregator {
-        
+
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
@@ -744,7 +744,7 @@ public class OrionHDFSSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -753,7 +753,7 @@ public class OrionHDFSSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -768,22 +768,22 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
-                                
+
                 if (mdAggregation == null) {
                     mdAggregation = new String();
                 } // if
-                
+
                 // aggregate the metadata
                 String concatMdAggregation;
-                
+
                 if (mdAggregation.isEmpty()) {
                     concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
                 } else {
                     concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
                 } // if else
-                
+
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
-                
+
                 // aggreagate the data
                 String line = recvTimeTs / 1000 + csvSeparator
                     + recvTime + csvSeparator
@@ -801,10 +801,10 @@ public class OrionHDFSSink extends OrionSink {
                 } // if else
             } // for
         } // aggregate
-        
+
         private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
             String csvMd = "";
-            
+
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
             JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
@@ -816,41 +816,41 @@ public class OrionHDFSSink extends OrionSink {
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value");
-                
+
                 if (csvMd.isEmpty()) {
                     csvMd = line;
                 } else {
                     csvMd += "\n" + line;
                 } // if else
             } // for
-            
+
             return csvMd;
         } // getCSVMetadata
-        
+
     } // CSVRowAggregator
-    
+
     /**
      * Class for aggregating aggregation in CSV column mode.
      */
     private class CSVColumnAggregator extends HDFSAggregator {
-        
+
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            
+
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
                     + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
-            
+
             // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 return;
             } // if
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -875,7 +875,7 @@ public class OrionHDFSSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -884,9 +884,9 @@ public class OrionHDFSSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             String line = recvTime + csvSeparator + servicePath + csvSeparator + entityId + csvSeparator + entityType;
-            
+
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -894,7 +894,7 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
+
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
                 String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
@@ -902,26 +902,26 @@ public class OrionHDFSSink extends OrionSink {
                 String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
-                
+
                 if (mdAggregation == null) {
                     mdAggregation = new String();
                 } // if
-                
+
                 // agregate the metadata
                 String concatMdAggregation;
-                
+
                 if (mdAggregation.isEmpty()) {
                     concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
                 } else {
                     concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
                 } // if else
-                
+
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
-                
+
                 // create part of the line with the current attribute (a.k.a. a column)
                 line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
             } // for
-            
+
             // now, aggregate the line
             if (aggregation.isEmpty()) {
                 aggregation = line;
@@ -929,10 +929,10 @@ public class OrionHDFSSink extends OrionSink {
                 aggregation += "\n" + line;
             } // if else
         } // aggregate
-        
+
         private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
             String csvMd = "";
-            
+
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
             JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
@@ -944,19 +944,19 @@ public class OrionHDFSSink extends OrionSink {
                         + mdJSONObject.get("name") + ","
                         + mdJSONObject.get("type") + ","
                         + mdJSONObject.get("value");
-                
+
                 if (csvMd.isEmpty()) {
                     csvMd = line;
                 } else {
                     csvMd += "\n" + line;
                 } // if else
             } // for
-            
+
             return csvMd;
         } // getCSVMetadata
-        
+
     } // CSVColumnAggregator
-    
+
     private HDFSAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
@@ -971,12 +971,12 @@ public class OrionHDFSSink extends OrionSink {
                 return null;
         } // switch
     } // getAggregator
-    
+
     private void persistAggregation(HDFSAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder();
         String hdfsFile = aggregator.getFile();
-        
+
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
 
@@ -987,14 +987,14 @@ public class OrionHDFSSink extends OrionSink {
             persistenceBackend.createFile(hdfsFile, aggregation);
         } // if else
     } // persistAggregation
-    
+
     private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
-        
+
         for (String hdfsMDFile : attrMDFiles) {
             String hdfsMdFolder = hdfsMDFile.substring(0, hdfsMDFile.lastIndexOf("/"));
             String mdAggregation = aggregator.getMDAggregation(hdfsMDFile);
-            
+
             LOGGER.info("[" + this.getName() + "] Persisting metadata at OrionHDFSSink. HDFS file ("
                     + hdfsMDFile + "), Data (" + mdAggregation + ")");
 
@@ -1006,12 +1006,12 @@ public class OrionHDFSSink extends OrionSink {
             } // if else
         } // for
     } // persistMDAggregations
-    
+
     private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
         String dirPath = aggregator.getFolder();
         String fields = aggregator.getHiveFields();
         String tag;
-        
+
         switch (fileFormat) {
             case JSONROW:
             case CSVROW:
@@ -1024,18 +1024,18 @@ public class OrionHDFSSink extends OrionSink {
             default:
                 tag = "";
         } // switch
-        
+
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
         String tableName = Utils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
         LOGGER.info("Creating Hive external table '" + tableName + "' in database '"  + dbName + "'");
-        
+
         // get a Hive client
         HiveBackendImpl hiveClient = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
-        
+
         // create the query
         String query;
-        
+
         switch (fileFormat) {
             case JSONCOLUMN:
             case JSONROW:
@@ -1056,13 +1056,13 @@ public class OrionHDFSSink extends OrionSink {
 
         // execute the query
         LOGGER.debug("Doing Hive query: '" + query + "'");
-        
+
         if (!hiveClient.doCreateTable(query)) {
             LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
         } // if
     } // provisionHive
-    
+
     /**
      * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
      * violated.
@@ -1072,15 +1072,15 @@ public class OrionHDFSSink extends OrionSink {
      */
     private String buildFirstLevel(String fiwareService) throws Exception {
         String firstLevel = fiwareService;
-        
+
         if (firstLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
                     + "and its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
-        
+
         return firstLevel;
     } // buildFirstLevel
-    
+
     /**
      * Builds the second level of a HDFS path given given a fiwareService and a destination. It throws an exception if
      * the naming conventions are violated.
@@ -1091,12 +1091,12 @@ public class OrionHDFSSink extends OrionSink {
      */
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
         String secondLevel = fiwareServicePath;
-        
+
         if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
                     + "its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
-        
+
         return secondLevel;
     } // buildSecondLevel
 
@@ -1109,7 +1109,7 @@ public class OrionHDFSSink extends OrionSink {
      */
     private String buildThirdLevel(String destination) throws Exception {
         String thirdLevel = destination;
-        
+
         if (thirdLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
                     + "greater than " + Constants.MAX_NAME_LEN_HDFS);
@@ -1117,7 +1117,7 @@ public class OrionHDFSSink extends OrionSink {
 
         return thirdLevel;
     } // buildThirdLevel
-    
+
     /**
      * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
      * violated.
@@ -1127,7 +1127,7 @@ public class OrionHDFSSink extends OrionSink {
      */
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
         String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
-        
+
         if (thirdLevelMd.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
                     + "greater than " + Constants.MAX_NAME_LEN_HDFS);

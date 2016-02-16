@@ -38,7 +38,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
  * @author frb
  */
 public class OrionKafkaSink extends OrionSink {
-    
+
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionKafkaSink.class);
     private KafkaProducer<String, String> persistenceBackend;
     private String brokerList;
@@ -47,7 +47,7 @@ public class OrionKafkaSink extends OrionSink {
     private ZkClient zookeeperClient;
     private int partitions;
     private int replicationFactor;
-    
+
     /**
      * Gets the broker list.
      * @return The broker list
@@ -55,7 +55,7 @@ public class OrionKafkaSink extends OrionSink {
     public String getBrokerList() {
         return brokerList;
     } // getBrokerList
-    
+
     /**
      * Gets the Zookeeper endpoint.
      * @return The Zookeeper endpoint
@@ -63,7 +63,7 @@ public class OrionKafkaSink extends OrionSink {
     public String getZookeeperEndpoint() {
         return zookeeperEndpoint;
     } // getZookeeperEndpoint
-    
+
     /**
      * Gets the persistence backend.
      * @return The persistence backend
@@ -71,7 +71,7 @@ public class OrionKafkaSink extends OrionSink {
     public KafkaProducer getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
-    
+
     /**
      * Sets the persistence backend. It is protected since it is used by the tests.
      * @param persistenceBackend The persistence backend to be set
@@ -79,7 +79,7 @@ public class OrionKafkaSink extends OrionSink {
     protected void setPersistenceBackend(KafkaProducer persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
-    
+
     /**
      * Sets the name API. It is protected since it is used by the tests.
      * @param topicAPI The name API to be set
@@ -87,7 +87,7 @@ public class OrionKafkaSink extends OrionSink {
     protected void setTopicAPI(TopicAPI topicAPI) {
         this.topicAPI = topicAPI;
     } // setTopicAPI
-    
+
     @Override
     public void configure(Context context) {
         brokerList = context.getString("broker_list", "localhost:9092");
@@ -96,24 +96,28 @@ public class OrionKafkaSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (zookeeper_endpoint="
                 + zookeeperEndpoint + ")");
         partitions = context.getInteger("partitions", 1);
+
         if (partitions <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (partitions=" + partitions 
-                    + ") must be upper than 0");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (partitions=" + partitions
+                    + ") -- Must be upper than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
         }
+
         replicationFactor = context.getInteger("replication_factor", 1);
+
         if (replicationFactor <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor=" 
-                    + replicationFactor + ") must be upper than 0");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor="
+                    + replicationFactor + ") -- Must be upper than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor=" + replicationFactor + ")");
         }
+
         super.configure(context);
     } // configure
-    
+
     @Override
     public void start() {
         // create the persistence backend
@@ -128,23 +132,23 @@ public class OrionKafkaSink extends OrionSink {
             LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
                     + e.getMessage());
         } // try catch
-        
+
         // creat the name API
         topicAPI = new TopicAPI();
-        
+
         // create the Zookeeper client
         zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
-        
+
         super.start();
     } // start
-    
+
     @Override
     void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
- 
+
         // iterate on the destinations, for each one a single create / append will be performed
         for (String destination : batch.getDestinations()) {
             LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
@@ -152,7 +156,7 @@ public class OrionKafkaSink extends OrionSink {
 
             // get the sub-batch for this destination
             ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
-            
+
             // get an aggregator for this destination and initialize it
             KafkaAggregator aggregator = new KafkaAggregator();
             aggregator.initialize(subBatch.get(0));
@@ -160,18 +164,18 @@ public class OrionKafkaSink extends OrionSink {
             for (CygnusEvent cygnusEvent : subBatch) {
                 aggregator.aggregate(cygnusEvent);
             } // for
-            
+
             // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-    
+
     /**
      * Class for aggregating aggregation.
      */
     private class KafkaAggregator {
-        
+
         // string containing the data aggregation
         protected String aggregation;
         protected String service;
@@ -179,27 +183,27 @@ public class OrionKafkaSink extends OrionSink {
         protected String entity;
         protected String attribute;
         protected String topic;
-        
+
         public KafkaAggregator() {
             aggregation = "";
         } // KafkaAggregator
-        
+
         public String getAggregation() {
             return aggregation;
         } // getAggregation
-        
+
         public String getService() {
             return service;
         } // getService
-        
+
         public String getServicePath() {
             return servicePath;
         } // servicePath
-        
+
         public String getTopic() {
             return topic;
         } // getTopic
-        
+
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
@@ -207,10 +211,10 @@ public class OrionKafkaSink extends OrionSink {
             attribute = cygnusEvent.getAttribute();
             topic = buildTopicName();
         } // initialize
-        
+
         private String buildTopicName() throws Exception {
             String name;
-            
+
             switch (dataModel) {
                 case DMBYSERVICE:
                     name = service;
@@ -228,7 +232,7 @@ public class OrionKafkaSink extends OrionSink {
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                             + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
             } // switch
-            
+
             if (name.length() > Constants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building topic name '" + name
                         + "' and its length is greater than " + Constants.MAX_NAME_LEN);
@@ -236,14 +240,14 @@ public class OrionKafkaSink extends OrionSink {
 
             return name;
         } // buildTopic
-        
+
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
-            
+
             if (aggregation.isEmpty()) {
                 aggregation = buildMessage(contextElement, service, servicePath, recvTimeTs);
             } else {
@@ -252,11 +256,11 @@ public class OrionKafkaSink extends OrionSink {
         } // aggregate
 
     } // KafkaAggregator
-    
+
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String destination = aggregator.getTopic();
-        
+
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
         String topicName = buildTopicName(destination);
@@ -290,16 +294,16 @@ public class OrionKafkaSink extends OrionSink {
             throw new CygnusBadConfiguration("Building topic " + topic + " and its length is greater "
                     + "than " + Constants.MAX_NAME_LEN);
         } // if
-        
+
         return topic;
     } // buildTopicFromDestination
-    
+
     /**
      * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
      * cannot be tested with Mockito; however, this class can be mocked.
      */
     public class TopicAPI {
-        
+
         /**
          * Returns true if the given name exists, false otherwise.
          * @param zookeeperClient
@@ -309,7 +313,7 @@ public class OrionKafkaSink extends OrionSink {
         public boolean topicExists(ZkClient zookeeperClient, String topic) {
             return AdminUtils.topicExists(zookeeperClient, topic);
         } // topicExists
-        
+
         /**
          * Creates the given name with given properties.
          * @param zookeeperClient
@@ -321,7 +325,7 @@ public class OrionKafkaSink extends OrionSink {
         public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
             AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
         } // createTopic
-        
+
     } // TopicAPI
 
 } // OrionKafkaSink

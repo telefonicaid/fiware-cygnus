@@ -32,7 +32,7 @@ import org.apache.flume.Context;
  * @author xdelox
  */
 public abstract class OrionMongoBaseSink extends OrionSink {
-    
+
     protected static final CygnusLogger LOGGER = new CygnusLogger(OrionMongoBaseSink.class);
     protected String mongoHosts;
     protected String mongoUsername;
@@ -50,7 +50,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getMongoHosts() {
         return mongoHosts;
     } // getMongoHosts
-    
+
     /**
      * Gets the mongo username. It is protected since it is used by the tests.
      * @return
@@ -58,7 +58,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getUsername() {
         return mongoUsername;
     } // getUsername
-    
+
     /**
      * Gets the mongo password. It is protected since it is used by the tests.
      * @return
@@ -66,7 +66,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getPassword() {
         return mongoPassword;
     } // getPassword
-    
+
     /**
      * Gets the database prefix. It is protected since it is used by the tests.
      * @return
@@ -74,7 +74,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getDbPrefix() {
         return dbPrefix;
     } // getDBPrefix
-    
+
     /**
      * Gets the collection prefix. It is protected since it is used by the tests.
      * @return
@@ -82,7 +82,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String getCollectionPrefix() {
         return collectionPrefix;
     } // getCollectionPrefix
-    
+
     /**
      * Sets the backend. It is protected since it is used by the tests.
      * @param backend
@@ -90,7 +90,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected void setBackend(MongoBackendImpl backend) {
         this.backend = backend;
     } // setBackend
-    
+
     /**
      * Gets the backend. It is protected since it is used by the tests.
      * @return
@@ -106,7 +106,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected boolean getRowAttrPersistence() {
         return this.rowAttrPersistence;
     }
-    
+
     @Override
     public void configure(Context context) {
         mongoHosts = context.getString("mongo_hosts", "localhost:27017");
@@ -124,6 +124,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
         this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence");
+
         try {
             if (persistence.equals("row") || persistence.equals("column")) {
                  LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
@@ -132,11 +133,12 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         } catch (Exception e) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + persistence + ") must be 'row' or 'column'");
+                + persistence + ") -- Must be 'row' or 'column'");
         }  // try catch
+
         super.configure(context);
     } // configure
-    
+
     @Override
     public void start() {
         try {
@@ -146,10 +148,10 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
                     + e.getMessage());
         } // try catch
-        
+
         super.start();
     } // start
-    
+
     /**
      * Gets the data model given its string representation.
      * @param dataModelStr
@@ -158,7 +160,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected DataModel getDataModel(String dataModelStr) {
         return DataModel.valueOf(dataModelStr.replaceAll("-", "").toUpperCase());
     } // getDataModel
-    
+
     /**
      * Gets a string reprensentation of a given data model.
      * @param dataModel
@@ -185,15 +187,15 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      */
     protected String buildDbName(String fiwareService) throws Exception {
         String dbName = dbPrefix + fiwareService;
-        
+
         if (dbName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
                     + "than " + Constants.MAX_NAME_LEN);
         } // if
-        
+
         return dbName;
     } // buildDbName
-    
+
     /**
      * Builds a collection name given a fiwareServicePath and a destination. It throws an exception if the naming
      * conventions are violated.
@@ -212,7 +214,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             boolean isAggregated, String entityId, String entityType, String fiwareService)
         throws Exception {
         String collectionName;
-        
+
         switch (dataModel) {
             case DMBYSERVICEPATH:
                 collectionName = fiwareServicePath;
@@ -227,10 +229,10 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                 // this should never be reached
                 collectionName = null;
         } // switch
-        
+
         if (shouldHash) {
             int limit = getHashSizeInBytes(dbName);
-            
+
             if (limit < Constants.STH_MIN_HASH_SIZE_IN_BYTES) {
                 LOGGER.error("The available bytes for the hashes to be used as part of the collection names is not "
                         + "big enough (at least " + Constants.STH_MIN_HASH_SIZE_IN_BYTES + " bytes are needed), "
@@ -238,28 +240,28 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                         + "prefix");
                 return null;
             } // if
-            
+
             String hash = generateHash(collectionName, limit);
             collectionName = collectionPrefix + hash;
             backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
                     entityType, attribute, entity);
         } else {
             collectionName = collectionPrefix + collectionName;
-            
+
             if (collectionName.getBytes().length > Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
                 LOGGER.error("");
                 return null;
             } // if
         } // if else
-        
+
         return collectionName;
     } // buildCollectionName
-    
+
     private int getHashSizeInBytes(String dbName) {
         return Constants.STH_MAX_NAMESPACE_SIZE_IN_BYTES - dbName.getBytes().length
                 - collectionPrefix.getBytes().length - ".aggr".getBytes().length - 1;
     } // getHashSizeInBytes
-    
+
     private String generateHash(String collectionName, int limit) throws Exception {
         MessageDigest messageDigest;
         messageDigest = MessageDigest.getInstance("SHA-512");
@@ -272,5 +274,5 @@ public abstract class OrionMongoBaseSink extends OrionSink {
 
         return hash;
     } // generateHash
-    
+
 } // OrionMongoBaseSink
