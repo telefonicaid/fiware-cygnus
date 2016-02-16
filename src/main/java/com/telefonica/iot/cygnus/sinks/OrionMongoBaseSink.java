@@ -41,7 +41,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String collectionPrefix;
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
-    protected boolean rowAttrPersistence;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -98,14 +97,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected MongoBackendImpl getBackend() {
         return backend;
     } // getBackend
-
-    /**
-     * Gets the rowAttrPersistence. It is protected since it is used by the tests.
-     * @return
-     */
-    protected boolean getRowAttrPersistence() {
-        return this.rowAttrPersistence;
-    }
     
     @Override
     public void configure(Context context) {
