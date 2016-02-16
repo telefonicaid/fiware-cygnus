@@ -145,7 +145,8 @@ public class HDFSBackendImplBinary implements HDFSBackend {
             case JSONCOLUMN:
             case JSONROW:
                 query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
-                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + "'org.openx.data.jsonserde.JsonSerDe' with serdeproperties "
+                        + "(\"dots.in.keys\" = \"true\") location '/user/"
                         + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
