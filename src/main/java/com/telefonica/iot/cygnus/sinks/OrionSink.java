@@ -164,9 +164,17 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     + dataModelStr + ")");
         } // catch
 
-        enableGrouping = context.getBoolean("enable_grouping", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
+        String enableGroupingStr = context.getString("enable_grouping");
+        
+        if (enableGroupingStr.equals("true") || enableGroupingStr.equals("false")) {
+            enableGrouping = Boolean.valueOf(enableGroupingStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
                 + (enableGrouping ? "true" : "false") + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_grouping="
+                + enableGroupingStr + ") -- Must be 'true' or 'false'");
+        }  // try catch
 
         batchSize = context.getInteger("batch_size", 1);
 

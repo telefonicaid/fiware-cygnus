@@ -120,21 +120,30 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
         collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
-        shouldHash = context.getBoolean("should_hash", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
-        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        String persistence = context.getString("attr_persistence");
+        
+        String shouldHashStr = context.getString("should_hash");
+        
+        if (shouldHashStr.equals("true") || shouldHashStr.equals("false")) {
+            shouldHash = Boolean.valueOf(shouldHashStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash="
+                + (shouldHash ? "true" : "false") + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (should_hash="
+                + shouldHashStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
+        String attrPersistenceStr = context.getString("attr_persistence");
 
-        try {
-            if (persistence.equals("row") || persistence.equals("column")) {
-                 LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                    + persistence + ")");
-            }
-        } catch (Exception e) {
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + persistence + ") -- Must be 'row' or 'column'");
-        }  // try catch
+                + attrPersistenceStr + ") -- Must be 'row' or 'column'");
+        }  // if else
 
         super.configure(context);
     } // configure

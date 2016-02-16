@@ -58,6 +58,11 @@ public class OrionHDFSSink extends OrionSink {
     public enum BackendImpl { BINARY, REST }
 
     /**
+     * Available file-format implementation.
+     */
+    public enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+    
+    /**
      * Available Hive database types.
      */
     public enum HiveDBType { DEFAULTDB, NAMESPACEDB }
@@ -295,26 +300,51 @@ public class OrionHDFSSink extends OrionSink {
 
         boolean rowAttrPersistenceConfigured = context.getParameters().containsKey("attr_persistence");
         boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
+        String attrPersistenceStr = context.getString("attr_persistence");
+
 
         if (fileFormatConfigured) {
-            fileFormat = FileFormat.valueOf(context.getString("file_format").replaceAll("-", "").toUpperCase());
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format=" + fileFormat + ")");
+            String fileFormatStr = context.getString("file_format");
+            
+            try {
+                fileFormat = FileFormat.valueOf(fileFormatStr.replaceAll("-", "").toUpperCase());
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (file_format="
+                    + fileFormatStr + ")");
+            } catch (Exception e) {
+                invalidConfiguration = true;
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (file_format="
+                    + fileFormatStr + ") -- Must be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
+            } // catch
+            
         } else if (rowAttrPersistenceConfigured) {
-            boolean rowAttrPersistence = context.getString("attr_persistence").equals("row");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ") -- DEPRECATED, converting to file_format="
-                + (rowAttrPersistence ? "json-row" : "json-column"));
-            fileFormat = (rowAttrPersistence ? FileFormat.JSONROW : FileFormat.JSONCOLUMN);
+            if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+                boolean rowAttrPersistence = attrPersistenceStr.equals("row");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+           		+ attrPersistenceStr + ") -- DEPRECATED, converting to file_format="
+           		+ (rowAttrPersistence ? "json-row" : "json-column"));
+            } else {
+                invalidConfiguration = true;
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                    + attrPersistenceStr + ") -- Must be 'row' or 'column'");
+            }  // if else
+            
         } else {
             fileFormat = FileFormat.JSONROW;
             LOGGER.debug("[" + this.getName() + "] Defaulting to file_format=json-row");
         } // if else if
 
         // Hive configuration
-        String enableHiveStr = context.getString("hive", "true");
-        enableHive = enableHiveStr.equals("true");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive=" + (enableHive ? "true" : "false")
-                + ")");
+        String enableHiveStr = context.getString("hive");
+        
+        if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
+            enableHive = Boolean.valueOf(enableHiveStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enableHive="
+                + (enableHive ? "true" : "false") + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enableHive="
+                + enableHiveStr + ") -- Must be 'true' or 'false'");
+        }  // if else
 
         String hiveHostOld = context.getString("hive_host");
         String hiveHostNew = context.getString("hive.host");
@@ -391,14 +421,33 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
         } // if else
 
-        String hiveDBTypeStr = context.getString("hive.db_type", "default-db");
-        hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" + hiveDBTypeStr);
+        String hiveDBTypeStr = context.getString("hive.db_type");
+        
+        try {
+            if (hiveDBTypeStr.equals("default-db") || hiveDBTypeStr.equals("namespace-db")) {
+                hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" 
+				+ hiveDBType);
+            }
+        } catch (Exception e) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.db_type="
+                + hiveDBTypeStr + ") -- Must be 'default-db' or 'namespace-db'");
+        }  // try catch
 
         // Kerberos configuration
-        enableKrb5 = context.getBoolean("krb5_auth", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth=" + (enableKrb5 ? "true" : "false")
-                + ")");
+        String enableKrb5Str = context.getString("krb5_auth");
+        
+        if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
+            enableKrb5 = Boolean.valueOf(enableKrb5Str);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth="
+                + (enableKrb5 ? "true" : "false") + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (krb5_auth="
+                + enableKrb5Str + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
         krb5User = context.getString("krb5_auth.krb5_user", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_user=" + krb5User + ")");
         krb5Password = context.getString("krb5_auth.krb5_password", "");
@@ -409,12 +458,32 @@ public class OrionHDFSSink extends OrionSink {
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
 
-        serviceAsNamespace = context.getBoolean("service_as_namespace", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (service_as_namespace=" + serviceAsNamespace
-                + ")");
-        String backendImplStr = context.getString("backend_impl", "rest");
-        backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" + backendImplStr + ")");
+        String serviceAsNamespaceStr = context.getString("service_as_namespace");
+        
+        if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
+            serviceAsNamespace = Boolean.valueOf(serviceAsNamespaceStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
+                + (serviceAsNamespace ? "true" : "false") + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (service_as_namespace="
+                + serviceAsNamespaceStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
+        String backendImplStr = context.getString("backend_impl");
+        
+        try {
+            if (backendImplStr.equals("rest") || backendImplStr.equals("binary")) {
+                backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" 
+					+ backendImplStr + ")");
+            }
+        } catch (Exception e) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend_impl="
+                + backendImplStr + ") -- Must be 'rest' or 'binary'");
+        }  // try catch
+        
         super.configure(context);
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;

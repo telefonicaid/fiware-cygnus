@@ -130,21 +130,30 @@ public class OrionCKANSink extends OrionSink {
 
         orionUrl = context.getString("orion_url", "http://localhost:1026");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        String persistence = context.getString("attr_persistence");
+        String attrPersistenceStr = context.getString("attr_persistence");
 
-        if (persistence.equals("row") || persistence.equals("column")) {
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + persistence + ")");
+                + attrPersistenceStr + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + persistence + ") -- Must be 'row' or 'column'");
+                + attrPersistenceStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
-        ssl = context.getBoolean("ssl", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
-        super.configure(context);
+        String sslStr = context.getString("ssl");
+        
+        if (sslStr.equals("true") || sslStr.equals("false")) {
+            ssl = Boolean.valueOf(sslStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl="
+                + (ssl ? "true" : "false") + ")");
+        } else  {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
+                + sslStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
     } // configure

@@ -35,6 +35,12 @@ import org.apache.flume.Context;
  * @author frb
  */
 public class OrionDynamoDBSink extends OrionSink {
+    
+    /**
+     * Available DynamoDB regions implementation.
+     */
+    public enum Regions { USEAST1, USWEST1, USWEST2,  EUWEST1, EUCENTRAL1, 
+        APNORTHEAST1, APNORTHEAST2, APSHOUTEAST1, APSHOUTEAST2, SAEAST1}
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionDynamoDBSink.class);
     private DynamoDBBackend persistenceBackend;
@@ -74,19 +80,30 @@ public class OrionDynamoDBSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (access_key_id=" + accessKeyId + ")");
         secretAccessKey = context.getString("secret_access_key");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (secret_access_key=" + secretAccessKey + ")");
-        region = context.getString("region", "eu-central-1");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (region=" + region + ")");
-        String attrPersistRowStr = context.getString("attr_persistence", "row");
-        attrPersistenceRow = attrPersistRowStr.equals("row");
-        String persistence = context.getString("attr_persistence");
+        
+        String regionStr = context.getString("region");
 
-        if (persistence.equals("row") || persistence.equals("column")) {
+        try {
+            Regions regionReg = Regions.valueOf(regionStr.replaceAll("-", "").toUpperCase());
+            region = regionStr;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (region="
+                    + regionStr + ")");
+        } catch (Exception e) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (region="
+                    + regionStr + ")");
+        } // catch
+        
+        String attrPersistRowStr = context.getString("attr_persistence");
+
+        if (attrPersistRowStr.equals("row") || attrPersistRowStr.equals("column")) {
+            attrPersistenceRow = attrPersistRowStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + persistence + ")");
+                + attrPersistRowStr + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + persistence + ") -- Must be 'row' or 'column'");
+                + attrPersistRowStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
         super.configure(context);
