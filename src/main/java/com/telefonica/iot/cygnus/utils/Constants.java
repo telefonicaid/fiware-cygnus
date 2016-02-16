@@ -63,6 +63,7 @@ public final class Constants {
     public static final int MAX_CONNS                   = 500;
     public static final int MAX_CONNS_PER_ROUTE         = 100;
     public static final int MAX_NAME_LEN                = 64;
+    public static final int MAX_NAME_LEN_HDFS           = 255;
     public static final int SERVICE_HEADER_MAX_LEN      = 50;
     public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
     

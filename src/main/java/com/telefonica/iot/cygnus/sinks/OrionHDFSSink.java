@@ -1040,9 +1040,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildFirstLevel(String fiwareService) throws Exception {
         String firstLevel = fiwareService;
         
-        if (firstLevel.length() > Constants.MAX_NAME_LEN) {
+        if (firstLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
-                    + "and its length is greater than " + Constants.MAX_NAME_LEN);
+                    + "and its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
         
         return firstLevel;
@@ -1059,9 +1059,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
         String secondLevel = fiwareServicePath;
         
-        if (secondLevel.length() > Constants.MAX_NAME_LEN) {
+        if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
-                    + "its length is greater than " + Constants.MAX_NAME_LEN);
+                    + "its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
         
         return secondLevel;
@@ -1077,9 +1077,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildThirdLevel(String destination) throws Exception {
         String thirdLevel = destination;
         
-        if (thirdLevel.length() > Constants.MAX_NAME_LEN) {
+        if (thirdLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
-                    + "greater than " + Constants.MAX_NAME_LEN);
+                    + "greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
 
         return thirdLevel;
@@ -1095,9 +1095,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
         String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
         
-        if (thirdLevelMd.length() > Constants.MAX_NAME_LEN) {
+        if (thirdLevelMd.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
-                    + "greater than " + Constants.MAX_NAME_LEN);
+                    + "greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
 
         return thirdLevelMd;
