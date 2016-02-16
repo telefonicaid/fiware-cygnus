@@ -63,7 +63,8 @@ public final class Constants {
     public static final int MAX_CONNS = 500;
     public static final int MAX_CONNS_PER_ROUTE = 100;
     public static final int MAX_NAME_LEN = 64;
-    
+    public static final int MAX_NAME_LEN_HDFS = 255;
+
     // Others
     public static final String EMPTY_MD = "[]";
 
