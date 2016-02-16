@@ -4,6 +4,7 @@ Content:
 * [Functionality](#section1)
 * [Grouping rules syntax](#section2)
 * [Usage](#section3)
+* [Management Interface related operations](#section4)
 
 ##<a name="section1"></a>Functionality
 This is a custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a new `fiware-servicePath` containing the destination entity may be configured (in case of HDFS, this is a folder; in case of CKAN this is a package; in case of MySQL this is simply a prefix for the table name; please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details).
@@ -34,7 +35,7 @@ There exists a <i>grouping rules</i> file containing Json-like <i>rules</i> defi
 
 Being:
 
-* <b>id</b>: A unique unsigned integer-based identifier. Not really used in the current implementation, but could be useful in the future.
+* <b>id</b>: A unique unsigned integer-based identifier.
 * <b>fields</b>: These are the fields that will be concatenated for regular expression matching. The available dictionary of fields for concatenation is "entityId", "entityType" and "servicePath". The order of these fields is important since the concatenation is made from left to right.
 * <b>regex</b>: Java-like regular expression to be applied on the concatenated fields. Special characters like '\' must be escaped ('\' is escaped as "\\\\").
 * <b>destination</b>: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of MySQL, Mongo and STH this sufixes the table/collection name. Please, have a look to [doc/design/naming_conventions.md](doc/design/naming_conventions.md) for more details.
@@ -108,5 +109,42 @@ The usage of such an Interceptor is:
     cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = [FLUME_HOME_DIR]/conf/grouping_rules.conf
 
 It is <b>very important</b> to configure the <b>absolute path to the grouping rules file</b>.
+
+[Top](#top)
+
+##<a name="section4"></a>Management Interface related operations
+
+The Management Interface of Cygnus exposes a set of operations under the `/v1/groupingrules` path related to the grouping rules feature, allowing listing/updating/removing the rules. For instance:
+
+```
+GET http://<cygnus_host>:<management_port>/v1/groupingrules
+```
+
+```
+{
+    "grouping_rules": [
+        {
+            "destination": "allcars",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "cars",
+            "id": 1,
+            "regex": "Car"
+        },
+        {
+            "destination": "allrooms",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "rooms",
+            "id": 2,
+            "regex": "Room"
+        }
+    ]
+}
+```
+
+Please, check [this](../installation_and_administration_guide/management_interface.md) link in order to know further details. 
 
 [Top](#top)

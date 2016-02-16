@@ -23,14 +23,10 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;
-import com.telefonica.iot.cygnus.interceptors.GroupingRules.GroupingRule;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -42,10 +38,6 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -80,7 +72,7 @@ public class GroupingInterceptor implements Interceptor {
     
     @Override
     public void initialize() {
-        groupingRules = new GroupingRules();
+        groupingRules = new GroupingRules(groupingRulesFileName);
         configurationReader = new ConfigurationReader(30000);
         configurationReader.start();
     } // initialize
@@ -266,47 +258,7 @@ public class GroupingInterceptor implements Interceptor {
                 } // if
 
                 lastModified = modified;
-
-                // read the grouping rules file; a JSONParse(Reader) method cannot be used since
-                // the file may contain comment lines starting by the '#' character
-                String jsonStr = readGroupingRulesFile(groupingRulesFileName);
-
-                if (jsonStr == null) {
-                    logger.info("No grouping rules have been read");
-                    
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException e) {
-                        logger.error("There was a problem with the checking interval. Details: "
-                                + e.getMessage());
-                    } // try catch
-                    
-                    continue;
-                } // if
-
-                logger.info("Grouping rules read: " + jsonStr);
-
-                // parse the Json containing the grouping rules
-                JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
-
-                if (jsonGroupingRules == null) {
-                    logger.warn("Grouping rules syntax has errors");
-                    
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException e) {
-                        logger.error("There was a problem with the checking interval. Details: "
-                                + e.getMessage());
-                    } // try catch
-                    
-                    continue;
-                } // if
-
-                logger.info("Grouping rules syntax is OK");
-
-                // create a list of grouping rules, with precompiled regex
-                groupingRules.setRules(jsonGroupingRules);
-                logger.info("Grouping rules regex'es have been compiled");
+                groupingRules = new GroupingRules(groupingRulesFileName);
 
                 // sleep the configured interval of time
                 try {
@@ -320,62 +272,6 @@ public class GroupingInterceptor implements Interceptor {
         public void signalForStop() {
             this.stop = true;
         } // signalForStop
-        
-        /**
-         * Reads a file containing Json-based grouing rules. The file may contain lines representing comments,
-         * which start with the '#' character.
-         * @param fileName File to be read
-         * @return A string containing the Json, discarding the comment lines
-         */
-        private String readGroupingRulesFile(String fileName) {
-            String jsonStr = "";
-
-            if (fileName == null) {
-                // despite configuring the interceptor, no table_matching.conf file has been specified
-                return null;
-            } // if
-
-            BufferedReader reader;
-
-            try {
-                reader = new BufferedReader(new FileReader(groupingRulesFileName));
-            } catch (FileNotFoundException e) {
-                LOGGER.error("File not found. Details=" + e.getMessage() + ")");
-                return null;
-            } // try catch
-
-            String line;
-
-            try {
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("#") || line.length() == 0) {
-                        continue;
-                    } // if
-
-                    jsonStr += line;
-                } // while
-
-                return jsonStr;
-            } catch (IOException e) {
-                LOGGER.error("Error while reading the Json-based grouping rules file. Details=" + e.getMessage() + ")");
-                return null;
-            } // try catch
-        } // readGroupingRulesFile
-
-        private JSONArray parseGroupingRules(String jsonStr) {
-            if (jsonStr == null) {
-                return null;
-            } // if
-
-            JSONParser jsonParser = new JSONParser();
-
-            try {
-                return (JSONArray) ((JSONObject) jsonParser.parse(jsonStr)).get("grouping_rules");
-            } catch (ParseException e) {
-                LOGGER.error("Error while parsing the Json-based grouping rules file. Details=" + e.getMessage());
-                return null;
-            } // try catch
-        } // parseGroupingRules
         
     } // ConfigurationReader
   

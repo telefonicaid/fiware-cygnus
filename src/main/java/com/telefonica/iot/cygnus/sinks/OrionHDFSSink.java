@@ -573,7 +573,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -614,15 +614,15 @@ public class OrionHDFSSink extends OrionSink {
                 
                 // create a line and aggregate it
                 String line = "{"
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME_TS) + "\":\"" + recvTimeTs / 1000 + "\","
-                    + "\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+                    + "\"" + Constants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
+                    + "\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_NAME) + "\":\"" + attrName + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_TYPE) + "\":\"" + attrType + "\","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_VALUE) + "\":" + attrValue + ","
-                    + "\"" + Utils.encodeHive(Constants.ATTR_MD) + "\":" + attrMetadata
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\","
+                    + "\"" + Constants.ATTR_NAME + "\":\"" + attrName + "\","
+                    + "\"" + Constants.ATTR_TYPE + "\":\"" + attrType + "\","
+                    + "\"" + Constants.ATTR_VALUE + "\":" + attrValue + ","
+                    + "\"" + Constants.ATTR_MD + "\":" + attrMetadata
                     + "}";
                 
                 if (aggregation.isEmpty()) {
@@ -646,7 +646,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
@@ -686,10 +686,10 @@ public class OrionHDFSSink extends OrionSink {
                 return;
             } // if
             
-            String line = "{\"" + Utils.encodeHive(Constants.RECV_TIME) + "\":\"" + recvTime + "\","
+            String line = "{\"" + Constants.RECV_TIME + "\":\"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_ID) + "\":\"" + entityId + "\","
-                    + "\"" + Utils.encodeHive(Constants.ENTITY_TYPE) + "\":\"" + entityType + "\"";
+                    + "\"" + Constants.ENTITY_ID + "\":\"" + entityId + "\","
+                    + "\"" + Constants.ENTITY_TYPE + "\":\"" + entityType + "\"";
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -700,8 +700,7 @@ public class OrionHDFSSink extends OrionSink {
                         + attrType + ")");
                 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += ", \"" + Utils.encodeHive(attrName) + "\":" + attrValue + ", \""
-                        + Utils.encodeHive(attrName) + "_md\":" + attrMetadata;
+                line += ", \"" + attrName + "\":" + attrValue + ", \"" + attrName + "_md\":" + attrMetadata;
             } // for
             
             // now, aggregate the line
@@ -724,7 +723,7 @@ public class OrionHDFSSink extends OrionSink {
             super.initialize(cygnusEvent);
             hiveFields = Utils.encodeHive(Constants.RECV_TIME_TS) + " bigint,"
                     + Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string,"
                     + Utils.encodeHive(Constants.ATTR_NAME) + " string,"
@@ -841,7 +840,7 @@ public class OrionHDFSSink extends OrionSink {
             
             // particular initialization
             hiveFields = Utils.encodeHive(Constants.RECV_TIME) + " string,"
-                    + Constants.FIWARE_SERVICE_PATH + " string,"
+                    + Utils.encodeHive(Constants.FIWARE_SERVICE_PATH) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_ID) + " string,"
                     + Utils.encodeHive(Constants.ENTITY_TYPE) + " string";
             
@@ -1041,7 +1040,8 @@ public class OrionHDFSSink extends OrionSink {
             case JSONCOLUMN:
             case JSONROW:
                 query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
-                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' with serdeproperties "
+                        + "(\"dots.in.keys\" = \"true\") location '/user/"
                         + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
@@ -1055,6 +1055,8 @@ public class OrionHDFSSink extends OrionSink {
         } // switch
 
         // execute the query
+        LOGGER.debug("Doing Hive query: '" + query + "'");
+        
         if (!hiveClient.doCreateTable(query)) {
             LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
@@ -1071,9 +1073,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildFirstLevel(String fiwareService) throws Exception {
         String firstLevel = fiwareService;
         
-        if (firstLevel.length() > Constants.MAX_NAME_LEN) {
+        if (firstLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
-                    + "and its length is greater than " + Constants.MAX_NAME_LEN);
+                    + "and its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
         
         return firstLevel;
@@ -1090,9 +1092,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
         String secondLevel = fiwareServicePath;
         
-        if (secondLevel.length() > Constants.MAX_NAME_LEN) {
+        if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
-                    + "its length is greater than " + Constants.MAX_NAME_LEN);
+                    + "its length is greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
         
         return secondLevel;
@@ -1108,9 +1110,9 @@ public class OrionHDFSSink extends OrionSink {
     private String buildThirdLevel(String destination) throws Exception {
         String thirdLevel = destination;
         
-        if (thirdLevel.length() > Constants.MAX_NAME_LEN) {
+        if (thirdLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
-                    + "greater than " + Constants.MAX_NAME_LEN);
+                    + "greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
 
         return thirdLevel;
@@ -1124,11 +1126,11 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
-        String thirdLevelMd = destination + "_" + Utils.encodeHive(attrName) + "_" + Utils.encodeHive(attrType);
+        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
         
-        if (thirdLevelMd.length() > Constants.MAX_NAME_LEN) {
+        if (thirdLevelMd.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
-                    + "greater than " + Constants.MAX_NAME_LEN);
+                    + "greater than " + Constants.MAX_NAME_LEN_HDFS);
         } // if
 
         return thirdLevelMd;

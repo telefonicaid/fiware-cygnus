@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.interceptors.GroupingRules.GroupingRule;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.event.EventBuilder;
@@ -29,8 +28,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

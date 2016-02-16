@@ -1,0 +1,131 @@
+/**
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of fiware-cygnus (FI-WARE project).
+ *
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ */
+package com.telefonica.iot.cygnus.interceptors;
+
+import com.telefonica.iot.cygnus.utils.Utils;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+/**
+ *
+ * @author frb
+ */
+/**
+ * Each one of the entries of the matching table.
+ */
+public class GroupingRule {
+
+    private final JSONObject jsonRule;
+
+    /**
+     * Constructor.
+     * @param jsonRule
+     */
+    public GroupingRule(JSONObject jsonRule) {
+        this.jsonRule = jsonRule;
+    } // GroupingRule
+
+    /**
+     * Sets the rule's id.
+     * @param id
+     */
+    public void setId(long id) {
+        this.jsonRule.put("id", id);
+    } // setId
+    
+    /**
+     * Gets the rule's id.
+     * @return
+     */
+    public long getId() {
+        return (Long) jsonRule.get("id");
+    } // getId
+
+    /**
+     * Gets the rule's fields array.
+     * @return The rule's fields array.
+     */
+    public ArrayList<String> getFields() {
+        return (JSONArray) jsonRule.get("fields");
+    } // getFields
+
+    /**
+     * Gets the rule's regular expression.
+     * @return the rule's regular expression.
+     */
+    public String getRegex() {
+        return (String) jsonRule.get("regex");
+    } // getRegex
+    
+    /**
+     * Gets the compiled pattern.
+     * @return The compiled pattern
+     */
+    public Pattern getPattern() {
+        return Pattern.compile((String) jsonRule.get("regex"));
+    } // getPattern
+
+    /**
+     * Gets the rule's destination.
+     * @return The rule's destination.
+     */
+    public String getDestination() {
+        return Utils.encode((String) jsonRule.get("destination"));
+    } // destination
+
+    /**
+     * Gets the rule's newFiwareServicePath.
+     * @return The rule's newFiwareServicePath.
+     */
+    public String getNewFiwareServicePath() {
+        return Utils.encode((String) jsonRule.get("fiware_service_path"));
+    } // getNewFiwareServicePath
+    
+    /**
+     * Checks if the given Json is valid as grouping rules.
+     * @param jsonRule
+     * @return True if the given Json is valid as grouping rule, otherwise false
+     */
+    public static int isValid(JSONObject jsonRule) {
+        // check if the rule contains all the required fields
+        if (!jsonRule.containsKey("fields")
+                || !jsonRule.containsKey("regex")
+                || !jsonRule.containsKey("destination")
+                || !jsonRule.containsKey("fiware_service_path")) {
+            return 1;
+        } // if
+
+        // check if the rule has any empty field
+        if (((JSONArray) jsonRule.get("fields")).size() == 0
+                || ((String) jsonRule.get("regex")).length() == 0
+                || ((String) jsonRule.get("destination")).length() == 0
+                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
+            return 2;
+        } // if
+
+        return 0;
+    } // isValid
+    
+    @Override
+    public String toString() {
+        return jsonRule.toJSONString();
+    } // toString
+
+} // GroupingRule

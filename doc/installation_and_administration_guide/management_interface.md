@@ -5,6 +5,8 @@ Content:
 * [GET `/v1/stats`](#section2)
 * [GET `/v1/groupingrules`](#section3)
 * [POST `/v1/groupingrules`](#section4)
+* [PUT `/v1/groupingrules`](#section5)
+* [DELETE `/v1/groupingrules`](#section6)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -95,7 +97,7 @@ Response:
 [Top](#top)
 
 ##<a neme="section3"></a>`GET /v1/groupingrules`
-Gets the configured grouping rules.
+Gets the configured [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
 GET http://<cygnus_host>:<management_port>/v1/groupingrules
@@ -131,17 +133,54 @@ Response:
 [Top](#top)
 
 ##<a neme="section4"></a>`POST /v1/groupingrules`
-Adds a new rule, passed as a Json in the payload, to the grouping rules.
+Adds a new rule, passed as a Json in the payload, to the [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
 POST http://<cygnus_host>:<management_port>/v1/groupingrules
 {
-	"id": 2,
 	"regex": "Room",
 	"destination": "allrooms",
 	"fiware_service_path": "rooms",
 	"fields": ["entityType"]
 }
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+Please observe the `id` field is not passed as part of the posted Json. This is because the Management Interface automatically deals with the proper ID insertion.
+
+[Top](#top)
+
+##<a neme="section5"></a>`PUT /v1/groupingrules`
+Updates an already existent [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
+
+```
+PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
+{
+	"regex": "Room",
+	"destination": "otherrooms",
+	"fiware_service_path": "rooms",
+	"fields": ["entityType"]
+}
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+[Top](#top)
+
+##<a neme="section6"></a>`DELETE /v1/groupingrules`
+Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
+
+```
+DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
 ```
 
 Response:

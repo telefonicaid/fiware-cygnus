@@ -19,13 +19,18 @@ package com.telefonica.iot.cygnus.interceptors;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Utils;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -35,63 +40,54 @@ public class GroupingRules {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(GroupingRules.class);
     private LinkedList<GroupingRule> groupingRules;
-
+    private long lastIndex;
+    
     /**
      * Constructor.
+     * @param groupingRulesFileName
      */
-    public GroupingRules() {
+    public GroupingRules(String groupingRulesFileName) {
         groupingRules = null;
+        lastIndex = 0;
+        
+        // read the grouping rules file
+        // a JSONParse(groupingRulesFileName) method cannot be used since the file may contain comment lines
+        // starting by the '#' character (comments)
+        String jsonStr = readGroupingRulesFile(groupingRulesFileName);
+
+        if (jsonStr == null) {
+            LOGGER.info("No grouping rules have been read");
+            return;
+        } // if
+
+        LOGGER.info("Grouping rules read: " + jsonStr);
+
+        // parse the Json containing the grouping rules
+        JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
+
+        if (jsonGroupingRules == null) {
+            LOGGER.warn("Grouping rules syntax has errors");
+            return;
+        } // if
+
+        LOGGER.info("Grouping rules syntax is OK");
+
+        // create a list of grouping rules, with precompiled regex
+        setRules(jsonGroupingRules);
+        LOGGER.info("Grouping rules regex'es have been compiled");
     } // GroupingRules
-
-    public synchronized LinkedList<GroupingRule> getRules() {
-        return groupingRules;
-    } // getRules
-
-    /**
-     * Sets the grouping rules given a Json Array of rules.
-     * @param jsonRules
-     */
-    public synchronized void setRules(JSONArray jsonRules) {
-        groupingRules = new LinkedList<GroupingRule>();
-
-        for (Object jsonGroupingRule : jsonRules) {
-            JSONObject jsonRule = (JSONObject) jsonGroupingRule;
-            int err = isValid(jsonRule);
-
-            if (err == 0) {
-                GroupingRule rule = new GroupingRule(jsonRule);
-                groupingRules.add(rule);
-            } else {
-                switch (err) {
-                    case 1:
-                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details="
-                                + jsonRule.toJSONString());
-                        break;
-                    case 2:
-                        LOGGER.warn("Invalid grouping rule, the id is not numeric or it is missing. It will be "
-                                + "discarded. Details=" + jsonRule.toJSONString());
-                        break;
-                    case 3:
-                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details="
-                                + jsonRule.toJSONString());
-                        break;
-                    default:
-                } // switch
-            } // if else
-        } // for
-    } // setRules
-
+    
     /**
      * Gets the rule matching the given context element for the given service path.
      * @param contextElement
      * @param servicePath
      * @return
      */
-    public synchronized GroupingRule getMatchingRule(ContextElement contextElement, String servicePath) {
+    public GroupingRule getMatchingRule(ContextElement contextElement, String servicePath) {
         if (groupingRules != null) {
             for (GroupingRule rule : groupingRules) {
                 String concat = concatenateFields(rule.getFields(), contextElement, servicePath);
-                Matcher matcher = rule.pattern.matcher(concat);
+                Matcher matcher = rule.getPattern().matcher(concat);
 
                 if (matcher.matches()) {
                     return rule;
@@ -103,6 +99,101 @@ public class GroupingRules {
             return null;
         } // if else
     } // getMatchingRule
+    
+    /**
+     * Adds a new rule to the grouping rules.
+     * @param rule
+     */
+    public void addRule(GroupingRule rule) {
+        lastIndex++;
+        rule.setId(this.lastIndex);
+        this.groupingRules.add(rule);
+    } // GroupingRule
+    
+    /**
+     * Deletes a rule given its ID.
+     * @param id
+     * @return True, if the rule was deleted, otherwise false
+     */
+    public boolean deleteRule(long id) {
+        for (int i = 0; i < groupingRules.size(); i++) {
+            GroupingRule groupingRule = groupingRules.get(i);
+            
+            if (groupingRule.getId() == id) {
+                groupingRules.remove(i);
+                return true;
+            } // if
+        } // for
+        
+        return false;
+    } // deleteRule
+    
+    /**
+     * Updates a rule given its ID.
+     * @param id
+     * @param rule
+     * @return True, if the rule was updated, otherwise false
+     */
+    public boolean updateRule(long id, GroupingRule rule) {
+        for (int i = 0; i < groupingRules.size(); i++) {
+            GroupingRule groupingRule = groupingRules.get(i);
+            
+            if (groupingRule.getId() == id) {
+                groupingRules.remove(i);
+                rule.setId(id);
+                groupingRules.add(i, rule);
+                return true;
+            } // if
+        } // for
+        
+        return false;
+    } // updateRule
+    
+    /**
+     * Gets a stringified version of the grouping rules.
+     * @return A stringified version of the grouping rules
+     */
+    @Override
+    public String toString() {
+        return "{\"grouping_rules\": " + groupingRules.toString() + "}";
+    } // toString
+    
+    /**
+     * Gets the grouping rules as a list of GroupingRule objects. It is protected since it is only used by the tests.
+     * @return The grouping rules as a list of GroupingRule objects
+     */
+    protected LinkedList<GroupingRule> getRules() {
+        return groupingRules;
+    } // getRules
+
+    private void setRules(JSONArray jsonRules) {
+        groupingRules = new LinkedList<GroupingRule>();
+
+        for (Object jsonGroupingRule : jsonRules) {
+            JSONObject jsonRule = (JSONObject) jsonGroupingRule;
+            int err = GroupingRule.isValid(jsonRule);
+
+            if (err == 0) {
+                GroupingRule rule = new GroupingRule(jsonRule);
+                groupingRules.add(rule);
+                lastIndex = rule.getId();
+            } else {
+                switch (err) {
+                    case 1:
+                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    case 2:
+                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    default:
+                        LOGGER.warn("Invalid grouping rule. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                } // switch
+            } // if else
+        } // for
+    } // setRules
     
     private String concatenateFields(ArrayList<String> fields, ContextElement contextElement, String servicePath) {
         String concat = "";
@@ -119,98 +210,53 @@ public class GroupingRules {
         
         return concat;
     } // concatenateFields
-
-    private int isValid(JSONObject jsonRule) {
-        // check if the rule contains all the required fields
-        if (!jsonRule.containsKey("id")
-                || !jsonRule.containsKey("fields")
-                || !jsonRule.containsKey("regex")
-                || !jsonRule.containsKey("destination")
-                || !jsonRule.containsKey("fiware_service_path")) {
-            return 1;
+    
+    private String readGroupingRulesFile(String groupingRulesFileName) {
+        if (groupingRulesFileName == null) {
+            return null;
         } // if
 
-        // check if the id is numeric
+        String jsonStr = "";
+        BufferedReader reader;
+
         try {
-            Long l = (Long) jsonRule.get("id");
-        } catch (Exception e) {
-            return 2;
-        } // catch
+            reader = new BufferedReader(new FileReader(groupingRulesFileName));
+        } catch (FileNotFoundException e) {
+            LOGGER.error("File not found. Details=" + e.getMessage() + ")");
+            return null;
+        } // try catch
 
-        // check if the rule has any empty field
-        if (((JSONArray) jsonRule.get("fields")).size() == 0
-                || ((String) jsonRule.get("regex")).length() == 0
-                || ((String) jsonRule.get("destination")).length() == 0
-                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
-            return 3;
+        String line;
+
+        try {
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#") || line.length() == 0) {
+                    continue;
+                } // if
+
+                jsonStr += line;
+            } // while
+
+            return jsonStr;
+        } catch (IOException e) {
+            LOGGER.error("Error while reading the Json-based grouping rules file. Details=" + e.getMessage() + ")");
+            return null;
+        } // try catch
+    } // readGroupingRulesFile
+
+    private JSONArray parseGroupingRules(String jsonStr) {
+        if (jsonStr == null) {
+            return null;
         } // if
 
-        return 0;
-    } // isValid
-    
-    /**
-     * Each one of the entries of the matching table.
-     */
-    protected class GroupingRule {
-        
-        private final long id;
-        private final ArrayList<String> fields;
-        private final Pattern pattern;
-        private final String destination;
-        private final String newFiwareServicePath;
-        
-        /**
-         * Constructor.
-         * @param jsonRule
-         */
-        public GroupingRule(JSONObject jsonRule) {
-            this.id = (Long) jsonRule.get("id");
-            this.fields = (JSONArray) jsonRule.get("fields");
-            this.pattern = Pattern.compile((String) jsonRule.get("regex"));
-            this.destination = Utils.encode((String) jsonRule.get("destination"));
-            this.newFiwareServicePath = Utils.encode((String) jsonRule.get("fiware_service_path"));
-        } // GroupingRule
-        
-        /**
-         * Gets the rule's id.
-         * @return
-         */
-        public long getId() {
-            return id;
-        } // getId
-        
-        /**
-         * Gets the rule's fields array.
-         * @return The rule's fields array.
-         */
-        public ArrayList<String> getFields() {
-            return fields;
-        } // getFields
-        
-        /**
-         * Gets the rule's regular expression.
-         * @return the rule's regular expression.
-         */
-        public String getRegex() {
-            return pattern.toString();
-        } // getRegex
-        
-        /**
-         * Gets the rule's destination.
-         * @return The rule's destination.
-         */
-        public String getDestination() {
-            return destination;
-        } // destination
-        
-        /**
-         * Gets the rule's newFiwareServicePath.
-         * @return The rule's newFiwareServicePath.
-         */
-        public String getNewFiwareServicePath() {
-            return newFiwareServicePath;
-        } // getNewFiwareServicePath
-        
-    } // GroupingRule
-    
+        JSONParser jsonParser = new JSONParser();
+
+        try {
+            return (JSONArray) ((JSONObject) jsonParser.parse(jsonStr)).get("grouping_rules");
+        } catch (ParseException e) {
+            LOGGER.error("Error while parsing the Json-based grouping rules file. Details=" + e.getMessage());
+            return null;
+        } // try catch
+    } // parseGroupingRules
+
 } // GroupingRules
