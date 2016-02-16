@@ -176,6 +176,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Feb 16 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 0.12.1
+- [BUG] Fix wrong spec date regarding release/0.12.0 (#750)
+- [BUG] Fix the name of the fiware service path field in all the sinks (#764)
+- [BUG] Fix the generalized Hive-like encoding style used in OrionHDFSSink (#781)
+
 * Mon Feb 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 0.12.0
 - [FEATURE] Add postgreSQL sink support (#511)
 - [FEATURE] Add batching support to OrionTestSink (#572)
