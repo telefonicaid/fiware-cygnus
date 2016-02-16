@@ -41,7 +41,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String collectionPrefix;
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
-    protected boolean rowAttrPersistence;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -98,14 +97,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected MongoBackendImpl getBackend() {
         return backend;
     } // getBackend
-
-    /**
-     * Gets the rowAttrPersistence. It is protected since it is used by the tests.
-     * @return
-     */
-    protected boolean getRowAttrPersistence() {
-        return this.rowAttrPersistence;
-    }
     
     @Override
     public void configure(Context context) {
@@ -122,9 +113,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         shouldHash = context.getBoolean("should_hash", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
-        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (this.rowAttrPersistence ? "row" : "column") + ")");
         super.configure(context);
     } // configure
     
