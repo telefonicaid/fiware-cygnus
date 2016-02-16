@@ -424,11 +424,9 @@ public class OrionHDFSSink extends OrionSink {
         String hiveDBTypeStr = context.getString("hive.db_type");
         
         try {
-            if (hiveDBTypeStr.equals("default-db") || hiveDBTypeStr.equals("namespace-db")) {
-                hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" 
-				+ hiveDBType);
-            }
+            hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" 
+                    + hiveDBType);
         } catch (Exception e) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.db_type="
@@ -473,11 +471,9 @@ public class OrionHDFSSink extends OrionSink {
         String backendImplStr = context.getString("backend_impl");
         
         try {
-            if (backendImplStr.equals("rest") || backendImplStr.equals("binary")) {
-                backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" 
-					+ backendImplStr + ")");
-            }
+            backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" 
+                        + backendImplStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend_impl="
