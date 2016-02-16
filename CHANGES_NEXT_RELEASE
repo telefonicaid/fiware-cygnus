@@ -1,2 +1,3 @@
 - [BUG] Fix the name of the fiware service path field (#764)
 - [BUG] Fix of the Cygnus installation using yum (#652)
+- [BUG] Fix the generalized Hive-like encoding style used in OrionHDFSSink (#781)

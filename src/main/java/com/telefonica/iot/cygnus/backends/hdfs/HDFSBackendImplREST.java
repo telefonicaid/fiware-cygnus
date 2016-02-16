@@ -23,7 +23,6 @@ import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import org.apache.http.Header;
@@ -210,7 +209,8 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
             case JSONCOLUMN:
             case JSONROW:
                 query = "create external table if not exists " + tableName + " (" + fields + ") row format serde "
-                        + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + "'org.openx.data.jsonserde.JsonSerDe' with serdeproperties "
+                        + "(\"dots.in.keys\" = \"true\") location '/user/"
                         + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
