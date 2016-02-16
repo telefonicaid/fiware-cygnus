@@ -1007,7 +1007,8 @@ public class OrionHDFSSink extends OrionSink {
             case JSONCOLUMN:
             case JSONROW:
                 query = "create external table if not exists " + dbName + "." + tableName + " (" + fields
-                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' location '/user/"
+                        + ") row format serde " + "'org.openx.data.jsonserde.JsonSerDe' with serdeproperties "
+                        + "(\"dots.in.keys\" = \"true\") location '/user/"
                         + (serviceAsNamespace ? "" : (username + "/")) + dirPath + "'";
                 break;
             case CSVCOLUMN:
@@ -1021,6 +1022,8 @@ public class OrionHDFSSink extends OrionSink {
         } // switch
 
         // execute the query
+        LOGGER.debug("Doing Hive query: '" + query + "'");
+        
         if (!hiveClient.doCreateTable(query)) {
             LOGGER.warn("The HiveQL external table could not be created, but Cygnus can continue working... "
                     + "Check your Hive/Shark installation");
