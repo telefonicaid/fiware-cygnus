@@ -80,11 +80,6 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         super.configure(context);
     } // configure
     
-    @Override
-    public void start() {
-        super.start();
-    } // start
-    
     /**
      * Class for aggregating batches.
      */
