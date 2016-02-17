@@ -85,6 +85,8 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + attrPersistenceStr + ") must be 'row' or 'column'");
         }  // if else
+        
+        super.configure(context);
     } // configure
     
     /**
