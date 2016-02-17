@@ -19,13 +19,9 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.HashMap;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +166,7 @@ public class OrionMongoSinkTest {
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
-        doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName);
+        doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName, 0, 0, 0);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataRaw(dbName, collectionName, null);
     } // setUp
 
