@@ -169,7 +169,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
         
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -243,7 +243,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         } // aggregate
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
 
             switch (dataModel) {
                 case DMBYSERVICEPATH:
