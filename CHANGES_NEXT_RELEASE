@@ -19,3 +19,4 @@
 - [BUG] Fix the generalized Hive-like encoding style used in OrionHDFSSink (#781)
 - [HARDENING] Relocate attr_persistence check from OrionMongoBaseSink to OrionMongoSink (#793)
 - [BUG] Fix recvTime in OrionMongoSink (#796)
+- [BUG] Fix the OrionCKANSink cache when to resources in different packages have the same name (#643)
