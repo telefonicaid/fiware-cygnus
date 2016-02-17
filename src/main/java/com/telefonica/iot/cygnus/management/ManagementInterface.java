@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import javax.servlet.ServletException;
@@ -355,6 +354,10 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("400 - Invalid grouping rule, some field is empty");
                     LOGGER.warn("Invalid grouping rule, some field is empty");
                     return;
+                case 3:
+                    response.getWriter().println("400 - Invalid grouping rule, some field is not allowed");
+                    LOGGER.warn("Invalid grouping rule, some field is not allowed");
+                    return;
                 default:
                     response.getWriter().println("400 - Invalid grouping rule");
                     LOGGER.warn("Invalid grouping rule");
@@ -436,6 +439,10 @@ public class ManagementInterface extends AbstractHandler {
                 case 2:
                     response.getWriter().println("400 - Invalid grouping rule, some field is empty");
                     LOGGER.warn("Invalid grouping rule, some field is empty");
+                    return;
+                case 3:
+                    response.getWriter().println("400 - Invalid grouping rule, some field is not allowed");
+                    LOGGER.warn("Invalid grouping rule, some field is not allowed");
                     return;
                 default:
                     response.getWriter().println("400 - Invalid grouping rule");

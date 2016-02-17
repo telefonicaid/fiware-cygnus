@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import org.json.simple.JSONArray;
@@ -76,6 +75,14 @@ public class GroupingRules {
         setRules(jsonGroupingRules);
         LOGGER.info("Grouping rules regex'es have been compiled");
     } // GroupingRules
+    
+    /**
+     * Gets if the object representing the grouping rules is empty.
+     * @return True if empty, otherwise false
+     */
+    public boolean isEmpty() {
+        return this.groupingRules == null || this.groupingRules.size() == 0;
+    } // isEmpty
     
     /**
      * Gets the rule matching the given context element for the given service path.
@@ -155,7 +162,11 @@ public class GroupingRules {
      */
     @Override
     public String toString() {
-        return "{\"grouping_rules\": " + groupingRules.toString() + "}";
+        if (groupingRules == null) {
+            return "{\"grouping_rules\": []}";
+        } else {
+            return "{\"grouping_rules\": " + groupingRules.toString() + "}";
+        } // if else
     } // toString
     
     /**
@@ -185,6 +196,10 @@ public class GroupingRules {
                         break;
                     case 2:
                         LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    case 3:
+                        LOGGER.warn("Invalid grouping rule, some field is not allowed. It will be discarded. Details:"
                                 + jsonRule.toJSONString());
                         break;
                     default:
