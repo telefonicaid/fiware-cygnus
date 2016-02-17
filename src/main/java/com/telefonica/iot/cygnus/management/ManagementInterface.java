@@ -340,7 +340,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
-        int err = GroupingRule.isValid(rule);
+        int err = GroupingRule.isValid(rule, true);
         
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -426,7 +426,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
-        int err = GroupingRule.isValid(rule);
+        int err = GroupingRule.isValid(rule, true);
         
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

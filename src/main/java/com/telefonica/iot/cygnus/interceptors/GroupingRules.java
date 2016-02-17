@@ -182,7 +182,7 @@ public class GroupingRules {
 
         for (Object jsonGroupingRule : jsonRules) {
             JSONObject jsonRule = (JSONObject) jsonGroupingRule;
-            int err = GroupingRule.isValid(jsonRule);
+            int err = GroupingRule.isValid(jsonRule, false);
 
             if (err == 0) {
                 GroupingRule rule = new GroupingRule(jsonRule);

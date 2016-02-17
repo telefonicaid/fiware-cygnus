@@ -102,14 +102,15 @@ public class GroupingRule {
     /**
      * Checks if the given Json is valid as grouping rule.
      * @param jsonRule
+     * @param checkExtraFields
      * @return True if the given Json is valid as grouping rule, otherwise false
      */
-    public static int isValid(JSONObject jsonRule) {
+    public static int isValid(JSONObject jsonRule, boolean checkExtraFields) {
         boolean containsFields = false;
         boolean containsRegex = false;
         boolean containsDestination = false;
         boolean containsFiwareServicePath = false;
-        boolean containsOther = false;
+        boolean containsExtraFields = false;
         int fieldsSize = 0;
         int regexLength = 0;
         int destinationLength = 0;
@@ -119,7 +120,7 @@ public class GroupingRule {
         Iterator it = jsonRule.keySet().iterator();
         
         while (it.hasNext()) {
-            String field = (String)it.next();
+            String field = (String) it.next();
             
             if (field.equals("fields")) {
                 containsFields = true;
@@ -134,7 +135,7 @@ public class GroupingRule {
                 containsFiwareServicePath = true;
                 fiwareServicePathLength = ((String) jsonRule.get("fiware_service_path")).length();
             } else {
-                containsOther = true;
+                containsExtraFields = true;
             } // if else
         } // while
         
@@ -149,7 +150,7 @@ public class GroupingRule {
         } // if
         
         // check if the rule has extra fields not allowed
-        if (containsOther) {
+        if (checkExtraFields && containsExtraFields) {
             return 3;
         } // if
 
