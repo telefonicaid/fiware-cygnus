@@ -135,18 +135,20 @@ public class MongoBackendImpl implements MongoBackend {
     @Override
     public void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
             long dataExpiration) throws Exception {
-        LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
         // create the collection, with size-based limits if possible
         try {
             if (collectionsSize != 0 && maxDocuments != 0) {
-                CreateCollectionOptions options = new CreateCollectionOptions();
-                options.capped(true);
-                options.sizeInBytes(collectionsSize);
-                options.maxDocuments(maxDocuments);
+                CreateCollectionOptions options = new CreateCollectionOptions()
+                        .capped(true)
+                        .sizeInBytes(collectionsSize)
+                        .maxDocuments(maxDocuments);
+                LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName + " with "
+                        + "collections_size=" + collectionsSize + " and max_documents=" + maxDocuments + " options");
                 db.createCollection(collectionName, options);
             } else {
+                LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
                 db.createCollection(collectionName);
             } // if else
         } catch (Exception e) {
