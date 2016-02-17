@@ -41,7 +41,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String collectionPrefix;
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
-    protected boolean rowAttrPersistence;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -98,15 +97,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected MongoBackendImpl getBackend() {
         return backend;
     } // getBackend
-
-    /**
-     * Gets the rowAttrPersistence. It is protected since it is used by the tests.
-     * @return
-     */
-    protected boolean getRowAttrPersistence() {
-        return this.rowAttrPersistence;
-    }
-
+    
     @Override
     public void configure(Context context) {
         mongoHosts = context.getString("mongo_hosts", "localhost:27017");
@@ -131,18 +122,6 @@ public abstract class OrionMongoBaseSink extends OrionSink {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (should_hash="
                 + shouldHashStr + ") -- Must be 'true' or 'false'");
-        }  // if else
-        
-        String attrPersistenceStr = context.getString("attr_persistence");
-
-        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
-            rowAttrPersistence = attrPersistenceStr.equals("row");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + attrPersistenceStr + ")");
-        } else {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + attrPersistenceStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
         super.configure(context);

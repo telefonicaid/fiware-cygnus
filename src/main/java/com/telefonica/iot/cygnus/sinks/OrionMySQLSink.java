@@ -129,6 +129,7 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence");
+        
         if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + persistence + ")");
@@ -137,6 +138,7 @@ public class OrionMySQLSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") must be 'row' or 'column'");
         }  // if else
+        
         super.configure(context);
     } // configure
 

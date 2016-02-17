@@ -23,6 +23,7 @@ import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
+import org.apache.flume.Context;
 
 /**
  * @author frb
@@ -33,6 +34,8 @@ import org.bson.Document;
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
 
+    private boolean rowAttrPersistence;
+    
     /**
      * Constructor.
      */
@@ -68,6 +71,21 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
+    
+    @Override
+    public void configure (Context context) {
+        String attrPersistenceStr = context.getString("attr_persistence");
+        
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            this.rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") must be 'row' or 'column'");
+        }  // if else
+    } // configure
     
     /**
      * Class for aggregating batches.
