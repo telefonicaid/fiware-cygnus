@@ -49,6 +49,9 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     
     @Override
     public void configure(Context context) {
+        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (rowAttrPersistence ? "row" : "column") + ")");
         collectionsSize = context.getInteger("collections_size", 0);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
         maxDocuments = context.getInteger("max_documents", 0);
@@ -84,15 +87,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-    
-    @Override
-    public void configure (Context context) {
-        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (this.rowAttrPersistence ? "row" : "column") + ")");
-        super.configure(context);
-    } // configure
-    
+
     /**
      * Class for aggregating batches.
      */
