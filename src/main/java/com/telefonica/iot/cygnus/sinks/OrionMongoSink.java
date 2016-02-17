@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.apache.flume.Context;
 import org.bson.Document;
+import org.apache.flume.Context;
 
 /**
  * @author frb
@@ -37,6 +38,8 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     private int collectionsSize;
     private int maxDocuments;
 
+    private boolean rowAttrPersistence;
+    
     /**
      * Constructor.
      */
@@ -81,6 +84,14 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
+    
+    @Override
+    public void configure (Context context) {
+        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (this.rowAttrPersistence ? "row" : "column") + ")");
+        super.configure(context);
+    } // configure
     
     /**
      * Class for aggregating batches.
@@ -171,7 +182,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
         
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -245,7 +256,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         } // aggregate
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
 
             switch (dataModel) {
                 case DMBYSERVICEPATH:

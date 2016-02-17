@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.ArrayList;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -71,20 +70,45 @@ public class OrionHDFSSinkTest {
     private final Long recvTimeTs = 123456789L;
     private final String normalService = "vehicles";
     private final String abnormalService =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservname";
     private final String normalDefaultServicePath = "4wheels";
     private final String rootServicePath = "";
     private final String abnormalDefaultServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservpathname";
     private final String normalGroupedServicePath = "cars";
     private final String abnormalGroupedServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservpathname";
     private final String normalDefaultDestination = "car1_car";
     private final String abnormalDefaultDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longdestname";
     private final String normalGroupedDestination = "my_cars";
     private final String abnormalGroupedDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longdestname";
     
     // notification constants
     private final String singleContextElementNotification = ""
