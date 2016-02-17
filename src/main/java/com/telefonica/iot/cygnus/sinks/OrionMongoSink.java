@@ -22,7 +22,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import java.util.ArrayList;
 import java.util.Date;
-import org.apache.flume.Context;
 import org.bson.Document;
 import org.apache.flume.Context;
 
@@ -35,8 +34,8 @@ import org.apache.flume.Context;
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
     
-    private int collectionsSize;
-    private int maxDocuments;
+    private long collectionsSize;
+    private long maxDocuments;
 
     private boolean rowAttrPersistence;
     
@@ -52,9 +51,9 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + (rowAttrPersistence ? "row" : "column") + ")");
-        collectionsSize = context.getInteger("collections_size", 0);
+        collectionsSize = context.getLong("collections_size", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
-        maxDocuments = context.getInteger("max_documents", 0);
+        maxDocuments = context.getLong("max_documents", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
         super.configure(context);
     } // configure
