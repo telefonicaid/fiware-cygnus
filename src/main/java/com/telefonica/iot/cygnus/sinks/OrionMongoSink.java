@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import java.util.ArrayList;
 import java.util.Date;
+import org.apache.flume.Context;
 import org.bson.Document;
 
 /**
@@ -32,6 +33,9 @@ import org.bson.Document;
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
+    
+    private int collectionsSize;
+    private int maxDocuments;
 
     /**
      * Constructor.
@@ -39,6 +43,15 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     public OrionMongoSink() {
         super();
     } // OrionMongoSink
+    
+    @Override
+    public void configure(Context context) {
+        collectionsSize = context.getInteger("collections_size", 0);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        maxDocuments = context.getInteger("max_documents", 0);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        super.configure(context);
+    } // configure
 
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -266,7 +279,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName);
+        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
         backend.insertContextDataRaw(dbName, collectionName, aggregation);
     } // persistAggregation
 
