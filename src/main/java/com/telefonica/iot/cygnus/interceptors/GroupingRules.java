@@ -46,7 +46,7 @@ public class GroupingRules {
      * @param groupingRulesFileName
      */
     public GroupingRules(String groupingRulesFileName) {
-        groupingRules = null;
+        groupingRules = new LinkedList<GroupingRule>();
         lastIndex = 0;
         
         // read the grouping rules file
@@ -77,34 +77,26 @@ public class GroupingRules {
     } // GroupingRules
     
     /**
-     * Gets if the object representing the grouping rules is empty.
-     * @return True if empty, otherwise false
-     */
-    public boolean isEmpty() {
-        return this.groupingRules == null || this.groupingRules.size() == 0;
-    } // isEmpty
-    
-    /**
      * Gets the rule matching the given context element for the given service path.
      * @param contextElement
      * @param servicePath
      * @return
      */
     public GroupingRule getMatchingRule(ContextElement contextElement, String servicePath) {
-        if (groupingRules != null) {
-            for (GroupingRule rule : groupingRules) {
-                String concat = concatenateFields(rule.getFields(), contextElement, servicePath);
-                Matcher matcher = rule.getPattern().matcher(concat);
-
-                if (matcher.matches()) {
-                    return rule;
-                } // if
-            } // for
-
+        if (groupingRules == null) {
             return null;
-        } else {
-            return null;
-        } // if else
+        } // if
+        
+        for (GroupingRule rule : groupingRules) {
+            String concat = concatenateFields(rule.getFields(), contextElement, servicePath);
+            Matcher matcher = rule.getPattern().matcher(concat);
+
+            if (matcher.matches()) {
+                return rule;
+            } // if
+        } // for
+
+        return null;
     } // getMatchingRule
     
     /**
@@ -123,6 +115,10 @@ public class GroupingRules {
      * @return True, if the rule was deleted, otherwise false
      */
     public boolean deleteRule(long id) {
+        if (groupingRules == null) {
+            return false;
+        } // if
+        
         for (int i = 0; i < groupingRules.size(); i++) {
             GroupingRule groupingRule = groupingRules.get(i);
             
@@ -142,6 +138,10 @@ public class GroupingRules {
      * @return True, if the rule was updated, otherwise false
      */
     public boolean updateRule(long id, GroupingRule rule) {
+        if (groupingRules == null) {
+            return false;
+        } // if
+        
         for (int i = 0; i < groupingRules.size(); i++) {
             GroupingRule groupingRule = groupingRules.get(i);
             
@@ -158,14 +158,22 @@ public class GroupingRules {
     
     /**
      * Gets a stringified version of the grouping rules.
+     * @param asField
      * @return A stringified version of the grouping rules
      */
-    @Override
-    public String toString() {
+    public String toString(boolean asField) {
         if (groupingRules == null) {
-            return "{\"grouping_rules\": []}";
+            if (asField) {
+                return "\"grouping_rules\": []";
+            } else {
+                return "{\"grouping_rules\": []}";
+            } // if else
         } else {
-            return "{\"grouping_rules\": " + groupingRules.toString() + "}";
+            if (asField) {
+                return "\"grouping_rules\": " + groupingRules.toString();
+            } else {
+                return "{\"grouping_rules\": " + groupingRules.toString() + "}";
+            } // if else
         } // if else
     } // toString
     
