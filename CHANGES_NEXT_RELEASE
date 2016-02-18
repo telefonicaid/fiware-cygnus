@@ -21,3 +21,4 @@
 - [FEATURE] Add time and size-based data management policies to collections in OrionMongoSink and OrionSTHSink (#484)
 - [HARDENING] Relocate attr_persistence check from OrionMongoBaseSink to OrionMongoSink (#793)
 - [BUG] Fix recvTime in OrionMongoSink (#796)
+- [BUG] Fix fiware service path field in OrionCKANSink, row mode (#800)
