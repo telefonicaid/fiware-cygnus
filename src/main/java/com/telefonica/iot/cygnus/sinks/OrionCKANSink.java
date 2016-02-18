@@ -147,7 +147,7 @@ public class OrionCKANSink extends OrionSink {
         if (sslStr.equals("true") || sslStr.equals("false")) {
             ssl = Boolean.valueOf(sslStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl="
-                + (ssl ? "true" : "false") + ")");
+                + sslStr + ")");
         } else  {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="

@@ -169,7 +169,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         if (enableGroupingStr.equals("true") || enableGroupingStr.equals("false")) {
             enableGrouping = Boolean.valueOf(enableGroupingStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
-                + (enableGrouping ? "true" : "false") + ")");
+                + enableGroupingStr + ")");
         }  else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_grouping="
@@ -181,7 +181,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         if (batchSize <= 0) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_size="
-                    + batchSize + ") -- Must be upper than 0");
+                    + batchSize + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
                     + batchSize + ")");
@@ -192,7 +192,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         if (batchTimeout <= 0) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_timeout="
-                    + batchTimeout + ") -- Must be upper than 0");
+                    + batchTimeout + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_timeout="
                     + batchTimeout + ")");

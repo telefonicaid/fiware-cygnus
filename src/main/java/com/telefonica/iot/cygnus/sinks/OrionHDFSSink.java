@@ -60,7 +60,7 @@ public class OrionHDFSSink extends OrionSink {
     /**
      * Available file-format implementation.
      */
-    public enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+    private enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
     
     /**
      * Available Hive database types.
@@ -244,6 +244,7 @@ public class OrionHDFSSink extends OrionSink {
         if (hdfsPort != null && hdfsPort.length() > 0) {
             port = hdfsPort;
             intPort = Integer.parseInt(port);
+            
             if ((intPort <= 0) || (intPort > 65535)) {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
@@ -251,17 +252,20 @@ public class OrionHDFSSink extends OrionSink {
             } else {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             }  // if else
+            
         } else if (cosmosPort != null && cosmosPort.length() > 0) {
             port = cosmosPort;
             intPort = Integer.parseInt(port);
+            
             if ((intPort <= 0) || (intPort > 65535)) {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (cosmos_port=" + port
-                        + ") -- Must be between 0 and 65535  -- DEPRECATED, use hdfs_port instead");
+                        + ") -- Must be between 0 and 65535 -- DEPRECATED, use hdfs_port instead");
             } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
                     + " -- DEPRECATED, use hdfs_port instead");
             }  // if else
+            
         } else {
             port = "14000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_port=14000");
@@ -302,7 +306,6 @@ public class OrionHDFSSink extends OrionSink {
         boolean fileFormatConfigured = context.getParameters().containsKey("file_format");
         String attrPersistenceStr = context.getString("attr_persistence");
 
-
         if (fileFormatConfigured) {
             String fileFormatStr = context.getString("file_format");
             
@@ -339,7 +342,7 @@ public class OrionHDFSSink extends OrionSink {
         if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
             enableHive = Boolean.valueOf(enableHiveStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (enableHive="
-                + (enableHive ? "true" : "false") + ")");
+                + enableHiveStr + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (enableHive="
@@ -368,6 +371,7 @@ public class OrionHDFSSink extends OrionSink {
         if (hivePortNew != null && hivePortNew.length() > 0) {
             hivePort = hivePortNew;
             intHivePort = Integer.parseInt(hivePort);
+            
             if ((intHivePort <= 0) && (intHivePort > 65535)) {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
@@ -375,9 +379,11 @@ public class OrionHDFSSink extends OrionSink {
             } else {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
             }  // if else
+            
         } else if (hivePortOld != null && hivePortOld.length() > 0) {
             hivePort = hivePortOld;
             intHivePort = Integer.parseInt(hivePort);
+            
             if ((intHivePort <= 0) && (intHivePort > 65535)) {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive_port=" + hivePort + ")"
@@ -386,6 +392,7 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")"
                         + " -- DEPRECATED, use hive.port instead");
             }  // else if
+            
         } else {
             hivePort = "10000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.port=10000");
@@ -396,16 +403,18 @@ public class OrionHDFSSink extends OrionSink {
 
         if (hiveServerVersionNew != null && hiveServerVersionNew.length() > 0) {
             hiveServerVersion = hiveServerVersionNew;
+            
             if ((hiveServerVersion.equals("1")) || (hiveServerVersion.equals("2"))) {
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version=" + hiveServerVersion
-                    + ")");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version=" + hiveServerVersion + ")");
             } else {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
                     + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2");
             }  // if else
+            
         } else if (hiveServerVersionOld != null && hiveServerVersionOld.length() > 0) {
             hiveServerVersion = hiveServerVersionOld;
+            
             if (hiveServerVersion.equals("1") || hiveServerVersion.equals("2")) {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion
                     + ")"
@@ -416,6 +425,7 @@ public class OrionHDFSSink extends OrionSink {
                     + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2"
                     + " -- DEPRECATED, use hive.server_version instead");
             }  // if else
+            
         } else {
             hiveServerVersion = "2";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
@@ -439,7 +449,7 @@ public class OrionHDFSSink extends OrionSink {
         if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
             enableKrb5 = Boolean.valueOf(enableKrb5Str);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth="
-                + (enableKrb5 ? "true" : "false") + ")");
+                + enableKrb5Str + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (krb5_auth="
@@ -461,7 +471,7 @@ public class OrionHDFSSink extends OrionSink {
         if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
             serviceAsNamespace = Boolean.valueOf(serviceAsNamespaceStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
-                + (serviceAsNamespace ? "true" : "false") + ")");
+                + serviceAsNamespaceStr + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (service_as_namespace="

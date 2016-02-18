@@ -115,6 +115,7 @@ public class OrionMySQLSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", "3306");
         int intPort = Integer.parseInt(mysqlPort);
+        
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
@@ -122,6 +123,7 @@ public class OrionMySQLSink extends OrionSink {
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         }  // if else
+        
         mysqlUsername = context.getString("mysql_username", "opendata");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: mysqlPassword should be read as a SHA1 and decoded here

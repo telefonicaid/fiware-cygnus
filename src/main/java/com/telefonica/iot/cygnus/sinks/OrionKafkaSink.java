@@ -100,7 +100,7 @@ public class OrionKafkaSink extends OrionSink {
         if (partitions <= 0) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (partitions=" + partitions
-                    + ") -- Must be upper than 0");
+                    + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
         }
@@ -110,7 +110,7 @@ public class OrionKafkaSink extends OrionSink {
         if (replicationFactor <= 0) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor="
-                    + replicationFactor + ") -- Must be upper than 0");
+                    + replicationFactor + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor=" + replicationFactor + ")");
         }
