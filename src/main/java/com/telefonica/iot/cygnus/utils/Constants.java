@@ -77,7 +77,7 @@ public final class Constants {
     public static final String PARAM_EVENTS_TTL           = "events_ttl";
     
     // OrionSTHSink specific headers
-    public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 120;
+    public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 113;
     public static final int STH_MIN_HASH_SIZE_IN_BYTES      = 20;
     
     // OrionDynamoDB specific headers

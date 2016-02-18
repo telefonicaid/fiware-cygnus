@@ -209,16 +209,17 @@ NOTES:
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
-| enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported |
-| mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-| mongo_username | no | <i>empty</i> | If empty, no authentication is done |
-| mongo_password | no | <i>empty</i> | If empty, no authentication is done |
-| should_hash | no | false | true for collection names based on a hash, false for human redable collections |
-| db_prefix | no | sth_ |
-| collection_prefix | no | sth_ |
-| batch_size | no | 1 | Number of events accumulated before persistence |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
+| mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
+| mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
+| mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
+| should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
+| db_prefix | no | sth_ ||
+| collection_prefix | no | sth_ ||
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `_id.origin` property. Set to 0 if not wanting this policy. |
 
 A configuration example could be:
 
@@ -237,6 +238,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.should_hash = false
     cygnusagent.sinks.sth-sink.batch_size = 100
     cygnusagent.sinks.sth-sink.batch_timeout = 30
+    cygnusagent.sinks.sth-sink.data_expiration = 0
 
 [Top](#top)
 

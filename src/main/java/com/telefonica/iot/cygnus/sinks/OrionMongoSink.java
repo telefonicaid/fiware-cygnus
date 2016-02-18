@@ -33,6 +33,9 @@ import org.apache.flume.Context;
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
+    
+    private long collectionsSize;
+    private long maxDocuments;
 
     private boolean rowAttrPersistence;
     
@@ -42,6 +45,18 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     public OrionMongoSink() {
         super();
     } // OrionMongoSink
+    
+    @Override
+    public void configure(Context context) {
+        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + (rowAttrPersistence ? "row" : "column") + ")");
+        collectionsSize = context.getLong("collections_size", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        maxDocuments = context.getLong("max_documents", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        super.configure(context);
+    } // configure
 
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -71,15 +86,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-    
-    @Override
-    public void configure (Context context) {
-        this.rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (this.rowAttrPersistence ? "row" : "column") + ")");
-        super.configure(context);
-    } // configure
-    
+
     /**
      * Class for aggregating batches.
      */
@@ -277,7 +284,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName);
+        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
         backend.insertContextDataRaw(dbName, collectionName, aggregation);
     } // persistAggregation
 
