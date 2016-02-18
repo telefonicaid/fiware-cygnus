@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.interceptors;
 
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -99,25 +100,58 @@ public class GroupingRule {
     } // getNewFiwareServicePath
     
     /**
-     * Checks if the given Json is valid as grouping rules.
+     * Checks if the given Json is valid as grouping rule.
      * @param jsonRule
+     * @param checkExtraFields
      * @return True if the given Json is valid as grouping rule, otherwise false
      */
-    public static int isValid(JSONObject jsonRule) {
+    public static int isValid(JSONObject jsonRule, boolean checkExtraFields) {
+        boolean containsFields = false;
+        boolean containsRegex = false;
+        boolean containsDestination = false;
+        boolean containsFiwareServicePath = false;
+        boolean containsExtraFields = false;
+        int fieldsSize = 0;
+        int regexLength = 0;
+        int destinationLength = 0;
+        int fiwareServicePathLength = 0;
+        
+        // iterate on the fields
+        Iterator it = jsonRule.keySet().iterator();
+        
+        while (it.hasNext()) {
+            String field = (String) it.next();
+            
+            if (field.equals("fields")) {
+                containsFields = true;
+                fieldsSize = ((JSONArray) jsonRule.get("fields")).size();
+            } else if (field.equals("regex")) {
+                containsRegex = true;
+                regexLength = ((String) jsonRule.get("regex")).length();
+            } else if (field.equals("destination")) {
+                containsDestination = true;
+                destinationLength = ((String) jsonRule.get("destination")).length();
+            } else if (field.equals("fiware_service_path")) {
+                containsFiwareServicePath = true;
+                fiwareServicePathLength = ((String) jsonRule.get("fiware_service_path")).length();
+            } else {
+                containsExtraFields = true;
+            } // if else
+        } // while
+        
         // check if the rule contains all the required fields
-        if (!jsonRule.containsKey("fields")
-                || !jsonRule.containsKey("regex")
-                || !jsonRule.containsKey("destination")
-                || !jsonRule.containsKey("fiware_service_path")) {
+        if (!containsFields || !containsRegex || !containsDestination || !containsFiwareServicePath) {
             return 1;
         } // if
-
+        
         // check if the rule has any empty field
-        if (((JSONArray) jsonRule.get("fields")).size() == 0
-                || ((String) jsonRule.get("regex")).length() == 0
-                || ((String) jsonRule.get("destination")).length() == 0
-                || ((String) jsonRule.get("fiware_service_path")).length() == 0) {
+        if (fieldsSize == 0 || regexLength == 0 || destinationLength == 0 || fiwareServicePathLength == 0) {
             return 2;
+        } // if
+        
+        // check if the rule has extra fields not allowed
+        if (checkExtraFields && containsExtraFields) {
+            return 3;
         } // if
 
         return 0;
