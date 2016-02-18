@@ -54,7 +54,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     public void configure(Context context) {
         collectionsSize = context.getLong("collections_size", 0L);
         
-        if (collectionsSize < 4096) {
+        if ((collectionsSize > 0) && (collectionsSize < 4096)) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (collections_size="
                     + collectionsSize + ") -- Must be greater than or equal to 4096");
