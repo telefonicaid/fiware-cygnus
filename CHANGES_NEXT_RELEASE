@@ -18,4 +18,6 @@
 - [HARDENING] Invalidate the sink if the data_model parameter is wrong (and prepare the code for further parameter checks) (#718)
 - [HARDENING] Check for input parameters validity (#752)
 - [BUG] Fix the generalized Hive-like encoding style used in OrionHDFSSink (#781)
+- [FEATURE] Add time and size-based data management policies to collections in OrionMongoSink and OrionSTHSink (#484)
 - [HARDENING] Relocate attr_persistence check from OrionMongoBaseSink to OrionMongoSink (#793)
+- [BUG] Fix recvTime in OrionMongoSink (#796)

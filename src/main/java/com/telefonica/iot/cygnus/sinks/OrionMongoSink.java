@@ -33,6 +33,9 @@ import org.apache.flume.Context;
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
+    
+    private long collectionsSize;
+    private long maxDocuments;
 
     private boolean rowAttrPersistence;
     
@@ -42,6 +45,28 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     public OrionMongoSink() {
         super();
     } // OrionMongoSink
+    
+    @Override
+    public void configure(Context context) {
+        collectionsSize = context.getLong("collections_size", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        maxDocuments = context.getLong("max_documents", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        
+        String attrPersistenceStr = context.getString("attr_persistence");
+        
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") must be 'row' or 'column'");
+        }  // if else
+        
+        super.configure(context);
+    } // configure
 
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -71,23 +96,6 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-    
-    @Override
-    public void configure (Context context) {
-        String attrPersistenceStr = context.getString("attr_persistence");
-        
-        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
-            this.rowAttrPersistence = attrPersistenceStr.equals("row");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + attrPersistenceStr + ")");
-        } else {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + attrPersistenceStr + ") must be 'row' or 'column'");
-        }  // if else
-        
-        super.configure(context);
-    } // configure
     
     /**
      * Class for aggregating batches.
@@ -178,7 +186,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
         
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -252,7 +260,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         } // aggregate
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
 
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -286,7 +294,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName);
+        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
         backend.insertContextDataRaw(dbName, collectionName, aggregation);
     } // persistAggregation
 
