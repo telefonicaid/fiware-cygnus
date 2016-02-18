@@ -357,7 +357,7 @@ public class CKANCache extends HttpBackend {
             // put the package in the tree and in the packages map
             String pkgId = pkg.get("id").toString();
             tree.get(orgName).put(pkgName, new ArrayList<String>());
-            pkgMap.put(pkgName, pkgId);
+            this.setPkgId(orgName, pkgName, pkgId);
             LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + " -> pkgName/pkgId=" + pkgName
                     + "/" + pkgId + ")");
             
@@ -405,7 +405,7 @@ public class CKANCache extends HttpBackend {
             } // if
             
             tree.get(orgName).get(pkgName).add(resourceName);
-            resMap.put(resourceName, resourceId);
+            this.setResId(orgName, pkgName, resourceName, resourceId);
             LOGGER.debug("Resource found in CKAN, now cached (orgName=" + orgName + " -> pkgName=" + pkgName
                     + " -> " + "resourceName/resourceId=" + resourceName + "/" + resourceId + ")");
         } // while
