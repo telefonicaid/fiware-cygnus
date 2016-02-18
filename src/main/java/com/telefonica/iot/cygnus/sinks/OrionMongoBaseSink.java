@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -41,6 +41,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected String collectionPrefix;
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
+    protected long dataExpiration;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -113,6 +114,8 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         shouldHash = context.getBoolean("should_hash", false);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash=" + shouldHash + ")");
+        dataExpiration = context.getLong("data_expiration", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiraton=" + dataExpiration + ")");
         super.configure(context);
     } // configure
     

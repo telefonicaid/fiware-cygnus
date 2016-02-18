@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -24,6 +24,8 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 /**
@@ -85,16 +88,19 @@ public class MongoBackendImpl implements MongoBackend {
     } // createDatabase
     
     /**
-     * Creates a collection, given its name, if not exists in the given database.
+     * Creates a collection for STH, given its name, if not exists in the given database. Time-based limits are set,
+     * if possible.
      * @param dbName
      * @param collectionName
+     * @param dataExpiration
      * @throws Exception
      */
     @Override
-    public void createCollection(String dbName, String collectionName) throws Exception {
+    public void createCollection(String dbName, String collectionName, long dataExpiration) throws Exception {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
+        // create the collection
         try {
             db.createCollection(collectionName);
         } catch (Exception e) {
@@ -103,6 +109,65 @@ public class MongoBackendImpl implements MongoBackend {
             } else {
                 throw e;
             } // if else
+        } // try catch
+        
+        // ensure the _id.origin index, if possible
+        try {
+            if (dataExpiration != 0) {
+                BasicDBObject keys = new BasicDBObject().append("_id.origin", 1);
+                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                db.getCollection(collectionName).createIndex(keys, options);
+            } // if
+        } catch (Exception e) {
+            throw e;
+        } // try catch
+    } // createCollection
+    
+    /**
+     * Creates a collection for plain MongoDB, given its name, if not exists in the given database. Size-based limits
+     * are set, if possible. Time-based limits are also set, if possible.
+     * @param dbName
+     * @param collectionName
+     * @param collectionsSize
+     * @param maxDocuments
+     * @throws Exception
+     */
+    @Override
+    public void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
+            long dataExpiration) throws Exception {
+        MongoDatabase db = getDatabase(dbName);
+
+        // create the collection, with size-based limits if possible
+        try {
+            if (collectionsSize != 0 && maxDocuments != 0) {
+                CreateCollectionOptions options = new CreateCollectionOptions()
+                        .capped(true)
+                        .sizeInBytes(collectionsSize)
+                        .maxDocuments(maxDocuments);
+                LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName + " with "
+                        + "collections_size=" + collectionsSize + " and max_documents=" + maxDocuments + " options");
+                db.createCollection(collectionName, options);
+            } else {
+                LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
+                db.createCollection(collectionName);
+            } // if else
+        } catch (Exception e) {
+            if (e.getMessage().contains("collection already exists")) {
+                LOGGER.debug("Collection already exists, nothing to create");
+            } else {
+                throw e;
+            } // if else
+        } // try catch
+
+        // ensure the recvTime index, if possible
+        try {
+            if (dataExpiration != 0) {
+                BasicDBObject keys = new BasicDBObject().append("recvTime", 1);
+                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                db.getCollection(collectionName).createIndex(keys, options);
+            } // if
+        } catch (Exception e) {
+            throw e;
         } // try catch
     } // createCollection
     

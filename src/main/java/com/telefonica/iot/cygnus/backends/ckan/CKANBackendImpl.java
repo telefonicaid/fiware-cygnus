@@ -333,7 +333,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                     + "\", \"fields\": [ "
                     + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
                     + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
-                    + "{ \"id\": \"" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ENTITY_ID + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ENTITY_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"

@@ -87,7 +87,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         if (dataModel == DataModel.DMBYSERVICEPATH) {
             collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
                     fiwareService) + ".aggr";
-            backend.createCollection(dbName, collectionName);
+            backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
         String entityId = contextElement.getId();
@@ -99,7 +99,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         if (dataModel == DataModel.DMBYENTITY) {
             collectionName = buildCollectionName(dbName, fiwareServicePath, destination, null, true,
                     entityId, entityType, fiwareService) + ".aggr";
-            backend.createCollection(dbName, collectionName);
+            backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
         // iterate on all this entity's attributes, if there are attributes
@@ -143,7 +143,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             if (dataModel == DataModel.DMBYATTRIBUTE) {
                 collectionName = buildCollectionName(dbName, fiwareServicePath, destination, attrName,
                         true, entityId, entityType, fiwareService) + ".aggr";
-                backend.createCollection(dbName, collectionName);
+                backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 
             // insert the data
