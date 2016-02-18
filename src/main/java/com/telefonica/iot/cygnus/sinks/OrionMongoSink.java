@@ -46,6 +46,10 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         super();
     } // OrionMongoSink
     
+    public boolean getRowAttrPersistence() {
+        return rowAttrPersistence;
+    }
+    
     @Override
     public void configure(Context context) {
         collectionsSize = context.getLong("collections_size", 0L);

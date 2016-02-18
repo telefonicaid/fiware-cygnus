@@ -493,13 +493,13 @@ public class OrionHDFSSinkTest {
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
+        context.put("hive", enableHive);
         
         if (useDeprecatedParams) {
             context.put("hive_server_version", hiveServerVersion);
             context.put("hive_host", hiveHost);
             context.put("hive_port", hivePort);
         } else {
-            context.put("hive", enableHive);
             context.put("hive.server_version", hiveServerVersion);
             context.put("hive.host", hiveHost);
             context.put("hive.port", hivePort);
