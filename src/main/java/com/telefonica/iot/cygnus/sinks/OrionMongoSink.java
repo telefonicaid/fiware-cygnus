@@ -49,9 +49,24 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     @Override
     public void configure(Context context) {
         collectionsSize = context.getLong("collections_size", 0L);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        
+        if (collectionsSize <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collections_size="
+                    + collectionsSize + ") -- Must be greater than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        }  // if else
+       
         maxDocuments = context.getLong("max_documents", 0L);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        
+        if (maxDocuments <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (max_documents="
+                    + maxDocuments + ") -- Must be greater than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        }  // if else
         
         String attrPersistenceStr = context.getString("attr_persistence");
         

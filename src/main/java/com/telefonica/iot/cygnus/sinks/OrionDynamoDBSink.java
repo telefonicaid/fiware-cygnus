@@ -92,7 +92,7 @@ public class OrionDynamoDBSink extends OrionSink {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (region="
                     + regionStr + ") -- Must be 'us-east-1', 'us-west-1', 'us-west-2',  'eu-west-1', 'eu-central-1', "
-                    + "'ap-northeast-1', 'ap-northeast1', 'ap-shouteast-1', 'ap-shouteast-2', 'sa-east-1'");
+                    + "'ap-northeast-1', 'ap-northeast1', 'ap-shouteast-1', 'ap-shouteast-2' or 'sa-east-1'");
         } // catch
         
         String attrPersistRowStr = context.getString("attr_persistence");
