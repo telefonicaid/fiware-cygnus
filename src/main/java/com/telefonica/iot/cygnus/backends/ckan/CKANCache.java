@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -71,20 +71,23 @@ public class CKANCache extends HttpBackend {
     
     /**
      * Gets the package id, given its name.
+     * @param orgName
      * @param pkgName
      * @return
      */
-    public String getPkgId(String pkgName) {
-        return pkgMap.get(pkgName);
+    public String getPkgId(String orgName, String pkgName) {
+        return pkgMap.get(orgName + "_" + pkgName);
     } // getPkgId
 
     /**
      * Gets the resource id, given its name.
+     * @param orgName
+     * @param pkgName
      * @param resName
      * @return
      */
-    public String getResId(String resName) {
-        return resMap.get(resName);
+    public String getResId(String orgName, String pkgName, String resName) {
+        return resMap.get(orgName + "_" + pkgName + "_" + resName);
     } // getResId
 
     /**
@@ -98,20 +101,23 @@ public class CKANCache extends HttpBackend {
     
     /**
      * Sets the package id, given its name.
+     * @param orgName
      * @param pkgName Package name
      * @param pkgId Package id
      */
-    public void setPkgId(String pkgName, String pkgId) {
-        pkgMap.put(pkgName, pkgId);
+    public void setPkgId(String orgName, String pkgName, String pkgId) {
+        pkgMap.put(orgName + "_" + pkgName, pkgId);
     } // setPkgId
 
     /**
      * Sets the resource id, given its name.
+     * @param orgName
+     * @param pkgName
      * @param resName Resource name
      * @param resId Resource id
      */
-    public void setResId(String resName, String resId) {
-        resMap.put(resName, resId);
+    public void setResId(String orgName, String pkgName, String resName, String resId) {
+        resMap.put(orgName + "_" + pkgName + "_" + resName, resId);
     } // setResId
     
     /**
