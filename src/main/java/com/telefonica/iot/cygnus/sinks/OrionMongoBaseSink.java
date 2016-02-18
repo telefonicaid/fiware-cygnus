@@ -125,7 +125,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                 + shouldHashStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
-        dataExpiration = context.getLong("data_expiration");
+        dataExpiration = context.getLong("data_expiration", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
         
         super.configure(context);
