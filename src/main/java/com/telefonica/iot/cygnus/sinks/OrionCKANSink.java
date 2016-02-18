@@ -15,7 +15,7 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
- 
+
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import org.apache.flume.Context;
 
 /**
- * 
+ *
  * @author fermin
  *
  * CKAN sink for Orion Context Broker.
@@ -45,7 +45,7 @@ public class OrionCKANSink extends OrionSink {
     private boolean rowAttrPersistence;
     private boolean ssl;
     private CKANBackend persistenceBackend;
-    
+
     /**
      * Constructor.
      */
@@ -68,7 +68,7 @@ public class OrionCKANSink extends OrionSink {
     protected String getCKANPort() {
         return ckanPort;
     } // getCKANPort
-    
+
     /**
      * Gets the CKAN API key. It is protected due to it is only required for testing purposes.
      * @return The CKAN API key
@@ -93,7 +93,7 @@ public class OrionCKANSink extends OrionSink {
     protected CKANBackend getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
-    
+
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
@@ -101,7 +101,7 @@ public class OrionCKANSink extends OrionSink {
     protected void setPersistenceBackend(CKANBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
-    
+
     /**
      * Gets if the connections with CKAN is SSL-enabled. It is protected due to it is only required for testing
      * purposes.
@@ -110,7 +110,7 @@ public class OrionCKANSink extends OrionSink {
     protected boolean getSSL() {
         return this.ssl;
     } // getSSL
-    
+
     @Override
     public void configure(Context context) {
         apiKey = context.getString("api_key", "nokey");
@@ -118,15 +118,42 @@ public class OrionCKANSink extends OrionSink {
         ckanHost = context.getString("ckan_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
         ckanPort = context.getString("ckan_port", "80");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
+        int intPort = Integer.parseInt(ckanPort);
+
+        if ((intPort <= 0) || (intPort > 65535)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ckan_port=" + ckanPort + ")"
+                    + " -- Must be between 0 and 65535");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
+        }  // if else
+
         orionUrl = context.getString("orion_url", "http://localhost:1026");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence=" + rowAttrPersistence
-                + ")");
-        ssl = context.getBoolean("ssl", false);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + (ssl ? "true" : "false") + ")");
-        super.configure(context);
+        String attrPersistenceStr = context.getString("attr_persistence");
+
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") -- Must be 'row' or 'column'");
+        }  // if else
+
+        String sslStr = context.getString("ssl");
+        
+        if (sslStr.equals("true") || sslStr.equals("false")) {
+            ssl = Boolean.valueOf(sslStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl="
+                + sslStr + ")");
+        } else  {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
+                + sslStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
     } // configure
@@ -143,14 +170,14 @@ public class OrionCKANSink extends OrionSink {
 
         super.start();
     } // start
-    
+
     @Override
     void persistBatch(Batch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
- 
+
         // iterate on the destinations, for each one a single create / append will be performed
         for (String destination : batch.getDestinations()) {
             LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
@@ -158,7 +185,7 @@ public class OrionCKANSink extends OrionSink {
 
             // get the sub-batch for this destination
             ArrayList<CygnusEvent> subBatch = batch.getEvents(destination);
-            
+
             // get an aggregator for this destination and initialize it
             CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
             aggregator.initialize(subBatch.get(0));
@@ -166,18 +193,18 @@ public class OrionCKANSink extends OrionSink {
             for (CygnusEvent cygnusEvent : subBatch) {
                 aggregator.aggregate(cygnusEvent);
             } // for
-            
+
             // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-    
+
     /**
      * Class for aggregating fieldValues.
      */
     private abstract class CKANAggregator {
-        
+
         // string containing the data records
         protected String records;
 
@@ -188,27 +215,27 @@ public class OrionCKANSink extends OrionSink {
         protected String pkgName;
         protected String resName;
         protected String resId;
-        
+
         public CKANAggregator() {
             records = "";
         } // CKANAggregator
-        
+
         public String getAggregation() {
             return records;
         } // getAggregation
-        
+
         public String getOrgName() {
             return orgName;
         } // getOrgName
-        
+
         public String getPkgName() {
             return pkgName;
         } // getPkgName
-        
+
         public String getResName() {
             return resName;
         } // getResName
-        
+
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
@@ -217,21 +244,21 @@ public class OrionCKANSink extends OrionSink {
             pkgName = buildPkgName(service, servicePath);
             resName = buildResName(destination);
         } // initialize
-        
+
         public abstract void aggregate(CygnusEvent cygnusEvent) throws Exception;
-        
+
     } // CKANAggregator
-    
+
     /**
      * Class for aggregating batches in row mode.
      */
     private class RowAggregator extends CKANAggregator {
-        
+
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
         } // initialize
-        
+
         @Override
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
@@ -244,7 +271,7 @@ public class OrionCKANSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -253,7 +280,7 @@ public class OrionCKANSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -261,7 +288,7 @@ public class OrionCKANSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
+
                 // create a column and aggregate it
                 String record = "{\"" + Constants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
                     + "\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
@@ -271,7 +298,7 @@ public class OrionCKANSink extends OrionSink {
                     + "\"" + Constants.ATTR_NAME + "\": \"" + attrName + "\","
                     + "\"" + Constants.ATTR_TYPE + "\": \"" + attrType + "\","
                     + "\"" + Constants.ATTR_VALUE + "\": " + attrValue;
-                
+
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
                 if (!attrMetadata.equals(Constants.EMPTY_MD)) {
@@ -289,7 +316,7 @@ public class OrionCKANSink extends OrionSink {
         } // aggregate
 
     } // RowAggregator
-    
+
     /**
      * Class for aggregating batches in column mode.
      */
@@ -299,7 +326,7 @@ public class OrionCKANSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
         } // initialize
-        
+
         @Override
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
@@ -312,7 +339,7 @@ public class OrionCKANSink extends OrionSink {
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
-            
+
             // iterate on all this context element attributes, if there are attributes
             ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
 
@@ -321,12 +348,12 @@ public class OrionCKANSink extends OrionSink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
             String record = "{\"" + Constants.RECV_TIME + "\": \"" + recvTime + "\","
                     + "\"" + Constants.FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
                     + "\"" + Constants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + Constants.ENTITY_TYPE + "\": \"" + entityType + "\"";
-            
+
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -334,17 +361,17 @@ public class OrionCKANSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
+
                 // create part of the column with the current attribute (a.k.a. a column)
                 record += ",\"" + attrName + "\": " + attrValue;
-                
+
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
                 if (!attrMetadata.equals(Constants.EMPTY_MD)) {
                     record += ",\"" + attrName + "_md\": " + attrMetadata;
                 } // if
             } // for
-            
+
             // now, aggregate the column
             if (records.isEmpty()) {
                 records += record + "}";
@@ -352,9 +379,9 @@ public class OrionCKANSink extends OrionSink {
                 records += "," + record + "}";
             } // if else
         } // aggregate
-        
+
     } // ColumnAggregator
-    
+
     private CKANAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
@@ -362,23 +389,23 @@ public class OrionCKANSink extends OrionSink {
             return new ColumnAggregator();
         } // if else
     } // getAggregator
-    
+
     private void persistAggregation(CKANAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String orgName = aggregator.getOrgName();
         String pkgName = aggregator.getPkgName();
         String resName = aggregator.getResName();
-        
+
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
-        
+
         if (aggregator instanceof RowAggregator) {
             persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
         } else {
             persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
         } // if else
     } // persistAggregation
-    
+
     /**
      * Builds an organization name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
@@ -387,15 +414,15 @@ public class OrionCKANSink extends OrionSink {
      */
     private String buildOrgName(String fiwareService) throws Exception {
         String orgName = fiwareService;
-        
+
         if (orgName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
                     + "greater than " + Constants.MAX_NAME_LEN);
         } // if
-        
+
         return orgName;
     } // buildOrgName
-    
+
     /**
      * Builds a package name given a fiwareService and a fiwareServicePath. It throws an exception if the naming
      * conventions are violated.
@@ -406,18 +433,18 @@ public class OrionCKANSink extends OrionSink {
      */
     private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
         String pkgName;
-        
+
         if (fiwareServicePath.length() == 0) {
             pkgName = fiwareService;
         } else {
             pkgName = fiwareService + "_" + fiwareServicePath;
         } // if else
-        
+
         if (pkgName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
                     + ") and its length is greater than " + Constants.MAX_NAME_LEN);
         } // if
-        
+
         return pkgName;
     } // buildPkgName
 
@@ -429,7 +456,7 @@ public class OrionCKANSink extends OrionSink {
      */
     private String buildResName(String destination) throws Exception {
         String resName = destination;
-        
+
         if (resName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
                     + "than " + Constants.MAX_NAME_LEN);
@@ -437,5 +464,5 @@ public class OrionCKANSink extends OrionSink {
 
         return resName;
     } // buildResName
-    
+
 } // OrionCKANSink

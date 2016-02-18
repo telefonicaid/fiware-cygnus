@@ -441,6 +441,7 @@ public class OrionKafkaSinkTest {
     
     private Context createContext(String dataModel) {
         Context context = new Context();
+        context.put("enable_grouping", "true");
         context.put("data_model", dataModel);
         context.put("broker_list", brokerList);
         context.put("zookeeper_endpoint", zookeeperEndpoint);

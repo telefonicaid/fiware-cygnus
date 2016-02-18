@@ -55,6 +55,7 @@ public class OrionMongoSinkTest {
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
     private final String enableGrouping = "true";
+    private final String attrPersistence = "row";
     private final String dbName = "db-name";
     private final String collectionName = "collection-name";
     private final long recvTimeTs = 1429535775;
@@ -161,6 +162,7 @@ public class OrionMongoSinkTest {
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
         context.put("enable_grouping", enableGrouping);
+        context.put("attr_persistente", attrPersistence);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         

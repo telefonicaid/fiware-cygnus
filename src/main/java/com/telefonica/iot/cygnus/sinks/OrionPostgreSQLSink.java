@@ -123,7 +123,16 @@ public class OrionPostgreSQLSink extends OrionSink {
         postgresqlHost = context.getString("postgresql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
         postgresqlPort = context.getString("postgresql_port", "3306");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+        int intPort = Integer.parseInt(postgresqlPort);
+
+        if ((intPort <= 0) || (intPort > 65535)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
+                    + " -- Must be between 0 and 65535");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+        }  // if else
+
         postgresqlDatabase = context.getString("postgresql_database", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
         postgresqlUsername = context.getString("postgresql_username", "opendata");
@@ -132,8 +141,17 @@ public class OrionPostgreSQLSink extends OrionSink {
         postgresqlPassword = context.getString("postgresql_password", "unknown");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
+        String persistence = context.getString("attr_persistence");
+
+        if (persistence.equals("row") || persistence.equals("column")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + persistence + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + persistence + ") -- Must be 'row' or 'column'");
+        }  // if else
+
         super.configure(context);
     } // configure
 
@@ -147,7 +165,7 @@ public class OrionPostgreSQLSink extends OrionSink {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
         } // try catch
-        
+
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start

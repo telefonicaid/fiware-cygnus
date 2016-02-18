@@ -48,6 +48,9 @@ public class OrionMongoBaseSinkTest {
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
     private final String enableGrouping = "true";
+    private final String attrPersistence = "row";
+    private final String shouldHash = "true";
+    private final String dataExpiration = "0";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -69,6 +72,9 @@ public class OrionMongoBaseSinkTest {
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
         context.put("enable_grouping", enableGrouping);
+        context.put("attr_persistence", attrPersistence);
+        context.put("should_hash", shouldHash);
+        context.put("data_expiration", dataExpiration);
     } // setUp
     
     /**
@@ -85,6 +91,7 @@ public class OrionMongoBaseSinkTest {
         assertEquals(dbPrefix, sink.getDbPrefix());
         assertEquals(collectionPrefix, sink.getCollectionPrefix());
         assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
+        assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
     } // testConfigure
 
     /**

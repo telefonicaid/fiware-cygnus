@@ -46,15 +46,37 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         super();
     } // OrionMongoSink
     
+    public boolean getRowAttrPersistence() {
+        return rowAttrPersistence;
+    }
+    
     @Override
     public void configure(Context context) {
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
         collectionsSize = context.getLong("collections_size", 0L);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        
+        if (collectionsSize < 4096) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collections_size="
+                    + collectionsSize + ") -- Must be greater than or equal to 4096");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        }  // if else
+       
         maxDocuments = context.getLong("max_documents", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        
+        String attrPersistenceStr = context.getString("attr_persistence");
+        
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") must be 'row' or 'column'");
+        }  // if else
+        
         super.configure(context);
     } // configure
 
@@ -86,7 +108,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-
+    
     /**
      * Class for aggregating batches.
      */
