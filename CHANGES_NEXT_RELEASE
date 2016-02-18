@@ -22,4 +22,3 @@
 - [HARDENING] Relocate attr_persistence check from OrionMongoBaseSink to OrionMongoSink (#793)
 - [BUG] Fix recvTime in OrionMongoSink (#796)
 - [BUG] Fix fiware service path field in OrionCKANSink, row mode (#800)
-- [BUG] Fix input value for collection_size and initialization for data_expiration in OrionMongoSink and OrionMongoBaseSink (#803)
