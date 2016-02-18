@@ -320,6 +320,7 @@ public class OrionHDFSSink extends OrionSink {
             } // catch
             
         } else if (rowAttrPersistenceConfigured) {
+            
             if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
                 boolean rowAttrPersistence = attrPersistenceStr.equals("row");
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
