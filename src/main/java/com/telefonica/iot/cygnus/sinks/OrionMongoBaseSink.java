@@ -126,14 +126,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         }  // if else
 
         dataExpiration = context.getLong("data_expiration");
-        
-        if (dataExpiration <= 0) {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (data_expiration="
-                    + dataExpiration + ") -- Must be greater than 0");
-        } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
-        }  // if else
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
         
         super.configure(context);
     } // configure
