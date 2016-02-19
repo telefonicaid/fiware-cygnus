@@ -23,3 +23,4 @@
 - [BUG] Fix recvTime in OrionMongoSink (#796)
 - [BUG] Fix the OrionCKANSink cache when to resources in different packages have the same name (#643)
 - [BUG] Fix fiware service path field in OrionCKANSink, row mode (#800)
+- [BUG] Fix the batching mechanism when two entities belonging the same service or service path have the same destination (#806)

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -517,9 +517,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
-                    String servicePath = notifiedServicePaths[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, destination, servicePath, null, null,
+                            recvTimeTs, destination, notifiedServicePaths[i], null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -527,9 +526,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < groupedServicePaths.length; i++) {
-                    String servicePath = groupedServicePaths[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, destination, servicePath, null, null,
+                            recvTimeTs, destination, groupedServicePaths[i], null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -544,9 +542,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
-                    String destination = notifiedServicePaths[i];
+                    String destination = service + "_" + notifiedServicePaths[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, destination, null, null,
+                            recvTimeTs, service, notifiedServicePaths[i], null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -554,9 +552,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] groupedServicePaths = headers.get(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
 
                 for (int i = 0; i < groupedServicePaths.length; i++) {
-                    String destination = groupedServicePaths[i];
+                    String destination = service + "_" + groupedServicePaths[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, destination, null, null,
+                            recvTimeTs, service, groupedServicePaths[i], null, null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -572,9 +570,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] notifiedEntities = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
 
                 for (int i = 0; i < notifiedEntities.length; i++) {
-                    String destination = notifiedEntities[i];
+                    String destination = service + "_" + notifiedServicePaths[i] + "_" + notifiedEntities[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, notifiedServicePaths[i], destination, null,
+                            recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i], null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -583,9 +581,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 String[] groupedEntities = headers.get(Constants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
 
                 for (int i = 0; i < groupedEntities.length; i++) {
-                    String destination = groupedEntities[i];
+                    String destination = service + "_" + groupedServicePaths[i] + "_" + groupedEntities[i];
                     CygnusEvent cygnusEvent = new CygnusEvent(
-                            recvTimeTs, service, groupedServicePaths[i], destination, null,
+                            recvTimeTs, service, groupedServicePaths[i], groupedEntities[i], null,
                             notification.getContextResponses().get(i).getContextElement());
                     batch.addEvent(destination, cygnusEvent);
                 } // for
@@ -606,10 +604,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
 
                     for (ContextAttribute attr : attrs) {
-                        String destination = attr.getName();
+                        String destination = service + "_" + notifiedServicePaths[i] + "_" + notifiedEntities[i]
+                                + "_" + attr.getName();
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
-                                destination, contextElement.filter(destination));
+                                attr.getName(), contextElement.filter(destination));
                         batch.addEvent(destination, cygnusEvent);
                     } // for
                 } // for
@@ -622,10 +621,11 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
 
                     for (ContextAttribute attr : attrs) {
-                        String destination = attr.getName();
+                        String destination = service + "_" + groupedServicePaths[i] + "_" + groupedEntities[i]
+                                + "_" + attr.getName();
                         CygnusEvent cygnusEvent = new CygnusEvent(
                                 recvTimeTs, service, groupedServicePaths[i], groupedEntities[i],
-                                destination, contextElement);
+                                attr.getName(), contextElement);
                         batch.addEvent(destination, cygnusEvent);
                     } // for
                 } // for
