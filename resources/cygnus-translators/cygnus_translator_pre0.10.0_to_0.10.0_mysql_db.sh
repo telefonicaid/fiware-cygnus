@@ -45,21 +45,17 @@ fi
 # Function to translate a row-like table
 # $1 --> table to be translated (input)
 function translate_table_row {
-        local table=$1
         mysql -u $user -p$password -e "use $database;alter table $table add fiwareServicePath text default null after recvTime"
 }
 
 # Function to translate a column-like table
-# $1 --> table to be translated (input)
 function translate_table_column {
-        local table=$1
         mysql -u $user -p$password -e "use $database;alter table $table add fiwareServicePath text default null after recvTime"
         mysql -u $user -p$password -e "use $database;alter table $table add entityId text default null after fiwareServicePath"
         mysql -u $user -p$password -e "use $database;alter table $table add entityType text default null after entityId"
 }
 
 # Function to translate a database
-# $1 --> database to be translated (input)
 function translate_database {
         local dbName=$1
 
