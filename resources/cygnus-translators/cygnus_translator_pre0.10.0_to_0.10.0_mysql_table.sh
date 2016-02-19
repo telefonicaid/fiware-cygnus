@@ -1,4 +1,4 @@
- #! /bin/bash
+#! /bin/bash
 #
 # Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
 #
@@ -45,16 +45,12 @@ if [ "$null_value" == "empty" ]; then
 fi
 
 # Function to translate a row-like table
-# $1 --> table to be translated (input)
 function translate_table_row {
-        local table=$1
         mysql -u $user -p$password -e "use $database;alter table $table add fiwareServicePath text default null after recvTime"
 }
 
 # Function to translate a column-like table
-# $1 --> table to be translated (input)
 function translate_table_column {
-#        local table=$1
         mysql -u $user -p$password -e "use $database;alter table $table add fiwareServicePath varchar(255) default null after recvTime"
         mysql -u $user -p$password -e "use $database;alter table $table add entityId varchar(255) default null after fiwareServicePath"
         mysql -u $user -p$password -e "use $database;alter table $table add entityType varchar(255) default null after entityId"
@@ -68,9 +64,9 @@ if [ "$backup" == "yes" ]; then
 fi
 
 if [ "$tableFormat" == "row" ]; then
-   translate_table_row $table
+   translate_table_row 
 elif [ "$tableFormat" == "column" ]; then
-   translate_table_column $table
+   translate_table_column
 else
    echo "Unknown table format: $tableFormat"
 fi
