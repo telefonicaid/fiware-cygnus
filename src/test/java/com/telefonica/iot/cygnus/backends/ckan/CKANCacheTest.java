@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -75,8 +75,8 @@ public class CKANCacheTest {
 
         // set up the behaviour of the mocked classes
         when(orgMap.get(orgName)).thenReturn(orgId);
-        when(pkgMap.get(pkgName)).thenReturn(pkgId);
-        when(resMap.get(resName)).thenReturn(resId);
+        when(pkgMap.get(orgName + "_" + pkgName)).thenReturn(pkgId);
+        when(resMap.get(orgName + "_" + pkgName + "_" + resName)).thenReturn(resId);
         
         ArrayList<String> ress = new ArrayList<String>();
         ress.add(resName);
@@ -103,7 +103,7 @@ public class CKANCacheTest {
     public void testGetPkgId() {
         System.out.println("Testing CKANCache.getPkgId");
         cache.setPkgMap(pkgMap);
-        assertEquals(pkgId, cache.getPkgId(pkgName));
+        assertEquals(pkgId, cache.getPkgId(orgName, pkgName));
     } // testGetPkgId
     
     /**
@@ -113,7 +113,7 @@ public class CKANCacheTest {
     public void testGetResId() {
         System.out.println("Testing CKANCache.getResId");
         cache.setResMap(resMap);
-        assertEquals(resId, cache.getResId(resName));
+        assertEquals(resId, cache.getResId(orgName, pkgName, resName));
     } // testGetResId
     
     /**
@@ -132,8 +132,8 @@ public class CKANCacheTest {
     @Test
     public void testSetPkgId() {
         System.out.println("Testing CKANCache.setPkgId");
-        cache.setPkgId(pkgName, pkgId);
-        assertEquals(pkgId, cache.getPkgId(pkgName));
+        cache.setPkgId(orgName, pkgName, pkgId);
+        assertEquals(pkgId, cache.getPkgId(orgName, pkgName));
     } // testSetPkgId
     
     /**
@@ -142,8 +142,8 @@ public class CKANCacheTest {
     @Test
     public void testSetResId() {
         System.out.println("Testing CKANCache.setResId");
-        cache.setResId(resName, resId);
-        assertEquals(resId, cache.getResId(resName));
+        cache.setResId(orgName, pkgName, resName, resId);
+        assertEquals(resId, cache.getResId(orgName, pkgName, resName));
     } // testSetResId
     
     /**
