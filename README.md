@@ -172,7 +172,10 @@ Run the following `curl` in order to get the version (assuming Cygnus runs on `l
 
 ```
 $ curl -X GET "http://localhost:8081/v1/version"
-{"version":"0.12.0.56eb400c2c50a87e34d6985326fc2c6eb044955c"}
+{
+    "success": "true",
+    "version": "0.12.0_SNAPSHOT.52399574ea8503aa8038ad14850380d77529b550"
+}
 ```
 
 Run the following `curl` in order to get certain Flume components statistics (assuming Cygnus runs on `localhost`):
@@ -183,36 +186,39 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
                                  Dload  Upload   Total   Spent    Left  Speed
 100   489  100   489    0     0  81500      0 --:--:-- --:--:-- --:--:-- 97800
 {
-    "channels": [
-        {
-            "name": "mysql-channel",
-            "num_events": 0,
-            "num_puts_failed": 0,
-            "num_puts_ok": 11858,
-            "num_takes_failed": 1,
-            "num_takes_ok": 11858,
-            "setup_time": "2016-02-05T10:34:25.80Z",
-            "status": "START"
-        }
-    ],
-    "sinks": [
-        {
-            "name": "mysql-sink",
-            "num_persisted_events": 11800,
-            "num_processed_events": 11858,
-            "setup_time": "2016-02-05T10:34:24.978Z",
-            "status": "START"
-        }
-    ],
-    "sources": [
-        {
-            "name": "http-source",
-            "num_processed_events": 11858,
-            "num_received_events": 11858,
-            "setup_time": "2016-02-05T10:34:24.921Z",
-            "status": "START"
-        }
-    ]
+    "stats": {
+        "channels": [
+            {
+                "name": "mysql-channel",
+                "num_events": 0,
+                "num_puts_failed": 0,
+                "num_puts_ok": 11858,
+                "num_takes_failed": 1,
+                "num_takes_ok": 11858,
+                "setup_time": "2016-02-05T10:34:25.80Z",
+                "status": "START"
+            }
+        ],
+        "sinks": [
+            {
+                "name": "mysql-sink",
+                "num_persisted_events": 11800,
+                "num_processed_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.978Z",
+                "status": "START"
+            }
+        ],
+        "sources": [
+            {
+                "name": "http-source",
+                "num_processed_events": 11858,
+                "num_received_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.921Z",
+                "status": "START"
+            }
+        ]
+    },
+    "success": "true"
 }
 ```
 
