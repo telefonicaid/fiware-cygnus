@@ -18,7 +18,10 @@ GET http://<cygnus_host>:<management_port>/v1/version
 Response:
 
 ```
-{"version":"0.12.0.8a6c07054da894fc37ef30480cb091333e2fccfa"}
+{
+    "success": "true",
+    "version": "0.12.0_SNAPSHOT.52399574ea8503aa8038ad14850380d77529b550"
+}
 ```
 
 [Top](#top)
@@ -61,36 +64,39 @@ Response:
 
 ```
 {
-    "channels": [
-        {
-            "name": "mysql-channel",
-            "num_events": 0,
-            "num_puts_failed": 0,
-            "num_puts_ok": 11858,
-            "num_takes_failed": 1,
-            "num_takes_ok": 11858,
-            "setup_time": "2016-02-05T10:34:25.80Z",
-            "status": "START"
-        }
-    ],
-    "sinks": [
-        {
-            "name": "mysql-sink",
-            "num_persisted_events": 11800,
-            "num_processed_events": 11858,
-            "setup_time": "2016-02-05T10:34:24.978Z",
-            "status": "START"
-        }
-    ],
-    "sources": [
-        {
-            "name": "http-source",
-            "num_processed_events": 11858,
-            "num_received_events": 11858,
-            "setup_time": "2016-02-05T10:34:24.921Z",
-            "status": "START"
-        }
-    ]
+    "stats": {
+        "channels": [
+            {
+                "name": "mysql-channel",
+                "num_events": 0,
+                "num_puts_failed": 0,
+                "num_puts_ok": 11858,
+                "num_takes_failed": 1,
+                "num_takes_ok": 11858,
+                "setup_time": "2016-02-05T10:34:25.80Z",
+                "status": "START"
+            }
+        ],
+        "sinks": [
+            {
+                "name": "mysql-sink",
+                "num_persisted_events": 11800,
+                "num_processed_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.978Z",
+                "status": "START"
+            }
+        ],
+        "sources": [
+            {
+                "name": "http-source",
+                "num_processed_events": 11858,
+                "num_received_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.921Z",
+                "status": "START"
+            }
+        ]
+    },
+    "success": "true"
 }
 ```
 
@@ -126,7 +132,8 @@ Response:
             "id": 2,
             "regex": "Room"
         }
-    ]
+    ],
+    "success": "true"
 }
 ```
 

@@ -111,47 +111,47 @@ public class ManagementInterface extends AbstractHandler {
             } else if (uri.equals("/v1/groupingrules")) {
                 handleGetGroupingRules(response);
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else if (method.equals("POST")) {
             if (uri.equals("/v1/groupingrules")) {
                 handlePostGroupingRules(request, response);
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else if (method.equals("PUT")) {
             if (uri.equals("/v1/groupingrules")) {
                 handlePutGroupingRules(request, response);
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else if (method.equals("DELETE")) {
             if (uri.equals("/v1/groupingrules")) {
                 handleDeleteGroupingRules(request, response);
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().println("404 - " + method + " " + uri + " Not found");
+                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().println("404 - " + method + " " + uri + " Not found");
+            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+            response.getWriter().println(method + " " + uri + " Not implemented");
         } // if else
     } // handle
     
     private void handleGetVersion(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("{\"version\":\"" + Utils.getCygnusVersion()
+        response.getWriter().println("{\"success\":\"true\",\"version\":\"" + Utils.getCygnusVersion()
                 + "." + Utils.getLastCommit() + "\"}");
     } // handleGetVersion
 
     private void handleGetStats(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        String jsonStr = "{\"sources\":[";
+        String jsonStr = "{\"success\":\"true\",\"stats\":{\"sources\":[";
         boolean first = true;
 
         for (String key : sources.keySet()) {
@@ -278,7 +278,7 @@ public class ManagementInterface extends AbstractHandler {
             } // if else
         } // for
 
-        jsonStr += "]}";
+        jsonStr += "]}}";
         response.getWriter().println(jsonStr);
     } // handleGetStats
     
