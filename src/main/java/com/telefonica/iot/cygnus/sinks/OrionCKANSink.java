@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -153,6 +153,8 @@ public class OrionCKANSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
+        
+        super.configure(context);
         
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
