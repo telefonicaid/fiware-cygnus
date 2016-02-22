@@ -127,7 +127,7 @@ cygnusagent.sinks.hdfs-sink.csv_separator = ,
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.hdfs-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
 cygnusagent.sinks.hdfs-sink.hive = true
@@ -174,7 +174,7 @@ cygnusagent.sinks.ckan-sink.ssl = false
 cygnusagent.sinks.ckan-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.ckan-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.ckan-sink.batch_ttl = 10
 
 # ============================================
@@ -203,7 +203,7 @@ cygnusagent.sinks.postgresql-sink.data_model = by-service-path
 cygnusagent.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.postgresql-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.postgresql-sink.batch_ttl = 10
 
 # ============================================
@@ -230,7 +230,7 @@ cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 cygnusagent.sinks.mysql-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.mysql-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.mysql-sink.batch_ttl = 10
 
 # ============================================
@@ -261,7 +261,7 @@ cygnusagent.sinks.mongo-sink.attr_persistence = column
 cygnusagent.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.mongo-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.mongo-sink.batch_ttl = 10
 
 # ============================================
@@ -288,7 +288,7 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.sth-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.sth-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.sth-sink.batch_ttl = 10
 
 #=============================================
@@ -307,7 +307,7 @@ cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 cygnusagent.sinks.kafka-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.kafka-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.kafka-sink.batch_ttl = 10
 
 # ============================================
@@ -332,7 +332,7 @@ cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
 cygnusagent.sinks.dynamo-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.dynamo-sink.batch_timeout = 30
-# number of retries upon persitence error
+# number of retries upon persistence error
 cygnusagent.sinks.dynamo-sink.batch_ttl = 10
 
 #=============================================
