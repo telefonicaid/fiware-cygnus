@@ -191,7 +191,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
-            String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
+            String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
