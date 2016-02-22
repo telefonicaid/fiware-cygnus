@@ -183,37 +183,38 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
-| channel | yes | N/A |
-| enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured |
-| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>
-| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS |
-| hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run |
-| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred |
-| hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary) |
-| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary).<br>Still usable; if both are configured, `hdfs_port` is preferred |
-| hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser |
-| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred |
-| hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication |
-| oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication |
-| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser |
-| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>|
-| csv_separator | no | , | |
-| batch_size | no | 1 | Number of events accumulated before persistence |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
-| hive | no | true | <i>true</i> or <i>false</i> |
-| hive\_server\_version<br>(**deprecated**) | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2.<br>Still usable; if both are configured, `hive.server_version` is preferred |
-| hive.server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2 |
-| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred |
-| hive.host | no | localhost |
-| hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred |
-| hive.port | no | 10000 |
+| channel | yes | N/A ||
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
+| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
+| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred. |
+| hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
+| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary).<br>Still usable; if both are configured, `hdfs_port` is preferred. |
+| hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
+| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred. |
+| hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication. |
+| oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
+| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser. |
+| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
+| csv_separator | no | , ||
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| hive | no | true | <i>true</i> or <i>false</i>. |
+| hive\_server\_version<br>(**deprecated**) | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2.<br>Still usable; if both are configured, `hive.server_version` is preferred. |
+| hive.server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2. |
+| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred. |
+| hive.host | no | localhost ||
+| hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred. |
+| hive.port | no | 10000 ||
 | hive.db_type | no | default-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
-| krb5_auth | no | false | <i>true</i> or <i>false</i> |
-| krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
-| krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise |
-| krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false` |
-| krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false` |
+| krb5_auth | no | false | <i>true</i> or <i>false</i>. |
+| krb5_user | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
+| krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
+| krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
+| krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
 
 A configuration example could be:
 
@@ -235,6 +236,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
+    cygnusagent.sinks.hdfs-sink.batch_ttl = 10
     cygnusagent.sinks.hdfs-sink.hive = true
     cygnusagent.sinks.hdfs-sink.hive.server_version = 2
     cygnusagent.sinks.hdfs-sink.hive.host = 192.168.80.35

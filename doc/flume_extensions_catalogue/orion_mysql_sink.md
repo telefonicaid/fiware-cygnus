@@ -258,15 +258,16 @@ NOTES:
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 ||
 | mysql_username | yes | N/A ||
 | mysql_password | yes | N/A ||
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
-| batch_size | no | 1 | Number of events accumulated before persistence |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 
 A configuration example could be:
 
@@ -284,6 +285,7 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.attr_persistence = column
     cygnusagent.sinks.mysql-sink.batch_size = 100
     cygnusagent.sinks.mysql-sink.batch_timeout = 30
+    cygnusagent.sinks.mysql-sink.batch_ttl = 10
     
 [Top](#top)
 

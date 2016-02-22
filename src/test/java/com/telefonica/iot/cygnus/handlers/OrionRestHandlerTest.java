@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -58,7 +58,6 @@ public class OrionRestHandlerTest {
     
     // constants
     private final String configuredNotificationTarget = "/notify";
-    private final String configuredEventsTTL = "10";
     private final String configuredDefaultService = "a.SERV_with-rare chars%@";
     private final String configuredDefaultServicePath = "a.SERVPATH_with-rare chars%@";
     private final String rootServicePath = "/";
@@ -86,7 +85,6 @@ public class OrionRestHandlerTest {
         context = new Context();
         context.put(TestConstants.PARAM_DEFAULT_SERVICE, configuredDefaultService);
         context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, configuredDefaultServicePath);
-        context.put(TestConstants.PARAM_EVENTS_TTL, configuredEventsTTL);
         context.put(TestConstants.PARAM_NOTIFICATION_TARGET, configuredNotificationTarget);
         
         // set up the behaviour of the mocked classes
@@ -114,7 +112,6 @@ public class OrionRestHandlerTest {
         System.out.println("Testing 'configure' method from class 'OrionRestHandler'");
         handler.configure(context);
         assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
-        assertEquals(configuredEventsTTL, handler.getEventsTTL());
         assertEquals(TestUtils.encode(configuredDefaultService), handler.getDefaultService());
         assertEquals(TestUtils.encode(configuredDefaultServicePath), handler.getDefaultServicePath());
     } // testConfigure
@@ -133,7 +130,7 @@ public class OrionRestHandlerTest {
             Event event = (Event) result.get(0);
             Map<String, String> eventHeaders = event.getHeaders();
             byte[] eventMessage = event.getBody();
-            assertTrue(eventHeaders.size() == 5);
+            assertTrue(eventHeaders.size() == 4);
             assertTrue(eventHeaders.containsKey("content-type"));
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));
@@ -158,7 +155,7 @@ public class OrionRestHandlerTest {
             Event event = (Event) result.get(0);
             Map<String, String> eventHeaders = event.getHeaders();
             byte[] eventMessage = event.getBody();
-            assertTrue(eventHeaders.size() == 5);
+            assertTrue(eventHeaders.size() == 4);
             assertTrue(eventHeaders.containsKey("content-type"));
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));

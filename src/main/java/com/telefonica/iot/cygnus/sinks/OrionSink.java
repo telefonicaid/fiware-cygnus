@@ -82,6 +82,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
+    protected int batchTTL;
     protected boolean invalidConfiguration;
     // accumulator utility
     private final Accumulator accumulator;
@@ -103,7 +104,6 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         // create the accumulator utility
         accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
 
         // crete the rollbacking queue
         rollbackedAccumulations = new ArrayList<Accumulator>();
@@ -174,7 +174,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_grouping="
                 + enableGroupingStr + ") -- Must be 'true' or 'false'");
-        }  // try catch
+        }  // if else
 
         batchSize = context.getInteger("batch_size", 1);
 
@@ -185,7 +185,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
                     + batchSize + ")");
-        } // if
+        } // if else
 
         batchTimeout = context.getInteger("batch_timeout", 30);
 
@@ -198,6 +198,16 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     + batchTimeout + ")");
         } // if
 
+        batchTTL = context.getInteger("batch_ttl", 10);
+        
+        if (batchTTL < -1) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_ttl="
+                    + batchTTL + ") -- Must be greater than -2");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_ttl="
+                    + batchTTL + ")");
+        } // if else
     } // configure
 
     @Override
@@ -208,6 +218,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
                     + "in the configuration, thus this sink will not run the expected logic");
         } else {
+            // the accumulator must be initialized once read the configuration
+            accumulator.initialize(new Date().getTime());
             LOGGER.info("[" + this.getName() + "] Startup completed");
         } // if else
     } // start
@@ -251,7 +263,20 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+                
+                if (rollbackedAccumulation.ttl == -1) {
+                    LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
+                            + "infinite batch TTL");
+                } else if (rollbackedAccumulation.ttl > 0) {
+                    rollbackedAccumulation.ttl--;
+                    LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
+                            + "batch TTL=" + rollbackedAccumulation.ttl);
+                } else {
+                    rollbackedAccumulations.remove(0);
+                    LOGGER.info("TTL exhausted, finishing transaction ("
+                            + rollbackedAccumulation.getAccTransactionIds() + ")");
+                } // if else
+                
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
             } else {
                 if (e instanceof CygnusRuntimeError) {
@@ -364,8 +389,20 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + ")");
-                rollbackedAccumulations.add(accumulator.clone());
+                
+                if (accumulator.ttl == -1) {
+                    rollbackedAccumulations.add(accumulator.clone());
+                    LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
+                            + "infinite batch TTL");
+                } else if (accumulator.ttl > 0) {
+                    accumulator.ttl--;
+                    rollbackedAccumulations.add(accumulator.clone());
+                    LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
+                            + "batch TTL=" + accumulator.ttl);
+                } else {
+                    LOGGER.info("TTL exhausted, finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+                } // if else
+                
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
@@ -445,6 +482,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         private long accStartDate;
         private int accIndex;
         private String accTransactionIds;
+        private int ttl;
 
         /**
          * Constructor.
@@ -454,6 +492,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             accStartDate = 0;
             accIndex = 0;
             accTransactionIds = null;
+            ttl = batchTTL;
         } // Accumulator
 
         public long getAccStartDate() {
@@ -643,6 +682,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             accStartDate = startDateMs;
             accIndex = 0;
             accTransactionIds = "";
+            ttl = batchTTL;
         } // initialize
 
         @Override

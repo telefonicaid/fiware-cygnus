@@ -219,6 +219,7 @@ NOTES:
 | collection_prefix | no | sth_ ||
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `_id.origin` property. Set to 0 if not wanting this policy. |
 
 A configuration example could be:
@@ -238,6 +239,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.should_hash = false
     cygnusagent.sinks.sth-sink.batch_size = 100
     cygnusagent.sinks.sth-sink.batch_timeout = 30
+    cygnusagent.sinks.sth-sink.batch_ttl = 10
     cygnusagent.sinks.sth-sink.data_expiration = 0
 
 [Top](#top)

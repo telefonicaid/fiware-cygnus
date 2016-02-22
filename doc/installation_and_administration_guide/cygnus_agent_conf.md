@@ -127,6 +127,8 @@ cygnusagent.sinks.hdfs-sink.csv_separator = ,
 cygnusagent.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.hdfs-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
 cygnusagent.sinks.hdfs-sink.hive = true
 # Hive server version, 1 or 2 (ignored if hive is false)
@@ -168,6 +170,12 @@ cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
 cygnusagent.sinks.ckan-sink.ssl = false
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.ckan-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.ckan-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.ckan-sink.batch_ttl = 10
 
 # ============================================
 # OrionPostgreSQLSink configuration
@@ -195,6 +203,8 @@ cygnusagent.sinks.postgresql-sink.data_model = by-service-path
 cygnusagent.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.postgresql-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.postgresql-sink.batch_ttl = 10
 
 # ============================================
 # OrionMySQLSink configuration
@@ -220,6 +230,8 @@ cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 cygnusagent.sinks.mysql-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.mysql-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.mysql-sink.batch_ttl = 10
 
 # ============================================
 # OrionMongoSink configuration
@@ -249,6 +261,8 @@ cygnusagent.sinks.mongo-sink.attr_persistence = column
 cygnusagent.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation
 cygunsagent.sinks.mongo-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.mongo-sink.batch_ttl = 10
 
 # ============================================
 # OrionSTHSink configuration
@@ -274,6 +288,8 @@ cygnusagent.sinks.sth-sink.should_hash = false
 cygnusagent.sinks.sth-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.sth-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.sth-sink.batch_ttl = 10
 
 #=============================================
 # OrionKafkaSink configuration
@@ -287,6 +303,12 @@ cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+# number of notifications to be included within a processing batch
+cygnusagent.sinks.kafka-sink.batch_size = 100
+# timeout for batch accumulation
+cygnusagent.sinks.kafka-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.kafka-sink.batch_ttl = 10
 
 # ============================================
 # OrionDynamoDBSink configuration
@@ -310,6 +332,8 @@ cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
 cygnusagent.sinks.dynamo-sink.batch_size = 100
 # timeout for batch accumulation
 cygnusagent.sinks.dynamo-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnusagent.sinks.dynamo-sink.batch_ttl = 10
 
 #=============================================
 # hdfs-channel configuration
