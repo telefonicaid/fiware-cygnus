@@ -52,7 +52,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
-    private String eventsTTL;
     private long transactionCount;
     private final long bootTimeSeconds;
     private long bootTimeMilliseconds;
@@ -131,14 +130,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getDefaultServicePath() {
         return defaultServicePath;
     } // getDefaultServicePath
-    
-    /**
-     * Gets the events TTL. It is protected due to it is only required for testing purposes.
-     * @return
-     */
-    protected String getEventsTTL() {
-        return eventsTTL;
-    } // getEventsTTL
 
     @Override
     public void configure(Context context) {
@@ -169,8 +160,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
         
         LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
-        eventsTTL = context.getString(Constants.PARAM_EVENTS_TTL, "10");
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
         LOGGER.info("Startup completed");
     } // configure
             
@@ -291,14 +280,12 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
         LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
                 + ", value=" + transId + ")");
-        eventHeaders.put(Constants.FLUME_HEADER_TTL, eventsTTL);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TTL + ", value=" + eventsTTL + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        LOGGER.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
+        LOGGER.info("Event put in the channel, id=" + event.hashCode());
         numProcessedEvents++;
         return eventList;
     } // getEvents
