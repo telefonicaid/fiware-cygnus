@@ -208,6 +208,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | collection_prefix | no | sth_ ||
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `recvTime` property. Set to 0 if not wanting this policy. |
 | collections_size | no | 0 | The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Notice that the size-based truncation policy takes precedence over the time-based one. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes. |
 | max_documents | no | 0 | The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy. |
@@ -231,6 +232,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
     cygnusagent.sinks.mongo-sink.batch_size = 100
     cygnusagent.sinks.mongo-sink.batch_timeout = 30
+    cygnusagent.sinks.mongo-sink.batch_ttl = 10
     cygnusagent.sinks.mongo-sink.data_expiration = 0
     cygnusagent.sinks.mongo-sink.collections_size = 0
     cygnusagent.sinks.mongo-sink.max_documents = 0
