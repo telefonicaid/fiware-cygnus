@@ -215,7 +215,7 @@ cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
 cygnusagent.sinks.mongo-sink.should_hash = false
 # specify if the sink will use a single collection for each service path, for each entity or for each attribute
-cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
+cygnusagent.sinks.mongo-sink.data_model = dm-by-entity  
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.mongo-sink.attr_persistence = column
 # number of notifications to be included within a processing batch
