@@ -159,6 +159,9 @@ public class OrionCKANSink extends OrionSink {
         
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
+    
+        // CKAN requires all the names written in lower case
+        enableLowercase = true;
     } // configure
 
     @Override
