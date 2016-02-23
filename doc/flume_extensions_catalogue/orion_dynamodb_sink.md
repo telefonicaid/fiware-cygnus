@@ -125,6 +125,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionDynam
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink</i> |
 | channel | yes | N/A ||
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-entity</i> or <i>dm-by-service-path</i>. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | access\_key\_id | yes | N/A | Provided by AWS when creating an account. |
@@ -142,6 +143,7 @@ A configuration example could be:
     cygnusagent.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
     cygnusagent.sinks.dynamodb-sink.channel = dynamodb-channel
     cygnusagent.sinks.dynamodb-sink.enable_grouping = false
+    cygnusagent.sinks.dynamodb-sink.enable_lowercase = false
     cygnusagent.sinks.dynamodb-sink.data_model = dm-by-entity
     cygnusagent.sinks.dynamodb-sink.attr_persistence = column
     cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx

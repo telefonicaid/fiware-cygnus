@@ -198,6 +198,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>. |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
@@ -223,6 +224,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
     cygnusagent.sinks.mongo-sink.attr_persistence = column
     cygnusagent.sinks.mongo-sink.enable_grouping = false
+    cygnusagent.sinks.mongo-sink.enable_lowercase = false
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
     cygnusagent.sinks.mongo-sink.mongo_username = myuser
     cygnusagent.sinks.mongo-sink.mongo_password = mypassword

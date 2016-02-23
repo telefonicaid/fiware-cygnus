@@ -104,6 +104,8 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
 cygnusagent.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
@@ -158,6 +160,8 @@ cygnusagent.sinks.ckan-sink.channel = ckan-channel
 cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.ckan-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
@@ -185,6 +189,8 @@ cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
 cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.postgresql-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # the FQDN/IP address where the PostgreSQL server runs
 cygnusagent.sinks.postgresql-sink.postgresql_host = x.y.z.w
 # the port where the PostgreSQL server listens for incomming connections
@@ -214,6 +220,8 @@ cygnusagent.sinks.mysql-sink.channel = mysql-channel
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mysql-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # the FQDN/IP address where the MySQL server runs
 cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listens for incomming connections
@@ -241,6 +249,8 @@ cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSi
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mongo-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
@@ -272,6 +282,8 @@ cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 cygnusagent.sinks.sth-sink.channel = sth-channel
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.sth-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
 cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
@@ -297,6 +309,10 @@ cygnusagent.sinks.sth-sink.batch_ttl = 10
 cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+cygnusagent.sinks.sth-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
 cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
@@ -324,6 +340,8 @@ cygnusagent.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 cygnusagent.sinks.dynamo-sink.region = eu-central-1
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.dynamo-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # how the attributes are stored, either per row either per column (row, column)
 cygnusagent.sinks.dynamo-sink.attr_persistence = column
 # select the table type from table-by-destination and table-by-service-path

@@ -147,6 +147,7 @@ NOTES:
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql_port | no | 3306 ||
@@ -165,6 +166,7 @@ A configuration example could be:
     cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
     cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
     cygnusagent.sinks.postgresql-sink.enable_grouping = false
+    cygnusagent.sinks.postgresql-sink.enable_lowercase = false
     cygnusagent.sinks.postgresql-sink.data_model = dm-by-entity
     cygnusagent.sinks.postgresql-sink.postgresql_host = 192.168.80.34
     cygnusagent.sinks.postgresql-sink.postgresql_port = 5432

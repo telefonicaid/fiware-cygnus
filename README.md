@@ -274,11 +274,12 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>OrionPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
   <tr><td rowspan="2">OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
-  <tr><td rowspan="5">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>
+  <tr><td rowspan="6">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>
   <tr><td>Pattern-based grouping</td><td>0.5.0</td></tr>
   <tr><td>Infinite events TTL</td><td>0.7.0</td></tr>
   <tr><td>enable/disable Grouping Rules</td><td>0.9.0</td></tr>
   <tr><td>Data model configuration</td><td>0.12.0</td></tr>
+  <tr><td>enable/disable forced lower case</td><td>0.13.0</td></tr>
   <tr><td rowspan="6">Management Interface</td><td>GET /version</td><td>0.5.0</td></tr>
   <tr><td>GET /stats</td><td>0.13.0</td></tr>
   <tr><td>GET /groupingrules</td><td>0.13.0</td></tr>

@@ -87,6 +87,7 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | s
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionTestSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -100,6 +101,7 @@ A configuration example could be:
     cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
     cygnusagent.sinks.test-sink.channel = ckan-channel
     cygnusagent.sinks.test-sink.enable_grouping = false
+    cygnusagent.sinks.test-sink.enable_lowercase = false
     cygnusagent.sinks.test-sink.data_model = dm-by-entity
     cygnusagent.sinks.test-sink.batch_size = 100
     cygnusagent.sinks.test-sink.batch_timeout = 30
