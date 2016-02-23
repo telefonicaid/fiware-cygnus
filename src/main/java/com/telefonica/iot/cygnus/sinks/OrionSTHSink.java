@@ -87,9 +87,9 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         if (dataModel == DataModel.DMBYSERVICEPATH) {
             collectionName = enableLowercase
                     ? (buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                    fiwareService) + ".aggr").toLowerCase()
+                            fiwareService) + ".aggr").toLowerCase()
                     : buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                    fiwareService) + ".aggr";
+                            fiwareService) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
@@ -102,9 +102,9 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         if (dataModel == DataModel.DMBYENTITY) {
             collectionName = enableLowercase
                     ? (buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                    entityId, entityType, fiwareService) + ".aggr").toLowerCase()
+                            entityId, entityType, fiwareService) + ".aggr").toLowerCase()
                     : buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                    entityId, entityType, fiwareService) + ".aggr";
+                            entityId, entityType, fiwareService) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
@@ -149,9 +149,9 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             if (dataModel == DataModel.DMBYATTRIBUTE) {
                 collectionName = enableLowercase
                         ? (buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                        true, entityId, entityType, fiwareService) + ".aggr").toLowerCase()
+                                true, entityId, entityType, fiwareService) + ".aggr").toLowerCase()
                         : buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                        true, entityId, entityType, fiwareService) + ".aggr";
+                                true, entityId, entityType, fiwareService) + ".aggr";
                 backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 
