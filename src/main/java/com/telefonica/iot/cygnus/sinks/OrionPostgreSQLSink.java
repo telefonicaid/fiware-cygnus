@@ -153,6 +153,9 @@ public class OrionPostgreSQLSink extends OrionSink {
         }  // if else
 
         super.configure(context);
+        
+        // CKAN requires all the names written in lower case
+        enableLowercase = true;
     } // configure
 
     @Override
