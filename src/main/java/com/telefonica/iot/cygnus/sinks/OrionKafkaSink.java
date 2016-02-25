@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -103,7 +103,7 @@ public class OrionKafkaSink extends OrionSink {
                     + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
-        }
+        } // if else
 
         replicationFactor = context.getInteger("replication_factor", 1);
 
@@ -112,8 +112,9 @@ public class OrionKafkaSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor="
                     + replicationFactor + ") -- Must be greater than 0");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor=" + replicationFactor + ")");
-        }
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor="
+                    + replicationFactor + ")");
+        } // if else
 
         super.configure(context);
     } // configure
@@ -200,8 +201,12 @@ public class OrionKafkaSink extends OrionSink {
             return servicePath;
         } // servicePath
 
-        public String getTopic() {
-            return topic;
+        public String getTopic(boolean enableLowercase) {
+            if (enableLowercase) {
+                return topic.toLowerCase();
+            } else {
+                return topic;
+            } // else
         } // getTopic
 
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -259,11 +264,10 @@ public class OrionKafkaSink extends OrionSink {
 
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
-        String destination = aggregator.getTopic();
+        String topicName = aggregator.getTopic(enableLowercase);
 
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
-        String topicName = buildTopicName(destination);
 
         if (!topicAPI.topicExists(zookeeperClient, topicName)) {
             LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
@@ -289,15 +293,6 @@ public class OrionKafkaSink extends OrionSink {
         return message;
     } // buildMessage
 
-    private String buildTopicName(String topic) throws Exception {
-        if (topic.length() > Constants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building topic " + topic + " and its length is greater "
-                    + "than " + Constants.MAX_NAME_LEN);
-        } // if
-
-        return topic;
-    } // buildTopicFromDestination
-
     /**
      * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
      * cannot be tested with Mockito; however, this class can be mocked.
@@ -322,7 +317,8 @@ public class OrionKafkaSink extends OrionSink {
          * @param partitions
          * @param replicationFactor
          */
-        public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
+        public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor,
+                Properties props) {
             AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
         } // createTopic
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -153,6 +153,9 @@ public class OrionPostgreSQLSink extends OrionSink {
         }  // if else
 
         super.configure(context);
+        
+        // CKAN requires all the names written in lower case
+        enableLowercase = true;
     } // configure
 
     @Override
@@ -224,12 +227,20 @@ public class OrionPostgreSQLSink extends OrionSink {
             return aggregation;
         } // getAggregation
 
-        public String getSchemaName() {
-            return schemaName;
+        public String getSchemaName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return schemaName.toLowerCase();
+            } else {
+                return schemaName;
+            } // if else
         } // getDbName
 
-        public String getTableName() {
-            return tableName;
+        public String getTableName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return tableName.toLowerCase();
+            } else {
+                return tableName;
+            } // if else
         } // getTableName
 
         public String getTypedFieldNames() {
@@ -469,8 +480,8 @@ public class OrionPostgreSQLSink extends OrionSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
-        String schemaName = aggregator.getSchemaName();
-        String tableName = aggregator.getTableName();
+        String schemaName = aggregator.getSchemaName(enableLowercase);
+        String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("

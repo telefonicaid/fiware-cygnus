@@ -77,7 +77,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
-        String dbName = buildDbName(fiwareService);
+        String dbName = enableLowercase ? buildDbName(fiwareService).toLowerCase() : buildDbName(fiwareService);
         backend.createDatabase(dbName);
         
         // collection name container
@@ -85,8 +85,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.DMBYSERVICEPATH) {
-            collectionName = buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                    fiwareService) + ".aggr";
+            collectionName = enableLowercase
+                    ? (buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
+                            fiwareService) + ".aggr").toLowerCase()
+                    : buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
+                            fiwareService) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
@@ -97,8 +100,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
         // create the collection at this stage, if the data model is collection-per-entity
         if (dataModel == DataModel.DMBYENTITY) {
-            collectionName = buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                    entityId, entityType, fiwareService) + ".aggr";
+            collectionName = enableLowercase
+                    ? (buildCollectionName(dbName, fiwareServicePath, destination, null, true,
+                            entityId, entityType, fiwareService) + ".aggr").toLowerCase()
+                    : buildCollectionName(dbName, fiwareServicePath, destination, null, true,
+                            entityId, entityType, fiwareService) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
@@ -141,8 +147,11 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // create the collection at this stage, if the data model is collection-per-attribute
             if (dataModel == DataModel.DMBYATTRIBUTE) {
-                collectionName = buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                        true, entityId, entityType, fiwareService) + ".aggr";
+                collectionName = enableLowercase
+                        ? (buildCollectionName(dbName, fiwareServicePath, destination, attrName,
+                                true, entityId, entityType, fiwareService) + ".aggr").toLowerCase()
+                        : buildCollectionName(dbName, fiwareServicePath, destination, attrName,
+                                true, entityId, entityType, fiwareService) + ".aggr";
                 backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 

@@ -211,12 +211,20 @@ public class OrionMySQLSink extends OrionSink {
             return aggregation;
         } // getAggregation
         
-        public String getDbName() {
-            return dbName;
+        public String getDbName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dbName.toLowerCase();
+            } else {
+                return dbName;
+            } // if else
         } // getDbName
         
-        public String getTableName() {
-            return tableName;
+        public String getTableName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return tableName.toLowerCase();
+            } else {
+                return tableName;
+            } // if else
         } // getTableName
         
         public String getTypedFieldNames() {
@@ -456,8 +464,8 @@ public class OrionMySQLSink extends OrionSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
-        String dbName = aggregator.getDbName();
-        String tableName = aggregator.getTableName();
+        String dbName = aggregator.getDbName(enableLowercase);
+        String tableName = aggregator.getTableName(enableLowercase);
         
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -121,7 +121,7 @@ public class GroupingInterceptorTest {
     private final String notifiedServicePath = "4wheels";
     private final String defaultServicePaths = "4wheels,4wheels";
     private final String groupedServicePaths = "rooms,rooms";
-    private final String defaultDestinations = "room.1_room,room.22_room";
+    private final String defaultDestinations = "Room.1_Room,Room.22_Room";
     private final String groupedDestinations = "numeric_rooms,numeric_rooms";
     private final String eventData = ""
             + "<notifyContextRequest>"

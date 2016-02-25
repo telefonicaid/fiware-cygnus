@@ -185,6 +185,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
@@ -224,6 +225,7 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
+    cygnusagent.sinks.hdfs-sink.enable_lowercase = false
     cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
     cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.backend_impl = rest

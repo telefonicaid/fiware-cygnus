@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.Locale;
 import org.apache.flume.Context;
 
 /**
@@ -158,6 +159,9 @@ public class OrionCKANSink extends OrionSink {
         
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
+    
+        // CKAN requires all the names written in lower case
+        enableLowercase = true;
     } // configure
 
     @Override
@@ -226,16 +230,28 @@ public class OrionCKANSink extends OrionSink {
             return records;
         } // getAggregation
 
-        public String getOrgName() {
-            return orgName;
+        public String getOrgName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return orgName.toLowerCase();
+            } else {
+                return orgName;
+            } // if else
         } // getOrgName
 
-        public String getPkgName() {
-            return pkgName;
+        public String getPkgName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return pkgName.toLowerCase();
+            } else {
+                return pkgName;
+            } // if else
         } // getPkgName
 
-        public String getResName() {
-            return resName;
+        public String getResName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return resName.toLowerCase();
+            } else {
+                return resName;
+            } // if else
         } // getResName
 
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -394,9 +410,9 @@ public class OrionCKANSink extends OrionSink {
 
     private void persistAggregation(CKANAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
-        String orgName = aggregator.getOrgName();
-        String pkgName = aggregator.getPkgName();
-        String resName = aggregator.getResName();
+        String orgName = aggregator.getOrgName(enableLowercase);
+        String pkgName = aggregator.getPkgName(enableLowercase);
+        String resName = aggregator.getResName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -39,8 +39,8 @@ public class OrionDynamoDBSink extends OrionSink {
     /**
      * Available DynamoDB regions implementation.
      */
-    private enum Regions { USEAST1, USWEST1, USWEST2,  EUWEST1, EUCENTRAL1, 
-        APNORTHEAST1, APNORTHEAST2, APSHOUTEAST1, APSHOUTEAST2, SAEAST1}
+    private enum Regions { USEAST1, USWEST1, USWEST2,  EUWEST1, EUCENTRAL1,
+            APNORTHEAST1, APNORTHEAST2, APSHOUTEAST1, APSHOUTEAST2, SAEAST1 }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionDynamoDBSink.class);
     private DynamoDBBackend persistenceBackend;
@@ -168,8 +168,12 @@ public class OrionDynamoDBSink extends OrionSink {
             return aggregation;
         } // getAggregation
 
-        public String getTableName() {
-            return tableName;
+        public String getTableName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return tableName.toLowerCase();
+            } else {
+                return tableName;
+            } // if else
         } // getTableName
 
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -316,7 +320,7 @@ public class OrionDynamoDBSink extends OrionSink {
 
     private void persistAggregation(DynamoDBAggregator aggregator) throws Exception {
         ArrayList aggregation = aggregator.getAggregation();
-        String tableName = aggregator.getTableName();
+        String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionDynamoSink. Dynamo table ("
                 + tableName + "), Data (" + aggregation.toString() + ")");

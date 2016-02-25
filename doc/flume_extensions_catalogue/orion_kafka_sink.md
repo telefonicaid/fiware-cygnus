@@ -111,6 +111,7 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionKafkaSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
 | broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
 | zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i>. |
@@ -128,6 +129,7 @@ A configuration example could be:
     cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
     cygnusagent.sinks.kafka-sink.channel = kafka-channel
     cygnusagent.sinks.kafka-sink.enable_grouping = false
+    cygnusagent.sinks.kafka-sink.enable_lowercase = false
     cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
     cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
     cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181

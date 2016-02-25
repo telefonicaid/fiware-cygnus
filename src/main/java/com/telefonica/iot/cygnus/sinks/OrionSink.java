@@ -83,6 +83,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     protected int batchSize;
     protected int batchTimeout;
     protected int batchTTL;
+    protected boolean enableLowercase;
     protected boolean invalidConfiguration;
     // accumulator utility
     private final Accumulator accumulator;
@@ -164,7 +165,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     + dataModelStr + ")");
         } // catch
 
-        String enableGroupingStr = context.getString("enable_grouping");
+        String enableGroupingStr = context.getString("enable_grouping", "false");
         
         if (enableGroupingStr.equals("true") || enableGroupingStr.equals("false")) {
             enableGrouping = Boolean.valueOf(enableGroupingStr);
@@ -174,6 +175,18 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_grouping="
                 + enableGroupingStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
+        String enableLowercaseStr = context.getString("enable_lowercase", "false");
+        
+        if (enableLowercaseStr.equals("true") || enableLowercaseStr.equals("false")) {
+            enableLowercase = Boolean.valueOf(enableLowercaseStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_lowercase="
+                + enableLowercaseStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_lowercase="
+                + enableLowercaseStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
         batchSize = context.getInteger("batch_size", 1);

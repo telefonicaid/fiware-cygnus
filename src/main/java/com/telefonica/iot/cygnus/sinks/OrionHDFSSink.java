@@ -19,11 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.CSVROW;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONCOLUMN;
-import static com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend.FileFormat.JSONROW;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
@@ -37,6 +32,7 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.flume.Context;
@@ -262,8 +258,8 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (cosmos_port=" + port
                         + ") -- Must be between 0 and 65535 -- DEPRECATED, use hdfs_port instead");
             } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
-                    + " -- DEPRECATED, use hdfs_port instead");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
+                        + " -- DEPRECATED, use hdfs_port instead");
             }  // if else
             
         } else {
@@ -324,8 +320,8 @@ public class OrionHDFSSink extends OrionSink {
             if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
                 boolean rowAttrPersistence = attrPersistenceStr.equals("row");
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-           		+ attrPersistenceStr + ") -- DEPRECATED, converting to file_format="
-           		+ (rowAttrPersistence ? "json-row" : "json-column"));
+                        + attrPersistenceStr + ") -- DEPRECATED, converting to file_format="
+                        + (rowAttrPersistence ? "json-row" : "json-column"));
             } else {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
@@ -406,7 +402,8 @@ public class OrionHDFSSink extends OrionSink {
             hiveServerVersion = hiveServerVersionNew;
             
             if ((hiveServerVersion.equals("1")) || (hiveServerVersion.equals("2"))) {
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version=" + hiveServerVersion + ")");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version="
+                        + hiveServerVersion + ")");
             } else {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
@@ -436,7 +433,7 @@ public class OrionHDFSSink extends OrionSink {
         
         try {
             hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type=" 
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
                     + hiveDBType);
         } catch (Exception e) {
             invalidConfiguration = true;
@@ -483,7 +480,7 @@ public class OrionHDFSSink extends OrionSink {
         
         try {
             backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl=" 
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl="
                         + backendImplStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
@@ -612,12 +609,20 @@ public class OrionHDFSSink extends OrionSink {
             return mdAggregations.get(attrMDFile);
         } // getMDAggregation
 
-        public String getFolder() {
-            return hdfsFolder;
+        public String getFolder(boolean enableLowercase) {
+            if (enableLowercase) {
+                return hdfsFolder.toLowerCase();
+            } else {
+                return hdfsFolder;
+            } // if else
         } // getFolder
 
-        public String getFile() {
-            return hdfsFile;
+        public String getFile(boolean enableLowercase) {
+            if (enableLowercase) {
+                return hdfsFile.toLowerCase();
+            } else {
+                return hdfsFile;
+            } // if else
         } // getFile
 
         public String getHiveFields() {
@@ -1050,8 +1055,8 @@ public class OrionHDFSSink extends OrionSink {
 
     private void persistAggregation(HDFSAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
-        String hdfsFolder = aggregator.getFolder();
-        String hdfsFile = aggregator.getFile();
+        String hdfsFolder = aggregator.getFolder(enableLowercase);
+        String hdfsFile = aggregator.getFile(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
@@ -1084,7 +1089,7 @@ public class OrionHDFSSink extends OrionSink {
     } // persistMDAggregations
 
     private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
-        String dirPath = aggregator.getFolder();
+        String dirPath = aggregator.getFolder(enableLowercase);
         String fields = aggregator.getHiveFields();
         String tag;
 

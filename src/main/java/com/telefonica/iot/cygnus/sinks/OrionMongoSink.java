@@ -132,12 +132,20 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             return aggregation;
         } // getAggregation
         
-        public String getDbName() {
-            return dbName;
+        public String getDbName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dbName.toLowerCase();
+            } else {
+                return dbName;
+            } // if else
         } // getDbName
         
-        public String getCollectionName() {
-            return collectionName;
+        public String getCollectionName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return collectionName.toLowerCase();
+            } else {
+                return collectionName;
+            } // if else
         } // getCollectionName
         
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -301,8 +309,8 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     
     private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
         ArrayList<Document> aggregation = aggregator.getAggregation();
-        String dbName = aggregator.getDbName();
-        String collectionName = aggregator.getCollectionName();
+        String dbName = aggregator.getDbName(enableLowercase);
+        String collectionName = aggregator.getCollectionName(enableLowercase);
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);

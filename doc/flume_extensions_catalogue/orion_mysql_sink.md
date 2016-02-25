@@ -259,6 +259,7 @@ NOTES:
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 ||
@@ -277,6 +278,7 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
     cygnusagent.sinks.mysql-sink.enable_grouping = false
+    cygnusagent.sinks.mysql-sink.enable_lowercase = false
     cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
