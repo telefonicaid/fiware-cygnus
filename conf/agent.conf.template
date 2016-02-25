@@ -100,7 +100,7 @@ cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # Hive server version, 1 or 2 (ignored if hive is false)
 # cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.host = localhost
+# cygnusagent.sinks.hdfs-sink.hive.host = localhost
 # Hive port for Hive external table provisioning (ignored if hive is false)
 # cygnusagent.sinks.hdfs-sink.hive.port = 10000
 # Hive database type, available types are default-db and namespace-db
