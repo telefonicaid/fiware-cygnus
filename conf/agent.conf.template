@@ -87,7 +87,7 @@ cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
 # cygnusagent.sinks.hdfs-sink.file_format = json-row
-#
+# field separator when using csv-row or csv-column, ',' by default
 # cygnusagent.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
 # cygnusagent.sinks.hdfs-sink.batch_size = 1
