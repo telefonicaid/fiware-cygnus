@@ -27,3 +27,4 @@
 - [HARDENING] Add cygnus_translator_pre0.10.0_to_0.10.0_mysql_table.sh and fix cygnus_translator_pre0.10.0_to_0.10.0_mysql_db.sh(#765)
 - [HARDENING] User per batch TTL, not per event TTL (#714)
 - [FEATURE] Add enable_lowercase parameter to all sinks (#815)
+- [HARDENING] Comment default configuration parameters in documentation (#365)
