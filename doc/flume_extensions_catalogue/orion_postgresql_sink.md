@@ -43,7 +43,7 @@ According to the [naming conventions](./naming_conventions.md), a schema named a
 Then, the context responses/entities within the container are iterated, and a table is created (if not yet existing) within the above schema whose name depends on the configured data model:
 
 * `dm-by-entity`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
-* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing). 
+* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing).
 
 The context attributes within each context response/entity are iterated, and a new data row (or rows) is inserted in the current table. The format for this row depends on the configured persistence mode:
 
@@ -151,6 +151,7 @@ NOTES:
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql_port | no | 3306 ||
+| postgresql_database | yes | N/A ||
 | postgresql_username | yes | N/A ||
 | postgresql_password | yes | N/A ||
 | attr_persistence | no | row | <i>row</i> or <i>column</i>. |
@@ -173,11 +174,11 @@ A configuration example could be:
     cygnusagent.sinks.postgresql-sink.postgresql_database = mydatabase
     cygnusagent.sinks.postgresql-sink.posqtgresql_username = myuser
     cygnusagent.sinks.postgresql-sink.postgresql_password = mypassword
-    cygnusagent.sinks.postgresql-sink.attr_persistence = column
+    cygnusagent.sinks.postgresql-sink.attr_persistence = row
     cygnusagent.sinks.postgresql-sink.batch_size = 100
     cygnusagent.sinks.postgresql-sink.batch_timeout = 30
     cygnusagent.sinks.postgresql-sink.batch_ttl = 10
-    
+
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
@@ -218,15 +219,15 @@ By default, `OrionPostgreSQLSink` has a configured batch size and batch accumula
 As any other NGSI-like sink, `OrionPostgreSQLSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the PostgreSQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `PostgreSQLBackend` implementation.
-    
+
     public void start();
 
 An implementation of `PostgreSQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionPostgreSQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -252,4 +253,3 @@ Persists the accumulated context data (in the form of the given field values) re
 Current implementation of `OrionPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
 
 [Top](#top)
-

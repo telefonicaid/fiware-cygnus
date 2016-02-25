@@ -231,7 +231,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.should_hash = false
-    cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
     cygnusagent.sinks.mongo-sink.batch_size = 100
     cygnusagent.sinks.mongo-sink.batch_timeout = 30
     cygnusagent.sinks.mongo-sink.batch_ttl = 10
