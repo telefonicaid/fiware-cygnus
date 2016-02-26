@@ -48,17 +48,22 @@ import org.slf4j.MDC;
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
+    // LOGGER
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionRestHandler.class);
+    
+    // configuration parameters
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
-    private long transactionCount;
-    private final long bootTimeSeconds;
-    private long bootTimeMilliseconds;
-    // statistics
-    private final long setupTime;
-    private long numReceivedEvents;
-    private long numProcessedEvents;
+    
+    // shared variables, making them static all the instances of this class will share them
+    private static final Object LOCK = new Object();
+    private static long transactionCount = 0;
+    private static final long BOOTTIME = new Date().getTime();
+    private static final long BOOTTIMESECONDS = BOOTTIME / 1000;
+    private static long bootTimeMiliseconds = BOOTTIME % 1000;
+    private static long numReceivedEvents = 0;
+    private static long numProcessedEvents = 0;
     
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
@@ -66,30 +71,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
-        // init the transaction id
-        transactionCount = 0;
-        
-        // store the boot time (not the exact boot time, but very accurate one)
-        long bootTime = new Date().getTime();
-        bootTimeSeconds = bootTime / 1000;
-        bootTimeMilliseconds = bootTime % 1000;
-        
         // print Cygnus version
         LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
-        
-        // initialize the statistics
-        setupTime = new Date().getTime();
-        numReceivedEvents = 0;
-        numProcessedEvents = 0;
     } // OrionRestHandler
     
     /**
      * Gets the setup time.
      * @return The setup time
      */
-    public long getSetupTime() {
-        return setupTime;
-    } // getSetupTime
+    public long getBootTime() {
+        return BOOTTIME;
+    } // getBootTime
     
     /**
      * Gets the number of received events.
@@ -296,18 +288,21 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * @return A new unique transaction identifier
      */
     private String generateTransId() {
-        long transCountTrunked = transactionCount % 10000000000L;
-        String transId = bootTimeSeconds + "-" + bootTimeMilliseconds + "-" + String.format("%010d", transCountTrunked);
-        
-        // check if the transactionCount must be restarted
-        if (transCountTrunked == 9999999999L) {
-            transactionCount = 0;
-            bootTimeMilliseconds = (bootTimeMilliseconds + 1) % 1000; // this could also overflow!
-        } else {
-            transactionCount++;
-        } // if else
-        
-        return transId;
+        synchronized (LOCK) {
+            long transCountTrunked = transactionCount % 10000000000L;
+            String transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                    + String.format("%010d", transCountTrunked);
+
+            // check if the transactionCount must be restarted
+            if (transCountTrunked == 9999999999L) {
+                transactionCount = 0;
+                bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
+            } else {
+                transactionCount++;
+            } // if else
+
+            return transId;
+        }
     } // generateTransId
  
 } // OrionRestHandler
