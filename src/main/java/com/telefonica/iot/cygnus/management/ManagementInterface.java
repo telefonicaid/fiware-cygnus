@@ -189,7 +189,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (handler instanceof OrionRestHandler) {
                 OrionRestHandler orh = (OrionRestHandler) handler;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(orh.getSetupTime(), true) + "\","
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(orh.getBootTime(), true) + "\","
                         + "\"num_received_events\":" + orh.getNumReceivedEvents() + ","
                         + "\"num_processed_events\":" + orh.getNumProcessedEvents() + "}";
             } else {
