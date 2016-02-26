@@ -41,11 +41,11 @@ cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
 cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
 # URL target
-cygnusagent.sources.http-source.handler.notification_target = /notify
+# cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service = def_serv
+# cygnusagent.sources.http-source.handler.default_service = def_serv
 # Default service path (service path semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service_path = def_servpath
+# cygnusagent.sources.http-source.handler.default_service_path = def_serv_path
 # Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Source interceptors, do not change
@@ -65,16 +65,18 @@ cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_grouping = false
+# cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# default data model, must be dm-by-entity
+# cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnusagent.sinks.hdfs-sink.backend_impl = rest
+# cygnusagent.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
+# cygnusagent.sinks.hdfs-sink.hdfs_host = localhost
 # port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
-cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+# cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the above username; this is only required for Hive authentication
@@ -82,35 +84,37 @@ cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
-cygnusagent.sinks.hdfs-sink.service_as_namespace = false
+# cygnusagent.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
-cygnusagent.sinks.hdfs-sink.file_format = json-column
+# cygnusagent.sinks.hdfs-sink.file_format = json-row
+# field separator when using csv-row or csv-column, ',' by default
+# cygnusagent.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.hdfs-sink.batch_size = 100
+# cygnusagent.sinks.hdfs-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.hdfs-sink.batch_timeout = 30
+# cygnusagent.sinks.hdfs-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.hdfs-sink.batch_ttl = 10
+# cygnusagent.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
-cygnusagent.sinks.hdfs-sink.hive = true
+# cygnusagent.sinks.hdfs-sink.hive = true
 # Hive server version, 1 or 2 (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+# cygnusagent.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
+# cygnusagent.sinks.hdfs-sink.hive.host = localhost
 # Hive port for Hive external table provisioning (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.port = 10000
+# cygnusagent.sinks.hdfs-sink.hive.port = 10000
 # Hive database type, available types are default-db and namespace-db
-cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
+# cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
-cygnusagent.sinks.hdfs-sink.krb5_auth = false
+# cygnusagent.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
 # Kerberos password (ignored if krb5_auth is false)
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 # Kerberos login file (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+# cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+# cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # OrionCKANSink configuration
@@ -119,27 +123,29 @@ cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.ckan-sink.enable_grouping = false
+# cygnusagent.sinks.ckan-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.ckan-sink.enable_lowercase = false
+# Always dm-by-entity, even if not configured.
+# cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
 # the CKAN API key to use
 cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
-cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
+# cygnusagent.sinks.ckan-sink.ckan_host = localhost
 # the port for the CKAN API endpoint
-cygnusagent.sinks.ckan-sink.ckan_port = 80
+# cygnusagent.sinks.ckan-sink.ckan_port = 80
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
-cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
+# cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.ckan-sink.attr_persistence = row
+# cygnusagent.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
-cygnusagent.sinks.ckan-sink.ssl = false
+# cygnusagent.sinks.ckan-sink.ssl = false
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.ckan-sink.batch_size = 100
+# cygnusagent.sinks.ckan-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.ckan-sink.batch_timeout = 30
+# cygnusagent.sinks.ckan-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.ckan-sink.batch_ttl = 10
+# cygnusagent.sinks.ckan-sink.batch_ttl = 10
 
 # ============================================
 # OrionMySQLSink configuration
@@ -148,27 +154,29 @@ cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
 cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.mysql-sink.enable_grouping = false
+# cygnusagent.sinks.mysql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.mysql-sink.enable_lowercase = false
+# Must be dm-by-service-path or dm-by-entity
+# cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
 # the FQDN/IP address where the MySQL server runs
-cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
+# cygnusagent.sinks.mysql-sink.mysql_host = localhost
 # the port where the MySQL server listes for incomming connections
-cygnusagent.sinks.mysql-sink.mysql_port = 3306
+# cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
 cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above
 cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.mysql-sink.attr_persistence = column
+# cygnusagent.sinks.mysql-sink.attr_persistence = row
 # select the table type from table-by-destination and table-by-service-path
 cygnusagent.sinks.mysql-sink.table_type = table-by-destination
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.mysql-sink.batch_size = 100
+# cygnusagent.sinks.mysql-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.mysql-sink.batch_timeout = 30
+# cygnusagent.sinks.mysql-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.mysql-sink.batch_ttl = 10
+# cygnusagent.sinks.mysql-sink.batch_ttl = 10
 
 # ============================================
 # OrionPostgreSQLSink configuration
@@ -177,13 +185,13 @@ cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
 # sink class, must not be changed
 cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.postgresql-sink.enable_grouping = false
+# cygnusagent.sinks.postgresql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.postgresql-sink.enable_lowercase = false
 # the FQDN/IP address where the PostgreSQL server runs
-cygnusagent.sinks.postgresql-sink.postgresql_host = x.y.z.w
+# cygnusagent.sinks.postgresql-sink.postgresql_host = localhost
 # the port where the PostgreSQL server listens for incomming connections
-cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
+# cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
 # the name of the postgresql database
 cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
 # a valid user in the PostgreSQL server
@@ -191,15 +199,15 @@ cygnusagent.sinks.postgresql-sink.postgresql_username = root
 # password for the user above
 cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.postgresql-sink.attr_persistence = column
-# select the table type
-cygnusagent.sinks.postgresql-sink.data_model = dm-by-service-path
+# cygnusagent.sinks.postgresql-sink.attr_persistence = row
+# Must be dm-by-service-path or dm-by-entity
+# cygnusagent.sinks.postgresql-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.postgresql-sink.batch_size = 100
+# cygnusagent.sinks.postgresql-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.postgresql-sink.batch_timeout = 30
+# cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+# cygnusagent.sinks.postgresql-sink.batch_ttl = 10
 
 # ============================================
 # OrionMongoSink configuration
@@ -208,31 +216,37 @@ cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSi
 # channel name from where to read notification events
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.mongo-sink.enable_grouping = false
+# cygnusagent.sinks.mongo-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.mongo-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# cygnusagent.sinks.mongo-sink.mongo_hosts = localhost:27017
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
+# cygnusagent.sinks.mongo-sink.mongo_username =
 # password for the user above (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
+# cygnusagent.sinks.mongo-sink.mongo_password =
 # prefix for the MongoDB databases
-cygnusagent.sinks.mongo-sink.db_prefix = sth_
+# cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix pro the MongoDB collections
-cygnusagent.sinks.mongo-sink.collection_prefix = sth_
+# cygnusagent.sinks.mongo-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.mongo-sink.should_hash = false
-# specify if the sink will use a single collection for each service path, for each entity or for each attribute
-cygnusagent.sinks.mongo-sink.data_model = collection-per-entity
+# cygnusagent.sinks.mongo-sink.should_hash = false
+# Must be dm-by-service-path or dm-by-entity
+# cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.mongo-sink.attr_persistence = column
+# cygnusagent.sinks.mongo-sink.attr_persistence = row
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.mongo-sink.batch_size = 100
+# cygnusagent.sinks.mongo-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.mongo-sink.batch_timeout = 30
+# cygnusagent.sinks.mongo-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.mongo-sink.batch_ttl = 10
+# cygnusagent.sinks.mongo-sink.batch_ttl = 10
+# Collections will be removed if older than the value specified in seconds. Set to 0 if not wanting this policy.
+# cygnusagent.sinks.mongo-sink.data_expiration = 0
+# The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Minimum value (different than 0) is 4096 bytes.
+# cygnusagent.sinks.mongo-sink.collection_size = 0
+# The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy
+# cygnusagent.sinks.mongo-sink.max_documents = 0
 
 # ============================================
 # OrionSTHSink configuration
@@ -241,27 +255,31 @@ cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
 # channel name from where to read notification events
 cygnusagent.sinks.sth-sink.channel = sth-channel
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.sth-sink.enable_grouping = false
+# cygnusagent.sinks.sth-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.sth-sink.enable_lowercase = false
+# Must be dm-by-service-path or dm-by-entity
+# cygnusagent.sinks.sth-sink.data_model = dm-by-entity
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# cygnusagent.sinks.sth-sink.mongo_hosts = localhost:27017
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.sth-sink.mongo_username = mongo_username
+# cygnusagent.sinks.sth-sink.mongo_username =
 # password for the user above (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
+# cygnusagent.sinks.sth-sink.mongo_password =
 # prefix for the MongoDB databases
-cygnusagent.sinks.sth-sink.db_prefix = sth_
+# cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
-cygnusagent.sinks.sth-sink.collection_prefix = sth_
+# cygnusagent.sinks.sth-sink.collection_prefix = sth_
 # true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.sth-sink.should_hash = false
+# cygnusagent.sinks.sth-sink.should_hash = false
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.sth-sink.batch_size = 100
+# cygnusagent.sinks.sth-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.sth-sink.batch_timeout = 30
+# cygnusagent.sinks.sth-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.sth-sink.batch_ttl = 10
+# cygnusagent.sinks.sth-sink.batch_ttl = 10
+# Collections will be removed if older than the value specified in seconds. Set to 0 if not wanting this policy.
+# cygnusagent.sinks.sth-sink.data_expiration = 0
 
 #=============================================
 # OrionKafkaSink configuration
@@ -270,48 +288,52 @@ cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSi
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.kafka-sink.enable_grouping = false
+# cygnusagent.sinks.kafka-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
-# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
-cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+# cygnusagent.sinks.kafka-sink.enable_lowercase = false
+# select the Kafka data model between dm-by-service, dm-by-service-path, dm-by-attribute and dm-by-entity
+# cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
-cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+# cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
-cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+# cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
+# number of partitions for a topic
+# cygnusagent.sinks.kafka-sink.partitions
+# replication factor of partitions into the brokers
+# cygnusagent.sinks.kafka-sink.replication_factor
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.kafka-sink.batch_size = 100
+# cygnusagent.sinks.kafka-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.kafka-sink.batch_timeout = 30
+# cygnusagent.sinks.kafka-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.kafka-sink.batch_ttl = 10
+# cygnusagent.sinks.kafka-sink.batch_ttl = 10
 
 # ============================================
 # OrionDynamoDBSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
+cygnusagent.sinks.dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
 # channel name from where to read notification events
-cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
+cygnusagent.sinks.dynamodb-sink.channel = dynamo-channel
 # AWS Access Key Id
-cygnusagent.sinks.dynamo-sink.access_key_id = xxxxxxxx
+cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
 # AWS Secret Access Key
-cygnusagent.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
+cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
 # AWS region where the tables will be created (link)
-cygnusagent.sinks.dynamo-sink.region = eu-central-1
+# cygnusagent.sinks.dynamodb-sink.region = eu-central-1
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.dynamo-sink.enable_grouping = false
+# cygnusagent.sinks.dynamodb-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+# cygnusagent.sinks.dynamodb-sink.enable_lowercase = false
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.dynamo-sink.attr_persistence = column
-# select the table type from table-by-destination and table-by-service-path
-cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
+# cygnusagent.sinks.dynamodb-sink.attr_persistence = row
+# select the data model from dm-by-entity and dm-by-service-path
+# cygnusagent.sinks.dynamodb-sink.table_type = dm-by-entity
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.dynamo-sink.batch_size = 100
+# cygnusagent.sinks.dynamodb-sink.batch_size = 1
 # timeout for batch accumulation
-cygnusagent.sinks.dynamo-sink.batch_timeout = 30
+# cygnusagent.sinks.dynamodb-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.dynamo-sink.batch_ttl = 10
+# cygnusagent.sinks.dynamodb-sink.batch_ttl = 10
 
 #=============================================
 # dynamo-channel configuration
