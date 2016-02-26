@@ -387,6 +387,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         try {
             if (accumulator.getAccIndex() != 0) {
+                LOGGER.info("Batch completed, persisting it");
                 persistBatch(accumulator.getBatch());
             } // if
 
