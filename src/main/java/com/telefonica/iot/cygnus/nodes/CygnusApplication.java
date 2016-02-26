@@ -416,7 +416,7 @@ public class CygnusApplication extends Application {
                     if ((t.getState() == State.TERMINATED || !t.isAlive())
                             && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
                         LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
-                                + ", name=" + t.getName() + ", " + Arrays.toString(t.getStackTrace()));
+                                + ", name=" + t.getName());
                         System.exit(-1);
                     } // if
                 } // for
