@@ -41,11 +41,11 @@ cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
 cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
 # URL target
-cygnusagent.sources.http-source.handler.notification_target = /notify
+# cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service = def_serv
+# cygnusagent.sources.http-source.handler.default_service = def_serv
 # Default service path (service path semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service_path = def_servpath
+# cygnusagent.sources.http-source.handler.default_service_path = def_serv_path
 # Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
 cygnusagent.sources.http-source.handler.events_ttl = 10
 # Source interceptors, do not change
@@ -200,7 +200,7 @@ cygnusagent.sinks.postgresql-sink.postgresql_username = root
 cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 # cygnusagent.sinks.postgresql-sink.attr_persistence = row
-# select the data model
+# Must be dm-by-service-path or dm-by-entity
 # cygnusagent.sinks.postgresql-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
 # cygnusagent.sinks.postgresql-sink.batch_size = 1
