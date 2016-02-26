@@ -411,14 +411,13 @@ public class CygnusApplication extends Application {
             
             while (true) {
                 for (Thread t: threadArray) {
-                    // exit Cygnus if some thread (except for the main one) is found to be not alive or in a terminated
-                    // state
-                    if (t.getState() == State.TERMINATED || !t.isAlive()) {
-                        if (!t.getName().equals("main") && !t.getName().contains("@qtp")) {
-                            LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
-                                    + ", name=" + t.getName() + ", " + Arrays.toString(t.getStackTrace()));
-                            System.exit(-1);
-                        } // if
+                    // exit Cygnus if some thread (except for the main one and threads from the Jetty
+                    // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
+                    if ((t.getState() == State.TERMINATED || !t.isAlive())
+                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
+                        LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
+                                + ", name=" + t.getName() + ", " + Arrays.toString(t.getStackTrace()));
+                        System.exit(-1);
                     } // if
                 } // for
                 
