@@ -403,23 +403,19 @@ public class CygnusApplication extends Application {
      */
     private static class YAFS extends Thread {
         
-        private final Thread[] threadArray;
-        
-        /**
-         * Constructor.
-         */
-        public YAFS() {
-            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-            threadArray = threadSet.toArray(new Thread[threadSet.size()]);
-        } // YAFS
-        
         @Override
         public void run() {
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+            
             while (true) {
                 for (Thread t: threadArray) {
-                    // exit Cygnus if some thread (except for the main one) is found to be not alive or in a terminated
-                    // state
-                    if (!t.getName().equals("main") && (t.getState() == State.TERMINATED || !t.isAlive())) {
+                    // exit Cygnus if some thread (except for the main one and threads from the Jetty
+                    // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
+                    if ((t.getState() == State.TERMINATED || !t.isAlive())
+                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
+                        LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
+                                + ", name=" + t.getName());
                         System.exit(-1);
                     } // if
                 } // for
