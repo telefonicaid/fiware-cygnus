@@ -124,10 +124,10 @@ public class OrionMySQLSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         }  // if else
         
-        mysqlUsername = context.getString("mysql_username", "opendata");
+        mysqlUsername = context.getString("mysql_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: mysqlPassword should be read as a SHA1 and decoded here
-        mysqlPassword = context.getString("mysql_password", "unknown");
+        mysqlPassword = context.getString("mysql_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence", "row");

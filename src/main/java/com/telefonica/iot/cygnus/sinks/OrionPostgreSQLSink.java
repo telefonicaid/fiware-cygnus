@@ -135,10 +135,10 @@ public class OrionPostgreSQLSink extends OrionSink {
 
         postgresqlDatabase = context.getString("postgresql_database", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", "opendata");
+        postgresqlUsername = context.getString("postgresql_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
-        postgresqlPassword = context.getString("postgresql_password", "unknown");
+        postgresqlPassword = context.getString("postgresql_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence", "row");

@@ -163,14 +163,14 @@ cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSi
 # cygnusagent.sinks.mysql-sink.mysql_host = localhost
 # the port where the MySQL server listes for incomming connections
 # cygnusagent.sinks.mysql-sink.mysql_port = 3306
-# a valid user in the MySQL server
-cygnusagent.sinks.mysql-sink.mysql_username = root
-# password for the user above
-cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxxx
+# a valid user in the MySQL server (empty user by default)
+# cygnusagent.sinks.mysql-sink.mysql_username =
+# password for the user above (empty user by default)
+# cygnusagent.sinks.mysql-sink.mysql_password =
 # how the attributes are stored, either per row either per column (row, column)
 # cygnusagent.sinks.mysql-sink.attr_persistence = row
-# select the table type from table-by-destination and table-by-service-path
-cygnusagent.sinks.mysql-sink.table_type = table-by-destination
+# select the data model from dm-by-entity and dm-by-service-path
+# cygnusagent.sinks.mysql-sink.table_type = dm-by-entity
 # number of notifications to be included within a processing batch
 # cygnusagent.sinks.mysql-sink.batch_size = 1
 # timeout for batch accumulation
@@ -192,12 +192,12 @@ cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPo
 # cygnusagent.sinks.postgresql-sink.postgresql_host = localhost
 # the port where the PostgreSQL server listens for incomming connections
 # cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
-# the name of the postgresql database
-cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
-# a valid user in the PostgreSQL server
-cygnusagent.sinks.postgresql-sink.postgresql_username = root
-# password for the user above
-cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
+# the name of the postgresql database (postgres is the default database)
+# cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
+# a valid user in the PostgreSQL server (empty user as default)
+# cygnusagent.sinks.postgresql-sink.postgresql_username =
+# password for the user above (empty password as default)
+# cygnusagent.sinks.postgresql-sink.postgresql_password = 
 # how the attributes are stored, either per row either per column (row, column)
 # cygnusagent.sinks.postgresql-sink.attr_persistence = row
 # Must be dm-by-service-path or dm-by-entity
