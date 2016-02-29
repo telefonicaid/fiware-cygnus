@@ -165,7 +165,7 @@ cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSi
 # cygnusagent.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server (empty user by default)
 # cygnusagent.sinks.mysql-sink.mysql_username =
-# password for the user above (empty user by default)
+# password for the user above (empty password by default)
 # cygnusagent.sinks.mysql-sink.mysql_password =
 # how the attributes are stored, either per row either per column (row, column)
 # cygnusagent.sinks.mysql-sink.attr_persistence = row
@@ -197,7 +197,7 @@ cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPo
 # a valid user in the PostgreSQL server (empty user as default)
 # cygnusagent.sinks.postgresql-sink.postgresql_username =
 # password for the user above (empty password as default)
-# cygnusagent.sinks.postgresql-sink.postgresql_password = 
+# cygnusagent.sinks.postgresql-sink.postgresql_password =
 # how the attributes are stored, either per row either per column (row, column)
 # cygnusagent.sinks.postgresql-sink.attr_persistence = row
 # Must be dm-by-service-path or dm-by-entity
