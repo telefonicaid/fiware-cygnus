@@ -4,7 +4,6 @@ This is a private environment for e2e testing addressed to fiware-cygnus develop
 
 * [Information about environment](https://docs.google.com/document/d/1XmoIn6TViEfss2PuBfVZ7SUB-57_S6EAsI4DB79yagA/edit?usp=sharing)
 
-
 #Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 

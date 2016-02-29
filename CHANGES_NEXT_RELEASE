@@ -30,3 +30,4 @@
 - [BUG] Fix the shared variables within OrionRESTHandler (#823)
 - [HARDENING] Comment default configuration parameters in documentation and configuration template (#365)
 - [BUG] Fix threads defunction supervision in CygnusApplication (#826)
+- [HARDENING] - Add documentation about testing environment (#777)
