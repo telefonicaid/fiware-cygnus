@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.channels;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.lang.reflect.Field;
 import java.util.Date;
-import org.apache.flume.Context;
 import org.apache.flume.channel.file.FileChannel;
 import org.apache.flume.instrumentation.ChannelCounter;
 
@@ -35,26 +34,7 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     private static final CygnusLogger LOGGER = new CygnusLogger(CygnusFileChannel.class);
     private long setupTime;
     private ChannelCounter channelCounterRef;
-    
-    @Override
-    public void configure(Context context) {
-        super.configure(context);
-        
-        try {
-            Field f = FileChannel.class.getDeclaredField("channelCounter");
-            f.setAccessible(true);
-            channelCounterRef = (ChannelCounter) f.get(this);
-        } catch (NoSuchFieldException e) {
-            LOGGER.error(e.getMessage());
-        } catch (SecurityException e) {
-            LOGGER.error(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            LOGGER.error(e.getMessage());
-        } catch (IllegalAccessException e) {
-            LOGGER.error(e.getMessage());
-        } // try catch
-    } // configure
-    
+
     @Override
     protected void initialize() {
         super.initialize();
@@ -93,7 +73,7 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
     @Override
     public long getNumPutsFail() {
-        return channelCounterRef.getEventPutAttemptCount();
+        return channelCounterRef.getEventPutAttemptCount() - channelCounterRef.getEventPutSuccessCount();
     } // getNumPutsFail
     
     @Override
@@ -103,7 +83,7 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
     @Override
     public long getNumTakesFail() {
-        return channelCounterRef.getEventTakeAttemptCount();
+        return channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
     } // getNumTakesFail
     
 } // CygnusFileChannel
