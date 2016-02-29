@@ -67,7 +67,10 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         String attrPersistenceStr = context.getString("attr_persistence");
         
-        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+        if (attrPersistenceStr == null) {
+            rowAttrPersistence = true;
+        }
+        else if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
             rowAttrPersistence = attrPersistenceStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + attrPersistenceStr + ")");

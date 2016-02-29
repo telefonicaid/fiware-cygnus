@@ -132,8 +132,11 @@ public class OrionCKANSink extends OrionSink {
         orionUrl = context.getString("orion_url", "http://localhost:1026");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_url=" + orionUrl + ")");
         String attrPersistenceStr = context.getString("attr_persistence");
-
-        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+        
+        if (attrPersistenceStr == null) {
+            rowAttrPersistence = true;
+        }
+        else if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
             rowAttrPersistence = attrPersistenceStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + attrPersistenceStr + ")");
@@ -145,7 +148,10 @@ public class OrionCKANSink extends OrionSink {
 
         String sslStr = context.getString("ssl");
         
-        if (sslStr.equals("true") || sslStr.equals("false")) {
+        if (sslStr == null) {
+            ssl = false;
+        }
+        else if (sslStr.equals("true") || sslStr.equals("false")) {
             ssl = Boolean.valueOf(sslStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl="
                 + sslStr + ")");

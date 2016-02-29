@@ -336,7 +336,10 @@ public class OrionHDFSSink extends OrionSink {
         // Hive configuration
         String enableHiveStr = context.getString("hive");
         
-        if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
+        if (enableHiveStr == null) {
+            enableHive = true;
+        }
+        else if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
             enableHive = Boolean.valueOf(enableHiveStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (enableHive="
                 + enableHiveStr + ")");
@@ -431,6 +434,10 @@ public class OrionHDFSSink extends OrionSink {
 
         String hiveDBTypeStr = context.getString("hive.db_type");
         
+        if (hiveDBTypeStr == null) {
+            hiveDBTypeStr = "default-db"; 
+       }
+        
         try {
             hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
@@ -444,7 +451,10 @@ public class OrionHDFSSink extends OrionSink {
         // Kerberos configuration
         String enableKrb5Str = context.getString("krb5_auth");
         
-        if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
+        if (enableKrb5Str == null) {
+            enableKrb5 = false;
+        }
+        else if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
             enableKrb5 = Boolean.valueOf(enableKrb5Str);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth="
                 + enableKrb5Str + ")");
@@ -466,7 +476,10 @@ public class OrionHDFSSink extends OrionSink {
 
         String serviceAsNamespaceStr = context.getString("service_as_namespace");
         
-        if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
+        if (serviceAsNamespaceStr == null) {
+            serviceAsNamespace = false;
+        }
+        else if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
             serviceAsNamespace = Boolean.valueOf(serviceAsNamespaceStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
                 + serviceAsNamespaceStr + ")");
@@ -477,6 +490,10 @@ public class OrionHDFSSink extends OrionSink {
         }  // if else
         
         String backendImplStr = context.getString("backend_impl");
+        
+        if (backendImplStr == null) {
+            backendImplStr = "rest";
+        }
         
         try {
             backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());

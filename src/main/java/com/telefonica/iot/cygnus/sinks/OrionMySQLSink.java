@@ -132,7 +132,10 @@ public class OrionMySQLSink extends OrionSink {
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence");
         
-        if (persistence.equals("row") || persistence.equals("column")) {
+        if (persistence == null) {
+            rowAttrPersistence = true;
+        }
+        else if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + persistence + ")");
         } else {

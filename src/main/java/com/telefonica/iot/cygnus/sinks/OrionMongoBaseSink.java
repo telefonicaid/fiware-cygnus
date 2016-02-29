@@ -115,7 +115,10 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         
         String shouldHashStr = context.getString("should_hash");
         
-        if (shouldHashStr.equals("true") || shouldHashStr.equals("false")) {
+        if (shouldHashStr == null) {
+            shouldHash = false;
+        }
+        else if (shouldHashStr.equals("true") || shouldHashStr.equals("false")) {
             shouldHash = Boolean.valueOf(shouldHashStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash="
                 + shouldHashStr + ")");
