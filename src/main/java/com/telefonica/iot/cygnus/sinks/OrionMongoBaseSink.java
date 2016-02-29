@@ -113,7 +113,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         
-        String shouldHashStr = context.getString("should_hash");
+        String shouldHashStr = context.getString("should_hash", "false");
         
         if (shouldHashStr.equals("true") || shouldHashStr.equals("false")) {
             shouldHash = Boolean.valueOf(shouldHashStr);
