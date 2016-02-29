@@ -334,12 +334,9 @@ public class OrionHDFSSink extends OrionSink {
         } // if else if
 
         // Hive configuration
-        String enableHiveStr = context.getString("hive");
+        String enableHiveStr = context.getString("hive", "true");
         
-        if (enableHiveStr == null) {
-            enableHive = true;
-        }
-        else if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
+        if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
             enableHive = Boolean.valueOf(enableHiveStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (enableHive="
                 + enableHiveStr + ")");
@@ -432,11 +429,7 @@ public class OrionHDFSSink extends OrionSink {
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.server_version=2");
         } // if else
 
-        String hiveDBTypeStr = context.getString("hive.db_type");
-        
-        if (hiveDBTypeStr == null) {
-            hiveDBTypeStr = "default-db"; 
-       }
+        String hiveDBTypeStr = context.getString("hive.db_type", "default-db");
         
         try {
             hiveDBType = HiveDBType.valueOf(hiveDBTypeStr.replaceAll("-", "").toUpperCase());
@@ -449,12 +442,9 @@ public class OrionHDFSSink extends OrionSink {
         }  // try catch
 
         // Kerberos configuration
-        String enableKrb5Str = context.getString("krb5_auth");
+        String enableKrb5Str = context.getString("krb5_auth", "false");
         
-        if (enableKrb5Str == null) {
-            enableKrb5 = false;
-        }
-        else if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
+        if (enableKrb5Str.equals("true") || enableKrb5Str.equals("false")) {
             enableKrb5 = Boolean.valueOf(enableKrb5Str);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_auth="
                 + enableKrb5Str + ")");
@@ -474,12 +464,9 @@ public class OrionHDFSSink extends OrionSink {
         krb5ConfFile = context.getString("krb5_auth.krb5_conf_file", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (krb5_conf_file=" + krb5ConfFile + ")");
 
-        String serviceAsNamespaceStr = context.getString("service_as_namespace");
+        String serviceAsNamespaceStr = context.getString("service_as_namespace", "false");
         
-        if (serviceAsNamespaceStr == null) {
-            serviceAsNamespace = false;
-        }
-        else if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
+        if (serviceAsNamespaceStr.equals("true") || serviceAsNamespaceStr.equals("false")) {
             serviceAsNamespace = Boolean.valueOf(serviceAsNamespaceStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.db_type="
                 + serviceAsNamespaceStr + ")");
@@ -489,12 +476,8 @@ public class OrionHDFSSink extends OrionSink {
                 + serviceAsNamespaceStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
-        String backendImplStr = context.getString("backend_impl");
-        
-        if (backendImplStr == null) {
-            backendImplStr = "rest";
-        }
-        
+        String backendImplStr = context.getString("backend_impl", "rest");
+
         try {
             backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
             LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl="

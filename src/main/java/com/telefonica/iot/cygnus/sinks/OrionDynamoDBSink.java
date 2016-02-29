@@ -81,7 +81,7 @@ public class OrionDynamoDBSink extends OrionSink {
         secretAccessKey = context.getString("secret_access_key");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (secret_access_key=" + secretAccessKey + ")");
         
-        String regionStr = context.getString("region");
+        String regionStr = context.getString("region", "eu-west-1");
 
         try {
             Regions regionReg = Regions.valueOf(regionStr.replaceAll("-", "").toUpperCase());
@@ -95,8 +95,8 @@ public class OrionDynamoDBSink extends OrionSink {
                     + "'ap-northeast-1', 'ap-northeast1', 'ap-shouteast-1', 'ap-shouteast-2' or 'sa-east-1'");
         } // catch
         
-        String attrPersistRowStr = context.getString("attr_persistence");
-
+        String attrPersistRowStr = context.getString("attr_persistence", "row");
+        
         if (attrPersistRowStr.equals("row") || attrPersistRowStr.equals("column")) {
             attrPersistenceRow = attrPersistRowStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="

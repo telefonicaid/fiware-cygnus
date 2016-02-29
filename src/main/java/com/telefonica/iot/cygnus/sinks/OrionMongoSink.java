@@ -65,12 +65,9 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         maxDocuments = context.getLong("max_documents", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
         
-        String attrPersistenceStr = context.getString("attr_persistence");
+        String attrPersistenceStr = context.getString("attr_persistence", "row");
         
-        if (attrPersistenceStr == null) {
-            rowAttrPersistence = true;
-        }
-        else if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
             rowAttrPersistence = attrPersistenceStr.equals("row");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + attrPersistenceStr + ")");
