@@ -1,6 +1,6 @@
 ##Introduction
 
-This is a private environment. All the information about it is described in a document in Google Docs where we will update all the changes. The document has restricted access (Contact us for more information):
+This is a private environment for e2e testing addressed to fiware-cygnus developers. All the information about it is described in a document in Google Docs where we will update all the changes. The document has restricted access (contact us for more information):
 
 * [Information about environment](https://docs.google.com/document/d/1XmoIn6TViEfss2PuBfVZ7SUB-57_S6EAsI4DB79yagA/edit?usp=sharing)
 
