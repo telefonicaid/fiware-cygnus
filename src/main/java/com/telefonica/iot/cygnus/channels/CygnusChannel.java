@@ -61,11 +61,4 @@ public interface CygnusChannel {
      */
     long getNumTakesFail();
     
-    /**
-     * Rollbacks the number of events when a transaction is rollbacked as well. This method is necessary because when
-     * a transaction is rollbacked the "put" method is not used but some kind of internal re-linking is done at the
-     * chanel; thus, the number of events is not increased, which must be deliberatedly done by issuing this method.
-     */
-    void rollback();
-    
 } // CygnusChannel

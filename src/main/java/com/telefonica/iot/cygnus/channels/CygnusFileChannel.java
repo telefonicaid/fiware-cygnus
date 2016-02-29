@@ -17,10 +17,12 @@
  */
 package com.telefonica.iot.cygnus.channels;
 
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+import java.lang.reflect.Field;
 import java.util.Date;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 import org.apache.flume.channel.file.FileChannel;
+import org.apache.flume.instrumentation.ChannelCounter;
 
 /**
  * CygnusFileChannel is an extension of Flume's FileChannel. Basically, it is the same channel but having methods
@@ -30,59 +32,50 @@ import org.apache.flume.channel.file.FileChannel;
  */
 public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusFileChannel.class);
     private long setupTime;
-    private long numEvents;
-    private long numPutsOK;
-    private long numPutsFail;
-    private long numTakesOK;
-    private long numTakesFail;
-    private long capacity;
+    private ChannelCounter channelCounterRef;
     
     @Override
     public void configure(Context context) {
         super.configure(context);
-        capacity = context.getInteger("capacity");
+        
+        try {
+            Field f = FileChannel.class.getDeclaredField("channelCounter");
+            f.setAccessible(true);
+            channelCounterRef = (ChannelCounter) f.get(this);
+        } catch (NoSuchFieldException e) {
+            LOGGER.error(e.getMessage());
+        } catch (SecurityException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOGGER.error(e.getMessage());
+        } // try catch
     } // configure
     
     @Override
     protected void initialize() {
         super.initialize();
+        
+        try {
+            Field f = FileChannel.class.getDeclaredField("channelCounter");
+            f.setAccessible(true);
+            channelCounterRef = (ChannelCounter) f.get(this);
+        } catch (NoSuchFieldException e) {
+            LOGGER.error(e.getMessage());
+        } catch (SecurityException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOGGER.error(e.getMessage());
+        } // try catch
+        
         setupTime = new Date().getTime();
-        numEvents = 0;
-        numPutsOK = 0;
-        numPutsFail = 0;
-        numTakesOK = 0;
-        numTakesFail = 0;
     } // initialize
-    
-    @Override
-    public void put(Event event) {
-        if (numEvents != capacity) {
-            numEvents++;
-            numPutsOK++;
-        } else {
-            numPutsFail++;
-        } // if else
-        
-        // independently of the remaining capacity, call the super version of the method in order to behave as a
-        // FileChannel (exceptions, errors, etc)
-        super.put(event);
-    } // put
-    
-    @Override
-    public Event take() {
-        Event event = super.take();
-        
-        if (event != null) {
-            numEvents--;
-            numTakesOK++;
-        } else {
-            numTakesFail++;
-        } // if else
-        
-        return event;
-    } // take
-    
+
     @Override
     public long getSetupTime() {
         return setupTime;
@@ -90,32 +83,27 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
     @Override
     public long getNumEvents() {
-        return numEvents;
+        return channelCounterRef.getChannelSize();
     } // getNumEvents
     
     @Override
     public long getNumPutsOK() {
-        return numPutsOK;
+        return channelCounterRef.getEventPutSuccessCount();
     } // getNumPutsOK
     
     @Override
     public long getNumPutsFail() {
-        return numPutsFail;
+        return channelCounterRef.getEventPutAttemptCount();
     } // getNumPutsFail
     
     @Override
     public long getNumTakesOK() {
-        return numTakesOK;
+        return channelCounterRef.getEventTakeSuccessCount();
     } // getNumTakesOK
     
     @Override
     public long getNumTakesFail() {
-        return numTakesFail;
+        return channelCounterRef.getEventTakeAttemptCount();
     } // getNumTakesFail
-    
-    @Override
-    public void rollback() {
-        numEvents++;
-    } // rollback
     
 } // CygnusFileChannel
