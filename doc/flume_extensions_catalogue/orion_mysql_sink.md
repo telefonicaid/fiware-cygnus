@@ -41,7 +41,7 @@ According to the [naming conventions](./naming_conventions.md), a database named
 Then, the context responses/entities within the container are iterated, and a table is created (if not yet existing) within the above database whose name depends on the configured data model:
 
 * `dm-by-entity`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
-* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing). 
+* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing).
 
 The context attributes within each context response/entity are iterated, and a new data row (or rows) is inserted in the current table. The format for this row depends on the configured persistence mode:
 
@@ -100,7 +100,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
-    Enter password: 
+    Enter password:
     Welcome to the MySQL monitor.  Commands end with ; or \g.
     ...
     mysql> show databases;
@@ -137,7 +137,7 @@ Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistenc
 If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
-    Enter password: 
+    Enter password:
     Welcome to the MySQL monitor.  Commands end with ; or \g.
     ...
     mysql> show databases;
@@ -169,11 +169,11 @@ If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionMySQLSink` 
     | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
-    
+
 If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
-    Enter password: 
+    Enter password:
     Welcome to the MySQL monitor.  Commands end with ; or \g.
     ...
     mysql> show databases;
@@ -206,11 +206,11 @@ If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMySQLSi
     | 1429535775 | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        |  oil_level  | float     | 74.6      | []     |
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
-    
+
 If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
-    Enter password: 
+    Enter password:
     Welcome to the MySQL monitor.  Commands end with ; or \g.
     ...
     mysql> show databases;
@@ -242,7 +242,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionMySQL
     | 2015-04-20T12:13:22.41.124 | 4wheels           | car1     | car        | 112.9 | []       |  74.6     | []           |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
-    
+
 NOTES:
 
 * `mysql` is the MySQL CLI for querying the data.
@@ -258,15 +258,17 @@ NOTES:
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 ||
 | mysql_username | yes | N/A ||
 | mysql_password | yes | N/A ||
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
-| batch_size | no | 1 | Number of events accumulated before persistence |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 
 A configuration example could be:
 
@@ -276,15 +278,17 @@ A configuration example could be:
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
     cygnusagent.sinks.mysql-sink.enable_grouping = false
+    cygnusagent.sinks.mysql-sink.enable_lowercase = false
     cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
     cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
     cygnusagent.sinks.mysql-sink.mysql_port = 3306
     cygnusagent.sinks.mysql-sink.mysql_username = myuser
     cygnusagent.sinks.mysql-sink.mysql_password = mypassword
-    cygnusagent.sinks.mysql-sink.attr_persistence = column
+    cygnusagent.sinks.mysql-sink.attr_persistence = row
     cygnusagent.sinks.mysql-sink.batch_size = 100
     cygnusagent.sinks.mysql-sink.batch_timeout = 30
-    
+    cygnusagent.sinks.mysql-sink.batch_ttl = 10
+
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
@@ -325,15 +329,15 @@ By default, `OrionMySQLSink` has a configured batch size and batch accumulation 
 As any other NGSI-like sink, `OrionMySQLSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MySQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MySQLBackend` implementation.
-    
+
     public void start();
 
 An implementation of `MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMySQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -342,15 +346,15 @@ A complete configuration as the described above is read from the given `Context`
 This is a convenience backend class for MySQL that implements the `MySQLBackend` interface (provides the methods that any MySQL backend must implement). Relevant methods are:
 
     public void createDatabase(String dbName) throws Exception;
-    
+
 Creates a database, given its name, if not existing.
-    
+
     public void createTable(String dbName, String tableName, String fieldNames) throws Exception;
-    
+
 Creates a table, given its name, if not existing within the given database. The field names are given as well.
-    
+
     void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
-    
+
 Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
 
 [Top](#top)
@@ -359,4 +363,3 @@ Persists the accumulated context data (in the form of the given field values) re
 Current implementation of `OrionMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
 
 [Top](#top)
-

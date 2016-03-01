@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -108,10 +108,7 @@ public abstract class HttpBackend {
      */
     public JsonResponse doRequest(String method, String url, boolean relative, ArrayList<Header> headers,
             StringEntity entity) throws Exception {
-        // default httpRes
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse("{}");
-        JsonResponse response = new JsonResponse(null, 503, "Service unavailable", null);
+        JsonResponse response;
         
         if (relative) {
             // iterate on the hosts
@@ -127,17 +124,9 @@ public abstract class HttpBackend {
                     } // if else
                 } catch (Exception e) {
                     LOGGER.debug("There was a problem when performing the request (details=" + e.getMessage() + "). "
-                            + "Most probably the used Http endpoint is not active, trying another one (host="
-                            + host + ")");
+                            + "Most probably the used http endpoint (" + host + ") is not active, trying another one");
                     continue;
-                } // try catch // try catch
-                
-                int status = response.getStatusCode();
-
-                if (status != 200 && status != 307 && status != 404 && status != 201) {
-                    LOGGER.debug("The used Http endpoint is not active, trying another one (host=" + host + ")");
-                    continue;
-                } // if
+                } // try catch
                 
                 // place the current host in the first place (if not yet placed), since it is currently working
                 if (!hosts.getFirst().equals(host)) {
@@ -146,17 +135,17 @@ public abstract class HttpBackend {
                     LOGGER.debug("Placing the host in the first place of the list (host=" + host + ")");
                 } // if
                 
-                break;
+                return response;
             } // for
+            
+            throw new CygnusPersistenceError("No http endpoint was reachable");
         } else {
             if (krb5) {
-                response = doPrivilegedRequest(method, url, headers, entity);
+                return doPrivilegedRequest(method, url, headers, entity);
             } else {
-                response = doRequest(method, url, headers, entity);
+                return doRequest(method, url, headers, entity);
             } // if else
         } // if else
-        
-        return response;
     } // doRequest
         
     private JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
@@ -268,6 +257,10 @@ public abstract class HttpBackend {
     
     private JsonResponse createJsonResponse(HttpResponse httpRes) throws Exception {
         try {
+            if (httpRes == null) {
+                return null;
+            } // if
+            
             LOGGER.debug("Http response: " + httpRes.getStatusLine().toString());
             
             // parse the httpRes payload

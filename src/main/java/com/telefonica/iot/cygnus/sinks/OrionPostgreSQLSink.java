@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -27,8 +26,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -126,37 +123,55 @@ public class OrionPostgreSQLSink extends OrionSink {
         postgresqlHost = context.getString("postgresql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
         postgresqlPort = context.getString("postgresql_port", "3306");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+        int intPort = Integer.parseInt(postgresqlPort);
+
+        if ((intPort <= 0) || (intPort > 65535)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
+                    + " -- Must be between 0 and 65535");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+        }  // if else
+
         postgresqlDatabase = context.getString("postgresql_database", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", "opendata");
+        postgresqlUsername = context.getString("postgresql_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
-        postgresqlPassword = context.getString("postgresql_password", "unknown");
+        postgresqlPassword = context.getString("postgresql_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
+        String persistence = context.getString("attr_persistence", "row");
+
+        if (persistence.equals("row") || persistence.equals("column")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + persistence + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + persistence + ") -- Must be 'row' or 'column'");
+        }  // if else
+
         super.configure(context);
+        
+        // CKAN requires all the names written in lower case
+        enableLowercase = true;
     } // configure
 
     @Override
     public void start() {
-        // create the persistence backend
-        LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
-        persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
-                postgresqlUsername, postgresqlPassword);
+        try {
+            LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
+            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
+                    postgresqlUsername, postgresqlPassword);
+        } catch (Exception e) {
+            LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
+
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
-
-    @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
 
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -212,12 +227,20 @@ public class OrionPostgreSQLSink extends OrionSink {
             return aggregation;
         } // getAggregation
 
-        public String getSchemaName() {
-            return schemaName;
+        public String getSchemaName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return schemaName.toLowerCase();
+            } else {
+                return schemaName;
+            } // if else
         } // getDbName
 
-        public String getTableName() {
-            return tableName;
+        public String getTableName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return tableName.toLowerCase();
+            } else {
+                return tableName;
+            } // if else
         } // getTableName
 
         public String getTypedFieldNames() {
@@ -457,8 +480,8 @@ public class OrionPostgreSQLSink extends OrionSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
-        String schemaName = aggregator.getSchemaName();
-        String tableName = aggregator.getTableName();
+        String schemaName = aggregator.getSchemaName(enableLowercase);
+        String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("

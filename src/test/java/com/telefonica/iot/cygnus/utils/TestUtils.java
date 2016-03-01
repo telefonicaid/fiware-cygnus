@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -87,7 +87,7 @@ public final class TestUtils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_").toLowerCase();
+        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
         return (res.startsWith("_") ? res.substring(1, res.length()) : res);
     } // encode
     

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -26,16 +26,39 @@ package com.telefonica.iot.cygnus.channels;
 public interface CygnusChannel {
     
     /**
+     * Gets the setup time of the channel.
+     * @return The setup time (in miliseconds) of the channel
+     */
+    long getSetupTime();
+    
+    /**
      * Gets the number of events within the channel.
      * @return The number of events within the channel.
      */
-    int getNumEvents();
+    long getNumEvents();
     
     /**
-     * Rollbacks the number of events when a transaction is rollbacked as well. This method is necessary because when
-     * a transaction is rollbacked the "put" method is not used but some kind of internal re-linking is done at the
-     * chanel; thus, the number of events is not increased, which must be deliberatedly done by issuing this method.
+     * Gets the number of put operations on the channel that went OK.
+     * @return The number of put operations on the channel that went OK
      */
-    void rollback();
+    long getNumPutsOK();
+    
+    /**
+     * Gets the number of put operations on the channel that failed.
+     * @return The number of put operations on the channel that failed
+     */
+    long getNumPutsFail();
+    
+    /**
+     * Gets the number of take operations on the channel that went OK.
+     * @return The number of take operations on the channel that went OK
+     */
+    long getNumTakesOK();
+    
+    /**
+     * Gets the number of take operations on the channel that failed.
+     * @return The number of take operations on the channel that failed
+     */
+    long getNumTakesFail();
     
 } // CygnusChannel

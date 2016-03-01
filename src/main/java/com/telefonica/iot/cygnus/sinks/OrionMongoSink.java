@@ -17,14 +17,13 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 import org.bson.Document;
+import org.apache.flume.Context;
 
 /**
  * @author frb
@@ -34,21 +33,52 @@ import org.bson.Document;
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
  */
 public class OrionMongoSink extends OrionMongoBaseSink {
+    
+    private long collectionsSize;
+    private long maxDocuments;
 
+    private boolean rowAttrPersistence;
+    
     /**
      * Constructor.
      */
     public OrionMongoSink() {
         super();
     } // OrionMongoSink
-
+    
+    public boolean getRowAttrPersistence() {
+        return rowAttrPersistence;
+    }
+    
     @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
+    public void configure(Context context) {
+        collectionsSize = context.getLong("collections_size", 0L);
+        
+        if ((collectionsSize > 0) && (collectionsSize < 4096)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collections_size="
+                    + collectionsSize + ") -- Must be greater than or equal to 4096");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
+        }  // if else
+       
+        maxDocuments = context.getLong("max_documents", 0L);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_documents=" + maxDocuments + ")");
+        
+        String attrPersistenceStr = context.getString("attr_persistence", "row");
+        
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") must be 'row' or 'column'");
+        }  // if else
+        
+        super.configure(context);
+    } // configure
 
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -102,12 +132,20 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             return aggregation;
         } // getAggregation
         
-        public String getDbName() {
-            return dbName;
+        public String getDbName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dbName.toLowerCase();
+            } else {
+                return dbName;
+            } // if else
         } // getDbName
         
-        public String getCollectionName() {
-            return collectionName;
+        public String getCollectionName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return collectionName.toLowerCase();
+            } else {
+                return collectionName;
+            } // if else
         } // getCollectionName
         
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
@@ -168,7 +206,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
         
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -242,7 +280,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         } // aggregate
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs * 1000));
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
 
             switch (dataModel) {
                 case DMBYSERVICEPATH:
@@ -271,12 +309,12 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     
     private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
         ArrayList<Document> aggregation = aggregator.getAggregation();
-        String dbName = aggregator.getDbName();
-        String collectionName = aggregator.getCollectionName();
+        String dbName = aggregator.getDbName(enableLowercase);
+        String collectionName = aggregator.getCollectionName(enableLowercase);
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName);
+        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
         backend.insertContextDataRaw(dbName, collectionName, aggregation);
     } // persistAggregation
 

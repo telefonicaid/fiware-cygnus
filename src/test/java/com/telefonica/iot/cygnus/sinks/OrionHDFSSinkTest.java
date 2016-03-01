@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.ArrayList;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -71,20 +70,45 @@ public class OrionHDFSSinkTest {
     private final Long recvTimeTs = 123456789L;
     private final String normalService = "vehicles";
     private final String abnormalService =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservname";
     private final String normalDefaultServicePath = "4wheels";
     private final String rootServicePath = "";
     private final String abnormalDefaultServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservpathname";
     private final String normalGroupedServicePath = "cars";
     private final String abnormalGroupedServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longservpathname";
     private final String normalDefaultDestination = "car1_car";
     private final String abnormalDefaultDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longdestname";
     private final String normalGroupedDestination = "my_cars";
     private final String abnormalGroupedDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
+            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            + "longdestname";
     
     // notification constants
     private final String singleContextElementNotification = ""
@@ -446,10 +470,8 @@ public class OrionHDFSSinkTest {
             ContextElement contextElement) {
         CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
-        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
-        groupedBatchEvents.add(groupedEvent);
         Batch batch = new Batch();
-        batch.addEvents(destination, groupedBatchEvents);
+        batch.addEvent(destination, groupedEvent);
         return batch;
     } // createBatch
     
@@ -471,13 +493,13 @@ public class OrionHDFSSinkTest {
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
+        context.put("hive", enableHive);
         
         if (useDeprecatedParams) {
             context.put("hive_server_version", hiveServerVersion);
             context.put("hive_host", hiveHost);
             context.put("hive_port", hivePort);
         } else {
-            context.put("hive", enableHive);
             context.put("hive.server_version", hiveServerVersion);
             context.put("hive.host", hiveHost);
             context.put("hive.port", hivePort);

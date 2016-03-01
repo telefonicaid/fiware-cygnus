@@ -57,6 +57,8 @@ public class OrionCKANSinkTest {
     private final String apiKey = "xyzwxyzwxyzw";
     private final String orionURL = "http://localhost:1026";
     private final String ssl = "true";
+    private String enableGrouping = "true";
+    private String attrPersistence = "row";
     
     // batches constants
     private final Long recvTimeTs = 123456789L;
@@ -173,14 +175,12 @@ public class OrionCKANSinkTest {
     @Test
     public void testConfigure() {
         System.out.println("Testing OrionCKANSink.configure");
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
         Context context = createContext(attrPersistence, enableGrouping);
         sink.configure(context);
         assertEquals(ckanHost, sink.getCKANHost());
         assertEquals(ckanPort, sink.getCKANPort());
         assertEquals(apiKey, sink.getAPIKey());
-        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
         assertEquals(apiKey, sink.getAPIKey());
         assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
         assertEquals(ssl, sink.getSSL() ? "true" : "false");
@@ -192,8 +192,8 @@ public class OrionCKANSinkTest {
     @Test
     public void testStart() {
         System.out.println("Testing OrionCKANSink.start");
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
+        enableGrouping = "true";
         Context context = createContext(attrPersistence, enableGrouping);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
@@ -208,8 +208,8 @@ public class OrionCKANSinkTest {
     @Test
     public void testPersistNullBatches() {
         System.out.println("Testing OrionCKANSinkTest.persistBatch (null batches)");
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
+        enableGrouping = "true";
         Context context = createContext(attrPersistence, enableGrouping);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
@@ -235,8 +235,8 @@ public class OrionCKANSinkTest {
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         System.out.println("Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)");
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
+        enableGrouping = "true";
         Context context = createContext(attrPersistence, enableGrouping);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
@@ -301,8 +301,8 @@ public class OrionCKANSinkTest {
     @Test
     public void testPersistResourceLengths() {
         // common objects
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
+        enableGrouping = "true";
         Context context = createContext(attrPersistence, enableGrouping);
         
         System.out.println("Testing OrionCKANSink.persisBatch (normal resource lengths)");
@@ -365,8 +365,8 @@ public class OrionCKANSinkTest {
     @Test
     public void testPersistServiceServicePath() {
         // common objects
-        String attrPersistence = "row";
-        String enableGrouping = "true";
+        attrPersistence = "row";
+        enableGrouping = "true";
         Context context = createContext(attrPersistence, enableGrouping);
         
         System.out.println("Testing OrionCKANSink.persistBatch (\"root\" servicePath name)");
@@ -403,10 +403,8 @@ public class OrionCKANSinkTest {
             NotifyContextRequest.ContextElement contextElement) {
         CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
-        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
-        groupedBatchEvents.add(groupedEvent);
         Batch batch = new Batch();
-        batch.addEvents(destination, groupedBatchEvents);
+        batch.addEvent(destination, groupedEvent);
         return batch;
     } // createBatch
     

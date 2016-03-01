@@ -53,7 +53,6 @@ Flume events are not much more different than the above representation: there is
 	         content-type=application/json,
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
-	         ttl=10,
 	         fiware-service=vehicles,
 	         fiware-servicepath=4wheels,
 	         notified-entities=car1_car
@@ -84,7 +83,6 @@ The headers are a subset of the notified HTTP headers and others added by Cygnus
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
 * The notification reception time is included in the list of headers (as <b>timestamp</b>) for timestamping purposes in the different sinks. It is added by a native interceptor.
 * The <b>transactionId</b> identifies a complete Cygnus transaction, starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted.
-* The time-to-live (or <b>ttl</b>) specifies the number of re-injection retries in the channel when something goes wrong while persisting the data. This re-injection mechanism is part of the reliability features of Flume. -1 means inifinite retries.
 * Note that Orion can include a `Fiware-Service` HTTP header specifying the tenant/organization associated to the notification. Since version 0.3, Cygnus is able to support this header, although the actual processing of such tenant/organization depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service specified in the `default_service` configuration property of `OrionRESTHandler`. This NGSI header is directly added to the Flume event as `fiware-service`.
 * Orion can notify another HTTP header, `Fiware-ServicePath` specifying a subservice within a tenant/organization. Since version 0.6, Cygnus is able to support this header, although the actual processing of such subservice depends on the particular sink. If the notification doesn't include this header, then Cygnus will use the default service path specified in the `default_service_path` configuration property of `OrionRESTHandler`. This NGSI header is used for building several Flume headers:
     * It is directly added as the `fiware-servicepath`.

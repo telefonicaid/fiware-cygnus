@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 #
 # This file is part of fiware-cygnus (FI-WARE project).
 #
@@ -54,7 +54,7 @@ function translate_table_row {
 function translate_table_column {
         local table=$1
         mysql -u $user -p$password -e "use $database;alter table $table add fiwareServicePath text default null after recvTime"
-        mysql -u $user -p$password -e "use $database;alter table $table add entityId text default null after fiwareservicePath"
+        mysql -u $user -p$password -e "use $database;alter table $table add entityId text default null after fiwareServicePath"
         mysql -u $user -p$password -e "use $database;alter table $table add entityType text default null after entityId"
 }
 

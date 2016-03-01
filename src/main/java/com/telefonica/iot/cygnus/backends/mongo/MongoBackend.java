@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -36,12 +36,27 @@ public interface MongoBackend {
     void createDatabase(String dbName) throws Exception;
     
     /**
-     * Creates a collection, given its name, if not exists in the given database.
+     * Creates a collection for STH, given its name, if not exists in the given database. Time-based limits are set,
+     * if possible.
      * @param dbName
      * @param collectionName
+     * @param dataExpiration
      * @throws Exception
      */
-    void createCollection(String dbName, String collectionName) throws Exception;
+    void createCollection(String dbName, String collectionName, long dataExpiration) throws Exception;
+    
+    /**
+     * Creates a collection for plain MongoDB, given its name, if not exists in the given database. Size-based limits
+     * are set, if possible. Time-based limits are also set, if possible.
+     * @param dbName
+     * @param collectionName
+     * @param collectionsSize
+     * @param maxDocuments
+     * @param dataExpiration
+     * @throws Exception
+     */
+    void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
+            long dataExpiration) throws Exception;
     
     /**
      * Inserts a new document in the given raw collection within the given database (row-like mode).

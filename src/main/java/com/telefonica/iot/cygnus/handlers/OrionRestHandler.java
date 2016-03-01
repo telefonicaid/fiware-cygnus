@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -48,14 +48,22 @@ import org.slf4j.MDC;
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
+    // LOGGER
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionRestHandler.class);
+    
+    // configuration parameters
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
-    private String eventsTTL;
-    private long transactionCount;
-    private final long bootTimeSeconds;
-    private long bootTimeMilliseconds;
+    
+    // shared variables, making them static all the instances of this class will share them
+    private static final Object LOCK = new Object();
+    private static long transactionCount = 0;
+    private static final long BOOTTIME = new Date().getTime();
+    private static final long BOOTTIMESECONDS = BOOTTIME / 1000;
+    private static long bootTimeMiliseconds = BOOTTIME % 1000;
+    private static long numReceivedEvents = 0;
+    private static long numProcessedEvents = 0;
     
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
@@ -63,17 +71,33 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
-        // init the transaction id
-        transactionCount = 0;
-        
-        // store the boot time (not the exact boot time, but very accurate one)
-        long bootTime = new Date().getTime();
-        bootTimeSeconds = bootTime / 1000;
-        bootTimeMilliseconds = bootTime % 1000;
-        
         // print Cygnus version
         LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
     } // OrionRestHandler
+    
+    /**
+     * Gets the setup time.
+     * @return The setup time
+     */
+    public long getBootTime() {
+        return BOOTTIME;
+    } // getBootTime
+    
+    /**
+     * Gets the number of received events.
+     * @return The number of received events
+     */
+    public long getNumReceivedEvents() {
+        return numReceivedEvents;
+    } // getNumReceivedEvents
+        
+    /**
+     * Gets the number of processed events.
+     * @return The number of processed events
+     */
+    public long getNumProcessedEvents() {
+        return numProcessedEvents;
+    } // getNumProcessedEvents
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
@@ -98,14 +122,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getDefaultServicePath() {
         return defaultServicePath;
     } // getDefaultServicePath
-    
-    /**
-     * Gets the events TTL. It is protected due to it is only required for testing purposes.
-     * @return
-     */
-    protected String getEventsTTL() {
-        return eventsTTL;
-    } // getEventsTTL
 
     @Override
     public void configure(Context context) {
@@ -136,13 +152,13 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
         
         LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
-        eventsTTL = context.getString(Constants.PARAM_EVENTS_TTL, "10");
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_EVENTS_TTL + "=" + eventsTTL + ")");
         LOGGER.info("Startup completed");
     } // configure
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        numReceivedEvents++;
+        
         // check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
@@ -167,7 +183,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
-            String headerValue = request.getHeader(headerName).toLowerCase(Locale.ENGLISH);
+            String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
@@ -197,6 +213,12 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 } // if else
             } // if else if
         } // while
+        
+        // check if received content type is null
+        if (contentType == null) {
+            LOGGER.warn("Missing content type. Required application/json or application/xml.");
+            throw new HTTPBadRequestException("Missing content type. Required application/json or application/xml.");
+        } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
         MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);
@@ -248,15 +270,15 @@ public class OrionRestHandler implements HTTPSourceHandler {
         LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
         eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID + ", value=" + transId + ")");
-        eventHeaders.put(Constants.FLUME_HEADER_TTL, eventsTTL);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TTL + ", value=" + eventsTTL + ")");
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
+                + ", value=" + transId + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        LOGGER.info("Event put in the channel (id=" + event.hashCode() + ", ttl=" + eventsTTL + ")");
+        LOGGER.info("Event put in the channel, id=" + event.hashCode());
+        numProcessedEvents++;
         return eventList;
     } // getEvents
     
@@ -266,18 +288,21 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * @return A new unique transaction identifier
      */
     private String generateTransId() {
-        long transCountTrunked = transactionCount % 10000000000L;
-        String transId = bootTimeSeconds + "-" + bootTimeMilliseconds + "-" + String.format("%010d", transCountTrunked);
-        
-        // check if the transactionCount must be restarted
-        if (transCountTrunked == 9999999999L) {
-            transactionCount = 0;
-            bootTimeMilliseconds = (bootTimeMilliseconds + 1) % 1000; // this could also overflow!
-        } else {
-            transactionCount++;
-        } // if else
-        
-        return transId;
+        synchronized (LOCK) {
+            long transCountTrunked = transactionCount % 10000000000L;
+            String transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                    + String.format("%010d", transCountTrunked);
+
+            // check if the transactionCount must be restarted
+            if (transCountTrunked == 9999999999L) {
+                transactionCount = 0;
+                bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
+            } else {
+                transactionCount++;
+            } // if else
+
+            return transId;
+        }
     } // generateTransId
  
 } // OrionRestHandler

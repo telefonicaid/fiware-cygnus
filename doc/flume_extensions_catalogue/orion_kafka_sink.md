@@ -87,19 +87,19 @@ If `data_model=dm-by-entity` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-    
+
 If `data_model=dm-by-service-path` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic 4wheels --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-    
+
 If `data_model=dm-by-service` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-    
+
 NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
-    
+
 [Top](#top)
 
 ##<a name="section2"></a>Administration guide
@@ -109,13 +109,17 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionKafkaSink</i> |
-| channel | yes | N/A |
-| enable_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i> |
-| broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>) |
-| zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i> |
-| batch_size | no | 1 | Number of events accumulated before persistence |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
+| channel | yes | N/A ||
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
+| broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
+| zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i>. |
+| partitions |  no | 1 | Number of partitions for a topic. |
+| replication_factor | no | 1 | For a topic with replication factor N, Kafka will tolerate N-1 server failures without losing any messages commited to the log. Replication factor must be less than or equal to the number of brokers created. | 
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 
 A configuration example could be:
 
@@ -125,11 +129,15 @@ A configuration example could be:
     cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
     cygnusagent.sinks.kafka-sink.channel = kafka-channel
     cygnusagent.sinks.kafka-sink.enable_grouping = false
+    cygnusagent.sinks.kafka-sink.enable_lowercase = false
     cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
     cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
     cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
+    cygnusagent.sinks.kafka-sink.partitions = 5
+    cygnusagent.sinks.kafka-sink.replication_factor = 1
     cygnusagent.sinks.kafka-sink.batch_size = 100
     cygnusagent.sinks.kafka-sink.batch_timeout = 30
+    cygnusagent.sinks.kafka-sink.batch_ttl = 10
 
 [Top](#top)
 
@@ -155,15 +163,15 @@ By default, `OrionKafkaSink` has a configured batch size and batch accumulation 
 As any other NGSI-like sink, `OrionKafkaSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the Kafka topic where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to the `KafkaProducer`.
-    
+
     public void start();
 
 `KafkaProducer` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionKafkaSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the one described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -172,8 +180,7 @@ A complete configuration as the one described above is read from the given `Cont
 The implementation of a class dealing with the details of the backend is given by Kafka itself through the [`KafkaProducer`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html) class. Thus, the sink has been developed by invoking the methods within that class, specially:
 
     public send(ProducerRecord<K,V>);
-    
+
 Which sends a [`ProducerRecord`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html) object to the configured topic.
 
 [Top](#top)
-

@@ -178,7 +178,8 @@ public class OrionKafkaSinkTest {
         // set up the behaviour of the mocked classes
         when(mockKafkaBackend.send(null)).thenReturn(null, null, null);
         when(mockTopicAPI.topicExists(null, null)).thenReturn(false, false, false);
-        doNothing().doNothing().doNothing().when(mockTopicAPI).createTopic(null, null, null);
+        doNothing().doNothing().doNothing().doNothing().doNothing().when(mockTopicAPI).
+                createTopic(null, null, 0, 0, null);
         
         // setup the testing purpose Zookeeper server
         zkServer = new TestingServer(zookeeperPort);
@@ -414,8 +415,6 @@ public class OrionKafkaSinkTest {
             NotifyContextRequest.ContextElement contextElement, DataModel dataModel) {
         CygnusEvent groupedEvent = new CygnusEvent(recvTimeTs, service, servicePath, entity, attribute,
             contextElement);
-        ArrayList<CygnusEvent> groupedBatchEvents = new ArrayList<CygnusEvent>();
-        groupedBatchEvents.add(groupedEvent);
         Batch batch = new Batch();
         String destination;
         
@@ -436,12 +435,13 @@ public class OrionKafkaSinkTest {
                 destination = null;
         } // switch
         
-        batch.addEvents(destination, groupedBatchEvents);
+        batch.addEvent(destination, groupedEvent);
         return batch;
     } // createBatch
     
     private Context createContext(String dataModel) {
         Context context = new Context();
+        context.put("enable_grouping", "true");
         context.put("data_model", dataModel);
         context.put("broker_list", brokerList);
         context.put("zookeeper_endpoint", zookeeperEndpoint);

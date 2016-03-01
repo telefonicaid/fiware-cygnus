@@ -19,13 +19,10 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -56,17 +53,7 @@ public class OrionTestSink extends OrionSink {
     @Override
     public void start() {
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
-
-    // TBD: to be removed once all the sinks have been migrated to persistBatch method
-    @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
     
     @Override
     void persistBatch(Batch batch) throws Exception {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -92,10 +92,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 cache.setOrgId(orgName, orgId);
                 String pkgId = createPackage(pkgName, orgId);
                 cache.addPkg(orgName, pkgName);
-                cache.setPkgId(pkgName, pkgId);
+                cache.setPkgId(orgName, pkgName, pkgId);
                 String resId = createResource(resName, pkgId);
                 cache.addRes(orgName, pkgName, resName);
-                cache.setResId(resName, resId);
+                cache.setResId(orgName, pkgName, resName, resId);
                 createDataStore(resId);
                 createView(resId);
                 return resId;
@@ -113,10 +113,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             if (createEnabled) {
                 String pkgId = createPackage(pkgName, cache.getOrgId(orgName));
                 cache.addPkg(orgName, pkgName);
-                cache.setPkgId(pkgName, pkgId);
+                cache.setPkgId(orgName, pkgName, pkgId);
                 String resId = createResource(resName, pkgId);
                 cache.addRes(orgName, pkgName, resName);
-                cache.setResId(resName, resId);
+                cache.setResId(orgName, pkgName, resName, resId);
                 createDataStore(resId);
                 createView(resId);
                 return resId;
@@ -132,9 +132,9 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                     + pkgName + ", resName=" + resName + ")");
             
             if (createEnabled) {
-                String resId = this.createResource(resName, cache.getPkgId(pkgName));
+                String resId = this.createResource(resName, cache.getPkgId(orgName, pkgName));
                 cache.addRes(orgName, pkgName, resName);
-                cache.setResId(resName, resId);
+                cache.setResId(orgName, pkgName, resName, resId);
                 createDataStore(resId);
                 createView(resId);
                 return resId;
@@ -146,7 +146,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         LOGGER.debug("The resource was cached (orgName=" + orgName + ", pkgName=" + pkgName + ", resName="
                 + resName + ")");
         
-        return cache.getResId(resName);
+        return cache.getResId(orgName, pkgName, resName);
     } // resourceLookupOrCreate
 
     /**
@@ -333,7 +333,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                     + "\", \"fields\": [ "
                     + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
                     + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
-                    + "{ \"id\": \"" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + Constants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ENTITY_ID + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ENTITY_TYPE + "\", \"type\": \"text\"},"
                     + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"

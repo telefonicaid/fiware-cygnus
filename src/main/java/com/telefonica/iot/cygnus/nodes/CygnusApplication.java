@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -80,6 +80,7 @@ public class CygnusApplication extends Application {
     private static final int YAFS_CHECKING_INTERVAL = 1000;
     private static final int DEF_MGMT_IF_PORT = 8081;
     private static final int DEF_POLLING_INTERVAL = 30;
+    private boolean firstTime = true;
     
     /**
      * Constructor.
@@ -128,6 +129,17 @@ public class CygnusApplication extends Application {
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        if (firstTime) {
+            // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
+            // certain order
+            sourcesRef = conf.getSourceRunners();
+            channelsRef = conf.getChannels();
+            sinksRef = conf.getSinkRunners();
+            LOGGER.debug("References to Flume components have been taken");
+            firstTime = false;
+            return;
+        } // if
+        
         super.handleConfigurationEvent(conf);
         
         // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
@@ -135,6 +147,7 @@ public class CygnusApplication extends Application {
         sourcesRef = conf.getSourceRunners();
         channelsRef = conf.getChannels();
         sinksRef = conf.getSinkRunners();
+        LOGGER.debug("References to Flume components have been taken");
     } // handleConfigurationEvent
 
     /**
@@ -205,7 +218,7 @@ public class CygnusApplication extends Application {
                     } catch (IOException e) {
                         LOGGER.error("Failed to read canonical path for file: " + path + ". Details="
                                 + e.getMessage());
-                    } // try catch // try catch
+                    } // try catch
                     
                     throw new ParseException("The specified configuration file does not exist: " + path);
                 } // if
@@ -231,12 +244,26 @@ public class CygnusApplication extends Application {
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
                         
-            // start the Cygnus application, including the management interface
-            LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(sourcesRef, channelsRef, sinksRef));
-            mgmtIfServer.start();
+            // start the Cygnus application
             LOGGER.info("Starting Cygnus application");
             application.start();
+            
+            // wait until the references to Flume components are not null
+            try {
+                while (sourcesRef == null || channelsRef == null || sinksRef == null) {
+                    LOGGER.info("Waiting for valid Flume components references...");
+                    Thread.sleep(1000);
+                } // while
+            } catch (InterruptedException e) {
+                LOGGER.error("There was an error while waiting for Flume components references. Details: "
+                        + e.getMessage());
+            } // try catch
+            
+            // start the Management Interface, passing references to Flume components
+            LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
+            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(configurationFile,
+                    sourcesRef, channelsRef, sinksRef));
+            mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
             Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
@@ -300,7 +327,7 @@ public class CygnusApplication extends Application {
                             continue;
                         } // if else
                         
-                        int numEvents = cygnusChannel.getNumEvents();
+                        long numEvents = cygnusChannel.getNumEvents();
                         
                         if (numEvents != 0) {
                             System.out.println("There are " + numEvents + " events within " + channelName
@@ -376,23 +403,19 @@ public class CygnusApplication extends Application {
      */
     private static class YAFS extends Thread {
         
-        private final Thread[] threadArray;
-        
-        /**
-         * Constructor.
-         */
-        public YAFS() {
-            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-            threadArray = threadSet.toArray(new Thread[threadSet.size()]);
-        } // YAFS
-        
         @Override
         public void run() {
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+            
             while (true) {
                 for (Thread t: threadArray) {
-                    // exit Cygnus if some thread (except for the main one) is found to be not alive or in a terminated
-                    // state
-                    if (!t.getName().equals("main") && (t.getState() == State.TERMINATED || !t.isAlive())) {
+                    // exit Cygnus if some thread (except for the main one and threads from the Jetty
+                    // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
+                    if ((t.getState() == State.TERMINATED || !t.isAlive())
+                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
+                        LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
+                                + ", name=" + t.getName());
                         System.exit(-1);
                     } // if
                 } // for

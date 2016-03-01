@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import java.util.HashMap;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
@@ -83,8 +82,8 @@ public class CKANBackendImplTest {
         when(mockCache.isCachedPkg(orgName, pkgName)).thenReturn(true);
         when(mockCache.isCachedRes(orgName, pkgName, resName)).thenReturn(true);
         when(mockCache.getOrgId(orgName)).thenReturn("org_id");
-        when(mockCache.getPkgId(pkgName)).thenReturn("pkg_id");
-        when(mockCache.getResId(resName)).thenReturn("res_id");
+        when(mockCache.getPkgId(orgName, pkgName)).thenReturn("pkg_id");
+        when(mockCache.getResId(orgName, pkgName, resName)).thenReturn("res_id");
         BasicHttpResponse response = new BasicHttpResponse(new ProtocolVersion("http", 1, 1), 200, "ok");
         response.setEntity(new StringEntity("{\"result\": {\"whatever\":\"whatever\"}}"));
         when(mockHttpClient.execute(Mockito.any(HttpUriRequest.class))).thenReturn(response);

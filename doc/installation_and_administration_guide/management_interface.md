@@ -1,8 +1,199 @@
-#Management interface
-From Cygnus 0.5 there is a REST-based management interface for administration purposes. Current available operations are:
+#<a name="top"></a>Management interface
+Content:
 
-<b>Get the version of the running software, including the last Git commit</b>:
+* [GET `/v1/version`](#section1)
+* [GET `/v1/stats`](#section2)
+* [GET `/v1/groupingrules`](#section3)
+* [POST `/v1/groupingrules`](#section4)
+* [PUT `/v1/groupingrules`](#section5)
+* [DELETE `/v1/groupingrules`](#section6)
 
-    GET http://host:management_port/version
+##<a name="section1"></a>`GET /v1/version`
+Gets the version of the running software, including the last Git commit:
 
-    {"version":"0.5_SNAPSHOT.8a6c07054da894fc37ef30480cb091333e2fccfa"}
+```
+GET http://<cygnus_host>:<management_port>/v1/version
+```
+
+Response:
+
+```
+{
+    "success": "true",
+    "version": "0.12.0_SNAPSHOT.52399574ea8503aa8038ad14850380d77529b550"
+}
+```
+
+[Top](#top)
+
+##<a neme="section2"></a>`GET /v1/stats`
+Gets statistics about the configured Flume components. It is important to note <b>in order to gathering statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
+
+Regarding the sources, it returns:
+
+* Name of the source as written in the configuration.
+* Setup time of the source.
+* Status of the source, i.e. started or stopped.
+* Number of processed events, i.e. number of events received by the source and attempeted to be put in the channels.
+* Number of finally events put in the channels.
+
+Regarding the channels, it returns:
+
+* Name of the channel as written in the configuration.
+* Setup time of the channel.
+* Status of the channel, i.e. started or stopped.
+* Number of events currently at the channel.
+* Number of successful puts.
+* Number of failed puts.
+* Number of sucessful takes.
+* Number of failed takes.
+
+Regarding the sinks, it returns:
+
+* Name of the sink as written in the configuration.
+* Setup time of the sink.
+* Status of the sink, i.e. started or stopped.
+* Number of processed events, i.e. number of events taken from the channel and attempted for persistence.
+* Number of finally persisted events.
+
+```
+GET http://<cygnus_host>:<management_port>/v1/stats
+```
+
+Response:
+
+```
+{
+    "stats": {
+        "channels": [
+            {
+                "name": "mysql-channel",
+                "num_events": 0,
+                "num_puts_failed": 0,
+                "num_puts_ok": 11858,
+                "num_takes_failed": 1,
+                "num_takes_ok": 11858,
+                "setup_time": "2016-02-05T10:34:25.80Z",
+                "status": "START"
+            }
+        ],
+        "sinks": [
+            {
+                "name": "mysql-sink",
+                "num_persisted_events": 11800,
+                "num_processed_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.978Z",
+                "status": "START"
+            }
+        ],
+        "sources": [
+            {
+                "name": "http-source",
+                "num_processed_events": 11858,
+                "num_received_events": 11858,
+                "setup_time": "2016-02-05T10:34:24.921Z",
+                "status": "START"
+            }
+        ]
+    },
+    "success": "true"
+}
+```
+
+[Top](#top)
+
+##<a neme="section3"></a>`GET /v1/groupingrules`
+Gets the configured [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
+
+```
+GET http://<cygnus_host>:<management_port>/v1/groupingrules
+```
+
+Response:
+
+```
+{
+    "grouping_rules": [
+        {
+            "destination": "allcars",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "cars",
+            "id": 1,
+            "regex": "Car"
+        },
+        {
+            "destination": "allrooms",
+            "fields": [
+                "entityType"
+            ],
+            "fiware_service_path": "rooms",
+            "id": 2,
+            "regex": "Room"
+        }
+    ],
+    "success": "true"
+}
+```
+
+[Top](#top)
+
+##<a neme="section4"></a>`POST /v1/groupingrules`
+Adds a new rule, passed as a Json in the payload, to the [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
+
+```
+POST http://<cygnus_host>:<management_port>/v1/groupingrules
+{
+	"regex": "Room",
+	"destination": "allrooms",
+	"fiware_service_path": "rooms",
+	"fields": ["entityType"]
+}
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+Please observe the `id` field is not passed as part of the posted Json. This is because the Management Interface automatically deals with the proper ID insertion.
+
+[Top](#top)
+
+##<a neme="section5"></a>`PUT /v1/groupingrules`
+Updates an already existent [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
+
+```
+PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
+{
+	"regex": "Room",
+	"destination": "otherrooms",
+	"fiware_service_path": "rooms",
+	"fields": ["entityType"]
+}
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+[Top](#top)
+
+##<a neme="section6"></a>`DELETE /v1/groupingrules`
+Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
+
+```
+DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+[Top](#top)

@@ -18,8 +18,10 @@
 
 package com.telefonica.iot.cygnus.management;
 
-import com.telefonica.iot.cygnus.management.ManagementInterface;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -47,7 +49,7 @@ public class ManagementInterfaceTest {
     private HttpServletResponse mockResponse;
     
     // constants
-    private final String requestURI = "/version";
+    private final String requestURI = "/v1/version";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -58,10 +60,11 @@ public class ManagementInterfaceTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        managementInterface = new ManagementInterface(null, null, null);
+        managementInterface = new ManagementInterface(new File(""), null, null, null);
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getRequestURI()).thenReturn(requestURI);
+        when(mockRequest.getMethod()).thenReturn("GET");
         when(mockResponse.getWriter()).thenReturn(new PrintWriter(System.out));
     } // setUp
     
@@ -74,7 +77,9 @@ public class ManagementInterfaceTest {
         
         try {
             managementInterface.handle(null, mockRequest, mockResponse, 1);
-        } catch (Exception e) {
+        } catch (IOException e) {
+            fail(e.getMessage());
+        } catch (ServletException e) {
             fail(e.getMessage());
         } finally {
             assertTrue(true);

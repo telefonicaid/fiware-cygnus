@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.event.EventBuilder;
 import org.apache.flume.Event;
-import com.telefonica.iot.cygnus.interceptors.GroupingInterceptor.GroupingRule;
 import com.telefonica.iot.cygnus.utils.Constants;
 import java.io.File;
 import java.io.PrintWriter;
@@ -122,7 +121,7 @@ public class GroupingInterceptorTest {
     private final String notifiedServicePath = "4wheels";
     private final String defaultServicePaths = "4wheels,4wheels";
     private final String groupedServicePaths = "rooms,rooms";
-    private final String defaultDestinations = "room.1_room,room.22_room";
+    private final String defaultDestinations = "Room.1_Room,Room.22_Room";
     private final String groupedDestinations = "numeric_rooms,numeric_rooms";
     private final String eventData = ""
             + "<notifyContextRequest>"
@@ -207,7 +206,18 @@ public class GroupingInterceptorTest {
         System.out.println("Testing GroupingInterceptor.initialize");
         groupingInterceptor = new GroupingInterceptor(groupingRulesFileName);
         groupingInterceptor.initialize();
-        LinkedList<GroupingRule> groupingRules = groupingInterceptor.getGroupingRules();
+        
+        try {
+            // just wait a second until the configuration reader starts
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.out.println("There was an error while waiting until the configuration reader starts."
+                    + " Details: " + e.getMessage());
+            assertTrue(false);
+            return;
+        } // try catch
+        
+        LinkedList<GroupingRule> groupingRules = groupingInterceptor.getGroupingRules().getRules();
         assertTrue(groupingRules.size() == 3); // there are 5 rules, but two are invalid
         GroupingRule firstRule = groupingRules.get(0);
         assertEquals(1, firstRule.getId());

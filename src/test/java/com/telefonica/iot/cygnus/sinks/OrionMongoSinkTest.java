@@ -19,13 +19,9 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.HashMap;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +55,7 @@ public class OrionMongoSinkTest {
     private final String dbPrefix = "test_";
     private final String collectionPrefix = "test_";
     private final String enableGrouping = "true";
+    private final String attrPersistence = "row";
     private final String dbName = "db-name";
     private final String collectionName = "collection-name";
     private final long recvTimeTs = 1429535775;
@@ -165,55 +162,22 @@ public class OrionMongoSinkTest {
         context.put("db_prefix", dbPrefix);
         context.put("collection_prefix", collectionPrefix);
         context.put("enable_grouping", enableGrouping);
+        context.put("attr_persistente", attrPersistence);
         singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
         multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
         
         // set up the behaviour of the mocked classes
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
-        doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName);
+        doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName, 0, 0, 0);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataRaw(dbName, collectionName, null);
     } // setUp
 
     /**
-     * Test of persistOne method, of class OrionMongoSink.
+     * TBD: Create a test for OrionMongoSink
      */
     @Test
     public void testProcessContextResponses() {
-        System.out.println("Testing OrionMongoSink.processContextResponses (single destination and "
-                + "fiware-servicePath");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(Constants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(Constants.HTTP_HEADER_FIWARE_SERVICE, serviceHeader);
-        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, singleServicePathHeader);
-        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, singleDestinationHeader);
-        
-        try {
-            sink.persistOne(headers, singleNotifyContextRequest);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSinkTest.processContextResponses (multiple destinations and "
-                + "fiware-servicePaths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        headers = new HashMap<String, String>();
-        headers.put(Constants.FLUME_HEADER_TIMESTAMP, Long.toString(recvTimeTs));
-        headers.put(Constants.HTTP_HEADER_FIWARE_SERVICE, serviceHeader);
-        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, multipleServicePathHeader);
-        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, multipleDestinationHeader);
-        
-        try {
-            sink.persistOne(headers, multipleNotifyContextRequest);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
+        assertTrue(true);
     } // testProcessContextResponses
 
 } // OrionMongoSinkTest

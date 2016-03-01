@@ -123,15 +123,17 @@ If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionDynam
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink</i> |
-| channel | yes | N/A |
-| enable\_grouping | no | false | <i>true</i> or <i>false</i> |
-| data_model | no | dm-by-entity |  <i>dm-by-entity</i> or <i>dm-by-service-path</i> |
-| attr\_persistence | no | row | <i>row</i> or <i>column</i>
-| access\_key\_id | yes | N/A | Provided by AWS when creating an account |
-| secret\_access\_key | yes | N/A | Provided by AWS when creating an account |
-| region | no | eu-central-1 | [AWS regions](http://docs.aws.amazon.com/general/latest/gr/rande.html) |
-| batch\_size | no | 1 | Number of events accumulated before persistence (Maximum 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information) |
-| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is |
+| channel | yes | N/A ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| data_model | no | dm-by-entity |  <i>dm-by-entity</i> or <i>dm-by-service-path</i>. |
+| attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| access\_key\_id | yes | N/A | Provided by AWS when creating an account. |
+| secret\_access\_key | yes | N/A | Provided by AWS when creating an account. |
+| region | no | eu-central-1 | [AWS regions](http://docs.aws.amazon.com/general/latest/gr/rande.html). |
+| batch\_size | no | 1 | Number of events accumulated before persistence (Maximum 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information). |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 
 A configuration example could be:
 
@@ -141,6 +143,7 @@ A configuration example could be:
     cygnusagent.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
     cygnusagent.sinks.dynamodb-sink.channel = dynamodb-channel
     cygnusagent.sinks.dynamodb-sink.enable_grouping = false
+    cygnusagent.sinks.dynamodb-sink.enable_lowercase = false
     cygnusagent.sinks.dynamodb-sink.data_model = dm-by-entity
     cygnusagent.sinks.dynamodb-sink.attr_persistence = column
     cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
@@ -148,6 +151,7 @@ A configuration example could be:
     cygnusagent.sinks.dynamodb-sink.region = eu-central-1
     cygnusagent.sinks.dynamodb-sink.batch_size = 25
     cygnusagent.sinks.dynamodb-sink.batch_timeout = 30
+    cygnusagent.sinks.dynamodb-sink.batch_ttl = 10
     
 [Top](#top)
 

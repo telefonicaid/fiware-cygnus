@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -17,9 +17,11 @@
  */
 package com.telefonica.iot.cygnus.channels;
 
-import org.apache.flume.Context;
-import org.apache.flume.Event;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+import java.lang.reflect.Field;
+import java.util.Date;
 import org.apache.flume.channel.file.FileChannel;
+import org.apache.flume.instrumentation.ChannelCounter;
 
 /**
  * CygnusFileChannel is an extension of Flume's FileChannel. Basically, it is the same channel but having methods
@@ -29,51 +31,59 @@ import org.apache.flume.channel.file.FileChannel;
  */
 public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     
-    private int numEvents;
-    private int capacity;
-    
-    @Override
-    public void configure(Context context) {
-        super.configure(context);
-        capacity = context.getInteger("capacity");
-    } // configure
-    
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusFileChannel.class);
+    private long setupTime;
+    private ChannelCounter channelCounterRef;
+
     @Override
     protected void initialize() {
         super.initialize();
-        numEvents = 0;
+        
+        try {
+            Field f = FileChannel.class.getDeclaredField("channelCounter");
+            f.setAccessible(true);
+            channelCounterRef = (ChannelCounter) f.get(this);
+        } catch (NoSuchFieldException e) {
+            LOGGER.error(e.getMessage());
+        } catch (SecurityException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOGGER.error(e.getMessage());
+        } // try catch
+        
+        setupTime = new Date().getTime();
     } // initialize
+
+    @Override
+    public long getSetupTime() {
+        return setupTime;
+    } // getSetupTime
     
     @Override
-    public void put(Event event) {
-        if (numEvents != capacity) {
-            numEvents++;
-        } // if
-        
-        // independently of the remaining capacity, call the super version of the method in order to behave as a
-        // FileChannel (exceptions, errors, etc)
-        super.put(event);
-    } // put
-    
-    @Override
-    public Event take() {
-        Event event = super.take();
-        
-        if (event != null) {
-            numEvents--;
-        } // if
-        
-        return event;
-    } // take
-    
-    @Override
-    public int getNumEvents() {
-        return numEvents;
+    public long getNumEvents() {
+        return channelCounterRef.getChannelSize();
     } // getNumEvents
     
     @Override
-    public void rollback() {
-        numEvents++;
-    } // rollback
+    public long getNumPutsOK() {
+        return channelCounterRef.getEventPutSuccessCount();
+    } // getNumPutsOK
+    
+    @Override
+    public long getNumPutsFail() {
+        return channelCounterRef.getEventPutAttemptCount() - channelCounterRef.getEventPutSuccessCount();
+    } // getNumPutsFail
+    
+    @Override
+    public long getNumTakesOK() {
+        return channelCounterRef.getEventTakeSuccessCount();
+    } // getNumTakesOK
+    
+    @Override
+    public long getNumTakesFail() {
+        return channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
+    } // getNumTakesFail
     
 } // CygnusFileChannel

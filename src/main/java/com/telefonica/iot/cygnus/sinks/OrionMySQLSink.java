@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -27,8 +26,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import org.apache.flume.Context;
 
 /**
@@ -117,34 +114,48 @@ public class OrionMySQLSink extends OrionSink {
         mysqlHost = context.getString("mysql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", "3306");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
-        mysqlUsername = context.getString("mysql_username", "opendata");
+        int intPort = Integer.parseInt(mysqlPort);
+        
+        if ((intPort <= 0) || (intPort > 65535)) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
+                    + "must be between 0 and 65535");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
+        }  // if else
+        
+        mysqlUsername = context.getString("mysql_username", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: mysqlPassword should be read as a SHA1 and decoded here
-        mysqlPassword = context.getString("mysql_password", "unknown");
+        mysqlPassword = context.getString("mysql_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
-                + (rowAttrPersistence ? "row" : "column") + ")");
+        String persistence = context.getString("attr_persistence", "row");
+        
+        if (persistence.equals("row") || persistence.equals("column")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + persistence + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + persistence + ") must be 'row' or 'column'");
+        }  // if else
+        
         super.configure(context);
     } // configure
 
     @Override
     public void start() {
-        // create the persistence backend
-        LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
-        persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+        try {
+            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+            LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+        } catch (Exception e) {
+            LOGGER.error("Error while creating the MySQL persistence backend. Details="
+                    + e.getMessage());
+        } // try catch
+        
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
-
-    @Override
-    void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception {
-        Accumulator accumulator = new Accumulator();
-        accumulator.initialize(new Date().getTime());
-        accumulator.accumulate(eventHeaders, notification);
-        persistBatch(accumulator.getBatch());
-    } // persistOne
     
     @Override
     void persistBatch(Batch batch) throws Exception {
@@ -200,12 +211,20 @@ public class OrionMySQLSink extends OrionSink {
             return aggregation;
         } // getAggregation
         
-        public String getDbName() {
-            return dbName;
+        public String getDbName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dbName.toLowerCase();
+            } else {
+                return dbName;
+            } // if else
         } // getDbName
         
-        public String getTableName() {
-            return tableName;
+        public String getTableName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return tableName.toLowerCase();
+            } else {
+                return tableName;
+            } // if else
         } // getTableName
         
         public String getTypedFieldNames() {
@@ -445,8 +464,8 @@ public class OrionMySQLSink extends OrionSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
-        String dbName = aggregator.getDbName();
-        String tableName = aggregator.getTableName();
+        String dbName = aggregator.getDbName(enableLowercase);
+        String tableName = aggregator.getTableName(enableLowercase);
         
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
