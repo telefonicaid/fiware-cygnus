@@ -1,0 +1,1 @@
+- [BUG] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)

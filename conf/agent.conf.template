@@ -194,8 +194,8 @@ cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPo
 # cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
 # the name of the postgresql database (postgres is the default database)
 # cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
-# a valid user in the PostgreSQL server (empty user as default)
-# cygnusagent.sinks.postgresql-sink.postgresql_username =
+# a valid user in the PostgreSQL server (postgres as default)
+# cygnusagent.sinks.postgresql-sink.postgresql_username = postgres
 # password for the user above (empty password as default)
 # cygnusagent.sinks.postgresql-sink.postgresql_password =
 # how the attributes are stored, either per row either per column (row, column)
