@@ -150,10 +150,10 @@ NOTES:
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
-| postgresql_port | no | 3306 ||
-| postgresql_database | yes | N/A ||
-| postgresql_username | yes | N/A ||
-| postgresql_password | yes | N/A ||
+| postgresql_port | no | 5432 ||
+| postgresql_database | no | postgres | `postgres` is the default database that is created automatically when install |
+| postgresql_username | no | postgres | `postgres` is the default username that is created automatically when install |
+| postgresql_password | no | N/A | Empty value by default (No password is created when install) |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -172,7 +172,7 @@ A configuration example could be:
     cygnusagent.sinks.postgresql-sink.postgresql_host = 192.168.80.34
     cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
     cygnusagent.sinks.postgresql-sink.postgresql_database = mydatabase
-    cygnusagent.sinks.postgresql-sink.posqtgresql_username = myuser
+    cygnusagent.sinks.postgresql-sink.postgresql_username = myuser
     cygnusagent.sinks.postgresql-sink.postgresql_password = mypassword
     cygnusagent.sinks.postgresql-sink.attr_persistence = row
     cygnusagent.sinks.postgresql-sink.batch_size = 100

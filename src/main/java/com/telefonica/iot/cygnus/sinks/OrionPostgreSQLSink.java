@@ -122,7 +122,7 @@ public class OrionPostgreSQLSink extends OrionSink {
     public void configure(Context context) {
         postgresqlHost = context.getString("postgresql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
-        postgresqlPort = context.getString("postgresql_port", "3306");
+        postgresqlPort = context.getString("postgresql_port", "5432");
         int intPort = Integer.parseInt(postgresqlPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {

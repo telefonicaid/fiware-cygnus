@@ -163,8 +163,8 @@ cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSi
 # cygnusagent.sinks.mysql-sink.mysql_host = localhost
 # the port where the MySQL server listes for incomming connections
 # cygnusagent.sinks.mysql-sink.mysql_port = 3306
-# a valid user in the MySQL server (empty user by default)
-# cygnusagent.sinks.mysql-sink.mysql_username =
+# a valid user in the MySQL server (root by default)
+# cygnusagent.sinks.mysql-sink.mysql_username = root
 # password for the user above (empty password by default)
 # cygnusagent.sinks.mysql-sink.mysql_password =
 # how the attributes are stored, either per row either per column (row, column)
