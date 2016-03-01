@@ -79,6 +79,7 @@ public class CygnusApplication extends Application {
     private static final int CHANNEL_CHECKING_INTERVAL = 5000;
     private static final int YAFS_CHECKING_INTERVAL = 1000;
     private static final int DEF_MGMT_IF_PORT = 8081;
+    private static final int DEF_GUI_PORT = 8082;
     private static final int DEF_POLLING_INTERVAL = 30;
     private boolean firstTime = true;
     
@@ -178,6 +179,10 @@ public class CygnusApplication extends Application {
             option.setRequired(false);
             options.addOption(option);
             
+            option = new Option("g", "gui-port", true, "the GUI port");
+            option.setRequired(false);
+            options.addOption(option);
+            
             option = new Option("t", "polling-interval", true, "polling interval");
             option.setRequired(false);
             options.addOption(option);
@@ -198,6 +203,12 @@ public class CygnusApplication extends Application {
             
             if (commandLine.hasOption('p')) {
                 mgmtIfPort = new Integer(commandLine.getOptionValue('p'));
+            } // if
+            
+            int guiPort = DEF_GUI_PORT;
+            
+            if (commandLine.hasOption('g')) {
+                guiPort = new Integer(commandLine.getOptionValue('g'));
             } // if
             
             int pollingInterval = DEF_POLLING_INTERVAL;
@@ -261,7 +272,7 @@ public class CygnusApplication extends Application {
             
             // start the Management Interface, passing references to Flume components
             LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(mgmtIfPort, new ManagementInterface(configurationFile,
+            mgmtIfServer = new JettyServer(mgmtIfPort, guiPort, new ManagementInterface(configurationFile,
                     sourcesRef, channelsRef, sinksRef));
             mgmtIfServer.start();
 
