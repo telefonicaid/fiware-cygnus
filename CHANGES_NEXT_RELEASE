@@ -1,2 +1,3 @@
 - [FEATURE] Add Cygnus GUI (#829)
 - [BUG] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)
+- [HARDENING] Use precompiled regexes in Utils.encode() and Utils.encodeHive() (#818)
