@@ -122,7 +122,7 @@ public class OrionPostgreSQLSink extends OrionSink {
     public void configure(Context context) {
         postgresqlHost = context.getString("postgresql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
-        postgresqlPort = context.getString("postgresql_port", "3306");
+        postgresqlPort = context.getString("postgresql_port", "5432");
         int intPort = Integer.parseInt(postgresqlPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
@@ -135,7 +135,7 @@ public class OrionPostgreSQLSink extends OrionSink {
 
         postgresqlDatabase = context.getString("postgresql_database", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", "");
+        postgresqlUsername = context.getString("postgresql_username", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
         postgresqlPassword = context.getString("postgresql_password", "");
