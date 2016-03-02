@@ -1,1 +1,2 @@
 - [FEATURE] Add Cygnus GUI (#829)
+- [BUG] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)

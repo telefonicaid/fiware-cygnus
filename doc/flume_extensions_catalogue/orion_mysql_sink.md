@@ -263,8 +263,8 @@ NOTES:
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql_port | no | 3306 ||
-| mysql_username | yes | N/A ||
-| mysql_password | yes | N/A ||
+| mysql_username | no | root | `root` is the default username that is created automatically |
+| mysql_password | no | N/A | Empty value as default (no password is created automatically) |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
