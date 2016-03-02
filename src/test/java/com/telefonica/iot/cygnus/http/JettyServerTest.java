@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,13 +18,12 @@
 
 package com.telefonica.iot.cygnus.http;
 
-import com.telefonica.iot.cygnus.http.JettyServer;
 import com.telefonica.iot.cygnus.management.ManagementInterface;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.*;
+import org.junit.Before;
 
 /**
  *
@@ -40,7 +39,8 @@ public class JettyServerTest {
     private ManagementInterface managementInterface;
     
     // constants
-    private final int port = 12345;
+    private final int mgmtPort = 8081;
+    private final int guiPort = 8082;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -51,7 +51,7 @@ public class JettyServerTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        jettyServer = new JettyServer(port, managementInterface);
+        jettyServer = new JettyServer(mgmtPort, guiPort, managementInterface);
     } // setUp
     
     /**

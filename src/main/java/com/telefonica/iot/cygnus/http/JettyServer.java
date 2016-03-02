@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.http;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 
 /**
  *
@@ -29,19 +30,31 @@ import org.mortbay.jetty.handler.AbstractHandler;
 public class JettyServer extends Thread {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(JettyServer.class);
-    private final int port;
-    private final AbstractHandler handler;
     private final Server server;
     
     /**
      * Constructor.
-     * @param port
+     * @param mgmtIfPort
+     * @param guiPort
      * @param handler
      */
-    public JettyServer(int port, AbstractHandler handler) {
-        this.port = port;
-        this.handler = handler;
-        server = new Server(port);
+    public JettyServer(int mgmtIfPort, int guiPort, AbstractHandler handler) {
+        // create the server
+        server = new Server();
+        
+        // add the Management Interface connector
+        SelectChannelConnector conn1 = new SelectChannelConnector();
+        conn1.setHost("0.0.0.0");
+        conn1.setPort(mgmtIfPort);
+        server.addConnector(conn1);
+        
+        // add the GUI connector
+        SelectChannelConnector conn2 = new SelectChannelConnector();
+        conn2.setHost("0.0.0.0");
+        conn2.setPort(guiPort);
+        server.addConnector(conn2);
+        
+        // set the handler
         server.setHandler(handler);
     } // JettyServer
     

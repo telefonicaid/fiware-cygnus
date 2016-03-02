@@ -62,6 +62,10 @@ public class ManagementInterface extends AbstractHandler {
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
+    private static int numPoints = 0;
+    private static String sourceRows = "";
+    private static String channelRows = "";
+    private static String sinkRows = "";
     
     /**
      * Constructor.
@@ -90,7 +94,6 @@ public class ManagementInterface extends AbstractHandler {
     @Override
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException {
-        
         HttpConnection connection = HttpConnection.getCurrentConnection();
         
         if (connection != null) {
@@ -99,45 +102,64 @@ public class ManagementInterface extends AbstractHandler {
         } // if
         
         response.setContentType("text/html;charset=utf-8");
+        int port = request.getServerPort();
         String uri = request.getRequestURI();
         String method = request.getMethod();
         LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
         
-        if (method.equals("GET")) {
-            if (uri.equals("/v1/version")) {
-                handleGetVersion(response);
-            } else if (uri.equals("/v1/stats")) {
-                handleGetStats(response);
-            } else if (uri.equals("/v1/groupingrules")) {
-                handleGetGroupingRules(response);
+        if (port == 8081) {
+            if (method.equals("GET")) {
+                if (uri.equals("/v1/version")) {
+                    handleGetVersion(response);
+                } else if (uri.equals("/v1/stats")) {
+                    handleGetStats(response);
+                } else if (uri.equals("/v1/groupingrules")) {
+                    handleGetGroupingRules(response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.getWriter().println(method + " " + uri + " Not implemented");
+                } // if else
+            } else if (method.equals("POST")) {
+                if (uri.equals("/v1/groupingrules")) {
+                    handlePostGroupingRules(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.getWriter().println(method + " " + uri + " Not implemented");
+                } // if else
+            } else if (method.equals("PUT")) {
+                if (uri.equals("/v1/groupingrules")) {
+                    handlePutGroupingRules(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.getWriter().println(method + " " + uri + " Not implemented");
+                } // if else
+            } else if (method.equals("DELETE")) {
+                if (uri.equals("/v1/groupingrules")) {
+                    handleDeleteGroupingRules(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.getWriter().println(method + " " + uri + " Not implemented");
+                } // if else
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
-        } else if (method.equals("POST")) {
-            if (uri.equals("/v1/groupingrules")) {
-                handlePostGroupingRules(request, response);
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                response.getWriter().println(method + " " + uri + " Not implemented");
-            } // if else
-        } else if (method.equals("PUT")) {
-            if (uri.equals("/v1/groupingrules")) {
-                handlePutGroupingRules(request, response);
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                response.getWriter().println(method + " " + uri + " Not implemented");
-            } // if else
-        } else if (method.equals("DELETE")) {
-            if (uri.equals("/v1/groupingrules")) {
-                handleDeleteGroupingRules(request, response);
+        } else if (port == 8082) {
+            if (method.equals("GET")) {
+                if (uri.equals("/")) {
+                    handleGetGUI(response);
+                } else if (uri.endsWith("/points")) {
+                    handleGetPoints(response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.getWriter().println(method + " " + uri + " Not implemented");
+                } // if else
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-            response.getWriter().println(method + " " + uri + " Not implemented");
+            LOGGER.debug("Attending a request in a non expected port!!");
         } // if else
     } // handle
     
@@ -555,5 +577,62 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         return groupingRulesConfFile;
     } // getGroupingRulesConfFile
+    
+    private void handleGetGUI(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        
+        String indexJSP = "";
+        BufferedReader reader = new BufferedReader(new FileReader(
+                "src/main/java/com/telefonica/iot/cygnus/management/index.html"));
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            indexJSP += line + "\n";
+        } // while
+        
+        response.getWriter().println(indexJSP);
+    } // handleGetGUI
+    
+    private void handleGetPoints(HttpServletResponse response) throws IOException {
+        // add a new source row
+        String sourceColumns = "";
+        
+        // add a new channel row
+        String channelColumns = "\"count\"";
+        String point = "[" + numPoints;
+        
+        for (String key : channels.keySet()) {
+            Channel channel = channels.get(key);
+            channelColumns += ",\"" + channel.getName() + "\"";
+            
+            if (channel instanceof CygnusChannel) {
+                CygnusChannel cygnusChannel = (CygnusChannel) channel;
+                point += "," + cygnusChannel.getNumEvents();
+            } // if
+        } // for
+        
+        point += "]";
+        
+        if (channelRows.length() == 0) {
+            channelRows += point;
+        } else {
+            channelRows += "," + point;
+        } // if else
+        
+        // add a new sink row
+        String sinkColumns = "";
+        
+        // increase the points counter
+        numPoints++;
+        
+        // return the points
+        response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println(
+                "{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":[" + sourceRows + "]},"
+                + "\"channel_points\":{\"columns\":[" + channelColumns + "],\"rows\":[" + channelRows + "]},"
+                + "\"sink_points\":{\"columns\":[" + sinkColumns + "],\"rows\":[" + sinkRows + "]}}");
+    } // handleGetPoints
 
 } // ManagementInterface
