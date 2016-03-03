@@ -84,8 +84,8 @@ public final class Utils {
                 out = in.get(i).toString();
             } else {
                 out += "," + in.get(i).toString();
-            }
-        }
+            } // if else
+        } // for
         return out;
     } // toString
     
