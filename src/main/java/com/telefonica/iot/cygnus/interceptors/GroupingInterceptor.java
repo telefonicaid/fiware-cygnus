@@ -153,16 +153,16 @@ public class GroupingInterceptor implements Interceptor {
             defaultDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
             defaultServicePaths.add(fiwareServicePath);
         } // for
- 
+        
         // set the final header values
         headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES,
-                defaultDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+                Utils.toString(defaultDestinations));
         headers.put(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS,
-                defaultServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+                Utils.toString(defaultServicePaths));
         headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES,
-                groupedDestinations.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+                Utils.toString(groupedDestinations));
         headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS,
-                groupedServicePaths.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", ""));
+                Utils.toString(groupedServicePaths));
         event.setHeaders(headers);
         return event;
     } // intercept

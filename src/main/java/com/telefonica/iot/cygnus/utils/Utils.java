@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -72,10 +73,27 @@ public final class Utils {
     } // encodeHive
     
     /**
+     * Encodes a string from an ArrayList
+     * @param in
+     * @return The encoded string
+     */
+    public static String toString(ArrayList in) {
+        String out = "";
+        for (int i=0; i < in.size(); i++) {
+            if (i == 0) {
+                out = in.get(i).toString();
+            } else {
+                out += "," + in.get(i).toString();
+            }
+        }
+        return out;
+    } // toString
+    
+    /**
      * Converts a XML node into Json.
      * @param xmlNode
      * @return
-     * @throws Exception
+     * @throws Exception 
      */
     public static JsonElement basicXml2Json(Node xmlNode) throws Exception {
         // if the XML node has not attributes, it is either an object either a string
