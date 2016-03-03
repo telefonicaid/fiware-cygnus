@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -39,6 +40,9 @@ import org.w3c.dom.NodeList;
  * @author frb
  */
 public final class Utils {
+    
+    private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
+    private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -53,7 +57,7 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        String res = ENCODEPATTERN.matcher(in).replaceAll("_");
         return (res.startsWith("_") ? res.substring(1, res.length()) : res);
     } // encode
     
@@ -64,7 +68,7 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encodeHive(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+        return ENCODEHIVEPATTERN.matcher(in).replaceAll("_").toLowerCase();
     } // encodeHive
     
     /**
