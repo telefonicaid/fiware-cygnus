@@ -242,17 +242,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         if (data.length() == 0) {
             LOGGER.warn("Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
-        } // if
-
-        // data adaptation; two replacements:
-        //   1. replace all the appearances of "contextValue" with "value" in order Orion versions under 0.10.0 may
-        //      work (Json content type only)
-        //   2. replace all the white lines between tags with nothing; the regex ">[ ]*<" means "all the white spaces
-        //      between '>' and '<', e.g. "<tag1>1</tag1>      <tag2>2</tag2>" becomes "<tag1>1</tag1><tag2>2</tag2>"
-        
-        if (contentType.equals("application/json")) {
-            data = data.replaceAll("contextValue", "value");
-        } // if
+        } // if 
 
         data = data.replaceAll(">[ ]*<", "><");
         LOGGER.info("Received data (" + data + ")");
