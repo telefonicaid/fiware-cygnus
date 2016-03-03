@@ -13,7 +13,7 @@
 # for more details.
 #
 # You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
-# %s://www.gnu.org/licenses/.
+# http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
@@ -162,7 +162,7 @@ def do_backup(fields, records, res_name, pkg_id):
 # Add new fields to a resource, given its current fields and its id
 def add_new_fields(fields, res_id):
    print('       |_Adding new fields'),
-   fields.append({'id':'fiware-ServicePath','type':'text'})
+   fields.append({'id':'fiwareServicePath','type':'text'})
    
    url = '%s://%s:%s/api/3/action/datastore_create' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
