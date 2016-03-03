@@ -79,6 +79,7 @@ public final class Utils {
      */
     public static String toString(ArrayList in) {
         String out = "";
+        
         for (int i=0; i < in.size(); i++) {
             if (i == 0) {
                 out = in.get(i).toString();
@@ -86,6 +87,7 @@ public final class Utils {
                 out += "," + in.get(i).toString();
             } // if else
         } // for
+        
         return out;
     } // toString
     

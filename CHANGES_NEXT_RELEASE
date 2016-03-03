@@ -2,4 +2,4 @@
 - [BUG] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)
 - [HARDENING] Use precompiled regexes in Utils.encode() and Utils.encodeHive() (#818)
 - [HARDENING] Remove a temporal fix regarding Orion <= 0.10.0 in OrionRESTHandler (#840) 
-- [HARDENING] Add an efficient function for converting ArrayList to Strings in Utils.java (#841)
+- [HARDENING] Add an efficient function for converting ArrayList to String in Utils.java (#841)
