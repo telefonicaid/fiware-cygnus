@@ -125,12 +125,6 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
 
-            // check if the attribute is not numerical
-            if (!Utils.isANumber(attrValue)) {
-                LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
-                continue;
-            } // if
-
             // check if the metadata contains a TimeInstant value; use the notified reception time instead
             Long recvTimeTs;
             String recvTime;
@@ -157,10 +151,10 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
-            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
+            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs, recvTime,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);
         } // for
     } // persistOne
