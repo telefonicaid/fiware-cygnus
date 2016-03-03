@@ -164,6 +164,10 @@ def add_new_fields(fields, res_id):
    print('       |_Adding new fields'),
    fields.append({'id':'fiwareServicePath','type':'text'})
    
+   if attr_persistence == 'column':
+      fields.append({'id':'entityId','type':'text'})
+      fields.append({'id':'entityType','type':'text'})
+
    url = '%s://%s:%s/api/3/action/datastore_create' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'resource_id':res_id,'force':'true','fields':fields}
