@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;
 import java.io.StringReader;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -38,28 +37,6 @@ public final class TestUtils {
      */
     private TestUtils() {
     } // TestUtils
-    
-    /**
-     * Create a XML-based notificationContextRequest given the string representation of such XML.
-     * @param xmlStr
-     * @return The XML-based notificationContextRequest
-     */
-    public static NotifyContextRequest createXMLNotifyContextRequest(String xmlStr) {
-        Logger logger = Logger.getLogger(Utils.class);
-        NotifyContextRequest notification = null;
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            
-        try {
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-            NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
-            saxParser.parse(new InputSource(new StringReader(xmlStr)), handler);
-            notification = handler.getNotifyContextRequest();
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        } // try catch
-        
-        return notification;
-    } // createXMLNotifyContextRequest
     
     /**
      * Create a Json-based notificationContextRequest given the string representation of such Json.

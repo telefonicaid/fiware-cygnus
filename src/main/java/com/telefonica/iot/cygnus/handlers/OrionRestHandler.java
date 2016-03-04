@@ -44,7 +44,7 @@ import org.slf4j.MDC;
  * Custom HTTP handler for the default HTTP Flume source. It checks the method, notificationTarget and headers are the
  * ones tipically sent by an instance of Orion Context Broker when notifying a context event. If everything is OK, a
  * Flume event is created in order the HTTP Flume source sends it to the Flume channel connecting the source with the
- * sink. This event contains both the context event data and a header specifying the content type (Json or XML).
+ * sink. This event contains both the context event data and a header specifying the content type (Json).
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
@@ -187,7 +187,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
+                if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
@@ -216,8 +216,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // check if received content type is null
         if (contentType == null) {
-            LOGGER.warn("Missing content type. Required application/json or application/xml.");
-            throw new HTTPBadRequestException("Missing content type. Required application/json or application/xml.");
+            LOGGER.warn("Missing content type. Required application/json.");
+            throw new HTTPBadRequestException("Missing content type. Required application/json.");
         } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
@@ -244,7 +244,6 @@ public class OrionRestHandler implements HTTPSourceHandler {
             throw new HTTPBadRequestException("No content in the request");
         } // if 
 
-        data = data.replaceAll(">[ ]*<", "><");
         LOGGER.info("Received data (" + data + ")");
         
         // create the appropiate headers

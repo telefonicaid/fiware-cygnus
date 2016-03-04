@@ -31,18 +31,14 @@ A set of scripts that can be use to simulate Orion NGSI10 notifications. Its mai
 * notification-json-md.sh
 * notification-json-simple.sh  
 * notification-json-2simple.sh  
-* notification-xml-compound.sh
-* notification-xml-md.sh
-* notification-xml-simple.sh
-* notification-xml-2simple.sh
 
-All them use two arguments: firts one is the URL to send the notification, second one (optional) is the default organization (a default value is used if the second argument is missing).
+All them use two arguments: first one is the URL to send the notification, second one (optional) is the default organization (a default value is used if the second argument is missing).
 
 ```
 ./notification-json-simple.sh 127.0.0.1:5050/notify Org22
 ```
 
-In addition the continous_notifier.sh script do a periodic JSON-based notification with a random attribute value, using the same two first arguments and a third one to specify the notification period (in seconds): 
+In addition the continous_notifier.sh script do a periodic JSON-based notification with a random attribute value, using the same two first arguments and a third one to specify the notification period (in seconds):
 
 ```
 ./continous_notifier.sh 127.0.0.1:5050/notify Org22 10
