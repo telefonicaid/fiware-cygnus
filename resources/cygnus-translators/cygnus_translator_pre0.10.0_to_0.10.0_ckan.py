@@ -25,12 +25,14 @@ import sys
 import requests
 import json
 import pprint
+import re
 
 # Show the usage
 # FIXME: the getopt library should be used instead
-if len(sys.argv) < 7:
-   print('Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port api_key org_name attr_persistence null_value backup')
-   print('where ckan_host       : IP address or FQDN of the host running the CKAN server')
+if len(sys.argv) < 8:
+   print('Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh secure ckan_host ckan_port api_key org_name attr_persistence backup')
+   print('where http            : either http or https')
+   print('      ckan_host       : IP address or FQDN of the host running the CKAN server')
    print('      ckan_port       : port where the above CKAN server is listening')
    print('      api_key         : API key for a user allowed to update the given organization')
    print('      org_name        : organization name to be translated')
@@ -39,45 +41,64 @@ if len(sys.argv) < 7:
    sys.exit(0)
 
 # Input parameters
-ckan_host=sys.argv[1]
-ckan_port=sys.argv[2]
-api_key=sys.argv[3]
-org_name=sys.argv[4]
-attr_persistence=sys.argv[5]
-backup=sys.argv[6]
+secure_protocol=sys.argv[1] 
+ckan_host=sys.argv[2]
+ckan_port=sys.argv[3]
+api_key=sys.argv[4]
+org_name=sys.argv[5]
+attr_persistence=sys.argv[6]
+backup=sys.argv[7]
 
 # Process an organization, given its name
 def process_org(org_name):
-   print('Processing organization ' + org_name)
-   url = 'http://%s:%s/api/3/action/organization_show' % (ckan_host, ckan_port)
+   print('Processing organization ' + org_name),
+   url = '%s://%s:%s/api/3/action/organization_show' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':org_name,'include_datasets':'true'}
    req = requests.post(url, headers=headers, json=payload)
-   dictionary = req.json()
+   if req.status_code == 200:
+      dictionary = req.json()
+      print
+   else:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
 
    for pkg in dictionary['result']['packages']:
       process_pkg(pkg['id'])
 
 # Process a package, given its id
 def process_pkg(pkg_id):
-   print(' |_Processing package ' + pkg_id)
-   url = 'http://%s:%s/api/3/action/package_show' % (ckan_host, ckan_port)
+   print(' |_Processing package ' + pkg_id),
+   url = '%s://%s:%s/api/3/action/package_show' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':pkg_id}
    req = requests.post(url, headers=headers, json=payload)
-   dictionary = req.json()
+   if req.status_code == 200:
+      dictionary = req.json()
+      print
+   else:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
 
+   regexp = re.compile(r'_bak')
    for res in dictionary['result']['resources']:
-      process_res(res['id'], res['name'], pkg_id)
+      if res['name'] is not None and regexp.search(res['name']) is None:
+         process_res(res['id'], res['name'], pkg_id)
 
 # Process a resource, given its id
 def process_res(res_id, res_name, pkg_id):
-   print('    |_Processing resource ' + res_id)
-   url = 'http://%s:%s/api/3/action/datastore_search' % (ckan_host, ckan_port)
+   print('    |_Processing resource ' + res_id),
+   url = '%s://%s:%s/api/3/action/datastore_search' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'id':res_id}
    req = requests.post(url, headers=headers, json=payload)
-   dictionary = req.json()
+   if req.status_code == 200:
+      dictionary = req.json()
+      print
+   else:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
+
    fields = dictionary['result']['fields']
 
    for i in range(0, len(fields)):
@@ -97,46 +118,65 @@ def process_res(res_id, res_name, pkg_id):
 
 # Do backup of a resource given its fields, its records and its id
 def do_backup(fields, records, res_name, pkg_id):
-   print('       |_Backing the resource')
+   print('       |_Backing the resource'),
 
    # Common headers
    headers = {'Authorization': api_key}
 
    # Create the backup resource
-   url = 'http://%s:%s/api/3/action/resource_create' % (ckan_host, ckan_port)
+   url = '%s://%s:%s/api/3/action/resource_create' % (secure_protocol, ckan_host, ckan_port)
    payload = {'name':res_name + '_bak','url':'none','format':'','package_id':pkg_id}
    req = requests.post(url, headers=headers, json=payload)
+   if req.status_code != 200:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
    dictionary = req.json()
    res_id = dictionary['result']['id']
 
    # Create the datastore for the backup resource
-   url = 'http://%s:%s/api/3/action/datastore_create' % (ckan_host, ckan_port)
+   url = '%s://%s:%s/api/3/action/datastore_create' % (secure_protocol, ckan_host, ckan_port)
    payload = {'fields':fields,'force':'true','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
+   if req.status_code != 200:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
 
    # Create the backup resource view
-   url = 'http://%s:%s/api/3/action/resource_view_create' % (ckan_host, ckan_port)
+   url = '%s://%s:%s/api/3/action/resource_view_create' % (secure_protocol, ckan_host, ckan_port)
    payload = {'view_type':'recline_grid_view','title':'Backup','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
+   if req.status_code != 200:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
 
    # Upsert the records in the backup resource
-   url = 'http://%s:%s/api/3/action/datastore_upsert' % (ckan_host, ckan_port)
+   url = '%s://%s:%s/api/3/action/datastore_upsert' % (secure_protocol, ckan_host, ckan_port)
    payload = {'records':records,'force':'true','method':'insert','resource_id':res_id}
    req = requests.post(url, headers=headers, json=payload)
+   if req.status_code == 200:
+      print
+   else:
+      print (' -> Error %s - %s' % (req.status_code,req.text))
+      return
 
 # Add new fields to a resource, given its current fields and its id
 def add_new_fields(fields, res_id):
-   print('       |_Adding new fields')
+   print('       |_Adding new fields'),
    fields.append({'id':'fiwareServicePath','type':'text'})
    
    if attr_persistence == 'column':
       fields.append({'id':'entityId','type':'text'})
       fields.append({'id':'entityType','type':'text'})
 
-   url = 'http://%s:%s/api/3/action/datastore_create' % (ckan_host, ckan_port)
+   url = '%s://%s:%s/api/3/action/datastore_create' % (secure_protocol, ckan_host, ckan_port)
    headers = {'Authorization': api_key}
    payload = {'resource_id':res_id,'force':'true','fields':fields}
    req = requests.post(url, headers=headers, json=payload)
+   if req.status_code == 200:
+      print (' -> OK')
+   elif req.status_code == 500:
+      print (' -> Error %s - fields already exists?' % (req.status_code))
+      return
 
 # Main function
 def main():
