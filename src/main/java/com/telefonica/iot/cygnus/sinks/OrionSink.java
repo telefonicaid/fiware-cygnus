@@ -23,7 +23,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -462,25 +461,10 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             } catch (Exception e) {
                 throw new CygnusBadContextData(e.getMessage());
             } // try catch
-        } else if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
-            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
-            try {
-                SAXParser saxParser = saxParserFactory.newSAXParser();
-                NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
-                saxParser.parse(new InputSource(new StringReader(eventData)), handler);
-                notification = handler.getNotifyContextRequest();
-            } catch (ParserConfigurationException e) {
-                throw new CygnusBadContextData(e.getMessage());
-            } catch (SAXException e) {
-                throw new CygnusBadContextData(e.getMessage());
-            } catch (IOException e) {
-                throw new CygnusBadContextData(e.getMessage());
-            } // try catch
         } else {
             // this point should never be reached since the content type has been checked when receiving the
             // notification
-            throw new Exception("Unrecognized content type (not Json nor XML)");
+            throw new Exception("Unrecognized content type (not Json)");
         } // if else if
 
         return notification;

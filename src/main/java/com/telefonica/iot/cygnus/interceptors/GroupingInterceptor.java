@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequestSAXHandler;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
@@ -99,28 +98,10 @@ public class GroupingInterceptor implements Interceptor {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
                 return null;
             } // try catch // try catch
-        } else if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/xml")) {
-            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            
-            try {
-                SAXParser saxParser = saxParserFactory.newSAXParser();
-                NotifyContextRequestSAXHandler handler = new NotifyContextRequestSAXHandler();
-                saxParser.parse(new InputSource(new StringReader(body)), handler);
-                notification = handler.getNotifyContextRequest();
-            } catch (ParserConfigurationException e) {
-                LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                return null;
-            } catch (SAXException e) {
-                LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                return null;
-            } catch (IOException e) {
-                LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                return null;
-            } // try catch // try catch
         } else {
             // this point should never be reached since the content type has been checked when receiving the
             // notification
-            LOGGER.error("Runtime error (Unrecognized content type (not Json nor XML)");
+            LOGGER.error("Runtime error (Unrecognized content type (not Json)");
             return null;
         } // if else if
         

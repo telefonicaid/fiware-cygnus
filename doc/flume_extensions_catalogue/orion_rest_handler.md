@@ -7,10 +7,10 @@ A NGSI-like event example could be (the code below is an <i>object representatio
         http-headers={
             Content-Length: 492
             Host: localhost:1028
-            Accept: application/xml, application/json
+            Accept: application/json
             Content-Type: application/json
             Fiware-Service: vehicles
-            Fiware-ServicePath: 4wheels 
+            Fiware-ServicePath: 4wheels
         },
         payload={
             {
@@ -77,7 +77,7 @@ Flume events are not much more different than the above representation: there is
 	         ]
 	     }
     }
-    
+
 The headers are a subset of the notified HTTP headers and others added by Cygnus interceptors:
 
 * The <b>content-type</b> header is a replica of the HTTP header. It is needed for the different sinks to know how to parse the event body. In this case it is JSON.
