@@ -27,7 +27,7 @@ import java.util.ArrayList;
 * @author frb
 *
 * Container classes mapping an Orion Context Broker nofifyContextRequest notification. These are necessaries in order
-* Gson (a Json parser) and DOM (a XML parser) can store in memory a notification.
+* Gson (a Json parser) can store in memory a notification.
 */
 public class NotifyContextRequest {
     

@@ -132,8 +132,7 @@ public class OrionRestHandlerTest {
             byte[] eventMessage = event.getBody();
             assertTrue(eventHeaders.size() == 4);
             assertTrue(eventHeaders.containsKey("content-type"));
-            assertTrue(eventHeaders.get("content-type").equals("application/json")
-                    || eventHeaders.get("content-type").equals("application/xml"));
+            assertTrue(eventHeaders.get("content-type").equals("application/json"));
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
             assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
                     TestUtils.encode(notificationService));
@@ -157,8 +156,7 @@ public class OrionRestHandlerTest {
             byte[] eventMessage = event.getBody();
             assertTrue(eventHeaders.size() == 4);
             assertTrue(eventHeaders.containsKey("content-type"));
-            assertTrue(eventHeaders.get("content-type").equals("application/json")
-                    || eventHeaders.get("content-type").equals("application/xml"));
+            assertTrue(eventHeaders.get("content-type").equals("application/json"));
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
             assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
                     TestUtils.encode(notificationService));
