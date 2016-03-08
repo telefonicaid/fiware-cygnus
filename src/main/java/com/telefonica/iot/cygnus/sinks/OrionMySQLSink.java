@@ -182,14 +182,14 @@ public class OrionMySQLSink extends OrionSink {
                 aggregator.aggregate(cygnusEvent);
             } // for
             
-            // persist the valuesForInsert
+            // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
         } // for
     } // persistBatch
     
     /**
-     * Class for aggregating valuesForInsert.
+     * Class for aggregating.
      */
     private abstract class MySQLAggregator {
         
