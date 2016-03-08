@@ -4,4 +4,4 @@
 - [HARDENING] Remove a temporal fix regarding Orion <= 0.10.0 in OrionRESTHandler (#840)
 - [HARDENING] Add an efficient function for converting ArrayList to String in Utils.java (#841)
 - [FEATURE] Remove support for XML notifications in all sinks and in the documentation (#448)
-- [BUG] Fix wrong class name in OrionSTHSink.md (#852)
+- [BUG] Fix wrong class name in configuration section of OrionSTHSink.md (#852)
