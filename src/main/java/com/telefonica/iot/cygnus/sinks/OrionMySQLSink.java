@@ -26,6 +26,8 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import org.apache.flume.Context;
 
 /**
@@ -180,19 +182,19 @@ public class OrionMySQLSink extends OrionSink {
                 aggregator.aggregate(cygnusEvent);
             } // for
             
-            // persist the fieldValues
+            // persist the aggregation
             persistAggregation(aggregator);
             batch.setPersisted(destination);
         } // for
     } // persistBatch
     
     /**
-     * Class for aggregating fieldValues.
+     * Class for aggregating.
      */
     private abstract class MySQLAggregator {
         
-        // string containing the data fieldValues
-        protected String aggregation;
+        // object containing the aggregated data
+        protected LinkedHashMap<String, ArrayList<String>> aggregation;
 
         protected String service;
         protected String servicePath;
@@ -200,16 +202,10 @@ public class OrionMySQLSink extends OrionSink {
         protected String attribute;
         protected String dbName;
         protected String tableName;
-        protected String typedFieldNames;
-        protected String fieldNames;
         
         public MySQLAggregator() {
-            aggregation = "";
+            aggregation = new LinkedHashMap<String, ArrayList<String>>();
         } // MySQLAggregator
-        
-        public String getAggregation() {
-            return aggregation;
-        } // getAggregation
         
         public String getDbName(boolean enableLowercase) {
             if (enableLowercase) {
@@ -227,13 +223,69 @@ public class OrionMySQLSink extends OrionSink {
             } // if else
         } // getTableName
         
-        public String getTypedFieldNames() {
-            return typedFieldNames;
-        } // getTypedFieldNames
+        public String getValuesForInsert() {
+            String valuesForInsert = "";
+            int numEvents = aggregation.get(Constants.FIWARE_SERVICE_PATH).size();
+            
+            for (int i = 0; i < numEvents; i++) {
+                if (i == 0) {
+                    valuesForInsert += "(";
+                } else {
+                    valuesForInsert += ",(";
+                } // if else
+                
+                boolean first = true;
+                Iterator it = aggregation.keySet().iterator();
+            
+                while (it.hasNext()) {
+                    ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
+                    if (first) {
+                        valuesForInsert += "'" + values.get(i) + "'";
+                        first = false;
+                    } else {
+                        valuesForInsert += ",'" + values.get(i) + "'";
+                    } // if else
+                } // while
+                
+                valuesForInsert += ")";
+            } // for
+            
+            return valuesForInsert;
+        } // getValuesForInsert
         
-        public String getFieldNames() {
-            return fieldNames;
-        } // getFieldNames
+        public String getFieldsForCreate() {
+            String fieldsForCreate = "(";
+            boolean first = true;
+            Iterator it = aggregation.keySet().iterator();
+            
+            while (it.hasNext()) {
+                if (first) {
+                    fieldsForCreate += (String) it.next() + " text";
+                    first = false;
+                } else {
+                    fieldsForCreate += "," + (String) it.next() + " text";
+                } // if else
+            } // while
+            
+            return fieldsForCreate + ")";
+        } // getFieldsForCreate
+        
+        public String getFieldsForInsert() {
+            String fieldsForInsert = "(";
+            boolean first = true;
+            Iterator it = aggregation.keySet().iterator();
+            
+            while (it.hasNext()) {
+                if (first) {
+                    fieldsForInsert += (String) it.next();
+                    first = false;
+                } else {
+                    fieldsForInsert += "," + (String) it.next();
+                } // if else
+            } // while
+            
+            return fieldsForInsert + ")";
+        } // getFieldsForInsert
         
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
@@ -293,28 +345,15 @@ public class OrionMySQLSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            typedFieldNames = "("
-                    + Constants.RECV_TIME_TS + " long,"
-                    + Constants.RECV_TIME + " text,"
-                    + Constants.FIWARE_SERVICE_PATH + " text,"
-                    + Constants.ENTITY_ID + " text,"
-                    + Constants.ENTITY_TYPE + " text,"
-                    + Constants.ATTR_NAME + " text,"
-                    + Constants.ATTR_TYPE + " text,"
-                    + Constants.ATTR_VALUE + " text,"
-                    + Constants.ATTR_MD + " text"
-                    + ")";
-            fieldNames = "("
-                    + Constants.RECV_TIME_TS + ","
-                    + Constants.RECV_TIME + ","
-                    + Constants.FIWARE_SERVICE_PATH + ","
-                    + Constants.ENTITY_ID + ","
-                    + Constants.ENTITY_TYPE + ","
-                    + Constants.ATTR_NAME + ","
-                    + Constants.ATTR_TYPE + ","
-                    + Constants.ATTR_VALUE + ","
-                    + Constants.ATTR_MD
-                    + ")";
+            aggregation.put(Constants.RECV_TIME_TS, new ArrayList<String>());
+            aggregation.put(Constants.RECV_TIME, new ArrayList<String>());
+            aggregation.put(Constants.FIWARE_SERVICE_PATH, new ArrayList<String>());
+            aggregation.put(Constants.ENTITY_ID, new ArrayList<String>());
+            aggregation.put(Constants.ENTITY_TYPE, new ArrayList<String>());
+            aggregation.put(Constants.ATTR_NAME, new ArrayList<String>());
+            aggregation.put(Constants.ATTR_TYPE, new ArrayList<String>());
+            aggregation.put(Constants.ATTR_VALUE, new ArrayList<String>());
+            aggregation.put(Constants.ATTR_MD, new ArrayList<String>());
         } // initialize
         
         @Override
@@ -347,24 +386,16 @@ public class OrionMySQLSink extends OrionSink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
-                // create a column and aggregate it
-                String row = "('"
-                    + recvTimeTs + "','"
-                    + recvTime + "','"
-                    + servicePath + "','"
-                    + entityId + "','"
-                    + entityType + "','"
-                    + attrName + "','"
-                    + attrType + "','"
-                    + attrValue + "','"
-                    + attrMetadata
-                    + "')";
-                
-                if (aggregation.isEmpty()) {
-                    aggregation += row;
-                } else {
-                    aggregation += "," + row;
-                } // if else
+                // aggregate the attribute information
+                aggregation.get(Constants.RECV_TIME_TS).add(Long.toString(recvTimeTs));
+                aggregation.get(Constants.RECV_TIME).add(recvTime);
+                aggregation.get(Constants.FIWARE_SERVICE_PATH).add(servicePath);
+                aggregation.get(Constants.ENTITY_ID).add(entityId);
+                aggregation.get(Constants.ENTITY_TYPE).add(entityType);
+                aggregation.get(Constants.ATTR_NAME).add(attrName);
+                aggregation.get(Constants.ATTR_TYPE).add(attrType);
+                aggregation.get(Constants.ATTR_VALUE).add(attrValue);
+                aggregation.get(Constants.ATTR_MD).add(attrMetadata);
             } // for
         } // aggregate
 
@@ -379,15 +410,11 @@ public class OrionMySQLSink extends OrionSink {
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
             
-            // particulat initialization
-            typedFieldNames = "(" + Constants.RECV_TIME + " text,"
-                    + Constants.FIWARE_SERVICE_PATH + " text,"
-                    + Constants.ENTITY_ID + " text,"
-                    + Constants.ENTITY_TYPE + " text";
-            fieldNames = "(" + Constants.RECV_TIME + ","
-                    + Constants.FIWARE_SERVICE_PATH + ","
-                    + Constants.ENTITY_ID + ","
-                    + Constants.ENTITY_TYPE;
+            // particular initialization
+            aggregation.put(Constants.RECV_TIME, new ArrayList<String>());
+            aggregation.put(Constants.FIWARE_SERVICE_PATH, new ArrayList<String>());
+            aggregation.put(Constants.ENTITY_ID, new ArrayList<String>());
+            aggregation.put(Constants.ENTITY_TYPE, new ArrayList<String>());
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -398,12 +425,9 @@ public class OrionMySQLSink extends OrionSink {
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                typedFieldNames += "," + attrName + " text," + attrName + "_md text";
-                fieldNames += "," + attrName + "," + attrName + "_md";
+                aggregation.put(attrName, new ArrayList<String>());
+                aggregation.put(attrName + "_md", new ArrayList<String>());
             } // for
-            
-            typedFieldNames += ")";
-            fieldNames += ")";
         } // initialize
         
         @Override
@@ -428,7 +452,10 @@ public class OrionMySQLSink extends OrionSink {
                 return;
             } // if
             
-            String column = "('" + recvTime + "','" + servicePath + "','" + entityId + "','" + entityType + "'";
+            aggregation.get(Constants.RECV_TIME).add(recvTime);
+            aggregation.get(Constants.FIWARE_SERVICE_PATH).add(servicePath);
+            aggregation.get(Constants.ENTITY_ID).add(entityId);
+            aggregation.get(Constants.ENTITY_TYPE).add(entityType);
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -437,17 +464,9 @@ public class OrionMySQLSink extends OrionSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                
-                // create part of the column with the current attribute (a.k.a. a column)
-                column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                aggregation.get(attrName).add(attrValue);
+                aggregation.get(attrName + "_md").add(attrMetadata);
             } // for
-            
-            // now, aggregate the column
-            if (aggregation.isEmpty()) {
-                aggregation += column + ")";
-            } else {
-                aggregation += "," + column + ")";
-            } // if else
         } // aggregate
         
     } // ColumnAggregator
@@ -461,24 +480,24 @@ public class OrionMySQLSink extends OrionSink {
     } // getAggregator
     
     private void persistAggregation(MySQLAggregator aggregator) throws Exception {
-        String typedFieldNames = aggregator.getTypedFieldNames();
-        String fieldNames = aggregator.getFieldNames();
-        String fieldValues = aggregator.getAggregation();
+        String fieldsForCreate = aggregator.getFieldsForCreate();
+        String fieldsForInsert = aggregator.getFieldsForInsert();
+        String valuesForInsert = aggregator.getValuesForInsert();
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
         
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMySQLSink. Database ("
-                + dbName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
-                + fieldValues + ")");
+                + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
+                + valuesForInsert + ")");
         
-        // creating the database and the table has only sense if working in row mode, in column node
+        // creating the database and the table has only sense if working in row mode, in column mode
         // everything must be provisioned in advance
         if (aggregator instanceof RowAggregator) {
             persistenceBackend.createDatabase(dbName);
-            persistenceBackend.createTable(dbName, tableName, typedFieldNames);
+            persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if
         
-        persistenceBackend.insertContextData(dbName, tableName, fieldNames, fieldValues);
+        persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
     } // persistAggregation
 
 } // OrionMySQLSink
