@@ -30,6 +30,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -230,5 +233,24 @@ public final class Utils {
         
         return true;
     } // isANumber
+    
+    public static Long getTimeInstant(String metadata) throws Exception {
+        Long res = null;
+        JSONParser parser = new JSONParser();
+        JSONArray mds = (JSONArray) parser.parse(metadata);
+        
+        for (Object mdObject : mds) {
+            JSONObject md = (JSONObject) mdObject;
+            String mdName = (String) md.get("name");
+            
+            if (mdName.equals("TimeInstant")) {
+                String mdValue = (String) md.get("value");
+                res = new Long(mdValue);
+                break;
+            } // if
+        } // for
+        
+        return res;
+    } // getTimeInstant
         
 } // Utils
