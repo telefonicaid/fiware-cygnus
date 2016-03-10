@@ -193,7 +193,7 @@ public class OrionMySQLSink extends OrionSink {
      */
     private abstract class MySQLAggregator {
         
-        // object containing the aggregted data
+        // object containing the aggregated data
         protected LinkedHashMap<String, ArrayList<String>> aggregation;
 
         protected String service;
@@ -490,7 +490,7 @@ public class OrionMySQLSink extends OrionSink {
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
-        // creating the database and the table has only sense if working in row mode, in column node
+        // creating the database and the table has only sense if working in row mode, in column mode
         // everything must be provisioned in advance
         if (aggregator instanceof RowAggregator) {
             persistenceBackend.createDatabase(dbName);
