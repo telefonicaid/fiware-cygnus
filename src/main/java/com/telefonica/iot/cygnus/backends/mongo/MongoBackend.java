@@ -72,7 +72,6 @@ public interface MongoBackend {
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
-     * @param recvTime
      * @param entityId
      * @param entityType
      * @param attrName
@@ -81,7 +80,7 @@ public interface MongoBackend {
      * @param attrMd
      * @throws Exception
      */
-    void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String recvTime,
+    void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception;
     
