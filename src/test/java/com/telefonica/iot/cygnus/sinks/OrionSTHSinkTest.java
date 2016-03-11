@@ -168,7 +168,7 @@ public class OrionSTHSinkTest {
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createDatabase(dbName);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).createCollection(dbName, collectionName, 0);
         doNothing().doThrow(new Exception()).when(mockMongoBackend).insertContextDataAggregated(dbName, collectionName,
-                recvTimeTs, recvTime, entityId, entityType, attrName, attrType, attrValue, attrMd);
+                recvTimeTs, entityId, entityType, attrName, attrType, attrValue, attrMd);
     } // setUp
     
     /**
