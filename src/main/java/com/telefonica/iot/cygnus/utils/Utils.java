@@ -264,13 +264,13 @@ public final class Utils {
                     try {
                         // ISO 8601 without miliseconds
                         DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                "yyyy-MM-ddThh:mm:ssZ").withOffsetParsed();
+                                "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed();
                         dateTime = formatter.parseDateTime(mdValue);
                     } catch (Exception e1) {
                         try {
                             // ISO 8601 with miliseconds
                             DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                    "yyyy-MM-ddThh:mm:ss.SSSZ").withOffsetParsed();
+                                    "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed();
                             dateTime = formatter.parseDateTime(mdValue);
                         } catch (Exception e2) {
                             try {
