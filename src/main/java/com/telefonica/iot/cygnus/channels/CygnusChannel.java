@@ -61,4 +61,28 @@ public interface CygnusChannel {
      */
     long getNumTakesFail();
     
+    /**
+     * Sets the number of put operations on the channel that went OK.
+     * @param n The number to be set
+     */
+    void setNumPutsOK(long n);
+    
+    /**
+     * Sets the number of put operations on the channel that failed.
+     * @param n The number to be set
+     */
+    void setNumPutsFail(long n);
+    
+    /**
+     * Sets the number of take operations on the channel that went OK.
+     * @param n The number to be set
+     */
+    void setNumTakesOK(long n);
+    
+    /**
+     * Sets the number of take operations on the channel that failed.
+     * @param n The number to be set
+     */
+    void setNumTakesFail(long n);
+    
 } // CygnusChannel

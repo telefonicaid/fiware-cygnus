@@ -30,14 +30,9 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.Map;
 import com.telefonica.iot.cygnus.utils.Constants;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -47,8 +42,6 @@ import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.MDC;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -146,9 +139,29 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         return numProcessedEvents;
     } // getNumProcessedEvents
 
+    /**
+     * Gets the number of persisted events.
+     * @return The number of persisted events.
+     */
     public long getNumPersistedEvents() {
         return numPersistedEvents;
     } // getNumPersistedEvents
+    
+    /**
+     * Sets the number of processed events.
+     * @param n The number of processed events to be set
+     */
+    public void setNumProcessedEvents(long n) {
+        numProcessedEvents = n;
+    } // setNumProcessedEvents
+    
+    /**
+     * Sets the number of persisted events.
+     * @param n The number of persisted events to be set
+     */
+    public void setNumPersistedEvents(long n) {
+        numPersistedEvents = n;
+    } // setNumPersistedEvents
 
     @Override
     public void configure(Context context) {
