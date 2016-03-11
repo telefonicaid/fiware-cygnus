@@ -100,6 +100,22 @@ public class OrionRestHandler implements HTTPSourceHandler {
     } // getNumProcessedEvents
     
     /**
+     * Sets the number of received events.
+     * @param n The number of received events to be set
+     */
+    public void setNumReceivedEvents(long n) {
+        numReceivedEvents = n;
+    } // setNumReceivedEvents
+    
+    /**
+     * Sets the number of processed events.
+     * @param n The number of processed events to be set
+     */
+    public void setNumProcessedEvents(long n) {
+        numProcessedEvents = n;
+    } // setNumProcessedEvents
+    
+    /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
      * @return The notifications target
      */
