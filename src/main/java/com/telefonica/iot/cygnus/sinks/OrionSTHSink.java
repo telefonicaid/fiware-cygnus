@@ -157,10 +157,10 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
-            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
+            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);
         } // for
     } // persistOne
