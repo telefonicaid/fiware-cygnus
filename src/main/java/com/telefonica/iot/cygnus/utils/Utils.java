@@ -28,8 +28,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -234,6 +238,12 @@ public final class Utils {
         return true;
     } // isANumber
     
+    /**
+     * Gets the timestamp within a TimeInstant metadata, if exists.
+     * @param metadata
+     * @return The timestamp within a TimeInstant metadata
+     * @throws Exception
+     */
     public static Long getTimeInstant(String metadata) throws Exception {
         Long res = null;
         JSONParser parser = new JSONParser();
@@ -245,7 +255,44 @@ public final class Utils {
             
             if (mdName.equals("TimeInstant")) {
                 String mdValue = (String) md.get("value");
-                res = new Long(mdValue);
+                
+                if (isANumber(mdValue)) {
+                    res = new Long(mdValue);
+                } else {
+                    DateTime dateTime;
+                    
+                    try {
+                        // ISO 8601 without miliseconds
+                        DateTimeFormatter formatter = DateTimeFormat.forPattern(
+                                "yyyy-MM-ddThh:mm:ssZ").withOffsetParsed();
+                        dateTime = formatter.parseDateTime(mdValue);
+                    } catch (Exception e1) {
+                        try {
+                            // ISO 8601 with miliseconds
+                            DateTimeFormatter formatter = DateTimeFormat.forPattern(
+                                    "yyyy-MM-ddThh:mm:ss.SSSZ").withOffsetParsed();
+                            dateTime = formatter.parseDateTime(mdValue);
+                        } catch (Exception e2) {
+                            try {
+                                DateTimeFormatter formatter = DateTimeFormat.forPattern(
+                                        "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
+                                dateTime = formatter.parseDateTime(mdValue);
+                            } catch (Exception e3) {
+                                try {
+                                    DateTimeFormatter formatter = DateTimeFormat.forPattern(
+                                            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
+                                    dateTime = formatter.parseDateTime(mdValue);
+                                } catch (Exception e4) {
+                                    return null;
+                                } // try catch
+                            } // try catch
+                        } // try catch
+                    } // try catch
+
+                    GregorianCalendar cal = dateTime.toGregorianCalendar();
+                    res = cal.getTimeInMillis();
+                } // if else
+                
                 break;
             } // if
         } // for
