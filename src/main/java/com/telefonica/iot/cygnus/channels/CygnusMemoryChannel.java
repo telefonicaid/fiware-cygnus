@@ -85,5 +85,25 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
     public long getNumTakesFail() {
         return channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
     } // getNumTakesFail
+    
+    @Override
+    public void setNumPutsOK(long n) {
+
+    } // setNumPutsOK
+    
+    @Override
+    public void setNumPutsFail(long n) {
+        
+    } // setNumPutsFail
+    
+    @Override
+    public void setNumTakesOK(long n) {
+        
+    } // setNumTakesOK
+
+    @Override
+    public void setNumTakesFail(long n) {
+        
+    } // setNumTakesFail
 
 } // CygnusMemoryChannel
