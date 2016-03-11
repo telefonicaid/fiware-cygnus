@@ -6,4 +6,5 @@
 - [BUG] Fix the way a set of notified attributes are processed in OrionMySQLSink, no order must be assumed (#855)
 - [FEATURE] Remove support for XML notifications in all sinks and in the documentation (#448)
 - [BUG] Fix wrong class name in configuration section of OrionSTHSink.md (#852)
+- [FEATURE] When notified, use the TimeInstant metadata instead of the reception time (#859)
 - [HARDENING] Add docker and support badges to the README (#858)

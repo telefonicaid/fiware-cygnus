@@ -135,7 +135,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             Long recvTimeTs;
             String recvTime;
 
-            Long timeInstant = getTimeInstant(attrMetadata);
+            Long timeInstant = Utils.getTimeInstant(attrMetadata);
 
             if (timeInstant != null) {
                 recvTimeTs = timeInstant;
@@ -157,31 +157,12 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs / 1000 + "," + recvTime + ","
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
-            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs / 1000, recvTime,
+            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);
         } // for
     } // persistOne
-    
-    private Long getTimeInstant(String metadata) throws Exception {
-        Long res = null;
-        JSONParser parser = new JSONParser();
-        JSONArray mds = (JSONArray) parser.parse(metadata);
-        
-        for (Object mdObject : mds) {
-            JSONObject md = (JSONObject) mdObject;
-            String mdName = (String) md.get("name");
-            
-            if (mdName.equals("TimeInstant")) {
-                String mdValue = (String) md.get("value");
-                res = new Long(mdValue);
-                break;
-            } // if
-        } // for
-        
-        return res;
-    } // getTimeInstant
     
 } // OrionSTHSink
