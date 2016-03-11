@@ -422,6 +422,8 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePostGroupingRules
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
         for (String key : sources.keySet()) {
             Source source;
             HTTPSourceHandler handler;
@@ -494,6 +496,10 @@ public class ManagementInterface extends AbstractHandler {
                 os.setNumPersistedEvents(0);
             } // if
         } // for
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"success\":\"true\"}");
+        LOGGER.debug("Statistics reseted");
     } // handlePutStats
     
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
