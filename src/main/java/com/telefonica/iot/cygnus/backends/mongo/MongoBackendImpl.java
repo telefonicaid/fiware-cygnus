@@ -191,7 +191,6 @@ public class MongoBackendImpl implements MongoBackend {
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
-     * @param recvTime
      * @param entityId
      * @param entityType
      * @param attrName
@@ -201,14 +200,14 @@ public class MongoBackendImpl implements MongoBackend {
      * @throws Exception
      */
     @Override
-    public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String recvTime,
+    public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception {
         // preprocess some values
         double value = new Double(attrValue);
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(recvTimeTs * 1000);
+        calendar.setTimeInMillis(recvTimeTs);
         
         // insert the data in an aggregated fashion for each resolution type
         insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,

@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
@@ -175,7 +176,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
         @Override
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            long notifiedRecvTimeTs = cygnusEvent.getRecvTimeTs();
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
@@ -197,6 +198,19 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                
+                // check if the metadata contains a TimeInstant value; use the notified reception time instead
+                Long recvTimeTs;
+
+                Long timeInstant = Utils.getTimeInstant(attrMetadata);
+
+                if (timeInstant != null) {
+                    recvTimeTs = timeInstant;
+                } else {
+                    recvTimeTs = notifiedRecvTimeTs;
+                } // if else
+                
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 Document doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
