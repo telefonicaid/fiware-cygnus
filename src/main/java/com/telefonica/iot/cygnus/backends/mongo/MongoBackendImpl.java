@@ -349,9 +349,10 @@ public class MongoBackendImpl implements MongoBackend {
             
         } else {
             int offset = getOffset(calendar, resolution);
+            int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
             update.append("$set", new BasicDBObject("attrType", attrType))
                     .append("$inc", new BasicDBObject("points.$.samples", 1)
-                            .append("points." + "" + ".occur." + attrValue, 1));
+                            .append("points." + modifiedOffset + ".occur." + attrValue, 1));
         } // if else
         
         return update;
@@ -414,7 +415,7 @@ public class MongoBackendImpl implements MongoBackend {
             for (int i = offsetOrigin; i < numValues; i++) {
                 prepopulatedData.add(new BasicDBObject("offset", i)
                         .append("samples", 0)
-                        .append("occur", "{}"));
+                        .append("occur", new BasicDBObject()));
             } // for
         } // if else
         
