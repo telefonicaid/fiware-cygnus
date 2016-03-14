@@ -497,7 +497,8 @@ public class OrionHDFSSink extends OrionSink {
     public void start() {
         try {
             // create Hive backend
-            hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
+            hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username,
+                    (password != null && password.length() > 0 ? password : oauth2Token));
             LOGGER.debug("[" + this.getName() + "] Hive persistence backend created");
 
             // create the persistence backend
