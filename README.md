@@ -246,7 +246,7 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
 ##<a name="section4"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
-  <tr><td rowspan="11">OrionHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
+  <tr><td rowspan="12">OrionHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
   <tr><td>Multiple HDFS endpoint setup</td><td>0.4.1</td></tr>
   <tr><td>Kerberos support</td><td>0.7.0</td></tr>
   <tr><td>OAuth2 support</td><td>0.8.2</td></tr>
@@ -257,6 +257,7 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>HDFSBackendImplBinary</td><td>0.10.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
   <tr><td>Per-user Hive databases</td><td>0.12.0</td></tr>
+  <tr><td>OAuth2-based authentication in Hive</td><td>0.14.0</td></tr>
   <tr><td rowspan="3">OrionCKANSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Enable SSL</td><td>0.4.2</td></tr>
   <tr><td>Batching mechanism</td><td>0.11.0</td></tr>
