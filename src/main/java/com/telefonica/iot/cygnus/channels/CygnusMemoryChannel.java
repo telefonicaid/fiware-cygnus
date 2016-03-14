@@ -34,6 +34,10 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
     private static final CygnusLogger LOGGER = new CygnusLogger(CygnusMemoryChannel.class);
     private long setupTime;
     private ChannelCounter channelCounterRef;
+    private long accPutsOK;
+    private long accPutsFail;
+    private long accTakesOK;
+    private long accTakesFail;
     
     @Override
     protected void initialize() {
@@ -54,6 +58,10 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
         } // try catch
         
         setupTime = new Date().getTime();
+        accPutsOK = 0;
+        accPutsFail = 0;
+        accTakesOK = 0;
+        accTakesFail = 0;
     } // initialize
 
     @Override
@@ -68,22 +76,48 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
     
     @Override
     public long getNumPutsOK() {
-        return channelCounterRef.getEventPutSuccessCount();
+        return channelCounterRef.getEventPutSuccessCount()
+                - accPutsOK;
     } // getNumPutsOK
     
     @Override
     public long getNumPutsFail() {
-        return channelCounterRef.getEventPutAttemptCount() - channelCounterRef.getEventPutSuccessCount();
+        return channelCounterRef.getEventPutAttemptCount()
+                - channelCounterRef.getEventPutSuccessCount()
+                - accPutsFail;
     } // getNumPutsFail
     
     @Override
     public long getNumTakesOK() {
-        return channelCounterRef.getEventTakeSuccessCount();
+        return channelCounterRef.getEventTakeSuccessCount()
+                - accTakesOK;
     } // getNumTakesOK
     
     @Override
     public long getNumTakesFail() {
-        return channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
+        return channelCounterRef.getEventTakeAttemptCount()
+                - channelCounterRef.getEventTakeSuccessCount()
+                - accTakesFail;
     } // getNumTakesFail
+    
+    @Override
+    public void setNumPutsOK(long n) {
+        accPutsOK = channelCounterRef.getEventPutSuccessCount() - n;
+    } // setNumPutsOK
+    
+    @Override
+    public void setNumPutsFail(long n) {
+        accPutsFail = channelCounterRef.getEventPutAttemptCount() - channelCounterRef.getEventPutSuccessCount() - n;
+    } // setNumPutsFail
+    
+    @Override
+    public void setNumTakesOK(long n) {
+        accTakesOK = channelCounterRef.getEventTakeSuccessCount() - n;
+    } // setNumTakesOK
+
+    @Override
+    public void setNumTakesFail(long n) {
+        accTakesFail = channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
+    } // setNumTakesFail
 
 } // CygnusMemoryChannel

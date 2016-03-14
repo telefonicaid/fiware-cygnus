@@ -11,9 +11,10 @@ Content:
     * [Important notes](#section2.3)
          * [Hashing based collections](#section2.3.1)
          * [About batching](#section2.3.2)
-* [Programmers guide](#section4)
-    * [`OrionMongoSink` class](#section4.1)
-    * [`MongoBackend` class](#section4.2)
+         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+* [Programmers guide](#section3)
+    * [`OrionMongoSink` class](#section3.1)
+    * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionMongoSink`, or simply `OrionMongosink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -265,8 +266,13 @@ By default, `OrionMongoSink` has a configured batch size and batch accumulation 
 
 [Top](#top)
 
-##<a name="section4"></a>Programmers guide
-###<a name="section4.1"></a>`OrionSTHSink` class
+###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+By default, `OrionMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+
+[Top](#top)
+
+##<a name="section3"></a>Programmers guide
+###<a name="section3.1"></a>`OrionSTHSink` class
 `OrionMongoSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -283,7 +289,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section4.2"></a>`MongoBackend` class
+###<a name="section3.2"></a>`MongoBackend` class
 This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
 
     public void createDatabase(String dbName) throws Exception;

@@ -3,10 +3,11 @@ Content:
 
 * [GET `/v1/version`](#section1)
 * [GET `/v1/stats`](#section2)
-* [GET `/v1/groupingrules`](#section3)
-* [POST `/v1/groupingrules`](#section4)
-* [PUT `/v1/groupingrules`](#section5)
-* [DELETE `/v1/groupingrules`](#section6)
+* [PUT `/v1/stats`](#section3)
+* [GET `/v1/groupingrules`](#section4)
+* [POST `/v1/groupingrules`](#section5)
+* [PUT `/v1/groupingrules`](#section6)
+* [DELETE `/v1/groupingrules`](#section7)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -26,7 +27,7 @@ Response:
 
 [Top](#top)
 
-##<a neme="section2"></a>`GET /v1/stats`
+##<a name="section2"></a>`GET /v1/stats`
 Gets statistics about the configured Flume components. It is important to note <b>in order to gathering statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
 
 Regarding the sources, it returns:
@@ -102,7 +103,22 @@ Response:
 
 [Top](#top)
 
-##<a neme="section3"></a>`GET /v1/groupingrules`
+##<a name="section3"></a>`PUT /v1/stats`
+Resets the statistics about the configured Flume components. It is important to note <b>in order to reset statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
+
+```
+PUT http://<cygnus_host>:<management_port>/v1/stats
+```
+
+Response:
+
+```
+{"success":"true"}
+```
+
+[Top](#top)
+
+##<a name="section4"></a>`GET /v1/groupingrules`
 Gets the configured [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
@@ -139,7 +155,7 @@ Response:
 
 [Top](#top)
 
-##<a neme="section4"></a>`POST /v1/groupingrules`
+##<a name="section5"></a>`POST /v1/groupingrules`
 Adds a new rule, passed as a Json in the payload, to the [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
@@ -162,7 +178,7 @@ Please observe the `id` field is not passed as part of the posted Json. This is 
 
 [Top](#top)
 
-##<a neme="section5"></a>`PUT /v1/groupingrules`
+##<a name="section6"></a>`PUT /v1/groupingrules`
 Updates an already existent [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
 
 ```
@@ -183,7 +199,7 @@ Response:
 
 [Top](#top)
 
-##<a neme="section6"></a>`DELETE /v1/groupingrules`
+##<a name="section7"></a>`DELETE /v1/groupingrules`
 Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
 
 ```

@@ -11,9 +11,10 @@ Content:
     * [Important notes](#section2.3)
         * [Hashing based collections](#section2.3.1)
         * [About batching](#section2.3.2)
-* [Implementation details](#section4)
-    * [`OrionSTHSink` class](#section4.1)
-    * [`MongoBackend` class](#section4.2)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+* [Implementation details](#section3)
+    * [`OrionSTHSink` class](#section3.1)
+    * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -92,7 +93,7 @@ Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=fa
     sth_/4wheels_car1_car.aggr
     system.indexes
     > db['sth_/4wheels_car1_car.aggr'].find()
-    { 
+    {
         "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
@@ -142,7 +143,7 @@ Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=fa
             { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
         ]
     }
-    { 
+    {
         "_id" : { "attrName" : "oil_level", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
             { "offset" : 0, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity },
@@ -207,7 +208,7 @@ NOTES:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
+| type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionSTHSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -228,7 +229,7 @@ A configuration example could be:
     cygnusagent.sinks = sth-sink
     cygnusagent.channels = sth-channel
     ...
-    cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+    cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
     cygnusagent.sinks.sth-sink.channel = sth-channel
     cygnusagent.sinks.sth-sink.enable_grouping = false
     cygnusagent.sinks.sth-sink.enable_lowercase = false
@@ -270,38 +271,40 @@ Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Plea
 
 [Top](#top)
 
-##<a name="section4"></a>Programmers guide
-###<a name="section4.1"></a>`OrionSTHSink` class
+###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+By default, `OrionSTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+
+##<a name="section3"></a>Programmers guide
+###<a name="section3.1"></a>`OrionSTHSink` class
 `OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
-    
+
     public void start();
 
 An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
 
-###<a name="section4.2"></a>`MongoBackend` class
+###<a name="section3.2"></a>`MongoBackend` class
 This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
 
     public void createDatabase(String dbName) throws Exception;
-    
+
 Creates a database, given its name, if not exists.
-    
+
     public void createCollection(String dbName, String collectionName) throws Exception;
-    
+
 Creates a collection, given its name, if not exists in the given database.
-    
+
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
-    
+
 Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 [Top](#top)
-

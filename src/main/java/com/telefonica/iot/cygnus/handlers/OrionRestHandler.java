@@ -44,7 +44,7 @@ import org.slf4j.MDC;
  * Custom HTTP handler for the default HTTP Flume source. It checks the method, notificationTarget and headers are the
  * ones tipically sent by an instance of Orion Context Broker when notifying a context event. If everything is OK, a
  * Flume event is created in order the HTTP Flume source sends it to the Flume channel connecting the source with the
- * sink. This event contains both the context event data and a header specifying the content type (Json or XML).
+ * sink. This event contains both the context event data and a header specifying the content type (Json).
  */
 public class OrionRestHandler implements HTTPSourceHandler {
     
@@ -98,6 +98,22 @@ public class OrionRestHandler implements HTTPSourceHandler {
     public long getNumProcessedEvents() {
         return numProcessedEvents;
     } // getNumProcessedEvents
+    
+    /**
+     * Sets the number of received events.
+     * @param n The number of received events to be set
+     */
+    public void setNumReceivedEvents(long n) {
+        numReceivedEvents = n;
+    } // setNumReceivedEvents
+    
+    /**
+     * Sets the number of processed events.
+     * @param n The number of processed events to be set
+     */
+    public void setNumProcessedEvents(long n) {
+        numProcessedEvents = n;
+    } // setNumProcessedEvents
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
@@ -187,7 +203,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json") && !headerValue.contains("application/xml")) {
+                if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
@@ -216,8 +232,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // check if received content type is null
         if (contentType == null) {
-            LOGGER.warn("Missing content type. Required application/json or application/xml.");
-            throw new HTTPBadRequestException("Missing content type. Required application/json or application/xml.");
+            LOGGER.warn("Missing content type. Required application/json.");
+            throw new HTTPBadRequestException("Missing content type. Required application/json.");
         } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
@@ -242,19 +258,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
         if (data.length() == 0) {
             LOGGER.warn("Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
-        } // if
+        } // if 
 
-        // data adaptation; two replacements:
-        //   1. replace all the appearances of "contextValue" with "value" in order Orion versions under 0.10.0 may
-        //      work (Json content type only)
-        //   2. replace all the white lines between tags with nothing; the regex ">[ ]*<" means "all the white spaces
-        //      between '>' and '<', e.g. "<tag1>1</tag1>      <tag2>2</tag2>" becomes "<tag1>1</tag1><tag2>2</tag2>"
-        
-        if (contentType.equals("application/json")) {
-            data = data.replaceAll("contextValue", "value");
-        } // if
-
-        data = data.replaceAll(">[ ]*<", "><");
         LOGGER.info("Received data (" + data + ")");
         
         // create the appropiate headers

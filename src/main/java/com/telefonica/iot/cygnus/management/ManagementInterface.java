@@ -127,7 +127,9 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println(method + " " + uri + " Not implemented");
                 } // if else
             } else if (method.equals("PUT")) {
-                if (uri.equals("/v1/groupingrules")) {
+                if (uri.equals("/v1/stats")) {
+                    handlePutStats(response);
+                } else if (uri.equals("/v1/groupingrules")) {
                     handlePutGroupingRules(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -150,6 +152,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetGUI(response);
                 } else if (uri.endsWith("/points")) {
                     handleGetPoints(response);
+                } else if (uri.equals("/stats")) { // this is order to avoid CORS access control
+                    handleGetStats(response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -416,6 +420,87 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"}");
         LOGGER.debug("Rule added. Grouping rules after adding the new rule: " + rulesStr);
     } // handlePostGroupingRules
+    
+    private void handlePutStats(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        for (String key : sources.keySet()) {
+            Source source;
+            HTTPSourceHandler handler;
+            
+            try {
+                SourceRunner sr = sources.get(key);
+                source = sr.getSource();
+                Field f = source.getClass().getDeclaredField("handler");
+                f.setAccessible(true);
+                handler = (HTTPSourceHandler) f.get(source);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+            
+            if (handler instanceof OrionRestHandler) {
+                OrionRestHandler orh = (OrionRestHandler) handler;
+                orh.setNumProcessedEvents(0);
+                orh.setNumReceivedEvents(0);
+            } // if
+        } // for
+
+        for (String key : channels.keySet()) {
+            Channel channel = channels.get(key);
+            
+            if (channel instanceof CygnusChannel) {
+                CygnusChannel cc = (CygnusChannel) channel;
+                cc.setNumPutsOK(0);
+                cc.setNumPutsFail(0);
+                cc.setNumTakesOK(0);
+                cc.setNumTakesFail(0);
+            } // if
+        } // for
+
+        for (String key : sinks.keySet()) {
+            Sink sink;
+            
+            try {
+                SinkRunner sr = sinks.get(key);
+                SinkProcessor sp = sr.getPolicy();
+                Field f = sp.getClass().getDeclaredField("sink");
+                f.setAccessible(true);
+                sink = (Sink) f.get(sp);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+
+            if (sink instanceof OrionSink) {
+                OrionSink os = (OrionSink) sink;
+                os.setNumProcessedEvents(0);
+                os.setNumPersistedEvents(0);
+            } // if
+        } // for
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"success\":\"true\"}");
+        LOGGER.debug("Statistics reseted");
+    } // handlePutStats
     
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");

@@ -192,7 +192,6 @@ public class MongoBackendImpl implements MongoBackend {
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
-     * @param recvTime
      * @param entityId
      * @param entityType
      * @param attrName
@@ -202,7 +201,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @throws Exception
      */
     @Override
-    public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String recvTime,
+    public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception {
         // preprocess some values

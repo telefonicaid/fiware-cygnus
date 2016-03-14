@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,27 +18,42 @@
 
 package com.telefonica.iot.cygnus.utils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.regex.Pattern;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  *
  * @author frb
  */
 public final class Utils {
+    
+    private static final CygnusLogger LOGGER = new CygnusLogger(Utils.class);
+    private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
+    private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
+    private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER3 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
+    private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -53,7 +68,7 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        String res = ENCODEPATTERN.matcher(in).replaceAll("_");
         return (res.startsWith("_") ? res.substring(1, res.length()) : res);
     } // encode
     
@@ -64,62 +79,27 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encodeHive(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+        return ENCODEHIVEPATTERN.matcher(in).replaceAll("_").toLowerCase();
     } // encodeHive
     
     /**
-     * Converts a XML node into Json.
-     * @param xmlNode
-     * @return
-     * @throws Exception
+     * Encodes a string from an ArrayList.
+     * @param in
+     * @return The encoded string
      */
-    public static JsonElement basicXml2Json(Node xmlNode) throws Exception {
-        // if the XML node has not attributes, it is either an object either a string
-        if (!xmlNode.hasAttributes()) {
-            Node child = xmlNode.getFirstChild();
-
-            if (child.getFirstChild() != null) {
-                NodeList domObjects = ((Element) xmlNode).getChildNodes();
-                JsonObject jsonObject = new JsonObject();
-
-                for (int i = 0; i < domObjects.getLength(); i++) {
-                    Node domObject = domObjects.item(i);
-                    jsonObject.add(domObject.getNodeName(), basicXml2Json(domObject));
-                } // for
-
-                return jsonObject;
+    public static String toString(ArrayList in) {
+        String out = "";
+        
+        for (int i = 0; i < in.size(); i++) {
+            if (i == 0) {
+                out = in.get(i).toString();
             } else {
-                return new JsonPrimitive(xmlNode.getTextContent());
+                out += "," + in.get(i).toString();
             } // if else
-        } // if
-
-        // if the "type" attribute is not among the existing ones then return error
-        if (xmlNode.getAttributes().getNamedItem("type") == null) {
-            throw new Exception("Attributes different than \"type\" are not allowed withing or any child tag "
-                    + "according to Orion notification API");
-        } // if
-
-        String valueType = xmlNode.getAttributes().getNamedItem("type").getTextContent();
-
-        // if the value of the "type" attribute is "vector", the proceed, return error otherwise
-        if (valueType.equals("vector")) {
-            NodeList domItems = ((Element) xmlNode).getElementsByTagName("item");
-
-            if (domItems.getLength() == 0) {
-                throw new Exception("No <item> tag within <contextValue type=\"vector\">");
-            } // if
-
-            JsonArray jsonArray = new JsonArray();
-
-            for (int i = 0; i < domItems.getLength(); i++) {
-                jsonArray.add(basicXml2Json(domItems.item(i)));
-            } // for
-
-            return jsonArray;
-        } else {
-            throw new Exception("Unknown XML node type: " + valueType);
-        } // if else if else
-    } // basicXml2Json
+        } // for
+        
+        return out;
+    } // toString
     
     /**
      * Gets the Cygnus version from the pom.xml.
@@ -230,5 +210,66 @@ public final class Utils {
         
         return true;
     } // isANumber
+    
+    /**
+     * Gets the timestamp within a TimeInstant metadata, if exists.
+     * @param metadata
+     * @return The timestamp within a TimeInstant metadata
+     * @throws Exception
+     */
+    public static Long getTimeInstant(String metadata) throws Exception {
+        Long res = null;
+        JSONParser parser = new JSONParser();
+        JSONArray mds = (JSONArray) parser.parse(metadata);
+        
+        for (Object mdObject : mds) {
+            JSONObject md = (JSONObject) mdObject;
+            String mdName = (String) md.get("name");
+            
+            if (mdName.equals("TimeInstant")) {
+                String mdValue = (String) md.get("value");
+                
+                if (isANumber(mdValue)) {
+                    res = new Long(mdValue);
+                } else {
+                    DateTime dateTime;
+                    
+                    try {
+                        // ISO 8601 without miliseconds
+                        dateTime = FORMATTER1.parseDateTime(mdValue);
+                    } catch (Exception e1) {
+                        LOGGER.debug(e1.getMessage());
+                        
+                        try {
+                            // ISO 8601 with miliseconds
+                            dateTime = FORMATTER2.parseDateTime(mdValue);
+                        } catch (Exception e2) {
+                            LOGGER.debug(e2.getMessage());
+                            
+                            try {
+                                dateTime = FORMATTER3.parseDateTime(mdValue);
+                            } catch (Exception e3) {
+                                LOGGER.debug(e3.getMessage());
+                                
+                                try {
+                                    dateTime = FORMATTER4.parseDateTime(mdValue);
+                                } catch (Exception e4) {
+                                    LOGGER.debug(e4.getMessage());
+                                    return null;
+                                } // try catch
+                            } // try catch
+                        } // try catch
+                    } // try catch
+
+                    GregorianCalendar cal = dateTime.toGregorianCalendar();
+                    res = cal.getTimeInMillis();
+                } // if else
+                
+                break;
+            } // if
+        } // for
+        
+        return res;
+    } // getTimeInstant
         
 } // Utils

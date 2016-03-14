@@ -22,9 +22,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -129,7 +126,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             Long recvTimeTs;
             String recvTime;
 
-            Long timeInstant = getTimeInstant(attrMetadata);
+            Long timeInstant = Utils.getTimeInstant(attrMetadata);
 
             if (timeInstant != null) {
                 recvTimeTs = timeInstant;
@@ -154,28 +151,9 @@ public class OrionSTHSink extends OrionMongoBaseSink {
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
-            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs, recvTime,
+            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);
         } // for
     } // persistOne
-    
-    private Long getTimeInstant(String metadata) throws Exception {
-        Long res = null;
-        JSONParser parser = new JSONParser();
-        JSONArray mds = (JSONArray) parser.parse(metadata);
-        
-        for (Object mdObject : mds) {
-            JSONObject md = (JSONObject) mdObject;
-            String mdName = (String) md.get("name");
-            
-            if (mdName.equals("TimeInstant")) {
-                String mdValue = (String) md.get("value");
-                res = new Long(mdValue);
-                break;
-            } // if
-        } // for
-        
-        return res;
-    } // getTimeInstant
     
 } // OrionSTHSink
