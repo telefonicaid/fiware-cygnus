@@ -115,9 +115,9 @@ cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
-# password for the above username; this is only required for Hive authentication
+# password for the above username when PAM authentication is enabled in Hive
 cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
-# OAuth2 token for HDFS authentication
+# OAuth2 token for WebHDFS/HttpFS authentication and, optionally, Hive authentication when OAuth2 is enabled
 cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
 cygnusagent.sinks.hdfs-sink.service_as_namespace = false
