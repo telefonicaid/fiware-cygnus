@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -39,13 +39,13 @@ public final class Constants {
     public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
     public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
     public static final String FLUME_HEADER_GROUPED_ENTITIES       = "grouped-entities";
-    public static final String FLUME_HEADER_TRANSACTION_ID         = "transactionId";
     public static final String FLUME_HEADER_TTL                    = "ttl";
     public static final String FLUME_HEADER_TIMESTAMP              = "timestamp";
     
     // Both HTTP and Flume header names
     public static final String HEADER_CONTENT_TYPE   = "content-type";
     public static final String HEADER_USER_AGENT     = "user-agent";
+    public static final String HEADER_TRANSACTION_ID = "transaction-id";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS        = "recvTimeTs";
@@ -83,7 +83,7 @@ public final class Constants {
     // OrionDynamoDB specific headers
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
     
-    // L4J specific constants
+    // log4j specific constants
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
     
