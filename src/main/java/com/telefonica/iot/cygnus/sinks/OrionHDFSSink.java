@@ -218,22 +218,16 @@ public class OrionHDFSSink extends OrionSink {
 
     @Override
     public void configure(Context context) {
-        String cosmosHost = context.getString("cosmos_host");
         String hdfsHost = context.getString("hdfs_host");
 
         if (hdfsHost != null && hdfsHost.length() > 0) {
             host = hdfsHost.split(",");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
-        } else if (cosmosHost != null && cosmosHost.length() > 0) {
-            host = cosmosHost.split(",");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_host=" + Arrays.toString(host) + ")"
-                    + " -- DEPRECATED, use hdfs_host instead");
         } else {
             host = new String[]{"localhost"};
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_host=localhost");
         } // if else
 
-        String cosmosPort = context.getString("cosmos_port");
         String hdfsPort = context.getString("hdfs_port");
         int intPort;
 
@@ -249,34 +243,16 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             }  // if else
             
-        } else if (cosmosPort != null && cosmosPort.length() > 0) {
-            port = cosmosPort;
-            intPort = Integer.parseInt(port);
-            
-            if ((intPort <= 0) || (intPort > 65535)) {
-                invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (cosmos_port=" + port
-                        + ") -- Must be between 0 and 65535 -- DEPRECATED, use hdfs_port instead");
-            } else {
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_port=" + port + ")"
-                        + " -- DEPRECATED, use hdfs_port instead");
-            }  // if else
-            
         } else {
             port = "14000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hdfs_port=14000");
         }  // if else
 
-        String cosmosDefaultUsername = context.getString("cosmos_default_username");
         String hdfsUsername = context.getString("hdfs_username");
 
         if (hdfsUsername != null && hdfsUsername.length() > 0) {
             username = hdfsUsername;
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_username=" + username + ")");
-        } else if (cosmosDefaultUsername != null && cosmosDefaultUsername.length() > 0) {
-            username = cosmosDefaultUsername;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cosmos_default_username=" + username + ")"
-                    + " -- DEPRECATED, use hdfs_username instead");
         } else {
             LOGGER.error("[" + this.getName() + "] No username provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
@@ -346,27 +322,21 @@ public class OrionHDFSSink extends OrionSink {
                 + enableHiveStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
-        String hiveHostOld = context.getString("hive_host");
-        String hiveHostNew = context.getString("hive.host");
+        String hiveHostStr = context.getString("hive.host");
 
-        if (hiveHostNew != null && hiveHostNew.length() > 0) {
-            hiveHost = hiveHostNew;
+        if (hiveHostStr != null && hiveHostStr.length() > 0) {
+            hiveHost = hiveHostStr;
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.host=" + hiveHost + ")");
-        } else if (hiveHostOld != null && hiveHostOld.length() > 0) {
-            hiveHost = hiveHostOld;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_host=" + hiveHost + ")"
-                    + " -- DEPRECATED, use hive.host instead");
         } else {
             hiveHost = "localhost";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.host=localhost");
         } // if else
 
-        String hivePortOld = context.getString("hive_port");
-        String hivePortNew = context.getString("hive.port");
+        String hivePortStr = context.getString("hive.port");
         int intHivePort;
 
-        if (hivePortNew != null && hivePortNew.length() > 0) {
-            hivePort = hivePortNew;
+        if (hivePortStr != null && hivePortStr.length() > 0) {
+            hivePort = hivePortStr;
             intHivePort = Integer.parseInt(hivePort);
             
             if ((intHivePort <= 0) && (intHivePort > 65535)) {
@@ -377,29 +347,15 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
             }  // if else
             
-        } else if (hivePortOld != null && hivePortOld.length() > 0) {
-            hivePort = hivePortOld;
-            intHivePort = Integer.parseInt(hivePort);
-            
-            if ((intHivePort <= 0) && (intHivePort > 65535)) {
-                invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive_port=" + hivePort + ")"
-                    + " -- Must be between 0 and 65535 -- DEPRECATED, use hive.port instead");
-            } else {
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_port=" + hivePort + ")"
-                        + " -- DEPRECATED, use hive.port instead");
-            }  // else if
-            
         } else {
             hivePort = "10000";
             LOGGER.debug("[" + this.getName() + "] Defaulting to hive.port=10000");
         } // if else
 
-        String hiveServerVersionOld = context.getString("hive_server_version");
-        String hiveServerVersionNew = context.getString("hive.server_version");
+        String hiveServerVersionStr = context.getString("hive.server_version");
 
-        if (hiveServerVersionNew != null && hiveServerVersionNew.length() > 0) {
-            hiveServerVersion = hiveServerVersionNew;
+        if (hiveServerVersionStr != null && hiveServerVersionStr.length() > 0) {
+            hiveServerVersion = hiveServerVersionStr;
             
             if ((hiveServerVersion.equals("1")) || (hiveServerVersion.equals("2"))) {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version="
@@ -408,20 +364,6 @@ public class OrionHDFSSink extends OrionSink {
                 invalidConfiguration = true;
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
                     + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2");
-            }  // if else
-            
-        } else if (hiveServerVersionOld != null && hiveServerVersionOld.length() > 0) {
-            hiveServerVersion = hiveServerVersionOld;
-            
-            if (hiveServerVersion.equals("1") || hiveServerVersion.equals("2")) {
-                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive_server_version=" + hiveServerVersion
-                    + ")"
-                    + " -- DEPRECATED, use hive.server_version instead");
-            } else {
-                invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive_server_version=" + hiveServerVersion
-                    + ") -- Must be '1' for HiveServer1 or '2' for HiveServer2"
-                    + " -- DEPRECATED, use hive.server_version instead");
             }  // if else
             
         } else {

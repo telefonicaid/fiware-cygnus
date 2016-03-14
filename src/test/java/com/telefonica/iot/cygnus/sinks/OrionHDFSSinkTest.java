@@ -210,8 +210,7 @@ public class OrionHDFSSinkTest {
     public void testConfigureDeprecatedParams() {
         System.out.println("Testing OrionHDFSSink.configure (deprecated parameters are used)");
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = true;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         sink.configure(context);
         assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
         assertEquals(cosmosPort, sink.getHDFSPort());
@@ -235,8 +234,7 @@ public class OrionHDFSSinkTest {
     public void testConfigure() {
         System.out.println("Testing OrionHDFSSinkTest.configure");
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         sink.configure(context);
         assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
         assertEquals(cosmosPort, sink.getHDFSPort());
@@ -260,8 +258,7 @@ public class OrionHDFSSinkTest {
     public void testStart() {
         System.out.println("Testing OrionHDFSSink.start");
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -276,8 +273,7 @@ public class OrionHDFSSinkTest {
     public void testPersistNullBatches() {
         System.out.println("Testing OrionHDFSSink.persistBatch (null batches)");
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -301,8 +297,7 @@ public class OrionHDFSSinkTest {
         
         System.out.println("Testing OrionHDFSSink.persistBatch (json-row file format)");
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -316,8 +311,7 @@ public class OrionHDFSSinkTest {
         
         System.out.println("Testing OrionHDFSSink.persistBatch (json-column file format)");
         fileFormat = "json-column";
-        useDeprecatedParams = false;
-        context = createContext(useDeprecatedParams, fileFormat);
+        context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -331,8 +325,7 @@ public class OrionHDFSSinkTest {
         
         System.out.println("Testing OrionHDFSSink.persistBatch (csv-row file format)");
         fileFormat = "csv-row";
-        useDeprecatedParams = false;
-        context = createContext(useDeprecatedParams, fileFormat);
+        context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -346,8 +339,7 @@ public class OrionHDFSSinkTest {
         
         System.out.println("Testing OrionHDFSSink.persistBatch (csv-column file format)");
         fileFormat = "csv-column";
-        useDeprecatedParams = false;
-        context = createContext(useDeprecatedParams, fileFormat);
+        context = createContext(fileFormat);
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         
@@ -368,8 +360,7 @@ public class OrionHDFSSinkTest {
     public void testPersistResourceLengths() throws Exception {
         // common objects
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         
         System.out.println("Testing OrionHDFSSink.persistBatch (normal resource lengths)");
         sink.configure(context);
@@ -433,8 +424,7 @@ public class OrionHDFSSinkTest {
     public void testPersistServiceServicePath() throws Exception {
         // common objects
         String fileFormat = "json-row";
-        boolean useDeprecatedParams = false;
-        Context context = createContext(useDeprecatedParams, fileFormat);
+        Context context = createContext(fileFormat);
         
         System.out.println("Testing OrionHDFSSink.persistBatch (\"root\" servicePath name)");
         sink.configure(context);
@@ -475,35 +465,22 @@ public class OrionHDFSSinkTest {
         return batch;
     } // createBatch
     
-    private Context createContext(boolean useDeprecatedParams, String fileFormat) {
+    private Context createContext(String fileFormat) {
         Context context = new Context();
         context.put("hdfs_password", hdfsPassword);
-        
-        if (useDeprecatedParams) {
-            context.put("cosmos_host", cosmosHost[0]);
-            context.put("cosmos_port", cosmosPort);
-            context.put("cosmos_default_username", hdfsUsername);
-        } else {
-            context.put("hdfs_host", cosmosHost[0]);
-            context.put("hdfs_port", cosmosPort);
-            context.put("hdfs_username", hdfsUsername);
-        } // if else
+
+        context.put("hdfs_host", cosmosHost[0]);
+        context.put("hdfs_port", cosmosPort);
+        context.put("hdfs_username", hdfsUsername);
         
         context.put("csv_separator", csvSeparator);
         context.put("oauth2_token", oauth2Token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("file_format", fileFormat);
         context.put("hive", enableHive);
-        
-        if (useDeprecatedParams) {
-            context.put("hive_server_version", hiveServerVersion);
-            context.put("hive_host", hiveHost);
-            context.put("hive_port", hivePort);
-        } else {
-            context.put("hive.server_version", hiveServerVersion);
-            context.put("hive.host", hiveHost);
-            context.put("hive.port", hivePort);
-        } // if else
+        context.put("hive.server_version", hiveServerVersion);
+        context.put("hive.host", hiveHost);
+        context.put("hive.port", hivePort);
         
         context.put("krb5_auth", enableKrb5Auth);
         context.put("enable_grouping", enableGrouping);
