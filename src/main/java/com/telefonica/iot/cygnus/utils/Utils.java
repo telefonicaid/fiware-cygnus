@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.utils;
 
+import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,8 +43,17 @@ import org.json.simple.parser.JSONParser;
  */
 public final class Utils {
     
+    private static final CygnusLogger LOGGER = new CygnusLogger(Utils.class);
     private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
+    private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER3 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
+    private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -73,14 +83,14 @@ public final class Utils {
     } // encodeHive
     
     /**
-     * Encodes a string from an ArrayList
+     * Encodes a string from an ArrayList.
      * @param in
      * @return The encoded string
      */
     public static String toString(ArrayList in) {
         String out = "";
         
-        for (int i=0; i < in.size(); i++) {
+        for (int i = 0; i < in.size(); i++) {
             if (i == 0) {
                 out = in.get(i).toString();
             } else {
@@ -226,26 +236,25 @@ public final class Utils {
                     
                     try {
                         // ISO 8601 without miliseconds
-                        DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed();
-                        dateTime = formatter.parseDateTime(mdValue);
+                        dateTime = FORMATTER1.parseDateTime(mdValue);
                     } catch (Exception e1) {
+                        LOGGER.debug(e1.getMessage());
+                        
                         try {
                             // ISO 8601 with miliseconds
-                            DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                    "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed();
-                            dateTime = formatter.parseDateTime(mdValue);
+                            dateTime = FORMATTER2.parseDateTime(mdValue);
                         } catch (Exception e2) {
+                            LOGGER.debug(e2.getMessage());
+                            
                             try {
-                                DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                        "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
-                                dateTime = formatter.parseDateTime(mdValue);
+                                dateTime = FORMATTER3.parseDateTime(mdValue);
                             } catch (Exception e3) {
+                                LOGGER.debug(e3.getMessage());
+                                
                                 try {
-                                    DateTimeFormatter formatter = DateTimeFormat.forPattern(
-                                            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
-                                    dateTime = formatter.parseDateTime(mdValue);
+                                    dateTime = FORMATTER4.parseDateTime(mdValue);
                                 } catch (Exception e4) {
+                                    LOGGER.debug(e4.getMessage());
                                     return null;
                                 } // try catch
                             } // try catch
