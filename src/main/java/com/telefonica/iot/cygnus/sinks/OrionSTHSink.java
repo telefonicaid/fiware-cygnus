@@ -124,16 +124,13 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // check if the metadata contains a TimeInstant value; use the notified reception time instead
             Long recvTimeTs;
-            String recvTime;
 
             Long timeInstant = Utils.getTimeInstant(attrMetadata);
 
             if (timeInstant != null) {
                 recvTimeTs = timeInstant;
-                recvTime = Utils.getHumanReadable(timeInstant, true);
             } else {
                 recvTimeTs = notifiedRecvTimeTs;
-                recvTime = notifiedRecvTime;
             } // if else
 
             // create the collection at this stage, if the data model is collection-per-attribute
@@ -148,7 +145,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
             backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
