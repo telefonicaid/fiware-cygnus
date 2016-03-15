@@ -24,7 +24,7 @@ Content:
     * Sum of the square value of all the samples.
     * Maximum value among all the samples.
     * Minimum value among all the samples.
-* Number of occurences for string attribute values.
+* Number of occurrences for string attribute values.
 
 You can get further details on STH and the supported aggregations at [STH Github](https://github.com/telefonicaid/fiware-sth-comet).
 

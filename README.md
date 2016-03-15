@@ -274,7 +274,7 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>TimeInstant metadata as reception time</td><td>0.12.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.13.0</td></tr>
   <tr><td>Time and size-based data management policies</td><td>0.13.0</td></tr>
-  <tr><td>String-based aggregation (ocurrences)</td><td>0.14.0</td></tr>
+  <tr><td>String-based aggregation (occurrences)</td><td>0.14.0</td></tr>
   <tr><td>OrionPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
   <tr><td rowspan="2">OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
