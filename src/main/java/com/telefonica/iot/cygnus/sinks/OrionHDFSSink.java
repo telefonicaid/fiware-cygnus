@@ -223,18 +223,19 @@ public class OrionHDFSSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
         
         port = context.getString("hdfs_port", "14000");
-        if (!(port.equals(""))) {
+        
+        try {
             int intPort = Integer.parseInt(port);
             
-            if ((intPort <= 0) || (intPort > 65535)) {
-                invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
-                  + ") -- Must be a valid number between 0 and 65535");
+            if ((intPort >= 0) && (intPort <= 65535)) {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             } // if
             
-        } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
-        }  // if else
+        } catch (Exception e) {
+            invalidConfiguration = true;            
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
+                  + ") -- Must be a valid number between 0 and 65535.");
+        } // try catch
 
         String hdfsUsername = context.getString("hdfs_username");
 

@@ -192,10 +192,9 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
-| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred. |
-| hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication. |
+| hdfs_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
-| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser. |
+| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`, which in this case must be a HDFS superuser. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
 | csv_separator | no | , ||
 | batch_size | no | 1 | Number of events accumulated before persistence. |
