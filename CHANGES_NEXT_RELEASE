@@ -1,6 +1,6 @@
 - [FEATURE] Add Cygnus GUI (#829)
 - [BUG] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)
-- [FEATURE] Add support for occurrence-based aggregation in OrionSTHSink (#547)
+- [FEATURE] Add support for string-based aggregation (occurences) in OrionSTHSink (#547)
 - [HARDENING] Use precompiled regexes in Utils.encode() and Utils.encodeHive() (#818)
 - [HARDENING] Remove a temporal fix regarding Orion <= 0.10.0 in OrionRESTHandler (#840)
 - [HARDENING] Add an efficient function for converting ArrayList to String in Utils.java (#841)
