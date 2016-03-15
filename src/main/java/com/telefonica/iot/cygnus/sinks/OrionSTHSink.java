@@ -22,9 +22,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.OrionMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -125,24 +122,15 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
 
-            // check if the attribute is not numerical
-            if (!Utils.isANumber(attrValue)) {
-                LOGGER.debug("[" + this.getName() + "] Context attribute discarded since it is not numerical");
-                continue;
-            } // if
-
             // check if the metadata contains a TimeInstant value; use the notified reception time instead
             Long recvTimeTs;
-            String recvTime;
 
             Long timeInstant = Utils.getTimeInstant(attrMetadata);
 
             if (timeInstant != null) {
                 recvTimeTs = timeInstant;
-                recvTime = Utils.getHumanReadable(timeInstant, true);
             } else {
                 recvTimeTs = notifiedRecvTimeTs;
-                recvTime = notifiedRecvTime;
             } // if else
 
             // create the collection at this stage, if the data model is collection-per-attribute
@@ -157,7 +145,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
 
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
-                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + "," + recvTime + ","
+                    + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
                     + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
                     + attrMetadata);
             backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,

@@ -17,7 +17,18 @@ Content:
     * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
+
+* For numeric attribute values:
+    * Sum of all the samples.
+    * Sum of the square value of all the samples.
+    * Maximum value among all the samples.
+    * Minimum value among all the samples.
+* Number of occurrences for string attribute values.
+
+You can get further details on STH and the supported aggregations at [STH Github](https://github.com/telefonicaid/fiware-sth-comet).
+
+Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
