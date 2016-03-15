@@ -229,7 +229,10 @@ public class OrionHDFSSink extends OrionSink {
             
             if ((intPort >= 0) && (intPort <= 65535)) {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
-            } // if
+            } else {
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
+                  + ") -- Must be between 0 and 65535.");
+            }
             
         } catch (Exception e) {
             invalidConfiguration = true;            
@@ -292,18 +295,23 @@ public class OrionHDFSSink extends OrionSink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.host=" + hiveHost + ")");
 
         hivePort = context.getString("hive.port", "10000");
-        if (!(hivePort.equals(""))) {
+        
+        try {
             int intHivePort = Integer.parseInt(hivePort);
             
-            if ((intHivePort <= 0) && (intHivePort > 65535)) {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
-                    + ") -- Must be a number between 0 and 65535");
-            } // if
+            if ((intHivePort >= 0) && (intHivePort <= 65535)) {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
+                    + ") -- Must be between 0 and 65535");
+            }
             
-        } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
-        }  // if else
+        } catch (Exception e) {
+            invalidConfiguration = true;            
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
+                    + ") -- Must be a valid number between 0 and 65535");
+        } // try catch
 
         hiveServerVersion = context.getString("hive.server_version", "2");
         
