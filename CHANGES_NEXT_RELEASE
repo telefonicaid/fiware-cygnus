@@ -10,3 +10,4 @@
 - [FEATURE] When notified, use the TimeInstant metadata instead of the reception time (#859)
 - [HARDENING] Add docker and support badges to the README (#858)
 - [HARDENING] Add a management API method for reseting the statistics (#851)
+- [HARDENING] Remove deprecated configuration parameters in OrionHDFSSink (#868)
