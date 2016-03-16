@@ -269,7 +269,13 @@ public abstract class HttpBackend {
             
             if (entity != null) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
-                String res = reader.readLine();
+                String res = "";
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    res += line;
+                } // while
+
                 LOGGER.debug("response payload: " + res);
                 
                 if (res != null) {
