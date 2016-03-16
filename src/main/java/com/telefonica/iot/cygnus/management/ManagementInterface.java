@@ -19,10 +19,15 @@
 package com.telefonica.iot.cygnus.management;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
+import com.telefonica.iot.cygnus.backends.orion.OrionBackend;
+import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
 import com.telefonica.iot.cygnus.interceptors.GroupingRule;
 import com.telefonica.iot.cygnus.interceptors.GroupingRules;
+import com.telefonica.iot.cygnus.containers.CygnusSubscription;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.OrionSink;
 import com.telefonica.iot.cygnus.utils.Utils;
@@ -33,6 +38,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,7 +62,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
  * @author frb
  */
 public class ManagementInterface extends AbstractHandler {
-    
+
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
     private String groupingRulesConfFile;
@@ -66,7 +73,8 @@ public class ManagementInterface extends AbstractHandler {
     private static String sourceRows = "";
     private static String channelRows = "";
     private static String sinkRows = "";
-    
+    private OrionBackendImpl subscriptionBackend;
+
     /**
      * Constructor.
      * @param configurationFile
@@ -77,7 +85,7 @@ public class ManagementInterface extends AbstractHandler {
     public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
             Channel> channels, ImmutableMap<String, SinkRunner> sinks) {
         this.configurationFile = configurationFile;
-        
+
         try {
             this.groupingRulesConfFile = getGroupingRulesConfFile();
         } catch (IOException e) {
@@ -85,28 +93,28 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
                     + e.getMessage());
         } // try catch
-            
+
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
     } // ManagementInterface
-    
+
     @Override
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException {
         HttpConnection connection = HttpConnection.getCurrentConnection();
-        
+
         if (connection != null) {
             Request baseRequest = (request instanceof Request) ? (Request) request : connection.getRequest();
             baseRequest.setHandled(true);
         } // if
-        
+
         response.setContentType("text/html;charset=utf-8");
         int port = request.getServerPort();
         String uri = request.getRequestURI();
         String method = request.getMethod();
         LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
-        
+
         if (port == 8081) {
             if (method.equals("GET")) {
                 if (uri.equals("/v1/version")) {
@@ -122,14 +130,14 @@ public class ManagementInterface extends AbstractHandler {
             } else if (method.equals("POST")) {
                 if (uri.equals("/v1/groupingrules")) {
                     handlePostGroupingRules(request, response);
+                } else if (uri.equals("/v1/subscriptions")) {
+                    handlePostSubscription(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
                 } // if else
             } else if (method.equals("PUT")) {
-                if (uri.equals("/v1/stats")) {
-                    handlePutStats(response);
-                } else if (uri.equals("/v1/groupingrules")) {
+                if (uri.equals("/v1/groupingrules")) {
                     handlePutGroupingRules(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -152,8 +160,6 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetGUI(response);
                 } else if (uri.endsWith("/points")) {
                     handleGetPoints(response);
-                } else if (uri.equals("/stats")) { // this is order to avoid CORS access control
-                    handleGetStats(response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -166,7 +172,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.debug("Attending a request in a non expected port!!");
         } // if else
     } // handle
-    
+
     private void handleGetVersion(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -186,10 +192,10 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 jsonStr += ",";
             } // if else
-            
+
             Source source;
             HTTPSourceHandler handler;
-            
+
             try {
                 SourceRunner sr = sources.get(key);
                 source = sr.getSource();
@@ -212,7 +218,7 @@ public class ManagementInterface extends AbstractHandler {
 
             jsonStr += "{\"name\":\"" + source.getName() + "\","
                     + "\"status\":\"" + source.getLifecycleState().toString() + "\",";
-            
+
             if (handler instanceof OrionRestHandler) {
                 OrionRestHandler orh = (OrionRestHandler) handler;
                 jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(orh.getBootTime(), true) + "\","
@@ -224,7 +230,7 @@ public class ManagementInterface extends AbstractHandler {
                         + "\"num_processed_events\":-1}";
             } // if else
         } // for
-        
+
         jsonStr += "],\"channels\":[";
         first = true;
 
@@ -234,11 +240,11 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 jsonStr += ",";
             } // if else
-            
+
             Channel channel = channels.get(key);
             jsonStr += "{\"name\":\"" + channel.getName() + "\","
                     + "\"status\":\"" + channel.getLifecycleState().toString() + "\",";
-            
+
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cc = (CygnusChannel) channel;
                 jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(cc.getSetupTime(), true) + "\","
@@ -256,7 +262,7 @@ public class ManagementInterface extends AbstractHandler {
                         + "\"num_takes_failed\":-1}";
             } // if else
         } // for
-        
+
         jsonStr += "],\"sinks\":[";
         first = true;
 
@@ -266,9 +272,9 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 jsonStr += ",";
             } // if else
-            
+
             Sink sink;
-            
+
             try {
                 SinkRunner sr = sinks.get(key);
                 SinkProcessor sp = sr.getPolicy();
@@ -291,7 +297,7 @@ public class ManagementInterface extends AbstractHandler {
 
             jsonStr += "{\"name\":\"" + sink.getName() + "\","
                     + "\"status\":\"" + sink.getLifecycleState().toString() + "\",";
-            
+
             if (sink instanceof OrionSink) {
                 OrionSink os = (OrionSink) sink;
                 jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(os.getSetupTime(), true) + "\","
@@ -307,17 +313,17 @@ public class ManagementInterface extends AbstractHandler {
         jsonStr += "]}}";
         response.getWriter().println(jsonStr);
     } // handleGetStats
-    
+
     private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
-        
+
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Missing configuration file for Grouping Rules\"}");
             LOGGER.error("Missing configuration file for Grouping Rules");
             return;
         } // if
-        
+
         if (!new File(groupingRulesConfFile).exists()) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Configuration file for Grouing Rules not found. Details: "
@@ -325,13 +331,13 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
             return;
         } // if
-        
+
         GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
         String rulesStr = groupingRules.toString(true);
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
-    
+
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
 
@@ -343,7 +349,7 @@ public class ManagementInterface extends AbstractHandler {
         while ((line = reader.readLine()) != null) {
             ruleStr += line;
         } // while
-        
+
         reader.close();
 
         // check the Json syntax of the new rule
@@ -364,10 +370,10 @@ public class ManagementInterface extends AbstractHandler {
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
         int err = GroupingRule.isValid(rule, true);
-        
+
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            
+
             switch (err) {
                 case 1:
                     response.getWriter().println("{\"success\":\"false\","
@@ -391,14 +397,14 @@ public class ManagementInterface extends AbstractHandler {
                     return;
             } // swtich
         } // if
-        
+
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Missing configuration file for Grouping Rules\"}");
             LOGGER.error("Missing configuration file for Grouping Rules");
             return;
         } // if
-        
+
         if (!new File(groupingRulesConfFile).exists()) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Configuration file for Grouing Rules not found. Details: "
@@ -406,11 +412,11 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
             return;
         } // if
-        
+
         GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
         groupingRules.addRule(new GroupingRule(rule));
         String rulesStr = groupingRules.toString(false);
-        
+
         // write the configuration
         PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
         writer.println(rulesStr);
@@ -420,91 +426,89 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"}");
         LOGGER.debug("Rule added. Grouping rules after adding the new rule: " + rulesStr);
     } // handlePostGroupingRules
-    
-    private void handlePutStats(HttpServletResponse response) throws IOException {
+
+    private void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
-        
-        for (String key : sources.keySet()) {
-            Source source;
-            HTTPSourceHandler handler;
-            
-            try {
-                SourceRunner sr = sources.get(key);
-                source = sr.getSource();
-                Field f = source.getClass().getDeclaredField("handler");
-                f.setAccessible(true);
-                handler = (HTTPSourceHandler) f.get(source);
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (IllegalAccessException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (NoSuchFieldException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (SecurityException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } // try catch
-            
-            if (handler instanceof OrionRestHandler) {
-                OrionRestHandler orh = (OrionRestHandler) handler;
-                orh.setNumProcessedEvents(0);
-                orh.setNumReceivedEvents(0);
-            } // if
-        } // for
 
-        for (String key : channels.keySet()) {
-            Channel channel = channels.get(key);
-            
-            if (channel instanceof CygnusChannel) {
-                CygnusChannel cc = (CygnusChannel) channel;
-                cc.setNumPutsOK(0);
-                cc.setNumPutsFail(0);
-                cc.setNumTakesOK(0);
-                cc.setNumTakesFail(0);
-            } // if
-        } // for
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String subStr = "";
+        String line;
 
-        for (String key : sinks.keySet()) {
-            Sink sink;
-            
-            try {
-                SinkRunner sr = sinks.get(key);
-                SinkProcessor sp = sr.getPolicy();
-                Field f = sp.getClass().getDeclaredField("sink");
-                f.setAccessible(true);
-                sink = (Sink) f.get(sp);
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (IllegalAccessException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (NoSuchFieldException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } catch (SecurityException e) {
-                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
-                continue;
-            } // try catch
+        while ((line = reader.readLine()) != null) {
+            subStr += line;
+        } // while
 
-            if (sink instanceof OrionSink) {
-                OrionSink os = (OrionSink) sink;
-                os.setNumProcessedEvents(0);
-                os.setNumPersistedEvents(0);
-            } // if
-        } // for
-        
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("{\"success\":\"true\"}");
-        LOGGER.debug("Statistics reseted");
-    } // handlePutStats
-    
+        reader.close();
+
+        // Create a Gson for check JSON
+        Gson gson = new Gson();
+        CygnusSubscription cygnusSubscription;
+        try {
+            cygnusSubscription = gson.fromJson(subStr, CygnusSubscription.class);
+        } catch (JsonSyntaxException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+            LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
+            return;
+        }
+
+        // check if the subscription is valid
+        int err = cygnusSubscription.isValid();
+        LOGGER.debug("Getting an error number: " + err);
+
+        if (err > 0) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            switch (err) {
+                case 1:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid subscription, some field is missing\"}");
+                    LOGGER.warn("Invalid subscription, some field is missing");
+                    return;
+                case 2:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid subscription, some field is empty\"}");
+                    LOGGER.warn("Invalid subscription, some field is empty");
+                    return;
+                case 3:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid subscription, some field is not allowed\"}");
+                    LOGGER.warn("Invalid subscription, some field is not allowed");
+                    return;
+                default:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid subscription\"}");
+                    LOGGER.warn("Invalid subscription");
+                    return;
+            } // swtich
+
+        } // if
+
+        response.getWriter().println("{\"success\":\"true\","
+                            + "\"OK\":\"Valid subscription. Creating request\"}");
+        LOGGER.warn("Valid subscription. Creating request...");
+
+        LOGGER.debug("PETICIÓN CON: \n" + CygnusSubscription.toString(cygnusSubscription));
+
+        String subscriptionStr = CygnusSubscription.toString(cygnusSubscription);
+
+        String host = cygnusSubscription.getOrionEndpoint().getHost();
+        String port = cygnusSubscription.getOrionEndpoint().getPort();
+
+        subscriptionBackend = new OrionBackendImpl(host, port);
+        try {
+            subscriptionBackend.subscribeContext(host, port, subscriptionStr);
+        } catch (Exception ex) {
+            Logger.getLogger(ManagementInterface.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    } // handlePostSubscription
+
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
-        
+
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
         String ruleStr = "";
@@ -513,9 +517,9 @@ public class ManagementInterface extends AbstractHandler {
         while ((line = reader.readLine()) != null) {
             ruleStr += line;
         } // while
-        
+
         reader.close();
-        
+
         // get the rule ID to be updated
         long id = new Long(request.getParameter("id"));
 
@@ -536,10 +540,10 @@ public class ManagementInterface extends AbstractHandler {
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
         int err = GroupingRule.isValid(rule, true);
-        
+
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            
+
             switch (err) {
                 case 1:
                     response.getWriter().println("{\"success\":\"false\","
@@ -563,14 +567,14 @@ public class ManagementInterface extends AbstractHandler {
                     return;
             } // swtich
         } // if
-        
+
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Missing configuration file for Grouping Rules\"}");
             LOGGER.error("Missing configuration file for Grouping Rules");
             return;
         } // if
-        
+
         if (!new File(groupingRulesConfFile).exists()) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Configuration file for Grouing Rules not found. Details: "
@@ -578,9 +582,9 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
             return;
         } // if
-        
+
         GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
-        
+
         if (groupingRules.updateRule(id, new GroupingRule(rule))) {
             PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
             writer.println(groupingRules.toString(false));
@@ -596,14 +600,14 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handlePutGroupingRules
-    
+
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         response.setContentType("json;charset=utf-8");
-        
+
         // get the rule ID to be deleted
         long id = new Long(request.getParameter("id"));
-        
+
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("{\"success\":\"false\","
@@ -611,7 +615,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Missing configuration file for Grouping Rules");
             return;
         } // if
-        
+
         if (!new File(groupingRulesConfFile).exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("{\"success\":\"false\","
@@ -620,9 +624,9 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
             return;
         } // if
-        
+
         GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
-        
+
         if (groupingRules.deleteRule(id)) {
             PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
             writer.println(groupingRules.toString(false));
@@ -638,17 +642,17 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handleDeleteGroupingRules
-    
+
     private String getGroupingRulesConfFile() throws IOException {
         if (!configurationFile.exists()) {
             return "404 - Configuration file for Cygnus not found. Details: "
                     + configurationFile.toString();
         } // if
-        
+
         String groupingRulesConfFile = null;
         BufferedReader reader = new BufferedReader(new FileReader(configurationFile));
         String line;
-        
+
         while ((line = reader.readLine()) != null) {
             if (!line.startsWith("#")) {
                 if (line.contains("grouping_rules_conf_file")) {
@@ -658,59 +662,59 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } // if
         } // while
-        
+
         reader.close();
         return groupingRulesConfFile;
     } // getGroupingRulesConfFile
-    
+
     private void handleGetGUI(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        
+
         String indexJSP = "";
         BufferedReader reader = new BufferedReader(new FileReader(
                 "src/main/java/com/telefonica/iot/cygnus/management/index.html"));
         String line;
-        
+
         while ((line = reader.readLine()) != null) {
             indexJSP += line + "\n";
         } // while
-        
+
         response.getWriter().println(indexJSP);
     } // handleGetGUI
-    
+
     private void handleGetPoints(HttpServletResponse response) throws IOException {
         // add a new source row
         String sourceColumns = "";
-        
+
         // add a new channel row
         String channelColumns = "\"count\"";
         String point = "[" + numPoints;
-        
+
         for (String key : channels.keySet()) {
             Channel channel = channels.get(key);
             channelColumns += ",\"" + channel.getName() + "\"";
-            
+
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cygnusChannel = (CygnusChannel) channel;
                 point += "," + cygnusChannel.getNumEvents();
             } // if
         } // for
-        
+
         point += "]";
-        
+
         if (channelRows.length() == 0) {
             channelRows += point;
         } else {
             channelRows += "," + point;
         } // if else
-        
+
         // add a new sink row
         String sinkColumns = "";
-        
+
         // increase the points counter
         numPoints++;
-        
+
         // return the points
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);

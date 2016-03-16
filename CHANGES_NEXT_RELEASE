@@ -12,3 +12,4 @@
 - [HARDENING] Add a management API method for reseting the statistics (#851)
 - [HARDENING] Remove deprecated configuration parameters in OrionHDFSSink (#868)
 - [BUG] Fix processing of splited Http responses in HttpBackend (#875)
+- [FEATURE] Add /v1/subscriptions route to API (#808)
