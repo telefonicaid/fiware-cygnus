@@ -261,7 +261,7 @@ public abstract class HttpBackend {
                 return null;
             } // if
             
-            LOGGER.debug("Http response: " + httpRes.getStatusLine().toString());
+            LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
             
             // parse the httpRes payload
             JSONObject jsonPayload = null;
