@@ -276,7 +276,7 @@ public abstract class HttpBackend {
                     res += line;
                 } // while
 
-                LOGGER.debug("response payload: " + res);
+                LOGGER.debug("Http response payload: " + res);
                 
                 if (res != null) {
                     JSONParser jsonParser = new JSONParser();
