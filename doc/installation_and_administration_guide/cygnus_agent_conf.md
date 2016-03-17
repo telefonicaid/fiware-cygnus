@@ -273,6 +273,8 @@ cygnusagent.sinks.mongo-sink.batch_size = 100
 cygunsagent.sinks.mongo-sink.batch_timeout = 30
 # number of retries upon persistence error
 cygnusagent.sinks.mongo-sink.batch_ttl = 10
+# true if white space-based attribute values must be ignored
+cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
 
 # ============================================
 # OrionSTHSink configuration
@@ -302,6 +304,8 @@ cygnusagent.sinks.sth-sink.batch_size = 100
 cygnusagent.sinks.sth-sink.batch_timeout = 30
 # number of retries upon persistence error
 cygnusagent.sinks.sth-sink.batch_ttl = 10
+# true if white space-based attribute values must be ignored
+cygnusagent.sinks.sth-sink.ignore_white_spaces = true
 
 #=============================================
 # OrionKafkaSink configuration

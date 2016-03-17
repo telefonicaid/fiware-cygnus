@@ -214,6 +214,7 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `recvTime` property. Set to 0 if not wanting this policy. |
 | collections_size | no | 0 | The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Notice that the size-based truncation policy takes precedence over the time-based one. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes. |
 | max_documents | no | 0 | The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy. |
+| ignore\_white\_spaces | no | true | <i>true</i> if exclusively white space-based attribute values must be ignored, <i>false</i> otherwise. |
 
 A configuration example could be:
 
@@ -239,6 +240,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.data_expiration = 0
     cygnusagent.sinks.mongo-sink.collections_size = 0
     cygnusagent.sinks.mongo-sink.max_documents = 0
+    cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
 
 [Top](#top)
 
