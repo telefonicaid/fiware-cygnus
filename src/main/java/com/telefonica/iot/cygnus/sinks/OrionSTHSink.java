@@ -152,7 +152,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
-                    + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
+                    + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);
             backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);
