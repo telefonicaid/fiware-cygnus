@@ -263,18 +263,20 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
   <tr><td>OrionDynamoDBSink</td><td>First implementation</td><td>0.11.0</td></tr>
   <tr><td rowspan="2">OrionKafkaSink</td><td>First implementation</td><td>0.9.0</td></tr>
   <tr><td>Batching mechanims</td><td>0.11.0</td></tr>
-  <tr><td rowspan="4">OrionMongoSink</td><td>First implementation</td><td>0.8.0</td></tr>
+  <tr><td rowspan="5">OrionMongoSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
   <tr><td>Batching support</td><td>0.12.0</td></tr>
   <tr><td>Time and size-based data management policies</td><td>0.13.0</td></tr>
+  <tr><td>Ignore white space-based attribute values</td><td>0.14.0</td></tr>
   <tr><td rowspan="2">OrionMySQLSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
-  <tr><td rowspan="6">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
+  <tr><td rowspan="7">OrionSTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
   <tr><td>TimeInstant metadata as reception time</td><td>0.12.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.13.0</td></tr>
   <tr><td>Time and size-based data management policies</td><td>0.13.0</td></tr>
   <tr><td>String-based aggregation (occurrences)</td><td>0.14.0</td></tr>
+  <tr><td>Ignore white space-based attribute values</td><td>0.14.0</td></tr>
   <tr><td>OrionPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
   <tr><td rowspan="2">OrionTestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
