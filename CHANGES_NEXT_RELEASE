@@ -11,3 +11,4 @@
 - [HARDENING] Add docker and support badges to the README (#858)
 - [HARDENING] Add a management API method for reseting the statistics (#851)
 - [HARDENING] Remove deprecated configuration parameters in OrionHDFSSink (#868)
+- [HARDENING] When configured, ignore white space-based string attributes (#678)
