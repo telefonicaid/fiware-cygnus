@@ -247,6 +247,8 @@ cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # cygnusagent.sinks.mongo-sink.collection_size = 0
 # The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy
 # cygnusagent.sinks.mongo-sink.max_documents = 0
+# true if white space-based attribute values must be ignored
+# cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
 
 # ============================================
 # OrionSTHSink configuration
@@ -280,6 +282,8 @@ cygnusagent.sinks.sth-sink.channel = sth-channel
 # cygnusagent.sinks.sth-sink.batch_ttl = 10
 # Collections will be removed if older than the value specified in seconds. Set to 0 if not wanting this policy.
 # cygnusagent.sinks.sth-sink.data_expiration = 0
+# true if white space-based attribute values must be ignored
+# cygnusagent.sinks.sth-sink.ignore_white_spaces = true
 
 #=============================================
 # OrionKafkaSink configuration
