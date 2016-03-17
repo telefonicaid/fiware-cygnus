@@ -119,6 +119,12 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             String attrType = contextAttribute.getType();
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
+            
+            // check if the attribute value is based on white spaces
+            if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                continue;
+            } // if
+            
             LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
 
