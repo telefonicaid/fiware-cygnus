@@ -65,7 +65,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         // get some values from the event
         Long notifiedRecvTimeTs = event.getRecvTimeTs();
         String fiwareService = event.getService();
-        String fiwareServicePath = "/" + event.getServicePath(); // this sink uses the removed initial slash
+        String fiwareServicePath = event.getServicePath();
         String destination = event.getEntity();
         ContextElement contextElement = event.getContextElement();
 

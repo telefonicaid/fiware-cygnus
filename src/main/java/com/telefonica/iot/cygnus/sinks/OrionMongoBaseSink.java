@@ -191,7 +191,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + fiwareService;
+        String dbName = dbPrefix + Utils.encode(fiwareService);
 
         if (dbName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -222,13 +222,19 @@ public abstract class OrionMongoBaseSink extends OrionSink {
 
         switch (dataModel) {
             case DMBYSERVICEPATH:
-                collectionName = fiwareServicePath;
+                if (fiwareServicePath.equals("/")) {
+                    throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                            + "dm-by-service-path data model");
+                } // if
+                
+                collectionName = Utils.encodeSTH(fiwareServicePath);
                 break;
             case DMBYENTITY:
-                collectionName = fiwareServicePath + "_" + entity;
+                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity);
                 break;
             case DMBYATTRIBUTE:
-                collectionName = fiwareServicePath + "_" + entity + "_" + attribute;
+                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity)
+                        + "_" + Utils.encode(attribute);
                 break;
             default:
                 // this should never be reached

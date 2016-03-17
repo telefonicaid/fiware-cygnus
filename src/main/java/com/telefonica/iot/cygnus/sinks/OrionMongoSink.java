@@ -155,7 +155,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
             dbName = buildDbName(service);
-            collectionName = buildCollectionName(dbName, "/" + servicePath, entity, attribute, false, null, null,
+            collectionName = buildCollectionName(dbName, servicePath, entity, attribute, false, null, null,
                     service);
         } // initialize
         

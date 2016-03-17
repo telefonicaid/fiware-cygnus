@@ -32,7 +32,6 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.flume.Context;
@@ -231,11 +230,10 @@ public class OrionHDFSSink extends OrionSink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             } else {
                 LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
-                  + ") -- Must be between 0 and 65535.");
-            }
-            
+                        + ") -- Must be between 0 and 65535.");
+            } // if else
         } catch (Exception e) {
-            invalidConfiguration = true;            
+            invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
                   + ") -- Must be a valid number between 0 and 65535.");
         } // try catch
@@ -275,8 +273,8 @@ public class OrionHDFSSink extends OrionSink {
         } catch (Exception e) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (file_format="
-                + fileFormatStr + ") -- Must be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
-            } // catch
+                    + fileFormatStr + ") -- Must be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
+        } // catch
 
         // Hive configuration
         String enableHiveStr = context.getString("hive", "true");
@@ -308,7 +306,7 @@ public class OrionHDFSSink extends OrionSink {
             }
             
         } catch (Exception e) {
-            invalidConfiguration = true;            
+            invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
                     + ") -- Must be a valid number between 0 and 65535");
         } // try catch
@@ -531,7 +529,7 @@ public class OrionHDFSSink extends OrionSink {
             firstLevel = buildFirstLevel(service);
             secondLevel = buildSecondLevel(servicePath);
             thirdLevel = buildThirdLevel(destination);
-            hdfsFolder = firstLevel + "/" + secondLevel + "/" + thirdLevel;
+            hdfsFolder = firstLevel + (servicePath.equals("/") ? "/" : "/" + secondLevel + "/") + thirdLevel;
             hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
         } // initialize
 
@@ -1047,7 +1045,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildFirstLevel(String fiwareService) throws Exception {
-        String firstLevel = fiwareService;
+        String firstLevel = Utils.encode(fiwareService);
 
         if (firstLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
@@ -1066,7 +1064,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
-        String secondLevel = fiwareServicePath;
+        String secondLevel = Utils.encode(fiwareServicePath);
 
         if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
@@ -1084,7 +1082,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildThirdLevel(String destination) throws Exception {
-        String thirdLevel = destination;
+        String thirdLevel = Utils.encode(destination);
 
         if (thirdLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
