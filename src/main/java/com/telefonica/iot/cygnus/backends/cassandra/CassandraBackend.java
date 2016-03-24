@@ -23,32 +23,33 @@ package com.telefonica.iot.cygnus.backends.cassandra;
  *
  * @author jdegenhardt
  */
+@SuppressWarnings("WeakerAccess")
 public interface CassandraBackend {
 
     /**
-     * Creates a schema, given its name, if not exists.
-     * @param schemaName
-     * @throws Exception
+     * Creates a keyspace, given its name, if not exists.
+     *
+     * @param keyspaceName name of the cassandra keyspace that shall get created
      */
-    void createSchema(String schemaName) throws Exception;
+    void createKeyspace(String keyspaceName) throws IllegalArgumentException;
 
     /**
-     * Creates a table, given its name, if not exists in the given schema.
-     * @param schemaName
-     * @param tableName
-     * @param fieldNames
-     * @throws Exception
+     * Creates a table, given its name, if not exists in the given keyspace.
+     *
+     * @param keyspaceName cassandra keyspace in what the table shall get created
+     * @param tableName    name of the table that shall get created
+     * @param fieldNames   names of the fields that shall get created in the table
      */
-    void createTable(String schemaName, String tableName, String fieldNames) throws Exception;
+    void createTable(String keyspaceName, String tableName, String fieldNames) throws IllegalArgumentException;
 
     /**
-     * Insert already processed context data into the given table within the given database.
-     * @param schemaName
-     * @param tableName
-     * @param fieldNames
-     * @param fieldValues
-     * @throws Exception
+     * Insert already processed context data into the given table within the given keyspace.
+     *
+     * @param keyspaceName cassandra keyspace in what the context shall get inserted
+     * @param tableName    name of the table in what the context shall get inserted
+     * @param fieldNames   name of the fields in what the context shall get inserted
+     * @param fieldValues  values that shall get inserted
      */
-    void insertContextData(String schemaName, String tableName, String fieldNames, String fieldValues) throws Exception;
+    void insertContextData(String keyspaceName, String tableName, String fieldNames, String fieldValues) throws IllegalArgumentException;
 
 } // CassandraBackend

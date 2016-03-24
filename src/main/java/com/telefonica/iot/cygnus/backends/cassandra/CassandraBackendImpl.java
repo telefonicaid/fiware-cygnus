@@ -1,272 +1,237 @@
 /**
  * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
- *
+ * <p>
  * This file is part of fiware-cygnus (FI-WARE project).
- *
+ * <p>
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
  * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
  * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
- *
+ * <p>
  * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
  * http://www.gnu.org/licenses/.
- *
+ * <p>
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package com.telefonica.iot.cygnus.backends.cassandra;
 
-import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
-import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import org.apache.commons.lang3.Validate;
 
-import java.sql.*;
 import java.util.HashMap;
-import java.util.Properties;
+import java.util.Map;
 
 /**
- *
- * @author jdegenhardt
- *
  * Cassandra related operations (database and table creation, context data insertion) when dealing with a Cassandra
  * persistence backend.
+ *
+ * @author jdegenhardt
  */
 public class CassandraBackendImpl implements CassandraBackend {
 
-    private static final String DRIVER_NAME = "org.Cassandra.Driver";
-    private CassandraDriver driver;
     private static final CygnusLogger LOGGER = new CygnusLogger(CassandraBackendImpl.class);
+
+    private static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', 'replication_factor':%d};";
+    private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS %s %s";
+    private CassandraDriver driver;
 
     /**
      * Constructor.
-     * @param CassandraHost Host URL where Cassandra is running
-     * @param CassandraPort Port under what Cassandra is running
-     * @param CassandraUsername
-     * @param CassandraPassword
+     *
+     * @param cassandraUsername Username under what to login at Cassandra
+     * @param cassandraPassword Password to use with username to login at Cassandra
+     * @param cassandraNodes    Nodes (typically IPs) where cassandra cluster is running
+     * @throws IllegalArgumentException gets thrown if a parameter is null or empty
      */
-    public CassandraBackendImpl(String CassandraHost, String CassandraPort, String CassandraDatabase, 
-                                 String CassandraUsername, String CassandraPassword) {
-        driver = new CassandraDriver(CassandraHost, CassandraPort, CassandraDatabase, CassandraUsername, CassandraPassword);
-    } // CassandraBackendImpl
+    public CassandraBackendImpl(String cassandraUsername, String cassandraPassword, String[] cassandraNodes) throws IllegalArgumentException {
+        try {
+            Validate.notNull(cassandraUsername, "cassandraUsername must not be null");
+            Validate.notNull(cassandraPassword, "cassandraPassword must not be null");
+            Validate.notEmpty(cassandraNodes, "cassandraNodes must not be null or empty");
+            Validate.noNullElements(cassandraNodes, "cassandraNodes must not be null or contain null elements");
+        } catch (NullPointerException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        }
 
-    /**
-     * Sets the CassandraDriver driver. It is protected since it is only used by the tests.
-     * @param driver The CassandraDriver driver to be set.
-     */
-    protected void setDriver(CassandraDriver driver) {
-        this.driver = driver;
-    } // setDriver
+        driver = new CassandraDriver(cassandraUsername, cassandraPassword, cassandraNodes);
+    } // CassandraBackendImpl
 
     protected CassandraDriver getDriver() {
         return driver;
     } // getDriver
 
     /**
-     * Creates a schema given its name, if not exists.
-     * @param schemaName
-     * @throws Exception
+     * Sets the CassandraDriver driver. It is protected since it is only used by the tests.
+     *
+     * @param driver The CassandraDriver driver to be set.
      */
-    @Override
-    public void createSchema(String schemaName) throws Exception {
-        Statement stmt = null;
-
-        // get a connection to an empty database
-        Connection con = driver.getConnection("");
-
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-
-        try {
-            String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
-            LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
-
-        closeCassandraObjects(con, stmt);
-    } // createSchema
+    protected void setDriver(CassandraDriver driver) {
+        this.driver = driver;
+    } // setDriver
 
     /**
-     * Creates a table, given its name, if not exists in the given schema
-     * @param schemaName
-     * @param tableName
-     * @throws Exception
+     * Creates a keyspace given its name, if not exists.
+     *
+     * @param keyspaceName Keyspace name that shall get created
      */
     @Override
-    public void createTable(String schemaName, String tableName, String typedFieldNames) throws Exception {
-        Statement stmt = null;
-
-        // get a connection to the given schema
-        Connection con = driver.getConnection(schemaName);
-
+    public void createKeyspace(String keyspaceName) throws IllegalArgumentException {
         try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            Validate.notBlank(keyspaceName, "keyspaceName must not be null or blank");
+        } catch (NullPointerException | IllegalArgumentException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        }
+        Session session = driver.getSession(null);
 
+        // TODO get replication factor
+        int replicationFactor = 3;
+        String query = String.format(CREATE_KEYSPACE, keyspaceName, replicationFactor);
+        executeQuery(session, query);
+    } // createKeyspace
+
+    /**
+     * Executes a query within a given session
+     *
+     * @param session session in what the query shall get executed
+     * @param query   a simple query string
+     */
+    private void executeQuery(Session session, String query) {
+        Statement create = new SimpleStatement(query);
+        LOGGER.debug("Executing CQL query '" + query + "'");
+        session.execute(create);
+    }
+
+    /**
+     * Creates a table, given its name, if not exists in the given keyspace
+     *
+     * @param keyspaceName    Keyspace name at what the table shall get created
+     * @param tableName       name of the table that shall get created
+     * @param typedFieldNames a list representing the columns and data types e.g.: "(name text, count bigint)"
+     */
+    @Override
+    public void createTable(String keyspaceName, String tableName, String typedFieldNames) throws IllegalArgumentException {
         try {
-            String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
-            LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            Validate.notBlank(keyspaceName, "keyspaceName must not be null or blank");
+            Validate.notBlank(tableName, "tableName must not be null or blank");
+            Validate.notBlank(typedFieldNames, "typedFieldNames must not be null or blank");
+            Validate.isTrue(typedFieldNames.startsWith("("), "typedFieldNames must be a list and thus start with an opening bracket");
+            Validate.isTrue(typedFieldNames.endsWith(")"), "typedFieldNames must be a list and thus end with a closing bracket");
+        } catch (NullPointerException | IllegalArgumentException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        }
+        Session session = driver.getSession(keyspaceName);
 
-        closeCassandraObjects(con, stmt);
+        String query = String.format(CREATE_TABLE, tableName, typedFieldNames);
+        executeQuery(session, query);
     } // createTable
 
     @Override
-    public void insertContextData(String schemaName, String tableName, String fieldNames, String fieldValues)
-        throws Exception {
-        Statement stmt = null;
-
-        // get a connection to the given database
-        Connection con = driver.getConnection(schemaName);
-
+    public void insertContextData(String keyspaceName, String tableName, String fieldNames, String fieldValues) {
         try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            Validate.notBlank(keyspaceName, "keyspaceName must not be null or blank");
+            Validate.notBlank(tableName, "tableName must not be null or blank");
+            Validate.notBlank(fieldNames, "fieldNames must not be null or blank");
+            Validate.notBlank(fieldValues, "fieldValues must not be null or blank");
+            Validate.isTrue(fieldNames.startsWith("("), "fieldNames must be a list and thus start with an opening bracket");
+            Validate.isTrue(fieldNames.endsWith(")"), "fieldNames must be a list and thus end with a closing bracket");
+            Validate.isTrue(fieldValues.startsWith("("), "fieldValues must be a list and thus start with an opening bracket");
+            Validate.isTrue(fieldValues.endsWith(")"), "fieldValues must be a list and thus end with a closing bracket");
+        } catch (NullPointerException | IllegalArgumentException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        }
 
-        try {
-            String query = "INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
-            LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
-        } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
-        } // try catch
+        Session session = driver.getSession(keyspaceName);
+
+        // FIXME fieldNames und fieldValues anpassen
+        Insert insert = QueryBuilder.insertInto(tableName).values(new String[0], new String[0]);
+        LOGGER.debug("Executing CQL query '" + insert.getQueryString() + "'");
+        session.execute(insert);
     } // insertContextData
 
-    /**
-     * Close all the Cassandra objects previously opened by createSchema and createTable.
-     * @param con
-     * @param stmt
-     * @return True if the Cassandra objects have been closed, false otherwise.
-     */
-    private void closeCassandraObjects(Connection con, Statement stmt) throws Exception {
-        if (con != null) {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive connection could not be closed. Details="
-                        + e.getMessage());
-            } // try catch
-        } // if
+    class CassandraDriver {
 
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive statement could not be closed. Details="
-                        + e.getMessage());
-            } // try catch
-        } // if
-    } // closeCassandraObjects
-
-    protected class CassandraDriver {
-
-        private final HashMap<String, Connection> connections;
-        private final String CassandraHost;
-        private final String CassandraPort;
-        private final String CassandraDatabase;
-        private final String CassandraUsername;
-        private final String CassandraPassword;
+        private final Map<String, Session> sessions;
+        private final Cluster cassandraCluster;
+        private final String cassandraUsername;
+        private final String cassandraPassword;
 
         /**
          * Constructor
-         * @param CassandraHost
-         * @param CassandraPort
-         * @param CassandraUsername
-         * @param CassandraPassword
+         *
+         * @param cassandraUsername Username under what to login at Cassandra
+         * @param cassandraPassword Password to use with username to login at Cassandra
+         * @param cassandraNodes    Nodes (typically IPs) where Cassandra is running
          */
-        public CassandraDriver(String CassandraHost, String CassandraPort,
-               String CassandraDatabase, String CassandraUsername, String CassandraPassword) {
-            connections = new HashMap<String, Connection>();
-            this.CassandraHost = CassandraHost;
-            this.CassandraPort = CassandraPort;
-            this.CassandraDatabase = CassandraDatabase;
-            this.CassandraUsername = CassandraUsername;
-            this.CassandraPassword = CassandraPassword;
+        CassandraDriver(String cassandraUsername, String cassandraPassword, String... cassandraNodes) {
+            this.sessions = new HashMap<>();
+            this.cassandraUsername = cassandraUsername;
+            this.cassandraPassword = cassandraPassword;
+            this.cassandraCluster = getCluster(cassandraNodes);
         } // CassandraDriver
 
         /**
-         * Gets a connection to the Cassandra server.
-         * @param schemaName
-         * @return
-         * @throws Exception
+         * Gets a session with a connection to the Cassandra cluster.
+         *
+         * @param keyspaceName Specifies the keyspace that shall be used
+         * @return a session with a connection to a cassandra keyspace
          */
-        public Connection getConnection(String schemaName) throws Exception {
-            try {
-                // FIXME: the number of cached connections should be limited to a certain number; with such a limit
-                //        number, if a new connection is needed, the oldest one is closed
-                Connection con = connections.get(schemaName);
+        Session getSession(String keyspaceName) {
 
-                if (con == null || !con.isValid(0)) {
-                    if (con != null) {
-                        con.close();
-                    } // if
+            Session session = sessions.get(keyspaceName);
 
-                    con = createConnection(schemaName);
-                    connections.put(schemaName, con);
-                } // if
+            if (session == null || session.isClosed()) {
+                if (keyspaceName == null) {
+                    session = cassandraCluster.connect();
+                } else {
+                    session = cassandraCluster.connect(keyspaceName);
+                }
+                sessions.put(keyspaceName, session);
+            } // if
 
-                return con;
-            } catch (ClassNotFoundException e) {
-                throw new CygnusPersistenceError(e.getMessage());
-            } catch (SQLException e) {
-                throw new CygnusPersistenceError(e.getMessage());
-            } // try catch
-        } // getConnection
+            return session;
+        } // getSession
 
         /**
-         * Gets if a connection is created for the given schema. It is protected since it is only used in the tests.
-         * @param schemaName
-         * @return True if the connection exists, false otherwise
+         * Gets the number of sessions created.
+         *
+         * @return The number of sessions created
          */
-        protected boolean isConnectionCreated(String schemaName) {
-            return connections.containsKey(schemaName);
-        } // isConnectionCreated
-
-        /**
-         * Gets the number of connections created.
-         * @return The number of connections created
-         */
-        protected int numConnectionsCreated() {
-            return connections.size();
+        int numConnectionsCreated() {
+            return sessions.size();
         } // numConnectionsCreated
 
         /**
-         * Creates a Cassandra connection.
-         * @param schemaName
-         * @return A Cassandra connection
-         * @throws Exception
+         * Gets if a session is created for the given keyspace.
+         *
+         * @param keyspaceName name of the keyspace to what a session shall exist
+         * @return True if the session exists, false otherwise
          */
-        private Connection createConnection(String schemaName)
-            throws Exception {
-            // dynamically load the Cassandra JDBC driver
-            Class.forName(DRIVER_NAME);
+        boolean isSessionCreated(String keyspaceName) {
+            return sessions.containsKey(keyspaceName);
+        } // isSessionCreated
 
-            // return a connection based on the Cassandra JDBC driver
-            String url = "jdbc:Cassandra://" + this.CassandraHost + ":" + this.CassandraPort + "/" + this.CassandraDatabase;
-            Properties props = new Properties();
-            props.setProperty("user", this.CassandraUsername);
-            props.setProperty("password", this.CassandraPassword);
-            props.setProperty("sslmode", "disable");
-
-            LOGGER.debug("Connecting to " + url);
-            return DriverManager.getConnection(url, props);
-        } // createConnection
+        /**
+         * Creates a Cassandra connection.
+         *
+         * @param cassandraNodes The Cassandra nodes to connect to (usually an IP address)
+         * @return A Cassandra cassandraCluster
+         */
+        private Cluster getCluster(String... cassandraNodes) {
+            return Cluster.builder().addContactPoints(cassandraNodes).withCredentials(cassandraUsername, cassandraPassword).build();
+        } // getCluster
     } // CassandraDriver
 } // CassandraBackendImpl
 
