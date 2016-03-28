@@ -1,2 +1,3 @@
 - [BUG] Fix the way a set of notified attributes are processed in OrionMySQLSink, no order must be assumed (#855)
 - [FEATURE] When notified, use the TimeInstant metadata instead of the reception time (#859)
+- [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
