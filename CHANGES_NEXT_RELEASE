@@ -15,3 +15,5 @@
 - [BUG] Fix processing of splited Http responses in HttpBackend (#875)
 - [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
 - [BUG] Fix some wrong links in the documentation (#885)
+- [HARDENING] Add missing components to the list of components having a restricted logging level in log4j.properties.template (#882)
+- [HARDENING] Set external dependencies logging level to WARN in lo4j.properties.template (#881)
