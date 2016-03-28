@@ -59,7 +59,7 @@ public class OrionRestHandlerTest {
     // constants
     private final String configuredNotificationTarget = "/notify";
     private final String configuredDefaultService = "a.SERV_with-rare chars%@";
-    private final String configuredDefaultServicePath = "a.SERVPATH_with-rare chars%@";
+    private final String configuredDefaultServicePath = "/a.SERVPATH_with-rare chars%@";
     private final String rootServicePath = "/";
     private final String[] notificationHeaderNamesStr = {"user-agent", "content-type", "fiware-service",
         "fiware-servicepath"};
@@ -68,7 +68,7 @@ public class OrionRestHandlerTest {
     private final String notificationRequestMethod = "POST";
     private final String notificationUserAgent = "whatever/0.12.7";
     private final String notificationService = "a.SERV_with-rare chars%@";
-    private final String notificationServicePath = "a.SERVPATH_with-rare chars%@";
+    private final String notificationServicePath = "/a.SERVPATH_with-rare chars%@";
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -112,8 +112,8 @@ public class OrionRestHandlerTest {
         System.out.println("Testing 'configure' method from class 'OrionRestHandler'");
         handler.configure(context);
         assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
-        assertEquals(TestUtils.encode(configuredDefaultService), handler.getDefaultService());
-        assertEquals(TestUtils.encode(configuredDefaultServicePath), handler.getDefaultServicePath());
+        assertEquals(configuredDefaultService, handler.getDefaultService());
+        assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
     } // testConfigure
 
     /**
@@ -135,11 +135,9 @@ public class OrionRestHandlerTest {
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
-                    TestUtils.encode(notificationService));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE), notificationService);
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
-                    TestUtils.encode(notificationServicePath));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH), notificationServicePath);
             assertTrue(eventMessage.length != 0);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -160,11 +158,9 @@ public class OrionRestHandlerTest {
             assertTrue(eventHeaders.get("content-type").equals("application/json")
                     || eventHeaders.get("content-type").equals("application/xml"));
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
-                    TestUtils.encode(notificationService));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE), notificationService);
             assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
-                    TestUtils.encode(rootServicePath));
+            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH), rootServicePath);
             assertTrue(eventMessage.length != 0);
         } catch (Exception e) {
             fail(e.getMessage());
