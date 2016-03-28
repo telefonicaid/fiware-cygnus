@@ -20,7 +20,10 @@ package com.telefonica.iot.cygnus.management;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackend;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
@@ -432,11 +435,11 @@ public class ManagementInterface extends AbstractHandler {
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
-        String subStr = "";
+        String jsonStr = "";
         String line;
 
         while ((line = reader.readLine()) != null) {
-            subStr += line;
+            jsonStr += line;
         } // while
 
         reader.close();
@@ -445,7 +448,7 @@ public class ManagementInterface extends AbstractHandler {
         Gson gson = new Gson();
         CygnusSubscription cygnusSubscription;
         try {
-            cygnusSubscription = gson.fromJson(subStr, CygnusSubscription.class);
+            cygnusSubscription = gson.fromJson(jsonStr, CygnusSubscription.class);
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -454,28 +457,32 @@ public class ManagementInterface extends AbstractHandler {
             return;
         }
 
-        // check if the subscription is valid
+        // check if the subscription and endpoint are valid
         int err = cygnusSubscription.isValid();
-        LOGGER.debug("Getting an error number: " + err);
 
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
             switch (err) {
-                case 1:
+                case 1: 
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Missing subscription or endpoint\"}");
+                    LOGGER.warn("Missing subscription or endpoint");
+                    return;
+                case 2:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, some field is missing\"}");
                     LOGGER.warn("Invalid subscription, some field is missing");
                     return;
-                case 2:
+                case 3:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, some field is empty\"}");
                     LOGGER.warn("Invalid subscription, some field is empty");
                     return;
-                case 3:
+                case 4:
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Invalid subscription, some field is not allowed\"}");
-                    LOGGER.warn("Invalid subscription, some field is not allowed");
+                            + "\"error\":\"Invalid subscription, some field is invalid\"}");
+                    LOGGER.warn("Invalid subscription, some field is invalid");
                     return;
                 default:
                     response.getWriter().println("{\"success\":\"false\","
@@ -486,23 +493,46 @@ public class ManagementInterface extends AbstractHandler {
 
         } // if
 
-        response.getWriter().println("{\"success\":\"true\","
-                            + "\"OK\":\"Valid subscription. Creating request\"}");
-        LOGGER.warn("Valid subscription. Creating request...");
+        LOGGER.debug("Valid CygnusSubscription. Creating request to Orion.");
 
-        LOGGER.debug("PETICIÓN CON: \n" + CygnusSubscription.toString(cygnusSubscription));
-
-        String subscriptionStr = CygnusSubscription.toString(cygnusSubscription);
-
+        // get host, port and ssl for request
         String host = cygnusSubscription.getOrionEndpoint().getHost();
         String port = cygnusSubscription.getOrionEndpoint().getPort();
+        boolean ssl = Boolean.valueOf(cygnusSubscription.
+                getOrionEndpoint().getSsl());
+        boolean xAuthToken = false;
+        String token = cygnusSubscription.getOrionEndpoint().getAuthToken();
+        
+        if (token != null) {
+            xAuthToken = true;
+        }
 
-        subscriptionBackend = new OrionBackendImpl(host, port);
+        // Create a subscriptionBackend for request
+        subscriptionBackend = new OrionBackendImpl(host, port, ssl);
+        
+        // Get /subscription JSON from entire one
+        JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
+        String subscriptionStr = inputJson.get("subscription").toString();
+        
         try {
-            subscriptionBackend.subscribeContext(host, port, subscriptionStr);
+            JsonResponse orionResponse = 
+                    subscriptionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
+            int status = orionResponse.getStatusCode();
+            JSONObject orionJson = orionResponse.getJsonObject();
+            
+            if (status == 200) {
+                response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                LOGGER.debug("Subscribed.");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                LOGGER.debug("Subscribed.");
+            } // if else
+            
         } catch (Exception ex) {
             Logger.getLogger(ManagementInterface.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } // try catch
 
     } // handlePostSubscription
 

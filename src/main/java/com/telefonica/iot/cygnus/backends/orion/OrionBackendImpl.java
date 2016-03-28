@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.backends.orion;
 
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
-import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import org.apache.http.Header;
@@ -39,13 +38,15 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
      * Constructor.
      * @param orionHost
      * @param orionPort
+     * @param ssl
      */
-    public OrionBackendImpl(String orionHost, String orionPort) {
-        super(new String[]{orionHost}, orionPort, false, false, null, null, null, null);
+    public OrionBackendImpl(String orionHost, String orionPort, boolean ssl) {
+        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null);
     } // StatsBackendImpl
 
     @Override
-    public void subscribeContext(String host, String port, String subscription) throws Exception {
+    public JsonResponse subscribeContext(String subscription, boolean xAuthToken, 
+            String token) throws Exception {
         
         // create the relative URL
         String relativeURL = "/v1/subscribeContext";
@@ -54,21 +55,18 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
+        if (xAuthToken) {
+            headers.add(new BasicHeader("X-Auth-token", token));
+        }
         
-        LOGGER.debug("Subscription: " + subscription);
-        
+        // create an entity for request
         StringEntity entity = new StringEntity(subscription);
         
+        // do the request
         JsonResponse response = doRequest("POST", relativeURL, true, headers, entity);
         
-        if (response.getStatusCode() != 200) {
-            throw new CygnusPersistenceError("The context could not be updated. HttpFS response: "
-                    + response.getStatusCode() + " " + response.getReasonPhrase());
-        } // if
-        
-        if (response.getStatusCode() == 200) {
-            LOGGER.info("Success... Done");
-        }
+        // check status code from response
+        return response;
     }
     
     /**

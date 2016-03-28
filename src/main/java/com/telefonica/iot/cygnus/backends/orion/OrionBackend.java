@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.backends.orion;
 
-import java.util.ArrayList;
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 
 /**
  *
@@ -38,11 +38,13 @@ public interface OrionBackend {
     /**
      * Subscribe to Orion with a given port, host and string with subscription information.
      * 
-     * @param host
-     * @param port
      * @param cygnusSubscription 
+     * @param xAuthToken 
+     * @param token
      * @throws Exception
+     * @return response
      */
-    void subscribeContext(String host, String port, String cygnusSubscription) throws Exception;
+    JsonResponse subscribeContext(String cygnusSubscription, boolean xAuthToken, 
+            String token) throws Exception;
     
 } // StatsBackend

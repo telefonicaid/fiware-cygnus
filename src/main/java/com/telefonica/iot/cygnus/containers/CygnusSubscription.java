@@ -98,6 +98,8 @@ public class CygnusSubscription {
     public class OrionEndpoint {
         private String host;
         private String port;
+        private String ssl;
+        private String xauthtoken;
         
         public OrionEndpoint() {
         } // endpoint
@@ -110,10 +112,27 @@ public class CygnusSubscription {
             return port;
         } // getport
         
-        public int getSubscriptionSize() {
+        public String getSsl() {
+            return ssl;
+        } // getSsl
+        
+        public String getAuthToken() {
+            return xauthtoken;
+        } // getAuthToken
+        
+        public boolean hasAuthToken() {
+            String token = this.getAuthToken();
+            return (token != null);
+        }
+        
+        public int getEndpointSize() {
             int size = 0;
             size += this.getHost().length();
             size += this.getPort().length();
+            size += this.getSsl().length();
+            if (this.hasAuthToken()) {
+                size += this.getAuthToken().length();
+            }
             return size;
         } // getEndpointSize
     }
@@ -156,210 +175,286 @@ public class CygnusSubscription {
     public int isValid() {
         OrionSubscription orionSubscription = this.getOrionSubscription();
         OrionEndpoint orionEndpoint = this.getOrionEndpoint();
+
+        int subscriptionMsg = isSubsciptionValid(orionSubscription);
+        int endpointMsg = isEndpointValid(orionEndpoint);
                 
-        int subscriptionMsg = isSubsciptionValid(orionSubscription, true);
-        int endpointMsg = isEndpointValid(orionEndpoint, true);
-        
-        // check if subscription contains all the required fields
-        if ((orionSubscription == null) || (orionEndpoint == null) || (subscriptionMsg == 1) || 
-                (endpointMsg == 1)) {
-            LOGGER.debug("There are missing fields in input JSON.");
+        // check if endpoint or subscription is missing
+        if ((subscriptionMsg == 1) || (endpointMsg == 1)) {
+            LOGGER.debug("Subscription or endpoint are missing.");
             return 1;
-        } // if
+        }
         
-        // check if subscription has any empty field
-        if ((orionSubscription.getSubscriptionSize() == 0) || 
-                (orionEndpoint.getSubscriptionSize() == 0) || 
-                (subscriptionMsg == 2) || (endpointMsg == 2)) {
-            LOGGER.debug("There are empty fields in input JSON.");
+        // check if subscription and endpoint contain all the required fields
+        if ((subscriptionMsg == 2) || (endpointMsg == 2)) {
+            LOGGER.debug("There are missing fields in input JSON.");
             return 2;
         } // if
         
-        // // TO DO: CHECK EXTRA FIELDS
+        // check if subscription and endpoint has any empty field
+        if ((orionSubscription.getSubscriptionSize() == 0) || 
+                (orionEndpoint.getEndpointSize() == 0) || 
+                (subscriptionMsg == 3) || (endpointMsg == 3)) {
+            LOGGER.debug("There are empty fields in input JSON.");
+            return 3;
+        } // if
         
-        LOGGER.debug("Valid JSON");
+        if (endpointMsg == 4) {
+            LOGGER.debug("There are invalid fields in input JSON");
+            return 4;
+        }
+                
+        LOGGER.debug("Valid input JSON.");
         return 0;
 
     } // isValid
-    
-    public int isSubsciptionValid (OrionSubscription orionSubscription, boolean checkExtraFields) {
-        ArrayList<SubscriptionEntity> entity = 
-                orionSubscription.getSubscriptionEntity();
-        ArrayList<String> attributes = 
-                orionSubscription.getSubscriptionAtrributes();
-        String reference = orionSubscription.getReference();
-        String duration = orionSubscription.getDuration();
-        ArrayList<SubscriptionConditions> notifyConditions = 
-                orionSubscription.getSubscriptionConditions();
-        String throttling = orionSubscription.getThrottling();
+     
+    public int isEndpointValid (OrionEndpoint orionEndpoint) {
         
-        int entitiesMsg = isEntitiesValid(entity, true);
-        int notifyConditionsMsg = isNotifyConditionsValid(notifyConditions, true);
-        
-        if ((reference == null) || (duration == null) || (throttling == null)
-                || (entitiesMsg == 1) || (notifyConditionsMsg == 1)) {
-            LOGGER.debug("There are missing fields in 'subscription' fields of input JSON");
-            return 1;
-        }
-        
-        if ((reference.length()==0) || (duration.length()==0) || (throttling.length()==0) || 
-                (entitiesMsg==2) || (notifyConditionsMsg == 2)) {
-            LOGGER.debug("There are empty fields in 'subscription' of input JSON");
-            return 2;
-        }
-        
-        LOGGER.debug("Valid field 'subscription'");
-        return 0;
-    }
-    
-    public int isEndpointValid (OrionEndpoint orionEndpoint, boolean checkExtraFields) {
+        // get host, port, ssl and authtoken
         String host = orionEndpoint.getHost();
         String port = orionEndpoint.getPort();
+        String ssl = orionEndpoint.getSsl();
+        boolean isValidSsl;
         
-        // check if subscription contains all the required fields
-        if ((host == null) || (port == null)) {
-            LOGGER.debug("There are missing fields in 'endpoint' of input JSON");
+        // check if entire endpoint is missing        
+        if ((host == null) && (port == null) && (ssl == null)) {
+            LOGGER.debug("Missing entire endpoint.");
             return 1;
-        } // if
+        }
         
-        // check if subscription has empty fields
-        if ((host.length() == 0) || (port.length() == 0)) {
-            LOGGER.debug("There are empty fields in 'endpoint' of input JSON");
+        // check if ssl field contains valid value
+        if ((ssl.equals("true") || ssl.equals("false")) ? 
+                (isValidSsl=true):(isValidSsl=false));  
+        
+        // check if endpoint contains all the required fields
+        if ((host == null) || (port == null) || (ssl == null)) {
+            LOGGER.debug("There are missing fields in endpoint.");
             return 2;
         } // if
         
-        // TO DO: CHECK EXTRA FIELDS
+        // check if endpoint has empty fields
+        if ((host.length() == 0) || (port.length() == 0) || (ssl.length() == 0)) {
+            LOGGER.debug("There are empty fields in endpoint.");
+            return 3;
+        } // if
         
-        LOGGER.debug("Valid field 'endpoint'");
+        // check if endpoint contains invalid fields
+        if (!(isValidSsl)) {
+            LOGGER.debug("There are invalid fields in endpoint");
+            return 4;
+        }
+                
+        LOGGER.debug("Valid endpoint.");
         return 0;
-    }
+    } // isEndpointValid
     
-    public int isEntitiesValid (ArrayList<SubscriptionEntity> entities, 
-            boolean checkExtraFields) {
+    public int isSubsciptionValid (OrionSubscription orionSubscription) {
+        // get entities arrayList
+        ArrayList<SubscriptionEntity> entity = 
+                orionSubscription.getSubscriptionEntity();
+        
+        // get attributes arrayList
+        ArrayList<String> attributes = 
+                orionSubscription.getSubscriptionAtrributes();
+        
+        // get reference and duration
+        String reference = orionSubscription.getReference();
+        String duration = orionSubscription.getDuration();
+        
+        // get conditions arrayList
+        ArrayList<SubscriptionConditions> notifyConditions = 
+                orionSubscription.getSubscriptionConditions();
+        
+        // get throttling
+        String throttling = orionSubscription.getThrottling();
+        
+        // check error messages from subfields of subscription
+        int entitiesMsg = isEntitiesValid(entity);
+        int notifyConditionsMsg = isNotifyConditionsValid(notifyConditions);
+        
+        // check if entire subscription is missing        
+        if ((entitiesMsg == 1) && (attributes.isEmpty()) && (reference == null) && 
+                (duration == null) && (notifyConditionsMsg == 1) && (throttling == null)) {
+            LOGGER.debug("Missing entire subscription.");
+            return 1;
+        }
+        
+        // check if subscription contains all the required fields
+        if ((reference == null) || (duration == null) || (throttling == null)
+                || (entitiesMsg == 2) || (notifyConditionsMsg == 2)) {
+            LOGGER.debug("There are missing fields in subscription.");
+            return 2;
+        }
+        
+        // check if subscription has any empty field
+        if ((reference.length()==0) || (duration.length()==0) || (throttling.length()==0) || 
+                (entitiesMsg==3) || (notifyConditionsMsg == 3)) {
+            LOGGER.debug("There are empty fields in subscription.");
+            return 3;
+        }
+        
+        // return 0 if valid subscription
+        LOGGER.debug("Valid subscription");
+        return 0;
+    } // isSubscriptionValid
+    
+    public int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
         boolean emptyFields = true;
         boolean validFields = true;
+  
+        // check if input ArrayList is empty        
+        if (entities.isEmpty()) {
+            LOGGER.debug("Missing entire entities");
+            return 1;
+        } // if
         
         for (SubscriptionEntity entity : entities) {
             String type = entity.getEntityType();
             String isPattern = entity.getPattern();
             String id = entity.getId();
             
-            validFields &= ((type != null) || (isPattern != null) || (id != null));
-            emptyFields &= validFields && ((type.length()== 0) || (isPattern.length() == 0) || 
+            validFields &= ((type != null) && (isPattern != null) && (id != null));
+            emptyFields &= validFields && ((type.length() == 0) || (isPattern.length() == 0) || 
                     (id.length() == 0));
-        }
+            
+        } // for
         
+        // check if entities contains all the required fields
         if (!validFields) {
-            LOGGER.debug("There are missing fields in 'entities' of input JSON");
-            return 1;
-        }
-        
-        if (emptyFields) {
-            LOGGER.debug("There are empty fields in 'entities' of input JSON");
+            LOGGER.debug("There are missing fields in entities.");
             return 2;
-        }
+        } // if
         
-        LOGGER.debug("Valid field 'entities'");
+        // check if entities has any empty field
+        if (emptyFields) {
+            LOGGER.debug("There are empty fields in entities.");
+            return 3;
+        } // if
+        
+        LOGGER.debug("Valid entities.");
         return 0;
-    }
+    } // isEntitiesValid
     
-    public int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions, 
-            boolean checkExtraFields) {
+    public int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions) {
+        
         boolean validFields = true;
         boolean emptyFields = true;
                 
+        // check if input ArrayList is empty
+        if (conditions.isEmpty()) {
+            LOGGER.debug("Missing entire notifyConditions");
+            return 1;
+        } // if
+        
         for (SubscriptionConditions condition : conditions) {
             String type = condition.getCondType();
             ArrayList<String> values = condition.getCondValues();
-            validFields &= ((type != null) || (values != null));
+            validFields &= ((type != null) && (values != null));
             emptyFields &= validFields && (type.length() == 0);
         } // for
         
-        // check if there are missing fields
+        // check if notifyConditions contains all the required fields
         if (!validFields) {
-           LOGGER.debug("There are missing fields in 'notifyConditions' of input JSON");
-           return 1;
-        }
+           LOGGER.debug("There are missing fields in notifyConditions.");
+           return 2;
+        } // if
         
-        // check if there are empty fields
+        // check if notifyConditions has any empty field
         if (emptyFields) {
-            LOGGER.debug("There are empty fields in 'notifyConditions' of input JSON");
-            return 2;
-        }
+            LOGGER.debug("There are empty fields in notifyConditions.");
+            return 3;
+        } // if
         
-        LOGGER.debug("Valid field 'notifyConditions'");
+        LOGGER.debug("Valid notifyConditions.");
         return 0;
-    }
+    } // isNotifyConditionsValid
     
     public static String toString (CygnusSubscription cygnusSubscription) {
         OrionSubscription subs = cygnusSubscription.getOrionSubscription();
-        int counter = 0;
+        int size;
+        int index = 0;
         String subscription = ""
                 + "{"
                 + "\"entities\": [";
-        // FOR ENTITIES
+
         ArrayList<SubscriptionEntity> entities = subs.getSubscriptionEntity();
+        size = entities.size();
+        
         for (SubscriptionEntity entity : entities) {
             subscription += "{"
                 + "\"type\":\"" + entity.getEntityType() + "\","
                 + "\"isPattern\":\"" + entity.getPattern() + "\","
                 + "\"id\":\"" + entity.getId() + "\"";
-            if (counter == (entities.size()-1)) {
+            
+            if (index == (size - 1)) {
                 subscription += "}";
             } else {
                 subscription += "},";
-            }
-            counter += 1;
-        } 
+            } // if else
+            
+            index += 1;
+        }  // for
          
-        subscription += "]," 
+        subscription += "], "
                 + "\"attributes\": [";
 
         ArrayList<String> attributes = subs.getSubscriptionAtrributes();
-        int size = attributes.size();
+        size = attributes.size();
+        index = 0;
         
         for (String attribute : attributes) {
-            if (counter == (size-1)) {
+            
+            if (index == (size - 1)) {
                 subscription += "\"" + attribute + "\"";
             } else {
                 subscription += "\"" + attribute + "\",";
-            }
-            counter += 1;
+            } // if else
+            
+            index += 1;
         } // for
         
         subscription += "],"
                 + "\"reference\":\"" + subs.getReference() + "\","
                 + "\"duration\":\"" + subs.getDuration() + "\","
                 + "\"notifyConditions\":[";
-        // FOR CONDVALUES
+
         ArrayList<SubscriptionConditions> conditions = subs.getSubscriptionConditions();
-        counter = 0;
+        index = 0;
+        size = conditions.size();
         
         for (SubscriptionConditions condition : conditions) {
             subscription += "{"
                 + "\"type\":\"" + condition.getCondType() + "\","
                 + "\"condValues\": [";
             ArrayList<String> condValues = condition.getCondValues();
-            int c = 0;
+            int indexCond = 0;
             for (String condValue : condValues) {
-                if (c == (condValues.size()-1)) {
+                
+                if (indexCond == (condValues.size()-1)) {
                     subscription += "\"" + condValue + "\"";
                 } else {
                     subscription += "\"" + condValue + "\",";
-                }
-                c += 1;
-            }
+                } // if else
+                
+                indexCond += 1;
+            } // for 
+            
             subscription += "]";
-            if (counter == (conditions.size()-1)) {
+            
+            if (index == (size - 1)) {
                 subscription += "}";
             } else {
                 subscription += "},";
-            }
-        }              
+            } // if else
+            
+        } // for              
+        
         subscription += "],"
                 + "\"throttling\":\"" + subs.getThrottling() + "\""
                 + "}";
+        
         return subscription;
-    }
+    } // toString
     
 }
