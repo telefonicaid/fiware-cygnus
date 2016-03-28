@@ -42,6 +42,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
     protected boolean shouldHash;
     protected MongoBackendImpl backend;
     protected long dataExpiration;
+    protected boolean ignoreWhiteSpaces;
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -128,6 +129,18 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         dataExpiration = context.getLong("data_expiration", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
         
+        String ignoreWhiteSpacesStr = context.getString("ignore_white_spaces", "true");
+        
+        if (ignoreWhiteSpacesStr.equals("true") || ignoreWhiteSpacesStr.equals("false")) {
+            ignoreWhiteSpaces = Boolean.valueOf(ignoreWhiteSpacesStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (ignore_white_spaces="
+                + ignoreWhiteSpacesStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
+                + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
         super.configure(context);
     } // configure
 
@@ -178,7 +191,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + fiwareService;
+        String dbName = dbPrefix + Utils.encode(fiwareService);
 
         if (dbName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -209,13 +222,19 @@ public abstract class OrionMongoBaseSink extends OrionSink {
 
         switch (dataModel) {
             case DMBYSERVICEPATH:
-                collectionName = fiwareServicePath;
+                if (fiwareServicePath.equals("/")) {
+                    throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                            + "dm-by-service-path data model");
+                } // if
+                
+                collectionName = Utils.encodeSTH(fiwareServicePath);
                 break;
             case DMBYENTITY:
-                collectionName = fiwareServicePath + "_" + entity;
+                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity);
                 break;
             case DMBYATTRIBUTE:
-                collectionName = fiwareServicePath + "_" + entity + "_" + attribute;
+                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity)
+                        + "_" + Utils.encode(attribute);
                 break;
             default:
                 // this should never be reached

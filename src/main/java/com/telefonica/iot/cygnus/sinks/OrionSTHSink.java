@@ -65,7 +65,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
         // get some values from the event
         Long notifiedRecvTimeTs = event.getRecvTimeTs();
         String fiwareService = event.getService();
-        String fiwareServicePath = "/" + event.getServicePath(); // this sink uses the removed initial slash
+        String fiwareServicePath = event.getServicePath();
         String destination = event.getEntity();
         ContextElement contextElement = event.getContextElement();
 
@@ -119,6 +119,12 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             String attrType = contextAttribute.getType();
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
+            
+            // check if the attribute value is based on white spaces
+            if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                continue;
+            } // if
+            
             LOGGER.debug("[" + this.getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
 
@@ -146,7 +152,7 @@ public class OrionSTHSink extends OrionMongoBaseSink {
             // insert the data
             LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
-                    + entityId + "," + entityType + "," + attrName + "," + entityType + "," + attrValue + ","
+                    + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);
             backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
                     entityId, entityType, attrName, attrType, attrValue, attrMetadata);

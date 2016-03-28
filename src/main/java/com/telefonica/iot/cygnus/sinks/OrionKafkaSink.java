@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
@@ -222,16 +223,21 @@ public class OrionKafkaSink extends OrionSink {
 
             switch (dataModel) {
                 case DMBYSERVICE:
-                    name = service;
+                    name = Utils.encode(service);
                     break;
                 case DMBYSERVICEPATH:
-                    name = servicePath;
+                    if (servicePath.equals("/")) {
+                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                                + "dm-by-service-path data model");
+                    } // if
+                    
+                    name = Utils.encode(servicePath);
                     break;
                 case DMBYENTITY:
-                    name = entity;
+                    name = Utils.encode(entity);
                     break;
                 case DMBYATTRIBUTE:
-                    name = attribute;
+                    name = Utils.encode(attribute);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()

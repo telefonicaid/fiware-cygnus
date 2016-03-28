@@ -337,10 +337,11 @@ public class OrionDynamoDBSink extends OrionSink {
 
         switch (dataModel) {
             case DMBYENTITY:
-                tableName = service + "_" + servicePath + "_" + destination;
+                tableName = Utils.encode(service) + (servicePath.equals("/") ? "" : "_" + Utils.encode(servicePath))
+                        + "_" + Utils.encode(destination);
                 break;
             case DMBYSERVICEPATH:
-                tableName = service + "_" + servicePath;
+                tableName = Utils.encode(service) + (servicePath.equals("/") ? "" : "_" + Utils.encode(servicePath));
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
