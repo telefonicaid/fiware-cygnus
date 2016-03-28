@@ -14,3 +14,4 @@
 - [FEATURE] When configured, ignore white space-based string attributes (#678)
 - [BUG] Fix processing of splited Http responses in HttpBackend (#875)
 - [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
+- [FEATURE] Add implementation for /admin/log route (#807)
