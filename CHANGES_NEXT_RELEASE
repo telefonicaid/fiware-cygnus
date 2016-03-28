@@ -14,3 +14,4 @@
 - [FEATURE] When configured, ignore white space-based string attributes (#678)
 - [BUG] Fix processing of splited Http responses in HttpBackend (#875)
 - [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
+- [HARDENING] Add missing components to the list of components having a restricted logging level in log4j.properties.template (#882)
