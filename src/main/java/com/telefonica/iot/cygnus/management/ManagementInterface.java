@@ -455,7 +455,7 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
             LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
             return;
-        }
+        } // try catch
 
         // check if the subscription and endpoint are valid
         int err = cygnusSubscription.isValid();
@@ -505,7 +505,7 @@ public class ManagementInterface extends AbstractHandler {
         
         if (token != null) {
             xAuthToken = true;
-        }
+        } // if
 
         // Create a subscriptionBackend for request
         subscriptionBackend = new OrionBackendImpl(host, port, ssl);
@@ -527,7 +527,6 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : {" + orionJson.toJSONString() + "}");
-                LOGGER.debug("Subscribed.");
             } // if else
             
         } catch (Exception ex) {

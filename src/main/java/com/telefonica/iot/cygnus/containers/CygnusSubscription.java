@@ -57,7 +57,7 @@ public class CygnusSubscription {
             entities = new ArrayList<SubscriptionEntity>();
             attributes = new ArrayList<String>();
             notifyConditions = new ArrayList<SubscriptionConditions>();
-        }
+        } // OrionSubscription
         
         public ArrayList<SubscriptionEntity> getSubscriptionEntity() {
             return entities;
@@ -93,7 +93,7 @@ public class CygnusSubscription {
             size += this.getSubscriptionConditions().size();
             return size;
         } // getSubscriptionSize
-    }
+    } // OrionSubscription
     
     public class OrionEndpoint {
         private String host;
@@ -123,7 +123,7 @@ public class CygnusSubscription {
         public boolean hasAuthToken() {
             String token = this.getAuthToken();
             return (token != null);
-        }
+        } // hasAuthToken
         
         public int getEndpointSize() {
             int size = 0;
@@ -135,7 +135,7 @@ public class CygnusSubscription {
             }
             return size;
         } // getEndpointSize
-    }
+    } // OrionEndpoint
     
     public class SubscriptionEntity {
         private String type;
@@ -153,7 +153,7 @@ public class CygnusSubscription {
         public String getId() {
             return id;
         } // getid
-    }
+    } // SubscriptionEntity
     
     public class SubscriptionConditions {
         private String type;
@@ -166,7 +166,7 @@ public class CygnusSubscription {
         public ArrayList<String> getCondValues() {
             return condValues;
         } // getCondValues
-    }
+    } // SubscriptionConditions
     
     /**
      * Checks if the given Gson has subscription and endpoint parameters.
@@ -178,12 +178,12 @@ public class CygnusSubscription {
 
         int subscriptionMsg = isSubsciptionValid(orionSubscription);
         int endpointMsg = isEndpointValid(orionEndpoint);
-                
+        
         // check if endpoint or subscription is missing
         if ((subscriptionMsg == 1) || (endpointMsg == 1)) {
             LOGGER.debug("Subscription or endpoint are missing.");
             return 1;
-        }
+        } // if
         
         // check if subscription and endpoint contain all the required fields
         if ((subscriptionMsg == 2) || (endpointMsg == 2)) {
@@ -199,17 +199,18 @@ public class CygnusSubscription {
             return 3;
         } // if
         
+        // check if subscription and endpoint has invalid fields
         if (endpointMsg == 4) {
             LOGGER.debug("There are invalid fields in input JSON");
             return 4;
-        }
+        } // if
                 
         LOGGER.debug("Valid input JSON.");
         return 0;
 
     } // isValid
-     
-    public int isEndpointValid (OrionEndpoint orionEndpoint) {
+    
+    private int isEndpointValid (OrionEndpoint orionEndpoint) {
         
         // get host, port, ssl and authtoken
         String host = orionEndpoint.getHost();
@@ -221,7 +222,7 @@ public class CygnusSubscription {
         if ((host == null) && (port == null) && (ssl == null)) {
             LOGGER.debug("Missing entire endpoint.");
             return 1;
-        }
+        } // if
         
         // check if ssl field contains valid value
         if ((ssl.equals("true") || ssl.equals("false")) ? 
@@ -243,13 +244,13 @@ public class CygnusSubscription {
         if (!(isValidSsl)) {
             LOGGER.debug("There are invalid fields in endpoint");
             return 4;
-        }
+        } // if
                 
         LOGGER.debug("Valid endpoint.");
         return 0;
     } // isEndpointValid
     
-    public int isSubsciptionValid (OrionSubscription orionSubscription) {
+    private int isSubsciptionValid (OrionSubscription orionSubscription) {
         // get entities arrayList
         ArrayList<SubscriptionEntity> entity = 
                 orionSubscription.getSubscriptionEntity();
@@ -258,15 +259,13 @@ public class CygnusSubscription {
         ArrayList<String> attributes = 
                 orionSubscription.getSubscriptionAtrributes();
         
-        // get reference and duration
-        String reference = orionSubscription.getReference();
-        String duration = orionSubscription.getDuration();
-        
         // get conditions arrayList
         ArrayList<SubscriptionConditions> notifyConditions = 
                 orionSubscription.getSubscriptionConditions();
         
-        // get throttling
+        // get throttling,reference and duration
+        String reference = orionSubscription.getReference();
+        String duration = orionSubscription.getDuration();
         String throttling = orionSubscription.getThrottling();
         
         // check error messages from subfields of subscription
@@ -278,28 +277,28 @@ public class CygnusSubscription {
                 (duration == null) && (notifyConditionsMsg == 1) && (throttling == null)) {
             LOGGER.debug("Missing entire subscription.");
             return 1;
-        }
+        } // if
         
         // check if subscription contains all the required fields
         if ((reference == null) || (duration == null) || (throttling == null)
                 || (entitiesMsg == 2) || (notifyConditionsMsg == 2)) {
             LOGGER.debug("There are missing fields in subscription.");
             return 2;
-        }
+        } // if
         
         // check if subscription has any empty field
         if ((reference.length()==0) || (duration.length()==0) || (throttling.length()==0) || 
                 (entitiesMsg==3) || (notifyConditionsMsg == 3)) {
             LOGGER.debug("There are empty fields in subscription.");
             return 3;
-        }
+        } // if
         
         // return 0 if valid subscription
         LOGGER.debug("Valid subscription");
         return 0;
     } // isSubscriptionValid
     
-    public int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
+    private int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
         boolean emptyFields = true;
         boolean validFields = true;
   
@@ -317,7 +316,6 @@ public class CygnusSubscription {
             validFields &= ((type != null) && (isPattern != null) && (id != null));
             emptyFields &= validFields && ((type.length() == 0) || (isPattern.length() == 0) || 
                     (id.length() == 0));
-            
         } // for
         
         // check if entities contains all the required fields
@@ -336,7 +334,7 @@ public class CygnusSubscription {
         return 0;
     } // isEntitiesValid
     
-    public int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions) {
+    private int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions) {
         
         boolean validFields = true;
         boolean emptyFields = true;
@@ -368,93 +366,6 @@ public class CygnusSubscription {
         
         LOGGER.debug("Valid notifyConditions.");
         return 0;
-    } // isNotifyConditionsValid
+    } // isNotifyConditionsValid  
     
-    public static String toString (CygnusSubscription cygnusSubscription) {
-        OrionSubscription subs = cygnusSubscription.getOrionSubscription();
-        int size;
-        int index = 0;
-        String subscription = ""
-                + "{"
-                + "\"entities\": [";
-
-        ArrayList<SubscriptionEntity> entities = subs.getSubscriptionEntity();
-        size = entities.size();
-        
-        for (SubscriptionEntity entity : entities) {
-            subscription += "{"
-                + "\"type\":\"" + entity.getEntityType() + "\","
-                + "\"isPattern\":\"" + entity.getPattern() + "\","
-                + "\"id\":\"" + entity.getId() + "\"";
-            
-            if (index == (size - 1)) {
-                subscription += "}";
-            } else {
-                subscription += "},";
-            } // if else
-            
-            index += 1;
-        }  // for
-         
-        subscription += "], "
-                + "\"attributes\": [";
-
-        ArrayList<String> attributes = subs.getSubscriptionAtrributes();
-        size = attributes.size();
-        index = 0;
-        
-        for (String attribute : attributes) {
-            
-            if (index == (size - 1)) {
-                subscription += "\"" + attribute + "\"";
-            } else {
-                subscription += "\"" + attribute + "\",";
-            } // if else
-            
-            index += 1;
-        } // for
-        
-        subscription += "],"
-                + "\"reference\":\"" + subs.getReference() + "\","
-                + "\"duration\":\"" + subs.getDuration() + "\","
-                + "\"notifyConditions\":[";
-
-        ArrayList<SubscriptionConditions> conditions = subs.getSubscriptionConditions();
-        index = 0;
-        size = conditions.size();
-        
-        for (SubscriptionConditions condition : conditions) {
-            subscription += "{"
-                + "\"type\":\"" + condition.getCondType() + "\","
-                + "\"condValues\": [";
-            ArrayList<String> condValues = condition.getCondValues();
-            int indexCond = 0;
-            for (String condValue : condValues) {
-                
-                if (indexCond == (condValues.size()-1)) {
-                    subscription += "\"" + condValue + "\"";
-                } else {
-                    subscription += "\"" + condValue + "\",";
-                } // if else
-                
-                indexCond += 1;
-            } // for 
-            
-            subscription += "]";
-            
-            if (index == (size - 1)) {
-                subscription += "}";
-            } else {
-                subscription += "},";
-            } // if else
-            
-        } // for              
-        
-        subscription += "],"
-                + "\"throttling\":\"" + subs.getThrottling() + "\""
-                + "}";
-        
-        return subscription;
-    } // toString
-    
-}
+} // CygnusSubscription
