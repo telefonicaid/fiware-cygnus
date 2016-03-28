@@ -1,4 +1,4 @@
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
@@ -25,11 +25,11 @@ flume.log.dir=/var/log/cygnus/
 flume.log.file=cygnus.log
 
 # Logging levels for certain components.
-log4j.logger.org.apache.flume.lifecycle = INFO
+log4j.logger.org.apache.flume.lifecycle = WARN
 log4j.logger.org.jboss = WARN
-log4j.logger.org.mortbay = INFO
+log4j.logger.org.mortbay = WARN
 log4j.logger.org.apache.avro.ipc.NettyTransceiver = WARN
-log4j.logger.org.apache.hadoop = INFO
+log4j.logger.org.apache.hadoop = WARN
 
 # Define the root logger to the system property "flume.root.logger".
 log4j.rootLogger=${flume.root.logger}
