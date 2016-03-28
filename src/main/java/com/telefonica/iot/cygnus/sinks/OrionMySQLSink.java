@@ -297,7 +297,7 @@ public class OrionMySQLSink extends OrionSink {
         } // initialize
         
         private String buildDbName() throws Exception {
-            String name = service;
+            String name = Utils.encode(service);
 
             if (name.length() > Constants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building database name '" + name
@@ -312,13 +312,19 @@ public class OrionMySQLSink extends OrionSink {
 
             switch(dataModel) {
                 case DMBYSERVICEPATH:
-                    name = servicePath;
+                    if (servicePath.equals("/")) {
+                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                                + "dm-by-service-path data model");
+                    } // if
+                    
+                    name = Utils.encode(servicePath);
                     break;
                 case DMBYENTITY:
-                    name = servicePath + '_' + entity;
+                    name = (servicePath.equals("/") ? "" : Utils.encode(servicePath) + '_') + Utils.encode(entity);
                     break;
                 case DMBYATTRIBUTE:
-                    name = servicePath + '_' + entity + '_' + attribute;
+                    name = (servicePath.equals("/") ? "" : Utils.encode(servicePath) + '_') + Utils.encode(entity)
+                            + '_' + Utils.encode(attribute);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()

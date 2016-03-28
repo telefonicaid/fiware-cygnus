@@ -132,7 +132,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             notificationTarget = "/" + notificationTarget;
         } // if
         
-        defaultService = Utils.encode(context.getString(Constants.PARAM_DEFAULT_SERVICE, "def_serv"));
+        defaultService = context.getString(Constants.PARAM_DEFAULT_SERVICE, "def_serv");
         
         if (defaultService.length() > Constants.SERVICE_HEADER_MAX_LEN) {
             LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
@@ -142,7 +142,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
         
         LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
-        defaultServicePath = Utils.encode(context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "def_serv_path"));
+        defaultServicePath = context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "def_serv_path");
         
         if (defaultServicePath.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
             LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
@@ -200,7 +200,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     throw new HTTPBadRequestException("'fiware-service' header length greater than "
                             + Constants.SERVICE_HEADER_MAX_LEN + ")");
                 } else {
-                    service = Utils.encode(headerValue);
+                    service = headerValue;
                 } // if else
             } else if (headerName.equals(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH)) {
                 if (headerValue.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
@@ -208,8 +208,11 @@ public class OrionRestHandler implements HTTPSourceHandler {
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
                             + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                } else if (!headerValue.startsWith("/")) {
+                    LOGGER.warn("Bad HTTP notification ('fiware-servicePath' heacder value must start with '/'");
+                    throw new HTTPBadRequestException("'fiware-servicePath' header value must start with '/'");
                 } else {
-                    servicePath = Utils.encode(headerValue);
+                    servicePath = headerValue;
                 } // if else
             } // if else if
         } // while

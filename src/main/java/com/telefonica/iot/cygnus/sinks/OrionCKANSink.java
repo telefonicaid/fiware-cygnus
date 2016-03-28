@@ -431,7 +431,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildOrgName(String fiwareService) throws Exception {
-        String orgName = fiwareService;
+        String orgName = Utils.encode(fiwareService);
 
         if (orgName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
@@ -452,10 +452,10 @@ public class OrionCKANSink extends OrionSink {
     private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
         String pkgName;
 
-        if (fiwareServicePath.length() == 0) {
-            pkgName = fiwareService;
+        if (fiwareServicePath.equals("/")) {
+            pkgName = Utils.encode(fiwareService);
         } else {
-            pkgName = fiwareService + "_" + fiwareServicePath;
+            pkgName = Utils.encode(fiwareService) + "_" + Utils.encode(fiwareServicePath);
         } // if else
 
         if (pkgName.length() > Constants.MAX_NAME_LEN) {
@@ -473,7 +473,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildResName(String destination) throws Exception {
-        String resName = destination;
+        String resName = Utils.encode(destination);
 
         if (resName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "

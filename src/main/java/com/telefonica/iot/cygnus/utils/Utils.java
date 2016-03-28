@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -49,6 +50,9 @@ import org.w3c.dom.NodeList;
 public final class Utils {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(Utils.class);
+    private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
+    private static final Pattern ENCODESTHPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
+    private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
             "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
@@ -66,14 +70,24 @@ public final class Utils {
     
     /**
      * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-' and '.').
+     * This should be only called when building a persistence element name, such as table names, file paths, etc.
      * 
      * @param in
      * @return The encoded version of the input string.
      */
     public static String encode(String in) {
-        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-        return (res.startsWith("_") ? res.substring(1, res.length()) : res);
+        return ENCODEPATTERN.matcher(in).replaceAll("_");
     } // encode
+    
+    /**
+     * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-', '.' and '/').
+     * This should be only called when building a STH persistence element names.
+     * @param in
+     * @return The encoded version of the input string.
+     */
+    public static String encodeSTH(String in) {
+        return ENCODESTHPATTERN.matcher(in).replaceAll("_");
+    } // encodeSTH
     
     /**
      * Encodes a string replacing all the non alphanumeric characters by '_'.
