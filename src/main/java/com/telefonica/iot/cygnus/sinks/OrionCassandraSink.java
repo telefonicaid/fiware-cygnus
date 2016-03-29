@@ -28,20 +28,20 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import org.apache.flume.Context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
+ * Detailed documentation may soon be found at:
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionCassandraSink.md .
  *
  * @author jdegenhardt
- *
- * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionCassandraSink.md
  */
-public class OrionCassandraSink extends OrionSink {
+class OrionCassandraSink extends OrionSink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionCassandraSink.class);
-    private String cassandraHost;
+    private String[] cassandraHosts;
     private String cassandraPort;
-    private String cassandraDatabase;
+    private String cassandraKeyspace;
     private String cassandraUsername;
     private String cassandraPassword;
     private boolean rowAttrPersistence;
@@ -50,53 +50,59 @@ public class OrionCassandraSink extends OrionSink {
     /**
      * Constructor.
      */
-    public OrionCassandraSink() {
+    OrionCassandraSink() {
         super();
     } // OrionCassandraSink
 
     /**
-     * Gets the Cassandra host. It is protected due to it is only required for testing purposes.
-     * @return The Cassandra host
+     * Gets the Cassandra host(s). It is protected due to it is only required for testing purposes.
+     *
+     * @return The Cassandra host(s)
      */
-    protected String getCassandraHost() {
-        return cassandraHost;
-    } // getCassandraHost
+    String[] getCassandraHosts() {
+        return cassandraHosts;
+    } // getCassandraHosts
 
     /**
      * Gets the Cassandra port. It is protected due to it is only required for testing purposes.
+     *
      * @return The Cassandra port
      */
-    protected String getCassandraPort() {
+    String getCassandraPort() {
         return cassandraPort;
     } // getCassandraPort
 
     /**
-     * Gets the Cassandra database. It is protected due to it is only required for testing purposes.
-     * @return The Cassandra database
+     * Gets the Cassandra keyspace. It is protected due to it is only required for testing purposes.
+     *
+     * @return The Cassandra keyspace
      */
-    protected String getCassandraDatabase() {
-        return cassandraDatabase;
-    } // getCassandraDatabase
+    protected String getCassandraKeyspace() {
+        return cassandraKeyspace;
+    } // getCassandraKeyspace
 
     /**
      * Gets the Cassandra username. It is protected due to it is only required for testing purposes.
+     *
      * @return The Cassandra username
      */
-    protected String getCassandraUsername() {
+    String getCassandraUsername() {
         return cassandraUsername;
     } // getCassandraUsername
 
     /**
      * Gets the Cassandra password. It is protected due to it is only required for testing purposes.
+     *
      * @return The Cassandra password
      */
-    protected String getCassandraPassword() {
+    String getCassandraPassword() {
         return cassandraPassword;
     } // getCassandraPassword
 
     /**
      * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
      * purposes.
+     *
      * @return True if the attribute persistence is row-based, false otherwise
      */
     protected boolean getRowAttrPersistence() {
@@ -105,6 +111,7 @@ public class OrionCassandraSink extends OrionSink {
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     *
      * @return The persistence backend
      */
     protected CassandraBackendImpl getPersistenceBackend() {
@@ -113,7 +120,8 @@ public class OrionCassandraSink extends OrionSink {
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     *
+     * @param persistenceBackend the persistence backend that shall be used
      */
     protected void setPersistenceBackend(CassandraBackendImpl persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
@@ -121,26 +129,27 @@ public class OrionCassandraSink extends OrionSink {
 
     @Override
     public void configure(Context context) {
-        cassandraHost = context.getString("Cassandra_host", "localhost");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (Cassandra_host=" + cassandraHost + ")");
-        cassandraPort = context.getString("Cassandra_port", "5432");
+        cassandraHosts = context.getString("cassandra_host", "localhost").split(";");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_hosts="
+                + Arrays.toString(cassandraHosts) + ")");
+        cassandraPort = context.getString("cassandra_port", "5432");
         int intPort = Integer.parseInt(cassandraPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (Cassandra_port=" + cassandraPort + ")"
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cassandra_port=" + cassandraPort + ")"
                     + " -- Must be between 0 and 65535");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (Cassandra_port=" + cassandraPort + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_port=" + cassandraPort + ")");
         }  // if else
 
-        cassandraDatabase = context.getString("Cassandra_database", "postgres");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (Cassandra_database=" + cassandraDatabase + ")");
-        cassandraUsername = context.getString("Cassandra_username", "postgres");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (Cassandra_username=" + cassandraUsername + ")");
+        cassandraKeyspace = context.getString("cassandra_database", "postgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_database=" + cassandraKeyspace + ")");
+        cassandraUsername = context.getString("cassandra_username", "cassandra");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_username=" + cassandraUsername + ")");
         // FIXME: cassandraPassword should be read as a SHA1 and decoded here
-        cassandraPassword = context.getString("Cassandra_password", "");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (Cassandra_password=" + cassandraPassword + ")");
+        cassandraPassword = context.getString("cassandra_password", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_password=" + cassandraPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence", "row");
 
@@ -163,8 +172,7 @@ public class OrionCassandraSink extends OrionSink {
     public void start() {
         try {
             LOGGER.debug("[" + this.getName() + "] Cassandra persistence backend created");
-            persistenceBackend = new CassandraBackendImpl(cassandraHost, cassandraPort, cassandraDatabase,
-                    cassandraUsername, cassandraPassword);
+            persistenceBackend = new CassandraBackendImpl(cassandraUsername, cassandraPassword, cassandraHosts);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Cassandra persistence backend. Details="
                     + e.getMessage());
@@ -176,6 +184,7 @@ public class OrionCassandraSink extends OrionSink {
 
     @Override
     void persistBatch(Batch batch) throws Exception {
+        // FIXME anpassen
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -203,6 +212,7 @@ public class OrionCassandraSink extends OrionSink {
         } // for
     } // persistBatch
 
+    @org.jetbrains.annotations.Contract("true -> !null; false -> !null")
     private CassandraAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
@@ -215,21 +225,21 @@ public class OrionCassandraSink extends OrionSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
-        String schemaName = aggregator.getSchemaName(enableLowercase);
+        String keyspaceName = aggregator.getKeyspaceName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionCassandraSink. Schema ("
-                + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at OrionCassandraSink. Keyspace ("
+                + keyspaceName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
 
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createSchema(schemaName);
-            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+            persistenceBackend.createKeyspace(keyspaceName);
+            persistenceBackend.createTable(keyspaceName, tableName, typedFieldNames);
         } // if
 
-        persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+        persistenceBackend.insertContextData(keyspaceName, tableName, fieldNames, fieldValues);
     } // persistAggregation
 
     /**
@@ -238,18 +248,18 @@ public class OrionCassandraSink extends OrionSink {
     private abstract class CassandraAggregator {
 
         // string containing the data fieldValues
-        protected String aggregation;
+        private String aggregation;
 
-        protected String service;
-        protected String servicePath;
-        protected String entity;
-        protected String attribute;
-        protected String schemaName;
-        protected String tableName;
-        protected String typedFieldNames;
-        protected String fieldNames;
+        private String service;
+        private String servicePath;
+        private String entity;
+        private String attribute;
+        private String keyspaceName;
+        private String tableName;
+        private String typedFieldNames;
+        private String fieldNames;
 
-        public CassandraAggregator() {
+        CassandraAggregator() {
             aggregation = "";
         } // CassandraAggregator
 
@@ -257,15 +267,23 @@ public class OrionCassandraSink extends OrionSink {
             return aggregation;
         } // getAggregation
 
-        public String getSchemaName(boolean enableLowercase) {
+        void addToAggregation(String aggregationAddition) {
+            this.aggregation += aggregationAddition;
+        } // addToAggregation
+
+        String getServicePath() {
+            return servicePath;
+        } // getServicePath
+
+        String getKeyspaceName(boolean enableLowercase) {
             if (enableLowercase) {
-                return schemaName.toLowerCase();
+                return keyspaceName.toLowerCase();
             } else {
-                return schemaName;
+                return keyspaceName;
             } // if else
         } // getDbName
 
-        public String getTableName(boolean enableLowercase) {
+        String getTableName(boolean enableLowercase) {
             if (enableLowercase) {
                 return tableName.toLowerCase();
             } else {
@@ -273,37 +291,54 @@ public class OrionCassandraSink extends OrionSink {
             } // if else
         } // getTableName
 
-        public String getTypedFieldNames() {
+        String getTypedFieldNames() {
             return typedFieldNames;
         } // getTypedFieldNames
+
+        void setTypedFieldNames(String typedFieldNames) {
+            this.typedFieldNames = typedFieldNames;
+        } // setTypedFieldNames
+
+        void addToTypedFieldNames(String typedFieldNamesAddition) {
+            this.typedFieldNames += typedFieldNamesAddition;
+        } // AddTotTypedFieldNames
 
         public String getFieldNames() {
             return fieldNames;
         } // getFieldNames
+
+        public void setFieldNames(String fieldNames) {
+            this.fieldNames = fieldNames;
+        } // setFieldNames
+
+        void addToFieldNames(String fieldNamesAddition) {
+            this.fieldNames += fieldNamesAddition;
+        } // addToFieldNames
 
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
-            schemaName = buildSchemaName();
+            keyspaceName = buildKeyspaceName();
             tableName = buildTableName();
         } // initialize
 
-        private String buildSchemaName() throws Exception {
+        private String buildKeyspaceName() throws Exception {
             String name = service;
 
             if (name.length() > Constants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building schema name '" + name
+                throw new CygnusBadConfiguration("Building keyspace name '" + name
                         + "' and its length is greater than " + Constants.MAX_NAME_LEN);
             } // if
 
             return name;
-        } // buildSchemaName
+        } // buildKeyspaceName
 
         private String buildTableName() throws Exception {
             String name;
 
+            //noinspection Duplicates
             switch (dataModel) {
                 case DMBYSERVICEPATH:
                     name = servicePath;
@@ -339,7 +374,7 @@ public class OrionCassandraSink extends OrionSink {
         @Override
         public void initialize(CygnusEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            typedFieldNames = "("
+            setTypedFieldNames("("
                     + Constants.RECV_TIME_TS + " bigint,"
                     + Constants.RECV_TIME + " text,"
                     + Constants.FIWARE_SERVICE_PATH + " text,"
@@ -349,8 +384,8 @@ public class OrionCassandraSink extends OrionSink {
                     + Constants.ATTR_TYPE + " text,"
                     + Constants.ATTR_VALUE + " text,"
                     + Constants.ATTR_MD + " text"
-                    + ")";
-            fieldNames = "("
+                    + ")");
+            setFieldNames("("
                     + Constants.RECV_TIME_TS + ","
                     + Constants.RECV_TIME + ","
                     + Constants.FIWARE_SERVICE_PATH + ","
@@ -360,7 +395,7 @@ public class OrionCassandraSink extends OrionSink {
                     + Constants.ATTR_TYPE + ","
                     + Constants.ATTR_VALUE + ","
                     + Constants.ATTR_MD
-                    + ")";
+                    + ")");
         } // initialize
 
         @Override
@@ -397,7 +432,7 @@ public class OrionCassandraSink extends OrionSink {
                 String row = "('"
                         + recvTimeTs + "','"
                         + recvTime + "','"
-                        + servicePath + "','"
+                        + getServicePath() + "','"
                         + entityId + "','"
                         + entityType + "','"
                         + attrName + "','"
@@ -406,10 +441,10 @@ public class OrionCassandraSink extends OrionSink {
                         + attrMetadata
                         + "')";
 
-                if (aggregation.isEmpty()) {
-                    aggregation += row;
+                if (getAggregation().isEmpty()) {
+                    addToAggregation(row);
                 } else {
-                    aggregation += "," + row;
+                    addToAggregation("," + row);
                 } // if else
             } // for
         } // aggregate
@@ -426,14 +461,14 @@ public class OrionCassandraSink extends OrionSink {
             super.initialize(cygnusEvent);
 
             // particulat initialization
-            typedFieldNames = "(" + Constants.RECV_TIME + " text,"
+            setTypedFieldNames("(" + Constants.RECV_TIME + " text,"
                     + Constants.FIWARE_SERVICE_PATH + " text,"
                     + Constants.ENTITY_ID + " text,"
-                    + Constants.ENTITY_TYPE + " text";
-            fieldNames = "(" + Constants.RECV_TIME + ","
+                    + Constants.ENTITY_TYPE + " text");
+            setFieldNames("(" + Constants.RECV_TIME + ","
                     + Constants.FIWARE_SERVICE_PATH + ","
                     + Constants.ENTITY_ID + ","
-                    + Constants.ENTITY_TYPE;
+                    + Constants.ENTITY_TYPE);
 
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -444,12 +479,12 @@ public class OrionCassandraSink extends OrionSink {
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                typedFieldNames += "," + attrName + " text," + attrName + "_md text";
-                fieldNames += "," + attrName + "," + attrName + "_md";
+                addToTypedFieldNames("," + attrName + " text," + attrName + "_md text");
+                addToFieldNames("," + attrName + "," + attrName + "_md");
             } // for
 
-            typedFieldNames += ")";
-            fieldNames += ")";
+            addToTypedFieldNames(")");
+            addToFieldNames(")");
         } // initialize
 
         @Override
@@ -474,8 +509,9 @@ public class OrionCassandraSink extends OrionSink {
                 return;
             } // if
 
-            String column = "('" + recvTime + "','" + servicePath + "','" + entityId + "','" + entityType + "'";
+            String column = "('" + recvTime + "','" + getServicePath() + "','" + entityId + "','" + entityType + "'";
 
+            //noinspection Duplicates
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -489,10 +525,10 @@ public class OrionCassandraSink extends OrionSink {
             } // for
 
             // now, aggregate the column
-            if (aggregation.isEmpty()) {
-                aggregation += column + ")";
+            if (getAggregation().isEmpty()) {
+                addToAggregation(column + ")");
             } else {
-                aggregation += "," + column + ")";
+                addToAggregation("," + column + ")");
             } // if else
         } // aggregate
 
