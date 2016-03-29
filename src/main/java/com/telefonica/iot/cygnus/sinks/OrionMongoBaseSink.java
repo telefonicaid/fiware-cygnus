@@ -108,9 +108,9 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"));
+        dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"), false, true);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"));
+        collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"), false, true);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         
         String shouldHashStr = context.getString("should_hash", "false");
@@ -178,7 +178,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + Utils.encode(fiwareService);
+        String dbName = dbPrefix + Utils.encode(fiwareService, false, true);
 
         if (dbName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -214,14 +214,16 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                             + "dm-by-service-path data model");
                 } // if
                 
-                collectionName = Utils.encodeSTH(fiwareServicePath);
+                collectionName = Utils.encode(fiwareServicePath, false, true);
                 break;
             case DMBYENTITY:
-                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity);
+                collectionName = Utils.encode(fiwareServicePath, false, false) + "_"
+                        + Utils.encode(entity, false, true);
                 break;
             case DMBYATTRIBUTE:
-                collectionName = Utils.encodeSTH(fiwareServicePath) + "_" + Utils.encode(entity)
-                        + "_" + Utils.encode(attribute);
+                collectionName = Utils.encode(fiwareServicePath, false, false)
+                        + "_" + Utils.encode(entity, false, true)
+                        + "_" + Utils.encode(attribute, false, true);
                 break;
             default:
                 // this should never be reached
