@@ -431,7 +431,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildOrgName(String fiwareService) throws Exception {
-        String orgName = Utils.encode(fiwareService);
+        String orgName = Utils.encode(fiwareService, false, true);
 
         if (orgName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
@@ -453,9 +453,11 @@ public class OrionCKANSink extends OrionSink {
         String pkgName;
 
         if (fiwareServicePath.equals("/")) {
-            pkgName = Utils.encode(fiwareService);
+            pkgName = Utils.encode(fiwareService, false, true);
         } else {
-            pkgName = Utils.encode(fiwareService) + "_" + Utils.encode(fiwareServicePath);
+            // no concatenation character, i.e. '_', is needed since the service must start with '/',
+            // which will be encoded as '_'
+            pkgName = Utils.encode(fiwareService, false, true) + Utils.encode(fiwareServicePath, true, false);
         } // if else
 
         if (pkgName.length() > Constants.MAX_NAME_LEN) {
@@ -473,7 +475,7 @@ public class OrionCKANSink extends OrionSink {
      * @throws Exception
      */
     private String buildResName(String destination) throws Exception {
-        String resName = Utils.encode(destination);
+        String resName = Utils.encode(destination, false, true);
 
         if (resName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "

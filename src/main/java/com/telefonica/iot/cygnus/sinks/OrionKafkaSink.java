@@ -223,7 +223,7 @@ public class OrionKafkaSink extends OrionSink {
 
             switch (dataModel) {
                 case DMBYSERVICE:
-                    name = Utils.encode(service);
+                    name = Utils.encode(service, false, true);
                     break;
                 case DMBYSERVICEPATH:
                     if (servicePath.equals("/")) {
@@ -231,13 +231,13 @@ public class OrionKafkaSink extends OrionSink {
                                 + "dm-by-service-path data model");
                     } // if
                     
-                    name = Utils.encode(servicePath);
+                    name = Utils.encode(servicePath, true, false);
                     break;
                 case DMBYENTITY:
-                    name = Utils.encode(entity);
+                    name = Utils.encode(entity, false, true);
                     break;
                 case DMBYATTRIBUTE:
-                    name = Utils.encode(attribute);
+                    name = Utils.encode(attribute, false, true);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
