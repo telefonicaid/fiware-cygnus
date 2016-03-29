@@ -43,6 +43,8 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -131,6 +133,8 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutStats(response);
                 } else if (uri.equals("/v1/groupingrules")) {
                     handlePutGroupingRules(request, response);
+                } else if (uri.equals("/admin/log")) {
+                    handlePutAdminLog(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -596,6 +600,50 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handlePutGroupingRules
+    
+    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        // get the parameters to be updated
+        String logLevel = request.getParameter("level");
+        
+        if (logLevel != null) {
+            if (logLevel.equals("DEBUG")) {
+                LogManager.getRootLogger().setLevel(Level.DEBUG);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("INFO")) {
+                LogManager.getRootLogger().setLevel(Level.INFO);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("WARNING") || logLevel.equals("WARN")) {
+                LogManager.getRootLogger().setLevel(Level.WARN);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("ERROR")) {
+                LogManager.getRootLogger().setLevel(Level.ERROR);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("FATAL")) {
+                LogManager.getRootLogger().setLevel(Level.FATAL);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"error\":\"Invalid log level\"}");
+                LOGGER.error("Invalid log level '" + logLevel + "'");
+            } // if else
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"error\":\"Log level missing\"}");
+            LOGGER.error("Log level missing in the request");
+        } // if else
+    } // handlePutAdminLog
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
