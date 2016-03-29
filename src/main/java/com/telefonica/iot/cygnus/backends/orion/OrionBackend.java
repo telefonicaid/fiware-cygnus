@@ -21,7 +21,7 @@ import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 
 /**
  *
- * @author frb
+ * @author pcoello25
  */
 public interface OrionBackend {
     
@@ -33,6 +33,7 @@ public interface OrionBackend {
      * @param allAttrStats
      * @throws Exception
      */
+    // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     // void updateContext(String entityId, String entityType, ArrayList<OrionStats> allAttrStats) throws Exception;
     
     /**

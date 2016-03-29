@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -30,7 +30,7 @@ public class CygnusSubscription {
     
     private final OrionSubscription subscription;
     private final OrionEndpoint endpoint;
-    private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);    
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusSubscription.class);    
     
     public CygnusSubscription() {
         subscription = new OrionSubscription();
@@ -176,81 +176,120 @@ public class CygnusSubscription {
         OrionSubscription orionSubscription = this.getOrionSubscription();
         OrionEndpoint orionEndpoint = this.getOrionEndpoint();
 
-        int subscriptionMsg = isSubsciptionValid(orionSubscription);
+        int subscriptionMsg = isSubscriptionValid(orionSubscription);
         int endpointMsg = isEndpointValid(orionEndpoint);
         
-        // check if endpoint or subscription is missing
-        if ((subscriptionMsg == 1) || (endpointMsg == 1)) {
-            LOGGER.debug("Subscription or endpoint are missing.");
-            return 1;
-        } // if
+        // Error codes: 
+        //      - First digit: 1 if subscription, 2 if endpoint
+        //      - Second digit: 1 if missing entire field, 2 if missing fields, 
+        //                      3 if empty fields, 4 if invalid fields
+        //      - Third digit: different cases
+        //  Example: 125 =  Subscription/MissingFields/notifyConditions field
         
-        // check if subscription and endpoint contain all the required fields
-        if ((subscriptionMsg == 2) || (endpointMsg == 2)) {
-            LOGGER.debug("There are missing fields in input JSON.");
-            return 2;
-        } // if
-        
-        // check if subscription and endpoint has any empty field
-        if ((orionSubscription.getSubscriptionSize() == 0) || 
-                (orionEndpoint.getEndpointSize() == 0) || 
-                (subscriptionMsg == 3) || (endpointMsg == 3)) {
-            LOGGER.debug("There are empty fields in input JSON.");
-            return 3;
-        } // if
-        
-        // check if subscription and endpoint has invalid fields
-        if (endpointMsg == 4) {
-            LOGGER.debug("There are invalid fields in input JSON");
-            return 4;
-        } // if
+        switch (subscriptionMsg) {
+            // case of missing entire subscription
+            case 11:
+                LOGGER.error("Subscription is missing");
+                return 11;
                 
+            // cases of missing fields in subscription
+                
+            // cases for entities
+            case 1211:
+                LOGGER.error("Field 'entities' is missing in the subscription");
+                return 1211;
+            case 1212:
+                LOGGER.error("Field 'entities' has missing fields ");
+                return 1212;
+            case 1213:
+                LOGGER.error("Field 'entities' has empty fields");
+                return 1213;
+                
+            case 122:
+                LOGGER.error("Field 'reference' is missing in the subscription");
+                return 122;
+            case 123:
+                LOGGER.error("Field 'duration' is missing in the subscription");
+                return 123;
+                
+            // cases for notifyConditions
+            case 1241:
+                LOGGER.error("Field 'notifyConditions' is missing in the subscription");
+                return 1241;
+            case 1242:
+                LOGGER.error("Field 'notifyConditions' has missing fields in the subcription");
+                return 1242;
+            case 1243:
+                LOGGER.error("Field 'notifyConditions' has emtpy fields in the subcription");
+                return 1243;
+                
+            case 125: 
+                LOGGER.error("Field 'throttling' is missing in the subscription");
+                return 125;
+            case 126:
+                LOGGER.error("Field 'attributes' is missing in the subscription");
+                return 126;
+                
+            // cases of empty fields in subscription
+            case 131:
+                LOGGER.error("Field 'entity' is empty in the subscription");
+                return 131;
+            case 132:
+                LOGGER.error("Field 'reference' is empty in the subscription");
+                return 132;
+            case 133:
+                LOGGER.error("Field 'duration' is empty in the subscription");
+                return 133;
+            case 134:
+                LOGGER.error("Field 'notifyConditions' has empty fields in the subscription");
+                return 134;
+            case 135:
+                LOGGER.error("Field 'throttling' is empty in the subscription");
+                return 135;
+            default:
+        }
+        
+        switch (endpointMsg) {
+            // case of missing entire endpoint
+            case 21:
+                LOGGER.error("Endpoint is missing");
+                return 21;
+                
+            // cases of missing fields in endpoint
+            case 221:
+                LOGGER.error("Field 'host' is missing in the endpoint");
+                return 221;
+            case 222:
+                LOGGER.error("Field 'port' is missing in the endpoint");
+                return 222;
+            case 223:
+                LOGGER.error("Field 'ssl' is missing in the endpoint");
+                return 223;
+                
+            // cases of empty fields in endpoint
+            case 231:
+                LOGGER.error("Field 'host' is empty in the endpoint");
+                return 231;
+            case 232:
+                LOGGER.error("Field 'port' is empty in the endpoint");
+                return 231;
+            case 233:
+                LOGGER.error("Field 'ssl' is empty in the endpoint");
+                return 231;
+                
+            // case of invalid field in the endpoint
+            case 24:
+                LOGGER.error("Field 'ssl' is invalid");
+                return 24;
+            default:
+        }
+      
         LOGGER.debug("Valid input JSON.");
         return 0;
 
     } // isValid
     
-    private int isEndpointValid (OrionEndpoint orionEndpoint) {
-        
-        // get host, port, ssl and authtoken
-        String host = orionEndpoint.getHost();
-        String port = orionEndpoint.getPort();
-        String ssl = orionEndpoint.getSsl();
-        boolean isValidSsl;
-        
-        // check if entire endpoint is missing        
-        if ((host == null) && (port == null) && (ssl == null)) {
-            LOGGER.debug("Missing entire endpoint.");
-            return 1;
-        } // if
-        
-        // check if ssl field contains valid value
-        if ((ssl.equals("true") || ssl.equals("false")) ? 
-                (isValidSsl=true):(isValidSsl=false));  
-        
-        // check if endpoint contains all the required fields
-        if ((host == null) || (port == null) || (ssl == null)) {
-            LOGGER.debug("There are missing fields in endpoint.");
-            return 2;
-        } // if
-        
-        // check if endpoint has empty fields
-        if ((host.length() == 0) || (port.length() == 0) || (ssl.length() == 0)) {
-            LOGGER.debug("There are empty fields in endpoint.");
-            return 3;
-        } // if
-        
-        // check if endpoint contains invalid fields
-        if (!(isValidSsl)) {
-            LOGGER.debug("There are invalid fields in endpoint");
-            return 4;
-        } // if
-                
-        LOGGER.debug("Valid endpoint.");
-        return 0;
-    } // isEndpointValid
-    
-    private int isSubsciptionValid (OrionSubscription orionSubscription) {
+    private int isSubscriptionValid (OrionSubscription orionSubscription) {
         // get entities arrayList
         ArrayList<SubscriptionEntity> entity = 
                 orionSubscription.getSubscriptionEntity();
@@ -275,22 +314,98 @@ public class CygnusSubscription {
         // check if entire subscription is missing        
         if ((entitiesMsg == 1) && (attributes.isEmpty()) && (reference == null) && 
                 (duration == null) && (notifyConditionsMsg == 1) && (throttling == null)) {
-            LOGGER.debug("Missing entire subscription.");
-            return 1;
+            LOGGER.error("Missing entire subscription.");
+            return 11;
         } // if
         
-        // check if subscription contains all the required fields
-        if ((reference == null) || (duration == null) || (throttling == null)
-                || (entitiesMsg == 2) || (notifyConditionsMsg == 2)) {
-            LOGGER.debug("There are missing fields in subscription.");
-            return 2;
+        // check if subscription contains entities
+        if (entitiesMsg == 1) {
+            LOGGER.error("Field 'entities' is missing in the subscription");
+            return 1211;
         } // if
         
-        // check if subscription has any empty field
-        if ((reference.length()==0) || (duration.length()==0) || (throttling.length()==0) || 
-                (entitiesMsg==3) || (notifyConditionsMsg == 3)) {
-            LOGGER.debug("There are empty fields in subscription.");
-            return 3;
+        // check if subscription.entities has missing fields
+        if (entitiesMsg == 2) {
+            LOGGER.error("Field 'entities' has missing fields");
+            return 1212;
+        } // if
+        
+        // check if subscription.entities has empty fields
+        if (entitiesMsg == 3) {
+            LOGGER.error("Field 'entities' has empty fields");
+            return 1213;
+        } // if
+        
+        // check if subscription contains reference
+        if (reference == null) {
+            LOGGER.error("Field 'reference' is missing in the subscription");
+            return 122;
+        } // if
+        
+        // check if subscription contains duration
+        if (duration == null) {
+            LOGGER.error("Field 'duration' is missing in the subscription");
+            return 123;
+        } // if
+        
+        // check if subscription contains notifyConditions
+        if (notifyConditionsMsg == 1) {
+            LOGGER.error("Field 'notifyConditions' is missing in the subscription");
+            return 1241;
+        } // if  
+         
+        // check if subscription.notifyConditions has missing fields
+        if (notifyConditionsMsg == 2) {
+            LOGGER.error("Field 'notifyConditions' has missing fields");
+            return 1242;
+        } // if 
+        
+        // check if subscription.notifyConditions has empty fields
+        if (notifyConditionsMsg == 3) {
+            LOGGER.error("Field 'notifyConditions' has empty fields");
+            return 1243;
+        } // if 
+        
+        // check if subscription contains throttlings
+        if (throttling == null) {
+            LOGGER.error("Field 'throttling' is missing in the subscription");
+            return 125;
+        } // if
+        
+        // check if subscription contains attributes (with values or empty)
+        if (attributes == null) {
+            LOGGER.error("Field 'attributes' is missing in the subscription");
+            return 126;
+        }
+      
+        // check if subscription has an empty entity
+        if (entitiesMsg==3) {
+            LOGGER.error("Field 'entity' is empty in the subscription");
+            return 131;
+        } // if        
+        
+        // check if subscription has an empty reference
+        if (reference.length()==0) {
+            LOGGER.error("Field 'reference' is empty in the subscription");
+            return 132;
+        } // if
+        
+        // check if subscription has an empty duration
+        if (duration.length()==0) {
+            LOGGER.error("Field 'duration' is empty in the subscription");
+            return 133;
+        } // if
+                
+        // check if subscription has an empty notifyConditions
+        if (notifyConditionsMsg == 3) {
+            LOGGER.error("Field 'notifyConditions' is empty in the subscription");
+            return 134;
+        } // if
+        
+        // check if subscription has an empty throttling
+        if (throttling.length()==0) {
+            LOGGER.error("Field 'throttling' is empty in the subscription");
+            return 135;
         } // if
         
         // return 0 if valid subscription
@@ -301,12 +416,11 @@ public class CygnusSubscription {
     private int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
         boolean emptyFields = true;
         boolean validFields = true;
-  
-        // check if input ArrayList is empty        
-        if (entities.isEmpty()) {
-            LOGGER.debug("Missing entire entities");
+        
+        if ((entities == null) || entities.isEmpty()) {
+            LOGGER.error("Field 'entities' is missing");
             return 1;
-        } // if
+        }
         
         for (SubscriptionEntity entity : entities) {
             String type = entity.getEntityType();
@@ -320,13 +434,13 @@ public class CygnusSubscription {
         
         // check if entities contains all the required fields
         if (!validFields) {
-            LOGGER.debug("There are missing fields in entities.");
+            LOGGER.error("There are missing fields in entities.");
             return 2;
         } // if
         
         // check if entities has any empty field
         if (emptyFields) {
-            LOGGER.debug("There are empty fields in entities.");
+            LOGGER.error("There are empty fields in entities.");
             return 3;
         } // if
         
@@ -339,9 +453,8 @@ public class CygnusSubscription {
         boolean validFields = true;
         boolean emptyFields = true;
                 
-        // check if input ArrayList is empty
-        if (conditions.isEmpty()) {
-            LOGGER.debug("Missing entire notifyConditions");
+        if ((conditions == null) || (conditions.isEmpty())) {
+            LOGGER.error("Field 'notifyConditions' is missing");
             return 1;
         } // if
         
@@ -354,18 +467,80 @@ public class CygnusSubscription {
         
         // check if notifyConditions contains all the required fields
         if (!validFields) {
-           LOGGER.debug("There are missing fields in notifyConditions.");
+           LOGGER.error("There are missing fields in notifyConditions.");
            return 2;
         } // if
         
         // check if notifyConditions has any empty field
         if (emptyFields) {
-            LOGGER.debug("There are empty fields in notifyConditions.");
+            LOGGER.error("There are empty fields in notifyConditions.");
             return 3;
         } // if
         
         LOGGER.debug("Valid notifyConditions.");
         return 0;
     } // isNotifyConditionsValid  
+    
+    private int isEndpointValid (OrionEndpoint orionEndpoint) {
+        
+        // get host, port, ssl and authtoken
+        String host = orionEndpoint.getHost();
+        String port = orionEndpoint.getPort();
+        String ssl = orionEndpoint.getSsl();
+        boolean isValidSsl;
+        
+        // check if entire endpoint is missing        
+        if ((host == null) && (port == null) && (ssl == null)) {
+            LOGGER.error("Missing entire endpoint.");
+            return 21;
+        } // if
+        
+        // check if endpoint contains ssl
+        if (ssl == null) {
+            LOGGER.error("Field 'ssl' is missing in the endpoint");
+            return 223;
+        } else if ((ssl.equals("true") || ssl.equals("false")) ? 
+                (isValidSsl=true):(isValidSsl=false));  
+        // if else
+        
+        // check if endpoint contains host
+        if (host == null) {
+            LOGGER.error("Field 'host' is missing in the endpoint");
+            return 221;
+        } // if
+        
+        // check if endpoint contains port 
+        if (port == null) {
+            LOGGER.error("Field 'port' is missing in the endpoint");
+            return 222;
+        } // if
+        
+        // check if endpoint has an empty host
+        if (host.length() == 0) {
+            LOGGER.error("Field 'host' is empty");
+            return 231;
+        } // if
+        
+        // check if endpoint has an empty port
+        if (port.length() == 0) {
+            LOGGER.error("Field 'port' is empty");
+            return 232;
+        } // if
+        
+        // check if endpoint has an empty ssl
+        if (ssl.length() == 0) {
+            LOGGER.error("Field 'ssl' is empty");
+            return 233;
+        } // if
+        
+        // check if endpoint contains invalid fields
+        if (!(isValidSsl)) {
+            LOGGER.error("There are invalid fields in endpoint");
+            return 24;
+        } // if
+                
+        LOGGER.debug("Valid endpoint.");
+        return 0;
+    } // isEndpointValid
     
 } // CygnusSubscription

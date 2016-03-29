@@ -28,11 +28,11 @@ import org.apache.http.message.BasicHeader;
 
 /**
  *
- * @author frb
+ * @author pcoello25
  */
 public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(HttpBackend.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(OrionBackendImpl.class);
     
     /**
      * Constructor.
@@ -55,9 +55,10 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
+        
         if (xAuthToken) {
             headers.add(new BasicHeader("X-Auth-token", token));
-        }
+        } // if
         
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);
@@ -69,6 +70,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         return response;
     }
     
+    // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     /**
     @Override
     public void updateContext(String entityId, String entityType, ArrayList<OrionStats> allAttrStats)
