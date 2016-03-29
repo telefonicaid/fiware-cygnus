@@ -26,7 +26,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Locale;
 import org.apache.flume.Context;
 
 /**
@@ -455,9 +454,7 @@ public class OrionCKANSink extends OrionSink {
         if (fiwareServicePath.equals("/")) {
             pkgName = Utils.encode(fiwareService, false, true);
         } else {
-            // no concatenation character, i.e. '_', is needed since the service must start with '/',
-            // which will be encoded as '_'
-            pkgName = Utils.encode(fiwareService, false, true) + Utils.encode(fiwareServicePath, true, false);
+            pkgName = Utils.encode(fiwareService, false, true) + Utils.encode(fiwareServicePath, false, true);
         } // if else
 
         if (pkgName.length() > Constants.MAX_NAME_LEN) {

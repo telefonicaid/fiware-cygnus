@@ -529,7 +529,7 @@ public class OrionHDFSSink extends OrionSink {
             firstLevel = buildFirstLevel(service);
             secondLevel = buildSecondLevel(servicePath);
             thirdLevel = buildThirdLevel(destination);
-            hdfsFolder = firstLevel + secondLevel + "/" + thirdLevel; // secondLevel
+            hdfsFolder = firstLevel + (servicePath.equals("/") ? "" : secondLevel) + "/" + thirdLevel;
             hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
         } // initialize
 

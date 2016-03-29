@@ -349,7 +349,7 @@ public class OrionDynamoDBSink extends OrionSink {
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH or DMBYENTITY");
         } // switch
 
         if (tableName.length() > Constants.MAX_NAME_LEN) {
