@@ -143,14 +143,16 @@ public class GroupingInterceptor implements Interceptor {
             GroupingRule matchingRule = groupingRules.getMatchingRule(contextElement, fiwareServicePath);
             
             if (matchingRule == null) {
-                groupedDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+                groupedDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType(),
+                        false, true));
                 groupedServicePaths.add(fiwareServicePath);
             } else {
                 groupedDestinations.add((String) matchingRule.getDestination());
                 groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
             } // if else
             
-            defaultDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+            defaultDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType(),
+                    false, true));
             defaultServicePaths.add(fiwareServicePath);
         } // for
  
