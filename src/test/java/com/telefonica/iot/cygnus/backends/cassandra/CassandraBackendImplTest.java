@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 public class CassandraBackendImplTest {
 
     // constants
-    private final String host = "localhost";
+    private final String[] hosts = {"localhost"};
     private final String keyspace = "my_keyspace";
     private final String user = "root";
     private final String password = "12345abcde";
@@ -65,7 +65,7 @@ public class CassandraBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new CassandraBackendImpl(host, user, password);
+        backend = new CassandraBackendImpl(user, password, hosts);
 
         // set up the behaviour of the mocked classes
         when(mockDriver.getSession(Mockito.anyString())).thenReturn(mockSession);

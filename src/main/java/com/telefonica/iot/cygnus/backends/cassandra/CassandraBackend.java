@@ -50,6 +50,9 @@ public interface CassandraBackend {
      * @param fieldNames   name of the fields in what the context shall get inserted
      * @param fieldValues  values that shall get inserted
      */
-    void insertContextData(String keyspaceName, String tableName, String fieldNames, String fieldValues) throws IllegalArgumentException;
+    void insertContextData(String keyspaceName,
+                           String tableName,
+                           String fieldNames,
+                           String fieldValues) throws IllegalArgumentException;
 
 } // CassandraBackend

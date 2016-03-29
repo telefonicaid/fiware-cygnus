@@ -40,7 +40,8 @@ public class CassandraBackendImpl implements CassandraBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CassandraBackendImpl.class);
 
-    private static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', 'replication_factor':%d};";
+    private static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS %s"
+            + " WITH replication = {'class':'SimpleStrategy', 'replication_factor':%d};";
     private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS %s %s";
     private CassandraDriver driver;
 
@@ -52,7 +53,9 @@ public class CassandraBackendImpl implements CassandraBackend {
      * @param cassandraNodes    Nodes (typically IPs) where cassandra cluster is running
      * @throws IllegalArgumentException gets thrown if a parameter is null or empty
      */
-    public CassandraBackendImpl(String cassandraUsername, String cassandraPassword, String[] cassandraNodes) throws IllegalArgumentException {
+    public CassandraBackendImpl(String cassandraUsername,
+                                String cassandraPassword,
+                                String[] cassandraNodes) throws IllegalArgumentException {
         try {
             Validate.notNull(cassandraUsername, "cassandraUsername must not be null");
             Validate.notNull(cassandraPassword, "cassandraPassword must not be null");
@@ -88,7 +91,10 @@ public class CassandraBackendImpl implements CassandraBackend {
     public void createKeyspace(String keyspaceName) throws IllegalArgumentException {
         try {
             Validate.notBlank(keyspaceName, "keyspaceName must not be null or blank");
-        } catch (NullPointerException | IllegalArgumentException e) {
+        } catch (NullPointerException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        } catch (IllegalArgumentException e) {
             LOGGER.error(e);
             throw new IllegalArgumentException(e);
         }
@@ -101,7 +107,7 @@ public class CassandraBackendImpl implements CassandraBackend {
     } // createKeyspace
 
     /**
-     * Executes a query within a given session
+     * Executes a query within a given session.
      *
      * @param session session in what the query shall get executed
      * @param query   a simple query string
@@ -113,21 +119,28 @@ public class CassandraBackendImpl implements CassandraBackend {
     }
 
     /**
-     * Creates a table, given its name, if not exists in the given keyspace
+     * Creates a table, given its name, if not exists in the given keyspace.
      *
      * @param keyspaceName    Keyspace name at what the table shall get created
      * @param tableName       name of the table that shall get created
      * @param typedFieldNames a list representing the columns and data types e.g.: "(name text, count bigint)"
      */
     @Override
-    public void createTable(String keyspaceName, String tableName, String typedFieldNames) throws IllegalArgumentException {
+    public void createTable(String keyspaceName,
+                            String tableName,
+                            String typedFieldNames) throws IllegalArgumentException {
         try {
             Validate.notBlank(keyspaceName, "keyspaceName must not be null or blank");
             Validate.notBlank(tableName, "tableName must not be null or blank");
             Validate.notBlank(typedFieldNames, "typedFieldNames must not be null or blank");
-            Validate.isTrue(typedFieldNames.startsWith("("), "typedFieldNames must be a list and thus start with an opening bracket");
-            Validate.isTrue(typedFieldNames.endsWith(")"), "typedFieldNames must be a list and thus end with a closing bracket");
-        } catch (NullPointerException | IllegalArgumentException e) {
+            Validate.isTrue(typedFieldNames.startsWith("("), "typedFieldNames"
+                    + " must be a list and thus start with an opening bracket");
+            Validate.isTrue(typedFieldNames.endsWith(")"), "typedFieldNames"
+                    + " must be a list and thus end with a closing bracket");
+        } catch (NullPointerException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        } catch (IllegalArgumentException e) {
             LOGGER.error(e);
             throw new IllegalArgumentException(e);
         }
@@ -144,11 +157,17 @@ public class CassandraBackendImpl implements CassandraBackend {
             Validate.notBlank(tableName, "tableName must not be null or blank");
             Validate.notBlank(fieldNames, "fieldNames must not be null or blank");
             Validate.notBlank(fieldValues, "fieldValues must not be null or blank");
-            Validate.isTrue(fieldNames.startsWith("("), "fieldNames must be a list and thus start with an opening bracket");
+            Validate.isTrue(fieldNames.startsWith("("), "fieldNames"
+                    + " must be a list and thus start with an opening bracket");
             Validate.isTrue(fieldNames.endsWith(")"), "fieldNames must be a list and thus end with a closing bracket");
-            Validate.isTrue(fieldValues.startsWith("("), "fieldValues must be a list and thus start with an opening bracket");
-            Validate.isTrue(fieldValues.endsWith(")"), "fieldValues must be a list and thus end with a closing bracket");
-        } catch (NullPointerException | IllegalArgumentException e) {
+            Validate.isTrue(fieldValues.startsWith("("), "fieldValues"
+                    + " must be a list and thus start with an opening bracket");
+            Validate.isTrue(fieldValues.endsWith(")"), "fieldValues"
+                    + " must be a list and thus end with a closing bracket");
+        } catch (NullPointerException e) {
+            LOGGER.error(e);
+            throw new IllegalArgumentException(e);
+        } catch (IllegalArgumentException e) {
             LOGGER.error(e);
             throw new IllegalArgumentException(e);
         }
@@ -161,6 +180,9 @@ public class CassandraBackendImpl implements CassandraBackend {
         session.execute(insert);
     } // insertContextData
 
+    /**
+     * This class represents the collection of created sessions to a Cassandra Cluster.
+     */
     class CassandraDriver {
 
         private final Map<String, Session> sessions;
@@ -169,14 +191,14 @@ public class CassandraBackendImpl implements CassandraBackend {
         private final String cassandraPassword;
 
         /**
-         * Constructor
+         * Constructor to create a Cassandra Driver.
          *
          * @param cassandraUsername Username under what to login at Cassandra
          * @param cassandraPassword Password to use with username to login at Cassandra
          * @param cassandraNodes    Nodes (typically IPs) where Cassandra is running
          */
         CassandraDriver(String cassandraUsername, String cassandraPassword, String... cassandraNodes) {
-            this.sessions = new HashMap<>();
+            this.sessions = new HashMap<String, Session>();
             this.cassandraUsername = cassandraUsername;
             this.cassandraPassword = cassandraPassword;
             this.cassandraCluster = getCluster(cassandraNodes);
@@ -230,7 +252,10 @@ public class CassandraBackendImpl implements CassandraBackend {
          * @return A Cassandra cassandraCluster
          */
         private Cluster getCluster(String... cassandraNodes) {
-            return Cluster.builder().addContactPoints(cassandraNodes).withCredentials(cassandraUsername, cassandraPassword).build();
+            return Cluster.builder()
+                    .addContactPoints(cassandraNodes)
+                    .withCredentials(cassandraUsername, cassandraPassword)
+                    .build();
         } // getCluster
     } // CassandraDriver
 } // CassandraBackendImpl
