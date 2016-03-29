@@ -28,9 +28,9 @@ MAINTAINER Herman Junge <herman.junge@telefonica.com>
 ###############################################################################
 
 
-RUN yum update -y
-RUN yum install -y wget tar git java-1.7.0-openjdk.x86_64
-ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-1.7.0.95-2.6.4.0.el7_2.x86_64/jre
+RUN yum update -y && \
+	yum install -y wget tar git java-1.7.0-openjdk.x86_64
+ENV JAVA_HOME /etc/alternatives/jre
 
 
 ###############################################################################

@@ -25,7 +25,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
-import com.telefonica.iot.cygnus.backends.orion.OrionBackend;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.handlers.OrionRestHandler;
 import com.telefonica.iot.cygnus.interceptors.GroupingRule;
@@ -41,8 +40,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,6 +50,8 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -140,8 +139,12 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println(method + " " + uri + " Not implemented");
                 } // if else
             } else if (method.equals("PUT")) {
-                if (uri.equals("/v1/groupingrules")) {
+                if (uri.equals("/v1/stats")) {
+                    handlePutStats(response);
+                } else if (uri.equals("/v1/groupingrules")) {
                     handlePutGroupingRules(request, response);
+                } else if (uri.equals("/admin/log")) {
+                    handlePutAdminLog(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -464,7 +467,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
             switch (err) {
-                case 1: 
+                case 1:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing subscription or endpoint\"}");
                     LOGGER.warn("Missing subscription or endpoint");
@@ -490,7 +493,6 @@ public class ManagementInterface extends AbstractHandler {
                     LOGGER.warn("Invalid subscription");
                     return;
             } // swtich
-
         } // if
 
         LOGGER.debug("Valid CygnusSubscription. Creating request to Orion.");
@@ -515,8 +517,7 @@ public class ManagementInterface extends AbstractHandler {
         String subscriptionStr = inputJson.get("subscription").toString();
         
         try {
-            JsonResponse orionResponse = 
-                    subscriptionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
+            JsonResponse orionResponse = subscriptionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
             int status = orionResponse.getStatusCode();
             JSONObject orionJson = orionResponse.getJsonObject();
             
@@ -528,12 +529,91 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : {" + orionJson.toJSONString() + "}");
             } // if else
-            
-        } catch (Exception ex) {
-            Logger.getLogger(ManagementInterface.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         } // try catch
-
     } // handlePostSubscription
+    
+    private void handlePutStats(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        for (String key : sources.keySet()) {
+            Source source;
+            HTTPSourceHandler handler;
+            
+            try {
+                SourceRunner sr = sources.get(key);
+                source = sr.getSource();
+                Field f = source.getClass().getDeclaredField("handler");
+                f.setAccessible(true);
+                handler = (HTTPSourceHandler) f.get(source);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+            
+            if (handler instanceof OrionRestHandler) {
+                OrionRestHandler orh = (OrionRestHandler) handler;
+                orh.setNumProcessedEvents(0);
+                orh.setNumReceivedEvents(0);
+            } // if
+        } // for
+
+        for (String key : channels.keySet()) {
+            Channel channel = channels.get(key);
+            
+            if (channel instanceof CygnusChannel) {
+                CygnusChannel cc = (CygnusChannel) channel;
+                cc.setNumPutsOK(0);
+                cc.setNumPutsFail(0);
+                cc.setNumTakesOK(0);
+                cc.setNumTakesFail(0);
+            } // if
+        } // for
+
+        for (String key : sinks.keySet()) {
+            Sink sink;
+            
+            try {
+                SinkRunner sr = sinks.get(key);
+                SinkProcessor sp = sr.getPolicy();
+                Field f = sp.getClass().getDeclaredField("sink");
+                f.setAccessible(true);
+                sink = (Sink) f.get(sp);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (IllegalAccessException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (NoSuchFieldException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } catch (SecurityException e) {
+                LOGGER.error("There was a problem when getting a sink. Details: " + e.getMessage());
+                continue;
+            } // try catch
+
+            if (sink instanceof OrionSink) {
+                OrionSink os = (OrionSink) sink;
+                os.setNumProcessedEvents(0);
+                os.setNumPersistedEvents(0);
+            } // if
+        } // for
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"success\":\"true\"}");
+        LOGGER.debug("Statistics reseted");
+    } // handlePutStats
 
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -629,7 +709,51 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handlePutGroupingRules
-
+    
+    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        // get the parameters to be updated
+        String logLevel = request.getParameter("level");
+        
+        if (logLevel != null) {
+            if (logLevel.equals("DEBUG")) {
+                LogManager.getRootLogger().setLevel(Level.DEBUG);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("INFO")) {
+                LogManager.getRootLogger().setLevel(Level.INFO);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("WARNING") || logLevel.equals("WARN")) {
+                LogManager.getRootLogger().setLevel(Level.WARN);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("ERROR")) {
+                LogManager.getRootLogger().setLevel(Level.ERROR);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else if (logLevel.equals("FATAL")) {
+                LogManager.getRootLogger().setLevel(Level.FATAL);
+                response.setStatus(HttpServletResponse.SC_OK);
+                //response.getWriter().println("{\"success\":\"true\"}");
+                LOGGER.info("log4j logging level updated to " + logLevel);
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"error\":\"Invalid log level\"}");
+                LOGGER.error("Invalid log level '" + logLevel + "'");
+            } // if else
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"error\":\"Log level missing\"}");
+            LOGGER.error("Log level missing in the request");
+        } // if else
+    } // handlePutAdminLog
+    
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         response.setContentType("json;charset=utf-8");

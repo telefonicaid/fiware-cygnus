@@ -108,7 +108,7 @@ cygnusagent.channels.test-channel.capacity = 1000
 cygnusagent.channels.test-channel.transactionCapacity = 100
 ```
 
-Check the [Installation and Administraion Guide](./installation_and_administration_guide/introduction.md) for configurations involving real data storages such as HDFS, MySQL, etc.
+Check the [Installation and Administraion Guide](./doc/installation_and_administration_guide/introduction.md) for configurations involving real data storages such as HDFS, MySQL, etc.
 
 In addition, a `/usr/cygnus/conf/cygnus_instance_1.conf` file must be created if we want to run Cygnus as a service (see next section):
 
@@ -230,7 +230,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 [Top](#top)
 
 ##<a name="section3"></a>Advanced topics and further reading
-Detailed information regarding Cygnus can be found in the [Installation and Administration Guide](./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](./user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](./flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
+Detailed information regarding Cygnus can be found in the [Installation and Administration Guide](./doc/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](./doc/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](./doc/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
 * [Installation with docker](doc/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
 * [Installation from sources](doc/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified, e.g. the `hadoop-core` libraries.
