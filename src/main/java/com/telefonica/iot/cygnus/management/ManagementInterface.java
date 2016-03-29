@@ -166,6 +166,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetGUI(response);
                 } else if (uri.endsWith("/points")) {
                     handleGetPoints(response);
+                } else if (uri.equals("/stats")) { // this is order to avoid CORS access control
+                    handleGetStats(response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
