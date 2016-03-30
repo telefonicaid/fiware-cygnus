@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -51,7 +51,7 @@ public final class Utils {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(Utils.class);
     private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
-    private static final Pattern ENCODESTHPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
+    private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
             "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
@@ -73,21 +73,19 @@ public final class Utils {
      * This should be only called when building a persistence element name, such as table names, file paths, etc.
      * 
      * @param in
+     * @param deleteSlash
+     * @param encodeSlash
      * @return The encoded version of the input string.
      */
-    public static String encode(String in) {
-        return ENCODEPATTERN.matcher(in).replaceAll("_");
+    public static String encode(String in, boolean deleteSlash, boolean encodeSlash) {
+        if (deleteSlash) {
+            return ENCODEPATTERN.matcher(in.substring(1)).replaceAll("_");
+        } else if (encodeSlash) {
+            return ENCODEPATTERN.matcher(in).replaceAll("_");
+        } else {
+            return ENCODEPATTERNSLASH.matcher(in).replaceAll("_");
+        } // if else
     } // encode
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-', '.' and '/').
-     * This should be only called when building a STH persistence element names.
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    public static String encodeSTH(String in) {
-        return ENCODESTHPATTERN.matcher(in).replaceAll("_");
-    } // encodeSTH
     
     /**
      * Encodes a string replacing all the non alphanumeric characters by '_'.
@@ -96,7 +94,7 @@ public final class Utils {
      * @return The encoded version of the input string.
      */
     public static String encodeHive(String in) {
-        return in.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+        return ENCODEHIVEPATTERN.matcher(in).replaceAll("_").toLowerCase();
     } // encodeHive
     
     /**

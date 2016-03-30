@@ -132,7 +132,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             notificationTarget = "/" + notificationTarget;
         } // if
         
-        defaultService = context.getString(Constants.PARAM_DEFAULT_SERVICE, "def_serv");
+        defaultService = context.getString(Constants.PARAM_DEFAULT_SERVICE, "default");
         
         if (defaultService.length() > Constants.SERVICE_HEADER_MAX_LEN) {
             LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
@@ -142,11 +142,17 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } // if
         
         LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
-        defaultServicePath = context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "def_serv_path");
+        defaultServicePath = context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "/");
         
         if (defaultServicePath.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
             LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
                     + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+            LOGGER.info("Exiting Cygnus");
+            System.exit(-1);
+        } // if
+        
+        if (!defaultServicePath.startsWith("/")) {
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' must start with '/')");
             LOGGER.info("Exiting Cygnus");
             System.exit(-1);
         } // if

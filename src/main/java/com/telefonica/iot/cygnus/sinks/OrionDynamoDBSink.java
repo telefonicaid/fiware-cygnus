@@ -336,16 +336,20 @@ public class OrionDynamoDBSink extends OrionSink {
         String tableName;
 
         switch (dataModel) {
-            case DMBYENTITY:
-                tableName = Utils.encode(service) + (servicePath.equals("/") ? "" : "_" + Utils.encode(servicePath))
-                        + "_" + Utils.encode(destination);
-                break;
             case DMBYSERVICEPATH:
-                tableName = Utils.encode(service) + (servicePath.equals("/") ? "" : "_" + Utils.encode(servicePath));
+                String truncatedServicePath = Utils.encode(servicePath, true, false);
+                tableName = Utils.encode(service, false, true)
+                        + (truncatedServicePath.isEmpty() ? "" : "_" + truncatedServicePath);
+                break;
+            case DMBYENTITY:
+                truncatedServicePath = Utils.encode(servicePath, true, false);
+                tableName = Utils.encode(service, false, true)
+                        + (truncatedServicePath.isEmpty() ? "" : "_" + truncatedServicePath)
+                        + "_" + Utils.encode(destination, false, true);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH or DMBYENTITY");
         } // switch
 
         if (tableName.length() > Constants.MAX_NAME_LEN) {

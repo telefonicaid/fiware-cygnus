@@ -76,10 +76,10 @@ public class OrionHDFSSinkTest {
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "longservname";
-    private final String normalDefaultServicePath = "4wheels";
-    private final String rootServicePath = "";
+    private final String normalDefaultServicePath = "/4wheels";
+    private final String rootServicePath = "/";
     private final String abnormalDefaultServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
@@ -87,7 +87,7 @@ public class OrionHDFSSinkTest {
             + "longservpathname";
     private final String normalGroupedServicePath = "cars";
     private final String abnormalGroupedServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
