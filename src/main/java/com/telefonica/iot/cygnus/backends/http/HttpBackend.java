@@ -276,9 +276,10 @@ public abstract class HttpBackend {
                     res += line;
                 } // while
 
+                reader.close();
                 LOGGER.debug("Http response payload: " + res);
                 
-                if (res != null) {
+                if (!res.isEmpty()) {
                     JSONParser jsonParser = new JSONParser();
                     jsonPayload = (JSONObject) jsonParser.parse(res);
                 } // if
