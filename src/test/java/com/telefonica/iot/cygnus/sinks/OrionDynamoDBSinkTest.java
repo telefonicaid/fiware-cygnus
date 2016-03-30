@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -21,7 +21,6 @@ import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.ArrayList;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
@@ -66,13 +65,13 @@ public class OrionDynamoDBSinkTest {
     private final String normalService = "vehicles";
     private final String abnormalService =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String normalDefaultServicePath = "4wheels";
-    private final String rootServicePath = "";
+    private final String normalDefaultServicePath = "/4wheels";
+    private final String rootServicePath = "/";
     private final String abnormalDefaultServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String normalGroupedServicePath = "cars";
     private final String abnormalGroupedServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String normalDefaultDestination = "car1_car";
     private final String abnormalDefaultDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";

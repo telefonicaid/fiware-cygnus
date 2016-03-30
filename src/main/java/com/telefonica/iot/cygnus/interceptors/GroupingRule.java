@@ -88,7 +88,7 @@ public class GroupingRule {
      * @return The rule's destination.
      */
     public String getDestination() {
-        return Utils.encode((String) jsonRule.get("destination"));
+        return Utils.encode((String) jsonRule.get("destination"), false, true);
     } // destination
 
     /**
@@ -96,7 +96,7 @@ public class GroupingRule {
      * @return The rule's newFiwareServicePath.
      */
     public String getNewFiwareServicePath() {
-        return Utils.encode((String) jsonRule.get("fiware_service_path"));
+        return Utils.encode((String) jsonRule.get("fiware_service_path"), false, true);
     } // getNewFiwareServicePath
     
     /**

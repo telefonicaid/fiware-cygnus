@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*; // this is required by "when" like function
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -65,13 +64,13 @@ public class OrionCKANSinkTest {
     private final String normalService = "vehicles";
     private final String abnormalService =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String normalDefaultServicePath = "4wheels";
-    private final String rootServicePath = "";
+    private final String normalDefaultServicePath = "/4wheels";
+    private final String rootServicePath = "/";
     private final String abnormalDefaultServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String normalGroupedServicePath = "cars";
     private final String abnormalGroupedServicePath =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
+            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
     private final String normalDefaultDestination = "car1_car";
     private final String abnormalDefaultDestination =
             "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
