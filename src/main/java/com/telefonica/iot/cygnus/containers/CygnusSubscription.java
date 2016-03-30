@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.containers;
 
+import com.sun.org.apache.xerces.internal.impl.xs.SchemaSymbols;
 import java.util.ArrayList;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
@@ -94,18 +95,10 @@ public class CygnusSubscription {
         } // getSubscriptionSize
         
         public boolean isSubscriptionEmpty() {
-            return ((this.entities == null) && (this.attributes == null) && 
-                    (this.notifyConditions == null) && (this.reference == null)
-                    && (this.duration == null) && (this.throttling == null));
+            return ((this.entities.isEmpty()) && (this.attributes.isEmpty()) && 
+                   (this.notifyConditions.isEmpty()) && (this.reference == null)
+                   && (this.duration == null) && (this.throttling == null));
         } // isSubscriptionEmpty
-        
-        public boolean hasNotifyConditions() {
-            return !(this.notifyConditions == null);
-        } // hasNotifiConditions
-        
-        public boolean hasEntities() {
-            return !(this.entities == null);
-        } // hasEntities
         
     } // OrionSubscription
     
@@ -150,10 +143,18 @@ public class CygnusSubscription {
             return size;
         } // getEndpointSize
         
-         public boolean isEndpointEmpty() {
+        public boolean isEndpointEmpty() {
             return ((this.host == null) && (this.port == null) && 
                     (this.ssl == null) && (this.xauthtoken == null));
         } // isEndpointEmpty
+         
+        public String toStrain() {
+            String out = " host = " + this.host;
+            out += "  port = " + this.port;
+            out += "  ssl = " + this.ssl;
+            out += "  token = " + this.xauthtoken;
+            return out;
+        }
          
     } // OrionEndpoint
     
@@ -203,31 +204,32 @@ public class CygnusSubscription {
     public int isValid() {
         OrionSubscription orionSubscription = this.getOrionSubscription();
         OrionEndpoint orionEndpoint = this.getOrionEndpoint();
-
-        int subscriptionMsg = isSubscriptionValid(orionSubscription);
-        int endpointMsg = isEndpointValid(orionEndpoint);
         
         // Error codes: 
         //      - First digit: 1 if subscription, 2 if endpoint
         //      - Second digit: 1 if missing entire field, 2 if missing fields, 
         //                      3 if empty fields, 4 if invalid fields
         //      - Third digit: different cases
-        //  Example: 125 =  Subscription/MissingFields/notifyConditions field
+        //  Example: 125 =  Subscription/MissingFields/notifyConditionsField
+        
+        int subscriptionMsg = isSubscriptionValid(orionSubscription);  
+        int endpointMsg = isEndpointValid(orionEndpoint);
         
         switch (subscriptionMsg) {
             // case of missing entire subscription
             case 11:
-                LOGGER.error("Subscription is empty");
-                return 11;
-            case 12:
                 LOGGER.error("Subscription is missing");
-                return 12;
+                return 11;
+                
             // cases of missing fields in subscription
                 
             // cases for entities
-            case 1211:
+            case 12111:
                 LOGGER.error("Field 'entities' is missing in the subscription");
-                return 1211;
+                return 12111;
+            case 12112:
+                LOGGER.error("Field 'entities' is empty");
+                return 12112;
             case 1212:
                 LOGGER.error("Field 'entities' has missing fields ");
                 return 1212;
@@ -243,9 +245,12 @@ public class CygnusSubscription {
                 return 123;
                 
             // cases for notifyConditions
-            case 1241:
+            case 12411:
                 LOGGER.error("Field 'notifyConditions' is missing in the subscription");
-                return 1241;
+                return 12411;
+            case 12412:
+                LOGGER.error("Field 'notifyConditions' is empty");
+                return 12412;
             case 1242:
                 LOGGER.error("Field 'notifyConditions' has missing fields in the subcription");
                 return 1242;
@@ -282,11 +287,8 @@ public class CygnusSubscription {
         switch (endpointMsg) {
             // case of missing entire endpoint
             case 21:
-                LOGGER.error("Endpoint is empty");
-                return 21;
-            case 22: 
                 LOGGER.error("Endpoint is missing");
-                return 22;
+                return 21;
                 
             // cases of missing fields in endpoint
             case 221:
@@ -340,41 +342,29 @@ public class CygnusSubscription {
         String duration = orionSubscription.getDuration();
         String throttling = orionSubscription.getThrottling();
         
-        // check error messages from subfields of subscription
-        int entitiesMsg = -1;
-        int notifyConditionsMsg = -1;
-        if (orionSubscription.hasEntities()) { 
-            entitiesMsg = isEntitiesValid(entity);
-        }
-        if (orionSubscription.hasNotifyConditions()) {
-            notifyConditionsMsg = isNotifyConditionsValid(notifyConditions);
-        }
-        
-        // check if subscription is empty
-        if (orionSubscription.isSubscriptionEmpty()) {
-            LOGGER.error("Empty subscription");
-            return 11;
-        }
-        
+        // check error messages from subfields of subscription 
+        int entitiesMsg = isEntitiesValid(entity);
+        int notifyConditionsMsg = isNotifyConditionsValid(notifyConditions);
+
         // check if entire subscription is missing        
-        if ((!orionSubscription.hasEntities()) && (attributes.isEmpty()) && 
-                (reference == null) && (duration == null) && 
-                (!orionSubscription.hasNotifyConditions()) && (throttling == null)) {
-            LOGGER.error("Missing entire subscription.");
-            return 12;
+        if ((entitiesMsg == 11) && (reference == null) && 
+                (duration == null) && (notifyConditionsMsg == 11) 
+                && (throttling == null)) {
+            LOGGER.error("Missing subscription.");
+            return 11;
+        } // if
+                
+        // check if subscription contains entities
+        if (entitiesMsg == 11) {
+            LOGGER.error("Field 'entities' is missing in the subscription");
+            return 12111;
         } // if
                    
         // check if subscription has an empty entities
-        if (entitiesMsg == -1) {
+        if (entitiesMsg == 12) {
             LOGGER.error("Field 'entities' is empty");
-            return 12111;
+            return 12112;
         }
-        
-        // check if subscription contains entities
-        if (entitiesMsg == 1) {
-            LOGGER.error("Field 'entities' is missing in the subscription");
-            return 1211;
-        } // if
         
         // check if subscription.entities has missing fields
         if (entitiesMsg == 2) {
@@ -400,18 +390,17 @@ public class CygnusSubscription {
             return 123;
         } // if
         
-                
-        // check if subscription contains an empty notifyConditions
-        if (notifyConditionsMsg == -1) {
-            LOGGER.error("Field 'notifyConditions' is empty");
+        // check if subscription contains notifyConditions
+        if (notifyConditionsMsg == 11) {
+            LOGGER.error("Field 'notifyConditions' is missing in the subscription");
             return 12411;
-        }
+        } // if 
         
         // check if subscription contains notifyConditions
-        if (notifyConditionsMsg == 1) {
-            LOGGER.error("Field 'notifyConditions' is missing in the subscription");
-            return 1241;
-        } // if 
+        if (notifyConditionsMsg == 12) {
+            LOGGER.error("Field 'notifyConditions' is empty");
+            return 12412;
+        } // if         
          
         // check if subscription.notifyConditions has missing fields
         if (notifyConditionsMsg == 2) {
@@ -476,10 +465,15 @@ public class CygnusSubscription {
         boolean emptyFields = true;
         boolean validFields = true;
         
-        if ((entities == null)) {
+        if (entities == null) {
             LOGGER.error("Field 'entities' is missing");
-            return 1;
+            return 11;
         } // if
+        
+        if (entities.isEmpty()) {
+            LOGGER.error("Field 'entities' is empty");
+            return 12;
+        }
         
         for (SubscriptionEntity entity : entities) {
             String type = entity.getEntityType();
@@ -514,8 +508,13 @@ public class CygnusSubscription {
                 
         if (conditions == null) {
             LOGGER.error("Field 'notifyConditions' is missing");
-            return 1;
+            return 11;
         } // if
+        
+        if (conditions.isEmpty()) {
+            LOGGER.error("Field 'notifyConditions' is empty");
+            return 12;
+        }
         
         for (SubscriptionConditions condition : conditions) {
             
@@ -543,21 +542,16 @@ public class CygnusSubscription {
     
     private int isEndpointValid (OrionEndpoint orionEndpoint) {
         
-        // get host, port, ssl and authtoken
+        // get host, port and ssl
         String host = orionEndpoint.getHost();
         String port = orionEndpoint.getPort();
         String ssl = orionEndpoint.getSsl();
         boolean isValidSsl;
         
-        if (orionEndpoint.isEndpointEmpty()) {
-            LOGGER.error("Empty endpoint");
-            return 21;
-        }
-        
         // check if entire endpoint is missing        
         if ((host == null) && (port == null) && (ssl == null)) {
-            LOGGER.error("Missing entire endpoint.");
-            return 22;
+            LOGGER.error("Missing endpoint.");
+            return 21;
         } // if
         
         // check if endpoint contains ssl

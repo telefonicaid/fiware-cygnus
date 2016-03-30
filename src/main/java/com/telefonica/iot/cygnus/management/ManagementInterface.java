@@ -470,22 +470,12 @@ public class ManagementInterface extends AbstractHandler {
 
             switch (err) {
                 // cases of missing endpoint or subscription
-                case 11:
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Empty subscription\"}");
-                    LOGGER.warn("Empty subscription");
-                    return;
-                case 12: 
+                case 11: 
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing subscription\"}");
                     LOGGER.warn("Missing subscription");
                     return;
                 case 21:
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Empty endpoint\"}");
-                    LOGGER.warn("Empty endpoint");
-                    return;
-                case 22:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing endpoint\"}");
                     LOGGER.warn("Missing endpoint");
@@ -494,12 +484,12 @@ public class ManagementInterface extends AbstractHandler {
                 // cases of missing fields in subscription
                     
                 // cases for 'entities'
-                case 1211:
+                case 12111:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is missing\"}");
                     LOGGER.warn("Invalid subscription, field 'entities' is missing");
                     return;
-                case 12111:
+                case 12112:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is empty\"}");
                     LOGGER.warn("Invalid subscription, field 'entities' is empty");
@@ -527,16 +517,17 @@ public class ManagementInterface extends AbstractHandler {
                     return;
                     
                 // cases for 'notifyConditions'
-                case 1241:
+                case 12411:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is missing\"}");
                     LOGGER.warn("Invalid subscription, field 'notifyConditions' is missing");
                     return;
-                case 12411:
+                case 12412:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is empty\"}");
                     LOGGER.warn("Invalid subscription, field 'notifyConditions' is empty");
                     return;
+                    
                 case 1242:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has missing fields\"}");
