@@ -484,15 +484,10 @@ public class ManagementInterface extends AbstractHandler {
                 // cases of missing fields in subscription
                     
                 // cases for 'entities'
-                case 12111:
+                case 1211:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is missing\"}");
                     LOGGER.warn("Invalid subscription, field 'entities' is missing");
-                    return;
-                case 12112:
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Invalid subscription, field 'entities' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'entities' is empty");
                     return;
                 case 1212:
                     response.getWriter().println("{\"success\":\"false\","
@@ -517,17 +512,11 @@ public class ManagementInterface extends AbstractHandler {
                     return;
                     
                 // cases for 'notifyConditions'
-                case 12411:
+                case 1241:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is missing\"}");
                     LOGGER.warn("Invalid subscription, field 'notifyConditions' is missing");
-                    return;
-                case 12412:
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Invalid subscription, field 'notifyConditions' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'notifyConditions' is empty");
-                    return;
-                    
+                    return;                    
                 case 1242:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has missing fields\"}");
