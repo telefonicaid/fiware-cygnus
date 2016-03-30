@@ -454,7 +454,7 @@ public class OrionCKANSink extends OrionSink {
         if (fiwareServicePath.equals("/")) {
             pkgName = Utils.encode(fiwareService, false, true);
         } else {
-            pkgName = Utils.encode(fiwareService, false, true) + "_" + Utils.encode(fiwareServicePath, false, true);
+            pkgName = Utils.encode(fiwareService, false, true) + Utils.encode(fiwareServicePath, false, true);
         } // if else
 
         if (pkgName.length() > Constants.MAX_NAME_LEN) {

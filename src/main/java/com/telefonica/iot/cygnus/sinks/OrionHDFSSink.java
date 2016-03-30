@@ -1168,7 +1168,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
-        String secondLevel = Utils.encode(fiwareServicePath, false, true);
+        String secondLevel = Utils.encode(fiwareServicePath, false, false);
 
         if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "

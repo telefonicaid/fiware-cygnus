@@ -214,7 +214,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                             + "dm-by-service-path data model");
                 } // if
                 
-                collectionName = Utils.encode(fiwareServicePath, false, true);
+                collectionName = Utils.encode(fiwareServicePath, false, false);
                 break;
             case DMBYENTITY:
                 collectionName = Utils.encode(fiwareServicePath, false, false) + "_"
