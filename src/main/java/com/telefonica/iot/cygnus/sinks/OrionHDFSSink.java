@@ -529,7 +529,7 @@ public class OrionHDFSSink extends OrionSink {
             firstLevel = buildFirstLevel(service);
             secondLevel = buildSecondLevel(servicePath);
             thirdLevel = buildThirdLevel(destination);
-            hdfsFolder = firstLevel + (servicePath.equals("/") ? "/" : "/" + secondLevel + "/") + thirdLevel;
+            hdfsFolder = firstLevel + (servicePath.equals("/") ? "" : secondLevel) + "/" + thirdLevel;
             hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
         } // initialize
 
@@ -1045,7 +1045,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildFirstLevel(String fiwareService) throws Exception {
-        String firstLevel = Utils.encode(fiwareService);
+        String firstLevel = Utils.encode(fiwareService, false, true);
 
         if (firstLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
@@ -1064,7 +1064,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildSecondLevel(String fiwareServicePath) throws Exception {
-        String secondLevel = Utils.encode(fiwareServicePath);
+        String secondLevel = Utils.encode(fiwareServicePath, false, false);
 
         if (secondLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
@@ -1082,7 +1082,7 @@ public class OrionHDFSSink extends OrionSink {
      * @throws Exception
      */
     private String buildThirdLevel(String destination) throws Exception {
-        String thirdLevel = Utils.encode(destination);
+        String thirdLevel = Utils.encode(destination, false, true);
 
         if (thirdLevel.length() > Constants.MAX_NAME_LEN_HDFS) {
             throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
