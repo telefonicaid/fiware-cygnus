@@ -473,12 +473,12 @@ public class ManagementInterface extends AbstractHandler {
                 case 11: 
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing subscription\"}");
-                    LOGGER.warn("Missing subscription");
+                    LOGGER.error("Missing subscription");
                     return;
                 case 21:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing endpoint\"}");
-                    LOGGER.warn("Missing endpoint");
+                    LOGGER.error("Missing endpoint");
                     return;
                 
                 // cases of missing fields in subscription
@@ -487,129 +487,129 @@ public class ManagementInterface extends AbstractHandler {
                 case 1211:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'entities' is missing");
+                    LOGGER.error("Invalid subscription, field 'entities' is missing");
                     return;
                 case 1212:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' has missing fields\"}");
-                    LOGGER.warn("Invalid subscription, field 'entities' has missing fields");
+                    LOGGER.error("Invalid subscription, field 'entities' has missing fields");
                     return;
                 case 1213:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' has empty fields\"}");
-                    LOGGER.warn("Invalid subscription, field 'entities' has empty fields");
+                    LOGGER.error("Invalid subscription, field 'entities' has empty fields");
                     return;    
                 
                 case 122:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'reference' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'reference' is missing");
+                    LOGGER.error("Invalid subscription, field 'reference' is missing");
                     return;
                 case 123:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'duration' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'duration' is missing");
+                    LOGGER.error("Invalid subscription, field 'duration' is missing");
                     return;
                     
                 // cases for 'notifyConditions'
                 case 1241:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'notifyConditions' is missing");
+                    LOGGER.error("Invalid subscription, field 'notifyConditions' is missing");
                     return;                    
                 case 1242:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has missing fields\"}");
-                    LOGGER.warn("Invalid subscription, field 'notifyConditions' has missing fields");
+                    LOGGER.error("Invalid subscription, field 'notifyConditions' has missing fields");
                     return;
                 case 1243:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has empty fields\"}");
-                    LOGGER.warn("Invalid subscription, field 'notifyConditions' has empty fields");
+                    LOGGER.error("Invalid subscription, field 'notifyConditions' has empty fields");
                     return;    
                     
                 case 125:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'throttling' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'throttling' is missing");
+                    LOGGER.error("Invalid subscription, field 'throttling' is missing");
                     return;
                 case 126:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'attributes' is missing\"}");
-                    LOGGER.warn("Invalid subscription, field 'attributes' is missing");
+                    LOGGER.error("Invalid subscription, field 'attributes' is missing");
                     return;
                     
                 // cases of missing fields in endpoint
                 case 221:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'host' is missing\"}");
-                    LOGGER.warn("Invalid endpoint, field 'host' is missing");
+                    LOGGER.error("Invalid endpoint, field 'host' is missing");
                     return;
                 case 222:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'port' is missing\"}");
-                    LOGGER.warn("Invalid endpoint, field 'port' is missing");
+                    LOGGER.error("Invalid endpoint, field 'port' is missing");
                     return;
                 case 223:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'ssl' is missing\"}");
-                    LOGGER.warn("Invalid endpoint, field 'ssl' is missing");
+                    LOGGER.error("Invalid endpoint, field 'ssl' is missing");
                     return;  
                     
                 // cases of empty fields in subscription    
                 case 131:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'entities' is empty");
+                    LOGGER.error("Invalid subscription, field 'entities' is empty");
                     return;
                 case 132:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'reference' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'reference' is empty");
+                    LOGGER.error("Invalid subscription, field 'reference' is empty");
                     return;
                 case 133:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'duration' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'duration' is empty");
+                    LOGGER.error("Invalid subscription, field 'duration' is empty");
                     return;
                 case 134:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'notifyConditions' is empty");
+                    LOGGER.error("Invalid subscription, field 'notifyConditions' is empty");
                     return;
                 case 135:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'throttling' is empty\"}");
-                    LOGGER.warn("Invalid subscription, field 'throttling' is empty");
+                    LOGGER.error("Invalid subscription, field 'throttling' is empty");
                     return;
                     
                 // cases of empty fields in endpoint
                 case 231:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'host' is empty\"}");
-                    LOGGER.warn("Invalid endpoint, field 'host' is empty");
+                    LOGGER.error("Invalid endpoint, field 'host' is empty");
                     return;
                 case 232:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'port' is empty\"}");
-                    LOGGER.warn("Invalid endpoint, field 'port' is empty");
+                    LOGGER.error("Invalid endpoint, field 'port' is empty");
                     return;
                 case 233:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'ssl' is empty\"}");
-                    LOGGER.warn("Invalid endpoint, field 'ssl' is empty");
+                    LOGGER.error("Invalid endpoint, field 'ssl' is empty");
                     return;
                    
                 // cases of invalid ssl in endpoint
                 case 24:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'ssl' invalid\"}");
-                    LOGGER.warn("Invalid endpoint, field 'ssl' invalid");
+                    LOGGER.error("Invalid endpoint, field 'ssl' invalid");
                     return;
                 default:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription\"}");
-                    LOGGER.warn("Invalid subscription");
+                    LOGGER.error("Invalid subscription");
                     return;
             } // swtich
         } // if
