@@ -20,6 +20,8 @@ package com.telefonica.iot.cygnus.backends.cassandra;
 
 /**
  * Interface for those backends implementing the persistence in Cassandra.
+ * <p>
+ * Adapted from {@link com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackend}
  *
  * @author jdegenhardt
  */

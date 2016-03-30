@@ -31,17 +31,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Detailed documentation may soon be found at:
+ * Detailed documentation may soon(er or later) be found at:
  * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/OrionCassandraSink.md .
+ * <p>
+ * Adapted from {@link OrionPostgreSQLSink}
  *
  * @author jdegenhardt
  */
-class OrionCassandraSink extends OrionSink {
+public class OrionCassandraSink extends OrionSink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionCassandraSink.class);
     private String[] cassandraHosts;
-    private String cassandraPort;
-    private String cassandraKeyspace;
     private String cassandraUsername;
     private String cassandraPassword;
     private boolean rowAttrPersistence;
@@ -62,24 +62,6 @@ class OrionCassandraSink extends OrionSink {
     String[] getCassandraHosts() {
         return cassandraHosts;
     } // getCassandraHosts
-
-    /**
-     * Gets the Cassandra port. It is protected due to it is only required for testing purposes.
-     *
-     * @return The Cassandra port
-     */
-    String getCassandraPort() {
-        return cassandraPort;
-    } // getCassandraPort
-
-    /**
-     * Gets the Cassandra keyspace. It is protected due to it is only required for testing purposes.
-     *
-     * @return The Cassandra keyspace
-     */
-    protected String getCassandraKeyspace() {
-        return cassandraKeyspace;
-    } // getCassandraKeyspace
 
     /**
      * Gets the Cassandra username. It is protected due to it is only required for testing purposes.
@@ -129,21 +111,18 @@ class OrionCassandraSink extends OrionSink {
 
     @Override
     public void configure(Context context) {
-        cassandraHosts = context.getString("cassandra_host", "localhost").split(";");
+        String hostsString = context.getString("cassandra_host", "localhost");
+        if (hostsString.startsWith("[")) {
+            hostsString = hostsString.substring(1);
+        } // if
+        if (hostsString.endsWith("]")) {
+            hostsString = hostsString.substring(0, hostsString.length() - 1);
+        } // if
+        cassandraHosts = hostsString.split(";");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_hosts="
                 + Arrays.toString(cassandraHosts) + ")");
-        cassandraPort = context.getString("cassandra_port", "5432");
-        int intPort = Integer.parseInt(cassandraPort);
 
-        if ((intPort <= 0) || (intPort > 65535)) {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cassandra_port=" + cassandraPort + ")"
-                    + " -- Must be between 0 and 65535");
-        } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_port=" + cassandraPort + ")");
-        }  // if else
-
-        cassandraKeyspace = context.getString("cassandra_database", "postgres");
+        String cassandraKeyspace = context.getString("cassandra_database", "cassandra");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_database=" + cassandraKeyspace + ")");
         cassandraUsername = context.getString("cassandra_username", "cassandra");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (cassandra_username=" + cassandraUsername + ")");
@@ -184,7 +163,6 @@ class OrionCassandraSink extends OrionSink {
 
     @Override
     void persistBatch(Batch batch) throws Exception {
-        // FIXME anpassen
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;

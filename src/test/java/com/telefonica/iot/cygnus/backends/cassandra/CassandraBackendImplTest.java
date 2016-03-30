@@ -33,6 +33,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 /**
+ * Adapted from {@link com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImplTest}
  * @author jdegenhardt
  */
 @SuppressWarnings({"FieldCanBeLocal", "Duplicates"})
@@ -44,8 +45,10 @@ public class CassandraBackendImplTest {
     private final String keyspace = "my_keyspace";
     private final String user = "root";
     private final String password = "12345abcde";
-    private final String tableName1 = "table1";
-    private final String fieldNames1 = "a text, b text";
+    private final String tableName = "table1";
+    private final String typedFieldNames = "(a text, b text)";
+    private final String fieldNames = "(a, b)";
+    private final String fieldValues = "(123, 456)";
     // instance to be tested
     private CassandraBackendImpl backend;
     // mocks
@@ -71,7 +74,7 @@ public class CassandraBackendImplTest {
         when(mockDriver.getSession(Mockito.anyString())).thenReturn(mockSession);
         when(mockDriver.isSessionCreated(Mockito.anyString())).thenReturn(true);
         when(mockDriver.numConnectionsCreated()).thenReturn(1);
-        when(mockDriver.isSessionCreated(Mockito.anyString())).thenReturn(true, true, true, true, true);
+        when(mockDriver.isSessionCreated(Mockito.anyString())).thenReturn(true);
         when(mockSession.execute(mockStatement)).thenReturn(null);
     } // setUp
 
@@ -79,8 +82,8 @@ public class CassandraBackendImplTest {
      * Test of createKeyspace method, of class CassandraBackendImpl.
      */
     @Test
-    public void testCreateSchema() {
-        System.out.println("Testing CassandraBackend.createKeyspace (first keyspace creation");
+    public void testCreateKeyspace() {
+        System.out.println("Testing CassandraBackend.createKeyspace (first keyspace creation)");
 
         try {
             backend.setDriver(mockDriver);
@@ -90,19 +93,19 @@ public class CassandraBackendImplTest {
         } finally {
             assertTrue(backend.getDriver().isSessionCreated(keyspace));
         } // try catch finally
-    } // testCreateSchema
+    } // testCreateKeyspace
 
     /**
      * Test of createTable method, of class CassandraBackendImpl.
      */
     @Test
     public void testCreateTable() {
-        System.out.println("Testing CassandraBackend.createTable (within first schema");
+        System.out.println("Testing CassandraBackend.createTable (within keyspace)");
 
         try {
             backend.setDriver(mockDriver);
             backend.createKeyspace(keyspace);
-            backend.createTable(keyspace, tableName1, fieldNames1);
+            backend.createTable(keyspace, tableName, typedFieldNames);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -116,5 +119,16 @@ public class CassandraBackendImplTest {
     @Test
     public void testInsertContextData() {
         System.out.println("Testing CassandraBackend.insertContextData");
+
+        try {
+            backend.setDriver(mockDriver);
+            backend.createKeyspace(keyspace);
+            backend.createTable(keyspace, tableName, typedFieldNames);
+            backend.insertContextData(keyspace, tableName, fieldNames, fieldValues);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            assertTrue(backend.getDriver().isSessionCreated(keyspace));
+        }
     } // testInsertContextData
 } // CassandraBackendImplTest

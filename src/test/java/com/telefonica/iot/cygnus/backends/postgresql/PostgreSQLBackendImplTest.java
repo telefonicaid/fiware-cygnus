@@ -19,17 +19,19 @@
 package com.telefonica.iot.cygnus.backends.postgresql;
 
 import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl.PostgreSQLDriver;
-import java.sql.Connection;
-import java.sql.Statement;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.sql.Connection;
+import java.sql.Statement;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -37,19 +39,6 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PostgreSQLBackendImplTest {
-
-    // instance to be tested
-    private PostgreSQLBackendImpl backend;
-
-    // mocks
-    @Mock
-    private PostgreSQLDriver mockDriverSchemaCreate;
-    @Mock
-    private PostgreSQLDriver mockDriverTableCreate;
-    @Mock
-    private Connection mockConnection;
-    @Mock
-    private Statement mockStatement;
 
     // constants
     private final String host = "localhost";
@@ -63,6 +52,17 @@ public class PostgreSQLBackendImplTest {
     private final String tableName2 = "table2";
     private final String fieldNames1 = "a text, b text";
     private final String fieldNames2 = "c text, d text";
+    // instance to be tested
+    private PostgreSQLBackendImpl backend;
+    // mocks
+    @Mock
+    private PostgreSQLDriver mockDriverSchemaCreate;
+    @Mock
+    private PostgreSQLDriver mockDriverTableCreate;
+    @Mock
+    private Connection mockConnection;
+    @Mock
+    private Statement mockStatement;
 
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -113,7 +113,7 @@ public class PostgreSQLBackendImplTest {
             // must be the unique element within the map
             assertTrue(backend.getDriver().numConnectionsCreated() == 1);
         } // try catch finally
-    } // testCreateSchema
+    } // testCreateKeyspace
 
     /**
      * Test of createTable method, of class PostgreSQLBackendImpl.

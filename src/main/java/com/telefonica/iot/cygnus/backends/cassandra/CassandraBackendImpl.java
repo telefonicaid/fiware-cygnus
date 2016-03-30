@@ -33,6 +33,8 @@ import java.util.Map;
 /**
  * Cassandra related operations (database and table creation, context data insertion) when dealing with a Cassandra
  * persistence backend.
+ * <p>
+ * Adapted from {@link com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl}
  *
  * @author jdegenhardt
  */
