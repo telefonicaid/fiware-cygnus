@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,8 +51,10 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.PatternLayout;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -125,6 +128,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetStats(response);
                 } else if (uri.equals("/v1/groupingrules")) {
                     handleGetGroupingRules(response);
+                } else if (uri.equals("/admin/log")) {
+                    handleGetAdminLog(response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -345,6 +350,45 @@ public class ManagementInterface extends AbstractHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
+    
+    private void handleGetAdminLog(HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        try {
+            Level level = LogManager.getRootLogger().getLevel();
+            Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+            String appendersJson = "";
+
+            while (appenders.hasMoreElements()) {
+                Appender appender = (Appender) appenders.nextElement();
+                String name = appender.getName();
+                PatternLayout layout = (PatternLayout) appender.getLayout();
+
+                if (appendersJson.isEmpty()) {
+                    appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\""
+                            + layout.getConversionPattern() + "\"}";
+                } else {
+                    appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
+                            + layout.getConversionPattern() + "\"}";
+                } // else
+            } // while
+
+            if (appendersJson.isEmpty()) {
+                appendersJson = "[]";
+            } else {
+                appendersJson += "]";
+            } // else
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
+                    + "\",\"appenders\":" + appendersJson + "}}");
+            LOGGER.info("Log4j configuration successfully sent");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().println("{\"success\":\"false\",\"error\":\"" + e.getMessage() + "\"}");
+            LOGGER.info(e.getMessage());
+        } // try catch
+    } // handleGetAdminLog
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -470,7 +514,7 @@ public class ManagementInterface extends AbstractHandler {
 
             switch (err) {
                 // cases of missing endpoint or subscription
-                case 11: 
+                case 11:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing subscription\"}");
                     LOGGER.error("Missing subscription");
@@ -498,7 +542,7 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' has empty fields\"}");
                     LOGGER.error("Invalid subscription, field 'entities' has empty fields");
-                    return;    
+                    return;
                 
                 case 122:
                     response.getWriter().println("{\"success\":\"false\","
@@ -516,7 +560,7 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' is missing\"}");
                     LOGGER.error("Invalid subscription, field 'notifyConditions' is missing");
-                    return;                    
+                    return;
                 case 1242:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has missing fields\"}");
@@ -526,7 +570,7 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'notifyConditions' has empty fields\"}");
                     LOGGER.error("Invalid subscription, field 'notifyConditions' has empty fields");
-                    return;    
+                    return;
                     
                 case 125:
                     response.getWriter().println("{\"success\":\"false\","
@@ -554,9 +598,9 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid endpoint, field 'ssl' is missing\"}");
                     LOGGER.error("Invalid endpoint, field 'ssl' is missing");
-                    return;  
+                    return;
                     
-                // cases of empty fields in subscription    
+                // cases of empty fields in subscription
                 case 131:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Invalid subscription, field 'entities' is empty\"}");

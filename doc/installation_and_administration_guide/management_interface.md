@@ -8,7 +8,8 @@ Content:
 * [POST `/v1/groupingrules`](#section5)
 * [PUT `/v1/groupingrules`](#section6)
 * [DELETE `/v1/groupingrules`](#section7)
-* [PUT `/admin/log`](#section8)
+* [GET `/admin/log`](#section8)
+* [PUT `/admin/log`](#section9)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -215,7 +216,41 @@ Response:
 
 [Top](#top)
 
-##<a name="section8"></a>`PUT /admin/log`
+##<a name="section8"></a>`GET /admin/log`
+Gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts).
+
+```
+GET http://<cygnus_host>:<management_port>/admin/log
+```
+
+Responses:
+
+```
+200 OK
+{
+    "log4j": {
+        "appenders": [
+            {
+                "layout": "...",
+                "name": "..."
+            }
+        ],
+        "level": "..."
+    },
+    "success": "true"
+}
+```
+
+```
+500 Internal Server Error
+{
+    "error": "..."
+}
+```
+
+[Top](#top)
+
+##<a name="section9"></a>`PUT /admin/log`
 Updates the logging level of Cygnus, given the logging level as a query parameter.
 
 Valid logging levels are `DEBUG`, `INFO`, `WARNING` (`WARN` also works), `ERROR` and `FATAL`.
