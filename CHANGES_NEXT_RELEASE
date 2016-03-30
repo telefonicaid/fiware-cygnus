@@ -18,3 +18,4 @@
 - [BUG] Fix some wrong links in the documentation (#885)
 - [HARDENING] Add missing components to the list of components having a restricted logging level in log4j.properties.template (#882)
 - [HARDENING] Set external dependencies logging level to WARN in lo4j.properties.template (#881)
+- [BUG] Fix wrong data conversion from SQL timestamp to ISO 8601 UTC when a year must be decreased (#873)
