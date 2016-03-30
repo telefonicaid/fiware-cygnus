@@ -84,7 +84,7 @@ public class OrionSTHSinkTest {
     public void testConfiguredCollectionPrefixIsEncoded() {
         System.out.println("[OrionSTHSink] -------- Configured 'collection_prefix' "
                 + "is encoded when having forbiden characters");
-        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars";
+        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
         String dbPrefix = "sth_";
         OrionSTHSink sink = new OrionSTHSink();
         sink.configure(createContext(collectionPrefix, dbPrefix));
@@ -108,7 +108,7 @@ public class OrionSTHSinkTest {
         System.out.println("[OrionSTHSink] -------- Configured 'db_prefix' "
                 + "is encoded when having forbiden characters");
         String collectionPrefix = "sth_";
-        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars";
+        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-.";
         OrionSTHSink sink = new OrionSTHSink();
         sink.configure(createContext(collectionPrefix, dbPrefix));
         String encodedDbPrefix = Utils.encodeSTHDB(dbPrefix);
