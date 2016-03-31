@@ -12,6 +12,7 @@ Content:
         * [Hashing based collections](#section2.3.1)
         * [About batching](#section2.3.2)
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+        * [Databases and collections encoding details](#section2.3.4)
 * [Implementation details](#section3)
     * [`OrionSTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
@@ -229,7 +230,7 @@ NOTES:
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ ||
+| collection_prefix | no | sth_ | `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -286,6 +287,16 @@ Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Plea
 
 ###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
 By default, `OrionSTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+
+[Top](#top)
+
+###<a name="section2.3.4"></a>Databases and collections encoding details
+`OrionMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+
+* Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
+* Collections names will have the characters `$` encoded as `_`.
+
+[Top](#top)
 
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`OrionSTHSink` class

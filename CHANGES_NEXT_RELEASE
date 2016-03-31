@@ -20,3 +20,4 @@
 - [HARDENING] Add missing components to the list of components having a restricted logging level in log4j.properties.template (#882)
 - [HARDENING] Set external dependencies logging level to WARN in lo4j.properties.template (#881)
 - [HARDENING] Check the service-paths within grouping rules start with / (#901)
+- [HARDENING] Use MongoDB accepted character set in OrionMongoSink and OrionSTHSink (#898)
