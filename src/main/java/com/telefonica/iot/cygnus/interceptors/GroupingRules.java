@@ -210,6 +210,10 @@ public class GroupingRules {
                         LOGGER.warn("Invalid grouping rule, some field is not allowed. It will be discarded. Details:"
                                 + jsonRule.toJSONString());
                         break;
+                    case 4:
+                        LOGGER.warn("Invalid grouping rule, the fiware-servicePath does not start with '/'. "
+                                + "It will be discarded. Details:" + jsonRule.toJSONString());
+                        break;
                     default:
                         LOGGER.warn("Invalid grouping rule. It will be discarded. Details:"
                                 + jsonRule.toJSONString());

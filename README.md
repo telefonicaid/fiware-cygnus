@@ -14,10 +14,11 @@
     * [Unit testing](#section2.5)
     * [e2e testing](#section2.6)
     * [Management API overview](#section2.7)
-* [Advanced topics and further reading](#section3)
-* [Features summary](#section4)
-* [Licensing](#section5)
-* [Reporting issues and contact information](#section6)
+* [Add a new image to the docker hub](#section3)
+* [Advanced topics and further reading](#section4)
+* [Features summary](#section5)
+* [Licensing](#section6)
+* [Reporting issues and contact information](#section7)
 
 ##<a name="section1"></a>Welcome to Cygnus
 This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
@@ -229,7 +230,21 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section3"></a>Advanced topics and further reading
+##<a name="section3"></a>Add a new image to the docker hub
+
+Everytime we release a new version (`<release version>`), please run the following commands (provided you have access to the docker hub of `fiware-cygnus`) 
+
+    docker-compose -f ./docker/0.compose.jar-compiler.yml -p cygnus run --rm compiler
+    docker build -f ./docker/Dockerfile -t fiware/cygnus:<release version> .
+    docker tag fiware/cygnus:<release version> fiware/cygnus:latest
+    docker login
+    docker push
+
+This will create an image with that version, tag it as the latest, and push this image into docker hub, both with its release version (eg: `0.13`), as with the `latest` tag.
+
+[Top](#top)
+
+##<a name="section4"></a>Advanced topics and further reading
 Detailed information regarding Cygnus can be found in the [Installation and Administration Guide](./doc/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](./doc/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](./doc/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
 * [Installation with docker](doc/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
@@ -243,7 +258,7 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
 
 [Top](#top)
 
-##<a name="section4"></a>Features summary
+##<a name="section5"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
   <tr><td rowspan="11">OrionHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
@@ -304,12 +319,12 @@ Detailed information regarding Cygnus can be found in the [Installation and Admi
 
 [Top](#top)
 
-##<a name="section5"></a>Licensing
+##<a name="section6"></a>Licensing
 Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](./LICENSE).
 
 [Top](#top)
 
-##<a name="section6"></a>Reporting issues and contact information
+##<a name="section7"></a>Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
@@ -318,7 +333,7 @@ There are several channels suited for reporting issues and asking for doubts in 
     * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
     * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
     * [german.torodelvalle@telefonica.com](mailto:german.torodelvalle@telefonica.com) **[Contributor]**
-    * [herman.junge@telefonica.com](mailto:herman.junge@telefonica.com) **[Contributor]**
+    * [herman.junge@telefonica.com](mailto:chpdg42@gmail.com) **[Contributor]**
     * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
 
 **NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.

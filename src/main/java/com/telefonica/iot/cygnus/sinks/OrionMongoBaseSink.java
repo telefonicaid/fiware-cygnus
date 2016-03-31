@@ -109,10 +109,17 @@ public abstract class OrionMongoBaseSink extends OrionSink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dbPrefix = Utils.encode(context.getString("db_prefix", "sth_"), false, true);
+        dbPrefix = Utils.encodeSTHDB(context.getString("db_prefix", "sth_"));
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        collectionPrefix = Utils.encode(context.getString("collection_prefix", "sth_"), false, true);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
+        collectionPrefix = Utils.encodeSTHCollection(context.getString("collection_prefix", "sth_"));
+        
+        if (collectionPrefix.equals("system.")) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collection_prefix="
+                + collectionPrefix + ") -- Cannot be 'system.'");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
+        } // if else
         
         String shouldHashStr = context.getString("should_hash", "false");
         
@@ -191,7 +198,7 @@ public abstract class OrionMongoBaseSink extends OrionSink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + Utils.encode(fiwareService, false, true);
+        String dbName = dbPrefix + Utils.encodeSTHDB(fiwareService);
 
         if (dbName.length() > Constants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -227,16 +234,16 @@ public abstract class OrionMongoBaseSink extends OrionSink {
                             + "dm-by-service-path data model");
                 } // if
                 
-                collectionName = Utils.encode(fiwareServicePath, false, false);
+                collectionName = Utils.encodeSTHCollection(fiwareServicePath);
                 break;
             case DMBYENTITY:
-                collectionName = Utils.encode(fiwareServicePath, false, false) + "_"
-                        + Utils.encode(entity, false, true);
+                collectionName = Utils.encodeSTHCollection(fiwareServicePath) + "_"
+                        + Utils.encodeSTHCollection(entity);
                 break;
             case DMBYATTRIBUTE:
-                collectionName = Utils.encode(fiwareServicePath, false, false)
-                        + "_" + Utils.encode(entity, false, true)
-                        + "_" + Utils.encode(attribute, false, true);
+                collectionName = Utils.encodeSTHCollection(fiwareServicePath)
+                        + "_" + Utils.encodeSTHCollection(entity)
+                        + "_" + Utils.encodeSTHCollection(attribute);
                 break;
             default:
                 // this should never be reached
