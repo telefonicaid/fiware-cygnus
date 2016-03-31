@@ -263,17 +263,25 @@ public final class Utils {
                             LOGGER.debug(e2.getMessage());
                             
                             try {
-                                // SQL timestamp without miliseconds
-                                dateTime = FORMATTER3.parseDateTime(mdValue);
+                                // ISO 8601 with microsencods
+                                String mdValueTruncated = mdValue.substring(0, mdValue.length() - 4) + "Z";
+                                dateTime = FORMATTER2.parseDateTime(mdValueTruncated);
                             } catch (Exception e3) {
                                 LOGGER.debug(e3.getMessage());
                                 
                                 try {
-                                    // SQL timestamp with miliseconds
-                                    dateTime = FORMATTER4.parseDateTime(mdValue);
+                                    // SQL timestamp without miliseconds
+                                    dateTime = FORMATTER3.parseDateTime(mdValue);
                                 } catch (Exception e4) {
                                     LOGGER.debug(e4.getMessage());
-                                    return null;
+
+                                    try {
+                                        // SQL timestamp with miliseconds
+                                        dateTime = FORMATTER4.parseDateTime(mdValue);
+                                    } catch (Exception e5) {
+                                        LOGGER.debug(e5.getMessage());
+                                        return null;
+                                    } // try catch
                                 } // try catch
                             } // try catch
                         } // try catch
