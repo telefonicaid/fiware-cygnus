@@ -21,3 +21,4 @@
 - [HARDENING] Set external dependencies logging level to WARN in lo4j.properties.template (#881)
 - [HARDENING] Check the service-paths within grouping rules start with / (#901)
 - [HARDENING] Use MongoDB accepted character set in OrionMongoSink and OrionSTHSink (#898)
+- [HARDENING] Expand topic name in OrionKafkaSink (#880)
