@@ -17,7 +17,6 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Pattern;
@@ -134,7 +133,7 @@ public class GroupingRule {
                 destinationLength = ((String) jsonRule.get("destination")).length();
             } else if (field.equals("fiware_service_path")) {
                 containsFiwareServicePath = true;
-                servicePathStartsWithSlash = field.startsWith("/");
+                servicePathStartsWithSlash = ((String) jsonRule.get("fiware_service_path")).startsWith("/");
                 fiwareServicePathLength = ((String) jsonRule.get("fiware_service_path")).length();
             } else {
                 containsExtraFields = true;
