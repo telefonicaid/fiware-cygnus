@@ -3,3 +3,4 @@
 - [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
 - [BUG] Fix wrong data conversion from SQL timestamp to ISO 8601 UTC when a year must be decreased (#873)
 - [BUG] Add support for ISO 8601 timestamps containing 6 microsecond digits (#906)
+- [BUG] Remove 'Z' character (UTC mark) when encoding the reception time in OrionMySQLSink (#909)
