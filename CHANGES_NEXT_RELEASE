@@ -1,3 +1,5 @@
 - [BUG] Fix the way a set of notified attributes are processed in OrionMySQLSink, no order must be assumed (#855)
 - [FEATURE] When notified, use the TimeInstant metadata instead of the reception time (#859)
 - [HARDENING] Improve the different elements naming when notified/default service path is / (#877)
+- [BUG] Fix wrong data conversion from SQL timestamp to ISO 8601 UTC when a year must be decreased (#873)
+- [BUG] Add support for ISO 8601 timestamps containing 6 microsecond digits (#906)

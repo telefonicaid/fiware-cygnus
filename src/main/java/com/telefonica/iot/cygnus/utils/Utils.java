@@ -54,13 +54,13 @@ public final class Utils {
     private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
+            "yyyy-MM-dd'T'HH:mm:ss'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER3 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
+            "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
+            "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -297,15 +297,23 @@ public final class Utils {
                             LOGGER.debug(e2.getMessage());
                             
                             try {
-                                dateTime = FORMATTER3.parseDateTime(mdValue);
-                            } catch (Exception e3) {
-                                LOGGER.debug(e3.getMessage());
+                                // ISO 8601 with microseconds
+                                String mdValueTruncated = mdValue.substring(0, mdValue.length() - 4) + "Z";
+                                dateTime = FORMATTER2.parseDateTime(mdValueTruncated);
+                            } catch (Exception e5) {
+                                LOGGER.debug(e5.getMessage());
                                 
                                 try {
-                                    dateTime = FORMATTER4.parseDateTime(mdValue);
-                                } catch (Exception e4) {
-                                    LOGGER.debug(e4.getMessage());
-                                    return null;
+                                    dateTime = FORMATTER3.parseDateTime(mdValue);
+                                } catch (Exception e3) {
+                                    LOGGER.debug(e3.getMessage());
+
+                                    try {
+                                        dateTime = FORMATTER4.parseDateTime(mdValue);
+                                    } catch (Exception e4) {
+                                        LOGGER.debug(e4.getMessage());
+                                        return null;
+                                    } // try catch
                                 } // try catch
                             } // try catch
                         } // try catch
