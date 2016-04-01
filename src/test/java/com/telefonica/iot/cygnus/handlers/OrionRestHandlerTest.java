@@ -44,11 +44,31 @@ public class OrionRestHandlerTest {
         
         try {
             assertEquals("/notify", handler.getNotificationTarget());
-            assertEquals("default", handler.getDefaultService());
-            assertEquals("/", handler.getDefaultServicePath());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration values are used");
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'notification_target' is '/notify'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration values are not used");
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'notification_target' is '" + handler.getNotificationTarget() + "'");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("default", handler.getDefaultService());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'default_service' is 'default'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'default_service' is '" + handler.getDefaultService() + "'");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("/", handler.getDefaultServicePath());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'default_service_path' is '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'default_service_path' is '" + handler.getDefaultServicePath() + "'");
             throw e;
         } // try catch
     } // testConfigureNotMandatoryParameters
