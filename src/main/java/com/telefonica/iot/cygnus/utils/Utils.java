@@ -36,6 +36,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -50,13 +51,13 @@ public final class Utils {
     private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[\\/\\\\.\\$\" ]");
     private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("\\$");
     private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd'T'hh:mm:ss'Z'").withOffsetParsed().withZoneUTC();
+            "yyyy-MM-dd'T'HH:mm:ss'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER3 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd hh:mm:ss").withOffsetParsed();
+            "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
-            "yyyy-MM-dd hh:mm:ss.SSS").withOffsetParsed();
+            "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -244,12 +245,18 @@ public final class Utils {
      * Gets the timestamp within a TimeInstant metadata, if exists.
      * @param metadata
      * @return The timestamp within a TimeInstant metadata
-     * @throws Exception
      */
-    public static Long getTimeInstant(String metadata) throws Exception {
+    public static Long getTimeInstant(String metadata) {
         Long res = null;
         JSONParser parser = new JSONParser();
-        JSONArray mds = (JSONArray) parser.parse(metadata);
+        JSONArray mds;
+        
+        try {
+            mds = (JSONArray) parser.parse(metadata);
+        } catch (ParseException e) {
+            LOGGER.error("Error while parsing the metadaga. Details: " + e.getMessage());
+            return null;
+        } // try catch
         
         for (Object mdObject : mds) {
             JSONObject md = (JSONObject) mdObject;
@@ -276,15 +283,25 @@ public final class Utils {
                             LOGGER.debug(e2.getMessage());
                             
                             try {
-                                dateTime = FORMATTER3.parseDateTime(mdValue);
+                                // ISO 8601 with microsencods
+                                String mdValueTruncated = mdValue.substring(0, mdValue.length() - 4) + "Z";
+                                dateTime = FORMATTER2.parseDateTime(mdValueTruncated);
                             } catch (Exception e3) {
                                 LOGGER.debug(e3.getMessage());
                                 
                                 try {
-                                    dateTime = FORMATTER4.parseDateTime(mdValue);
+                                    // SQL timestamp without miliseconds
+                                    dateTime = FORMATTER3.parseDateTime(mdValue);
                                 } catch (Exception e4) {
                                     LOGGER.debug(e4.getMessage());
-                                    return null;
+
+                                    try {
+                                        // SQL timestamp with miliseconds
+                                        dateTime = FORMATTER4.parseDateTime(mdValue);
+                                    } catch (Exception e5) {
+                                        LOGGER.debug(e5.getMessage());
+                                        return null;
+                                    } // try catch
                                 } // try catch
                             } // try catch
                         } // try catch

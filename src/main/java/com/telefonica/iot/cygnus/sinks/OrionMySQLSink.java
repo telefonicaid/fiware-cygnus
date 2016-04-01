@@ -370,7 +370,7 @@ public class OrionMySQLSink extends OrionSink {
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+            String recvTime = Utils.getHumanReadable(recvTimeTs, false);
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
@@ -444,7 +444,7 @@ public class OrionMySQLSink extends OrionSink {
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = Utils.getHumanReadable(recvTimeTs, true);
+            String recvTime = Utils.getHumanReadable(recvTimeTs, false);
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
