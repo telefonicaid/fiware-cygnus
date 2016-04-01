@@ -24,3 +24,4 @@
 - [HARDENING] Check the service-paths within grouping rules start with / (#901)
 - [HARDENING] Use MongoDB accepted character set in OrionMongoSink and OrionSTHSink (#898)
 - [BUG] Remove 'Z' character (UTC mark) when encoding the reception time in OrionMySQLSink (#909)
+- [HARDENING] Create a backend for OrionKafkaSink (#912)
