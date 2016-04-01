@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
+import com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -25,11 +26,9 @@ import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
 import java.util.Properties;
-import kafka.admin.AdminUtils;
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -41,10 +40,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class OrionKafkaSink extends OrionSink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionKafkaSink.class);
-    private KafkaProducer<String, String> persistenceBackend;
+    private KafkaBackendImpl persistenceBackend;
     private String brokerList;
     private String zookeeperEndpoint;
-    private TopicAPI topicAPI;
     private ZkClient zookeeperClient;
     private int partitions;
     private int replicationFactor;
@@ -69,7 +67,7 @@ public class OrionKafkaSink extends OrionSink {
      * Gets the persistence backend.
      * @return The persistence backend
      */
-    public KafkaProducer getPersistenceBackend() {
+    public KafkaBackendImpl getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
 
@@ -77,17 +75,9 @@ public class OrionKafkaSink extends OrionSink {
      * Sets the persistence backend. It is protected since it is used by the tests.
      * @param persistenceBackend The persistence backend to be set
      */
-    protected void setPersistenceBackend(KafkaProducer persistenceBackend) {
+    protected void setPersistenceBackend(KafkaBackendImpl persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
-
-    /**
-     * Sets the name API. It is protected since it is used by the tests.
-     * @param topicAPI The name API to be set
-     */
-    protected void setTopicAPI(TopicAPI topicAPI) {
-        this.topicAPI = topicAPI;
-    } // setTopicAPI
 
     @Override
     public void configure(Context context) {
@@ -128,15 +118,12 @@ public class OrionKafkaSink extends OrionSink {
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            persistenceBackend = new KafkaProducer<String, String>(props);
+            persistenceBackend = new KafkaBackendImpl(props);
             LOGGER.debug("[" + this.getName() + "] Kafka persistence backend (KafkaProducer) created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
                     + e.getMessage());
         } // try catch
-
-        // creat the name API
-        topicAPI = new TopicAPI();
 
         // create the Zookeeper client
         zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
@@ -275,11 +262,11 @@ public class OrionKafkaSink extends OrionSink {
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
 
-        if (!topicAPI.topicExists(zookeeperClient, topicName)) {
+        if (!persistenceBackend.topicExists(zookeeperClient, topicName)) {
             LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
                     + "Topic: " + topicName + " , partitions: " + partitions + " , "
                     + "replication factor: " + replicationFactor);
-            topicAPI.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
+            persistenceBackend.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
         } // if
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
@@ -298,36 +285,5 @@ public class OrionKafkaSink extends OrionSink {
         message += contextElementResponseStr + "}";
         return message;
     } // buildMessage
-
-    /**
-     * API for dealing with topics existence check and creation. It is needed since static methods from AdminUtils
-     * cannot be tested with Mockito; however, this class can be mocked.
-     */
-    public class TopicAPI {
-
-        /**
-         * Returns true if the given name exists, false otherwise.
-         * @param zookeeperClient
-         * @param topic
-         * @return True if the given name exists, false otherwise
-         */
-        public boolean topicExists(ZkClient zookeeperClient, String topic) {
-            return AdminUtils.topicExists(zookeeperClient, topic);
-        } // topicExists
-
-        /**
-         * Creates the given name with given properties.
-         * @param zookeeperClient
-         * @param topic
-         * @param props
-         * @param partitions
-         * @param replicationFactor
-         */
-        public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor,
-                Properties props) {
-            AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
-        } // createTopic
-
-    } // TopicAPI
 
 } // OrionKafkaSink
