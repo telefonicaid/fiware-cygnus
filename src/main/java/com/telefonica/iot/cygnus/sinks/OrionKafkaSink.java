@@ -220,7 +220,6 @@ public class OrionKafkaSink extends OrionSink {
 
         private String buildTopicName() throws Exception {
             String name;
-            String topicName;
 
             switch (dataModel) {
                 case DMBYSERVICE:
@@ -231,9 +230,8 @@ public class OrionKafkaSink extends OrionSink {
                         name = Utils.encode(service, false, true);
                         break;
                     } else if (servicePath.startsWith("/")) {
-                        topicName = service + "_" 
+                        name =  Utils.encode(service, false, true) + "_" 
                                 + Utils.encode(servicePath, true, false);
-                        name = Utils.encode(topicName, false, true);
                         break;
                     } else {
                         // Impossible to reach this case
@@ -243,14 +241,13 @@ public class OrionKafkaSink extends OrionSink {
                 
                 case DMBYENTITY:
                     if (servicePath.equals("/")) {
-                        topicName = service + "_" + entity;
-                        name = Utils.encode(topicName, false, true);
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(entity, false, true);
                         break;
                     } else if (servicePath.startsWith("/")) {
-                        topicName = service + "_" + 
-                                Utils.encode(servicePath, true, false) + "_" 
-                                + entity;
-                        name = Utils.encode(topicName, false, true);
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(servicePath, true, false) + "_" 
+                                + Utils.encode(entity, false, true);
                         break;
                     } else {
                         // Impossible to reach this case
@@ -260,14 +257,15 @@ public class OrionKafkaSink extends OrionSink {
 
                 case DMBYATTRIBUTE:
                     if (servicePath.equals("/")) {
-                        topicName = service + "_" + entity + "_" + attribute;
-                        name = Utils.encode(topicName, false, true);
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(entity, false, true) + "_" 
+                                + Utils.encode(attribute, false, true);
                         break;
                     } else if (servicePath.startsWith("/")) {
-                        topicName = service + "_" + 
-                                Utils.encode(servicePath, true, false) + "_" 
-                                + entity + "_" + attribute;
-                        name = Utils.encode(topicName, false, true);
+                        name = Utils.encode(service, false, true) + "_"
+                                + Utils.encode(servicePath, true, false) + "_"
+                                + Utils.encode(entity, false, true) + "_"
+                                + Utils.encode(attribute, false, true);
                         break;
                     } else {
                         // Impossible to reach this case
