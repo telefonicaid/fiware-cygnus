@@ -38,7 +38,7 @@ public interface KafkaBackend {
     boolean topicExists(ZkClient zookeeperClient, String topic) throws Exception;
     
     /** 
-     * Create a topic
+     * Create a topic.
      * @param zookeeperClient
      * @param topic
      * @param partitions
@@ -48,7 +48,7 @@ public interface KafkaBackend {
     void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props);
     
     /**
-     * Send a record
+     * Send a record.
      * @param record 
      */
     void send(ProducerRecord<String, String> record);

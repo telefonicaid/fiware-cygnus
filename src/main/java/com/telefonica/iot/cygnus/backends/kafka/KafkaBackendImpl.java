@@ -17,6 +17,7 @@
  */
 package com.telefonica.iot.cygnus.backends.kafka;
 
+import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
 import org.I0Itec.zkclient.ZkClient;
@@ -31,9 +32,10 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 public class KafkaBackendImpl implements KafkaBackend {
     
     private KafkaProducer<String, String> kafkaProducer;
+    private static final CygnusLogger LOGGER = new CygnusLogger(KafkaBackendImpl.class);
     
     /**
-     * Constructor
+     * Constructor.
      * @param properties 
      */
     public KafkaBackendImpl(Properties properties) {
@@ -42,16 +44,21 @@ public class KafkaBackendImpl implements KafkaBackend {
 
     @Override
     public boolean topicExists(ZkClient zookeeperClient, String topic) throws Exception {
+        LOGGER.debug("Checking if topic '" + topic + "' already exists.");
         return AdminUtils.topicExists(zookeeperClient, topic);
     } // topicExists
 
     @Override
-    public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
+    public void createTopic(ZkClient zookeeperClient, String topic, 
+            int partitions, int replicationFactor, Properties props) {
+        LOGGER.debug("Creating topic: " + topic + "(Partitions: " + partitions 
+                + " , Replication factor: " + replicationFactor + ")");
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
     } // createTopic
 
     @Override
     public void send(ProducerRecord<String, String> record) {
+        LOGGER.debug("Sending the record to Kafka");
         kafkaProducer.send(record);
     } // send
     
