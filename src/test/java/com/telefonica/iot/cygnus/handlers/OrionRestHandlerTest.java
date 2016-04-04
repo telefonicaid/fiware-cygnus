@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -45,6 +47,13 @@ public class OrionRestHandlerTest {
     // Mocks
     @Mock
     private HttpServletRequest mockHttpServletRequest1;
+    
+    /**
+     * Constructor.
+     */
+    public OrionRestHandlerTest() {
+        LogManager.getRootLogger().setLevel(Level.ERROR);
+    } // OrionRestHandlerTest
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -147,6 +156,47 @@ public class OrionRestHandlerTest {
             assertTrue(false);
         } // try catch
     } // testGetEventsContentTypeHeader
+    
+    /**
+     * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
+     */
+    @Test
+    public void testGenerateTransIdReused() {
+        System.out.println("[OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is "
+                + "reused");
+        OrionRestHandler handler = new OrionRestHandler();
+        String notifiedTransId = "1234567890-123-1234567890";
+        
+        try {
+            assertEquals(notifiedTransId, handler.generateTransId(notifiedTransId));
+            System.out.println("[OrionRestHandler.generateTransId] -  OK  - The notified transaction ID '"
+                    + notifiedTransId + "' is reused");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.generateTransId] - FAIL - The notified transaction ID '"
+                    + notifiedTransId + "' is not reused");
+            throw e;
+        } // try catch
+    } // testGenerateTransIdReused
+    
+    /**
+     * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
+     */
+    @Test
+    public void testGenerateTransIdGenerated() {
+        System.out.println("[OrionRestHandler.generateTransId] -------- When a transcation ID is not notified, "
+                + "it is generated");
+        OrionRestHandler handler = new OrionRestHandler();
+        String notifiedTransId = null;
+        
+        try {
+            assertTrue(handler.generateTransId(notifiedTransId) != null);
+            System.out.println("[OrionRestHandler.generateTransId] -  OK  - The transaction ID has been generated");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.generateTransId] - FAIL - The transaction ID has not been "
+                    + "generated");
+            throw e;
+        } // try catch
+    } // testGenerateTransIdGenerated
     
     private Context createContext(String notificationTarget, String defaultService, String defaultServicePath) {
         Context context = new Context();
