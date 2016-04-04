@@ -81,11 +81,9 @@ cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.Ori
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service = def_serv
+cygnusagent.sources.http-source.handler.default_service = default
 # Default service path (service path semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service_path = def_servpath
-# Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
-cygnusagent.sources.http-source.handler.events_ttl = 10
+cygnusagent.sources.http-source.handler.default_service_path = /
 # Source interceptors, do not change
 cygnusagent.sources.http-source.interceptors = ts gi
 # TimestampInterceptor, do not change
