@@ -52,8 +52,7 @@ public class KafkaBackendImpl implements KafkaBackend {
     @Override
     public void createTopic(ZkClient zookeeperClient, String topic, 
             int partitions, int replicationFactor, Properties props) {
-        LOGGER.info("Creating Topic: " + topic + " , partitions: " + partitions + " , "
-                    + "replication factor: " + replicationFactor +".");
+        LOGGER.debug("Creating Topic.");
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
     } // createTopic
 
