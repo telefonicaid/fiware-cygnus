@@ -214,18 +214,52 @@ public class OrionKafkaSink extends OrionSink {
                     break;
                 case DMBYSERVICEPATH:
                     if (servicePath.equals("/")) {
-                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
-                                + "dm-by-service-path data model");
-                    } // if
-                    
-                    name = Utils.encode(servicePath, true, false);
-                    break;
+                        name = Utils.encode(service, false, true);
+                        break;
+                    } else if (servicePath.startsWith("/")) {
+                        name =  Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(servicePath, true, false);
+                        break;
+                    } else {
+                        // Impossible to reach this case
+                        throw new CygnusBadConfiguration("Service path must be"
+                                + "'/' or must start with '/'");
+                    } // if else if
+                
                 case DMBYENTITY:
-                    name = Utils.encode(entity, false, true);
-                    break;
+                    if (servicePath.equals("/")) {
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(entity, false, true);
+                        break;
+                    } else if (servicePath.startsWith("/")) {
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(servicePath, true, false) + "_" 
+                                + Utils.encode(entity, false, true);
+                        break;
+                    } else {
+                        // Impossible to reach this case
+                        throw new CygnusBadConfiguration("Service path must be"
+                                + "'/' or must start with '/'");
+                    } // if else if
+
                 case DMBYATTRIBUTE:
-                    name = Utils.encode(attribute, false, true);
-                    break;
+                    if (servicePath.equals("/")) {
+                        name = Utils.encode(service, false, true) + "_" 
+                                + Utils.encode(entity, false, true) + "_" 
+                                + Utils.encode(attribute, false, true);
+                        break;
+                    } else if (servicePath.startsWith("/")) {
+                        name = Utils.encode(service, false, true) + "_"
+                                + Utils.encode(servicePath, true, false) + "_"
+                                + Utils.encode(entity, false, true) + "_"
+                                + Utils.encode(attribute, false, true);
+                        break;
+                    } else {
+                        // Impossible to reach this case
+                        throw new CygnusBadConfiguration("Service path must be"
+                                + "'/' or must start with '/'");
+                    } // if else if
+
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                             + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
