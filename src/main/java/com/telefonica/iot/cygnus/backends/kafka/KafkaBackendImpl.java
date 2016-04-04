@@ -39,6 +39,7 @@ public class KafkaBackendImpl implements KafkaBackend {
      * @param properties 
      */
     public KafkaBackendImpl(Properties properties) {
+        LOGGER.debug("Creating persistence backend.");
         kafkaProducer = new KafkaProducer<String, String>(properties);
     } // KafkaBackendImpl
 
@@ -51,8 +52,8 @@ public class KafkaBackendImpl implements KafkaBackend {
     @Override
     public void createTopic(ZkClient zookeeperClient, String topic, 
             int partitions, int replicationFactor, Properties props) {
-        LOGGER.debug("Creating topic: " + topic + "(Partitions: " + partitions 
-                + " , Replication factor: " + replicationFactor + ")");
+        LOGGER.info("Creating Topic: " + topic + " , partitions: " + partitions + " , "
+                    + "replication factor: " + replicationFactor +".");
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
     } // createTopic
 
