@@ -218,7 +218,7 @@ public class OrionRestHandlerTest {
                 configuredDefaultServicePath));
         
         try {
-            assertEquals(null, handler.getEvents(mockHttpServletRequest1));
+            assertEquals(0, handler.getEvents(mockHttpServletRequest1).size());
             System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
                     + "configuration is wrong");
         } catch (AssertionError e1) {
