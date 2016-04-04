@@ -38,21 +38,22 @@ public class KafkaBackendImpl implements KafkaBackend {
      */
     public KafkaBackendImpl(Properties properties) {
         kafkaProducer = new KafkaProducer<String, String>(properties);
-    }
+    } // KafkaBackendImpl
 
     @Override
     public boolean topicExists(ZkClient zookeeperClient, String topic) throws Exception {
         return AdminUtils.topicExists(zookeeperClient, topic);
-    }
+    } // topicExists
 
     @Override
     public void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props) {
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
-    }
+    } // createTopic
 
     @Override
     public void send(ProducerRecord<String, String> record) {
         kafkaProducer.send(record);
-    }
+    } // send
     
-}
+} // KafkaBackendImpl
+

@@ -53,4 +53,5 @@ public interface KafkaBackend {
      */
     void send(ProducerRecord<String, String> record);
     
-}
+} // KafkaBackend
+
