@@ -261,7 +261,7 @@ public class OrionPostgreSQLSink extends OrionSink {
         } // initialize
 
         private String buildSchemaName() throws Exception {
-            String name = service;
+            String name = Utils.encode(service, false, true);
 
             if (name.length() > Constants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building schema name '" + name
@@ -276,13 +276,23 @@ public class OrionPostgreSQLSink extends OrionSink {
 
             switch(dataModel) {
                 case DMBYSERVICEPATH:
-                    name = servicePath;
+                    if (servicePath.equals("/")) {
+                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                                + "dm-by-service-path data model");
+                    } // if
+                    
+                    name = Utils.encode(servicePath, true, false);
                     break;
                 case DMBYENTITY:
-                    name = servicePath + '_' + entity;
+                    String truncatedServicePath = Utils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + Utils.encode(entity, false, true);
                     break;
                 case DMBYATTRIBUTE:
-                    name = servicePath + '_' + entity + '_' + attribute;
+                    truncatedServicePath = Utils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + Utils.encode(entity, false, true)
+                            + '_' + Utils.encode(attribute, false, true);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()

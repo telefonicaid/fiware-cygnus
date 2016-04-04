@@ -155,7 +155,7 @@ public class OrionMongoSink extends OrionMongoBaseSink {
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
             dbName = buildDbName(service);
-            collectionName = buildCollectionName(dbName, "/" + servicePath, entity, attribute, false, null, null,
+            collectionName = buildCollectionName(dbName, servicePath, entity, attribute, false, null, null,
                     service);
         } // initialize
         
@@ -199,6 +199,11 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
+                
+                // check if the attribute value is based on white spaces
+                if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                    continue;
+                } // if
                 
                 // check if the metadata contains a TimeInstant value; use the notified reception time instead
                 Long recvTimeTs;
@@ -285,6 +290,12 @@ public class OrionMongoSink extends OrionMongoBaseSink {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
+                
+                // check if the attribute value is based on white spaces
+                if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                    continue;
+                } // if
+                
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 doc.append(attrName, attrValue);
@@ -323,6 +334,11 @@ public class OrionMongoSink extends OrionMongoBaseSink {
     
     private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
         ArrayList<Document> aggregation = aggregator.getAggregation();
+        
+        if (aggregation.isEmpty()) {
+            return;
+        } // if
+        
         String dbName = aggregator.getDbName(enableLowercase);
         String collectionName = aggregator.getCollectionName(enableLowercase);
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "

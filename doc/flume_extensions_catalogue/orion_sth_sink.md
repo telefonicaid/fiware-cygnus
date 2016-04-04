@@ -12,12 +12,24 @@ Content:
         * [Hashing based collections](#section2.3.1)
         * [About batching](#section2.3.2)
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+        * [Databases and collections encoding details](#section2.3.4)
 * [Implementation details](#section3)
     * [`OrionSTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
+
+* For numeric attribute values:
+    * Sum of all the samples.
+    * Sum of the square value of all the samples.
+    * Maximum value among all the samples.
+    * Minimum value among all the samples.
+* Number of occurrences for string attribute values.
+
+You can get further details on STH and the supported aggregations at [STH Github](https://github.com/telefonicaid/fiware-sth-comet).
+
+Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
@@ -218,11 +230,12 @@ NOTES:
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ ||
+| collection_prefix | no | sth_ | `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `_id.origin` property. Set to 0 if not wanting this policy. |
+| ignore\_white\_spaces | no | true | <i>true</i> if exclusively white space-based attribute values must be ignored, <i>false</i> otherwise. |
 
 A configuration example could be:
 
@@ -244,6 +257,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.batch_timeout = 30
     cygnusagent.sinks.sth-sink.batch_ttl = 10
     cygnusagent.sinks.sth-sink.data_expiration = 0
+    cygnusagent.sinks.sth-sink.ignore_white_spaces = true
 
 [Top](#top)
 
@@ -273,6 +287,16 @@ Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Plea
 
 ###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
 By default, `OrionSTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+
+[Top](#top)
+
+###<a name="section2.3.4"></a>Databases and collections encoding details
+`OrionMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+
+* Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
+* Collections names will have the characters `$` encoded as `_`.
+
+[Top](#top)
 
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`OrionSTHSink` class

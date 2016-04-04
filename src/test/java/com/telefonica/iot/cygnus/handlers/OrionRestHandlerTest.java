@@ -18,26 +18,22 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
-import com.telefonica.iot.cygnus.utils.TestConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.Constants;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.junit.Before;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
+import static org.junit.Assert.*; // this is required by "fail" like assertions
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Test;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -45,30 +41,10 @@ import org.mockito.Mock;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OrionRestHandlerTest {
-
-    // instance to be tested
-    private OrionRestHandler handler;
     
-    // other instances
-    private Context context;
-    
-    // mocks
+    // Mocks
     @Mock
-    private HttpServletRequest mockRequest;
-    
-    // constants
-    private final String configuredNotificationTarget = "/notify";
-    private final String configuredDefaultService = "a.SERV_with-rare chars%@";
-    private final String configuredDefaultServicePath = "a.SERVPATH_with-rare chars%@";
-    private final String rootServicePath = "/";
-    private final String[] notificationHeaderNamesStr = {"user-agent", "content-type", "fiware-service",
-        "fiware-servicepath"};
-    private final String notificationNotificationTarget = "/notify";
-    private final String notificationContentType = "application/json";
-    private final String notificationRequestMethod = "POST";
-    private final String notificationUserAgent = "whatever/0.12.7";
-    private final String notificationService = "a.SERV_with-rare chars%@";
-    private final String notificationServicePath = "a.SERVPATH_with-rare chars%@";
+    private HttpServletRequest mockHttpServletRequest1;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -78,95 +54,106 @@ public class OrionRestHandlerTest {
      */
     @Before
     public void setUp() throws Exception {
-        // set up the instance of the tested class
-        handler = new OrionRestHandler();
-        
-        // set up other instances
-        context = new Context();
-        context.put(TestConstants.PARAM_DEFAULT_SERVICE, configuredDefaultService);
-        context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, configuredDefaultServicePath);
-        context.put(TestConstants.PARAM_NOTIFICATION_TARGET, configuredNotificationTarget);
-        
-        // set up the behaviour of the mocked classes
-        when(mockRequest.getMethod()).thenReturn(notificationRequestMethod);
-        when(mockRequest.getRequestURI()).thenReturn(notificationNotificationTarget);
-        when(mockRequest.getHeaderNames()).thenReturn(
-                Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))),
-                Collections.enumeration(new ArrayList(Arrays.asList(notificationHeaderNamesStr))));
-        when(mockRequest.getHeader("user-agent")).thenReturn(notificationUserAgent);
-        when(mockRequest.getHeader("content-type")).thenReturn(notificationContentType);
-        when(mockRequest.getHeader("fiware-service")).thenReturn(notificationService);
-        when(mockRequest.getHeader("fiware-servicepath")).thenReturn(notificationServicePath, rootServicePath);
-        when(mockRequest.getReader()).thenReturn(
+        when(mockHttpServletRequest1.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest1.getRequestURI()).thenReturn("/notify");
+        String[] headerNames = {"Content-Type", "fiware-service", "fiware-servicePath"};
+        when(mockHttpServletRequest1.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames))));
+        when(mockHttpServletRequest1.getHeader("content-type")).thenReturn("application/json");
+        when(mockHttpServletRequest1.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest1.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
+        when(mockHttpServletRequest1.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))),
-                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                        "<tag1>1</tag1>      <tag2>2</tag2>".getBytes()))));
+                        "something_not_empty".getBytes()))));
     } // setUp
     
     /**
-     * Test of configure method, of class OrionRestHandler.
+     * [OrionRestHandler.configure] -------- When not configured, the default values are used for non mandatory
+     * parameters.
      */
     @Test
-    public void testConfigure() {
-        System.out.println("Testing 'configure' method from class 'OrionRestHandler'");
-        handler.configure(context);
-        assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
-        assertEquals(TestUtils.encode(configuredDefaultService), handler.getDefaultService());
-        assertEquals(TestUtils.encode(configuredDefaultServicePath), handler.getDefaultServicePath());
-    } // testConfigure
-
-    /**
-     * Test of getEvents method, of class OrionRestHandler.
-     */
-    @Test
-    public void testGetEvents() {
-        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (invalid characters");
+    public void testConfigureNotMandatoryParameters() {
+        System.out.println("[OrionRestHandler.configure] -------- When not configured, the default values are used "
+                + "for non mandatory parameters");
+        OrionRestHandler handler = new OrionRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
         
         try {
-            handler.configure(context);
-            List result = handler.getEvents(mockRequest);
-            assertTrue(result.size() == 1);
-            Event event = (Event) result.get(0);
-            Map<String, String> eventHeaders = event.getHeaders();
-            byte[] eventMessage = event.getBody();
-            assertTrue(eventHeaders.size() == 4);
-            assertTrue(eventHeaders.containsKey("content-type"));
-            assertTrue(eventHeaders.get("content-type").equals("application/json"));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
-                    TestUtils.encode(notificationService));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
-                    TestUtils.encode(notificationServicePath));
-            assertTrue(eventMessage.length != 0);
-        } catch (Exception e) {
-            fail(e.getMessage());
+            assertEquals("/notify", handler.getNotificationTarget());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'notification_target' is '/notify'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'notification_target' is '" + handler.getNotificationTarget() + "'");
+            throw e;
         } // try catch
- 
-        System.out.println("Testing 'getEvents' method from class 'OrionRestHandler' (\"root\" servicePath name");
         
         try {
-            context.put(TestConstants.PARAM_DEFAULT_SERVICE_PATH, rootServicePath);
-            handler.configure(context);
-            List result = handler.getEvents(mockRequest);
-            assertTrue(result.size() == 1);
-            Event event = (Event) result.get(0);
-            Map<String, String> eventHeaders = event.getHeaders();
-            byte[] eventMessage = event.getBody();
-            assertTrue(eventHeaders.size() == 4);
-            assertTrue(eventHeaders.containsKey("content-type"));
-            assertTrue(eventHeaders.get("content-type").equals("application/json"));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE),
-                    TestUtils.encode(notificationService));
-            assertTrue(eventHeaders.containsKey(TestConstants.HEADER_NOTIFIED_SERVICE_PATH));
-            assertEquals(eventHeaders.get(TestConstants.HEADER_NOTIFIED_SERVICE_PATH),
-                    TestUtils.encode(rootServicePath));
-            assertTrue(eventMessage.length != 0);
-        } catch (Exception e) {
-            fail(e.getMessage());
+            assertEquals("default", handler.getDefaultService());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'default_service' is 'default'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'default_service' is '" + handler.getDefaultService() + "'");
+            throw e;
         } // try catch
-    } // testGetEvents
+        
+        try {
+            assertEquals("/", handler.getDefaultServicePath());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
+                    + "'default_service_path' is '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
+                    + "'default_service_path' is '" + handler.getDefaultServicePath() + "'");
+            throw e;
+        } // try catch
+    } // testConfigureNotMandatoryParameters
     
+    /**
+     * [OrionRestHandler.getEvents] -------- When a notification is sent, the headers are valid.
+     */
+    @Test
+    public void testGetEventsContentTypeHeader() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a notification is sent, the headers are valid");
+        OrionRestHandler handler = new OrionRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        
+        try {
+            handler.getEvents(mockHttpServletRequest1);
+            assertTrue(true);
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - The value for 'Content-Type' header is "
+                    + "'application/json'");
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - The value for 'fiware-servicePath' header "
+                    + "starts with '/'");
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - The length of 'fiware-service' header value is "
+                    + " less or equal than '" + Constants.SERVICE_HEADER_MAX_LEN + "'");
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - The length of 'fiware-servicePath' header value "
+                    + "is less or equal than '" + Constants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+        } catch (Exception e) {
+            if (e.getMessage().contains("content type not supported")) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The value for 'Content-Type' is not "
+                        + "'application/json'");
+            } else if (e.getMessage().contains("header value must start with '/'")) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The value for 'fiware-servicePath' does not "
+                        + "start with '/'");
+            } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The length of 'fiware-service' header value "
+                        + "is greater than '" + Constants.SERVICE_HEADER_MAX_LEN + "'");
+            } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The length of 'fiware-servicePath' header "
+                        + "value is greater than '" + Constants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+            } // if else
+            
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsContentTypeHeader
+    
+    private Context createContext(String notificationTarget, String defaultService, String defaultServicePath) {
+        Context context = new Context();
+        context.put("notification_target", notificationTarget);
+        context.put("default_service", defaultService);
+        context.put("default_service_path", defaultServicePath);
+        return context;
+    } // createContext
+
 } // OrionRestHandlerTest

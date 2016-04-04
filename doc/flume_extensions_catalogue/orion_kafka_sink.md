@@ -35,9 +35,9 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 
 A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured data model:
 
-* `dm-by-attribute`. A topic is created for each notified attribute.
-* `dm-by-entity`. A topic named `<destination>` is created, where `<destination>` value is got from the event headers.
-* `dm-by-service-path`. A topic named `<fiware-servicePath>` is created, where `<fiware-servicePath>` value is got from the event headers.
+* `dm-by-attribute`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>_<entityId>_<entityType>_<attributeName>` is created for each notified attribute.
+* `dm-by-entity`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>_<entityId>_<entityType>` is created, where values are got from the event headers.
+* `dm-by-service-path`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>` is created, where `<fiware-servicePath>` value is got from the event headers.
 * `dm-by-service`. A topic named `<fiware-service>` is created, where `<fiware-service>` value is got from the event headers.
 
 The context responses/entities within the container are iterated, and they are serialized in the Kafka topic as JSON documents.
@@ -52,11 +52,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -78,25 +78,25 @@ Assuming the following Flume event is created from a notified NGSI context data 
 
 Assuming `data_model=dm-by-attribute` as configuration parameter, then `OrionKafkaSink` will persist the data as:
 
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic speed --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic oil_level --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_speed --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_oil_level --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
 
 If `data_model=dm-by-entity` then `OrionKafkaSink` will persist the data as:
 
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic room1_room --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
 
 If `data_model=dm-by-service-path` then `OrionKafkaSink` will persist the data as:
 
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic 4wheels --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels --from-beginning
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
 
 If `data_model=dm-by-service` then `OrionKafkaSink` will persist the data as:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"Room","isPattern":"false","id":"Room1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
+    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
 
 NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
 
@@ -116,7 +116,7 @@ NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that ru
 | broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
 | zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i>. |
 | partitions |  no | 1 | Number of partitions for a topic. |
-| replication_factor | no | 1 | For a topic with replication factor N, Kafka will tolerate N-1 server failures without losing any messages commited to the log. Replication factor must be less than or equal to the number of brokers created. | 
+| replication_factor | no | 1 | For a topic with replication factor N, Kafka will tolerate N-1 server failures without losing any messages commited to the log. Replication factor must be less than or equal to the number of brokers created. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |

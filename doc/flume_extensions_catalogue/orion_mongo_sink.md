@@ -12,6 +12,7 @@ Content:
          * [Hashing based collections](#section2.3.1)
          * [About batching](#section2.3.2)
          * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+         * [Databases and collections encoding details](#section2.3.4)
 * [Programmers guide](#section3)
     * [`OrionMongoSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
@@ -207,13 +208,14 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ ||
+| collection_prefix | no | sth_ | `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `recvTime` property. Set to 0 if not wanting this policy. |
 | collections_size | no | 0 | The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Notice that the size-based truncation policy takes precedence over the time-based one. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes. |
 | max_documents | no | 0 | The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy. |
+| ignore\_white\_spaces | no | true | <i>true</i> if exclusively white space-based attribute values must be ignored, <i>false</i> otherwise. |
 
 A configuration example could be:
 
@@ -239,6 +241,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.data_expiration = 0
     cygnusagent.sinks.mongo-sink.collections_size = 0
     cygnusagent.sinks.mongo-sink.max_documents = 0
+    cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
 
 [Top](#top)
 
@@ -268,6 +271,14 @@ By default, `OrionMongoSink` has a configured batch size and batch accumulation 
 
 ###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
 By default, `OrionMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+
+[Top](#top)
+
+###<a name="section2.3.4"></a>Databases and collections encoding details
+`OrionMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+
+* Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
+* Collections names will have the characters `$` encoded as `_`.
 
 [Top](#top)
 

@@ -261,7 +261,7 @@ public abstract class HttpBackend {
                 return null;
             } // if
             
-            LOGGER.debug("Http response: " + httpRes.getStatusLine().toString());
+            LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
             
             // parse the httpRes payload
             JSONObject jsonPayload = null;
@@ -269,10 +269,17 @@ public abstract class HttpBackend {
             
             if (entity != null) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
-                String res = reader.readLine();
-                LOGGER.debug("response payload: " + res);
+                String res = "";
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    res += line;
+                } // while
+
+                reader.close();
+                LOGGER.debug("Http response payload: " + res);
                 
-                if (res != null) {
+                if (!res.isEmpty()) {
                     JSONParser jsonParser = new JSONParser();
                     jsonPayload = (JSONObject) jsonParser.parse(res);
                 } // if

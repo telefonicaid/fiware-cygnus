@@ -26,19 +26,12 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * Custom interceptor in charge of extracting the destination where the data must be persisted. This destination is
@@ -124,14 +117,14 @@ public class GroupingInterceptor implements Interceptor {
             GroupingRule matchingRule = groupingRules.getMatchingRule(contextElement, fiwareServicePath);
             
             if (matchingRule == null) {
-                groupedDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+                groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
                 groupedServicePaths.add(fiwareServicePath);
             } else {
                 groupedDestinations.add((String) matchingRule.getDestination());
                 groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
             } // if else
             
-            defaultDestinations.add(Utils.encode(contextElement.getId() + "_" + contextElement.getType()));
+            defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
             defaultServicePaths.add(fiwareServicePath);
         } // for
         

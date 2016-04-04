@@ -128,7 +128,7 @@ If `file_format=json-colum` then `OrionHDFSSink` will persist the data within th
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
-    
+
 If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
@@ -139,9 +139,9 @@ If `file_format=csv-column` then `OrionHDFSSink` will persist the data within th
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
-    
+
 NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
-    
+
 Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
 
 In the case the metadata for the `speed` attribute was, for instance:
@@ -150,7 +150,7 @@ In the case the metadata for the `speed` attribute was, for instance:
        {"name": "manufacturer", "type": "string", "value": "acme"},
        {"name": "installation_year", "type": "integer", "value": 2014}
     ]
-    
+
 then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt` file content would be:
 
     1429535775,manufacturer,string,acme
@@ -190,25 +190,19 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
-| cosmos_host<br>(**deprecated**)| no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run.<br>Still usable; if both are configured, `hdfs_host` is preferred. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
-| cosmos_port<br>(**deprecated**) | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary).<br>Still usable; if both are configured, `hdfs_port` is preferred. |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
-| cosmos\_default\_username<br>(**deprecated**) | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser.<br>Still usable; if both are configured, `hdfs_username` is preferred. |
-| hdfs_password | yes | N/A | Password for the above `hdfs_username`/`cosmos_default_username`; this is only required for Hive authentication. |
+| hdfs_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
-| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`/`cosmos_default_username`, which in this case must be a HDFS superuser. |
+| service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`, which in this case must be a HDFS superuser. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
 | csv_separator | no | , ||
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | hive | no | true | <i>true</i> or <i>false</i>. |
-| hive\_server\_version<br>(**deprecated**) | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2.<br>Still usable; if both are configured, `hive.server_version` is preferred. |
 | hive.server\_version | no | 2 | `1` if the remote Hive server runs HiveServer1 or `2` if the remote Hive server runs HiveServer2. |
-| hive_host<br>(**deprecated**) | no | localhost | Still usable; if both are configured, `hive.host` is preferred. |
 | hive.host | no | localhost ||
-| hive_port<br>(**deprecated**) | no | 10000 | Still usable; if both are configured, `hive.port` is preferred. |
 | hive.port | no | 10000 ||
 | hive.db_type | no | default-db | <i>default-db</i> or <i>namespace-db</i>. If `hive.db_type=default-db` then the default Hive database is used. If `hive.db_type=namespace-db` and `service_as_namespace=false` then the `hdfs_username` is used as Hive database. If `hive.db_type=namespace-db` and `service_as_namespace=true` then the notified fiware-service is used as Hive database. |
 | krb5_auth | no | false | <i>true</i> or <i>false</i>. |
@@ -291,15 +285,15 @@ By default, `OrionHDFSSink` has a configured batch size and batch accumulation t
 As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the HDFS file where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `HDFSBackend` implementation (binary or rest).
-    
+
     public void start();
 
 An implementation of `HDFSBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionHDFSSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -308,27 +302,27 @@ A complete configuration as the described above is read from the given `Context`
 This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement). Relevant methods are:
 
     public void createDir(String dirPath) throws Exception;
-    
+
 Creates a HDFS directory, given its path.
-    
+
     public void createFile(String filePath, String data) throws Exception;
-    
+
 Creates a HDFS file, given its path, and writes initial data to it.
-    
+
     public void append(String filePath, String data) throws Exception;
-    
+
 Appends new data to an already existent given HDFS file.
 
     public boolean exists(String filePath) throws Exception;
-    
+
 Checks if a HDFS file, given its path, exists ot not.
-    
+
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception;
-    
+
 Provisions a Hive table with data stored using constant 8-fields. This is usually invoked for `*-row`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_row`).
-    
+
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
-    
+
 Provisions a Hive table with data stored using the given variable length fields. This is usually invoked for `*-column`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_column`).
 
 [Top](#top)
@@ -394,7 +388,7 @@ Contains the following line, which must not be changed (thus, the distributed fi
     cygnus_krb5_login {
         com.sun.security.auth.module.Krb5LoginModule required doNotPrompt=false debug=true useTicketCache=false;
     };
-    
+
 [Top](#top)
 
 ####`conf/krb5.conf`
@@ -408,16 +402,15 @@ This file can be built from the distributed `conf/krb5.conf.template`. Edit it a
      ticket_lifetime = 24h
      renew_lifetime = 7d
      forwardable = true
-    
+
     [realms]
      EXAMPLE.COM = {
       kdc = kdc.example.com
       admin_server = admin_server.example.com
      }
-    
+
     [domain_realms]
      .example.com = EXAMPLE.COM
      example.com = EXAMPLE.COM
 
 [Top](#top)
-
