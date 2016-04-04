@@ -84,6 +84,7 @@ public final class Constants {
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
     
     // log4j specific constants
+    public static final String LOG4J_TRANS = "transactionId";
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
     
