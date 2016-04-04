@@ -198,7 +198,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // if the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
-            return null;
+            LOGGER.debug("Invalid configuration, thus returning an empty list of Flume events");
+            return new ArrayList<Event>();
         } // if
         
         numReceivedEvents++;
