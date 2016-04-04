@@ -258,7 +258,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             transId = generateTransId();
         } // if
         
-        MDC.put(Constants.HEADER_TRANSACTION_ID, transId);
+        MDC.put(Constants.LOG4J_TRANS, transId);
         LOGGER.info("Starting transaction (" + transId + ")");
         
         // get the data content
