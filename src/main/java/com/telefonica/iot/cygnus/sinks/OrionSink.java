@@ -371,7 +371,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             // set the transactionId, fiwareservice and fiwareservicepath in MDC
             try {
-                MDC.put(Constants.HEADER_TRANSACTION_ID,
+                MDC.put(Constants.LOG4J_TRANS,
                         event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
                 MDC.put(Constants.LOG4J_SVC,
                         event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE));
