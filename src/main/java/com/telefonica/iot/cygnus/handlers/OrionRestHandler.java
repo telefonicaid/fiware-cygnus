@@ -254,9 +254,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // get a transaction id if not sent in the notification, and store it in the log4j Mapped Diagnostic
         // Context (MDC); this way it will be accessible by the whole source code
-        if (transId == null) {
-            transId = generateTransId();
-        } // if
+        transId = generateTransId(transId);
         
         MDC.put(Constants.LOG4J_TRANS, transId);
         LOGGER.info("Starting transaction (" + transId + ")");
@@ -307,22 +305,26 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * <bootTimeSeconds>-<bootTimeMilliseconds>-<transactionCount%10000000000>
      * @return A new unique transaction identifier
      */
-    private String generateTransId() {
-        synchronized (LOCK) {
-            long transCountTrunked = transactionCount % 10000000000L;
-            String transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
-                    + String.format("%010d", transCountTrunked);
-
-            // check if the transactionCount must be restarted
-            if (transCountTrunked == 9999999999L) {
-                transactionCount = 0;
-                bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
-            } else {
-                transactionCount++;
-            } // if else
-
+    protected String generateTransId(String transId) {
+        if (transId != null) {
             return transId;
-        }
+        } else {
+            synchronized (LOCK) {
+                long transCountTrunked = transactionCount % 10000000000L;
+                transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                        + String.format("%010d", transCountTrunked);
+
+                // check if the transactionCount must be restarted
+                if (transCountTrunked == 9999999999L) {
+                    transactionCount = 0;
+                    bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
+                } else {
+                    transactionCount++;
+                } // if else
+
+                return transId;
+            } // synchronized
+        } // else
     } // generateTransId
  
 } // OrionRestHandler
