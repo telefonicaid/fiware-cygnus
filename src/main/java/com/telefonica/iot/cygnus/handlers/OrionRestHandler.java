@@ -199,6 +199,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // check the headers looking for not supported user agents, content type and tenant/organization
         Enumeration headerNames = request.getHeaderNames();
+        String transId = null;
         String contentType = null;
         String service = null;
         String servicePath = null;
@@ -208,7 +209,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
-            if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
+            if (headerName.equals(Constants.HEADER_TRANSACTION_ID)) {
+                transId = headerValue;
+            } else if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
@@ -249,10 +252,11 @@ public class OrionRestHandler implements HTTPSourceHandler {
         MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);
         MDC.put(Constants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
-        // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
-        // accessible by the whole source code
-        String transId = generateTransId();
-        MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
+        // get a transaction id if not sent in the notification, and store it in the log4j Mapped Diagnostic
+        // Context (MDC); this way it will be accessible by the whole source code
+        transId = generateTransId(transId);
+        
+        MDC.put(Constants.LOG4J_TRANS, transId);
         LOGGER.info("Starting transaction (" + transId + ")");
         
         // get the data content
@@ -283,8 +287,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 ? defaultServicePath : servicePath);
         LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
+        eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID
                 + ", value=" + transId + ")");
         
         // create the event list containing only one event
@@ -301,22 +305,26 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * <bootTimeSeconds>-<bootTimeMilliseconds>-<transactionCount%10000000000>
      * @return A new unique transaction identifier
      */
-    private String generateTransId() {
-        synchronized (LOCK) {
-            long transCountTrunked = transactionCount % 10000000000L;
-            String transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
-                    + String.format("%010d", transCountTrunked);
-
-            // check if the transactionCount must be restarted
-            if (transCountTrunked == 9999999999L) {
-                transactionCount = 0;
-                bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
-            } else {
-                transactionCount++;
-            } // if else
-
+    protected String generateTransId(String transId) {
+        if (transId != null) {
             return transId;
-        }
+        } else {
+            synchronized (LOCK) {
+                long transCountTrunked = transactionCount % 10000000000L;
+                transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                        + String.format("%010d", transCountTrunked);
+
+                // check if the transactionCount must be restarted
+                if (transCountTrunked == 9999999999L) {
+                    transactionCount = 0;
+                    bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
+                } else {
+                    transactionCount++;
+                } // if else
+
+                return transId;
+            } // synchronized
+        } // else
     } // generateTransId
  
 } // OrionRestHandler
