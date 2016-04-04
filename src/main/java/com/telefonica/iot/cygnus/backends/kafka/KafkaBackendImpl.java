@@ -52,13 +52,13 @@ public class KafkaBackendImpl implements KafkaBackend {
     @Override
     public void createTopic(ZkClient zookeeperClient, String topic, 
             int partitions, int replicationFactor, Properties props) {
-        LOGGER.debug("Creating Topic.");
+        LOGGER.debug("Add the details of the topic being created.");
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
     } // createTopic
 
     @Override
     public void send(ProducerRecord<String, String> record) {
-        LOGGER.debug("Sending the record to Kafka");
+        LOGGER.debug("Add the record to be sent.");
         kafkaProducer.send(record);
     } // send
     
