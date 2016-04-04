@@ -119,6 +119,52 @@ public class OrionRestHandlerTest {
     } // testConfigureNotMandatoryParameters
     
     /**
+     * [OrionRestHandler.configure] -------- The configured default service path must start with '/'.
+     */
+    @Test
+    public void testConfigureDefaultServicePathStartsWithSlash() {
+        System.out.println("[OrionRestHandler.configure] -------- The configured default service path must start "
+                + "with '/'");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredDefaultServicePath = "/something";
+        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        
+        try {
+            assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
+            assertTrue(!handler.getInvalidConfiguration());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The configured default service path '"
+                    + configuredDefaultServicePath + "' starts with '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The configured default service path '"
+                    + configuredDefaultServicePath + "' does not start with '/'");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServicePathStartsWithSlash
+    
+    /**
+     * [OrionRestHandler.configure] -------- The configured notification target must start with '/'.
+     */
+    @Test
+    public void testConfigureNotificationTargerStartsWithSlash() {
+        System.out.println("[OrionRestHandler.configure] -------- The configured notification target must start "
+                + "with '/'");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredNotificationTarget = "/notify";
+        handler.configure(createContext(configuredNotificationTarget, null, null));
+        
+        try {
+            assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
+            assertTrue(!handler.getInvalidConfiguration());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The configured notification target '"
+                    + configuredNotificationTarget + "' starts with '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The configured notification target '"
+                    + configuredNotificationTarget + "' does not start with '/'");
+            throw e;
+        } // try catch // try catch
+    } // testConfigureDefaultServicePathStartsWithSlash
+    
+    /**
      * [OrionRestHandler.getEvents] -------- When a notification is sent, the headers are valid.
      */
     @Test
@@ -156,6 +202,35 @@ public class OrionRestHandlerTest {
             assertTrue(false);
         } // try catch
     } // testGetEventsContentTypeHeader
+    
+    /**
+     * [OrionRestHandler.getEvents] -------- When a the configuration is wrong, no events are obtained.
+     */
+    @Test
+    public void testGetEventsNullEventsUponInvalidConfiguration() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a the configuration is wrong, no evetns "
+                + "are obtained");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredNotificationTarget = "notify"; // wrong value
+        String configuredDefaultService = "default";
+        String configuredDefaultServicePath = "something"; // wrong value
+        handler.configure(createContext(configuredNotificationTarget, configuredDefaultService,
+                configuredDefaultServicePath));
+        
+        try {
+            assertEquals(null, handler.getEvents(mockHttpServletRequest1));
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
+                    + "configuration is wrong");
+        } catch (AssertionError e1) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - The events are being processed "
+                    + "despite of the configuration is wrong");
+            throw e1;
+        } catch (Exception e2) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
+                    + "the events");
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsNullEventsUponInvalidConfiguration
     
     /**
      * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
