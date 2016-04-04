@@ -45,7 +45,7 @@ public final class Constants {
     // Both HTTP and Flume header names
     public static final String HEADER_CONTENT_TYPE   = "content-type";
     public static final String HEADER_USER_AGENT     = "user-agent";
-    public static final String HEADER_TRANSACTION_ID = "transaction-id";
+    public static final String HEADER_TRANSACTION_ID = "fiware-transaction";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS        = "recvTimeTs";
