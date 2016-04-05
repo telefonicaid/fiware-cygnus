@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -45,6 +47,13 @@ public class OrionRestHandlerTest {
     // Mocks
     @Mock
     private HttpServletRequest mockHttpServletRequest1;
+    
+    /**
+     * Constructor.
+     */
+    public OrionRestHandlerTest() {
+        LogManager.getRootLogger().setLevel(Level.ERROR);
+    } // OrionRestHandlerTest
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -110,6 +119,52 @@ public class OrionRestHandlerTest {
     } // testConfigureNotMandatoryParameters
     
     /**
+     * [OrionRestHandler.configure] -------- The configured default service path must start with '/'.
+     */
+    @Test
+    public void testConfigureDefaultServicePathStartsWithSlash() {
+        System.out.println("[OrionRestHandler.configure] -------- The configured default service path must start "
+                + "with '/'");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredDefaultServicePath = "/something";
+        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        
+        try {
+            assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
+            assertTrue(!handler.getInvalidConfiguration());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The configured default service path '"
+                    + configuredDefaultServicePath + "' starts with '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The configured default service path '"
+                    + configuredDefaultServicePath + "' does not start with '/'");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServicePathStartsWithSlash
+    
+    /**
+     * [OrionRestHandler.configure] -------- The configured notification target must start with '/'.
+     */
+    @Test
+    public void testConfigureNotificationTargerStartsWithSlash() {
+        System.out.println("[OrionRestHandler.configure] -------- The configured notification target must start "
+                + "with '/'");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredNotificationTarget = "/notify";
+        handler.configure(createContext(configuredNotificationTarget, null, null));
+        
+        try {
+            assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
+            assertTrue(!handler.getInvalidConfiguration());
+            System.out.println("[OrionRestHandler.configure] -  OK  - The configured notification target '"
+                    + configuredNotificationTarget + "' starts with '/'");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.configure] - FAIL - The configured notification target '"
+                    + configuredNotificationTarget + "' does not start with '/'");
+            throw e;
+        } // try catch // try catch
+    } // testConfigureDefaultServicePathStartsWithSlash
+    
+    /**
      * [OrionRestHandler.getEvents] -------- When a notification is sent, the headers are valid.
      */
     @Test
@@ -147,6 +202,76 @@ public class OrionRestHandlerTest {
             assertTrue(false);
         } // try catch
     } // testGetEventsContentTypeHeader
+    
+    /**
+     * [OrionRestHandler.getEvents] -------- When a the configuration is wrong, no events are obtained.
+     */
+    @Test
+    public void testGetEventsNullEventsUponInvalidConfiguration() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a the configuration is wrong, no evetns "
+                + "are obtained");
+        OrionRestHandler handler = new OrionRestHandler();
+        String configuredNotificationTarget = "notify"; // wrong value
+        String configuredDefaultService = "default";
+        String configuredDefaultServicePath = "something"; // wrong value
+        handler.configure(createContext(configuredNotificationTarget, configuredDefaultService,
+                configuredDefaultServicePath));
+        
+        try {
+            assertEquals(0, handler.getEvents(mockHttpServletRequest1).size());
+            System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
+                    + "configuration is wrong");
+        } catch (AssertionError e1) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - The events are being processed "
+                    + "despite of the configuration is wrong");
+            throw e1;
+        } catch (Exception e2) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
+                    + "the events");
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsNullEventsUponInvalidConfiguration
+    
+    /**
+     * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
+     */
+    @Test
+    public void testGenerateTransIdReused() {
+        System.out.println("[OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is "
+                + "reused");
+        OrionRestHandler handler = new OrionRestHandler();
+        String notifiedTransId = "1234567890-123-1234567890";
+        
+        try {
+            assertEquals(notifiedTransId, handler.generateTransId(notifiedTransId));
+            System.out.println("[OrionRestHandler.generateTransId] -  OK  - The notified transaction ID '"
+                    + notifiedTransId + "' is reused");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.generateTransId] - FAIL - The notified transaction ID '"
+                    + notifiedTransId + "' is not reused");
+            throw e;
+        } // try catch
+    } // testGenerateTransIdReused
+    
+    /**
+     * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
+     */
+    @Test
+    public void testGenerateTransIdGenerated() {
+        System.out.println("[OrionRestHandler.generateTransId] -------- When a transcation ID is not notified, "
+                + "it is generated");
+        OrionRestHandler handler = new OrionRestHandler();
+        String notifiedTransId = null;
+        
+        try {
+            assertTrue(handler.generateTransId(notifiedTransId) != null);
+            System.out.println("[OrionRestHandler.generateTransId] -  OK  - The transaction ID has been generated");
+        } catch (AssertionError e) {
+            System.out.println("[OrionRestHandler.generateTransId] - FAIL - The transaction ID has not been "
+                    + "generated");
+            throw e;
+        } // try catch
+    } // testGenerateTransIdGenerated
     
     private Context createContext(String notificationTarget, String defaultService, String defaultServicePath) {
         Context context = new Context();

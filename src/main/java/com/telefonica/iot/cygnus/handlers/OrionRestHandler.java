@@ -52,6 +52,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionRestHandler.class);
     
     // configuration parameters
+    private boolean invalidConfiguration;
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
@@ -71,6 +72,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
+        // initially, the configuration is meant to be valid
+        invalidConfiguration = false;
+        
         // print Cygnus version
         LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
     } // OrionRestHandler
@@ -138,47 +142,66 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getDefaultServicePath() {
         return defaultServicePath;
     } // getDefaultServicePath
+    
+    /**
+     * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
+     * required for testing purposes.
+     * @return
+     */
+    protected boolean getInvalidConfiguration() {
+        return invalidConfiguration;
+    } // getInvalidConfiguration
 
     @Override
     public void configure(Context context) {
-        notificationTarget = context.getString(Constants.PARAM_NOTIFICATION_TARGET, "notify");
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "=" + notificationTarget + ")");
-
-        if (notificationTarget.charAt(0) != '/') {
-            notificationTarget = "/" + notificationTarget;
-        } // if
+        notificationTarget = context.getString(Constants.PARAM_NOTIFICATION_TARGET, "/notify");
+        
+        if (notificationTarget.startsWith("/")) {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "="
+                    + notificationTarget + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "="
+                    + notificationTarget + ") -- Must start with '/'");
+        } // if else
         
         defaultService = context.getString(Constants.PARAM_DEFAULT_SERVICE, "default");
         
         if (defaultService.length() > Constants.SERVICE_HEADER_MAX_LEN) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
-                    + Constants.SERVICE_HEADER_MAX_LEN + ")");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE
+                    + "' parameter length greater than " + Constants.SERVICE_HEADER_MAX_LEN + ")");
+        } else {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "="
+                    + defaultService + ")");
+        } // if else
         
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
         defaultServicePath = context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "/");
         
         if (defaultServicePath.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
-                    + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' parameter length greater " + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+        } else if (!defaultServicePath.startsWith("/")) {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' must start with '/')");
+        } else {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "="
+                    + defaultServicePath + ")");
+        } // if else
         
-        if (!defaultServicePath.startsWith("/")) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' must start with '/')");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
-        
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
         LOGGER.info("Startup completed");
     } // configure
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        // if the configuration is invalid, nothing has to be done but to return null
+        if (invalidConfiguration) {
+            LOGGER.debug("Invalid configuration, thus returning an empty list of Flume events");
+            return new ArrayList<Event>();
+        } // if
+        
         numReceivedEvents++;
         
         // check the method
@@ -199,6 +222,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // check the headers looking for not supported user agents, content type and tenant/organization
         Enumeration headerNames = request.getHeaderNames();
+        String transId = null;
         String contentType = null;
         String service = null;
         String servicePath = null;
@@ -208,7 +232,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
-            if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
+            if (headerName.equals(Constants.HEADER_TRANSACTION_ID)) {
+                transId = headerValue;
+            } else if (headerName.equals(Constants.HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
@@ -249,10 +275,11 @@ public class OrionRestHandler implements HTTPSourceHandler {
         MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);
         MDC.put(Constants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
-        // get a transaction id and store it in the log4j Mapped Diagnostic Context (MDC); this way it will be
-        // accessible by the whole source code
-        String transId = generateTransId();
-        MDC.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
+        // get a transaction id if not sent in the notification, and store it in the log4j Mapped Diagnostic
+        // Context (MDC); this way it will be accessible by the whole source code
+        transId = generateTransId(transId);
+        
+        MDC.put(Constants.LOG4J_TRANS, transId);
         LOGGER.info("Starting transaction (" + transId + ")");
         
         // get the data content
@@ -283,8 +310,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 ? defaultServicePath : servicePath);
         LOGGER.debug("Adding flume event header (name=" + Constants.HTTP_HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
+        eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID
                 + ", value=" + transId + ")");
         
         // create the event list containing only one event
@@ -298,25 +325,30 @@ public class OrionRestHandler implements HTTPSourceHandler {
     
     /**
      * Generates a new unique transaction identifier. The format for this id is:
-     * <bootTimeSeconds>-<bootTimeMilliseconds>-<transactionCount%10000000000>
+     * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
+     * @param transId An alrady existent transaction ID, most probably a notified one
      * @return A new unique transaction identifier
      */
-    private String generateTransId() {
-        synchronized (LOCK) {
-            long transCountTrunked = transactionCount % 10000000000L;
-            String transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
-                    + String.format("%010d", transCountTrunked);
-
-            // check if the transactionCount must be restarted
-            if (transCountTrunked == 9999999999L) {
-                transactionCount = 0;
-                bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
-            } else {
-                transactionCount++;
-            } // if else
-
+    protected String generateTransId(String transId) {
+        if (transId != null) {
             return transId;
-        }
+        } else {
+            synchronized (LOCK) {
+                long transCountTrunked = transactionCount % 10000000000L;
+                transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                        + String.format("%010d", transCountTrunked);
+
+                // check if the transactionCount must be restarted
+                if (transCountTrunked == 9999999999L) {
+                    transactionCount = 0;
+                    bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
+                } else {
+                    transactionCount++;
+                } // if else
+
+                return transId;
+            } // synchronized
+        } // else
     } // generateTransId
  
 } // OrionRestHandler
