@@ -19,9 +19,6 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.utils.Utils;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
-import org.apache.flume.lifecycle.LifecycleState;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,30 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OrionMongoSinkTest {
-    
-    /**
-     * [OrionMongoSink] -------- The sink starts properly.
-     */
-    @Test
-    public void testStart() {
-        System.out.println("[OrionMongoSink] -------- The sink starts properly");
-        String collectionPrefix = "sth_";
-        String dbPrefix = "sth_";
-        OrionMongoSink sink = new OrionMongoSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix));
-        sink.setChannel(new MemoryChannel());
-        sink.start();
-        LifecycleState state = sink.getLifecycleState();
-        
-        try {
-            assertEquals(LifecycleState.START, state);
-            System.out.println("[OrionMongoSink] -  OK  - The sink started properly, the lifecycle state is '"
-                    + state.toString() + "'");
-        } catch (AssertionError e) {
-            System.out.println("[OrionMongoSink] - FAIL - The sink did not start properly, the lifecycle state "
-                    + "is '" + state.toString() + "'");
-        } // try catch
-    } // testStart
     
     /**
      * [OrionMongoSink] -------- Configured 'collection_prefix' cannot be 'system.'.
