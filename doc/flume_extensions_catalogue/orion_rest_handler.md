@@ -1,5 +1,17 @@
-#OrionRESTHandler
-This document explains how a notified NGSI event containing context data is converted into a Flume event, suitable for being consumed by any of the Cygnus sinks, thanks to OrionRESTHandler
+#<a name="top"></a>OrionCKANSink
+Content:
+
+* [Functionality](#section1)
+    * [Mapping NGSI events to flume events](#section1.1)
+    * [Example](#section1.2)
+* [Administration guide](#section2)
+    * [Configuration](#section2.1)
+* [Programmers guide](#section3)
+    * [`OrionRestHandler` class](#section3.1)
+
+##<a name="section1"></a>Functionality
+###<a name"section1.1"></a>Mapping NGSI events to flume events
+This section explains how a notified NGSI event containing context data is converted into a Flume event, suitable for being consumed by any of the Cygnus sinks, thanks to OrionRESTHandler
 
 A NGSI-like event example could be (the code below is an <i>object representation</i>, not any real data format; look for it at [Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE)):
 
@@ -54,11 +66,11 @@ Flume events are not much more different than the above representation: there is
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	         entityId=car1,
@@ -93,3 +105,32 @@ The headers are a subset of the notified HTTP headers and others added by Cygnus
     * `grouped-entities`, an array that can be used by those sinks enabling the grouping feature.
 
 The body simply contains a byte representation of the HTTP payload that will be parsed by the sinks.
+
+[Top](#top)
+
+##<a name="section2"></a>Administration guide
+###<a name="section2.1"></a>Configuration
+`OrionRestHandler` is configured through the following parameters:
+
+| Parameter | Mandatory | Default value | Comments |
+|---|---|---|---|
+| notification\_target | no | `notify/` | Any other configured value must start with `/`. |
+| default\_service | no | `default` || 
+| default\_service\_path | no | `/` | `/` is the root service path (also know as root subservice). Any other configured value must start with `/`. |
+
+A configuration example could be:
+
+    cygnusagent.sources = http-source
+    ...
+    cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
+    cygnusagent.sources.http-source.notification_target = /notify
+    cygnusagent.sources.http-source.default_service = default
+    cygnusagent.sources.http-source.default_service_path = /
+
+[Top](#top)
+
+##<a name="section3"></a>Programmers guide
+###<a name="section3.1"></a>`OrionRestHandler` class
+TBD
+
+[Top](#top)

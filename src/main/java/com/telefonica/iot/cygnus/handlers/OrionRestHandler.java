@@ -52,6 +52,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionRestHandler.class);
     
     // configuration parameters
+    private boolean invalidConfiguration;
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
@@ -71,6 +72,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
      * time, it is the closest code to such real initialization.
      */
     public OrionRestHandler() {
+        // initially, the configuration is meant to be valid
+        invalidConfiguration = false;
+        
         // print Cygnus version
         LOGGER.info("Cygnus version (" + Utils.getCygnusVersion() + "." + Utils.getLastCommit() + ")");
     } // OrionRestHandler
@@ -138,47 +142,66 @@ public class OrionRestHandler implements HTTPSourceHandler {
     protected String getDefaultServicePath() {
         return defaultServicePath;
     } // getDefaultServicePath
+    
+    /**
+     * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
+     * required for testing purposes.
+     * @return
+     */
+    protected boolean getInvalidConfiguration() {
+        return invalidConfiguration;
+    } // getInvalidConfiguration
 
     @Override
     public void configure(Context context) {
-        notificationTarget = context.getString(Constants.PARAM_NOTIFICATION_TARGET, "notify");
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "=" + notificationTarget + ")");
-
-        if (notificationTarget.charAt(0) != '/') {
-            notificationTarget = "/" + notificationTarget;
-        } // if
+        notificationTarget = context.getString(Constants.PARAM_NOTIFICATION_TARGET, "/notify");
+        
+        if (notificationTarget.startsWith("/")) {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "="
+                    + notificationTarget + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration (" + Constants.PARAM_NOTIFICATION_TARGET + "="
+                    + notificationTarget + ") -- Must start with '/'");
+        } // if else
         
         defaultService = context.getString(Constants.PARAM_DEFAULT_SERVICE, "default");
         
         if (defaultService.length() > Constants.SERVICE_HEADER_MAX_LEN) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE + "' parameter length greater than "
-                    + Constants.SERVICE_HEADER_MAX_LEN + ")");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE
+                    + "' parameter length greater than " + Constants.SERVICE_HEADER_MAX_LEN + ")");
+        } else {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "="
+                    + defaultService + ")");
+        } // if else
         
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE + "=" + defaultService + ")");
         defaultServicePath = context.getString(Constants.PARAM_DEFAULT_SERVICE_PATH, "/");
         
         if (defaultServicePath.length() > Constants.SERVICE_PATH_HEADER_MAX_LEN) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' parameter length greater "
-                    + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' parameter length greater " + "than " + Constants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+        } else if (!defaultServicePath.startsWith("/")) {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' must start with '/')");
+        } else {
+            LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "="
+                    + defaultServicePath + ")");
+        } // if else
         
-        if (!defaultServicePath.startsWith("/")) {
-            LOGGER.error("Bad configuration ('" + Constants.PARAM_DEFAULT_SERVICE_PATH + "' must start with '/')");
-            LOGGER.info("Exiting Cygnus");
-            System.exit(-1);
-        } // if
-        
-        LOGGER.debug("Reading configuration (" + Constants.PARAM_DEFAULT_SERVICE_PATH + "=" + defaultServicePath + ")");
         LOGGER.info("Startup completed");
     } // configure
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        // if the configuration is invalid, nothing has to be done but to return null
+        if (invalidConfiguration) {
+            LOGGER.debug("Invalid configuration, thus returning an empty list of Flume events");
+            return new ArrayList<Event>();
+        } // if
+        
         numReceivedEvents++;
         
         // check the method
@@ -302,7 +325,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
     
     /**
      * Generates a new unique transaction identifier. The format for this id is:
-     * <bootTimeSeconds>-<bootTimeMilliseconds>-<transactionCount%10000000000>
+     * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
+     * @param transId An alrady existent transaction ID, most probably a notified one
      * @return A new unique transaction identifier
      */
     protected String generateTransId(String transId) {
