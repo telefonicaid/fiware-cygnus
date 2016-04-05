@@ -194,6 +194,15 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public void setNumPersistedEvents(long n) {
         numPersistedEvents = n;
     } // setNumPersistedEvents
+    
+    /**
+     * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
+     * required for testing purposes.
+     * @return
+     */
+    protected boolean getInvalidConfiguration() {
+        return invalidConfiguration;
+    } // getInvalidConfiguration
 
     @Override
     public void configure(Context context) {
