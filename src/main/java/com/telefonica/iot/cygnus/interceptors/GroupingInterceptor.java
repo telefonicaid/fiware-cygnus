@@ -76,27 +76,19 @@ public class GroupingInterceptor implements Interceptor {
         String body = new String(event.getBody());
         
         // get some original header values
-        String fiwareServicePath = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH);
+        String fiwareServicePath = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH);
         
         // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
         // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
         NotifyContextRequest notification;
+        Gson gson = new Gson();
 
-        if (headers.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
-            Gson gson = new Gson();
-
-            try {
-                notification = gson.fromJson(body, NotifyContextRequest.class);
-            } catch (Exception e) {
-                LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                return null;
-            } // try catch // try catch
-        } else {
-            // this point should never be reached since the content type has been checked when receiving the
-            // notification
-            LOGGER.error("Runtime error (Unrecognized content type (not Json)");
+        try {
+            notification = gson.fromJson(body, NotifyContextRequest.class);
+        } catch (Exception e) {
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
             return null;
-        } // if else if
+        } // try catch
         
         // iterate on the contextResponses
         ArrayList<String> defaultDestinations = new ArrayList<String>();

@@ -415,9 +415,9 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 MDC.put(Constants.LOG4J_TRANS,
                         event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
                 MDC.put(Constants.LOG4J_SVC,
-                        event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE));
+                        event.getHeaders().get(Constants.HEADER_FIWARE_SERVICE));
                 MDC.put(Constants.LOG4J_SUBSVC,
-                        event.getHeaders().get(Constants.HTTP_HEADER_FIWARE_SERVICE_PATH));
+                        event.getHeaders().get(Constants.HEADER_FIWARE_SERVICE_PATH));
             } catch (Exception e) {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch
@@ -502,24 +502,16 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
      */
     private NotifyContextRequest parseEventBody(Event event) throws Exception {
         String eventData = new String(event.getBody());
-        Map<String, String> eventHeaders = event.getHeaders();
 
-        // parse the eventData
+        // parse the event body as a Json document
         NotifyContextRequest notification = null;
+        Gson gson = new Gson();
 
-        if (eventHeaders.get(Constants.HEADER_CONTENT_TYPE).contains("application/json")) {
-            Gson gson = new Gson();
-
-            try {
-                notification = gson.fromJson(eventData, NotifyContextRequest.class);
-            } catch (Exception e) {
-                throw new CygnusBadContextData(e.getMessage());
-            } // try catch
-        } else {
-            // this point should never be reached since the content type has been checked when receiving the
-            // notification
-            throw new Exception("Unrecognized content type (not Json)");
-        } // if else if
+        try {
+            notification = gson.fromJson(eventData, NotifyContextRequest.class);
+        } catch (Exception e) {
+            throw new CygnusBadContextData(e.getMessage());
+        } // try catch
 
         return notification;
     } // parseEventBody
@@ -601,7 +593,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         private void accumulateByService(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
             String destination = service;
 
             if (!enableGrouping) {
@@ -627,7 +619,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         private void accumulateByServicePath(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
 
             if (!enableGrouping) {
                 String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
@@ -654,7 +646,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         private void accumulateByEntity(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
 
             if (!enableGrouping) {
                 String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
@@ -683,7 +675,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
         private void accumulateByAttribute(Map<String, String> headers, NotifyContextRequest notification) {
             Long recvTimeTs = new Long(headers.get(Constants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(Constants.HTTP_HEADER_FIWARE_SERVICE);
+            String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
             ArrayList<ContextElementResponse> contextElementResponses = notification.getContextResponses();
 
             if (!enableGrouping) {
