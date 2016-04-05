@@ -62,5 +62,10 @@ public class KafkaBackendImpl implements KafkaBackend {
         kafkaProducer.send(record);
     } // send
     
+    protected void setKafkaProducer(KafkaProducer producer) {
+        LOGGER.debug("Setting the producer to the backend.");
+        this.kafkaProducer = producer;
+    } // setKafkaProducer
+    
 } // KafkaBackendImpl
 
