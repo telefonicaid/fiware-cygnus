@@ -106,22 +106,54 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         numProcessedEvents = 0;
         numPersistedEvents = 0;
     } // OrionSink
+    
+    /**
+     * Gets the batch size.
+     * @return The batch size.
+     */
+    protected int getBatchSize() {
+        return batchSize;
+    } // getBatchSize
+    
+    /**
+     * Gets the batch timeout.
+     * @return The batch timeout.
+     */
+    protected int getBatchTimeout() {
+        return batchTimeout;
+    } // getBatchTimeout
+    
+    /**
+     * Gets the batch TTL.
+     * @return The batch TTL.
+     */
+    protected int getBatchTTL() {
+        return batchTTL;
+    } // getBatchTTL
+    
+    /**
+     * Gets the data model.
+     * @return The data model
+     */
+    protected DataModel getDataModel() {
+        return dataModel;
+    } // getDataModel
 
     /**
      * Gets if the grouping feature is enabled.
      * @return True if the grouping feature is enabled, false otherwise.
      */
-    public boolean getEnableGrouping() {
+    protected boolean getEnableGrouping() {
         return enableGrouping;
     } // getEnableGrouping
 
     /**
-     * Gets the data model.
-     * @return The data model
+     * Gets if lower case is enabled.
+     * @return True is lower case is enabled, false otherwise.
      */
-    public DataModel getDataModel() {
-        return dataModel;
-    } // getDataModel
+    protected boolean getEnableLowerCase() {
+        return enableLowercase;
+    } // getEnableLowerCase
 
     /**
      * Gets the setup time.
@@ -162,6 +194,15 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
     public void setNumPersistedEvents(long n) {
         numPersistedEvents = n;
     } // setNumPersistedEvents
+    
+    /**
+     * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
+     * required for testing purposes.
+     * @return
+     */
+    protected boolean getInvalidConfiguration() {
+        return invalidConfiguration;
+    } // getInvalidConfiguration
 
     @Override
     public void configure(Context context) {
