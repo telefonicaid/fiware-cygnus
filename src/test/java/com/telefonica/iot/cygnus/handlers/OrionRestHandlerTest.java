@@ -25,8 +25,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
+import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
@@ -216,21 +220,80 @@ public class OrionRestHandlerTest {
         String configuredDefaultServicePath = "something"; // wrong value
         handler.configure(createContext(configuredNotificationTarget, configuredDefaultService,
                 configuredDefaultServicePath));
+        List<Event> events;
         
         try {
-            assertEquals(0, handler.getEvents(mockHttpServletRequest1).size());
-            System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
-                    + "configuration is wrong");
-        } catch (AssertionError e1) {
-            System.out.println("[OrionRestHandler.getEvents] - FAIL - The events are being processed "
-                    + "despite of the configuration is wrong");
-            throw e1;
-        } catch (Exception e2) {
+            events = handler.getEvents(mockHttpServletRequest1);
+            
+            try {
+                assertEquals(0, events.size());
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
+                        + "configuration is wrong");
+            } catch (AssertionError e1) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The events are being processed "
+                        + "despite of the configuration is wrong");
+                throw e1;
+            } // try catch
+        } catch (Exception ex) {
             System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
                     + "the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsNullEventsUponInvalidConfiguration
+    
+    /**
+     * [OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains fiware-service,
+     * fiware-servicepath and fiware-correlator headers.
+     */
+    @Test
+    public void testGetEventsHeadersInFlumeEvent() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains "
+                + "fiware-service, fiware-servicepath and fiware-correlator headers");
+        OrionRestHandler handler = new OrionRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        Map<String, String> headers;
+        
+        try {
+            headers = handler.getEvents(mockHttpServletRequest1).get(0).getHeaders();
+            
+            try {
+                assertTrue(headers.containsKey("fiware-service"));
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
+                        + "'fiware-service'");
+            } catch (AssertionError e1) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
+                        + "contains 'fiware-servicepath'");
+                throw e1;
+            } // try catch
+            
+            try {
+                assertTrue(headers.containsKey("fiware-servicepath"));
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
+                        + "'fiware-service'");
+            } catch (AssertionError e2) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
+                        + "contains 'fiware-servicepath'");
+                throw e2;
+            } // try catch
+/*   
+            TDB: uncomment when current fiware-transaction if renamed as fiware-correlator
+            
+            try {
+                assertTrue(headers.containsKey("fiware-correlator"));
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
+                        + "'fiware-correlator'");
+            } catch (AssertionError e3) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
+                        + "contains 'fiware-correlator'");
+                throw e3;
+            } // try catch
+*/
+        } catch (Exception e) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
+                    + "the events");
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsHeadersInFlumeEvent
     
     /**
      * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
