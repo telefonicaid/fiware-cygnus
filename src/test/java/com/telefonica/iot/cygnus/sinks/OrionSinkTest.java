@@ -21,6 +21,8 @@ import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -42,6 +44,13 @@ public class OrionSinkTest {
         } // persistBatch
         
     } // OrionSinkImpl
+    
+    /**
+     * Constructor.
+     */
+    public OrionSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.ERROR);
+    } // OrionSinkTest
     
     /**
      * [OrionSink] -------- The sink starts properly.
