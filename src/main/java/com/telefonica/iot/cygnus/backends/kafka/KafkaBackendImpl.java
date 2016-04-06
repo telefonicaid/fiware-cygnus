@@ -36,8 +36,7 @@ public class KafkaBackendImpl implements KafkaBackend {
     
     private KafkaProducer<String, String> kafkaProducer;
     private static final CygnusLogger LOGGER = new CygnusLogger(KafkaBackendImpl.class);
-    private ZkClient zookeeperClient;
-    private Properties properties;
+    private final String zkEndpoint;
     
     /**
      * Constructor.
@@ -45,14 +44,11 @@ public class KafkaBackendImpl implements KafkaBackend {
      * @param zookeperEndpoint
      */
     public KafkaBackendImpl(String brokerList, String zookeperEndpoint) {
-        properties = new Properties();
+        zkEndpoint = zookeperEndpoint;
+        Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        
-        // create the Zookeeper client
-        zookeeperClient = new ZkClient(zookeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
-        
         LOGGER.debug("Creating persistence backend.");
         kafkaProducer = new KafkaProducer<String, String>(properties);
     } // KafkaBackendImpl
@@ -60,12 +56,14 @@ public class KafkaBackendImpl implements KafkaBackend {
     @Override
     public boolean topicExists(String topic) throws Exception {
         LOGGER.debug("Checking if topic '" + topic + "' already exists.");
+        ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         return AdminUtils.topicExists(zookeeperClient, topic);
     } // topicExists
 
     @Override
     public void createTopic(String topic, int partitions, int replicationFactor) {
-        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, properties);
+        ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
+        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, new Properties());
         LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions 
                 + " , " + "replication factor: " + replicationFactor + ".");
     } // createTopic

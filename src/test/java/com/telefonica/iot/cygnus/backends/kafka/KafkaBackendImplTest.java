@@ -58,9 +58,10 @@ public class KafkaBackendImplTest {
     
     @Test
     public void recordIsAddedAndSent() throws Exception {
-        KafkaBackendImpl backendImpl = new KafkaBackendImpl("localhost:9092", "");    
+        // null zookeeperEndpoint because is not necessary for pass the tests 
+        KafkaBackendImpl backendImpl = new KafkaBackendImpl("0.0.0.0:9092", null);    
         backendImpl.setKafkaProducer(mockKafkaProducer);
-        System.out.println("[KafkaBackendImplTest ] -------- Adding a record to send -------- ");
+        System.out.println("[KafkaBackendImplTest ] -------- The backend sends a message to Kafka -------- ");
         
         try {
             backendImpl.send(Mockito.any(ProducerRecord.class));  
