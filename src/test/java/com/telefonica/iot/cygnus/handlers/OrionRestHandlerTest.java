@@ -27,12 +27,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -50,7 +51,10 @@ public class OrionRestHandlerTest {
     
     // Mocks
     @Mock
-    private HttpServletRequest mockHttpServletRequest1;
+    private HttpServletRequest mockHttpServletRequest;
+    
+    // Other variables
+    JSONObject notification;
     
     /**
      * Constructor.
@@ -67,17 +71,38 @@ public class OrionRestHandlerTest {
      */
     @Before
     public void setUp() throws Exception {
-        when(mockHttpServletRequest1.getMethod()).thenReturn("POST");
-        when(mockHttpServletRequest1.getRequestURI()).thenReturn("/notify");
+        when(mockHttpServletRequest.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest.getRequestURI()).thenReturn("/notify");
         String[] headerNames = {"Content-Type", "fiware-service", "fiware-servicePath"};
-        when(mockHttpServletRequest1.getHeaderNames()).thenReturn(
+        when(mockHttpServletRequest.getHeaderNames()).thenReturn(
                 Collections.enumeration(new ArrayList(Arrays.asList(headerNames))));
-        when(mockHttpServletRequest1.getHeader("content-type")).thenReturn("application/json");
-        when(mockHttpServletRequest1.getHeader("fiware-service")).thenReturn("myservice");
-        when(mockHttpServletRequest1.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
-        when(mockHttpServletRequest1.getReader()).thenReturn(
+        when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json");
+        when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
+        JSONObject attributes = new JSONObject();
+        attributes.put("name", "temperature");
+        attributes.put("type", "centigrade");
+        attributes.put("value", "26.5");
+        JSONObject contextElement = new JSONObject();
+        contextElement.put("attributes",attributes);
+        contextElement.put("type", "Room");
+        contextElement.put("isPattern", "false");
+        contextElement.put("id", "room1");
+        JSONObject statusCode = new JSONObject();
+        statusCode.put("code", "200");
+        statusCode.put("reasonPhrase", "OK");
+        JSONObject contextResponse = new JSONObject();
+        contextResponse.put("contextElement", contextElement);
+        contextResponse.put("statusCode", statusCode);
+        JSONArray contextResponses = new JSONArray();
+        contextResponses.add(contextResponse);
+        notification = new JSONObject();
+        notification.put("subscriptionId", "51c0ac9ed714fb3b37d7d5a8");
+        notification.put("originator", "localhost");
+        notification.put("contextResponses", contextResponses);
+        when(mockHttpServletRequest.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                        "something_not_empty".getBytes()))));
+                        notification.toJSONString().getBytes()))));
     } // setUp
     
     /**
@@ -178,7 +203,7 @@ public class OrionRestHandlerTest {
         handler.configure(createContext(null, null, null)); // default configuration
         
         try {
-            handler.getEvents(mockHttpServletRequest1);
+            handler.getEvents(mockHttpServletRequest);
             assertTrue(true);
             System.out.println("[OrionRestHandler.getEvents] -  OK  - The value for 'Content-Type' header is "
                     + "'application/json'");
@@ -223,7 +248,7 @@ public class OrionRestHandlerTest {
         List<Event> events;
         
         try {
-            events = handler.getEvents(mockHttpServletRequest1);
+            events = handler.getEvents(mockHttpServletRequest);
             
             try {
                 assertEquals(0, events.size());
@@ -242,6 +267,35 @@ public class OrionRestHandlerTest {
     } // testGetEventsNullEventsUponInvalidConfiguration
     
     /**
+     * [OrionRestHandler.getEvents] -------- When a notification is sent as a Http message, a single Flume event
+     * is generated.
+     */
+    @Test
+    public void testGetEventsSingleEvent() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a notification is sent as a Http message, "
+                + "a single Flume event is generated");
+        OrionRestHandler handler = new OrionRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        List<Event> events;
+        
+        try {
+            events = handler.getEvents(mockHttpServletRequest);
+            
+            try {
+                assertEquals(1, events.size());
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - A single event has been generated");
+            } catch (AssertionError e1) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - 0, 2 or more than an event were generated");
+                throw e1;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
+                    + "the events");
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsSingleEvent
+    
+    /**
      * [OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains fiware-service,
      * fiware-servicepath and fiware-correlator headers.
      */
@@ -254,7 +308,7 @@ public class OrionRestHandlerTest {
         Map<String, String> headers;
         
         try {
-            headers = handler.getEvents(mockHttpServletRequest1).get(0).getHeaders();
+            headers = handler.getEvents(mockHttpServletRequest).get(0).getHeaders();
             
             try {
                 assertTrue(headers.containsKey("fiware-service"));
@@ -294,6 +348,50 @@ public class OrionRestHandlerTest {
             assertTrue(false);
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
+    
+    /**
+     * [OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains the payload of the Http
+     * notification as body.
+     */
+    @Test
+    public void testGetEventsBodyInFlumeEvent() {
+        System.out.println("[OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains "
+                + "the payload of the Http notification as body");
+        OrionRestHandler handler = new OrionRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        byte[] body;
+        
+        try {
+            body = handler.getEvents(mockHttpServletRequest).get(0).getBody();
+            byte[] notificationBytes = notification.toJSONString().getBytes();
+            boolean areEqual = true;
+            
+            if (body.length != notificationBytes.length) {
+                areEqual = false;
+            } else {
+                for (int i = 0; i < body.length; i++) {
+                    if (body[i] != notificationBytes[i]) {
+                        areEqual = false;
+                        break;
+                    } // if
+                } // for
+            } // if else
+            
+            try {
+                assertTrue(areEqual);
+                System.out.println("[OrionRestHandler.getEvents] -  OK  - The event body '" + new String(body)
+                        + "' is equal to the notification Json '" + new String(notificationBytes) + "'");
+            } catch (AssertionError e1) {
+                System.out.println("[OrionRestHandler.getEvents] - FAIL - The event body '" + new String(body)
+                        + "' is nbot equal to the notification Json '" + new String(notificationBytes) + "'");
+                throw e1;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
+                    + "the events");
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsBodyInFlumeEvent
     
     /**
      * [OrionRestHandler.generateTransId] -------- When a transcation ID is notified, it is reused.
