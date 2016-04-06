@@ -29,23 +29,22 @@ public final class Constants {
      */
     private Constants() {
     } // Constants
-
-    // HTTP header names
-    public static final String HTTP_HEADER_FIWARE_SERVICE      = "fiware-service";
-    public static final String HTTP_HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
+    
+    // Http header names
+    public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
     
     // Flume header names
     public static final String FLUME_HEADER_NOTIFIED_SERVICE_PATHS = "notified-servicepaths";
     public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
     public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
     public static final String FLUME_HEADER_GROUPED_ENTITIES       = "grouped-entities";
-    public static final String FLUME_HEADER_TTL                    = "ttl";
     public static final String FLUME_HEADER_TIMESTAMP              = "timestamp";
     
     // Both HTTP and Flume header names
-    public static final String HEADER_CONTENT_TYPE   = "content-type";
-    public static final String HEADER_USER_AGENT     = "user-agent";
-    public static final String HEADER_TRANSACTION_ID = "fiware-transaction";
+    
+    public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
+    public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
+    public static final String HEADER_TRANSACTION_ID      = "fiware-transaction";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS        = "recvTimeTs";
@@ -74,7 +73,6 @@ public final class Constants {
     public static final String PARAM_DEFAULT_SERVICE      = "default_service";
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
     public static final String PARAM_NOTIFICATION_TARGET  = "notification_target";
-    public static final String PARAM_EVENTS_TTL           = "events_ttl";
     
     // OrionSTHSink specific headers
     public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 113;

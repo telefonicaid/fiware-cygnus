@@ -28,3 +28,4 @@
 - [BUG] Remove 'Z' character (UTC mark) when encoding the reception time in OrionMySQLSink (#909)
 - [HARDENING] Create a backend for OrionKafkaSink (#912)
 - [HARDENING] Invalidate configurations instead of exiting Cygnus upon wrong configuration (#917)
+- [HARDENING] Remove the user-agent header, and consider content-type as a Http-only header (#920)
