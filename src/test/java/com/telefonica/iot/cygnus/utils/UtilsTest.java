@@ -165,4 +165,30 @@ public class UtilsTest {
         } // try catch
     } // testGetTimeInstantSQLTimestampWithMiliseconds
     
+    /**
+     * [Utils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp with microseconds.
+     */
+    @Test
+    public void testGetTimeInstantSQLTimestampWithMicroseconds() {
+        System.out.println("[Utils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL "
+                + "timestamp with microseconds");
+        JSONObject metadataJson = new JSONObject();
+        metadataJson.put("name", "TimeInstant");
+        metadataJson.put("type", "SQL timestamp");
+        metadataJson.put("value", "2017-01-01 00:00:01.123456");
+        JSONArray metadatasJson = new JSONArray();
+        metadatasJson.add(metadataJson);
+        String metadatasStr = metadatasJson.toJSONString();
+        Long timeInstant = Utils.getTimeInstant(metadatasStr);
+
+        try {
+            assertTrue(timeInstant != null);
+            System.out.println("[Utils.getTimeInstant] -  OK  - Time instant obtained for '"
+                    + metadatasJson.toJSONString() + "' is '" + timeInstant + "'");
+        } catch (AssertionError e) {
+            System.out.println("[Utils.getTimeInstant] - FAIL - Time instant obtained is 'null'");
+            throw e;
+        } // try catch
+    } // testGetTimeInstantSQLTimestampWithMicroseconds
+    
 } // UtilsTest

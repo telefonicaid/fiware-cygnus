@@ -300,7 +300,15 @@ public final class Utils {
                                         dateTime = FORMATTER4.parseDateTime(mdValue);
                                     } catch (Exception e5) {
                                         LOGGER.debug(e5.getMessage());
-                                        return null;
+                                        
+                                        try {
+                                            // SQL timestamp with microseconds
+                                            String mdValueTruncated = mdValue.substring(0, mdValue.length() - 3);
+                                            dateTime = FORMATTER4.parseDateTime(mdValueTruncated);
+                                        } catch (Exception e6) {
+                                            LOGGER.debug(e6.getMessage());
+                                            return null;
+                                        } // try catch
                                     } // try catch
                                 } // try catch
                             } // try catch
