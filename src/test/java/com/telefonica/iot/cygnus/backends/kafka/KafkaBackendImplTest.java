@@ -18,7 +18,6 @@
 package com.telefonica.iot.cygnus.backends.kafka;
 
 import java.util.Properties;
-import kafka.admin.AdminUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -59,16 +58,16 @@ public class KafkaBackendImplTest {
     
     @Test
     public void recordIsAddedAndSent() throws Exception {
-        KafkaBackendImpl backendImpl = new KafkaBackendImpl(createProperties());    
+        KafkaBackendImpl backendImpl = new KafkaBackendImpl("localhost:9092", "");    
         backendImpl.setKafkaProducer(mockKafkaProducer);
-        System.out.println("[KafkaBackendImplTest] ---- Adding a record to send ---- ");
+        System.out.println("[KafkaBackendImplTest ] -------- Adding a record to send -------- ");
         
         try {
-            backendImpl.send(Mockito.any(ProducerRecord.class));   
-            System.out.println("[KafkaBackendImpl.createTopic] -  OK  - Added to send");
+            backendImpl.send(Mockito.any(ProducerRecord.class));  
+            System.out.println("[KafkaBackendImpl.send] -  OK  - Added to be sent");
             assertTrue(true);
         } catch (AssertionError e) {
-            System.out.println("[KafkaBackendImpl.createTopic] -  FAIL  - Addition failed");
+            System.out.println("[KafkaBackendImpl.send] - FAIL - Addition failed");
             throw e;
         } // try catch
         

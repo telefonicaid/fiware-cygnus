@@ -25,13 +25,9 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.ArrayList;
-import java.util.Properties;
-import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 
 /**
  *
@@ -114,19 +110,12 @@ public class OrionKafkaSink extends OrionSink {
     public void start() {
         // create the persistence backend
         try {
-            Properties props = new Properties();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
-            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            persistenceBackend = new KafkaBackendImpl(props);
+            persistenceBackend = new KafkaBackendImpl(brokerList, zookeeperEndpoint);
             LOGGER.debug("[" + this.getName() + "] Kafka persistence backend (KafkaProducer) created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the Kafka persistence backend (KafkaProducer). Details="
                     + e.getMessage());
         } // try catch
-
-        // create the Zookeeper client
-        zookeeperClient = new ZkClient(zookeeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
 
         super.start();
     } // start
@@ -296,11 +285,11 @@ public class OrionKafkaSink extends OrionSink {
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
 
-        if (!persistenceBackend.topicExists(zookeeperClient, topicName)) {
+        if (!persistenceBackend.topicExists(topicName)) {
             LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
                     + "Topic: " + topicName + " , partitions: " + partitions + " , "
                     + "replication factor: " + replicationFactor);
-            persistenceBackend.createTopic(zookeeperClient, topicName, partitions, replicationFactor, new Properties());
+            persistenceBackend.createTopic(topicName, partitions, replicationFactor);
         } // if
 
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("

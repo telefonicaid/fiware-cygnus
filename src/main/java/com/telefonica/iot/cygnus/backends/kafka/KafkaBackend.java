@@ -17,8 +17,6 @@
  */
 package com.telefonica.iot.cygnus.backends.kafka;
 
-import java.util.Properties;
-import org.I0Itec.zkclient.ZkClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
@@ -30,22 +28,19 @@ public interface KafkaBackend {
     
     /**
      * Check if a topic exists.
-     * @param zookeeperClient
      * @param topic
      * @return 
      * @throws Exception
      */
-    boolean topicExists(ZkClient zookeeperClient, String topic) throws Exception;
+    boolean topicExists(String topic) throws Exception;
     
     /** 
      * Create a topic.
-     * @param zookeeperClient
      * @param topic
      * @param partitions
-     * @param replicationFactor
-     * @param props 
+     * @param replicationFactor 
      */
-    void createTopic(ZkClient zookeeperClient, String topic, int partitions, int replicationFactor, Properties props);
+    void createTopic(String topic, int partitions, int replicationFactor);
     
     /**
      * Send a record.

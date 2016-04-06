@@ -20,9 +20,12 @@ package com.telefonica.iot.cygnus.backends.kafka;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.Properties;
 import kafka.admin.AdminUtils;
+import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 /**
  *
@@ -33,33 +36,44 @@ public class KafkaBackendImpl implements KafkaBackend {
     
     private KafkaProducer<String, String> kafkaProducer;
     private static final CygnusLogger LOGGER = new CygnusLogger(KafkaBackendImpl.class);
+    private ZkClient zookeeperClient;
+    private Properties properties;
     
     /**
      * Constructor.
-     * @param properties 
+     * @param brokerList
+     * @param zookeperEndpoint
      */
-    public KafkaBackendImpl(Properties properties) {
+    public KafkaBackendImpl(String brokerList, String zookeperEndpoint) {
+        properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        
+        // create the Zookeeper client
+        zookeeperClient = new ZkClient(zookeperEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
+        
         LOGGER.debug("Creating persistence backend.");
         kafkaProducer = new KafkaProducer<String, String>(properties);
     } // KafkaBackendImpl
 
     @Override
-    public boolean topicExists(ZkClient zookeeperClient, String topic) throws Exception {
+    public boolean topicExists(String topic) throws Exception {
         LOGGER.debug("Checking if topic '" + topic + "' already exists.");
         return AdminUtils.topicExists(zookeeperClient, topic);
     } // topicExists
 
     @Override
-    public void createTopic(ZkClient zookeeperClient, String topic, 
-            int partitions, int replicationFactor, Properties props) {
-        LOGGER.debug("Add the details of the topic being created.");
-        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, props);
+    public void createTopic(String topic, int partitions, int replicationFactor) {
+        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, properties);
+        LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions 
+                + " , " + "replication factor: " + replicationFactor + ".");
     } // createTopic
 
     @Override
     public void send(ProducerRecord<String, String> record) {
-        LOGGER.debug("Add the record to be sent.");
         kafkaProducer.send(record);
+        LOGGER.debug("Record: '" + record + "' sent to Kafka.");
     } // send
     
     protected void setKafkaProducer(KafkaProducer producer) {
