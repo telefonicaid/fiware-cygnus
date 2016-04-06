@@ -44,12 +44,12 @@ public class KafkaBackendImpl implements KafkaBackend {
      * @param zookeperEndpoint
      */
     public KafkaBackendImpl(String brokerList, String zookeperEndpoint) {
+        LOGGER.debug("Creating persistence backend.");
         zkEndpoint = zookeperEndpoint;
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        LOGGER.debug("Creating persistence backend.");
         kafkaProducer = new KafkaProducer<String, String>(properties);
     } // KafkaBackendImpl
 
@@ -63,7 +63,7 @@ public class KafkaBackendImpl implements KafkaBackend {
     @Override
     public void createTopic(String topic, int partitions, int replicationFactor) {
         ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
-        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, new Properties());
+        AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, null);
         LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions 
                 + " , " + "replication factor: " + replicationFactor + ".");
     } // createTopic

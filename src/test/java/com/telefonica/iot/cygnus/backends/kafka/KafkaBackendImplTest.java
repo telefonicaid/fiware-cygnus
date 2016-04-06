@@ -74,11 +74,4 @@ public class KafkaBackendImplTest {
         
     } // testTopicNameIsCreatedAndExists 
     
-    private Properties createProperties() {
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return props;
-    }
 } // KafkaBackendImplTest
