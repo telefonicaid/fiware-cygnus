@@ -17,6 +17,9 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import static org.junit.Assert.assertEquals;
@@ -29,11 +32,19 @@ import org.junit.Test;
 public class GroupingRuleTest {
     
     /**
-     * [Groupingrule] -------- fiware-servicePath field in a grouping rule must start with '/'.
+     * Constructor.
+     */
+    public GroupingRuleTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // GroupingRuleTest
+    
+    /**
+     * [Groupingrule.isValid] -------- fiware-servicePath field in a grouping rule must start with '/'.
      */
     @Test
     public void testFiwareServicePathStartsWithSlash() {
-        System.out.println("[GroupingRule] -------- fiware-servicePath field in a grouping rule must start with '/'");
+        System.out.println(getTestTraceHead("[GroupingRule.isValid]")
+                + "-------- fiware-servicePath field in a grouping rule must start with '/'");
         JSONObject jsonRule = new JSONObject();
         JSONArray fields = new JSONArray();
         fields.add("entityId");
@@ -44,10 +55,12 @@ public class GroupingRuleTest {
         
         try {
             assertEquals(0, GroupingRule.isValid(jsonRule, true));
-            System.out.println("[GroupingRule] -  OK  - The fiware-servicePath field in the rule '"
+            System.out.println(getTestTraceHead("[GroupingRule.isValid]")
+                    + "-  OK  - The fiware-servicePath field in the rule '"
                     + jsonRule.toJSONString() + "' starts with '/'");
         } catch (AssertionError e) {
-            System.out.println("[GroupingRule] - FAIL - The fiware-servicePath field in the rule '"
+            System.out.println(getTestTraceHead("[GroupingRule.isValid]")
+                    + "- FAIL - The fiware-servicePath field in the rule '"
                     + jsonRule.toJSONString() + "' does not start with '/'");
             throw e;
         } // try catch
