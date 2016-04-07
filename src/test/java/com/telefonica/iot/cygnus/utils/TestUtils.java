@@ -20,17 +20,16 @@ package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import java.io.StringReader;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.xml.sax.InputSource;
 
 /**
  *
  * @author frb
  */
 public final class TestUtils {
+    
+    private static final int MAX_LEN_TEST_TRACE_HEAD = 40;
     
     /**
      * Constructor. It is private since utility clasess should not have a public or default constructor.
@@ -58,14 +57,13 @@ public final class TestUtils {
     } // createJsonNotifyContextRequest
     
     /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
+     * Gets a trace head.
+     * @param originalHead
+     * @return A trace head
      */
-    public static String encode(String in) {
-        String res = in.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-        return (res.startsWith("_") ? res.substring(1, res.length()) : res);
-    } // encode
-    
+    public static String getTestTraceHead(String originalHead) {
+        String traceHead = originalHead;
+        traceHead += " " + StringUtils.repeat("-", MAX_LEN_TEST_TRACE_HEAD - originalHead.length());
+        return traceHead;
+    } // getTestTraceHead
 } // TestUtils
