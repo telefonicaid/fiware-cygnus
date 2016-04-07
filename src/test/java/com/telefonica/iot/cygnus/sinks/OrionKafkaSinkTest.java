@@ -40,56 +40,56 @@ public class OrionKafkaSinkTest {
     public void testTopicNameDmByService() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
                 + "root service-path is notified/defaulted and data_model="
-                + "dm-by-service and enable_grouping=false, the Kafka topic name "
+                + "dm-by-service, the Kafka topic name "
                 + "is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-service"));
+        sink.configure(createContext("false", "dm-by-service"));
         String topic = sink.buildTopicName(service,servicePath,entity,attribute);
         
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
             System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation "
-                    + "[dm-by-service] Create topic is equals to <service>");
+                    + "[dm-by-service] Created topic is equals to <service>");
         } catch (AssertionError e) {
             System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation '"
                     + "[dm-by-service] Bad built topic: " + topic);
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByService
+    } // testTopicNameDmByService
     
     @Test
     public void testTopicNameDmByServiceWithSlashServicePath() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
                 + "root service-path is notified/defaulted and "
-                + "data_model=dm-by-service and enable_grouping=false, the Kafka "
+                + "data_model=dm-by-service, the Kafka "
                 + "topic name is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-service-path"));
+        sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
         
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
             System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation "
-                    + "[dm-by-service] Topic created is equals to <service>");
+                    + "[dm-by-service] Created topic is equals to <service>");
         } catch (AssertionError e) {
             System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation '"
                     + "[dm-by-service] Bad build topic: " + topic);
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByService
+    } // testTopicNameDmByServiceWithSlashServicePath
     
     @Test
     public void testTopicNameDmByServicePath() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
                 + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-service-path and enable_grouping=false, "
+                + "and data_model=dm-by-service-path, "
                 + "the Kafka topic name is <service>_<service-path>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-service-path"));
+        sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service,servicePath,entity,attribute);
         
         try {
@@ -103,16 +103,16 @@ public class OrionKafkaSinkTest {
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByServicePath 
+    } // testTopicNameDmByServicePath 
     
     @Test
     public void testTopicNameDmByServicePathWithSlashServicePath() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
                 + "root service-path is notified/defaulted and "
-                + "data_model=dm-by-service-path and enable_grouping=false, "
+                + "data_model=dm-by-service-path, "
                 + "the Kafka topic name is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-service-path"));
+        sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
         
         try {
@@ -126,62 +126,62 @@ public class OrionKafkaSinkTest {
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByServicePath    
+    } // testTopicNameDmByServicePathWithSlashServicePath    
     
     @Test
     public void testTopicNameDmByEntity() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
                 + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-entity and enable_grouping=false, the "
+                + "and data_model=dm-by-entity, the "
                 + "Kafka topic name is <service>_<service-path>_<entityId>_<entityType>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-entity"));
+        sink.configure(createContext("false", "dm-by-entity"));
         String topic = sink.buildTopicName(service,servicePath,entity,attribute);
         
         try {
             expectedTopic = "service_servicePath_entityId_entityType";
             assertEquals(expectedTopic, topic);
             System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation "
-                    + "[dm-by-entity] Create topic is equals to <service>_<servicePath>_<entityId>_<entityType>");
+                    + "[dm-by-entity] Created topic is equals to <service>_<servicePath>_<entityId>_<entityType>");
         } catch (AssertionError e) {
             System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation '"
                     + "[dm-by-entity] Bad built topic: " + topic);
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByEntity
+    } // testTopicNameDmByEntity
     
     @Test
     public void testTopicNameDmByEntityWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
+        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-"
-                + "entity and enable_grouping=false, the Kafka topic name is "
+                + "entity, the Kafka topic name is "
                 + "<service>_<entityId>_<entityType>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-entity"));
+        sink.configure(createContext("false", "dm-by-entity"));
         String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
         
         try {
             expectedTopic = "service_entityId_entityType";
             assertEquals(expectedTopic, topic);
             System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation "
-                    + "[dm-by-entity] Created topid is equals to <service>_<entityId>_<entityType>");
+                    + "[dm-by-entity] Created topic is equals to <service>_<entityId>_<entityType>");
         } catch (AssertionError e) {
             System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation '"
                     + "[dm-by-entity] Bad built topic: " + topic);
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByEntity
+    } // testTopicNameDmByEntityWithSlashServicePath
     
     @Test
     public void testTopicNameDmByAttribute() throws Exception {
         System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-"
-                + "attribute and enable_grouping=false, the Kafka topic name is "
+                + "attribute, the Kafka topic name is "
                 + "<service>_<service-path>_<entityId>_<entityType>_<attrName>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-attribute"));
+        sink.configure(createContext("false", "dm-by-attribute"));
         String topic = sink.buildTopicName(service,servicePath,entity,attribute);
         
         try {
@@ -195,16 +195,16 @@ public class OrionKafkaSinkTest {
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByAttribute
+    } // testTopicNameDmByAttribute
     
     @Test
     public void testTopicNameDmByAttributeWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
+        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
                 + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-attribute and enable_grouping=false, the "
+                + "and data_model=dm-by-attribute, the "
                 + "Kafka topic name is <service>_<entityId>_<entityType>_<attrName>");
         OrionKafkaSink sink = new OrionKafkaSink();
-        sink.configure(createContext("false", "false", "dm-by-attribute"));
+        sink.configure(createContext("false", "dm-by-attribute"));
         String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
         
         try {
@@ -218,12 +218,11 @@ public class OrionKafkaSinkTest {
             throw e;
         } // try catch
         
-    } // testTopicNamesDmByAttribute
+    } // testTopicNameDmByAttributeWithSlashServicePath
     
-    private Context createContext(String lowerCase, String grouping, String dataModel) {
+    private Context createContext(String lowerCase, String dataModel) {
         Context context = new Context();
         context.put("enable_lowercase", lowerCase);
-        context.put("enable_grouping", grouping);
         context.put("data_model", dataModel);
         return context;
     } // createContext
