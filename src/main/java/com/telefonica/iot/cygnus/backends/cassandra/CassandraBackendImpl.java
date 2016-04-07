@@ -176,11 +176,34 @@ public class CassandraBackendImpl implements CassandraBackend {
 
         Session session = driver.getSession(keyspaceName);
 
-        // FIXME fieldNames und fieldValues anpassen
-        Insert insert = QueryBuilder.insertInto(tableName).values(new String[0], new String[0]);
+        String[] names = splitToArray(fieldNames);
+        String[] values = splitToArray(fieldValues);
+        Insert insert = QueryBuilder.insertInto(tableName).values(names, values);
         LOGGER.debug("Executing CQL query '" + insert.getQueryString() + "'");
         session.execute(insert);
     } // insertContextData
+
+    /**
+     * Splits the String to an array.
+     *
+     * @param str a list of Strings like "(string1, string2, string3)
+     * @return an array containing the strings
+     */
+    private String[] splitToArray(String str) {
+        String[] array = str.split(",");
+        for (int i = 0; i < array.length; i++) {
+            String tmp = array[i];
+            while (tmp.startsWith("(")) {
+                tmp = tmp.substring(1);
+            } // while
+            while (tmp.endsWith(")")) {
+                tmp = tmp.substring(0, tmp.length() - 1);
+            } // while
+            tmp = tmp.trim();
+            array[i] = tmp;
+        } // for
+        return array;
+    } // splitToArray
 
     /**
      * This class represents the collection of created sessions to a Cassandra Cluster.
