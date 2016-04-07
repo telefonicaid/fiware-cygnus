@@ -49,10 +49,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equal to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -72,10 +72,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -95,10 +95,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service_servicePath";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -118,10 +118,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -141,10 +141,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service_servicePath_entityId_entityType";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -164,10 +164,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service_entityId_entityType";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -187,10 +187,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service_servicePath_entityId_entityType_attributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -210,10 +210,10 @@ public class OrionKafkaSinkTest {
         try {
             expectedTopic = "service_entityId_entityType_attributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - Succesful creation  - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - Failed creation - "
+            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
