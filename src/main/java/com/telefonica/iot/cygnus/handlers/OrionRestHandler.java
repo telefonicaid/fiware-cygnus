@@ -222,7 +222,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // check the headers looking for not supported user agents, content type and tenant/organization
         Enumeration headerNames = request.getHeaderNames();
-        String transId = null;
+        String corrId = null;
         String contentType = null;
         String service = null;
         String servicePath = null;
@@ -232,8 +232,8 @@ public class OrionRestHandler implements HTTPSourceHandler {
             String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
-            if (headerName.equals(Constants.HEADER_TRANSACTION_ID)) {
-                transId = headerValue;
+            if (headerName.equals(Constants.HEADER_CORRELATOR_ID)) {
+                corrId = headerValue;
             } else if (headerName.equals(Constants.HTTP_HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
@@ -277,10 +277,10 @@ public class OrionRestHandler implements HTTPSourceHandler {
         
         // get a transaction id if not sent in the notification, and store it in the log4j Mapped Diagnostic
         // Context (MDC); this way it will be accessible by the whole source code
-        transId = generateTransId(transId);
+        corrId = generateTransId(corrId);
         
-        MDC.put(Constants.LOG4J_TRANS, transId);
-        LOGGER.info("Starting transaction (" + transId + ")");
+        MDC.put(Constants.LOG4J_CORR, corrId);
+        LOGGER.info("Starting transaction (" + corrId + ")");
         
         // get the data content
         String data = "";
@@ -307,9 +307,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
                 ? defaultServicePath : servicePath);
         LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(Constants.HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_TRANSACTION_ID
-                + ", value=" + transId + ")");
+        eventHeaders.put(Constants.HEADER_CORRELATOR_ID, corrId);
+        LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_CORRELATOR_ID
+                + ", value=" + corrId + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();

@@ -412,8 +412,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
 
             // set the transactionId, fiwareservice and fiwareservicepath in MDC
             try {
-                MDC.put(Constants.LOG4J_TRANS,
-                        event.getHeaders().get(Constants.HEADER_TRANSACTION_ID));
+                MDC.put(Constants.LOG4J_CORR,
+                        event.getHeaders().get(Constants.HEADER_CORRELATOR_ID));
                 MDC.put(Constants.LOG4J_SVC,
                         event.getHeaders().get(Constants.HEADER_FIWARE_SERVICE));
                 MDC.put(Constants.LOG4J_SUBSVC,
@@ -565,7 +565,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
          * @param notification
          */
         public void accumulate(Map<String, String> headers, NotifyContextRequest notification) {
-            String transactionId = headers.get(Constants.HEADER_TRANSACTION_ID);
+            String transactionId = headers.get(Constants.HEADER_CORRELATOR_ID);
 
             if (accTransactionIds.isEmpty()) {
                 accTransactionIds = transactionId;
