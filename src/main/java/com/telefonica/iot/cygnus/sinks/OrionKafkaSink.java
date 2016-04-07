@@ -148,53 +148,9 @@ public class OrionKafkaSink extends OrionSink {
             batch.setPersisted(destination);
         } // for
     } // persistBatch
-
-    /**
-     * Class for aggregating aggregation.
-     */
-    private class KafkaAggregator {
-
-        // string containing the data aggregation
-        protected String aggregation;
-        protected String service;
-        protected String servicePath;
-        protected String entity;
-        protected String attribute;
-        protected String topic;
-
-        public KafkaAggregator() {
-            aggregation = "";
-        } // KafkaAggregator
-
-        public String getAggregation() {
-            return aggregation;
-        } // getAggregation
-
-        public String getService() {
-            return service;
-        } // getService
-
-        public String getServicePath() {
-            return servicePath;
-        } // servicePath
-
-        public String getTopic(boolean enableLowercase) {
-            if (enableLowercase) {
-                return topic.toLowerCase();
-            } else {
-                return topic;
-            } // else
-        } // getTopic
-
-        public void initialize(CygnusEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
-            topic = buildTopicName();
-        } // initialize
-
-        private String buildTopicName() throws Exception {
+    
+    protected String buildTopicName(String service, String servicePath,
+            String entity, String attribute) throws Exception {
             String name;
 
             switch (dataModel) {
@@ -262,6 +218,49 @@ public class OrionKafkaSink extends OrionSink {
             return name;
         } // buildTopic
 
+    /**
+     * Class for aggregating aggregation.
+     */
+    private class KafkaAggregator {
+
+        // string containing the data aggregation
+        protected String aggregation;
+        protected String service;
+        protected String servicePath;
+        protected String entity;
+        protected String attribute;
+
+        public KafkaAggregator() {
+            aggregation = "";
+        } // KafkaAggregator
+
+        public String getAggregation() {
+            return aggregation;
+        } // getAggregation
+
+        public String getService() {
+            return service;
+        } // getService
+
+        public String getServicePath() {
+            return servicePath;
+        } // getServicePath
+        
+        public String getEntity() {
+            return entity;
+        } // getEntity
+        
+        public String getAttribute() {
+            return attribute;
+        } // getAttribute
+
+        public void initialize(CygnusEvent cygnusEvent) throws Exception {
+            service = cygnusEvent.getService();
+            servicePath = cygnusEvent.getServicePath();
+            entity = cygnusEvent.getEntity();
+            attribute = cygnusEvent.getAttribute();
+        } // initialize
+
         public void aggregate(CygnusEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
@@ -280,7 +279,9 @@ public class OrionKafkaSink extends OrionSink {
 
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
-        String topicName = aggregator.getTopic(enableLowercase);
+        String topicName = buildTopicName(aggregator.getService(), 
+                aggregator.getServicePath(), aggregator.getEntity(), 
+                aggregator.getAttribute()).toLowerCase();
 
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
