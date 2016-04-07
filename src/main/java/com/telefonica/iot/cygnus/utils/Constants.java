@@ -44,7 +44,7 @@ public final class Constants {
     
     public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
     public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
-    public static final String HEADER_TRANSACTION_ID      = "fiware-transaction";
+    public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
 
     // Common fields for sinks/backends
     public static final String RECV_TIME_TS        = "recvTimeTs";
@@ -82,7 +82,7 @@ public final class Constants {
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
     
     // log4j specific constants
-    public static final String LOG4J_TRANS = "transactionId";
+    public static final String LOG4J_CORR = "correlatorId";
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
     
