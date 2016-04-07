@@ -329,9 +329,7 @@ public class OrionRestHandlerTest {
                         + "contains 'fiware-servicepath'");
                 throw e2;
             } // try catch
-/*   
-            TDB: uncomment when current fiware-transaction if renamed as fiware-correlator
-            
+
             try {
                 assertTrue(headers.containsKey("fiware-correlator"));
                 System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
@@ -341,7 +339,6 @@ public class OrionRestHandlerTest {
                         + "contains 'fiware-correlator'");
                 throw e3;
             } // try catch
-*/
         } catch (Exception e) {
             System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
                     + "the events");
