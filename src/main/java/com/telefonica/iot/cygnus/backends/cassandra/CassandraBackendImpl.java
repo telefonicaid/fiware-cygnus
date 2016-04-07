@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Cassandra related operations (database and table creation, context data insertion) when dealing with a Cassandra
@@ -148,6 +149,9 @@ public class CassandraBackendImpl implements CassandraBackend {
         }
         Session session = driver.getSession(keyspaceName);
 
+        typedFieldNames = typedFieldNames.substring(1);
+        typedFieldNames = "(id uuid PRIMARY KEY," + typedFieldNames;
+
         String query = String.format(CREATE_TABLE, tableName, typedFieldNames);
         executeQuery(session, query);
     } // createTable
@@ -177,8 +181,14 @@ public class CassandraBackendImpl implements CassandraBackend {
         Session session = driver.getSession(keyspaceName);
 
         String[] names = splitToArray(fieldNames);
+        String[] namesWithId = new String[names.length + 1];
+        namesWithId[0] = "id";
+        System.arraycopy(names, 0, namesWithId, 1, names.length);
         String[] values = splitToArray(fieldValues);
-        Insert insert = QueryBuilder.insertInto(tableName).values(names, values);
+        String[] valuesWithUUID = new String[values.length + 1];
+        valuesWithUUID[0] = UUID.randomUUID().toString();
+        System.arraycopy(values, 0, valuesWithUUID, 1, values.length);
+        Insert insert = QueryBuilder.insertInto(tableName).values(namesWithId, valuesWithUUID);
         LOGGER.debug("Executing CQL query '" + insert.getQueryString() + "'");
         session.execute(insert);
     } // insertContextData
