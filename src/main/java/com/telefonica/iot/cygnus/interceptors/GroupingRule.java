@@ -33,6 +33,7 @@ import org.json.simple.JSONObject;
 public class GroupingRule {
 
     private final JSONObject jsonRule;
+    private Pattern pattern;
 
     /**
      * Constructor.
@@ -40,6 +41,7 @@ public class GroupingRule {
      */
     public GroupingRule(JSONObject jsonRule) {
         this.jsonRule = jsonRule;
+        this.pattern = Pattern.compile((String) jsonRule.get("regex"));
     } // GroupingRule
 
     /**
@@ -79,7 +81,7 @@ public class GroupingRule {
      * @return The compiled pattern
      */
     public Pattern getPattern() {
-        return Pattern.compile((String) jsonRule.get("regex"));
+        return pattern;
     } // getPattern
 
     /**
