@@ -30,4 +30,3 @@
 - [HARDENING] Invalidate configurations instead of exiting Cygnus upon wrong configuration (#917)
 - [HARDENING] Add support for SQL timestamps with microseconds in Utils.getTimeInstant (#922)
 - [HARDENING] Remove the user-agent header, and consider content-type as a Http-only header (#920)
-- [HARDENING] Refactor method buildTopicName from OrionKafkaSink (#926)
