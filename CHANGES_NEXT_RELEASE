@@ -32,3 +32,4 @@
 - [HARDENING] Remove the user-agent header, and consider content-type as a Http-only header (#920)
 - [HARDENING] Precompile the regexes once read in GroupingRules.java (#928)
 - [HARDENING] Add an internal Transaction ID (#930)
+- [HARDENING] Use UUIDv4 in the generation of correlator and transaction IDs in OrionRestHandler (#931)

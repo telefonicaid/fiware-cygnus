@@ -36,6 +36,7 @@ import com.telefonica.iot.cygnus.utils.Utils;
 import java.util.Date;
 import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
+import java.util.UUID;
 
 /**
  *
@@ -342,20 +343,13 @@ public class OrionRestHandler implements HTTPSourceHandler {
         } else if (transactionId != null) {
             return transactionId;
         } else {
+            // Check this SOF link: A bug doesn't allow to uuid be thread-safe
+            // For that reason we use LOCK in order to avoid problems with treads
+            // http://stackoverflow.com/questions/7212635/is-java-util-uuid-thread-safe
             synchronized (LOCK) {
-                long transCountTrunked = transactionCount % 10000000000L;
-                notifiedId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
-                        + String.format("%010d", transCountTrunked);
-
-                // check if the transactionCount must be restarted
-                if (transCountTrunked == 9999999999L) {
-                    transactionCount = 0;
-                    bootTimeMiliseconds = (bootTimeMiliseconds + 1) % 1000; // this could also overflow!
-                } else {
-                    transactionCount++;
-                } // if else
-
-                return notifiedId;
+                UUID id = UUID.randomUUID();
+                LOGGER.debug("UUID GENERADO: " + id.toString());
+                return id.toString();
             } // synchronized
         } // else
     } // generateUniqueId
