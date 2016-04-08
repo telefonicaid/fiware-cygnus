@@ -7,7 +7,7 @@
 
 * [Welcome to Cygnus](#section1)
 * [Basic operation](#section2)
-    * [Hardware requirements](#section2.1) 
+    * [Hardware requirements](#section2.1)
     * [Installation (CentOS/RedHat)](#section2.2)
     * [Configuration](#section2.3)
     * [Running](#section2.4)
@@ -35,7 +35,7 @@ Current stable release is able to persist Orion context data in:
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [STH](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+* [FIWARE Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 
@@ -44,7 +44,7 @@ You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) b
 [Top](#top)
 
 ##<a name="section2"></a>Basic operation
-###<a name="section2.1"></a>Hardware requirements 
+###<a name="section2.1"></a>Hardware requirements
 * RAM: 1 GB, specially if abusing of the batching mechanism.
 * HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
@@ -60,11 +60,11 @@ Simply configure the FIWARE repository if not yet configured:
     gpgcheck=0
     enabled=1
     EOL
-    
+
 And use your applications manager in order to install the latest version of Cygnus:
 
     $ yum install cygnus
-    
+
 The above will install Cygnus in `/usr/cygnus/`.
 
 [Top](#top)
@@ -158,12 +158,12 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 > Fiware-Service: myservice
 > Fiware-ServicePath: myservicepath
 > Content-Length: 460
-> 
+>
 * upload completely sent off: 460 out of 460 bytes
 < HTTP/1.1 200 OK
 < Transfer-Encoding: chunked
 < Server: Jetty(6.1.26)
-< 
+<
 * Connection #0 to host localhost left intact
 ```
 
@@ -232,7 +232,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 ##<a name="section3"></a>Add a new image to the docker hub
 
-Everytime we release a new version (`<release version>`), please run the following commands (provided you have access to the docker hub of `fiware-cygnus`) 
+Everytime we release a new version (`<release version>`), please run the following commands (provided you have access to the docker hub of `fiware-cygnus`)
 
     docker-compose -f ./docker/0.compose.jar-compiler.yml -p cygnus run --rm compiler
     docker build -f ./docker/Dockerfile -t fiware/cygnus:<release version> .

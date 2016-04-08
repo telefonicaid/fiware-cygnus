@@ -48,19 +48,19 @@ import org.bson.Document;
  * @author xdelox
  */
 public class MongoBackendImpl implements MongoBackend {
-    
+
     /**
      * Available resolutions for aggregated data.
      */
     public enum Resolution { SECOND, MINUTE, HOUR, DAY, MONTH }
-    
+
     private MongoClient client;
     private final String mongoHosts;
     private final String mongoUsername;
     private final String mongoPassword;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
-            
+
     /**
      * Constructor.
      * @param mongoHosts
@@ -76,7 +76,7 @@ public class MongoBackendImpl implements MongoBackend {
         this.mongoPassword = mongoPassword;
         this.dataModel = dataModel;
     } // MongoBackendImpl
-    
+
     /**
      * Creates a database, given its name, if not exists.
      * @param dbName
@@ -87,9 +87,9 @@ public class MongoBackendImpl implements MongoBackend {
         LOGGER.debug("Creating Mongo database=" + dbName);
         getDatabase(dbName); // getting a non existent database automatically creates it
     } // createDatabase
-    
+
     /**
-     * Creates a collection for STH, given its name, if not exists in the given database. Time-based limits are set,
+     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
      * @param dbName
      * @param collectionName
@@ -111,7 +111,7 @@ public class MongoBackendImpl implements MongoBackend {
                 throw e;
             } // if else
         } // try catch
-        
+
         // ensure the _id.origin index, if possible
         try {
             if (dataExpiration != 0) {
@@ -123,7 +123,7 @@ public class MongoBackendImpl implements MongoBackend {
             throw e;
         } // try catch
     } // createCollection
-    
+
     /**
      * Creates a collection for plain MongoDB, given its name, if not exists in the given database. Size-based limits
      * are set, if possible. Time-based limits are also set, if possible.
@@ -171,7 +171,7 @@ public class MongoBackendImpl implements MongoBackend {
             throw e;
         } // try catch
     } // createCollection
-    
+
     /**
      * Inserts a new document in the given raw collection within the given database (row-like mode).
      * @param dbName
@@ -186,7 +186,7 @@ public class MongoBackendImpl implements MongoBackend {
         MongoCollection collection = db.getCollection(collectionName);
         collection.insertMany(aggregation);
     } // insertContextDataRaw
-    
+
     /**
      * Inserts a new document in the given aggregated collection within the given database (row-like mode).
      * @param dbName
@@ -208,7 +208,7 @@ public class MongoBackendImpl implements MongoBackend {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
-        
+
         // insert the data in an aggregated fashion for each resolution type
         insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                 attrName, attrType, attrValue, Resolution.SECOND);
@@ -221,7 +221,7 @@ public class MongoBackendImpl implements MongoBackend {
         insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                 attrName, attrType, attrValue, Resolution.MONTH);
     } // insertContextDataAggregated
-        
+
     /**
      * Inserts a new document with given resolution in the given aggregated collection within the given database
      * (row-like mode).
@@ -241,14 +241,14 @@ public class MongoBackendImpl implements MongoBackend {
         // get database and collection
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
-        
+
         // build the query
         BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolution);
-        
+
         // prepopulate if needed
         BasicDBObject insert = buildInsertForPrepopulate(attrType, attrValue, resolution);
         UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
-        
+
         if (res.getMatchedCount() == 0) {
             LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", query="
                     + query.toString() + ", insert=" + insert.toString());
@@ -273,7 +273,7 @@ public class MongoBackendImpl implements MongoBackend {
     private BasicDBObject buildQueryForInsertAggregated(GregorianCalendar calendar, String entityId, String entityType,
             String attrName, Resolution resolution) {
         int offset = 0;
-        
+
         switch (resolution) {
             case SECOND:
                 offset = calendar.get(Calendar.SECOND);
@@ -293,9 +293,9 @@ public class MongoBackendImpl implements MongoBackend {
             default:
                 // this should never be reached;
         } // switch
-        
+
         BasicDBObject query = new BasicDBObject();
-                
+
         switch (dataModel) {
             case DMBYSERVICEPATH:
                 query.append("_id", new BasicDBObject("entityId", entityId)
@@ -322,10 +322,10 @@ public class MongoBackendImpl implements MongoBackend {
             default:
                 // this will never be reached
         } // switch
-        
+
         return query;
     } // buildQueryForInsertAggregated
-    
+
     /**
      * Builds the Json update used when updating an aggregated collection.
      * @param attrType
@@ -337,7 +337,7 @@ public class MongoBackendImpl implements MongoBackend {
     private BasicDBObject buildUpdateForUpdate(String attrType, String attrValue, Resolution resolution,
             GregorianCalendar calendar) {
         BasicDBObject update = new BasicDBObject();
-        
+
         if (Utils.isANumber(attrValue)) {
             double value = new Double(attrValue);
             update.append("$set", new BasicDBObject("attrType", attrType))
@@ -346,7 +346,7 @@ public class MongoBackendImpl implements MongoBackend {
                             .append("points.$.sum2", Math.pow(value, 2)))
                     .append("$min", new BasicDBObject("points.$.min", value))
                     .append("$max", new BasicDBObject("points.$.max", value));
-            
+
         } else {
             int offset = getOffset(calendar, resolution);
             int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
@@ -354,10 +354,10 @@ public class MongoBackendImpl implements MongoBackend {
                     .append("$inc", new BasicDBObject("points.$.samples", 1)
                             .append("points." + modifiedOffset + ".occur." + attrValue, 1));
         } // if else
-        
+
         return update;
     } // buildUpdateForUpdate
-    
+
     /**
      * Builds the Json used to prepopulate an aggregated collection.
      * @param attrType
@@ -370,7 +370,7 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("points", buildPrepopulatedPoints(resolution, Utils.isANumber(attrValue))));
         return update;
     } // buildInsertForPrepopulate
-    
+
     /**
      * Builds the points part for the Json used to prepopulate.
      * @param resolution
@@ -379,7 +379,7 @@ public class MongoBackendImpl implements MongoBackend {
         BasicDBList prepopulatedData = new BasicDBList();
         int offsetOrigin = 0;
         int numValues = 0;
-        
+
         switch (resolution) {
             case SECOND:
                 numValues = 60;
@@ -401,7 +401,7 @@ public class MongoBackendImpl implements MongoBackend {
             default:
                 // should never be reached
         } // switch
-        
+
         if (isANumber) {
             for (int i = offsetOrigin; i < numValues; i++) {
                 prepopulatedData.add(new BasicDBObject("offset", i)
@@ -418,10 +418,10 @@ public class MongoBackendImpl implements MongoBackend {
                         .append("occur", new BasicDBObject()));
             } // for
         } // if else
-        
+
         return prepopulatedData;
     } // buildPrepopulatedPoints
-    
+
     /**
      * Gets a Mongo database.
      * @param dbName
@@ -431,14 +431,14 @@ public class MongoBackendImpl implements MongoBackend {
         // create a ServerAddress object for each configured URI
         List<ServerAddress> servers = new ArrayList<ServerAddress>();
         String[] uris = mongoHosts.split(",");
-        
+
         for (String uri: uris) {
             String[] uriParts = uri.split(":");
             servers.add(new ServerAddress(uriParts[0], new Integer(uriParts[1])));
         } // for
-        
+
         // create a Mongo client
-        
+
         if (client == null) {
             if (mongoUsername.length() != 0) {
                 MongoCredential credential = MongoCredential.createCredential(mongoUsername, dbName,
@@ -448,11 +448,11 @@ public class MongoBackendImpl implements MongoBackend {
                 client = new MongoClient(servers);
             } // if else
         } // if
-        
+
         // get the database
         return client.getDatabase(dbName);
     } // getDatabase
-    
+
     /**
      * Gets the range related to a resolution.
      * @param resolution
@@ -474,7 +474,7 @@ public class MongoBackendImpl implements MongoBackend {
                 return null; // this should never be returned
         } // switch
     } // getDataModel
-    
+
     /**
      * Gets the origin date for the aggregated collection.
      * @param calendar
@@ -488,7 +488,7 @@ public class MongoBackendImpl implements MongoBackend {
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int second;
-        
+
         switch (resolution) {
             case MONTH:
                 month = 0;
@@ -509,12 +509,12 @@ public class MongoBackendImpl implements MongoBackend {
                 // should never be reached
                 return null;
         } // switch
-        
+
         GregorianCalendar gc = new GregorianCalendar(year, month, day, hour, minute, second);
         gc.setTimeZone(TimeZone.getTimeZone("UTC"));
         return new Date(gc.getTimeInMillis());
     } // getOrigin
-    
+
     private int getOffset(GregorianCalendar calendar, Resolution resolution) {
         int offset;
 
@@ -538,10 +538,10 @@ public class MongoBackendImpl implements MongoBackend {
                 // should never be reached
                 offset = 0;
         } // switch
-        
+
         return offset;
     } // getOffset
-    
+
     /**
      * Stores in per-service/database "collection_names" collection the matching between a hash and the fields used to
      * build it.
@@ -581,10 +581,10 @@ public class MongoBackendImpl implements MongoBackend {
         // same field in a $set operation as a $setOnInsert operation. More details:
         // http://stackoverflow.com/questions/23992723/ \
         //     findandmodify-fails-with-error-cannot-update-field1-and-field1-at-the-same
-        
+
         // build the query
         BasicDBObject query = new BasicDBObject().append("_id", hash + (isAggregated ? ".aggr" : ""));
-        
+
         // do the first update
         BasicDBObject update = buildUpdateForCollectionHash("$setOnInsert", isAggregated, fiwareService,
                 fiwareServicePath, entityId, entityType, attrName, destination);
@@ -595,20 +595,20 @@ public class MongoBackendImpl implements MongoBackend {
         TECHDEBT:
         https://github.com/telefonicaid/fiware-cygnus/issues/428
         https://github.com/telefonicaid/fiware-cygnus/issues/429
-        
+
         if (res.getMatchedCount() == 0) {
             LOGGER.error("There was an error when storing the collecion hash, database=" + dbName
                     + ", collection=collection_names, query=" + query.toString() + ", update=" + update.toString());
             return;
         } // if
-        
+
         // do the second update
         update = buildUpdateForCollectionHash("$set", isAggregated, fiwareService, fiwareServicePath, entityId,
                 entityType, attrName, destination);
         LOGGER.debug("Updating data, database=" + dbName + ", collection=collection_names, query="
                 + query.toString() + ", update=" + update.toString());
         res = collection.updateOne(query, update);
-        
+
         if (res.getMatchedCount() == 0) {
             LOGGER.error("There was an error when storing the collecion hash, database=" + dbName
                     + ", collection=collection_names, query=" + query.toString() + ", update=" + update.toString());
@@ -630,5 +630,5 @@ public class MongoBackendImpl implements MongoBackend {
                 append("destination", destination));
         return update;
     } // buildUpdateForCollectionHash
-    
+
 } // MongoBackendImpl

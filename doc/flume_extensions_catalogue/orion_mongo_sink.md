@@ -313,10 +313,10 @@ Creates a collection, given its name, if not exists in the given database.
 
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
-Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for a single attribute. See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for a single attribute. See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, Map<String, String> attrs, Map<String, String> mds) throws Exception
 
-Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for multiple attributes. See STH at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for multiple attributes. See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 [Top](#top)
