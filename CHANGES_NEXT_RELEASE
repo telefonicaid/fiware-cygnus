@@ -33,3 +33,4 @@
 - [HARDENING] Precompile the regexes once read in GroupingRules.java (#928)
 - [HARDENING] Add an internal Transaction ID (#930)
 - [HARDENING] Replace all references to "STH" with "FIWARE Comet" (#573)
+- [HARDENING] Use UUIDv4 in the generation of correlator and transaction IDs in OrionRestHandler (#931)
