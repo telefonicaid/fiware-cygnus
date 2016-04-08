@@ -33,7 +33,7 @@ import org.json.simple.JSONObject;
 public class GroupingRule {
 
     private final JSONObject jsonRule;
-    private Pattern pattern;
+    private final Pattern pattern;
 
     /**
      * Constructor.
