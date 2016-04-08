@@ -34,6 +34,7 @@ public final class Constants {
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
     
     // Flume header names
+    public static final String FLUME_HEADER_TRANSACTION_ID         = "transaction-id";
     public static final String FLUME_HEADER_NOTIFIED_SERVICE_PATHS = "notified-servicepaths";
     public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
     public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
@@ -41,7 +42,6 @@ public final class Constants {
     public static final String FLUME_HEADER_TIMESTAMP              = "timestamp";
     
     // Both HTTP and Flume header names
-    
     public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
     public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
@@ -83,6 +83,7 @@ public final class Constants {
     
     // log4j specific constants
     public static final String LOG4J_CORR = "correlatorId";
+    public static final String LOG4J_TRANS = "transactionId";
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
     

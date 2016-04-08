@@ -319,7 +319,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
         // try persisting the rollbacked accumulation
         try {
             persistBatch(rollbackedAccumulation.getBatch());
-            LOGGER.info("Finishing transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+            LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
             rollbackedAccumulations.remove(0);
             numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
             return Status.READY;
@@ -339,7 +339,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                             + "batch TTL=" + rollbackedAccumulation.ttl);
                 } else {
                     rollbackedAccumulations.remove(0);
-                    LOGGER.info("TTL exhausted, finishing transaction ("
+                    LOGGER.info("TTL exhausted, finishing internal transaction ("
                             + rollbackedAccumulation.getAccTransactionIds() + ")");
                 } // if else
                 
@@ -410,10 +410,12 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 return Status.BACKOFF; // slow down the sink since no events are available
             } // if
 
-            // set the transactionId, fiwareservice and fiwareservicepath in MDC
+            // set the correlation ID, transaction ID, service and service path in MDC
             try {
                 MDC.put(Constants.LOG4J_CORR,
                         event.getHeaders().get(Constants.HEADER_CORRELATOR_ID));
+                MDC.put(Constants.LOG4J_TRANS,
+                        event.getHeaders().get(Constants.FLUME_HEADER_TRANSACTION_ID));
                 MDC.put(Constants.LOG4J_SVC,
                         event.getHeaders().get(Constants.HEADER_FIWARE_SERVICE));
                 MDC.put(Constants.LOG4J_SUBSVC,
@@ -444,7 +446,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                 persistBatch(accumulator.getBatch());
             } // if
 
-            LOGGER.info("Finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+            LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
             numPersistedEvents += accumulator.getBatch().getNumEvents();
             accumulator.initialize(new Date().getTime());
             txn.commit();
@@ -467,7 +469,8 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
                     LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
                             + "batch TTL=" + accumulator.ttl);
                 } else {
-                    LOGGER.info("TTL exhausted, finishing transaction (" + accumulator.getAccTransactionIds() + ")");
+                    LOGGER.info("TTL exhausted, finishing internal transaction ("
+                            + accumulator.getAccTransactionIds() + ")");
                 } // if else
                 
                 accumulator.initialize(new Date().getTime());

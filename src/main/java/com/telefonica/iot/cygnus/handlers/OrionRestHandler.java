@@ -275,12 +275,18 @@ public class OrionRestHandler implements HTTPSourceHandler {
         MDC.put(Constants.LOG4J_SVC, service == null ? defaultService : service);
         MDC.put(Constants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
-        // get a transaction id if not sent in the notification, and store it in the log4j Mapped Diagnostic
-        // Context (MDC); this way it will be accessible by the whole source code
-        corrId = generateTransId(corrId);
+        // Get an internal transaction ID.
+        String transId = generateUniqueId(null, null);
         
+        // Get also a correlator ID if not sent in the notification. Id correlator ID is not notified
+        // then correlator ID and transaction ID must have the same value.
+        corrId = generateUniqueId(corrId, transId);
+        
+        // Store both of them in the log4j Mapped Diagnostic Context (MDC), this way it will be accessible
+        // by the whole source code.
         MDC.put(Constants.LOG4J_CORR, corrId);
-        LOGGER.info("Starting transaction (" + corrId + ")");
+        MDC.put(Constants.LOG4J_TRANS, transId);
+        LOGGER.info("Starting internal transaction (" + transId + ")");
         
         // get the data content
         String data = "";
@@ -310,6 +316,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
         eventHeaders.put(Constants.HEADER_CORRELATOR_ID, corrId);
         LOGGER.debug("Adding flume event header (name=" + Constants.HEADER_CORRELATOR_ID
                 + ", value=" + corrId + ")");
+        eventHeaders.put(Constants.FLUME_HEADER_TRANSACTION_ID, transId);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_TRANSACTION_ID
+                + ", value=" + transId + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
@@ -321,18 +330,21 @@ public class OrionRestHandler implements HTTPSourceHandler {
     } // getEvents
     
     /**
-     * Generates a new unique transaction identifier. The format for this id is:
+     * Generates a new unique identifier. The format for this notifiedId is:
      * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
-     * @param transId An alrady existent transaction ID, most probably a notified one
-     * @return A new unique transaction identifier
+     * @param notifiedId An alrady existent identifier, most probably a notified one
+     * @param transactionId An already existent internal identifier
+     * @return A new unique identifier
      */
-    protected String generateTransId(String transId) {
-        if (transId != null) {
-            return transId;
+    protected String generateUniqueId(String notifiedId, String transactionId) {
+        if (notifiedId != null) {
+            return notifiedId;
+        } else if (transactionId != null) {
+            return transactionId;
         } else {
             synchronized (LOCK) {
                 long transCountTrunked = transactionCount % 10000000000L;
-                transId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
+                notifiedId = BOOTTIMESECONDS + "-" + bootTimeMiliseconds + "-"
                         + String.format("%010d", transCountTrunked);
 
                 // check if the transactionCount must be restarted
@@ -343,9 +355,9 @@ public class OrionRestHandler implements HTTPSourceHandler {
                     transactionCount++;
                 } // if else
 
-                return transId;
+                return notifiedId;
             } // synchronized
         } // else
-    } // generateTransId
+    } // generateUniqueId
  
 } // OrionRestHandler
