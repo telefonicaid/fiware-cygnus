@@ -22,21 +22,21 @@ import org.bson.Document;
 
 /**
  * Interface for those backends implementing the persistence in MongoDB.
- * 
+ *
  * @author frb
  */
 
 public interface MongoBackend {
-    
+
     /**
      * Creates a database, given its name, if not exists.
      * @param dbName
      * @throws Exception
      */
     void createDatabase(String dbName) throws Exception;
-    
+
     /**
-     * Creates a collection for STH, given its name, if not exists in the given database. Time-based limits are set,
+     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
      * @param dbName
      * @param collectionName
@@ -44,7 +44,7 @@ public interface MongoBackend {
      * @throws Exception
      */
     void createCollection(String dbName, String collectionName, long dataExpiration) throws Exception;
-    
+
     /**
      * Creates a collection for plain MongoDB, given its name, if not exists in the given database. Size-based limits
      * are set, if possible. Time-based limits are also set, if possible.
@@ -57,7 +57,7 @@ public interface MongoBackend {
      */
     void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
             long dataExpiration) throws Exception;
-    
+
     /**
      * Inserts a new document in the given raw collection within the given database (row-like mode).
      * @param dbName
@@ -66,7 +66,7 @@ public interface MongoBackend {
      * @throws Exception
      */
     void insertContextDataRaw(String dbName, String collectionName, ArrayList<Document> aggregation) throws Exception;
-    
+
     /**
      * Inserts a new document in the given aggregated collection within the given database (row-like mode).
      * @param dbName
@@ -83,7 +83,7 @@ public interface MongoBackend {
     void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
             String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
         throws Exception;
-    
+
     /**
      * Stores in per-service/database "collection_names" collection the matching between a hash and the fields used to
      * build it.
