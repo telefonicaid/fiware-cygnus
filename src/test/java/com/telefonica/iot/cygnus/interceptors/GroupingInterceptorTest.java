@@ -21,6 +21,8 @@ import com.telefonica.iot.cygnus.utils.TestUtils;
 import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import java.util.Map;
 import org.apache.flume.Event;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -29,6 +31,13 @@ import org.junit.Test;
  * @author frb
  */
 public class GroupingInterceptorTest {
+    
+    /**
+     * Constructor.
+     */
+    public GroupingInterceptorTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // GroupingInterceptorTest
     
     /**
      * [GroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains fiware-service,
