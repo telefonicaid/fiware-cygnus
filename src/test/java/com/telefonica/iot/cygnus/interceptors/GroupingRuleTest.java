@@ -71,7 +71,7 @@ public class GroupingRuleTest {
                 + "-------- Rule's attributes are not null");
         
         JSONObject jsonObject = createJsonObject();
-        jsonObject.put("id",1L);
+        jsonObject.put("id", 1L);
         
         // Create the rule for doing the tests
         GroupingRule rule = new GroupingRule(jsonObject);
