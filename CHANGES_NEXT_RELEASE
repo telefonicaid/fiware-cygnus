@@ -31,3 +31,4 @@
 - [HARDENING] Add support for SQL timestamps with microseconds in Utils.getTimeInstant (#922)
 - [HARDENING] Remove the user-agent header, and consider content-type as a Http-only header (#920)
 - [HARDENING] Add an internal Transaction ID (#930)
+- [BUG] Add support for multi-valued Fiware-ServicePath within notifications (#923)
