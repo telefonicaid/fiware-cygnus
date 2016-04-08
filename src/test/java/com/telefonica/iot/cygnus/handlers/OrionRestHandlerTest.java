@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.utils.Constants;
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -54,13 +55,13 @@ public class OrionRestHandlerTest {
     private HttpServletRequest mockHttpServletRequest;
     
     // Other variables
-    JSONObject notification;
+    private JSONObject notification;
     
     /**
      * Constructor.
      */
     public OrionRestHandlerTest() {
-        LogManager.getRootLogger().setLevel(Level.ERROR);
+        LogManager.getRootLogger().setLevel(Level.FATAL);
     } // OrionRestHandlerTest
     
     /**
@@ -84,7 +85,7 @@ public class OrionRestHandlerTest {
         attributes.put("type", "centigrade");
         attributes.put("value", "26.5");
         JSONObject contextElement = new JSONObject();
-        contextElement.put("attributes",attributes);
+        contextElement.put("attributes", attributes);
         contextElement.put("type", "Room");
         contextElement.put("isPattern", "false");
         contextElement.put("id", "room1");
@@ -111,38 +112,41 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
-        System.out.println("[OrionRestHandler.configure] -------- When not configured, the default values are used "
-                + "for non mandatory parameters");
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- When not configured, the default values are used for non mandatory parameters");
         OrionRestHandler handler = new OrionRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         
         try {
             assertEquals("/notify", handler.getNotificationTarget());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
-                    + "'notification_target' is '/notify'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The default configuration value for 'notification_target' is '/notify'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
-                    + "'notification_target' is '" + handler.getNotificationTarget() + "'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The default configuration value for 'notification_target' is '"
+                    + handler.getNotificationTarget() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals("default", handler.getDefaultService());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
-                    + "'default_service' is 'default'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The default configuration value for 'default_service' is 'default'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
-                    + "'default_service' is '" + handler.getDefaultService() + "'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The default configuration value for 'default_service' is '"
+                    + handler.getDefaultService() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals("/", handler.getDefaultServicePath());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The default configuration value for "
-                    + "'default_service_path' is '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The default configuration value for 'default_service_path' is '/'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The default configuration value for "
-                    + "'default_service_path' is '" + handler.getDefaultServicePath() + "'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The default configuration value for 'default_service_path' is '"
+                    + handler.getDefaultServicePath() + "'");
             throw e;
         } // try catch
     } // testConfigureNotMandatoryParameters
@@ -152,8 +156,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testConfigureDefaultServicePathStartsWithSlash() {
-        System.out.println("[OrionRestHandler.configure] -------- The configured default service path must start "
-                + "with '/'");
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured default service path must start with '/'");
         OrionRestHandler handler = new OrionRestHandler();
         String configuredDefaultServicePath = "/something";
         handler.configure(createContext(null, null, configuredDefaultServicePath));
@@ -161,11 +165,13 @@ public class OrionRestHandlerTest {
         try {
             assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
             assertTrue(!handler.getInvalidConfiguration());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The configured default service path '"
-                    + configuredDefaultServicePath + "' starts with '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured default service path '" + configuredDefaultServicePath
+                    + "' starts with '/'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The configured default service path '"
-                    + configuredDefaultServicePath + "' does not start with '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured default service path '" + configuredDefaultServicePath
+                    + "' does not start with '/'");
             throw e;
         } // try catch
     } // testConfigureDefaultServicePathStartsWithSlash
@@ -175,8 +181,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testConfigureNotificationTargerStartsWithSlash() {
-        System.out.println("[OrionRestHandler.configure] -------- The configured notification target must start "
-                + "with '/'");
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured notification target must start with '/'");
         OrionRestHandler handler = new OrionRestHandler();
         String configuredNotificationTarget = "/notify";
         handler.configure(createContext(configuredNotificationTarget, null, null));
@@ -184,11 +190,13 @@ public class OrionRestHandlerTest {
         try {
             assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
             assertTrue(!handler.getInvalidConfiguration());
-            System.out.println("[OrionRestHandler.configure] -  OK  - The configured notification target '"
-                    + configuredNotificationTarget + "' starts with '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured notification target '" + configuredNotificationTarget
+                    + "' starts with '/'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.configure] - FAIL - The configured notification target '"
-                    + configuredNotificationTarget + "' does not start with '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured notification target '" + configuredNotificationTarget
+                    + "' does not start with '/'");
             throw e;
         } // try catch // try catch
     } // testConfigureDefaultServicePathStartsWithSlash
@@ -198,33 +206,38 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEventsContentTypeHeader() {
-        System.out.println("[OrionRestHandler.getEvents] -------- When a notification is sent, the headers are valid");
+        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                + "-------- When a notification is sent, the headers are valid");
         OrionRestHandler handler = new OrionRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         
         try {
             handler.getEvents(mockHttpServletRequest);
             assertTrue(true);
-            System.out.println("[OrionRestHandler.getEvents] -  OK  - The value for 'Content-Type' header is "
-                    + "'application/json'");
-            System.out.println("[OrionRestHandler.getEvents] -  OK  - The value for 'fiware-servicePath' header "
-                    + "starts with '/'");
-            System.out.println("[OrionRestHandler.getEvents] -  OK  - The length of 'fiware-service' header value is "
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "-  OK  - The value for 'Content-Type' header is 'application/json'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "-  OK  - The length of 'fiware-service' header value is "
                     + " less or equal than '" + Constants.SERVICE_HEADER_MAX_LEN + "'");
-            System.out.println("[OrionRestHandler.getEvents] -  OK  - The length of 'fiware-servicePath' header value "
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "-  OK  - The length of 'fiware-servicePath' header value "
                     + "is less or equal than '" + Constants.SERVICE_PATH_HEADER_MAX_LEN + "'");
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The value for 'Content-Type' is not "
-                        + "'application/json'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The value for 'Content-Type' is not 'application/json'");
             } else if (e.getMessage().contains("header value must start with '/'")) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The value for 'fiware-servicePath' does not "
-                        + "start with '/'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The value for 'fiware-servicePath' does not start with '/'");
             } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The length of 'fiware-service' header value "
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The length of 'fiware-service' header value "
                         + "is greater than '" + Constants.SERVICE_HEADER_MAX_LEN + "'");
             } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The length of 'fiware-servicePath' header "
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The length of 'fiware-servicePath' header "
                         + "value is greater than '" + Constants.SERVICE_PATH_HEADER_MAX_LEN + "'");
             } // if else
             
@@ -237,8 +250,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEventsNullEventsUponInvalidConfiguration() {
-        System.out.println("[OrionRestHandler.getEvents] -------- When a the configuration is wrong, no evetns "
-                + "are obtained");
+        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                + "-------- When a the configuration is wrong, no evetns are obtained");
         OrionRestHandler handler = new OrionRestHandler();
         String configuredNotificationTarget = "notify"; // wrong value
         String configuredDefaultService = "default";
@@ -252,16 +265,16 @@ public class OrionRestHandlerTest {
             
             try {
                 assertEquals(0, events.size());
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - No events are processed since the "
-                        + "configuration is wrong");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - No events are processed since the configuration is wrong");
             } catch (AssertionError e1) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The events are being processed "
-                        + "despite of the configuration is wrong");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The events are being processed despite of the configuration is wrong");
                 throw e1;
             } // try catch
         } catch (Exception ex) {
-            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
-                    + "the events");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsNullEventsUponInvalidConfiguration
@@ -272,8 +285,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEventsSingleEvent() {
-        System.out.println("[OrionRestHandler.getEvents] -------- When a notification is sent as a Http message, "
-                + "a single Flume event is generated");
+        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                + "-------- When a notification is sent as a Http message, a single Flume event is generated");
         OrionRestHandler handler = new OrionRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         List<Event> events;
@@ -283,14 +296,16 @@ public class OrionRestHandlerTest {
             
             try {
                 assertEquals(1, events.size());
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - A single event has been generated");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - A single event has been generated");
             } catch (AssertionError e1) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - 0, 2 or more than an event were generated");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - 0, 2 or more than an event were generated");
                 throw e1;
             } // try catch
         } catch (Exception e) {
-            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
-                    + "the events");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsSingleEvent
@@ -312,8 +327,8 @@ public class OrionRestHandlerTest {
             
             try {
                 assertTrue(headers.containsKey("fiware-service"));
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
-                        + "'fiware-service'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - The generated Flume event contains 'fiware-service'");
             } catch (AssertionError e1) {
                 System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
                         + "contains 'fiware-service'");
@@ -325,18 +340,18 @@ public class OrionRestHandlerTest {
                 System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
                         + "'fiware-servicepath'");
             } catch (AssertionError e2) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
-                        + "contains 'fiware-servicepath'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The generated Flume event does not contain 'fiware-servicepath'");
                 throw e2;
             } // try catch
 
             try {
                 assertTrue(headers.containsKey("fiware-correlator"));
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
-                        + "'fiware-correlator'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - The generated Flume event contains 'fiware-correlator'");
             } catch (AssertionError e3) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
-                        + "contains 'fiware-correlator'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The generated Flume event does not contain 'fiware-correlator'");
                 throw e3;
             } // try catch
             
@@ -350,8 +365,8 @@ public class OrionRestHandlerTest {
                 throw e4;
             } // try catch
         } catch (Exception e) {
-            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
-                    + "the events");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
@@ -362,7 +377,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEventsBodyInFlumeEvent() {
-        System.out.println("[OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains "
+        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                + "-------- When a Flume event is generated, it contains "
                 + "the payload of the Http notification as body");
         OrionRestHandler handler = new OrionRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
@@ -386,16 +402,18 @@ public class OrionRestHandlerTest {
             
             try {
                 assertTrue(areEqual);
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - The event body '" + new String(body)
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - The event body '" + new String(body)
                         + "' is equal to the notification Json '" + new String(notificationBytes) + "'");
             } catch (AssertionError e1) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The event body '" + new String(body)
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The event body '" + new String(body)
                         + "' is nbot equal to the notification Json '" + new String(notificationBytes) + "'");
                 throw e1;
             } // try catch
         } catch (Exception e) {
-            System.out.println("[OrionRestHandler.getEvents] - FAIL - There was some problem while processing "
-                    + "the events");
+            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                    + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsBodyInFlumeEvent
