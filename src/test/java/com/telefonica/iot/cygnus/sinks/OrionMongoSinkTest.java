@@ -17,8 +17,11 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.Utils;
 import org.apache.flume.Context;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,11 +35,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class OrionMongoSinkTest {
     
     /**
-     * [OrionMongoSink] -------- Configured 'collection_prefix' cannot be 'system.'.
+     * Constructor.
+     */
+    public OrionMongoSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // OrionMongoSinkTest
+    
+    /**
+     * [OrionMongoSink.configure] -------- Configured 'collection_prefix' cannot be 'system.'.
      */
     @Test
-    public void testConfiguredCollectionPrefixIsNotSystem() {
-        System.out.println("[OrionMongoSink] -------- Configured 'collection_prefix' cannot be 'system.'");
+    public void testConfigureCollectionPrefixIsNotSystem() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'collection_prefix' cannot be 'system.'");
         String collectionPrefix = "system.";
         String dbPrefix = "sth_";
         OrionMongoSink sink = new OrionMongoSink();
@@ -44,19 +55,21 @@ public class OrionMongoSinkTest {
         
         try {
             assertTrue(sink.invalidConfiguration);
-            System.out.println("[OrionMongoSink] -  OK  - 'system.' value detected for 'collection_prefix'");
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'system.' value detected for 'collection_prefix'");
         } catch (AssertionError e) {
-            System.out.println("[OrionMongoSink] - FAIL - 'system.' value not detected for 'collection_prefix'");
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'system.' value not detected for 'collection_prefix'");
         } // try catch
-    } // testConfiguredCollectionPrefixIsNotSystem
+    } // testConfigureCollectionPrefixIsNotSystem
     
     /**
-     * [OrionMongoSink] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
+     * [OrionMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
      */
     @Test
-    public void testConfiguredCollectionPrefixIsEncoded() {
-        System.out.println("[OrionMongoSink] -------- Configured 'collection_prefix' "
-                + "is encoded when having forbiden characters");
+    public void testConfigureCollectionPrefixIsEncoded() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
         String dbPrefix = "sth_";
         OrionMongoSink sink = new OrionMongoSink();
@@ -65,21 +78,23 @@ public class OrionMongoSinkTest {
         
         try {
             assertTrue(sink.collectionPrefix.equals(encodedCollectionPrefix));
-            System.out.println("[OrionMongoSink] -  OK  - 'collection_prefix=" + collectionPrefix
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'collection_prefix=" + collectionPrefix
                     + "' correctly encoded as '" + encodedCollectionPrefix + "'");
         } catch (AssertionError e) {
-            System.out.println("[OrionMongoSink] - FAIL - 'collection_prefix=" + collectionPrefix
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'collection_prefix=" + collectionPrefix
                     + "' wrongly encoded as '" + encodedCollectionPrefix + "'");
         } // try catch
-    } // testConfiguredCollectionPrefixIsEncoded
+    } // testConfigureCollectionPrefixIsEncoded
     
     /**
-     * [OrionMongoSink] -------- Configured 'db_prefix' is encoded when having forbiden characters.
+     * [OrionMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbiden characters.
      */
     @Test
-    public void testConfiguredDBPrefixIsEncoded() {
-        System.out.println("[OrionMongoSink] -------- Configured 'db_prefix' "
-                + "is encoded when having forbiden characters");
+    public void testConfigureDBPrefixIsEncoded() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "sth_";
         String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
         OrionMongoSink sink = new OrionMongoSink();
@@ -88,13 +103,13 @@ public class OrionMongoSinkTest {
         
         try {
             assertTrue(sink.dbPrefix.equals(encodedDbPrefix));
-            System.out.println("[OrionMongoSink] -  OK  - 'db_prefix=" + dbPrefix
-                    + "' correctly encoded as '" + encodedDbPrefix + "'");
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + encodedDbPrefix + "'");
         } catch (AssertionError e) {
-            System.out.println("[OrionMongoSink] - FAIL - 'db_prefix=" + dbPrefix
-                    + "' wrongly encoded as '" + encodedDbPrefix + "'");
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + encodedDbPrefix + "'");
         } // try catch
-    } // testConfiguredDBPrefixIsEncoded
+    } // testConfigureDBPrefixIsEncoded
     
     private Context createContext(String collectionPrefix, String dbPrefix) {
         Context context = new Context();

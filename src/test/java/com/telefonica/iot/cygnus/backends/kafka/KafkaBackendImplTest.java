@@ -17,11 +17,11 @@
  */
 package com.telefonica.iot.cygnus.backends.kafka;
 
-import java.util.Properties;
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,39 +39,48 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaBackendImplTest {
     
-    // mocks 
-    @Mock 
+    // mocks
+    @Mock
     private KafkaProducer mockKafkaProducer;
     
     /**
-     * Sets up tests by creating a unique instance of the tested class, and by 
-     * defining the behaviour of the mocked
+     * Constructor.
+     */
+    public KafkaBackendImplTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // KafkaBackendImplTest
+    
+    /**
+     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
      * classes.
      *  
      * @throws Exception
      */
-    
     @Before
-    public void setUp() throws Exception {  
+    public void setUp() throws Exception {
         when(mockKafkaProducer.send(Mockito.any(ProducerRecord.class))).thenReturn(null);
     } // setUp
     
+    /**
+     * [KafkaBackendImplTest.send] -------- The backend sends a message to Kafka.
+     * @throws Exception
+     */
     @Test
     public void recordIsAddedAndSent() throws Exception {
-        // null zookeeperEndpoint because is not necessary for pass the tests 
-        KafkaBackendImpl backendImpl = new KafkaBackendImpl("0.0.0.0:9092", null);    
+        // null zookeeperEndpoint because is not necessary for pass the tests
+        KafkaBackendImpl backendImpl = new KafkaBackendImpl("0.0.0.0:9092", null);
         backendImpl.setKafkaProducer(mockKafkaProducer);
-        System.out.println("[KafkaBackendImplTest ] -------- The backend sends a message to Kafka -------- ");
+        System.out.println(getTestTraceHead("[KafkaBackendImplTest.send]")
+                + "-------- The backend sends a message to Kafka");
         
         try {
-            backendImpl.send(Mockito.any(ProducerRecord.class));  
-            System.out.println("[KafkaBackendImpl.send] -  OK  - Added to be sent");
+            backendImpl.send(Mockito.any(ProducerRecord.class));
+            System.out.println(getTestTraceHead("[KafkaBackendImpl.send]") + "-  OK  - Added to be sent");
             assertTrue(true);
         } catch (AssertionError e) {
-            System.out.println("[KafkaBackendImpl.send] - FAIL - Addition failed");
+            System.out.println(getTestTraceHead("[KafkaBackendImpl.send]") + "- FAIL - Addition failed");
             throw e;
         } // try catch
-        
-    } // testTopicNameIsCreatedAndExists 
+    } // testTopicNameIsCreatedAndExists
     
 } // KafkaBackendImplTest
