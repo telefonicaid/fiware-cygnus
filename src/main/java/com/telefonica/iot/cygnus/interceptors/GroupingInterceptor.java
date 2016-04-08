@@ -90,7 +90,7 @@ public class GroupingInterceptor implements Interceptor {
             return null;
         } // try catch
         
-        // iterate on the contextResponses
+        // iterate on the context responses and notified service paths
         ArrayList<String> defaultDestinations = new ArrayList<String>();
         ArrayList<String> groupedDestinations = new ArrayList<String>();
         ArrayList<String> groupedServicePaths = new ArrayList<String>();
@@ -101,7 +101,10 @@ public class GroupingInterceptor implements Interceptor {
             return null;
         } // if
         
-        for (ContextElementResponse contextElementResponse : contextResponses) {
+        String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
+        
+        for (int i = 0; i < contextResponses.size(); i++) {
+            ContextElementResponse contextElementResponse = contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             
             // get the matching rule
@@ -109,7 +112,7 @@ public class GroupingInterceptor implements Interceptor {
             
             if (matchingRule == null) {
                 groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-                groupedServicePaths.add(fiwareServicePath);
+                groupedServicePaths.add(splitedNotifiedServicePaths[i]);
             } else {
                 groupedDestinations.add((String) matchingRule.getDestination());
                 groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
