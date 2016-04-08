@@ -71,6 +71,8 @@ public class GroupingInterceptor implements Interceptor {
  
     @Override
     public Event intercept(Event event) {
+        LOGGER.debug("Event intercepted, id=" + event.hashCode());
+        
         // get the original headers and body
         Map<String, String> headers = event.getHeaders();
         String body = new String(event.getBody());
@@ -122,13 +124,20 @@ public class GroupingInterceptor implements Interceptor {
         } // for
         
         // set the final header values
-        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES,
-                Utils.toString(defaultDestinations));
-        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES,
-                Utils.toString(groupedDestinations));
-        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS,
-                Utils.toString(groupedServicePaths));
+        String defaultDestinationsStr = Utils.toString(defaultDestinations);
+        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_NOTIFIED_ENTITIES
+                + ", value=" + defaultDestinationsStr + ")");
+        String groupedDestinationsStr = Utils.toString(groupedDestinations);
+        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_ENTITIES
+                + ", value=" + groupedDestinationsStr + ")");
+        String groupedServicePathsStr = Utils.toString(groupedServicePaths);
+        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+                + ", value=" + groupedServicePathsStr + ")");
         event.setHeaders(headers);
+        LOGGER.debug("Event put in the channel, id=" + event.hashCode());
         return event;
     } // intercept
  
