@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.sinks.OrionSink.DataModel;
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
@@ -49,15 +50,15 @@ public class OrionSinkTest {
      * Constructor.
      */
     public OrionSinkTest() {
-        LogManager.getRootLogger().setLevel(Level.ERROR);
+        LogManager.getRootLogger().setLevel(Level.FATAL);
     } // OrionSinkTest
     
     /**
-     * [OrionSink] -------- The sink starts properly.
+     * [OrionSink.start] -------- The sink starts properly.
      */
     @Test
     public void testStart() {
-        System.out.println("[OrionSink] -------- The sink starts properly");
+        System.out.println(getTestTraceHead("[OrionSink.start]") + "-------- The sink starts properly");
         OrionSinkImpl sink = new OrionSinkImpl();
         sink.configure(createContext(null, null, null, null, null, null)); // default configuration
         sink.setChannel(new MemoryChannel());
@@ -66,11 +67,11 @@ public class OrionSinkTest {
         
         try {
             assertEquals(LifecycleState.START, state);
-            System.out.println("[OrionSink] -  OK  - The sink started properly, the lifecycle state is '"
-                    + state.toString() + "'");
+            System.out.println(getTestTraceHead("[OrionSink.start]")
+                    + "-  OK  - The sink started properly, the lifecycle state is '" + state.toString() + "'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink] - FAIL - The sink did not start properly, the lifecycle state "
-                    + "is '" + state.toString() + "'");
+            System.out.println(getTestTraceHead("[OrionSink.start]")
+                    + "- FAIL - The sink did not start properly, the lifecycle state is '" + state.toString() + "'");
         } // try catch
     } // testStart
     
@@ -80,67 +81,71 @@ public class OrionSinkTest {
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
-        System.out.println("[OrionSink.configure] -------- When not configured, the default values are used "
-                + "for non mandatory parameters");
+        System.out.println(getTestTraceHead("[OrionSink.configure]")
+                + "-------- When not configured, the default values are used for non mandatory parameters");
         OrionSinkImpl sink = new OrionSinkImpl();
         sink.configure(createContext(null, null, null, null, null, null)); // default configuration
         
         try {
             assertEquals(1, sink.getBatchSize());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'batch_size' is '1'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'batch_size' is '1'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
-                    + "'batch_size' is '" + sink.getBatchSize() + "'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for 'batch_size' is '" + sink.getBatchSize() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(30, sink.getBatchTimeout());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'batch_timeout' is '30'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'batch_timeout' is '30'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
-                    + "'batch_timeout' is '" + sink.getBatchTimeout() + "'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for 'batch_timeout' is '"
+                    + sink.getBatchTimeout() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(10, sink.getBatchTTL());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'batch_ttl' is '10'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'batch_ttl' is '10'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
-                    + "'batch_ttl' is '" + sink.getBatchTTL() + "'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for 'batch_ttl' is '" + sink.getBatchTTL() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(DataModel.DMBYENTITY, sink.getDataModel());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'data_model' is 'dm-by-entity'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'data_model' is 'dm-by-entity'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for "
                     + "'data_model' is '" + sink.getDataModel() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(false, sink.getEnableGrouping());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'enable_grouping' is 'false'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'enable_grouping' is 'false'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for "
                     + "'enable_grouping' is '" + sink.getEnableGrouping() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(false, sink.getEnableLowerCase());
-            System.out.println("[OrionSink.configure] -  OK  - The default configuration value for "
-                    + "'enable_lowercase' is 'false'");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'enable_lowercase' is 'false'");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - The default configuration value for "
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for "
                     + "'enable_lowercase' is '" + sink.getEnableLowerCase() + "'");
             throw e;
         } // try catch
@@ -152,19 +157,21 @@ public class OrionSinkTest {
      */
     @Test
     public void testConfigureInvalidConfiguration() {
-        System.out.println("[OrionSink.configure] -------- The configuration becomes invalid upon out-of-the-limits "
-                + "configured values for parameters having a discrete set of accepted values, or numerical values "
-                + "having upper or lower limits");
+        System.out.println(getTestTraceHead("[OrionSink.configure]")
+                + "-------- The configuration becomes invalid upon out-of-the-limits configured values for parameters "
+                + "having a discrete set of accepted values, or numerical values having upper or lower limits");
         OrionSinkImpl sink = new OrionSinkImpl();
         String configuredBatchSize = "0";
         sink.configure(createContext(configuredBatchSize, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'batch_size='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'batch_size='"
                     + configuredBatchSize + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'batch_size='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'batch_size='"
                     + configuredBatchSize + "' has not been detected");
             throw e;
         } // try catch
@@ -175,10 +182,12 @@ public class OrionSinkTest {
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'batch_timeout='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'batch_timeout='"
                     + configuredBatchTimeout + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'batch_timeout='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'batch_timeout='"
                     + configuredBatchTimeout + "' has not been detected");
             throw e;
         } // try catch
@@ -189,11 +198,11 @@ public class OrionSinkTest {
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'batch_ttl='"
-                    + configuredBatchTTL + "' has been detected");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'batch_ttl='" + configuredBatchTTL + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'batch_ttl='"
-                    + configuredBatchTTL + "' has not been detected");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'batch_ttl='" + configuredBatchTTL + "' has not been detected");
             throw e;
         } // try catch
         
@@ -203,11 +212,11 @@ public class OrionSinkTest {
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'data_model='"
-                    + dataModel + "' has been detected");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'data_model='" + dataModel + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'data_model='"
-                    + dataModel + "' has not been detected");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'data_model='" + dataModel + "' has not been detected");
             throw e;
         } // try catch
         
@@ -217,10 +226,12 @@ public class OrionSinkTest {
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'enable_grouping='"
-                    + configuredEnableGrouping + "' has been detected");
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'enable_grouping='"
++ configuredEnableGrouping + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'enable_grouping='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'enable_grouping='"
                     + configuredEnableGrouping + "' has not been detected");
             throw e;
         } // try catch
@@ -231,10 +242,12 @@ public class OrionSinkTest {
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println("[OrionSink.configure] -  OK  - A wrong configuration 'enable_lowercase='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - A wrong configuration 'enable_lowercase='"
                     + configuredEnableLowercase + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println("[OrionSink.configure] - FAIL - A wrong configuration 'enable_lowercase='"
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - A wrong configuration 'enable_lowercase='"
                     + configuredEnableLowercase + "' has not been detected");
             throw e;
         } // try catch

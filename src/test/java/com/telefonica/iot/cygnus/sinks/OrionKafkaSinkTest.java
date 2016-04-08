@@ -17,208 +17,238 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import org.apache.flume.Context;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
  *
- * @author frb
+ * @author pcoello25
  */
-public class OrionKafkaSinkTest {   
+public class OrionKafkaSinkTest {
     
-    String service = "service";
-    String serviceUpper = "SERVICE";
-    String servicePath = "/servicePath";
-    String servicePathUpper = "/SERVICEPATH";
-    String servicePathSlash = "/";
-    String entity = "entityId_entityType";
-    String attribute = "attributeName";
-    String expectedTopic;
+    private final String service = "service";
+    private final String servicePath = "/servicePath";
+    private final String servicePathSlash = "/";
+    private final String entity = "entityId_entityType";
+    private final String attribute = "attributeName";
+    private String expectedTopic;
     
+    /**
+     * Constructor.
+     */
+    public OrionKafkaSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // OrionKafkaSinkTest
+    
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByService() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
-                + "root service-path is notified/defaulted and data_model="
-                + "dm-by-service, the Kafka topic name "
-                + "is <service>");
+    public void testbuildTopicNameDmByService() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+                + "root service-path is notified/defaulted and data_model=dm-by-service, the Kafka topic "
+                + "name is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-service"));
-        String topic = sink.buildTopicName(service,servicePath,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equal to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByService
+    } // testBuildTopicNameDmByService
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByServiceWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
-                + "root service-path is notified/defaulted and "
-                + "data_model=dm-by-service, the Kafka "
+    public void testBuildTopicNameDmByServiceWithSlashServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+                + "root service-path is notified/defaulted and data_model=dm-by-service, the Kafka "
                 + "topic name is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
-        String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByServiceWithSlashServicePath
+    } // testBuildTopicNameDmByServiceWithSlashServicePath
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
-                + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-service-path, "
+    public void testBuildTopicNameDmByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+                + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
                 + "the Kafka topic name is <service>_<service-path>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
-        String topic = sink.buildTopicName(service,servicePath,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
             expectedTopic = "service_servicePath";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByServicePath 
+    } // testBuildTopicNameDmByServicePath
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByServicePathWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
-                + "root service-path is notified/defaulted and "
-                + "data_model=dm-by-service-path, "
+    public void testBuildTopicNameDmByServicePathWithSlashServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+                + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
                 + "the Kafka topic name is <service>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
-        String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByServicePathWithSlashServicePath    
+    } // testBuildTopicNameDmByServicePathWithSlashServicePath
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByEntity() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
-                + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-entity, the "
+    public void testBuildTopicNameDmByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+                + "root service-path is notified/defaulted and data_model=dm-by-entity, the "
                 + "Kafka topic name is <service>_<service-path>_<entityId>_<entityType>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
-        String topic = sink.buildTopicName(service,servicePath,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
             expectedTopic = "service_servicePath_entityId_entityType";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]")  + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByEntity
+    } // testBuildTopicNameDmByEntity
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByEntityWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
-                + "root service-path is notified/defaulted and data_model=dm-by-"
-                + "entity, the Kafka topic name is "
-                + "<service>_<entityId>_<entityType>");
+    public void testBuildTopicNameDmByEntityWithSlashServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+                + "root service-path is notified/defaulted and data_model=dm-by-entity, the Kafka topic "
+                + "name is <service>_<entityId>_<entityType>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
-        String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
             expectedTopic = "service_entityId_entityType";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
-                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+                    + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
+                    + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByEntityWithSlashServicePath
+    } // testBuildTopicNameDmByEntityWithSlashServicePath
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByAttribute() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When a non "
-                + "root service-path is notified/defaulted and data_model=dm-by-"
-                + "attribute, the Kafka topic name is "
-                + "<service>_<service-path>_<entityId>_<entityType>_<attrName>");
+    public void testBuildTopicNameDmByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+                + "root service-path is notified/defaulted and data_model=dm-by-attribute, the Kafka "
+                + "topic name is <service>_<service-path>_<entityId>_<entityType>_<attrName>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
-        String topic = sink.buildTopicName(service,servicePath,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
             expectedTopic = "service_servicePath_entityId_entityType_attributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByAttribute
+    } // testBuildTopicNameDmByAttribute
     
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testTopicNameDmByAttributeWithSlashServicePath() throws Exception {
-        System.out.println("[OrionKafkaSink.buildTopicName ] -------- When the "
-                + "root service-path is notified/defaulted "
-                + "and data_model=dm-by-attribute, the "
+    public void testBuildTopicNameDmByAttributeWithSlashServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+                + "root service-path is notified/defaulted and data_model=dm-by-attribute, the "
                 + "Kafka topic name is <service>_<entityId>_<entityType>_<attrName>");
         OrionKafkaSink sink = new OrionKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
-        String topic = sink.buildTopicName(service,servicePathSlash,entity,attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
             expectedTopic = "service_entityId_entityType_attributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println("[OrionKafkaSink.buildTopicName ] -  OK  - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println("[OrionKafkaSink.buildTopicName ] - FAIL - "
+            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
-        
-    } // testTopicNameDmByAttributeWithSlashServicePath
+    } // testBuildTopicNameDmByAttributeWithSlashServicePath
     
     private Context createContext(String lowerCase, String dataModel) {
         Context context = new Context();
