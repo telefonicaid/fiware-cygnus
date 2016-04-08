@@ -46,9 +46,10 @@ public class GroupingInterceptorTest {
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
-        System.out.println("[GroupingInterceptor.intercept] -------- When a Flume event is put in the channel, it "
-                + "contains fiware-service, fiware-servicepath, fiware-correlator, transaction-id, notified-entities, "
-                + "grouped-servicepaths and grouped-entities headers");
+        System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
+                + "-------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, "
+                + "fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities "
+                + "headers");
         GroupingInterceptor groupingInterceptor = new GroupingInterceptor("");
         groupingInterceptor.initialize();
         Event originalEvent = TestUtils.createEvent();
