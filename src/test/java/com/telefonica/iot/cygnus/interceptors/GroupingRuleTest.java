@@ -22,7 +22,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -45,13 +47,7 @@ public class GroupingRuleTest {
     public void testFiwareServicePathStartsWithSlash() {
         System.out.println(getTestTraceHead("[GroupingRule.isValid]")
                 + "-------- fiware-servicePath field in a grouping rule must start with '/'");
-        JSONObject jsonRule = new JSONObject();
-        JSONArray fields = new JSONArray();
-        fields.add("entityId");
-        jsonRule.put("fields", fields);
-        jsonRule.put("regex", "room1");
-        jsonRule.put("fiware_service_path", "/rooms");
-        jsonRule.put("destination", "all_rooms");
+        JSONObject jsonRule = createJsonObject();
         
         try {
             assertEquals(0, GroupingRule.isValid(jsonRule, true));
@@ -65,5 +61,92 @@ public class GroupingRuleTest {
             throw e;
         } // try catch
     } // testFiwareServicePathStartsWithSlash
+    
+    /**
+     * [Groupingrule.getXXXX] -------- Rule's attributes are not null.
+     */
+    @Test
+    public void testIfGetsAreNotNull() {
+        System.out.println(getTestTraceHead("[GroupingRule.getXXXX]")
+                + "-------- Rule's attributes are not null");
+        
+        JSONObject jsonObject = createJsonObject();
+        jsonObject.put("id", 1L);
+        
+        // Create the rule for doing the tests
+        GroupingRule rule = new GroupingRule(jsonObject);
+        
+        try { 
+            assertTrue(rule.getPattern() != null);
+            System.out.println(getTestTraceHead("[GroupingRule.getPattern]")
+                    + "-  OK  - Rule’s pattern is not null");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getPattern]")
+                    + "- FAIL - Rule’s pattern is null");
+            throw e;
+        } // try catch
+        
+        try { 
+            assertTrue(rule.getId() > 0L);
+            System.out.println(getTestTraceHead("[GroupingRule.getId]")
+                    + "-  OK  - Rule’s id is upper than 0");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getId]")
+                    + "- FAIL - Rule’s id is invalid");
+            throw e;
+        } // try catch
+        
+        try { 
+            assertTrue(rule.getFields() != null);
+            System.out.println(getTestTraceHead("[GroupingRule.getFields]")
+                    + "-  OK  - Rule’s fields are not null");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getFields]")
+                    + "- FAIL - Rule’s fields are null");
+            throw e;
+        } // try catch
+        
+        try { 
+            assertTrue(rule.getRegex() != null);
+            System.out.println(getTestTraceHead("[GroupingRule.getRegex]")
+                    + "-  OK  - Rule’s regex is not null");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getRegex]")
+                    + "- FAIL - Rule’s regex is null");
+            throw e;
+        } // try catch
+        
+        try { 
+            assertTrue(rule.getDestination() != null);
+            System.out.println(getTestTraceHead("[GroupingRule.getDestination]")
+                    + "-  OK  - Rule’s destination is not null");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getDestination]")
+                    + "- FAIL - Rule’s destination is null");
+            throw e;
+        } // try catch
+        
+        try { 
+            assertTrue(rule.getNewFiwareServicePath() != null);
+            System.out.println(getTestTraceHead("[GroupingRule.getNewFiwareServicePath]")
+                    + "-  OK  - Rule’s newFiwareServicePath is not null");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingRule.getNewFiwareServicePath]")
+                    + "- FAIL - Rule’s newFiwareServicePath is null");
+            throw e;
+        } // try catch
+           
+    } // testIfGetsAreNotNull
+    
+    public JSONObject createJsonObject() {
+        JSONObject jsonRule = new JSONObject();
+        JSONArray fields = new JSONArray();
+        fields.add("entityId");
+        jsonRule.put("fields", fields);
+        jsonRule.put("regex", "room1");
+        jsonRule.put("fiware_service_path", "/rooms");
+        jsonRule.put("destination", "all_rooms");
+        return jsonRule;
+    } // createJsonObject
     
 } // GroupingRuleTest

@@ -30,5 +30,8 @@
 - [HARDENING] Invalidate configurations instead of exiting Cygnus upon wrong configuration (#917)
 - [HARDENING] Add support for SQL timestamps with microseconds in Utils.getTimeInstant (#922)
 - [HARDENING] Remove the user-agent header, and consider content-type as a Http-only header (#920)
+- [HARDENING] Precompile the regexes once read in GroupingRules.java (#928)
 - [HARDENING] Add an internal Transaction ID (#930)
 - [BUG] Add support for multi-valued Fiware-ServicePath within notifications (#923)
+- [HARDENING] Replace all references to "STH" with "FIWARE Comet" (#573)
+- [HARDENING] Use UUIDv4 in the generation of correlator and transaction IDs in OrionRestHandler (#931)
