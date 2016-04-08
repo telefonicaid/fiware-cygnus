@@ -92,7 +92,6 @@ public class GroupingInterceptor implements Interceptor {
         
         // iterate on the contextResponses
         ArrayList<String> defaultDestinations = new ArrayList<String>();
-        ArrayList<String> defaultServicePaths = new ArrayList<String>();
         ArrayList<String> groupedDestinations = new ArrayList<String>();
         ArrayList<String> groupedServicePaths = new ArrayList<String>();
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
@@ -117,14 +116,11 @@ public class GroupingInterceptor implements Interceptor {
             } // if else
             
             defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-            defaultServicePaths.add(fiwareServicePath);
         } // for
         
         // set the final header values
         headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES,
                 Utils.toString(defaultDestinations));
-        headers.put(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS,
-                Utils.toString(defaultServicePaths));
         headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES,
                 Utils.toString(groupedDestinations));
         headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS,
