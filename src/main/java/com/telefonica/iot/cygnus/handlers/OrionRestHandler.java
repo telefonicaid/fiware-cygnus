@@ -347,9 +347,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
             // For that reason we use LOCK in order to avoid problems with treads
             // http://stackoverflow.com/questions/7212635/is-java-util-uuid-thread-safe
             synchronized (LOCK) {
-                UUID id = UUID.randomUUID();
-                LOGGER.debug("UUID GENERADO: " + id.toString());
-                return id.toString();
+                return UUID.randomUUID().toString();
             } // synchronized
         } // else
     } // generateUniqueId
