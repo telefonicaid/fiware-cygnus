@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.TestUtils;
 import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -80,27 +81,7 @@ public class OrionRestHandlerTest {
         when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json");
         when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
         when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
-        JSONObject attributes = new JSONObject();
-        attributes.put("name", "temperature");
-        attributes.put("type", "centigrade");
-        attributes.put("value", "26.5");
-        JSONObject contextElement = new JSONObject();
-        contextElement.put("attributes", attributes);
-        contextElement.put("type", "Room");
-        contextElement.put("isPattern", "false");
-        contextElement.put("id", "room1");
-        JSONObject statusCode = new JSONObject();
-        statusCode.put("code", "200");
-        statusCode.put("reasonPhrase", "OK");
-        JSONObject contextResponse = new JSONObject();
-        contextResponse.put("contextElement", contextElement);
-        contextResponse.put("statusCode", statusCode);
-        JSONArray contextResponses = new JSONArray();
-        contextResponses.add(contextResponse);
-        notification = new JSONObject();
-        notification.put("subscriptionId", "51c0ac9ed714fb3b37d7d5a8");
-        notification.put("originator", "localhost");
-        notification.put("contextResponses", contextResponses);
+        notification = TestUtils.createNotification();
         when(mockHttpServletRequest.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
                         notification.toJSONString().getBytes()))));
@@ -316,8 +297,9 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
-        System.out.println("[OrionRestHandler.getEvents] -------- When a Flume event is generated, it contains "
-                + "fiware-service, fiware-servicepath, fiware-correlator and transaction-id headers");
+        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                + "-------- When a Flume event is generated, it contains fiware-service, fiware-servicepath, "
+                + "fiware-correlator and transaction-id headers");
         OrionRestHandler handler = new OrionRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         Map<String, String> headers;
@@ -330,15 +312,15 @@ public class OrionRestHandlerTest {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "-  OK  - The generated Flume event contains 'fiware-service'");
             } catch (AssertionError e1) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
-                        + "contains 'fiware-service'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The generated Flume event does not contain 'fiware-service'");
                 throw e1;
             } // try catch
             
             try {
                 assertTrue(headers.containsKey("fiware-servicepath"));
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
-                        + "'fiware-servicepath'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - The generated Flume event contains 'fiware-servicepath'");
             } catch (AssertionError e2) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The generated Flume event does not contain 'fiware-servicepath'");
@@ -357,11 +339,11 @@ public class OrionRestHandlerTest {
             
             try {
                 assertTrue(headers.containsKey("transaction-id"));
-                System.out.println("[OrionRestHandler.getEvents] -  OK  - The generated Flume event contains "
-                        + "'transaction-id'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "-  OK  - The generated Flume event contains 'transaction-id'");
             } catch (AssertionError e4) {
-                System.out.println("[OrionRestHandler.getEvents] - FAIL - The generated Flume event does not "
-                        + "contains 'transaction-id'");
+                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                        + "- FAIL - The generated Flume event does not contain 'transaction-id'");
                 throw e4;
             } // try catch
         } catch (Exception e) {
@@ -423,16 +405,18 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdTransIdGenerated() {
-        System.out.println("[OrionRestHandler.generateUniqueId] -------- An internal transaction ID is generated");
+        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                + "-------- An internal transaction ID is generated");
         OrionRestHandler handler = new OrionRestHandler();
         String generatedTransId = handler.generateUniqueId(null, null);
         
         try {
             assertTrue(generatedTransId != null);
-            System.out.println("[OrionRestHandler.generateUniqueId] -  OK  - An internal transaction ID '"
-                    + generatedTransId + "' has been generated");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "-  OK  - An internal transaction ID '" + generatedTransId + "' has been generated");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.generateUniqueId] - FAIL - An intertnal transaction ID was not "
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "- FAIL - An intertnal transaction ID was not "
                     + "generated");
             throw e;
         } // try catch // try catch
@@ -443,8 +427,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdCorrIdReused() {
-        System.out.println("[OrionRestHandler.generateUniqueId] -------- When a correlator ID is notified, it is "
-                + "reused");
+        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                + "-------- When a correlator ID is notified, it is reused");
         OrionRestHandler handler = new OrionRestHandler();
         String generatedTransId = "1111111111-111-1111111111";
         String notifiedCorrId = "1234567890-123-1234567890";
@@ -452,11 +436,12 @@ public class OrionRestHandlerTest {
         
         try {
             assertEquals(notifiedCorrId, generatedCorrId);
-            System.out.println("[OrionRestHandler.generateUniqueId] -  OK  - The notified transaction ID '"
-                    + notifiedCorrId + "' has been reused");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "-  OK  - The notified transaction ID '" + notifiedCorrId + "' has been reused");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.generateUniqueId] - FAIL - The notified transaction ID '"
-                    + notifiedCorrId + "' has not not reused, '" + generatedCorrId + "' has been generated instead");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "- FAIL - The notified transaction ID '" + notifiedCorrId + "' has not not reused, '"
+                    + generatedCorrId + "' has been generated instead");
             throw e;
         } // try catch // try catch
     } // testGenerateUniqueIdCorrIdReused
@@ -466,18 +451,19 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdCorrIdGenerated() {
-        System.out.println("[OrionRestHandler.generateUniqueId] -------- When a correlation ID is not notified, "
-                + "it is generated");
+        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                + "-------- When a correlation ID is not notified, it is generated");
         OrionRestHandler handler = new OrionRestHandler();
         String generatedTransId = "1234567890-123-1234567890";
         String notifiedCorrId = null;
         
         try {
             assertTrue(handler.generateUniqueId(notifiedCorrId, generatedTransId) != null);
-            System.out.println("[OrionRestHandler.generateUniqueId] -  OK  - The transaction ID has been generated");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "-  OK  - The transaction ID has been generated");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.generateUniqueId] - FAIL - The transaction ID has not been "
-                    + "generated");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "- FAIL - The transaction ID has not been generated");
             throw e;
         } // try catch
     } // testGenerateUniqueIdCorrIdGenerated
@@ -488,7 +474,8 @@ public class OrionRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdSameCorrAndTransIds() {
-        System.out.println("[OrionRestHandler.generateUniqueId] -------- When a correlation ID is genereated, both "
+        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                + "-------- When a correlation ID is genereated, both "
                 + "generated correlation ID and generated transaction ID have the same value");
         OrionRestHandler handler = new OrionRestHandler();
         String generatedTransId = "1234567890-123-1234567890";
@@ -497,11 +484,13 @@ public class OrionRestHandlerTest {
         
         try {
             assertEquals(generatedTransId, generatedCorrId);
-            System.out.println("[OrionRestHandler.generateUniqueId] -  OK  - The generated transaction ID '"
-                    + generatedTransId + "' is equals to the generated correlator ID '" + generatedCorrId + "'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "-  OK  - The generated transaction ID '" + generatedTransId
+                    + "' is equals to the generated correlator ID '" + generatedCorrId + "'");
         } catch (AssertionError e) {
-            System.out.println("[OrionRestHandler.generateUniqueId] - FAIL - The generated transaction ID '"
-                    + generatedTransId + "' is not equals to the generated correlator ID '" + generatedCorrId + "'");
+            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+                    + "- FAIL - The generated transaction ID '" + generatedTransId
+                    + "' is not equals to the generated correlator ID '" + generatedCorrId + "'");
             throw e;
         } // try catch
     } // testGenerateUniqueIdSameCorrAndTransIds
