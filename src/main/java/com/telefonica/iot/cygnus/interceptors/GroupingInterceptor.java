@@ -71,6 +71,8 @@ public class GroupingInterceptor implements Interceptor {
  
     @Override
     public Event intercept(Event event) {
+        LOGGER.debug("Event intercepted, id=" + event.hashCode());
+        
         // get the original headers and body
         Map<String, String> headers = event.getHeaders();
         String body = new String(event.getBody());
@@ -90,9 +92,8 @@ public class GroupingInterceptor implements Interceptor {
             return null;
         } // try catch
         
-        // iterate on the contextResponses
+        // iterate on the context responses and notified service paths
         ArrayList<String> defaultDestinations = new ArrayList<String>();
-        ArrayList<String> defaultServicePaths = new ArrayList<String>();
         ArrayList<String> groupedDestinations = new ArrayList<String>();
         ArrayList<String> groupedServicePaths = new ArrayList<String>();
         ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
@@ -102,7 +103,10 @@ public class GroupingInterceptor implements Interceptor {
             return null;
         } // if
         
-        for (ContextElementResponse contextElementResponse : contextResponses) {
+        String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
+        
+        for (int i = 0; i < contextResponses.size(); i++) {
+            ContextElementResponse contextElementResponse = contextResponses.get(i);
             ContextElement contextElement = contextElementResponse.getContextElement();
             
             // get the matching rule
@@ -110,26 +114,30 @@ public class GroupingInterceptor implements Interceptor {
             
             if (matchingRule == null) {
                 groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-                groupedServicePaths.add(fiwareServicePath);
+                groupedServicePaths.add(splitedNotifiedServicePaths[i]);
             } else {
                 groupedDestinations.add((String) matchingRule.getDestination());
                 groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
             } // if else
             
             defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-            defaultServicePaths.add(fiwareServicePath);
         } // for
         
         // set the final header values
-        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES,
-                Utils.toString(defaultDestinations));
-        headers.put(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS,
-                Utils.toString(defaultServicePaths));
-        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES,
-                Utils.toString(groupedDestinations));
-        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS,
-                Utils.toString(groupedServicePaths));
+        String defaultDestinationsStr = Utils.toString(defaultDestinations);
+        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_NOTIFIED_ENTITIES
+                + ", value=" + defaultDestinationsStr + ")");
+        String groupedDestinationsStr = Utils.toString(groupedDestinations);
+        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_ENTITIES
+                + ", value=" + groupedDestinationsStr + ")");
+        String groupedServicePathsStr = Utils.toString(groupedServicePaths);
+        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+                + ", value=" + groupedServicePathsStr + ")");
         event.setHeaders(headers);
+        LOGGER.debug("Event put in the channel, id=" + event.hashCode());
         return event;
     } // intercept
  

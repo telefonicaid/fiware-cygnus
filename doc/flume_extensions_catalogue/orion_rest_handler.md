@@ -39,10 +39,8 @@ Despite all the details about interceptors used in Cygnus are widely documented 
 * An interceptor is a piece of code in charge of "intercepting" events before they are put in the sink's channel and modifying them by adding/removing/modifying a header.
 * A `timestamp` header is added by the native `TimestampInterceptor`. It is expressed as a Unix time.
 * A `notified-entities` header is added by the custom `GroupingInterceptor`. This header contains one <i>default destination</i> per each notified context element. It is used by the sinks when the grouping rules are not enabled.
-* A `notified-servicepaths` header is added by the custom `GroupingInterceptor`. This header contains one <i>default service path</i> per each notified context element. It is used by the sinks when the grouping rules are not enabled.
 * A `grouped-entities` header is added by the custom `GroupingInterceptor`. This header contains one <i>grouped destination</i> per each notified context element. It is used by the sinks when the grouping rules are enabled.
 * A `grouped-servicepath` header is added by the custom `GroupingInterceptor`. This header contains one <i>grouped service path</i> per each notified context element. It is used by the sinks when the grouping rules are enabled.
-
 
 [Top](#top)
 
@@ -56,7 +54,7 @@ A NGSI-like event example could be (the code below is an <i>object representatio
             Accept: application/json
             Content-Type: application/json
             Fiware-Service: vehicles
-            Fiware-ServicePath: 4wheels
+            Fiware-ServicePath: /4wheels
             Fiware-Correlator: ABCDEF1234567890
         },
         payload={
@@ -98,13 +96,13 @@ As said, Flume events are not much more different than the above representation:
     flume-event={
         headers={
 	         timestamp=1429535775,
+	         transaction-id=0123456789ABCDEF,
+	         fiware-correlator=ABCDEF1234567890,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         fiware-correlator=ABCDEF1234567890
-	         notified-entities=car1_car
-	         notified-servicepaths=/4wheels
-	         grouped-entities=car1_car
-	         grouped-servicepath=/4wheels
+	         notified-entities=car1_car,
+	         grouped-entities=cars,
+	         grouped-servicepath=/mycars
         },
         body={
 	         entityId=car1,

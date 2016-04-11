@@ -600,7 +600,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             String destination = service;
 
             if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+                String[] notifiedServicePaths = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH).split(",");
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
                     CygnusEvent cygnusEvent = new CygnusEvent(
@@ -625,7 +625,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
 
             if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+                String[] notifiedServicePaths = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH).split(",");
 
                 for (int i = 0; i < notifiedServicePaths.length; i++) {
                     String destination = service + "_" + notifiedServicePaths[i];
@@ -652,7 +652,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             String service = headers.get(Constants.HEADER_FIWARE_SERVICE);
 
             if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+                String[] notifiedServicePaths = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH).split(",");
                 String[] notifiedEntities = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
 
                 for (int i = 0; i < notifiedEntities.length; i++) {
@@ -682,7 +682,7 @@ public abstract class OrionSink extends AbstractSink implements Configurable {
             ArrayList<ContextElementResponse> contextElementResponses = notification.getContextResponses();
 
             if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(Constants.FLUME_HEADER_NOTIFIED_SERVICE_PATHS).split(",");
+                String[] notifiedServicePaths = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH).split(",");
                 String[] notifiedEntities = headers.get(Constants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
 
                 for (int i = 0; i < contextElementResponses.size(); i++) {

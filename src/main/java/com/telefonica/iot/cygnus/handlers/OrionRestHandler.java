@@ -325,7 +325,7 @@ public class OrionRestHandler implements HTTPSourceHandler {
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        LOGGER.info("Event put in the channel, id=" + event.hashCode());
+        LOGGER.debug("Event put in the channel, id=" + event.hashCode());
         numProcessedEvents++;
         return eventList;
     } // getEvents

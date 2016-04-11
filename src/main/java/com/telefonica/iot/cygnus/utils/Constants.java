@@ -35,7 +35,6 @@ public final class Constants {
     
     // Flume header names
     public static final String FLUME_HEADER_TRANSACTION_ID         = "transaction-id";
-    public static final String FLUME_HEADER_NOTIFIED_SERVICE_PATHS = "notified-servicepaths";
     public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
     public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
     public static final String FLUME_HEADER_GROUPED_ENTITIES       = "grouped-entities";
