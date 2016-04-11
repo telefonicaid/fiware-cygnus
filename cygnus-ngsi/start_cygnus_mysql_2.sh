@@ -1,1 +1,0 @@
-/Applications/Apache/apache-flume-1.4.0-bin/bin/flume-ng agent --conf /Users/frb/devel/fiware/fiware-cygnus/conf -f /Users/frb/devel/fiware/fiware-cygnus/conf/agent_mysql.conf -n cygnusagent -Dflume.root.logger=$1,$2
