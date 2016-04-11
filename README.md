@@ -27,3 +27,5 @@ Current stable release is able to persist the following sources of data in the f
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
 You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
+
+Any doubt you may have, please refer to [here](./reporting_issues_and_contact.md).
