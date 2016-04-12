@@ -59,7 +59,7 @@ get_version_string()
           total_commit_number=$(git rev-list --all --count)
           short_hash=$(git rev-parse --short HEAD)
           version="$(git describe --tags --long  --match "[0-9*].[0-9*].[0-9*]" 2>/dev/null)"
-          [[ ${?} -ne 0 ]] && version="$(git describe --tags --long  --match "[0-9*].[0-9*].[0-9*]" 2>/dev/null)"
+          [[ ${?} -ne 0 ]] && version="$(git describe --tags --long  --match "release-[0-9*].[0-9*].[0-9*]" 2>/dev/null)"
           version="${version%-*-*}"
           version="${version#*release-}"
           echo "${version}-${total_commit_number}-${short_hash}"
