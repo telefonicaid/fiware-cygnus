@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
-
-# Copyright 2014 Telefonica Investigacion y Desarrollo, S.A.U
+# Copyright 2013 Telefonica Investigacion y Desarrollo, S.A.U
 #
-# This file is part of perseo-fe.
+# This file is part of fiware-cygnus (FI-WARE project).
 #
-# perseo-fe is free software: you can redistribute it and/or
+# fiware-cygnus is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# perseo-fe is distributed in the hope that it will be useful,
+# fiware-cygnus is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
 # General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with perseo-fe. If not, see http://www.gnu.org/licenses/.
+# along with fiware-cygnus. If not, see http://www.gnu.org/licenses/.
 #
 # For those usages not covered by this license please contact with
 # iot_support at tid dot es
 
-# Bash lib to know the RPM version and revision from a Github repository
+# Bash lib to know the RPM version and revision from a GitHub repository
 # Call method get_rpm_version_string to obtain them for rpmbuild
+#
 
 if [[ $(ps -hp  $$ | grep bash) ]]; then
   shopt -s extglob
