@@ -31,14 +31,14 @@ import org.junit.Test;
  *
  * @author frb
  */
-public class GroupingRuleTest {
+public class CygnusGroupingRuleTest {
     
     /**
      * Constructor.
      */
-    public GroupingRuleTest() {
+    public CygnusGroupingRuleTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
-    } // GroupingRuleTest
+    } // CygnusGroupingRuleTest
     
     /**
      * [Groupingrule.isValid] -------- fiware-servicePath field in a grouping rule must start with '/'.
@@ -149,4 +149,4 @@ public class GroupingRuleTest {
         return jsonRule;
     } // createJsonObject
     
-} // GroupingRuleTest
+} // CygnusGroupingRuleTest
