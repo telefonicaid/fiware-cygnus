@@ -48,7 +48,7 @@ get_branch_type()
 
 get_version_string()
 {
-    local branch branch_name describe_tags version ancestor
+    local branch branch_name describe_tags version ancestor release
     case $(get_branch_type) in
         stable)
            # If we are on stable branch get last tag as the version, but transform to x.x.x-x-SHA1
@@ -61,19 +61,26 @@ get_version_string()
           total_commit_number=$(git rev-list --all --count)
           short_hash=$(git rev-parse --short HEAD)
           version="$(git describe --tags --long  --match "[[:digit:]]*.[[:digit:]]*.[[:digit:]]*" 2>/dev/null)"
-          echo "${version%-*-*}-${total_commit_number}-${short_hash}"
+          version="${version%-*-*}"
+          version="${version%KO}"
+          echo "${version}-${total_commit_number}-${short_hash}"
         ;;
         release)
           ## in release branches the version is a tag named
           branch_name="$(get_branch)"
           branch_name="${branch_name#*/}"
-          version="$(git describe --tags --long  --match ${branch_name} 2>/dev/null)"
-          echo ${version}
+          describe_tags="$(git describe --tags --long  --match ${branch_name} 2>/dev/null)"
+          version="${describe_tags%-*-*}"
+          version="${version%KO}"
+          release=${describe_tags#*.*.*-}
+          echo "${version}-${release}"
         ;;
         other)
             ## We are in detached mode, use the last x-y-z tag
             version="$(git describe --tags --long  --match "[[:digit:]]*.[[:digit:]]*.[[:digit:]]*" 2>/dev/null)"
-            echo "${version%-*-*}"
+            version="${version%-*-*}"
+            version="${version%KO}"
+            echo "${version}"
         ;;
         *)
            # RMs don't stablish any standard here, we use branch name as version
