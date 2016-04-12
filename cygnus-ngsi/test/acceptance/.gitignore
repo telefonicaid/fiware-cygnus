@@ -1,0 +1,15 @@
+# test
+#------
+*.out
+*.pyc
+.idea/
+certs/
+conf/
+logs/
+settings/
+jenkins/
+testreport/
+10.95.*/
+properties.json
+
+
