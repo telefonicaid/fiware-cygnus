@@ -50,7 +50,7 @@ public class GroupingRuleTest {
         JSONObject jsonRule = createJsonObject();
         
         try {
-            assertEquals(0, GroupingRule.isValid(jsonRule, true));
+            assertEquals(0, CygnusGroupingRule.isValid(jsonRule, true));
             System.out.println(getTestTraceHead("[GroupingRule.isValid]")
                     + "-  OK  - The fiware-servicePath field in the rule '"
                     + jsonRule.toJSONString() + "' starts with '/'");
@@ -74,7 +74,7 @@ public class GroupingRuleTest {
         jsonObject.put("id", 1L);
         
         // Create the rule for doing the tests
-        GroupingRule rule = new GroupingRule(jsonObject);
+        CygnusGroupingRule rule = new CygnusGroupingRule(jsonObject);
         
         try { 
             assertTrue(rule.getPattern() != null);
