@@ -26,12 +26,12 @@ import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
-import com.telefonica.iot.cygnus.interceptors.GroupingRule;
-import com.telefonica.iot.cygnus.interceptors.GroupingRules;
 import com.telefonica.iot.cygnus.containers.CygnusSubscription;
-import com.telefonica.iot.cygnus.handlers.NGSIRestHandler;
+import com.telefonica.iot.cygnus.handlers.CygnusHandler;
+import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
+import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.sinks.NGSISink;
+import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.BufferedReader;
 import java.io.File;
@@ -232,11 +232,11 @@ public class ManagementInterface extends AbstractHandler {
             jsonStr += "{\"name\":\"" + source.getName() + "\","
                     + "\"status\":\"" + source.getLifecycleState().toString() + "\",";
 
-            if (handler instanceof NGSIRestHandler) {
-                NGSIRestHandler orh = (NGSIRestHandler) handler;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(orh.getBootTime(), true) + "\","
-                        + "\"num_received_events\":" + orh.getNumReceivedEvents() + ","
-                        + "\"num_processed_events\":" + orh.getNumProcessedEvents() + "}";
+            if (handler instanceof CygnusHandler) {
+                CygnusHandler ch = (CygnusHandler) handler;
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(ch.getBootTime(), true) + "\","
+                        + "\"num_received_events\":" + ch.getNumReceivedEvents() + ","
+                        + "\"num_processed_events\":" + ch.getNumProcessedEvents() + "}";
             } else {
                 jsonStr += "\"setup_time\":\"unknown\","
                         + "\"num_received_events\":-1,"
@@ -311,11 +311,11 @@ public class ManagementInterface extends AbstractHandler {
             jsonStr += "{\"name\":\"" + sink.getName() + "\","
                     + "\"status\":\"" + sink.getLifecycleState().toString() + "\",";
 
-            if (sink instanceof NGSISink) {
-                NGSISink os = (NGSISink) sink;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(os.getSetupTime(), true) + "\","
-                        + "\"num_processed_events\":" + os.getNumProcessedEvents() + ","
-                        + "\"num_persisted_events\":" + os.getNumPersistedEvents() + "}";
+            if (sink instanceof CygnusSink) {
+                CygnusSink cs = (CygnusSink) sink;
+                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(cs.getSetupTime(), true) + "\","
+                        + "\"num_processed_events\":" + cs.getNumProcessedEvents() + ","
+                        + "\"num_persisted_events\":" + cs.getNumPersistedEvents() + "}";
             } else {
                 jsonStr += "\"setup_time\":\"unknown\","
                         + "\"num_processed_events\":-1,"
@@ -345,7 +345,7 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
 
-        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        CygnusGroupingRules groupingRules = new CygnusGroupingRules(groupingRulesConfFile);
         String rulesStr = groupingRules.toString(true);
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
@@ -421,7 +421,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
-        int err = GroupingRule.isValid(rule, true);
+        int err = CygnusGroupingRule.isValid(rule, true);
 
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -465,8 +465,8 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
 
-        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
-        groupingRules.addRule(new GroupingRule(rule));
+        CygnusGroupingRules groupingRules = new CygnusGroupingRules(groupingRulesConfFile);
+        groupingRules.addRule(new CygnusGroupingRule(rule));
         String rulesStr = groupingRules.toString(false);
 
         // write the configuration
@@ -724,10 +724,10 @@ public class ManagementInterface extends AbstractHandler {
                 continue;
             } // try catch
             
-            if (handler instanceof NGSIRestHandler) {
-                NGSIRestHandler orh = (NGSIRestHandler) handler;
-                orh.setNumProcessedEvents(0);
-                orh.setNumReceivedEvents(0);
+            if (handler instanceof CygnusHandler) {
+                CygnusHandler ch = (CygnusHandler) handler;
+                ch.setNumProcessedEvents(0);
+                ch.setNumReceivedEvents(0);
             } // if
         } // for
 
@@ -766,10 +766,10 @@ public class ManagementInterface extends AbstractHandler {
                 continue;
             } // try catch
 
-            if (sink instanceof NGSISink) {
-                NGSISink os = (NGSISink) sink;
-                os.setNumProcessedEvents(0);
-                os.setNumPersistedEvents(0);
+            if (sink instanceof CygnusSink) {
+                CygnusSink cs = (CygnusSink) sink;
+                cs.setNumProcessedEvents(0);
+                cs.setNumPersistedEvents(0);
             } // if
         } // for
         
@@ -811,7 +811,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // check if the rule is valid (it could be a valid Json document,
         // but not a Json document describing a rule)
-        int err = GroupingRule.isValid(rule, true);
+        int err = CygnusGroupingRule.isValid(rule, true);
 
         if (err > 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -855,9 +855,9 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
 
-        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        CygnusGroupingRules groupingRules = new CygnusGroupingRules(groupingRulesConfFile);
 
-        if (groupingRules.updateRule(id, new GroupingRule(rule))) {
+        if (groupingRules.updateRule(id, new CygnusGroupingRule(rule))) {
             PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
             writer.println(groupingRules.toString(false));
             writer.flush();
@@ -941,7 +941,7 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
 
-        GroupingRules groupingRules = new GroupingRules(groupingRulesConfFile);
+        CygnusGroupingRules groupingRules = new CygnusGroupingRules(groupingRulesConfFile);
 
         if (groupingRules.deleteRule(id)) {
             PrintWriter writer = new PrintWriter(new FileWriter(groupingRulesConfFile));
