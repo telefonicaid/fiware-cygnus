@@ -45,7 +45,6 @@ import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.conf.Configurable;
-import org.apache.flume.sink.AbstractSink;
 import org.apache.log4j.MDC;
 
 /**
@@ -65,7 +64,7 @@ import org.apache.log4j.MDC;
   - void start()
   - void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
-public abstract class NGSISink extends AbstractSink implements Configurable {
+public abstract class NGSISink extends CygnusSink implements Configurable {
 
     // logger
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISink.class);
@@ -81,10 +80,6 @@ public abstract class NGSISink extends AbstractSink implements Configurable {
     private final Accumulator accumulator;
     // rollback queues
     private final ArrayList<Accumulator> rollbackedAccumulations;
-    // statistics
-    private final long setupTime;
-    private long numProcessedEvents;
-    private long numPersistedEvents;
 
     /**
      * Constructor.
@@ -100,11 +95,6 @@ public abstract class NGSISink extends AbstractSink implements Configurable {
 
         // crete the rollbacking queue
         rollbackedAccumulations = new ArrayList<Accumulator>();
-
-        // initialize the statistics
-        setupTime = new Date().getTime();
-        numProcessedEvents = 0;
-        numPersistedEvents = 0;
     } // NGSISink
     
     /**
@@ -154,46 +144,6 @@ public abstract class NGSISink extends AbstractSink implements Configurable {
     protected boolean getEnableLowerCase() {
         return enableLowercase;
     } // getEnableLowerCase
-
-    /**
-     * Gets the setup time.
-     * @return The setup time (in miliseconds)
-     */
-    public long getSetupTime() {
-        return setupTime;
-    } // getSetupTime
-
-    /**
-     * Gets the number of processed events.
-     * @return The number of processed events
-     */
-    public long getNumProcessedEvents() {
-        return numProcessedEvents;
-    } // getNumProcessedEvents
-
-    /**
-     * Gets the number of persisted events.
-     * @return The number of persisted events.
-     */
-    public long getNumPersistedEvents() {
-        return numPersistedEvents;
-    } // getNumPersistedEvents
-    
-    /**
-     * Sets the number of processed events.
-     * @param n The number of processed events to be set
-     */
-    public void setNumProcessedEvents(long n) {
-        numProcessedEvents = n;
-    } // setNumProcessedEvents
-    
-    /**
-     * Sets the number of persisted events.
-     * @param n The number of persisted events to be set
-     */
-    public void setNumPersistedEvents(long n) {
-        numPersistedEvents = n;
-    } // setNumPersistedEvents
     
     /**
      * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
