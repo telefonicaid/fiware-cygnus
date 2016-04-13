@@ -15,6 +15,8 @@ Content:
 * [Releasing](#section7)
 * [Deployers and installers (RPMs and dockers)](#section8)
 * [Documentation](#section9)
+    * [Repository documentation](#section9.1)
+    * [`readthedocs.org` documentation](#section9.2)
 * [References](#section10)
 
 ##<a name="section1"></a>Introduction
@@ -22,7 +24,7 @@ This document is intended to developers aiming at contributing a complete Cygnus
 
 Within this document developers will find detailed guidelines regarding how to contribute to the main Cygnus repository.
 
-Any doubt you may have, please refer [here](./reporting_issues_and_contact.md).
+Any doubt you may have, please refer to [here](https://github.com/telefonicaid/fiware-cygnus/blob/develop/reporting_issues_and_contact.md).
 
 [Top](#top)
 
@@ -52,7 +54,6 @@ Each agent MUST have a dedicated folder. Each folder MUST be prefixed with `cygn
 Each folder MUST have, at least, the following subdirectories and files:
 
 * `src/` → functional code and unit tests
-* `doc/` → documentation in Markdown language
 * `docker/` → everything about deploying Cygnus by means of Docker
 * `test/` → acceptance tests, e2e tests, performance tests, others
 * `neore/` or `re/` → everything about installing Cygnus by means of a RPM
@@ -188,7 +189,66 @@ Work in progress.
 [Top](#top)
 
 ##<a name="section9"></a>Documentation
-Work in progress.
+###<a name="section9.1"></a>Repository documentation
+There MUST exist a `doc/` folder at the root of the main repository. Within this folder, there will be a subfolder for each agent type, in addition to a subfolder for `cygnus-common`. For instance:
+
+* `doc/cygnus-ngsi`
+* `doc/cygnus-twitter`
+* `doc/cygnus-common`
+
+All the agent teams MUST provide any documentation aimed to be exposed to the Community within its documentation subfolder.
+
+In addition, any agent documentation subfolder MUST have at least the following elements:
+
+* `doc/<agent name>/installation_and_administration_guide/` → Any document regarding how to install and administrate the agent MUST be placed here. Markdown MUST be used for the documents within this subfolder.
+* `doc/<agent name>/user_and_programmer_guide/` → Any document regarding how to use and programme the agent MUST be placed here. Markdown MUST be used for the documents within this subfolder.
+
+The following elements SHOULD be present as well:
+
+* `doc/<agent name>/flume_extensions_catalogue/` → For each class added to the native Apache Flume library, there SHOULD be a document placed here. Markdown MUST be used for the documents within this subfolder.
+* `doc/<agent name>/quick_start_guide.md/` → Simple and ready-to-use commands/actions to be taken in order to quickly test the agent SHOULD be documented here. Markdown MUST be used.
+
+[Top](#top)
+
+###<a name="section9.1"></a>`readthedocs.org` documentation
+The documentation within the `doc/` folder MUST be exposed in the Interned by means of `readthedocs.org` service. In order to achieve this, a `mkdocs.yml` file MUST live in the root of the main repository acting as a hook.
+
+The format of this `mkdocs.yml` file MUST follow this example:
+
+```
+site_name: fiware-cygnus
+site_url: https://fiware-cygnus.readthedocs.org
+repo_url: https://github.com/telefonicaid/fiware-cygnus.git
+site_description: Cygnus Documentation
+docs_dir: doc
+site_dir: html
+markdown_extensions: [toc,fenced_code]
+use_directory_urls: false
+theme: readthedocs
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+pages:
+  - Home: index.md
+  - 'Contributing': 'contributing/contributing_guidelines.md
+  - 'cygnus-ngsi':
+      - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
+      - 'Installation and Administration Guide':
+          - 'subsection 1 example': 'cygnus-ngsi/installation_and_administration_guide/subsection_1_example.md'
+          - 'subsection 2 example': 'cygnus-ngsi/installation_and_administration_guide/subsection_2_example.md'
+      - 'User and Programmer Guide':
+          - ...
+      - 'Flume extensions catalogue':
+          - ...
+  - 'cygnus-twitter':
+      - 'Quick Start Guide': 'cygnus-twitter/quick_start_guide.md'
+      - 'Installation and Administration Guide':
+          - ...
+      - 'User and Programmer Guide':
+          - ...
+      - 'Flume extensions catalogue':
+          - ...
+  - 'cygnus-common':
+      - ...
+```
 
 [Top](#top)
 
