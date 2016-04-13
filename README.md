@@ -5,6 +5,7 @@
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
 
+##Welcome
 This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
 
 Cygnus is a connector in charge of persisting certain sources of data in certain configured third-party storages, creating a historical view of such data.
@@ -26,6 +27,12 @@ Current stable release is able to persist the following sources of data in the f
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
-You may consider to visit [Cygnus Quick Start Guide](doc/quick_start_guide.md) before going deep into the details.
+##Further documentation
+The per agent **Quick Start Guide** provides a good documentation summary.
 
-Any doubt you may have, please refer to [here](./reporting_issues_and_contact.md).
+Nevertheless, both the **Installation and Administration Guide** and the **User and Programmer Guide** shown within this documentation for each agent cover more advanced topics.
+
+The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
+
+##Reporting issues and contact information
+Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
