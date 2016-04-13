@@ -10,7 +10,8 @@ theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
 pages:
   - Home: index.md
-  - cygnus-ngsi:
+  - 'Contributing': 'contributing/contributing_guidelines.md
+  - 'cygnus-ngsi':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-ngsi/installation_and_administration_guide/introduction.md'
@@ -54,7 +55,7 @@ pages:
           - 'GroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/grouping_interceptor.md'
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
-  - cygnus-twitter:
+  - 'cygnus-twitter':
       - 'Quick Start Guide': 'cygnus-twitter/to_be_done.md'
       - 'Installation and Administration Guide':
           - 'To be done': 'cygnus-twitter/to_be_done.md'
@@ -62,6 +63,6 @@ pages:
           - 'To be done': 'cygnus-twitter/to_be_done.md'
       - 'Flume extensions catalogue':
           - 'To be done': 'cygnus-twitter/to_be_done.md'
-  - cygnus-common:
-      - 'To be done': 'cygnus-twitter/to_be_done.md'
+  - 'cygnus-common':
+      - 'To be done': 'cygnus-common/to_be_done.md'
 
