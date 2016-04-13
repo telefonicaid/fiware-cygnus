@@ -76,7 +76,7 @@ Specific persistence logic is implemented by overwritting the only abstract meth
 [Top](#top)
 
 ###<a name="section2.4"></a>Inherited counters
-Because `NGSISink` extends `CygnusSink` the following counters are alrady available for retrieving statistics of any sink extending `NGSISink`:
+Because `NGSISink` extends `CygnusSink` the following counters are already available for retrieving statistics of any sink extending `NGSISink`:
 
 * Number of processed events, i.e. the number of events taken from the channel and accumulated in a batch for persistence.
 * Number of persisted events, i.e. the number of events within batches finally written/inserted/added in the final storage.
