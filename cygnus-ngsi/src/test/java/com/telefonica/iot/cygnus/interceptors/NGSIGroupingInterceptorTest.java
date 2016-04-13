@@ -30,19 +30,19 @@ import org.junit.Test;
  *
  * @author frb
  */
-public class GroupingInterceptorTest {
+public class NGSIGroupingInterceptorTest {
     
     /**
      * Constructor.
      */
-    public GroupingInterceptorTest() {
+    public NGSIGroupingInterceptorTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
-    } // GroupingInterceptorTest
+    } // NGSIGroupingInterceptorTest
     
     /**
-     * [GroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains fiware-service,
-     * fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath and
-     * grouped-entities headers.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains fiware-service,
+ fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath and
+ grouped-entities headers.
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
@@ -50,7 +50,7 @@ public class GroupingInterceptorTest {
                 + "-------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities "
                 + "headers");
-        GroupingInterceptor groupingInterceptor = new GroupingInterceptor("");
+        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("");
         groupingInterceptor.initialize();
         Event originalEvent = TestUtils.createEvent();
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();
@@ -126,4 +126,4 @@ public class GroupingInterceptorTest {
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
     
-} // GroupingInterceptorTest
+} // NGSIGroupingInterceptorTest

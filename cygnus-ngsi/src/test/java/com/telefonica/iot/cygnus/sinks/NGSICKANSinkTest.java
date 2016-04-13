@@ -228,9 +228,9 @@ public class NGSICKANSinkTest {
     @Test
     public void testPersistAttrPersistence() {
         // common objects
-        CygnusBatch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
+        NGSIBatch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        CygnusBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         System.out.println("Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)");
@@ -307,7 +307,7 @@ public class NGSICKANSinkTest {
         System.out.println("Testing OrionCKANSink.persisBatch (normal resource lengths)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        CygnusBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
+        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
@@ -371,7 +371,7 @@ public class NGSICKANSinkTest {
         System.out.println("Testing OrionCKANSink.persistBatch (\"root\" servicePath name)");
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
-        CygnusBatch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
+        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
                 singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         try {
@@ -398,11 +398,11 @@ public class NGSICKANSinkTest {
         } // try catch finally
     } // testPersistServiceServicePath
     
-    private CygnusBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
+    private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
         NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
             contextElement);
-        CygnusBatch batch = new CygnusBatch();
+        NGSIBatch batch = new NGSIBatch();
         batch.addEvent(destination, groupedEvent);
         return batch;
     } // createBatch

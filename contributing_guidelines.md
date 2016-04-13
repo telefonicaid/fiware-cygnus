@@ -10,7 +10,8 @@ Content:
     * [Main repository versus forked repositories](#section6.1)
     * [Pull requests](#section6.2)
     * [Contribution contents](#section6.3)
-    * [Commits and squashing](#section6.4)
+    * [Coding style](#section6.4)
+    * [Commits and squashing](#section6.5)
 * [Releasing](#section7)
 * [Deployers and installers (RPMs and dockers)](#section8)
 * [Documentation](#section9)
@@ -142,7 +143,12 @@ Where <i>short description</i> MAY enclose other “[...]” sublevels. For inst
 
 [Top](#top)
 
-###<a name="section6.4"></a>Commits nad squashing
+###<a name="section6.4"></a>Coding style
+The `fiware-cygnus/telefonica_checkstyle.xml` file MUST be configured in any Integrated Development Environment (IDE) used by the different development teams as a coding style checker. This XML file contains all the coding style rules accepted by Telefónica.
+
+[Top](#top)
+
+###<a name="section6.5"></a>Commits and squashing
 Commits within PRs MUST include a comment following this format:
 
     [<agent name>] [issue number] <short description>

@@ -17,7 +17,6 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -35,18 +34,18 @@ import org.json.simple.parser.ParseException;
  *
  * @author frb
  */
-public class GroupingRules {
+public class CygnusGroupingRules {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(GroupingRules.class);
-    private LinkedList<GroupingRule> groupingRules;
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusGroupingRules.class);
+    private LinkedList<CygnusGroupingRule> groupingRules;
     private long lastIndex;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
      */
-    public GroupingRules(String groupingRulesFileName) {
-        groupingRules = new LinkedList<GroupingRule>();
+    public CygnusGroupingRules(String groupingRulesFileName) {
+        groupingRules = new LinkedList<CygnusGroupingRule>();
         lastIndex = 0;
         
         // read the grouping rules file
@@ -74,22 +73,23 @@ public class GroupingRules {
         // create a list of grouping rules, with precompiled regex
         setRules(jsonGroupingRules);
         LOGGER.info("Grouping rules regex'es have been compiled");
-    } // GroupingRules
+    } // CygnusGroupingRules
     
     /**
-     * Gets the rule matching the given context element for the given service path.
-     * @param contextElement
+     * Gets the rule matching the given string.
      * @param servicePath
-     * @return
+     * @param entityId
+     * @param entityType
+     * @return The grouping rule matching the give string
      */
-    public GroupingRule getMatchingRule(ContextElement contextElement, String servicePath) {
+    public CygnusGroupingRule getMatchingRule(String servicePath, String entityId, String entityType) {
         if (groupingRules == null) {
             return null;
         } // if
         
-        for (GroupingRule rule : groupingRules) {
-            String concat = concatenateFields(rule.getFields(), contextElement, servicePath);
-            Matcher matcher = rule.getPattern().matcher(concat);
+        for (CygnusGroupingRule rule : groupingRules) {
+            String s = concatenateFields(rule.getFields(), servicePath, entityId, entityType);
+            Matcher matcher = rule.getPattern().matcher(s);
 
             if (matcher.matches()) {
                 return rule;
@@ -99,15 +99,32 @@ public class GroupingRules {
         return null;
     } // getMatchingRule
     
+    private String concatenateFields(ArrayList<String> fields, String servicePath, String entityId,
+            String entityType) {
+        String concat = "";
+
+        for (String field : fields) {
+            if (field.equals("entityId")) {
+                concat += entityId;
+            } else if (field.equals("entityType")) {
+                concat += entityType;
+            } else if (field.equals("servicePath")) {
+                concat += servicePath;
+            } // if else
+        } // for
+        
+        return concat;
+    } // concatenateFields
+    
     /**
      * Adds a new rule to the grouping rules.
      * @param rule
      */
-    public void addRule(GroupingRule rule) {
+    public void addRule(CygnusGroupingRule rule) {
         lastIndex++;
         rule.setId(this.lastIndex);
         this.groupingRules.add(rule);
-    } // GroupingRule
+    } // CygnusGroupingRule
     
     /**
      * Deletes a rule given its ID.
@@ -120,7 +137,7 @@ public class GroupingRules {
         } // if
         
         for (int i = 0; i < groupingRules.size(); i++) {
-            GroupingRule groupingRule = groupingRules.get(i);
+            CygnusGroupingRule groupingRule = groupingRules.get(i);
             
             if (groupingRule.getId() == id) {
                 groupingRules.remove(i);
@@ -137,13 +154,13 @@ public class GroupingRules {
      * @param rule
      * @return True, if the rule was updated, otherwise false
      */
-    public boolean updateRule(long id, GroupingRule rule) {
+    public boolean updateRule(long id, CygnusGroupingRule rule) {
         if (groupingRules == null) {
             return false;
         } // if
         
         for (int i = 0; i < groupingRules.size(); i++) {
-            GroupingRule groupingRule = groupingRules.get(i);
+            CygnusGroupingRule groupingRule = groupingRules.get(i);
             
             if (groupingRule.getId() == id) {
                 groupingRules.remove(i);
@@ -178,22 +195,23 @@ public class GroupingRules {
     } // toString
     
     /**
-     * Gets the grouping rules as a list of GroupingRule objects. It is protected since it is only used by the tests.
-     * @return The grouping rules as a list of GroupingRule objects
+     * Gets the grouping rules as a list of CygnusGroupingRule objects. It is protected since it is only used
+     * by the tests.
+     * @return The grouping rules as a list of CygnusGroupingRule objects
      */
-    protected LinkedList<GroupingRule> getRules() {
+    protected LinkedList<CygnusGroupingRule> getRules() {
         return groupingRules;
     } // getRules
 
     private void setRules(JSONArray jsonRules) {
-        groupingRules = new LinkedList<GroupingRule>();
+        groupingRules = new LinkedList<CygnusGroupingRule>();
 
         for (Object jsonGroupingRule : jsonRules) {
             JSONObject jsonRule = (JSONObject) jsonGroupingRule;
-            int err = GroupingRule.isValid(jsonRule, false);
+            int err = CygnusGroupingRule.isValid(jsonRule, false);
 
             if (err == 0) {
-                GroupingRule rule = new GroupingRule(jsonRule);
+                CygnusGroupingRule rule = new CygnusGroupingRule(jsonRule);
                 groupingRules.add(rule);
                 lastIndex = rule.getId();
             } else {
@@ -221,22 +239,6 @@ public class GroupingRules {
             } // if else
         } // for
     } // setRules
-    
-    private String concatenateFields(ArrayList<String> fields, ContextElement contextElement, String servicePath) {
-        String concat = "";
-
-        for (String field : fields) {
-            if (field.equals("entityId")) {
-                concat += contextElement.getString(field);
-            } else if (field.equals("entityType")) {
-                concat += contextElement.getString(field);
-            } else if (field.equals("servicePath")) {
-                concat += servicePath;
-            } // if else
-        } // for
-        
-        return concat;
-    } // concatenateFields
     
     private String readGroupingRulesFile(String groupingRulesFileName) {
         if (groupingRulesFileName == null) {
@@ -286,4 +288,4 @@ public class GroupingRules {
         } // try catch
     } // parseGroupingRules
 
-} // GroupingRules
+} // CygnusGroupingRules

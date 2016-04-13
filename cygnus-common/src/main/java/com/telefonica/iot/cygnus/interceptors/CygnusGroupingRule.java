@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
 /**
  * Each one of the entries of the matching table.
  */
-public class GroupingRule {
+public class CygnusGroupingRule {
 
     private final JSONObject jsonRule;
     private final Pattern pattern;
@@ -39,10 +39,10 @@ public class GroupingRule {
      * Constructor.
      * @param jsonRule
      */
-    public GroupingRule(JSONObject jsonRule) {
+    public CygnusGroupingRule(JSONObject jsonRule) {
         this.jsonRule = jsonRule;
         this.pattern = Pattern.compile((String) jsonRule.get("regex"));
-    } // GroupingRule
+    } // CygnusGroupingRule
 
     /**
      * Sets the rule's id.
@@ -170,4 +170,4 @@ public class GroupingRule {
         return jsonRule.toJSONString();
     } // toString
 
-} // GroupingRule
+} // CygnusGroupingRule
