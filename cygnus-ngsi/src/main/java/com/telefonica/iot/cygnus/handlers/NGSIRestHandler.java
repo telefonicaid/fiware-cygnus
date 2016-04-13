@@ -47,7 +47,7 @@ import java.util.UUID;
  * Flume event is created in order the HTTP Flume source sends it to the Flume channel connecting the source with the
  * sink. This event contains both the context event data and a header specifying the content type (Json).
  */
-public class NGSIRestHandler implements HTTPSourceHandler {
+public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler {
     
     // LOGGER
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIRestHandler.class);
@@ -60,12 +60,6 @@ public class NGSIRestHandler implements HTTPSourceHandler {
     
     // shared variables, making them static all the instances of this class will share them
     private static final Object LOCK = new Object();
-    private static long transactionCount = 0;
-    private static final long BOOTTIME = new Date().getTime();
-    private static final long BOOTTIMESECONDS = BOOTTIME / 1000;
-    private static long bootTimeMiliseconds = BOOTTIME % 1000;
-    private static long numReceivedEvents = 0;
-    private static long numProcessedEvents = 0;
     
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
@@ -79,46 +73,6 @@ public class NGSIRestHandler implements HTTPSourceHandler {
         // print Cygnus version
         LOGGER.info("Cygnus version (" + NGSIUtils.getCygnusVersion() + "." + NGSIUtils.getLastCommit() + ")");
     } // NGSIRestHandler
-    
-    /**
-     * Gets the setup time.
-     * @return The setup time
-     */
-    public long getBootTime() {
-        return BOOTTIME;
-    } // getBootTime
-    
-    /**
-     * Gets the number of received events.
-     * @return The number of received events
-     */
-    public long getNumReceivedEvents() {
-        return numReceivedEvents;
-    } // getNumReceivedEvents
-        
-    /**
-     * Gets the number of processed events.
-     * @return The number of processed events
-     */
-    public long getNumProcessedEvents() {
-        return numProcessedEvents;
-    } // getNumProcessedEvents
-    
-    /**
-     * Sets the number of received events.
-     * @param n The number of received events to be set
-     */
-    public void setNumReceivedEvents(long n) {
-        numReceivedEvents = n;
-    } // setNumReceivedEvents
-    
-    /**
-     * Sets the number of processed events.
-     * @param n The number of processed events to be set
-     */
-    public void setNumProcessedEvents(long n) {
-        numProcessedEvents = n;
-    } // setNumProcessedEvents
     
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.

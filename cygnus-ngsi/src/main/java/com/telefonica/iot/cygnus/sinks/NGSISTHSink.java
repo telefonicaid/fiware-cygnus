@@ -38,7 +38,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
     } // NGSISTHSink
     
     @Override
-    public void persistBatch(CygnusBatch batch) throws Exception {
+    public void persistBatch(NGSIBatch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;

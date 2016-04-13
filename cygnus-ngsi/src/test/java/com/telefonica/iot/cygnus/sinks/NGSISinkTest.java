@@ -40,7 +40,7 @@ public class NGSISinkTest {
     private class OrionSinkImpl extends NGSISink {
 
         @Override
-        void persistBatch(CygnusBatch batch) throws Exception {
+        void persistBatch(NGSIBatch batch) throws Exception {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
         
