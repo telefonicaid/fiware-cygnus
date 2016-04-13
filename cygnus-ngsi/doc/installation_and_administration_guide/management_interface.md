@@ -10,6 +10,7 @@ Content:
 * [DELETE `/v1/groupingrules`](#section7)
 * [GET `/admin/log`](#section8)
 * [PUT `/admin/log`](#section9)
+* [POST `/v1/subscriptions`](#section10)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -272,6 +273,99 @@ Responses:
 
 ```
 400 Bad Request
-{"error":"
+{"error":"}
+```
+
+[Top](#top)
+
+##<a name="section10"></a>`POST /v1/subscriptions`
+
+Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
+
+```
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
+{
+    "subscription":{
+          "entities": [
+              {
+                  "type": "Room",
+                  "isPattern": "false",
+                  "id": "Room1"
+              }
+          ],
+          "attributes": [],
+          "reference": "http://<reference_host>:<reference_port>",
+          "duration": "P1M",
+          "notifyConditions": [
+              {
+                  "type": "ONCHANGE",
+                  "condValues": []
+              }
+          ],
+          "throttling": "PT5S"
+    },
+    "endpoint":{
+          "host":"<endpoint_host>",
+          "port":"<endpoint_port>",
+          "ssl":"false",
+          "xauthtoken":"234123123123123"
+    }
+}'
+```
+Responses:
+
+Valid subscription:
+```
+{
+    "success":"true",
+    "result" : {
+        {
+            "subscribeResponse":{
+                  "duration":"P1M",
+                  "throttling":"PT5S",
+                  "subscriptionId":"56f9081c3c6fb7e9d2a912a0"
+            }
+        }
+    }
+}
+```
+
+Invalid subscription (Unknown fields in this case)
+```
+{
+    "success":"true",
+    "result" :
+        {
+            "subscribeError":
+                  {
+                      "errorCode":
+                            {
+                                "code":"400",
+                                "reasonPhrase":"Bad Request",
+                                "details":"JSON Parse Error: unknown field: \/extraField"
+                            }
+                  }
+      }
+}
+```
+
+Invalid JSON (Empty field and missing field)
+```
+{
+    "success":"false",
+    "error":"Invalid subscription, field 'duration' is empty"
+}
+
+{
+    "success":"false",
+    "error":"Invalid subscription, field 'notifyConditions' is missing"
+}
+
+
+```
+
+Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
+
+
 
 [Top](#top)
