@@ -1,149 +1,122 @@
-#<a name="top"></a>Adding new sinks development guide
-
+#<a name="top"></a>Adding new NGSI sinks development guide
 Content:
 
 * [Introduction](#section1)
-* [Before starting](#section2)
-    * [Contributing to Cygnus](#section2.1)
-    * [Coding style](#section2.2)
-* [New sink development](#section3)
-    * [`OrionSink` class](#section3.1)
-    * [Sink configuration](#section3.2)
-    * [Naming and placing the new sink](#section3.3)
-    * [Backend convenience classes](#section3.4)
-* [Reporting issues and contact information](#section4)
+* [Base `OrionSink` class](#section2)
+    * [Inherited configuration](#section2.1)
+    * [Inherited starting and stoping](#section2.2)
+    * [Inherited events consumption](#section2.3)
+    * [Inherited counters ](#section2.4)
+* [New sink class](#section3)
+    * [Specific configuration](#section3.1)
+    * [Kind of information to be persisted](#section3.2)
+    * [Fitting to the specific data structures](#section3.3)
+* [Backend convenience classes](#section4)
+* [Naming and placing the new sink](#section5)
 
 ##<a name="section1"></a>Introduction
-Cygnus allows for Orion context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks could be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official Cygnus contributor!
+`cygnus-ngsi` allows for NGSI context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks could be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official `cygnus-ngsi` contributor!
 
-This document tries to guide you on the development of such alternative sinks, by giving you guidelines about how to write the sink code, but also how the different classes must be called, the accepted coding style, etc.
-
-[Top](#top)
-
-##<a name="section2"></a>Before starting
-
-###<a name="section2.1"></a>Contributing to Cygnus
-You can contribute to Cygnus (open sourced) as usual:
-
-1. Fork our Github [Cygnus](https://github.com/telefonicaid/fiware-cygnus) repository (you will need an account on Github).
-2. Create a new branch where to code your fix/addon.
-3. Submit a pull request to us!  
-
-We will not merge new code in the Cygnus repository coming from a different path.
+This document tries to guide you on the development of such alternative sinks, by giving you guidelines about how to write the sink code, but also how the different classes must be called, the backends that can be used, etc.
 
 [Top](#top)
 
-###<a name="section2.2"></a>Coding style 
+##<a name="section2"></a>Base `NGSISink` class
+`NGSISink` is the base class all the sinks within `cygnus-ngsi` extend. It is an abstract class which extends from `CygnusSink` class at `cygnus-common` (which, by its side, extends Flume's native `AbstractSink`).
 
-Please, add the `fiware-cygnus/telefonica_checkstyle.xml` to you IDE as check style configuration. This XML file contains all the coding style rules accepted by Telefónica.
+`NGSISink` provides most of the logic required by any NGSI-like sink:
 
-We will not merge new code in the Cygnus repository if such coding style is not met.
-
-[Top](#top)
-
-##<a name="section3"></a>New sink development
-
-###<a name="section3.1"></a>`OrionSink` class
-`OrionSink` is the base class all the Cygnus sinks extend. This class governs the consumption of the Flume events put by `OrionRestHandler` in the sink channel, taking them from the channel and calls to the persistence abstract method which in final term is the unique method that must be implemented by the extending class. All the logic about starting and stopping the sink, beginning, committing and closing Flume transactions and many other features is already there, thus you will not have to deal with it.
+* Configuration of parameters common to all the sinks.
+* Starting and stoping the sink.
+* Flume events consumption in a batch-like approach, including opening, committing and closing of Flume transactions.
+* Counters for statistics (in fact, this feature is given by `CygnusSink`).
 
 You find this class at the following path:
 
-    fiware-cygnus/src/main/java/com/telefonica/iot/cygnus/sinks/OrionSink.java
-
-`OrionSink`, on its side, extends `AbstractSink` from the Flume API; this class is the one providing all the necessary methods, as previously said. As can be seen, all of them are already implemented (`start`, `stop`, etc) or overridden (`process`). Only showing relevant parts in pseudo-code:
-
-    public abstract class OrionSink extends AbstractSink implements Configurable {
+    fiware-cygnus/cygnus-ngsi/src/main/java/com/telefonica/iot/cygnus/sinks/NGSISink.java
     
-    	Batch batch;
-    	
-		/**
-		 * Constructor
-		 */ 
-		public OrionSink() {
-			super();
-			...
-		} // OrionSink
-
-		@Override
-		public Status process() throws EventDeliveryException {
-			Channel ch = getChannel();
-			Transaction txn = ch.getTransaction();
-			txn.begin();
-			
-			for (int i = 0; i < batchSize; i++) {
-				Event event = ch.take();
-				NotifyContextRequest notification = parseEventBody(event);
-				accumulateInBatch(event.getHeaders(), notification);
-			} // for
-			
-			persistBatch(batch);
-			txn.commit();
-			return Status.READY;
-		} // process
-
-    	/**
-     	 * This is the method the classes extending this class must implement when dealing with a batch of events to be
-     	 * persisted.
-     	 * @param batch
-     	 * @throws Exception
-        */
-    	abstract void persistBatch(Batch batch) throws Exception;
+[Top](#top)
     
-    } // OrionSink   
+###<a name="section2.1"></a>Inherited configuration
+All the sinks extending `NGSISink` inherit the following configuration parameters:
 
-The `process` method is responsible for getting the channel, initiating a Flume transaction, taking as many events from the channel as necessary to build a `Batch` object and processing it by calling the `persistBatch` method. Such a `persistBatch` method is the only piece of code a developer must create according to the logic of his/her sink.
+| Parameter | Mandatory | Default value | Comments |
+|---|---|---|---|
+| batch_size | no | 1 | Number of events accumulated before persistence. |
+| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| data_model | no | dm-by-entity | Accepted values: <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> and <dm-by-attribute</i>. |
+| enable_grouping | no | false | Accepted values: <i>true</i> or <i>false</i>. |
+| enable\_lowercase | no | false | Accepted values: <i>true</i> or <i>false</i>. |
 
-Please notice that the `process` method handles all the possible errors that may occur during a Flume transaction by catching exceptions, especially those thrown by the abstract `persistBatch` method. There exists a collection of Cygnus-related exceptions whose usage is mandatory located at:
-
-    fiware-cygnus/src/main/java/com/telefonica/iot/cygnus/errors/
+These parameters are read (and defaulted, when required) in the `configure(Context)` method.
 
 [Top](#top)
 
-###<a name="section3.2"></a>Sink configuration
-In addition to extending `AbstractSink`, `OrionSink` implements the `Configure` interface which allows for parameterizing the new sink from the general Cygnus configuration file.
-
-Configuration parameters must follow this schema:
-
-    cygnusagent.sources = http-source
-    cygnusagent.sinks = <sink_name> <other_sink_names>
-    cygnusagent.channels = <sink_channel_name> <other_sink_channel_names>
-    ...
-    cygnusagent.sinks.<sink_name>.<parameter_1_name> = <parameter_1_value>
-    cygnusagent.sinks.<sink_name>.<parameter_2_name> = <parameter_2_value>
-	...
-	cygnusagent.sinks.<sink_name>.<parameter_N_name> = <parameter_N_value>
-	...
+###<a name="section2.2"></a>Inherited starting and stoping
+TBD
 
 [Top](#top)
 
-###<a name="section3.3"></a>Naming and placing the new sink
-New sink classes must be called `Orion<technology>Sink`, being <i>technology</i> the name of the persistence backend. Examples are `OrionHDFSSink`, `OrionCKANSink` or `OrionMySQLSink` (by the way, these three exist already).
+###<a name="section2.3"></a>Inherited events consumption    
+The most important part of `NGSISink` is where the events are consumed in a batch-like approach. This is done in the `process()` method inherited from `AbstractSink`, which is overwritten.
 
-The path where the new sink is to be placed:
+Such events processing is done by opening a Flume transaction and reading events as specified in the `batch_size` parameter (if no enough events are available, the accumulation ends when the `batch_timeout` is reached). For each event read, the transaction is committed. Once the accumulations ends the transaction is closed.
 
-    fiware-cygnus/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/sinks
-    
+Please notice that the `process()` method handles all the possible errors that may occur during a Flume transaction by catching exceptions. There exists a collection of Cygnus-related exceptions whose usage is mandatory located at `cygnus-common`:
+
+    fiware-cygnus/cygnus-common/src/main/java/com/telefonica/iot/cygnus/errors/
+
+Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/grouped destination (`notified-destinations` and `grouped-destinations` headers in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_grouping` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
+
+Specific persistence logic is implemented by overwritting the only abstract method within `NGSISink`, i.e. `persistBatch(NGSIBatch)`:
+
+    abstract void persistBatch(NGSIBatch) throws Exception;
+
+[Top](#top)
+
+###<a name="section2.4"></a>Inherited counters
+Because `NGSISink` extends `CygnusSink` the following counters are alrady available for retrieving statistics of any sink extending `NGSISink`:
+
+* Number of processed events, i.e. the number of events taken from the channel and accumulated in a batch for persistence.
+* Number of persisted events, i.e. the number of events within batches finally written/inserted/added in the final storage.
+
+[Top](#top)
+
+##<a name="section3"></a>New sink class
+###<a name="section3.1"></a>Specific configuration
+The `configure(Context)` method of `NGSISink` can be extended with specific configuration parameters reading (and defaulting, when required).
+
+[Top](#top)
+
+###<a name="section3.2"></a>Kind of information to be persisted
+We include a list of fields that are usually persisted in Cygnus sinks:* The reception time of the notification in miliseconds.* The reception time of the notification in human-readable format.* The notified/grouped FIWARE service path.* The entity ID.* The entity type.* The attributes and the attribute’s metadata.Regarding the attributes and their metadata, you may choose between two options (or both of them, by means of a switching configuration parameter):* <i>row</i> format, i.e. a write/insertion/upsert per attribute and metadata.* <i>column</i> format, i.e. a single write/insertion/upsert containing all the attributes and their metadata.
+
+[Top](#top)
+
+###<a name="section3.2"></a>Fitting to the specific data structures
+It is worth to briefly comment how the specific data structures should be created.
+Typically, the notified service (which defines a client/tenant) should map to the storage element in charge of defining namespaces per user. For instance, in MySQL, PostgreSQL, MongoDB and STH, the service maps to a specific database where permissions can be defined at user level. While in CKAN, the service maps to an organization. In other cases, the mapping is not so evident, as in HDFS, where the service maps into a folder under `hdfs://user/`. Or it is totally impossible to fit, as is the case of DynamoDB or Kafka, where the service can only be added as part of the persistence element name (table and topic, respectively).
+Regarding the notified service path, it is usually included as a prefix of the destination name (file, table, resource, collection, topic) where the data is really written. This is the case of all the sinks except HDFS and CKAN. HDFS maps the service path as a subfolder under `hdfs://user/service`, and CKAN maps the service path as a package.
+Of special interest is the root service path (`/`). In this case, the service path should not be considered when prefixing destination name (because it is used to be a forbidden character).
+Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a grouping rule is used to overwrite this default behavior).
+
 [Top](#top)
  
-###<a name="section3.4"></a>Backend convenience classes
-
-Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. These classes must be placed at:
-
-    fiware-cygnus/src/main/java/es/tid/fiware/fiwareconnectors/cygnus/backends/<my_backend_classes>/
-
+##<a name="section4"></a>Backend convenience classes
+Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. Nevertheless, these classes should not be located at `cygnus-ngsi` but at `cygnus-common`.
+    
 [Top](#top)
+    
+##<a name="section5"></a>Naming and placing the new classes
+New sink classes must be called `NGSI<technology>Sink`, being <i>technology</i> the name of the persistence backend. Examples are the already existent sinks `NGSIHDFSSink`, `NGSICKANSink` or `NGSIMySQLSink`.
 
-##<a name="section4"></a>Reporting issues and contact information
-There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
+Regarding the new sink class location, it must be:
 
-* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
-* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
-* Personal email:
-    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
-    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
-    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
-    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
+    fiware-cygnus/cygnus-ngsi/src/main/java/com/telefonica/iot/cygnus/sinks/
+    
+As already explained, backends must be located at:
 
-**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
-
+    fiware-cygnus/cygnus-common/src/main/java/com/telefonica/iot/cygnus/backends/<technology>/
+    
 [Top](#top)
