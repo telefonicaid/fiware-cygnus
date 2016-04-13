@@ -10,6 +10,7 @@ Content:
 * [DELETE `/v1/groupingrules`](#section7)
 * [GET `/admin/log`](#section8)
 * [PUT `/admin/log`](#section9)
+* [POST `/v1/subscriptions`](#section10)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -272,6 +273,61 @@ Responses:
 
 ```
 400 Bad Request
-{"error":"
+{"error":"}
+```
+
+[Top](#top)
+
+##<a name="section10"></a>`POST /v1/subscription`
+
+Creates a new subscription to Orion, passed as a Json in the payload (Two JSON are required, the first must contain
+the subscription as it would be sent to Orion normally and the second must contain the information about the endpoint).
+
+```
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
+{
+    "subscription":{
+          "entities": [
+              {
+                  "type": "Room",
+                  "isPattern": "false",
+                  "id": "Room1"
+              }
+          ],
+          "attributes": [],
+          "reference": "http://<reference_host>:<reference_port>",
+          "duration": "P1M",
+          "notifyConditions": [
+              {
+                  "type": "ONCHANGE",
+                  "condValues": []
+              }
+          ],
+          "throttling": "PT5S"
+    },
+    "endpoint":{
+          "host":"<endpoint_host>",
+          "port":"<endpoint_port>",
+          "ssl":"false",
+          "xauthtoken":"234123123123123"
+    }
+}'
+```
+Response:
+
+```
+{
+    "success":"true",
+    "result" : {
+        {
+            "subscribeResponse":{
+                  "duration":"P1M",
+                  "throttling":"PT5S",
+                  "subscriptionId":"56f9081c3c6fb7e9d2a912a0"
+            }
+        }
+    }
+}
+```
 
 [Top](#top)
