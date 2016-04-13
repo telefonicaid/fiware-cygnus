@@ -280,8 +280,7 @@ Responses:
 
 ##<a name="section10"></a>`POST /v1/subscriptions`
 
-Creates a new subscription to Orion, passed as a Json in the payload (Two JSON are required, the first must contain
-the subscription as it would be sent to Orion normally and the second must contain the information about the endpoint).
+Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
@@ -315,6 +314,7 @@ POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
 ```
 Responses:
 
+Valid subscription:
 ```
 {
     "success":"true",
@@ -329,16 +329,43 @@ Responses:
     }
 }
 ```
+
+Invalid subscription (Unknown fields in this case)
 ```
 {
-    "success":"false",
-    "error":"<error_message>"
+    "success":"true",
+    "result" :
+        {
+            "subscribeError":
+                  {
+                      "errorCode":
+                            {
+                                "code":"400",
+                                "reasonPhrase":"Bad Request",
+                                "details":"JSON Parse Error: unknown field: \/extraField"
+                            }
+                  }
+      }
 }
 ```
 
-Please observe that Cygnus check if is a valid subscription, with all the required fields with valid values.
-If `subscription` and `endpoint` are valid the `subscription` is sent to Orion. In this moment we'll receive
-a message from Orion with a `subscribeResponse` or a `subscribeError`.  
+Invalid JSON (Empty field and missing field)
+```
+{
+    "success":"false",
+    "error":"Invalid subscription, field 'duration' is empty"
+}
+
+{
+    "success":"false",
+    "error":"Invalid subscription, field 'notifyConditions' is missing"
+}
+
+
+```
+
+Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
+
 
 
 [Top](#top)
