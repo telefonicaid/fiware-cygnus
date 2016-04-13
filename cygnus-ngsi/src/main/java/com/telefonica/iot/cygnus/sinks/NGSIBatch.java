@@ -29,7 +29,7 @@ import java.util.Set;
  * Class representing a batch of Cygnus events.
  * 
  */
-public class CygnusBatch {
+public class NGSIBatch {
     
     private long numEvents;
     private final ArrayList<String> persistedDestinations;
@@ -38,11 +38,11 @@ public class CygnusBatch {
     /**
      * Constructor.
      */
-    public CygnusBatch() {
+    public NGSIBatch() {
         numEvents = 0;
         persistedDestinations = new ArrayList<String>();
         eventsPerDestination = new HashMap<String, ArrayList<NGSIEvent>>();
-    } // CygnusBatch
+    } // NGSIBatch
 
     public Set<String> getDestinations() {
         return eventsPerDestination.keySet();
@@ -99,4 +99,4 @@ public class CygnusBatch {
         return numEvents;
     } // getNumEvents
         
-} // CygnusBatch
+} // NGSIBatch
