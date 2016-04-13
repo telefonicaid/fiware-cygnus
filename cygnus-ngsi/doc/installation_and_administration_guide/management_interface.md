@@ -278,7 +278,7 @@ Responses:
 
 [Top](#top)
 
-##<a name="section10"></a>`POST /v1/subscription`
+##<a name="section10"></a>`POST /v1/subscriptions`
 
 Creates a new subscription to Orion, passed as a Json in the payload (Two JSON are required, the first must contain
 the subscription as it would be sent to Orion normally and the second must contain the information about the endpoint).
@@ -313,7 +313,7 @@ POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
     }
 }'
 ```
-Response:
+Responses:
 
 ```
 {
@@ -329,5 +329,16 @@ Response:
     }
 }
 ```
+```
+{
+    "success":"false",
+    "error":"<error_message>"
+}
+```
+
+Please observe that Cygnus check if is a valid subscription, with all the required fields with valid values.
+If `subscription` and `endpoint` are valid the `subscription` is sent to Orion. In this moment we'll receive
+a message from Orion with a `subscribeResponse` or a `subscribeError`.  
+
 
 [Top](#top)
