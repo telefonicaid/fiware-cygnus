@@ -178,7 +178,7 @@ public class NGSICKANSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(CygnusBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;

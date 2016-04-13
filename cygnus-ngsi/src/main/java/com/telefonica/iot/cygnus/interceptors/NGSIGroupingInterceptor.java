@@ -20,8 +20,6 @@ package com.telefonica.iot.cygnus.interceptors;
 
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.Constants;
 import com.telefonica.iot.cygnus.utils.Utils;
@@ -39,36 +37,36 @@ import org.apache.flume.interceptor.Interceptor;
  * 
  * @author frb
  */
-public class GroupingInterceptor implements Interceptor {
+public class NGSIGroupingInterceptor implements Interceptor {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(GroupingInterceptor.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGroupingInterceptor.class);
     private final String groupingRulesFileName;
-    private GroupingRules groupingRules;
+    private CygnusGroupingRules groupingRules;
     private ConfigurationReader configurationReader;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
      */
-    public GroupingInterceptor(String groupingRulesFileName) {
+    public NGSIGroupingInterceptor(String groupingRulesFileName) {
         this.groupingRulesFileName = groupingRulesFileName;
-    } // GroupingInterceptor
+    } // NGSIGroupingInterceptor
     
     /**
      * Gets the grouping rules. This is protected since it is only going to be used in the tests.
      * @return
      */
-    protected GroupingRules getGroupingRules() {
+    protected CygnusGroupingRules getGroupingRules() {
         return groupingRules;
     } // getGroupingRules
     
     @Override
     public void initialize() {
-        groupingRules = new GroupingRules(groupingRulesFileName);
+        groupingRules = new CygnusGroupingRules(groupingRulesFileName);
         configurationReader = new ConfigurationReader(30000);
         configurationReader.start();
     } // initialize
- 
+    
     @Override
     public Event intercept(Event event) {
         LOGGER.debug("Event intercepted, id=" + event.hashCode());
@@ -96,7 +94,7 @@ public class GroupingInterceptor implements Interceptor {
         ArrayList<String> defaultDestinations = new ArrayList<String>();
         ArrayList<String> groupedDestinations = new ArrayList<String>();
         ArrayList<String> groupedServicePaths = new ArrayList<String>();
-        ArrayList<ContextElementResponse> contextResponses = notification.getContextResponses();
+        ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses = notification.getContextResponses();
         
         if (contextResponses == null || contextResponses.isEmpty()) {
             LOGGER.warn("No context responses within the notified entity, nothing is done");
@@ -106,11 +104,12 @@ public class GroupingInterceptor implements Interceptor {
         String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
         
         for (int i = 0; i < contextResponses.size(); i++) {
-            ContextElementResponse contextElementResponse = contextResponses.get(i);
-            ContextElement contextElement = contextElementResponse.getContextElement();
+            NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
+            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
             
             // get the matching rule
-            GroupingRule matchingRule = groupingRules.getMatchingRule(contextElement, fiwareServicePath);
+            CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath, contextElement.getId(),
+                    contextElement.getType());
             
             if (matchingRule == null) {
                 groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
@@ -191,12 +190,12 @@ public class GroupingInterceptor implements Interceptor {
  
         @Override
         public Interceptor build() {
-            return new GroupingInterceptor(groupingRulesFileName);
+            return new NGSIGroupingInterceptor(groupingRulesFileName);
         } // build
     } // Builder
     
     /**
-     * Class in charge or periodically reading the GroupingInterceptor configuration file.
+     * Class in charge or periodically reading the NGSIGroupingInterceptor configuration file.
      */
     private class ConfigurationReader extends Thread {
         
@@ -232,7 +231,7 @@ public class GroupingInterceptor implements Interceptor {
                 } // if
 
                 lastModified = modified;
-                groupingRules = new GroupingRules(groupingRulesFileName);
+                groupingRules = new CygnusGroupingRules(groupingRulesFileName);
 
                 // sleep the configured interval of time
                 try {
@@ -249,4 +248,4 @@ public class GroupingInterceptor implements Interceptor {
         
     } // ConfigurationReader
   
-} // GroupingInterceptor
+} // NGSIGroupingInterceptor
