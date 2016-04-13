@@ -56,7 +56,6 @@ pages:
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
   - cygnus-twitter:
       - 'Quick Start Guide': 'cygnus-twitter/to_be_done.md'
-          - 'To be done': 'cygnus-twitter/to_be_done.md'
       - 'Installation and Administration Guide':
           - 'To be done': 'cygnus-twitter/to_be_done.md'
       - 'User and Programmer Guide':
