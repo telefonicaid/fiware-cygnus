@@ -475,7 +475,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private class Accumulator implements Cloneable {
 
         // accumulated events
-        private CygnusBatch batch;
+        private NGSIBatch batch;
         private long accStartDate;
         private int accIndex;
         private String accTransactionIds;
@@ -485,7 +485,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
          * Constructor.
          */
         public Accumulator() {
-            batch = new CygnusBatch();
+            batch = new NGSIBatch();
             accStartDate = 0;
             accIndex = 0;
             accTransactionIds = null;
@@ -504,7 +504,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             this.accIndex = accIndex;
         } // setAccIndex
 
-        public CygnusBatch getBatch() {
+        public NGSIBatch getBatch() {
             return batch;
         } // getBatch
 
@@ -675,7 +675,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         public void initialize(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
             // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
-            batch = new CygnusBatch();
+            batch = new NGSIBatch();
             accStartDate = startDateMs;
             accIndex = 0;
             accTransactionIds = "";
@@ -700,6 +700,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * @param batch
      * @throws Exception
      */
-    abstract void persistBatch(CygnusBatch batch) throws Exception;
+    abstract void persistBatch(NGSIBatch batch) throws Exception;
 
 } // NGSISink
