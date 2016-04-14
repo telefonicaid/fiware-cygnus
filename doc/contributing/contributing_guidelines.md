@@ -190,13 +190,12 @@ Work in progress.
 
 ##<a name="section9"></a>Documentation
 ###<a name="section9.1"></a>Repository documentation
-There MUST exist a `doc/` folder at the root of the main repository. Within this folder, there will be a subfolder for each agent type, in addition to a subfolder for `cygnus-common`. For instance:
+There MUST exist a `doc/` folder at the root of the main repository. Every Cygnus agent MUST include a documentation folder as per the following rules:
 
+* `doc/cygnus-common`
 * `doc/cygnus-ngsi`
 * `doc/cygnus-twitter`
-* `doc/cygnus-common`
-
-All the agent teams MUST provide any documentation aimed to be exposed to the Community within its documentation subfolder.
+* ...
 
 In addition, any agent documentation subfolder MUST have at least the following elements:
 
@@ -210,8 +209,8 @@ The following elements SHOULD be present as well:
 
 [Top](#top)
 
-###<a name="section9.1"></a>`readthedocs.org` documentation
-The documentation within the `doc/` folder MUST be exposed in the Interned by means of `readthedocs.org` service. In order to achieve this, a `mkdocs.yml` file MUST live in the root of the main repository acting as a hook.
+###<a name="section9.2"></a>`readthedocs.org` documentation
+The documentation within the `doc/` folder MUST be published to `readthedocs.org`. In order to achieve this, a `mkdocs.yml` file MUST live in the root of the main repository acting as a hook.
 
 The format of this `mkdocs.yml` file MUST follow this example:
 
