@@ -88,7 +88,8 @@ function copy_cygnus_to_flume(){
     mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
     mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
     mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
-    cp $BASE_DIR/target/cygnus-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+    cp $BASE_DIR/target/cygnus-ngsi-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+    cp $BASE_DIR/../cygnus-common/target/cygnus-common-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
 }
 
 function copy_cygnus_conf() {
