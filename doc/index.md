@@ -1,4 +1,5 @@
 #Cygnus
+
 [![License badge](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Documentation badge](https://readthedocs.org/projects/fiware-cygnus/badge/?version=latest)](http://fiware-cygnus.readthedocs.org/en/latest/?badge=latest)
 [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus/)
@@ -27,14 +28,14 @@ Current stable release is able to persist the following sources of data in the f
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
-##Further documentation
+##About this documentation
 The per agent **Quick Start Guide** provides a good documentation summary.
 
 Nevertheless, both the **Installation and Administration Guide** and the **User and Programmer Guide** shown within this documentation for each agent cover more advanced topics.
 
 The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
 
-Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
+Of special interest are the [Contributing Guidelines](./contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
 
 ##Reporting issues and contact information
-Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
+Any doubt you may have, please refer to the [Cygnus Core Team](https://github.com/telefonicaid/fiware-cygnus/blob/develop/reporting_issues_and_contact.md).
