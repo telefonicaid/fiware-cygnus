@@ -34,5 +34,7 @@ Nevertheless, both the **Installation and Administration Guide** and the **User 
 
 The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
 
+Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
+
 ##Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
