@@ -48,4 +48,16 @@ public interface OrionBackend {
     JsonResponse subscribeContext(String cygnusSubscription, boolean xAuthToken, 
             String token) throws Exception;
     
+    /** 
+     * Unsubscribe from Orion with a given subscription id.
+     * 
+     * @param subscriptionId 
+     * @param xAuthToken 
+     * @param token
+     * @throws Exception
+     * @return response
+     */
+    JsonResponse deleteSubscription(String subscriptionId, boolean xAuthToken, 
+            String token) throws Exception;
+    
 } // StatsBackend
