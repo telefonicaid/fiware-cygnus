@@ -11,6 +11,7 @@ Content:
 * [GET `/admin/log`](#section8)
 * [PUT `/admin/log`](#section9)
 * [POST `/v1/subscriptions`](#section10)
+* [DELETE `/v2/subscriptions`](#section11)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -366,6 +367,43 @@ Invalid JSON (Empty field and missing field)
 
 Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
 
+[Top](#top)
 
+##<a name="section11"></a>`DELETE /v1/subscriptions`
+
+Deletes a subscription made to Orion with a given subscriptionId. The Json passed in the payload contains the Orion's endpoint details.
+
+```
+DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>"
+```
+
+Responses:
+
+204 OK
+```
+{"success":"true","result" : {
+      "Subscription deleted"
+}
+```
+
+Wrong parameter:
+```
+{"success":"false","error":"Parse error, wrong parameter. Check it for errors."}
+```
+
+Wrong subscriptionId:
+```
+{"success":"false","result" : {
+    "description":{
+        "The requested subscription has not been found. Check id","error":"NotFound"
+        }
+    }
+}
+```
+
+Missing endpoind (Empty or not given):
+```
+{"success":"false","error":"Missing endpoint"}
+```
 
 [Top](#top)
