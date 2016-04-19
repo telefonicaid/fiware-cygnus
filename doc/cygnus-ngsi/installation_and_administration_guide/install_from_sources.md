@@ -8,6 +8,7 @@ Content:
     * [Cloning `fiware-cygnus`](#section4.1)
     * [Installing `cygnus-common`](#section4.2)
     * [Installing `cygnus-ngsi`](#section4.3)
+    * [Known issues](#section4.4)
 * [Installing dependencies](#section5)
     * [Cygnus dependencies](#section5.1)
     * [OrionCKANSink dependencies](#section5.2)
@@ -131,6 +132,13 @@ In both cases, the installation is completed by copying the `cygnus-flume-ng` sc
 
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
     $ chmod a+x APACHE_FLUME_HOME/bin/cygnus-flume-ng
+
+[Top](#top)
+
+###<a name="section4.4"></a>Known issues
+It may happen while compiling either `cygnus-common` either `cygnus-ngsi` the Maven JVM has not enough memory. This can be chaged as detailed at the [Maven official documentation](https://cwiki.apache.org/confluence/display/MAVEN/OutOfMemoryError):
+
+    $ export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
 
 [Top](#top)
 
