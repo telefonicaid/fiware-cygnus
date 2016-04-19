@@ -68,7 +68,31 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
         // check status code from response
         return response;
-    }
+    } // subscribeContext
+    
+    @Override
+    public JsonResponse deleteSubscription(String subscriptionId, boolean xAuthToken, 
+            String token) throws Exception {
+        
+        //create the relative URL
+        String relativeURL = "/v2/subscriptions/";
+        relativeURL += subscriptionId;
+        
+        // create the http header
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Content-type", "application/json"));
+        headers.add(new BasicHeader("Accept", "application/json"));
+        
+        if (xAuthToken) {
+            headers.add(new BasicHeader("X-Auth-token", token));
+        } // if
+        
+        // do the request
+        JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
+        
+        return response;
+        
+    } // deleteSubscription
     
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     /**

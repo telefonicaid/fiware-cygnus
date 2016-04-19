@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.containers.CygnusSubscription;
+import com.telefonica.iot.cygnus.containers.OrionEndpoint;
 import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
@@ -157,6 +158,8 @@ public class ManagementInterface extends AbstractHandler {
             } else if (method.equals("DELETE")) {
                 if (uri.equals("/v1/groupingrules")) {
                     handleDeleteGroupingRules(request, response);
+                } else if (uri.equals("/v2/subscriptions")){
+                    handleDeleteSubscription(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -692,10 +695,169 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : {" + orionJson.toJSONString() + "}");
             } // if else
+            
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         } // try catch
+        
     } // handlePostSubscription
+    
+    private void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String subscriptionId = request.getParameter("subscription_id");
+        
+        if ((subscriptionId == null) || (subscriptionId.equals(""))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, wrong parameter. Check it for errors.\"");
+            LOGGER.error("Parse error, wrong parameter. Check it for errors.\"");
+            return;
+        } // if
+                
+        LOGGER.debug("Subscription id = " + subscriptionId);
+         
+         // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String endpointStr = "";
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            endpointStr += line;
+        } // while
+
+        reader.close();
+        
+        // Create a Gson for check JSON
+        Gson gson = new Gson();
+        OrionEndpoint endpoint;
+        
+        try {
+            endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+        } catch (JsonSyntaxException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+            LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
+            return;
+        } // try catch
+                       
+        // check if the endpoint are valid
+        int err;
+        
+        if (endpoint != null) {
+            err = endpoint.isValid(true);
+        } else {
+            // missing entire endpoint -> missing endpoint (code nº21)
+            err = 21;
+        } // if else
+        
+        if (err > 0) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            switch (err) {
+                // cases of missing endpoint
+                case 21:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Missing endpoint\"}");
+                    LOGGER.error("Missing endpoint");
+                    return;
+                    
+                // cases of missing fields in endpoint
+                case 221:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'host' is missing\"}");
+                    LOGGER.error("Invalid endpoint, field 'host' is missing");
+                    return;
+                case 222:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'port' is missing\"}");
+                    LOGGER.error("Invalid endpoint, field 'port' is missing");
+                    return;
+                case 223:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'ssl' is missing\"}");
+                    LOGGER.error("Invalid endpoint, field 'ssl' is missing");
+                    return;
+                    
+                // cases of empty fields in endpoint
+                case 231:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'host' is empty\"}");
+                    LOGGER.error("Invalid endpoint, field 'host' is empty");
+                    return;
+                case 232:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'port' is empty\"}");
+                    LOGGER.error("Invalid endpoint, field 'port' is empty");
+                    return;
+                case 233:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'ssl' is empty\"}");
+                    LOGGER.error("Invalid endpoint, field 'ssl' is empty");
+                    return;
+                   
+                // cases of invalid ssl in endpoint
+                case 24:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid endpoint, field 'ssl' invalid\"}");
+                    LOGGER.error("Invalid endpoint, field 'ssl' invalid");
+                    return;
+                    
+                // case for authtoken missing
+                case 5:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Missing Auth-Token. Required for DELETE subscriptions\"}");
+                    LOGGER.error("Invalid endpoint, missing 'xAuthToken'");
+                    return;
+                    
+                default:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Invalid subscription\"}");
+                    LOGGER.error("Invalid subscription");
+            } // switch
+        } // if
+        
+        LOGGER.debug("Valid Endpoint. Creating request to Orion.");
+        
+        // get host, port and ssl for request
+        String host = endpoint.getHost();
+        String port = endpoint.getPort();
+        boolean ssl = Boolean.valueOf(endpoint.getSsl());
+        boolean xAuthToken = false;
+        String token = endpoint.getAuthToken();
+        
+        if (token != null) {
+            xAuthToken = true;
+        } // if
+
+        // Create a subscriptionBackend for request
+        subscriptionBackend = new OrionBackendImpl(host, port, ssl);
+        
+        try {
+            JsonResponse orionResponse = subscriptionBackend.
+                    deleteSubscription(subscriptionId, xAuthToken, token);
+            JSONObject orionJson = new JSONObject();
+            int status = -1;
+            if (orionResponse != null) {
+                orionJson = orionResponse.getJsonObject();
+                status = orionResponse.getStatusCode();
+            }
+            
+            if (status == 204) {
+                response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : {\" Subscription deleted \"}");
+                LOGGER.debug("Subscription deleted succesfully.");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+            } // if else
+            
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        } // try catch
+        
+    } // handleDeleteSubscription
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");

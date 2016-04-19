@@ -37,6 +37,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -171,6 +172,8 @@ public abstract class HttpBackend {
             request = req;
         } else if (method.equals("GET")) {
             request = new HttpGet(url);
+        } else if (method.equals("DELETE")) {
+            request = new HttpDelete(url);
         } else {
             throw new CygnusRuntimeError("HTTP method not supported: " + method);
         } // if else
