@@ -136,7 +136,7 @@ In both cases, the installation is completed by copying the `cygnus-flume-ng` sc
 [Top](#top)
 
 ###<a name="section4.4"></a>Known issues
-It may happen while compiling either `cygnus-common` either `cygnus-ngsi` the Maven JVM has not enough memory. This can be chaged as detailed at the [Maven official documentation](https://cwiki.apache.org/confluence/display/MAVEN/OutOfMemoryError):
+It may happen while compiling either `cygnus-common` either `cygnus-ngsi` the Maven JVM has not enough memory. This can be changed as detailed at the [Maven official documentation](https://cwiki.apache.org/confluence/display/MAVEN/OutOfMemoryError):
 
     $ export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
 
