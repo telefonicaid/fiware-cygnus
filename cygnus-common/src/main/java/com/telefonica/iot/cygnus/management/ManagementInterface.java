@@ -158,7 +158,7 @@ public class ManagementInterface extends AbstractHandler {
             } else if (method.equals("DELETE")) {
                 if (uri.equals("/v1/groupingrules")) {
                     handleDeleteGroupingRules(request, response);
-                } else if (uri.equals("/v2/subscriptions")){
+                } else if (uri.equals("/v1/subscriptions")){
                     handleDeleteSubscription(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
