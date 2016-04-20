@@ -122,7 +122,7 @@ public class OrionEndpoint {
         } // if
         
         // API CHECK: authtoken empty
-        if (requiredToken && (xauthtoken == null)) {
+        if (requiredToken && (xauthtoken.length() == 0)) {
             LOGGER.debug("Auth-Token given is empty: Required for use API");
             return 52;
         } // if
