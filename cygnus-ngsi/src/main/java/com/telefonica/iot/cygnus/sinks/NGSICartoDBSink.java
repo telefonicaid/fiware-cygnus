@@ -40,6 +40,7 @@ public class NGSICartoDBSink extends NGSISink {
     private String port;
     private boolean ssl;
     private String apiKey;
+    private String schema;
     private CartoDBBackendImpl backend;
     
     /**
@@ -49,10 +50,21 @@ public class NGSICartoDBSink extends NGSISink {
         super();
     } // NGSICartoDBSink
     
+    /**
+     * Gets the CartoDB backend. It is protected since it is only used by the tests.
+     * @return The CartoDB backend
+     */
+    protected CartoDBBackendImpl getBackend() {
+        return backend;
+    } // getBackend
+    
     @Override
     public void configure(Context context) {
         // Read NGSISink general configuration
         super.configure(context);
+        
+        // impose enable ower case, since PostgreSQL only accepts lower case
+        enableLowercase = true;
         
         // Read NGSICartoDB specific configuration
         String endpoint = context.getString("endpoint");
@@ -65,7 +77,7 @@ public class NGSICartoDBSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (endpoint=" + endpoint + ")");
         } // else
         
-        int index = 0;
+        int index;
         
         if (endpoint.startsWith("http://")) {
             port = "80";
@@ -93,6 +105,8 @@ public class NGSICartoDBSink extends NGSISink {
         } // if else
         
         apiKey = context.getString("api_key");
+        String[] split2 = host.split("\\.");
+        schema = split2[0];
         
         if (apiKey == null) {
             invalidConfiguration = true;
@@ -147,7 +161,7 @@ public class NGSICartoDBSink extends NGSISink {
     /**
      * Convenience class for aggregating data.
      */
-    private class CartoDBAggregator {
+    protected class CartoDBAggregator {
         
         private LinkedHashMap<String, ArrayList<String>> aggregation;
         private String service;
@@ -215,15 +229,16 @@ public class NGSICartoDBSink extends NGSISink {
                 } // if else
             } // while
             
-            return fields + ")";
+            fields += ")";
+            return fields.toLowerCase();
         } // getFields
         
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
-            dbName = buildDbName(service);
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getService();
+            servicePath = event.getServicePath();
+            entity = event.getEntity();
+            attribute = event.getAttribute();
+            //dbName = buildDbName(service);
             tableName = buildTableName(servicePath, entity, attribute);
             
             // aggregation initialization
@@ -232,9 +247,10 @@ public class NGSICartoDBSink extends NGSISink {
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
+            aggregation.put(NGSIConstants.THE_GEOM, new ArrayList<String>());
             
             // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
+            ArrayList<ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 return;
@@ -242,8 +258,13 @@ public class NGSICartoDBSink extends NGSISink {
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                aggregation.put(attrName, new ArrayList<String>());
-                aggregation.put(attrName + "_md", new ArrayList<String>());
+                String attrValue = contextAttribute.getContextValue(false);
+                String attrMetadata = contextAttribute.getContextMetadata();
+                
+                if (!NGSIUtils.getLocation(attrValue, attrMetadata).startsWith("ST_SetSRID(ST_MakePoint(")) {
+                    aggregation.put(attrName, new ArrayList<String>());
+                    aggregation.put(attrName + "_md", new ArrayList<String>());
+                } // if
             } // for
         } // initialize
         
@@ -280,8 +301,14 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                aggregation.get(attrName).add(NGSIUtils.getLocation(attrValue, attrMetadata));
-                aggregation.get(attrName + "_md").add(attrMetadata);
+                String location = NGSIUtils.getLocation(attrValue, attrMetadata);
+                
+                if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
+                    aggregation.get(NGSIConstants.THE_GEOM).add(location);
+                } else {
+                    aggregation.get(attrName).add(NGSIUtils.getLocation(attrValue, attrMetadata));
+                    aggregation.get(attrName + "_md").add(attrMetadata);
+                } // if else
             } // for
         } // aggregate
         
@@ -289,14 +316,15 @@ public class NGSICartoDBSink extends NGSISink {
     
     private void persistAggregation(CartoDBAggregator aggregator) throws Exception {
         String rows = aggregator.getRows();
-        String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
+        //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String fields = aggregator.getFields();
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Database (" + dbName
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Data (" + rows + ")");
         backend.insert(tableName, fields, rows);
     } // persistAggregation
     
+    /*
     private String buildDbName(String service) throws Exception {
         String name = NGSIUtils.encodePostgreSQL(service, false);
 
@@ -307,8 +335,17 @@ public class NGSICartoDBSink extends NGSISink {
 
         return name;
     } // buildDbName
+    */
     
-    private String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+    /**
+     * Builds a table name for CartoDB given a service path, an entity and an attribute.
+     * @param servicePath
+     * @param entity
+     * @param attribute
+     * @return The table name for CartoDB
+     * @throws Exception
+     */
+    protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
         String name;
         
         switch(dataModel) {
