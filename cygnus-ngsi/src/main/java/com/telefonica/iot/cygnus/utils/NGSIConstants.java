@@ -77,12 +77,15 @@ public final class NGSIConstants {
     public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 113;
     public static final int STH_MIN_HASH_SIZE_IN_BYTES      = 20;
     
-    // NGSIDynamoDB specific headers
+    // NGSIDynamoDBSink specific headers
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
     
-    // NGSIPostgreSQL specific headers
+    // NGSIPostgreSQLSink specific headers
     // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public static final int POSTGRESQL_MAX_ID_LEN = 63;
+    
+    // NGSICartoDBSink specific headers
+    public static final String THE_GEOM = "the_geom";
     
     // log4j specific constants
     public static final String LOG4J_CORR = "correlatorId";
