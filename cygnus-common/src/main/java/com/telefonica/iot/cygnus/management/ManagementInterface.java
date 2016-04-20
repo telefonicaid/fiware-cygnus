@@ -805,10 +805,17 @@ public class ManagementInterface extends AbstractHandler {
                     return;
                     
                 // case for authtoken missing
-                case 5:
+                case 51:
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"error\":\"Missing Auth-Token. Required for DELETE subscriptions\"}");
                     LOGGER.error("Invalid endpoint, missing 'xAuthToken'");
+                    return;
+                    
+                // case for authtoken empty
+                case 52:
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"error\":\"Empty Auth-Token. Required for DELETE subscriptions\"}");
+                    LOGGER.error("Invalid endpoint, empty 'xAuthToken'");
                     return;
                     
                 default:

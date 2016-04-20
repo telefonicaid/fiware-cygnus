@@ -62,6 +62,7 @@ public class OrionEndpoint {
         host = this.getHost();
         port = this.getPort();
         ssl = this.getSsl();
+        xauthtoken = this.getAuthToken();
         boolean isValidSsl;
         
         // check if entire endpoint is missing        
@@ -117,8 +118,15 @@ public class OrionEndpoint {
         // API CHECK: authtoken neccesary 
         if (requiredToken && !hasAuthToken()) {
             LOGGER.debug("Auth-Token not given: Required for use API");
-            return 5;
-        }
+            return 51;
+        } // if
+        
+        // API CHECK: authtoken empty
+        if (requiredToken && (xauthtoken == null)) {
+            LOGGER.debug("Auth-Token given is empty: Required for use API");
+            return 52;
+        } // if
+        
         LOGGER.debug("Valid endpoint");
         return 0;
         
