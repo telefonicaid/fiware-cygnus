@@ -11,7 +11,7 @@ Content:
 * [GET `/admin/log`](#section8)
 * [PUT `/admin/log`](#section9)
 * [POST `/v1/subscriptions`](#section10)
-* [DELETE `/v2/subscriptions`](#section11)
+* [DELETE `/v1/subscriptions`](#section11)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -399,6 +399,13 @@ Wrong subscriptionId:
         }
     }
 }
+```
+
+Empty or missing AuthToken:
+```
+{"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
+
+{"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
 ```
 
 Missing endpoind (Empty or not given):
