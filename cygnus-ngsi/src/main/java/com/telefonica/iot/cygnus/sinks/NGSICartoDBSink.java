@@ -40,6 +40,7 @@ public class NGSICartoDBSink extends NGSISink {
     private String port;
     private boolean ssl;
     private String apiKey;
+    private boolean flipCoordinates;
     private String schema;
     private CartoDBBackendImpl backend;
     
@@ -71,7 +72,7 @@ public class NGSICartoDBSink extends NGSISink {
         
         if (endpoint == null) {
             invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (endpoint=null) -- Must not be empty)");
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (endpoint=null) -- Must not be empty");
             return;
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (endpoint=" + endpoint + ")");
@@ -90,7 +91,7 @@ public class NGSICartoDBSink extends NGSISink {
         } else {
             invalidConfiguration = true;
             LOGGER.error("[" + this.getName() + "] Invalid configuration (endpoint=" + endpoint + ") "
-                    + "-- The URI must use the http or https schemes)");
+                    + "-- The URI must use the http or https schemes");
             return;
         } // if else
         
@@ -110,9 +111,22 @@ public class NGSICartoDBSink extends NGSISink {
         
         if (apiKey == null) {
             invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (apiKey=null) -- Must not be empty)");
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (apiKey=null) -- Must not be empty");
+            return;
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (apiKey=" + apiKey + ")");
+        } // if else
+        
+        String flipCoordinatesStr = context.getString("flip_coordinates", "false");
+        
+        if(flipCoordinatesStr.equals("true") || flipCoordinatesStr.equals("false")) {
+            flipCoordinates = flipCoordinatesStr.equals("true");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (flip_coordinates="
+                    + flipCoordinatesStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (flip_coordinates="
+                    + flipCoordinatesStr + ") -- Must be 'true' or 'false'");
         } // if else
     } // configure
     
@@ -261,7 +275,8 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
-                if (!NGSIUtils.getLocation(attrValue, attrMetadata).startsWith("ST_SetSRID(ST_MakePoint(")) {
+                if (!NGSIUtils.getLocation(attrValue, attrMetadata, flipCoordinates).startsWith(
+                        "ST_SetSRID(ST_MakePoint(")) {
                     aggregation.put(attrName, new ArrayList<String>());
                     aggregation.put(attrName + "_md", new ArrayList<String>());
                 } // if
@@ -301,12 +316,12 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                String location = NGSIUtils.getLocation(attrValue, attrMetadata);
+                String location = NGSIUtils.getLocation(attrValue, attrMetadata, flipCoordinates);
                 
                 if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
                     aggregation.get(NGSIConstants.THE_GEOM).add(location);
                 } else {
-                    aggregation.get(attrName).add(NGSIUtils.getLocation(attrValue, attrMetadata));
+                    aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
                 } // if else
             } // for
