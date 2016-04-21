@@ -348,9 +348,10 @@ public final class NGSIUtils {
      * If the attribute is not geo-related, it is returned as it is.
      * @param attrValue
      * @param metadata
+     * @param flipCoordinates
      * @return The geolocation value, ready for insertion in CartoDB, or tehe value as it is
      */
-    public static String getLocation(String attrValue, String metadata) {
+    public static String getLocation(String attrValue, String metadata, boolean flipCoordinates) {
         JSONParser parser = new JSONParser();
         JSONArray mds;
         
@@ -369,7 +370,12 @@ public final class NGSIUtils {
             
             if (mdName.equals("location") && mdType.equals("string") && mdValue.equals("WGS84")) {
                 String[] split = attrValue.trim().split(",");
-                return "ST_SetSRID(ST_MakePoint(" + split[0] + "," + split[1] + "), 4326)";
+                
+                if(flipCoordinates) {
+                    return "ST_SetSRID(ST_MakePoint(" + split[1] + "," + split[0] + "), 4326)";
+                } else {
+                    return "ST_SetSRID(ST_MakePoint(" + split[0] + "," + split[1] + "), 4326)";
+                } // if else
             } // if
         } // for
         
