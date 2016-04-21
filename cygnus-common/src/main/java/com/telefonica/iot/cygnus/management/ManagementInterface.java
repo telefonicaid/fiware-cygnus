@@ -62,6 +62,7 @@ import org.json.simple.parser.ParseException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -79,7 +80,7 @@ public class ManagementInterface extends AbstractHandler {
     private static String sourceRows = "";
     private static String channelRows = "";
     private static String sinkRows = "";
-    private OrionBackendImpl subscriptionBackend;
+    private OrionBackendImpl orionBackend;
 
     /**
      * Constructor.
@@ -675,15 +676,15 @@ public class ManagementInterface extends AbstractHandler {
             xAuthToken = true;
         } // if
 
-        // Create a subscriptionBackend for request
-        subscriptionBackend = new OrionBackendImpl(host, port, ssl);
+        // Create a orionBackend for request
+        orionBackend = new OrionBackendImpl(host, port, ssl);
         
         // Get /subscription JSON from entire one
         JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
         String subscriptionStr = inputJson.get("subscription").toString();
         
         try {
-            JsonResponse orionResponse = subscriptionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
+            JsonResponse orionResponse = orionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
             int status = orionResponse.getStatusCode();
             JSONObject orionJson = orionResponse.getJsonObject();
             
@@ -706,12 +707,21 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("json;charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
+        String ngsiVersion = request.getParameter("ngsi_version");
         
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, wrong parameter. Check it for errors.\"");
-            LOGGER.error("Parse error, wrong parameter. Check it for errors.\"");
+                    + "\"error\":\"Parse error, wrong parameter (subscription_id). Check it for errors.\"");
+            LOGGER.error("Parse error, wrong parameter (subscription_id). Check it for errors.\"}");
+            return;
+        } // if
+        
+        if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"");
+            LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
             return;
         } // if
                 
@@ -838,20 +848,41 @@ public class ManagementInterface extends AbstractHandler {
             xAuthToken = true;
         } // if
 
-        // Create a subscriptionBackend for request
-        subscriptionBackend = new OrionBackendImpl(host, port, ssl);
+        // Create a orionBackend for request
+        orionBackend = new OrionBackendImpl(host, port, ssl);
         
         try {
-            JsonResponse orionResponse = subscriptionBackend.
-                    deleteSubscription(subscriptionId, xAuthToken, token);
-            JSONObject orionJson = new JSONObject();
-            int status = -1;
-            if (orionResponse != null) {
-                orionJson = orionResponse.getJsonObject();
-                status = orionResponse.getStatusCode();
-            }
             
-            if (status == 204) {
+            JsonResponse orionResponse = null;
+            int status = -1;
+            JSONObject orionJson = new JSONObject();
+            
+            if (ngsiVersion.equals("1")) {
+                orionResponse = orionBackend.
+                    deleteSubscriptionV1(subscriptionId, xAuthToken, token);
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    JSONObject statusCode = (JSONObject) orionJson.get("statusCode");       
+                    String code = (String) statusCode.get("code");                   
+                    status = Integer.parseInt(code);
+                } // if
+            } else if (ngsiVersion.equals("2")) {
+                orionResponse = orionBackend.
+                    deleteSubscriptionV2(subscriptionId, xAuthToken, token);
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    status = orionResponse.getStatusCode();
+                } // if
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid value, 'ngsi_version' invalid\"}");
+                LOGGER.error("Invalid value, 'ngsi_version' invalid");
+                return;
+            } // if else
+            
+            LOGGER.debug("Status code got: " + status);
+            
+            if ((status == 204) || (status == 200)) {
                 response.getWriter().println("{\"success\":\"true\","
                             + "\"result\" : {\" Subscription deleted \"}");
                 LOGGER.debug("Subscription deleted succesfully.");
