@@ -71,15 +71,15 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // subscribeContext
     
     @Override
-    public JsonResponse deleteSubscriptionV1(String subscriptionId, boolean xAuthToken, 
-            String token) throws Exception {
+    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token) 
+            throws Exception {
         
         // create the http header
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         
-        if (xAuthToken) {
+        if (token != null) {
             headers.add(new BasicHeader("X-Auth-token", token));
         } // if
                 
@@ -96,15 +96,14 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     }
     
     @Override
-    public JsonResponse deleteSubscriptionV2(String subscriptionId, boolean xAuthToken, 
-            String token) throws Exception {
+    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception {
         
         // create the http header
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         
-        if (xAuthToken) {
+        if (token != null) {
             headers.add(new BasicHeader("X-Auth-token", token));
         } // if
         
