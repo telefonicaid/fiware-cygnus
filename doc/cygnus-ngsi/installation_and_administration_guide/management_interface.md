@@ -371,7 +371,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 ##<a name="section11"></a>`DELETE /v1/subscriptions`
 
-Deletes a subscription made to Orion with a given subscriptionId and a given ngsi_version. The Json passed in the payload contains the Orion's endpoint details.
+Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
 ```
 DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>"
@@ -392,7 +392,7 @@ Wrong parameter:
 {"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
 ```
 
-Wrong subscriptionId:
+Wrong subscription ID:
 ```
 [NGSI v1]
 
@@ -403,14 +403,14 @@ Wrong subscriptionId:
 {"success":"false","result" : {{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
 ```
 
-Empty or missing AuthToken:
+Empty or missing authentication token:
 ```
 {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
 
 {"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
 ```
 
-Missing fields (Empty or not given):
+Missing fields (empty or not given):
 ```
 {"success":"false","error":"Missing endpoint"}
 {"success":"false","error":"Invalid endpoint, field 'host' is missing"}
