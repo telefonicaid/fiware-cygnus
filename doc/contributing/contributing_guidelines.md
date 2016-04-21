@@ -282,7 +282,7 @@ Field by field:
 * `srv`: FIWARE service sent to the Cygnus agent in some way (e.g. a Http header).
 * `subsrv`: FIWARE sub-service sent to the Cygnus agent in some way (e.g. a Http header).
 * `function`: Name of the Java method where the log is traced from.
-* `comp`: Name of the Cygnus agent, e.g. `cygnus-ngsi`, or `cygnus-common`.
+* `comp`: Name of the Cygnus agent.
 * `msg`: Java class containing the traced function, the specific line at the class and the application suplied message.
 
 [Top](#top)
