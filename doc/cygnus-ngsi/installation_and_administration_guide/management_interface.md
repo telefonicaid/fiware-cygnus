@@ -371,34 +371,36 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 ##<a name="section11"></a>`DELETE /v1/subscriptions`
 
-Deletes a subscription made to Orion with a given subscriptionId. The Json passed in the payload contains the Orion's endpoint details.
+Deletes a subscription made to Orion with a given subscriptionId and a given ngsi_version. The Json passed in the payload contains the Orion's endpoint details.
 
 ```
-DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>"
+DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>"
 ```
 
 Responses:
 
-204 OK
+Subscriptions deleted in v1 and v2:
 ```
-{"success":"true","result" : {
-      "Subscription deleted"
-}
+{"success":"true","result" : {" Subscription deleted "}
+
 ```
 
 Wrong parameter:
 ```
-{"success":"false","error":"Parse error, wrong parameter. Check it for errors."}
+{"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
+
+{"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
 ```
 
 Wrong subscriptionId:
 ```
-{"success":"false","result" : {
-    "description":{
-        "The requested subscription has not been found. Check id","error":"NotFound"
-        }
-    }
-}
+[NGSI v1]
+
+{"success":"false","result" : {{"subscriptionId":"571872a9c0585c7451571be4","statusCode":{"code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"}}}
+
+[NGSI v2]
+
+{"success":"false","result" : {{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
 ```
 
 Empty or missing AuthToken:
@@ -408,9 +410,11 @@ Empty or missing AuthToken:
 {"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
 ```
 
-Missing endpoind (Empty or not given):
+Missing fields (Empty or not given):
 ```
 {"success":"false","error":"Missing endpoint"}
+{"success":"false","error":"Invalid endpoint, field 'host' is missing"}
+{"success":"false","error":"Invalid endpoint, field 'ssl is empty"}
 ```
 
 [Top](#top)
