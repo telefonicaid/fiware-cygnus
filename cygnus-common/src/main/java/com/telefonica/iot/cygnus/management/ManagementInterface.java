@@ -841,12 +841,7 @@ public class ManagementInterface extends AbstractHandler {
         String host = endpoint.getHost();
         String port = endpoint.getPort();
         boolean ssl = Boolean.valueOf(endpoint.getSsl());
-        boolean xAuthToken = false;
         String token = endpoint.getAuthToken();
-        
-        if (token != null) {
-            xAuthToken = true;
-        } // if
 
         // Create a orionBackend for request
         orionBackend = new OrionBackendImpl(host, port, ssl);
@@ -859,7 +854,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (ngsiVersion.equals("1")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV1(subscriptionId, xAuthToken, token);
+                    deleteSubscriptionV1(subscriptionId, token);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     JSONObject statusCode = (JSONObject) orionJson.get("statusCode");       
@@ -868,7 +863,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } else if (ngsiVersion.equals("2")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV2(subscriptionId, xAuthToken, token);
+                    deleteSubscriptionV2(subscriptionId, token);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();

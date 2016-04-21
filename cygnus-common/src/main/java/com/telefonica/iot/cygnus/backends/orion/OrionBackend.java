@@ -57,8 +57,8 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    public JsonResponse deleteSubscriptionV1(String subscriptionId, boolean xAuthToken, 
-            String token) throws Exception;
+    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token) 
+            throws Exception;
     
     /** 
      * Unsubscribe from Orion with a given subscription id (Orion v2)
@@ -69,7 +69,7 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    public JsonResponse deleteSubscriptionV2(String subscriptionId, boolean xAuthToken, 
-            String token) throws Exception;
+    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) 
+            throws Exception;
     
 } // StatsBackend
