@@ -3,21 +3,25 @@ Content:
 
 * [Introduction](#section1)
 * [Adopted conventions](#section2)
-* [Language of the main repository](#section3)
-* [Repository organization](#section4)
-* [Backlog](#section5)
-* [Contributing to the repository](#section6)
-    * [Main repository versus forked repositories](#section6.1)
-    * [Pull requests](#section6.2)
-    * [Contribution contents](#section6.3)
-    * [Coding style](#section6.4)
-    * [Commits and squashing](#section6.5)
-* [Releasing](#section7)
-* [Deployers and installers (RPMs and dockers)](#section8)
-* [Documentation](#section9)
-    * [Repository documentation](#section9.1)
-    * [`readthedocs.org` documentation](#section9.2)
-* [References](#section10)
+* [Contributing to the repository](#section3)
+    * [Language of the main repository](#section3.1)
+    * [Repository organization](#section3.2)
+    * [Backlog](#section3.3)
+    * [Main repository versus forked repositories](#section3.4)
+    * [Pull requests](#section3.5)
+    * [Contribution contents](#section3.6)
+    * [Coding style](#section3.7)
+    * [Commits and squashing](#section3.8)
+    * [Releasing](#section3.9)
+* [Deployers](#section4)
+    * [RPMs](#section4.1)
+    * [Dockers](#section4.2)
+* [Documentation](#section5)
+    * [Repository documentation](#section5.1)
+    * [`readthedocs.org` documentation](#section5.2)
+* [Logs and alarms](#section6)
+    * [log4j](#section6.1)
+    * [Section in the documentation](#section6.2)
 
 ##<a name="section1"></a>Introduction
 This document is intended to developers aiming at contributing a complete Cygnus agent to the Cygnus suite. In order to accept those contributions a [contribution policy](./ContributionPolicy.txt) document has to be signed beforehand.
@@ -30,7 +34,7 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 
 ##<a name="section2"></a>Adopted conventions
 1. This document uses the following guidelines with regard to the usage of MUST, SHOULD and MAY (and NOT) keywords:
-    * MUST Guidelines. They are mandatory and your GEi project must conform to that.
+    * MUST Guidelines. They are mandatory and your agent must conform to that.
     * SHOULD Guidelines. They are not mandatory but highly recommended if you want to have a mature development process.
     * MAY Guidelines. They are nice to have.
 
@@ -40,12 +44,13 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 
 [Top](#top)
 
-##<a name="section3"></a>Language of the main repository
+##<a name="section3"></a>Contributing to the repository
+###<a name="section3.1"></a>Language of the main repository
 The main repository language MUST be English.
 
 [Top](#top)
 
-##<a name="section4"></a>Repository organization
+###<a name="section3.2"></a>Repository organization
 Each agent MUST have a dedicated folder. Each folder MUST be prefixed with `cygnus-`. For instance:
 
 * `cygnus-ngsi`
@@ -83,7 +88,7 @@ As can be seen, despite the repository organization, from a Java perspective all
 
 [Top](#top)
 
-##<a name="section5"></a>Backlog
+###<a name="section3.3"></a>Backlog
 The <i>issues</i> section of the main repository MUST be used for tracking all the features, hardening, bugs and task to be implemented by every agent.
 
 The name of each issue MUST follow the following format:
@@ -106,15 +111,14 @@ There MUST NOT be assignee because each issue is considered to be assigned to a 
 
 [Top](#top)
 
-##<a name="section6"></a>Contributing to the repository
-###<a name="section6.1"></a>Main repository versus forked repositories
+###<a name="section3.4"></a>Main repository versus forked repositories
 Every team in charge of an agent MUST create one or more forks of the main repository. Every team SHOULD synchronize their forked repositories with the main one after opening a pull request (see next section).
 
 Only those contributions merged into the main repository MUST be considered as part of the official Cygnus development.
 
 [Top](#top)
 
-###<a name="section6.2"></a>Pull requests
+###<a name="section3.5"></a>Pull requests
 Any contribution MUST be done through a new opened pull request (PR). These PRs MUST compare certain branch at any forked repository against the `develop` base branch in the main repository.
 
 The review process made by the Cygnus Core Team MUST check that the content of the PR is aligned with guidelines. In addition, as any other contribution, a code-wise review MAY be performed by the Cygnus Core Team or any other member of the Community.
@@ -125,7 +129,7 @@ Internally to every team, private code reviews SHOULD be done before pull reques
 
 [Top](#top)
 
-###<a name="section6.3"></a>Contribution contents
+###<a name="section3.6"></a>Contribution contents
 Every contribution/PR MUST include:
 
 * The code implementing the feature/hardening/bug/task.
@@ -144,27 +148,27 @@ Where <i>short description</i> MAY enclose other “[...]” sublevels. For inst
 
 [Top](#top)
 
-###<a name="section6.4"></a>Coding style
+###<a name="section3.7"></a>Coding style
 The `fiware-cygnus/telefonica_checkstyle.xml` file MUST be configured in any Integrated Development Environment (IDE) used by the different development teams as a coding style checker. This XML file contains all the coding style rules accepted by Telefónica.
 
 [Top](#top)
 
-###<a name="section6.5"></a>Commits and squashing
+###<a name="section3.8"></a>Commits and squashing
 Commits within PRs MUST include a comment following this format:
 
-    [<agent name>] [issue number] <short description>
+    [#<issue number>] [<agent name>] <short description>
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    [cygnus-ngsi] [873] Update CHANGES_NEXT_RELEASE
-    [cygnus-ngsi] [873] Add support for pattern storage
-    [cygnus-ngsi] [873] Add regex compilation
+    [#873] [cygnus-ngsi] Update CHANGES_NEXT_RELEASE
+    [#873] [cygnus-ngsi] Add support for pattern storage
+    [#873] [cygnus-ngsi] Add regex compilation
 
-With regards to the squashing policy, the main repository MUST be configured with the <i>Allow Squash Merging</i> option.
+With regards to the [squashing policy](https://help.github.com/articles/configuring-pull-request-merge-squashing), the main repository MUST be configured with the <i>Allow Squash Merging</i> option.
 
 [Top](#top)
 
-##<a name="section7"></a>Releasing
+###<a name="section3.9"></a>Releasing
 When generating a new version of Cygnus from the main repository, all the agents MUST be released at the same time as a whole.
 
 A minor version (0.X.0, at the moment of writing 0.13.0) of Cygnus MUST be released at the end of each sprint/milestone. A sprint SHOULD comprise a natural month, however sometimes the sprints MAY comprise a different period, for instance a month and a half or half a month (usually, in order to adapt to holydays time). Every sprint MUST be scheduled in advance by Cygnus Core Team in the form of deadline in the related milestone. Agent teams SHOULD use this information in order to, internally, schedule the sprint in terms of issues to be implemented.
@@ -183,13 +187,23 @@ Obtaining a new release MUST imply creating a new branch  `release/0.X.0` direct
 
 Releases MUST be published in the <i>releases</i> section of the main repository.
 
-##<a name="section8"></a>Deployers and installers (RPMs and dockers)
-Work in progress.
+##<a name="section4"></a>Deployers
+###<a name="section4.1"></a>RPMs
+As said, each agent MUST provide scripts for creating RPMs. Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
+
+Agents' RPMs MUST depend on `cygnus-common` RPM, which MUST be in charge of installing not only the common classes to all the agents, but installing Apache Flume and provisioning the Cygnus plugin. `cygnus-common` RPM is typically uploaded to `http://repositories.testbed.fiware.org` as well.
 
 [Top](#top)
 
-##<a name="section9"></a>Documentation
-###<a name="section9.1"></a>Repository documentation
+###<a name="section4.2"></a>Dockers
+As said, each agent MUST provide Docker files. Upon releasing, these files MUST be updated to the new Cygnus version and uploaded to `https://hub.docker.com/r/fiware/` with a version tag.
+
+Agents' Docker files MUST contain `cygnus-common` and Apache Flume and the Cygnus plugin provisioned.
+
+[Top](#top)
+
+##<a name="section5"></a>Documentation
+###<a name="section5.1"></a>Repository documentation
 There MUST exist a `doc/` folder at the root of the main repository. Every Cygnus agent MUST include a documentation folder as per the following rules:
 
 * `doc/cygnus-common`
@@ -209,7 +223,7 @@ The following elements SHOULD be present as well:
 
 [Top](#top)
 
-###<a name="section9.2"></a>`readthedocs.org` documentation
+###<a name="section5.2"></a>`readthedocs.org` documentation
 The documentation within the `doc/` folder MUST be published to `readthedocs.org`. In order to achieve this, a `mkdocs.yml` file MUST live in the root of the main repository acting as a hook.
 
 The format of this `mkdocs.yml` file MUST follow this example:
@@ -251,8 +265,48 @@ pages:
 
 [Top](#top)
 
-##<a name="section10"></a>References
-https://help.github.com/articles/configuring-pull-request-merge-squashing/
-https://github.com/blog/2141-squash-your-commits
+##<a name="section6"></a>Logs and alarms
+###<a name="section6.1"></a>log4j
+log4j is the logging system used by Apache Flume, thus Cygnus agents MUST use log4j.
+
+Logs traced by any Cygnus agent MUST contain the following log4 layout:
+
+    time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=<agent name> | msg=%C[%L] : %m%n
+    
+Field by field:
+
+* `time`: Date and time the log was generated at.
+* `lvl`: log4j logging level. Accepted levels MUST be `FATAL`, `ERROR`, `WARN`, `INFO` and `DEBUG`.
+* `corr`: Correlation ID, it MUST be unique and transversal to all the IoT platform. The guidelines regarding this ID are: it MUST be re-used if sent to the Cygnus agent in some way (e.g. a Http header), otherwise it MUST be auto-generated.
+* `trans`: Transaction ID, it MUST be unique and auto-generated by the Cygnus agent. It the correlation ID has to be created, then the transaction and correlation IDs MUST be equals.
+* `srv`: FIWARE service sent to the Cygnus agent in some way (e.g. a Http header).
+* `subsrv`: FIWARE sub-service sent to the Cygnus agent in some way (e.g. a Http header).
+* `function`: Name of the Java method where the log is traced from.
+* `comp`: Name of the Cygnus agent, e.g. `cygnus-ngsi`, or `cygnus-common`.
+* `msg`: Java class containing the traced function, the specific line at the class and the application suplied message.
+
+[Top](#top)
+
+###<a name="section6.2"></a>Repository documentation
+The installation and administration guide of any agent (`doc/<agent name>/installation_and_administration_guide/`) MUST contain a section about logs and alarms.
+
+Such a section MUST describe the main log message types the agent uses. It is a set of easily identifiable strings or <i>tags</i> in the traces text, and each log traced by the agent MUST be of any of the types among the set. For instance, `cygnus-ngsi` considers the following ones:
+
+* <i>Fatal error.</i>
+* <i>Runtime error.</i>
+* <i>Bad configuration.</i>
+* <i>Bad Http notification.</i>
+* <i>Bad context data.</i>
+* <i>Channel error.</i>
+* <i>Persistence error.</i>
+
+In addition, a table MUST be included in charge of defining a set of alarm conditions that any third-party alarming system MUST have into account. Fields for this table are:
+
+* Alarm ID: An interger number starting by 1.
+* Severity: "CRITICAL" or "WARNING".
+* Detection strategy: What has to be found in the logs in order to raise this alarm. It may be a logging level, a log message type, etc.
+* Stop condition: What has to be found in the logs in order to decide the alarm is fixed. It may be a logging level, a log message type, etc.
+* Description: A description of the alarm, why it was raised and including its consequences.
+* Action: 
 
 [Top](#top)
