@@ -518,6 +518,7 @@ public class ManagementInterface extends AbstractHandler {
             
             try {
                 manageErrorMsg(err, response);
+                return;
             } // if
             catch (Exception e) {
                 Logger.getLogger(e.getMessage());
@@ -588,12 +589,12 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } 
         
-        if ((ngsiVersion.equals("1")) || (ngsiVersion.equals("2"))) {
+        if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, invalid parameter (subscription_id): "
+                    + "\"error\":\"Parse error, invalid parameter (ngsi_version): "
                     + "Must be 1 or 2. Check it for errors.\"}");
-            LOGGER.error("Parse error, invalid parameter (subscription_id): "
+            LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                     + "Must be 1 or 2. Check it for errors.");
             return;
         } 
@@ -629,7 +630,7 @@ public class ManagementInterface extends AbstractHandler {
         int err;
         
         if (endpoint != null) {
-            err = endpoint.isValid(true);
+            err = endpoint.isValid();
         } else {
             // missing entire endpoint -> missing endpoint (code nº21)
             err = 21;
@@ -640,6 +641,7 @@ public class ManagementInterface extends AbstractHandler {
 
             try {
                 manageErrorMsg(err, response);
+                return;
             } // if
             catch (Exception e) {
                 Logger.getLogger(e.getMessage());
@@ -695,6 +697,8 @@ public class ManagementInterface extends AbstractHandler {
             
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + e.getMessage() + "}");
         } // try catch
         
     } // handleDeleteSubscription
@@ -1181,6 +1185,21 @@ public class ManagementInterface extends AbstractHandler {
                         + "\"error\":\"Invalid endpoint, field 'ssl' invalid\"}");
                 LOGGER.error("Invalid endpoint, field 'ssl' invalid");
                 return;
+                
+            // case for authtoken missing
+            case 51:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Missing Auth-Token. Required for DELETE subscriptions\"}");
+                LOGGER.error("Invalid endpoint, missing 'xAuthToken'");
+                return;
+
+            // case for authtoken empty
+            case 52:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Empty Auth-Token. Required for DELETE subscriptions\"}");
+                LOGGER.error("Invalid endpoint, empty 'xAuthToken'");
+                return;
+                
             default:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription\"}");

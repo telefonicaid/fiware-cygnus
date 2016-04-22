@@ -50,13 +50,8 @@ public class OrionEndpoint {
     public String getAuthToken() {
         return xauthtoken;
     } // getAuthToken
-
-    public boolean hasAuthToken() {
-        String token = this.getAuthToken();
-        return (token != null);
-    } // hasAuthToken
     
-    public int isValid (boolean requiredToken) {
+    public int isValid () {
         
         // get host, port and ssl
         host = this.getHost();
@@ -66,7 +61,8 @@ public class OrionEndpoint {
         boolean isValidSsl;
         
         // check if entire endpoint is missing        
-        if ((host == null) && (port == null) && (ssl == null)) {
+        if ((host == null) && (port == null) && (ssl == null) 
+                && (xauthtoken == null)) {
             LOGGER.debug("Missing endpoint in the request");
             return 21;
         } // if
@@ -116,13 +112,13 @@ public class OrionEndpoint {
         } // if
                 
         // API CHECK: authtoken neccesary 
-        if (requiredToken && !hasAuthToken()) {
+        if (xauthtoken == null) {
             LOGGER.debug("Auth-Token not given: Required for use API");
             return 51;
         } // if
         
         // API CHECK: authtoken empty
-        if (requiredToken && (xauthtoken.length() == 0)) {
+        if (xauthtoken.length() == 0) {
             LOGGER.debug("Auth-Token given is empty: Required for use API");
             return 52;
         } // if
