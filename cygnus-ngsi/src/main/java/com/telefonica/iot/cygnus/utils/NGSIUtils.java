@@ -369,12 +369,12 @@ public final class NGSIUtils {
             String mdValue = (String) md.get("value");
             
             if (mdName.equals("location") && mdType.equals("string") && mdValue.equals("WGS84")) {
-                String[] split = attrValue.trim().split(",");
+                String[] split = attrValue.split(",");
                 
-                if(flipCoordinates) {
-                    return "ST_SetSRID(ST_MakePoint(" + split[1] + "," + split[0] + "), 4326)";
+                if (flipCoordinates) {
+                    return "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)";
                 } else {
-                    return "ST_SetSRID(ST_MakePoint(" + split[0] + "," + split[1] + "), 4326)";
+                    return "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)";
                 } // if else
             } // if
         } // for
