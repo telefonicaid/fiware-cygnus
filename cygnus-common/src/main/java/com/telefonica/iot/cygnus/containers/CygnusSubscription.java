@@ -256,7 +256,7 @@ public class CygnusSubscription {
         //  Example: 125 =  Subscription/MissingFields/notifyConditionsField
         
         int subscriptionMsg = orionSubscription.isValid();  
-        int endpointMsg = orionEndpoint.isValid(false);
+        int endpointMsg = orionEndpoint.isValid();
         
         switch (subscriptionMsg) {
             // case of missing entire subscription
