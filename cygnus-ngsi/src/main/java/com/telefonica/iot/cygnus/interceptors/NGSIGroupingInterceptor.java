@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.interceptors;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.Utils;
 import java.io.File;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
         String body = new String(event.getBody());
         
         // get some original header values
-        String fiwareServicePath = headers.get(Constants.HEADER_FIWARE_SERVICE_PATH);
+        String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
         
         // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
         // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
@@ -124,16 +124,16 @@ public class NGSIGroupingInterceptor implements Interceptor {
         
         // set the final header values
         String defaultDestinationsStr = Utils.toString(defaultDestinations);
-        headers.put(Constants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_NOTIFIED_ENTITIES
+        headers.put(CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES
                 + ", value=" + defaultDestinationsStr + ")");
         String groupedDestinationsStr = Utils.toString(groupedDestinations);
-        headers.put(Constants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_ENTITIES
+        headers.put(CommonConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_ENTITIES
                 + ", value=" + groupedDestinationsStr + ")");
         String groupedServicePathsStr = Utils.toString(groupedServicePaths);
-        headers.put(Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
-        LOGGER.debug("Adding flume event header (name=" + Constants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+        headers.put(CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
                 + ", value=" + groupedServicePathsStr + ")");
         event.setHeaders(headers);
         LOGGER.debug("Event put in the channel, id=" + event.hashCode());

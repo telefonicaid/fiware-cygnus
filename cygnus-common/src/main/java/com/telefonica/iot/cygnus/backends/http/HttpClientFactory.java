@@ -19,7 +19,7 @@
 package com.telefonica.iot.cygnus.backends.http;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -68,16 +68,16 @@ public class HttpClientFactory {
         // create the appropriate connections manager
         if (ssl) {
             sslConnectionsManager = new PoolingClientConnectionManager(getSSLSchemeRegistry());
-            sslConnectionsManager.setMaxTotal(Constants.MAX_CONNS);
-            sslConnectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
+            sslConnectionsManager.setMaxTotal(CommonConstants.MAX_CONNS);
+            sslConnectionsManager.setDefaultMaxPerRoute(CommonConstants.MAX_CONNS_PER_ROUTE);
         } else {
             connectionsManager = new PoolingClientConnectionManager();
-            connectionsManager.setMaxTotal(Constants.MAX_CONNS);
-            connectionsManager.setDefaultMaxPerRoute(Constants.MAX_CONNS_PER_ROUTE);
+            connectionsManager.setMaxTotal(CommonConstants.MAX_CONNS);
+            connectionsManager.setDefaultMaxPerRoute(CommonConstants.MAX_CONNS_PER_ROUTE);
         } // if else
         
-        LOGGER.info("Setting max total connections (" + Constants.MAX_CONNS + ")");
-        LOGGER.info("Setting default max connections per route (" + Constants.MAX_CONNS_PER_ROUTE + ")");
+        LOGGER.info("Setting max total connections (" + CommonConstants.MAX_CONNS + ")");
+        LOGGER.info("Setting default max connections per route (" + CommonConstants.MAX_CONNS_PER_ROUTE + ")");
     } // HttpClientFactory
     
     /**
