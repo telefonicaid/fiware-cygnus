@@ -68,6 +68,50 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
         // check status code from response
         return response;
+    } // subscribeContext
+    
+    @Override
+    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token) 
+            throws Exception {
+        
+        // create the http header
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Content-type", "application/json"));
+        headers.add(new BasicHeader("Accept", "application/json"));
+        
+        if (token != null) {
+            headers.add(new BasicHeader("X-Auth-token", token));
+        } // if
+                
+        String relativeURL = "/v1/unsubscribeContext";
+        String subscriptionStr = "{\n" 
+                + "\"subscriptionId\": \"" + subscriptionId + "\"\n"
+                + "}";
+        StringEntity subscriptionEnt = new StringEntity(subscriptionStr);
+        
+        // do the request
+        JsonResponse response = doRequest("POST", relativeURL, true, headers, subscriptionEnt);
+        
+        return response;   
+    }
+    
+    @Override
+    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception {
+        
+        // create the http header
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader("Content-type", "application/json"));
+        headers.add(new BasicHeader("Accept", "application/json"));
+        
+        if (token != null) {
+            headers.add(new BasicHeader("X-Auth-token", token));
+        } // if
+        
+        String relativeURL = "/v2/subscriptions/" + subscriptionId;
+        JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
+        
+        return response;
+        
     }
     
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
