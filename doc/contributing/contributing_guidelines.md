@@ -271,7 +271,7 @@ log4j is the logging system used by Apache Flume, thus Cygnus agents MUST use lo
 
 Logs traced by any Cygnus agent MUST contain the following log4 layout:
 
-    time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=<agent name> | msg=%C[%L] : %m%n
+    time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=%X{agent} | msg=%C[%L] : %m%n
     
 Field by field:
 
@@ -282,7 +282,7 @@ Field by field:
 * `srv`: FIWARE service sent to the Cygnus agent in some way (e.g. a Http header).
 * `subsrv`: FIWARE sub-service sent to the Cygnus agent in some way (e.g. a Http header).
 * `function`: Name of the Java method where the log is traced from.
-* `comp`: Name of the Cygnus agent.
+* `comp`: Name of the Cygnus agent, it is the one passed in the command used for running Flume.
 * `msg`: Java class containing the traced function, the specific line at the class and the application suplied message.
 
 [Top](#top)
