@@ -1,0 +1,17 @@
+[libdefaults]
+ default_realm = EXAMPLE.COM
+ dns_lookup_realm = false
+ dns_lookup_kdc = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+
+[realms]
+ EXAMPLE.COM = {
+  kdc = kdc.example.com
+  admin_server = admin_server.example.com
+ }
+
+[domain_realms]
+ .example.com = EXAMPLE.COM
+ example.com = EXAMPLE.COM
