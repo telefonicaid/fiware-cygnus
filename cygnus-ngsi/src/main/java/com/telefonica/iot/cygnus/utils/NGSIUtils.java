@@ -347,11 +347,24 @@ public final class NGSIUtils {
      * Gets the geolocation value, ready for insertion in CartoDB, given a NGSI attribute value and its metadata.
      * If the attribute is not geo-related, it is returned as it is.
      * @param attrValue
+     * @param attrType
      * @param metadata
      * @param flipCoordinates
      * @return The geolocation value, ready for insertion in CartoDB, or tehe value as it is
      */
-    public static String getLocation(String attrValue, String metadata, boolean flipCoordinates) {
+    public static String getLocation(String attrValue, String attrType, String metadata, boolean flipCoordinates) {
+        // First, check the attribute type
+        if (attrType.equals("geo:point")) {
+            String[] split = attrValue.split(",");
+                
+            if (flipCoordinates) {
+                return "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)";
+            } else {
+                return "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)";
+            } // if else
+        } // if
+        
+        // The type was not 'geo:pint', thus try the metadata
         JSONParser parser = new JSONParser();
         JSONArray mds;
         
@@ -379,6 +392,7 @@ public final class NGSIUtils {
             } // if
         } // for
         
+        // The attribute was not related to a geolocation
         return attrValue;
     } // getLocation
         
