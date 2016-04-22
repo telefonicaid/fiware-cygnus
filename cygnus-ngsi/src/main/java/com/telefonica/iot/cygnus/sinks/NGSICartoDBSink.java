@@ -119,7 +119,7 @@ public class NGSICartoDBSink extends NGSISink {
         
         String flipCoordinatesStr = context.getString("flip_coordinates", "false");
         
-        if(flipCoordinatesStr.equals("true") || flipCoordinatesStr.equals("false")) {
+        if (flipCoordinatesStr.equals("true") || flipCoordinatesStr.equals("false")) {
             flipCoordinates = flipCoordinatesStr.equals("true");
             LOGGER.debug("[" + this.getName() + "] Reading configuration (flip_coordinates="
                     + flipCoordinatesStr + ")");
@@ -272,10 +272,11 @@ public class NGSICartoDBSink extends NGSISink {
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
-                if (!NGSIUtils.getLocation(attrValue, attrMetadata, flipCoordinates).startsWith(
+                if (!NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates).startsWith(
                         "ST_SetSRID(ST_MakePoint(")) {
                     aggregation.put(attrName, new ArrayList<String>());
                     aggregation.put(attrName + "_md", new ArrayList<String>());
@@ -316,7 +317,7 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                String location = NGSIUtils.getLocation(attrValue, attrMetadata, flipCoordinates);
+                String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
                 
                 if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
                     aggregation.get(NGSIConstants.THE_GEOM).add(location);
