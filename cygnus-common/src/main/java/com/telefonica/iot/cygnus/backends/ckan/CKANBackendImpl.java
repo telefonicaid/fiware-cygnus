@@ -24,7 +24,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Constants;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.util.ArrayList;
 import org.json.simple.JSONObject;
 import org.apache.http.Header;
@@ -331,15 +331,15 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
             String jsonString = "{ \"resource_id\": \"" + resourceId
                     + "\", \"fields\": [ "
-                    + "{ \"id\": \"" + Constants.RECV_TIME_TS + "\", \"type\": \"int\"},"
-                    + "{ \"id\": \"" + Constants.RECV_TIME + "\", \"type\": \"timestamp\"},"
-                    + "{ \"id\": \"" + Constants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + Constants.ENTITY_ID + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + Constants.ENTITY_TYPE + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + Constants.ATTR_NAME + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + Constants.ATTR_TYPE + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + Constants.ATTR_VALUE + "\", \"type\": \"json\"},"
-                    + "{ \"id\": \"" + Constants.ATTR_MD + "\", \"type\": \"json\"}"
+                    + "{ \"id\": \"" + CommonConstants.RECV_TIME_TS + "\", \"type\": \"int\"},"
+                    + "{ \"id\": \"" + CommonConstants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                    + "{ \"id\": \"" + CommonConstants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + CommonConstants.ENTITY_ID + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + CommonConstants.ENTITY_TYPE + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + CommonConstants.ATTR_NAME + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + CommonConstants.ATTR_TYPE + "\", \"type\": \"text\"},"
+                    + "{ \"id\": \"" + CommonConstants.ATTR_VALUE + "\", \"type\": \"json\"},"
+                    + "{ \"id\": \"" + CommonConstants.ATTR_MD + "\", \"type\": \"json\"}"
                     + "], "
                     + "\"force\": \"true\" }";
             
