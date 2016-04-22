@@ -28,6 +28,7 @@ import com.telefonica.iot.cygnus.channels.CygnusMemoryChannel;
 import com.telefonica.iot.cygnus.http.JettyServer;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.management.ManagementInterface;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -52,6 +53,7 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
+import org.slf4j.MDC;
 
 /**
  * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
@@ -254,6 +256,9 @@ public class CygnusApplication extends Application {
                 application = new CygnusApplication();
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
+                 
+            // use the agent name as component name in the logs through log4j Mapped Diagnostic Context (MDC)
+            MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
                         
             // start the Cygnus application
             LOGGER.info("Starting Cygnus application");
