@@ -22,13 +22,13 @@ package com.telefonica.iot.cygnus.utils;
  *
  * @author fermin
  */
-public final class Constants {
+public final class CommonConstants {
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
      */
-    private Constants() {
-    } // Constants
+    private CommonConstants() {
+    } // CommonConstants
     
     // Http header names
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
@@ -85,5 +85,6 @@ public final class Constants {
     public static final String LOG4J_TRANS = "transactionId";
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
+    public static final String LOG4J_COMP = "agent";
     
-} // Constants
+} // CommonConstants
