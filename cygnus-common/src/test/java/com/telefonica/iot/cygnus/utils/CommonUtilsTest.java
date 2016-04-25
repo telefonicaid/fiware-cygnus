@@ -42,14 +42,14 @@ public class CommonUtilsTest {
     } // CommonUtilsTest
 
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp without
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp without miliseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithoutMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 "
-                + "timestamp without miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp without miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -71,13 +71,14 @@ public class CommonUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithoutMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp with
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp with miliseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 timestamp with miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -99,13 +100,14 @@ public class CommonUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp with
- microseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid ISO 8601 timestamp with microseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithMicroseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 timestamp with microseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with microseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -127,13 +129,14 @@ public class CommonUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithMicroseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp without
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp without miliseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithoutMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp without miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp without miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -155,13 +158,14 @@ public class CommonUtilsTest {
     } // testGetTimeInstantSQLTimestampWithoutMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp with
-     * miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp with miliseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp with miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp with miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -184,13 +188,14 @@ public class CommonUtilsTest {
     } // testGetTimeInstantSQLTimestampWithMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp with
-     * microseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp with microseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithMicroseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp with microseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp with microseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -211,5 +216,5 @@ public class CommonUtilsTest {
             throw e;
         } // try catch
     } // testGetTimeInstantSQLTimestampWithMicroseconds
-    
-} // CommonUtilsTest
+
+} // NGSIUtilsTest
