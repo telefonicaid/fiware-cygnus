@@ -303,19 +303,19 @@ Error list (HTTP response code in parenthesis):
 
        {"success":"true","result" : {" Subscription deleted "}
 
-+ Response 400 (application/json) [Bad parameters]
++ Response 400 (application/json)
 
        {"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
 
        {"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
 
-+ Response 400 (application/json) [Wrong subscription id in v1 and v2]
++ Response 400 (application/json)
 
        {"success":"false","result" : {{"subscriptionId":"571872a9c0585c7451571be4","statusCode":{"code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"}}}
 
        {"success":"false","result" : {{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
 
-+ Response 400 (application/json) [Empty or missing authentication token]
++ Response 400 (application/json) 
 
        {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
 
