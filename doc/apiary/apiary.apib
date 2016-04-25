@@ -199,7 +199,7 @@ Error list (HTTP response code in parenthesis):
 
 + Request
 
-       DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
+       DELETE "http://<cygnus_host>:<management_port>/v1/groupingrules?id=2"
 
 + Response 200 (application/json)
 
@@ -297,11 +297,11 @@ Error list (HTTP response code in parenthesis):
 
 + Request
 
-       DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>"
+       DELETE http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>
 
 + Response 204 (application/json)
 
-       {"success":"true","result" : {" Subscription deleted "}
+       {"success":"true","result" : {" Subscription deleted "}}
 
 + Response 400 (application/json)
 
@@ -315,7 +315,7 @@ Error list (HTTP response code in parenthesis):
 
        {"success":"false","result" : {{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
 
-+ Response 400 (application/json) 
++ Response 400 (application/json)
 
        {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
 
