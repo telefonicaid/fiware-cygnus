@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;

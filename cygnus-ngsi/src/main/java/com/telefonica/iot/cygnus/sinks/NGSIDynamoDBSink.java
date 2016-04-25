@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -205,7 +206,7 @@ public class NGSIDynamoDBSink extends NGSISink {
         public void aggregate(NGSIEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = NGSIUtils.getHumanReadable(recvTimeTs, true);
+            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
             // get the event body
             NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
@@ -266,7 +267,7 @@ public class NGSIDynamoDBSink extends NGSISink {
         public void aggregate(NGSIEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = NGSIUtils.getHumanReadable(recvTimeTs, true);
+            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
             // get the event body
             NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();

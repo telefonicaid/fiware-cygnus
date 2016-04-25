@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -347,7 +348,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         public void aggregate(NGSIEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = NGSIUtils.getHumanReadable(recvTimeTs, true);
+            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
@@ -436,7 +437,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         public void aggregate(NGSIEvent cygnusEvent) throws Exception {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = NGSIUtils.getHumanReadable(recvTimeTs, true);
+            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
             // get the event body
             ContextElement contextElement = cygnusEvent.getContextElement();
