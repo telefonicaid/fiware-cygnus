@@ -22,6 +22,7 @@ Content:
 * [Logs and alarms](#section6)
     * [log4j](#section6.1)
     * [Section in the documentation](#section6.2)
+* [Configuration files](#section7)
 
 ##<a name="section1"></a>Introduction
 This document is intended to developers aiming at contributing a complete Cygnus agent to the Cygnus suite. In order to accept those contributions a [contribution policy](./ContributionPolicy.txt) document has to be signed beforehand.
@@ -191,14 +192,14 @@ Releases MUST be published in the <i>releases</i> section of the main repository
 ###<a name="section4.1"></a>RPMs
 As said, each agent MUST provide scripts for creating RPMs. Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
 
-Agents' RPMs MUST depend on `cygnus-common` RPM, which MUST be in charge of installing not only the common classes to all the agents, but installing Apache Flume and provisioning the Cygnus plugin. `cygnus-common` RPM is typically uploaded to `http://repositories.testbed.fiware.org` as well.
+Agents' RPMs MUST depend on `cygnus-common` RPM, which MUST be in charge of installing not only the common classes to all the agents, but installing Apache Flume, default configuration templates and provisioning the Cygnus plugin. `cygnus-common` RPM is typically uploaded to `http://repositories.testbed.fiware.org` as well.
 
 [Top](#top)
 
 ###<a name="section4.2"></a>Dockers
 As said, each agent MUST provide Docker files. Upon releasing, these files MUST be updated to the new Cygnus version and uploaded to `https://hub.docker.com/r/fiware/` with a version tag.
 
-Agents' Docker files MUST contain `cygnus-common` and Apache Flume and the Cygnus plugin provisioned.
+Agents' Docker files MUST contain `cygnus-common`, default configuration templates, Apache Flume and the Cygnus plugin provisioned.
 
 [Top](#top)
 
@@ -308,5 +309,12 @@ In addition, a table MUST be included in charge of defining a set of alarm condi
 * Stop condition: What has to be found in the logs in order to decide the alarm is fixed. It may be a logging level, a log message type, etc.
 * Description: A description of the alarm, why it was raised and including its consequences.
 * Action: 
+
+[Top](#top)
+
+##<a name="section7"></a>Configuration
+When adding a new agent to Cygnus, it MUST include an agent configuration template in [Flume format](https://flume.apache.org/FlumeUserGuide.html#setup). Other configuration files MAY be added as well.
+
+The specific agent configuration template MUST replace the one handled by `cygnus-common` in the Flume deployment donde by `cygnus-common` RPM.
 
 [Top](#top)
