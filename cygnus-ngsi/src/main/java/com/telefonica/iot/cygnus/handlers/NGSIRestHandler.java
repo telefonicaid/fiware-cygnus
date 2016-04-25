@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
@@ -121,10 +122,10 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         defaultService = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE, "default");
         
-        if (defaultService.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN) {
+        if (defaultService.length() > CommonConstants.SERVICE_HEADER_MAX_LEN) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
-                    + "' parameter length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                    + "' parameter length greater than " + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
         } else {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
                     + defaultService + ")");
@@ -132,10 +133,10 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         defaultServicePath = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE_PATH, "/");
         
-        if (defaultServicePath.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN) {
+        if (defaultServicePath.length() > CommonConstants.SERVICE_PATH_HEADER_MAX_LEN) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
-                    + "' parameter length greater " + "than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                    + "' parameter length greater " + "than " + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
         } else if (!defaultServicePath.startsWith("/")) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
@@ -186,30 +187,30 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             String headerValue = request.getHeader(headerName);
             LOGGER.debug("Header " + headerName + " received with value " + headerValue);
             
-            if (headerName.equals(NGSIConstants.HEADER_CORRELATOR_ID)) {
+            if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
                 corrId = headerValue;
-            } else if (headerName.equals(NGSIConstants.HTTP_HEADER_CONTENT_TYPE)) {
+            } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
                 if (!headerValue.contains("application/json")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
                 } // if else
-            } else if (headerName.equals(NGSIConstants.HEADER_FIWARE_SERVICE)) {
-                if (headerValue.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN) {
+            } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE)) {
+                if (headerValue.length() > CommonConstants.SERVICE_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-service' header length greater than "
-                            + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                            + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'fiware-service' header length greater than "
-                            + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                            + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
                 } else {
                     service = headerValue;
                 } // if else
-            } else if (headerName.equals(NGSIConstants.HEADER_FIWARE_SERVICE_PATH)) {
-                if (headerValue.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN) {
+            } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE_PATH)) {
+                if (headerValue.length() > CommonConstants.SERVICE_PATH_HEADER_MAX_LEN) {
                     LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
-                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                            + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
-                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                            + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
                 } else if (!headerValue.startsWith("/")) {
                     LOGGER.warn("Bad HTTP notification ('fiware-servicePath' heacder value must start with '/'");
                     throw new HTTPBadRequestException("'fiware-servicePath' header value must start with '/'");
@@ -226,8 +227,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
-        MDC.put(NGSIConstants.LOG4J_SVC, service == null ? defaultService : service);
-        MDC.put(NGSIConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
+        MDC.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
+        MDC.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
         // Get an internal transaction ID.
         String transId = generateUniqueId(null, null);
@@ -238,8 +239,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // Store both of them in the log4j Mapped Diagnostic Context (MDC), this way it will be accessible
         // by the whole source code.
-        MDC.put(NGSIConstants.LOG4J_CORR, corrId);
-        MDC.put(NGSIConstants.LOG4J_TRANS, transId);
+        MDC.put(CommonConstants.LOG4J_CORR, corrId);
+        MDC.put(CommonConstants.LOG4J_TRANS, transId);
         LOGGER.info("Starting internal transaction (" + transId + ")");
         
         // get the data content
@@ -260,15 +261,15 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(NGSIConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.HEADER_FIWARE_SERVICE
+        eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
-        eventHeaders.put(NGSIConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
+        eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
                 ? defaultServicePath : servicePath);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.HEADER_FIWARE_SERVICE_PATH
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(NGSIConstants.HEADER_CORRELATOR_ID, corrId);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.HEADER_CORRELATOR_ID
+        eventHeaders.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
+        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_CORRELATOR_ID
                 + ", value=" + corrId + ")");
         eventHeaders.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
         LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID

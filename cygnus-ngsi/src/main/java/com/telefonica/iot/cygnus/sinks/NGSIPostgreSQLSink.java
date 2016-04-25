@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
@@ -264,9 +265,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
         private String buildSchemaName() throws Exception {
             String name = NGSIUtils.encode(service, false, true);
 
-            if (name.length() > NGSIConstants.MAX_NAME_LEN) {
+            if (name.length() > CommonConstants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building schema name '" + name
-                        + "' and its length is greater than " + NGSIConstants.MAX_NAME_LEN);
+                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
             } // if
 
             return name;
@@ -300,9 +301,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
                             + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
             } // switch
 
-            if (name.length() > NGSIConstants.MAX_NAME_LEN) {
+            if (name.length() > CommonConstants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building table name '" + name
-                        + "' and its length is greater than " + NGSIConstants.MAX_NAME_LEN);
+                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
             } // if
 
             return name;

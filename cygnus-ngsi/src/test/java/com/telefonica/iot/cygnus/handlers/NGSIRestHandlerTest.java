@@ -18,9 +18,9 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -200,10 +200,10 @@ public class NGSIRestHandlerTest {
                     + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-service' header value is "
-                    + " less or equal than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
+                    + " less or equal than '" + CommonConstants.SERVICE_HEADER_MAX_LEN + "'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-servicePath' header value "
-                    + "is less or equal than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+                    + "is less or equal than '" + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
@@ -214,11 +214,11 @@ public class NGSIRestHandlerTest {
             } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-service' header value "
-                        + "is greater than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
+                        + "is greater than '" + CommonConstants.SERVICE_HEADER_MAX_LEN + "'");
             } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-servicePath' header "
-                        + "value is greater than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+                        + "value is greater than '" + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
             } // if else
             
             assertTrue(false);

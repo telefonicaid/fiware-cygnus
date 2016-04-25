@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,16 +125,16 @@ public class NGSIGroupingInterceptor implements Interceptor {
         
         // set the final header values
         String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
-        headers.put(CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES
+        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
                 + ", value=" + defaultDestinationsStr + ")");
         String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
-        headers.put(CommonConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_ENTITIES
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
                 + ", value=" + groupedDestinationsStr + ")");
         String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
-        headers.put(CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
                 + ", value=" + groupedServicePathsStr + ")");
         event.setHeaders(headers);
         LOGGER.debug("Event put in the channel, id=" + event.hashCode());
