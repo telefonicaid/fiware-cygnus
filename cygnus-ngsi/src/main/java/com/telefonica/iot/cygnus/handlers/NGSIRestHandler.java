@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -32,8 +33,6 @@ import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
-import java.util.Date;
 import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
 import java.util.UUID;
@@ -71,7 +70,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         invalidConfiguration = false;
         
         // print Cygnus version
-        LOGGER.info("Cygnus version (" + NGSIUtils.getCygnusVersion() + "." + NGSIUtils.getLastCommit() + ")");
+        LOGGER.info("Cygnus version (" + CommonUtils.getCygnusVersion() + "." + CommonUtils.getLastCommit() + ")");
     } // NGSIRestHandler
     
     /**

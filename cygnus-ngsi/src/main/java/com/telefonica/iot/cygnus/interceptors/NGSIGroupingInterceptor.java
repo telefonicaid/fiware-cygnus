@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,15 +123,15 @@ public class NGSIGroupingInterceptor implements Interceptor {
         } // for
         
         // set the final header values
-        String defaultDestinationsStr = Utils.toString(defaultDestinations);
+        String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
         headers.put(CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
         LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_NOTIFIED_ENTITIES
                 + ", value=" + defaultDestinationsStr + ")");
-        String groupedDestinationsStr = Utils.toString(groupedDestinations);
+        String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
         headers.put(CommonConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
         LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_ENTITIES
                 + ", value=" + groupedDestinationsStr + ")");
-        String groupedServicePathsStr = Utils.toString(groupedServicePaths);
+        String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
         headers.put(CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
         LOGGER.debug("Adding flume event header (name=" + CommonConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
                 + ", value=" + groupedServicePathsStr + ")");

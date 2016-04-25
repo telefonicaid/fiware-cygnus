@@ -17,8 +17,8 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.createEvent;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.util.Map;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
@@ -52,7 +52,7 @@ public class NGSIGroupingInterceptorTest {
                 + "headers");
         NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("");
         groupingInterceptor.initialize();
-        Event originalEvent = TestUtils.createEvent();
+        Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();
 
         try {
@@ -125,5 +125,5 @@ public class NGSIGroupingInterceptorTest {
             throw e7;
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
-    
+
 } // NGSIGroupingInterceptorTest
