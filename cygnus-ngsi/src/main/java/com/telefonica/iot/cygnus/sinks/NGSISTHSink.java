@@ -21,7 +21,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 
 /**
@@ -71,7 +71,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         ContextElement contextElement = event.getContextElement();
 
         // human readable version of the reception time
-        String notifiedRecvTime = NGSIUtils.getHumanReadable(notifiedRecvTimeTs, true);
+        String notifiedRecvTime = CommonUtils.getHumanReadable(notifiedRecvTimeTs, true);
 
         // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
@@ -132,7 +132,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             // check if the metadata contains a TimeInstant value; use the notified reception time instead
             Long recvTimeTs;
 
-            Long timeInstant = NGSIUtils.getTimeInstant(attrMetadata);
+            Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
 
             if (timeInstant != null) {
                 recvTimeTs = timeInstant;

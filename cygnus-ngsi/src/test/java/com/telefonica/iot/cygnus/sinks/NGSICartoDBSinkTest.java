@@ -23,8 +23,8 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata;
 import com.telefonica.iot.cygnus.sinks.NGSICartoDBSink.CartoDBAggregator;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import java.util.ArrayList;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;

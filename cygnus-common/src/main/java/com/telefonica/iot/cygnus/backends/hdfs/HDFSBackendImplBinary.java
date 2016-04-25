@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.backends.hdfs;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;

@@ -33,7 +33,7 @@ import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -340,7 +340,7 @@ public class MongoBackendImpl implements MongoBackend {
             GregorianCalendar calendar) {
         BasicDBObject update = new BasicDBObject();
 
-        if (Utils.isANumber(attrValue)) {
+        if (CommonUtils.isANumber(attrValue)) {
             double value = new Double(attrValue);
             update.append("$set", new BasicDBObject("attrType", attrType))
                     .append("$inc", new BasicDBObject("points.$.samples", 1)
@@ -369,7 +369,7 @@ public class MongoBackendImpl implements MongoBackend {
     private BasicDBObject buildInsertForPrepopulate(String attrType, String attrValue, Resolution resolution) {
         BasicDBObject update = new BasicDBObject();
         update.append("$setOnInsert", new BasicDBObject("attrType", attrType)
-                .append("points", buildPrepopulatedPoints(resolution, Utils.isANumber(attrValue))));
+                .append("points", buildPrepopulatedPoints(resolution, CommonUtils.isANumber(attrValue))));
         return update;
     } // buildInsertForPrepopulate
 
@@ -622,7 +622,7 @@ public class MongoBackendImpl implements MongoBackend {
     private BasicDBObject buildUpdateForCollectionHash(String operation, boolean isAggregated, String fiwareService,
             String fiwareServicePath, String entityId, String entityType, String attrName, String destination) {
         BasicDBObject update = new BasicDBObject();
-        update.append(operation, new BasicDBObject("dataModel", Utils.getStrDataModel(dataModel)).
+        update.append(operation, new BasicDBObject("dataModel", CommonUtils.getStrDataModel(dataModel)).
                 append("isAggregated", isAggregated).
                 append("service", fiwareService).
                 append("servicePath", fiwareServicePath).
