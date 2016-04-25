@@ -22,6 +22,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,14 +43,14 @@ public class NGSIUtilsTest {
     } // NGSIUtilsTest
 
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp without
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp without miliseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithoutMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 "
-                + "timestamp without miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp without miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -71,13 +72,14 @@ public class NGSIUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithoutMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp with
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp with miliseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 timestamp with miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -99,13 +101,14 @@ public class NGSIUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid ISO 8601 timestamp with
- microseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid ISO 8601 timestamp with microseconds.
      */
     @Test
     public void testGetTimeInstantISO8601TimestampWithMicroseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid ISO 8601 timestamp with microseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with microseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -127,13 +130,14 @@ public class NGSIUtilsTest {
     } // testGetTimeInstantISO8601TimestampWithMicroseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp without
- miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp without miliseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithoutMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp without miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp without miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -155,12 +159,14 @@ public class NGSIUtilsTest {
     } // testGetTimeInstantSQLTimestampWithoutMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp with miliseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp with miliseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithMiliseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp with miliseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp with miliseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -183,12 +189,14 @@ public class NGSIUtilsTest {
     } // testGetTimeInstantSQLTimestampWithMiliseconds
     
     /**
-     * [NGSIUtils.getTimeInstant] -------- A time instant is obtained when passing a valid SQL timestamp with microseconds.
+     * [NGSIUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when
+     * passing a valid SQL timestamp with microseconds.
      */
     @Test
     public void testGetTimeInstantSQLTimestampWithMicroseconds() {
         System.out.println(getTestTraceHead("[Utils.getTimeInstant]")
-                + "-------- A time instant is obtained when passing a valid SQL timestamp with microseconds");
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "SQL timestamp with microseconds");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "TimeInstant");
         metadataJson.put("type", "SQL timestamp");
@@ -209,5 +217,93 @@ public class NGSIUtilsTest {
             throw e;
         } // try catch
     } // testGetTimeInstantSQLTimestampWithMicroseconds
+    
+    /**
+     * [NGSIUtils.getLocation] -------- When getting a location, a CartoDB point is obtained when passing
+     * an attribute of type 'geo:point'.
+     */
+    @Test
+    public void testGetLocationType() {
+        System.out.println(getTestTraceHead("[Utils.getLocation]")
+                + "-------- When getting a location, a CartoDB point is obtained when passing an attribute "
+                + "of type 'geo:point'");
+        String attrMetadataStr = "[]";
+        String attrValue = "-3.7167, 40.3833";
+        String attrType = "geo:point";
+        boolean flipCoordinates = false; // irrelevant for this test
+        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+
+        try {
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", location);
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "-  OK  - Location '" + location + "' obtained for an attribute of type '" + attrType
+                    + "' and value '" + attrValue + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "- FAIL - Location '" + location + "' obtained for an attribute of type '" + attrType
+                    + "' and value '" + attrValue + "'");
+            throw e;
+        } // try catch
+    } // testGetLocationType
+    
+    /**
+     * [NGSIUtils.getLocation] -------- When getting a location, a CartoDB point is obtained when passing
+     * an attribute of type 'geo:point'.
+     */
+    @Test
+    public void testGetLocationMetadata() {
+        System.out.println(getTestTraceHead("[Utils.getLocation]")
+                + "-------- When getting a location, a CartoDB point is obtained when passing an attribute "
+                + "of type 'geo:point'");
+        JSONObject metadataJson = new JSONObject();
+        metadataJson.put("name", "location");
+        metadataJson.put("type", "string");
+        metadataJson.put("value", "WGS84");
+        JSONArray metadatasJson = new JSONArray();
+        metadatasJson.add(metadataJson);
+        String attrMetadataStr = metadatasJson.toJSONString();
+        String attrValue = "-3.7167, 40.3833";
+        String attrType = "coordinates"; // irrelevant for this test
+        boolean flipCoordinates = false; // irrelevant for this test
+        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+
+        try {
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", location);
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "-  OK  - Location '" + location + "' obtained for an attribute with metadata '"
+                    + attrMetadataStr + "' and value '" + attrValue + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "- FAIL - Location '" + location + "' obtained for an attribute with metadata '"
+                    + attrMetadataStr + "' and value '" + attrValue + "'");
+            throw e;
+        } // try catch
+    } // testGetLocationMetadata
+    
+    /**
+     * [NGSIUtils.getLocation] -------- When getting a location, the original attribute is returned when the
+     * attribute type is not geo:point and there is no WGS84 location metadata.
+     */
+    @Test
+    public void testGetLocationNoGeolocation() {
+        System.out.println(getTestTraceHead("[Utils.getLocation]")
+                + "-------- When getting a location, the original attribute is returned when the attribute "
+                + "type is not geo:point and there is no WGS84 location metadata");
+        String attrMetadataStr = "[]";
+        String attrValue = "-3.7167, 40.3833";
+        String attrType = "coordinates";
+        boolean flipCoordinates = false; // irrelevant for this test
+        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+
+        try {
+            assertEquals(attrValue, location);
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "-  OK  - Location '" + location + "' obtained for a not geolocated attribute");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "- FAIL - Location '" + location + "' obtained for a not geolocated attribute");
+            throw e;
+        } // try catch
+    } // testGetLocationNoGeolocation
     
 } // NGSIUtilsTest
