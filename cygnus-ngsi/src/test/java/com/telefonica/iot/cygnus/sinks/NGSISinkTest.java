@@ -18,7 +18,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;

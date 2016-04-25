@@ -20,7 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
@@ -208,7 +208,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 // check if the metadata contains a TimeInstant value; use the notified reception time instead
                 Long recvTimeTs;
 
-                Long timeInstant = NGSIUtils.getTimeInstant(attrMetadata);
+                Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
 
                 if (timeInstant != null) {
                     recvTimeTs = timeInstant;

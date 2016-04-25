@@ -18,9 +18,9 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
+import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -34,7 +34,6 @@ import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
@@ -81,7 +80,7 @@ public class NGSIRestHandlerTest {
         when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json");
         when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
         when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
-        notification = TestUtils.createNotification();
+        notification = CommonUtilsForTests.createNotification();
         when(mockHttpServletRequest.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
                         notification.toJSONString().getBytes()))));
