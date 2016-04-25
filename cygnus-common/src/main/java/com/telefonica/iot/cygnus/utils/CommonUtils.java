@@ -15,7 +15,6 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.utils;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -33,7 +32,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -46,14 +44,9 @@ import org.json.simple.parser.ParseException;
  *
  * @author frb
  */
-public final class Utils {
+public final class CommonUtils {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(Utils.class);
-    private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
-    private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
-    private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
-    private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[\\/\\\\.\\$\" ]");
-    private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("\\$");
+    private static final CygnusLogger LOGGER = new CygnusLogger(CommonUtils.class);
     private static final DateTimeFormatter FORMATTER1 = DateTimeFormat.forPattern(
             "yyyy-MM-dd'T'HH:mm:ss'Z'").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER2 = DateTimeFormat.forPattern(
@@ -66,55 +59,8 @@ public final class Utils {
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
      */
-    private Utils() {
-    } // Utils
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-' and '.').
-     * This should be only called when building a persistence element name, such as table names, file paths, etc.
-     * 
-     * @param in
-     * @param deleteSlash
-     * @param encodeSlash
-     * @return The encoded version of the input string.
-     */
-    public static String encode(String in, boolean deleteSlash, boolean encodeSlash) {
-        if (deleteSlash) {
-            return ENCODEPATTERN.matcher(in.substring(1)).replaceAll("_");
-        } else if (encodeSlash) {
-            return ENCODEPATTERN.matcher(in).replaceAll("_");
-        } else {
-            return ENCODEPATTERNSLASH.matcher(in).replaceAll("_");
-        } // if else
-    } // encode
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    public static String encodeHive(String in) {
-        return ENCODEHIVEPATTERN.matcher(in).replaceAll("_").toLowerCase();
-    } // encodeHive
-    
-    /**
-     * Encodes a string replacing all '/', '\', '.', ' ', '"' and '$' by '_'.
-     * @param in
-     * @return The encoded version of the input string
-     */
-    public static String encodeSTHDB(String in) {
-        return ENCODESTHDBPATTERN.matcher(in).replaceAll("_");
-    } // encodeSTHDB
-    
-    /**
-     * Encodes a string replacing all '$' by '_'.
-     * @param in
-     * @return The encoded version of the input string
-     */
-    public static String encodeSTHCollection(String in) {
-        return ENCODESTHCOLLECTIONPATTERN.matcher(in).replaceAll("_");
-    } // encodeSTHCollection
+    private CommonUtils() {
+    } // CommonUtils
     
     /**
      * Encodes a string from an ArrayList.
@@ -140,7 +86,7 @@ public final class Utils {
      * @return The Cygnus version
      */
     public static String getCygnusVersion() {
-        InputStream stream = Utils.class.getClassLoader().getResourceAsStream("pom.properties");
+        InputStream stream = CommonUtils.class.getClassLoader().getResourceAsStream("pom.properties");
         
         if (stream == null) {
             return "UNKNOWN";
@@ -162,7 +108,7 @@ public final class Utils {
      * @return The hash regarding the last Git commit.
      */
     public static String getLastCommit() {
-        InputStream stream = Utils.class.getClassLoader().getResourceAsStream("last_git_commit.txt");
+        InputStream stream = CommonUtils.class.getClassLoader().getResourceAsStream("last_git_commit.txt");
         
         if (stream == null) {
             return "UNKNOWN";
@@ -245,6 +191,24 @@ public final class Utils {
         return true;
     } // isANumber
     
+    /**
+     * Gets a string reprensentation of a given data model.
+     * @param dataModel
+     * @return The string representation of the given data model
+     */
+    public static String getStrDataModel(Enums.DataModel dataModel) {
+        switch(dataModel) {
+            case DMBYSERVICEPATH:
+                return "dm-by-service-path";
+            case DMBYENTITY:
+                return "dm-by-entity";
+            case DMBYATTRIBUTE:
+                return "dm-by-attribute";
+            default:
+                return null;
+        } // switch
+    } // getStrDataModel
+        
     /**
      * Gets the timestamp within a TimeInstant metadata, if exists.
      * @param metadata
@@ -329,23 +293,5 @@ public final class Utils {
         
         return res;
     } // getTimeInstant
-    
-    /**
-     * Gets a string reprensentation of a given data model.
-     * @param dataModel
-     * @return The string representation of the given data model
-     */
-    public static String getStrDataModel(Enums.DataModel dataModel) {
-        switch(dataModel) {
-            case DMBYSERVICEPATH:
-                return "dm-by-service-path";
-            case DMBYENTITY:
-                return "dm-by-entity";
-            case DMBYATTRIBUTE:
-                return "dm-by-attribute";
-            default:
-                return null;
-        } // switch
-    } // getStrDataModel
-        
-} // Utils
+
+} // CommonUtils
