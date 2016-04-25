@@ -33,7 +33,7 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -193,8 +193,8 @@ public class ManagementInterface extends AbstractHandler {
     private void handleGetVersion(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("{\"success\":\"true\",\"version\":\"" + Utils.getCygnusVersion()
-                + "." + Utils.getLastCommit() + "\"}");
+        response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
+                + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
 
     private void handleGetStats(HttpServletResponse response) throws IOException {
@@ -238,7 +238,7 @@ public class ManagementInterface extends AbstractHandler {
 
             if (handler instanceof CygnusHandler) {
                 CygnusHandler ch = (CygnusHandler) handler;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(ch.getBootTime(), true) + "\","
+                jsonStr += "\"setup_time\":\"" + CommonUtils.getHumanReadable(ch.getBootTime(), true) + "\","
                         + "\"num_received_events\":" + ch.getNumReceivedEvents() + ","
                         + "\"num_processed_events\":" + ch.getNumProcessedEvents() + "}";
             } else {
@@ -264,7 +264,7 @@ public class ManagementInterface extends AbstractHandler {
 
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cc = (CygnusChannel) channel;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(cc.getSetupTime(), true) + "\","
+                jsonStr += "\"setup_time\":\"" + CommonUtils.getHumanReadable(cc.getSetupTime(), true) + "\","
                         + "\"num_events\":" + cc.getNumEvents() + ","
                         + "\"num_puts_ok\":" + cc.getNumPutsOK() + ","
                         + "\"num_puts_failed\":" + cc.getNumPutsFail() + ","
@@ -317,7 +317,7 @@ public class ManagementInterface extends AbstractHandler {
 
             if (sink instanceof CygnusSink) {
                 CygnusSink cs = (CygnusSink) sink;
-                jsonStr += "\"setup_time\":\"" + Utils.getHumanReadable(cs.getSetupTime(), true) + "\","
+                jsonStr += "\"setup_time\":\"" + CommonUtils.getHumanReadable(cs.getSetupTime(), true) + "\","
                         + "\"num_processed_events\":" + cs.getNumProcessedEvents() + ","
                         + "\"num_persisted_events\":" + cs.getNumPersistedEvents() + "}";
             } else {

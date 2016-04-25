@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.backends.kafka;
 
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Level;
