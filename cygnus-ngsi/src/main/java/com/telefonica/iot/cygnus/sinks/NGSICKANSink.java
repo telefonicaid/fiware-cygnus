@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
@@ -320,7 +321,7 @@ public class NGSICKANSink extends NGSISink {
 
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(NGSIConstants.EMPTY_MD)) {
+                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
                     record += ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata + "}";
                 } else {
                     record += "}";
@@ -386,7 +387,7 @@ public class NGSICKANSink extends NGSISink {
 
                 // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
                 // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(NGSIConstants.EMPTY_MD)) {
+                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
                     record += ",\"" + attrName + "_md\": " + attrMetadata;
                 } // if
             } // for
@@ -434,9 +435,9 @@ public class NGSICKANSink extends NGSISink {
     private String buildOrgName(String fiwareService) throws Exception {
         String orgName = NGSIUtils.encode(fiwareService, false, true);
 
-        if (orgName.length() > NGSIConstants.MAX_NAME_LEN) {
+        if (orgName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
-                    + "greater than " + NGSIConstants.MAX_NAME_LEN);
+                    + "greater than " + CommonConstants.MAX_NAME_LEN);
         } // if
 
         return orgName;
@@ -459,9 +460,9 @@ public class NGSICKANSink extends NGSISink {
             pkgName = NGSIUtils.encode(fiwareService, false, true) + NGSIUtils.encode(fiwareServicePath, false, true);
         } // if else
 
-        if (pkgName.length() > NGSIConstants.MAX_NAME_LEN) {
+        if (pkgName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
-                    + ") and its length is greater than " + NGSIConstants.MAX_NAME_LEN);
+                    + ") and its length is greater than " + CommonConstants.MAX_NAME_LEN);
         } // if
 
         return pkgName;
@@ -476,9 +477,9 @@ public class NGSICKANSink extends NGSISink {
     private String buildResName(String destination) throws Exception {
         String resName = NGSIUtils.encode(destination, false, true);
 
-        if (resName.length() > NGSIConstants.MAX_NAME_LEN) {
+        if (resName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
-                    + "than " + NGSIConstants.MAX_NAME_LEN);
+                    + "than " + CommonConstants.MAX_NAME_LEN);
         } // if
 
         return resName;

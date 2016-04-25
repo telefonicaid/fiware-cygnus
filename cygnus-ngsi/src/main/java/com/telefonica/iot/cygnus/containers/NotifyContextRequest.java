@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.containers;
 
 import com.google.gson.JsonElement;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 
@@ -276,11 +277,11 @@ public class NotifyContextRequest {
          */
         public String getContextMetadata() {
             if (metadatas == null) {
-                return NGSIConstants.EMPTY_MD;
+                return CommonConstants.EMPTY_MD;
             } // if
             
             if (metadatas.isEmpty()) {
-                return NGSIConstants.EMPTY_MD;
+                return CommonConstants.EMPTY_MD;
             } // if
             
             String res = "[";
