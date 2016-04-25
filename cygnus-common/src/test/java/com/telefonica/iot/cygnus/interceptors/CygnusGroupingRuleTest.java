@@ -17,12 +17,11 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import static com.telefonica.iot.cygnus.utils.TestUtils.getTestTraceHead;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;

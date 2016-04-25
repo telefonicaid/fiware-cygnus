@@ -23,7 +23,7 @@ import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Utils;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
