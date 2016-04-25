@@ -97,7 +97,7 @@ function copy_cygnus_conf() {
     rm -rf {RPM_SOURCE_DIR}/config 
     mkdir -p ${RPM_SOURCE_DIR}/config
     cp ${BASE_DIR}/conf/* ${RPM_SOURCE_DIR}/config/ # templates are copied
-    cp ${BASE_DIR}/conf/log4j.properties.template ${RPM_SOURCE_DIR}/config/log4j.properties # log4j is effectively templated
+    cp ${BASE_DIR}/../cygnus-common/conf/log4j.properties.template ${RPM_SOURCE_DIR}/config/log4j.properties # log4j is effectively templated
 }
 
 function clean_up_previous_builds() {
