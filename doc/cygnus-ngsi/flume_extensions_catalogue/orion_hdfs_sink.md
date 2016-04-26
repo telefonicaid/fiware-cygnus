@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionHDFSSink
+#<a name="top"></a>NGSIHDFSSink
 Content:
 
 * [Functionality](#section1)
@@ -14,13 +14,13 @@ Content:
         * [About the binary backend](#section2.3.2)
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
-    * [`OrionHDFSSink` class](#section3.1)
+    * [`NGSIHDFSSink` class](#section3.1)
     * [`HDFSBackendImpl` class](#section3.2)
     * [OAuth2 authentication](#section3.3)
     * [Kerberos authentication](#section3.4)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionHDFSSink`, or simply `OrionHDFSSink` is a sink designed to persist NGSI-like context data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIHDFSSink`, or simply `NGSIHDFSSink` is a sink designed to persist NGSI-like context data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
@@ -31,12 +31,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to HDFS data structures
-[HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `OrionHDFSSink` each time a Flume event is going to be persisted.
+[HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `NGSIHDFSSink` each time a Flume event is going to be persisted.
 
 According to the [naming conventions](./naming_conventions.md), a folder named `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<hdfs_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
 
@@ -78,7 +78,7 @@ The context attributes within each context response/entity are iterated, and a o
 [Top](#top)
 
 ###<a name="section1.3"></a>Hive
-A special feature regarding HDFS persisted data is the posssibility to exploit it through Hive, a SQL-like querying system. `OrionHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
+A special feature regarding HDFS persisted data is the posssibility to exploit it through Hive, a SQL-like querying system. `NGSIHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
 
 The fields regarding each data row match the fields of the JSON documents/CSV records appended to the HDFS files. In the case of JSON, they are deserialized by using a [JSON serde](https://github.com/rcongiu/Hive-JSON-Serde). In the case of CSV they are deserialized by the delimiter fields specified in the table creation.
 
@@ -118,24 +118,24 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `batch_size=1`, `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then `OrionHDFSSink` will persist the data within the body as:
+Assuming `batch_size=1`, `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
     {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
 
-If `file_format=json-colum` then `OrionHDFSSink` will persist the data within the body as:
+If `file_format=json-colum` then `NGSIHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     {"recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
 
-If `file_format=csv-row` then `OrionHDFSSink` will persist the data within the body as:
+If `file_format=csv-row` then `NGSIHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
     1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
 
-If `file_format=csv-column` then `OrionHDFSSink` will persist the data within the body as:
+If `file_format=csv-column` then `NGSIHDFSSink` will persist the data within the body as:
 
     $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
     2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
@@ -178,11 +178,11 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionHDFSSink` is configured through the following parameters:
+`NGSIHDFSSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionHDFSSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -216,7 +216,7 @@ A configuration example could be:
     cygnusagent.sinks = hdfs-sink
     cygnusagent.channels = hdfs-channel
     ...
-    cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
+    cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
     cygnusagent.sinks.hdfs-sink.enable_lowercase = false
@@ -243,7 +243,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use `OrionHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
+Use `NGSIHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
 
 For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, FIWARE Comet or MySQL (Cygnus provides sinks for them, as well).
 
@@ -270,19 +270,19 @@ There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `OrionHDFSSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIHDFSSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `OrionHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionHDFSSink` class
-As any other NGSI-like sink, `OrionHDFSSink` extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSIHDFSSink` class
+As any other NGSI-like sink, `NGSIHDFSSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -290,7 +290,7 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
 
     public void start();
 
-An implementation of `HDFSBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionHDFSSink()` (contructor), `configure()` and `start()`.
+An implementation of `HDFSBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIHDFSSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
@@ -364,7 +364,7 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 [Top](#top)
 
 ####`conf/cygnus.conf`
-This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `OrionHDFSSink` configuration:
+This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
     cygnusagent.sinks.hdfs-sink.krb5_auth = true

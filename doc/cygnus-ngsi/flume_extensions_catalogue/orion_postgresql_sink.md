@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionPostgreSQLSink
+#<a name="top"></a>NGSIPostgreSQLSink
 Content:
 
 * [Functionality](#section1)
@@ -13,12 +13,12 @@ Content:
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
-    * [`OrionPostgreSQLSink` class](#section3.1)
+    * [`NGSIPostgreSQLSink` class](#section3.1)
     * [`PostgreSQLBackendImpl` class](#section3.2)
     * [Authentication and authorization](#section3.3)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionPostgreSQLSink`, or simply `OrionPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific PostgreSQL data structures.
 
@@ -29,12 +29,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to PostgreSQL data structures
-PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `OrionPostgreSQLSink` each time a Flume event is going to be persisted.
+PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreSQLSink` each time a Flume event is going to be persisted.
 
 Previous to any operation with PostgreSQL you need to create the database to be used.
 
@@ -99,7 +99,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `postgresql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionPostgreSQLSink` will persist the data within the body as:
+Assuming `postgresql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIPostgreSQLSink` will persist the data within the body as:
 
     $ psql -U myuser
     psql (9.5.0)
@@ -140,11 +140,11 @@ NOTES:
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionPostgreSQLSink` is configured through the following parameters:
+`NGSIPostgreSQLSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -164,7 +164,7 @@ A configuration example could be:
     cygnusagent.sinks = postgresql-sink
     cygnusagent.channels = postgresql-channel
     ...
-    cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
+    cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
     cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
     cygnusagent.sinks.postgresql-sink.enable_grouping = false
     cygnusagent.sinks.postgresql-sink.enable_lowercase = false
@@ -182,7 +182,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use `OrionPostgreSQLSink` if you are looking for a big database with several tenants. PostgreSQL is bad at having several databases, but very good at having different schemas.
+Use `NGSIPostgreSQLSink` if you are looking for a big database with several tenants. PostgreSQL is bad at having several databases, but very good at having different schemas.
 
 [Top](#top)
 
@@ -204,19 +204,19 @@ In addition, when running in `column` mode, due to the number of notified attrib
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `OrionPostgreSQLSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIPostgreSQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same PostgreSQL table. If processing the events one by one, we would need 100 inserts into PostgreSQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination PostgreSQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different PostgreSQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `OrionPostgreSQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIPostgreSQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionPostgreSQLSink` class
-As any other NGSI-like sink, `OrionPostgreSQLSink` extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSIPostgreSQLSink` class
+As any other NGSI-like sink, `NGSIPostgreSQLSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -224,7 +224,7 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
 
     public void start();
 
-An implementation of `PostgreSQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionPostgreSQLSink()` (contructor), `configure()` and `start()`.
+An implementation of `PostgreSQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIPostgreSQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
@@ -250,6 +250,6 @@ Persists the accumulated context data (in the form of the given field values) re
 [Top](#top)
 
 ###<a name="section3.3"></a>Authentication and authorization
-Current implementation of `OrionPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
+Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
 
 [Top](#top)

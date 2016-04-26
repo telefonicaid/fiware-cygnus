@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionMongoSink
+#<a name="top"></a>NGSIMongoSink
 Content:
 
 * [Functionality](#section1)
@@ -14,11 +14,11 @@ Content:
          * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
          * [Databases and collections encoding details](#section2.3.4)
 * [Programmers guide](#section3)
-    * [`OrionMongoSink` class](#section3.1)
+    * [`NGSIMongoSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionMongoSink`, or simply `OrionMongosink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIMongoSink`, or simply `NGSIMongoSink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
@@ -29,12 +29,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
-MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionMongoSink` each time a Flume event is going to be persisted.
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a Flume event is going to be persisted.
 
 A database called as the `fiware-service` header value within the event is created (if not existing yet).
 
@@ -79,7 +79,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
     }
 
 According to different combinations of the parameters `datamodel` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
-Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionMongoSink` will persist the data within the body as:
+Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -98,7 +98,7 @@ Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-e
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
 
-If `data_model=dm-by-entity` and `attr_persistence=column` then `OrionMongoSink` will persist the data within the body as:
+If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -116,7 +116,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `OrionMongoSink`
     > db['sth_/4wheels_car1_car'].find()
     {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
 
-If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
+If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -140,7 +140,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMongoSi
 Note: The first two documents were generated by the above flume-event, while the last two documents (`"entityId" : "car2"`) were originated by another event (not shown here).
 We have left these documents in order to show that the same collection stores data of different entities, unlike what it happens with other value of `data_model` parameter.
 
-Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then `OrionMongoSink` will persist the data as:
+Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -158,7 +158,7 @@ Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then
     > db['sth_/4wheels'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db86"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "speed" : "112.9", "oil_level" : "74.6" }
 
-If `data_model=dm-by-attribute` and `attr_persistence=row` then `OrionMongoSink` will persist the data as:
+If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -179,13 +179,13 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `OrionMongoSink`
     > db['sth_/4wheels_car1_oil_level'].find()
      { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
 
-Finally, the pair of parameters `data_model=dm-by-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. In this case, in fact, `OrionMongoSink` will not persist anything; only a warning will be logged.
+Finally, the pair of parameters `data_model=dm-by-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. In this case, in fact, `NGSIMongoSink` will not persist anything; only a warning will be logged.
 
 NOTES:
 
 * `mongo` is the MongoDB CLI for querying the data.
 * `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
-* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `NGSIRestHandler`.
 
 NOTE: `mongo` is the MongoDB CLI for querying the data.
 
@@ -193,11 +193,11 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionMongoSink` is configured through the following parameters:
+`NGSIMongoSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionMongoSink |
+| type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSIMongoSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -222,7 +222,7 @@ A configuration example could be:
     cygnusagent.sinks = mongo-sink
     cygnusagent.channels = mongo-channel
     ...
-    cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+    cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
     cygnusagent.sinks.mongo-sink.channel = mongo-channel
     cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
     cygnusagent.sinks.mongo-sink.attr_persistence = column
@@ -246,7 +246,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a neme="section2.2"></a>Use cases
-Use `OrionMongoSink` if you are looking for a Json-based document storage not growing so much in the mid-long term.
+Use `NGSIMongoSink` if you are looking for a Json-based document storage not growing so much in the mid-long term.
 
 [Top](#top)
 
@@ -259,23 +259,23 @@ In case of using hashes as part of the collection names and to let the user or d
 [Top](#top)
 
 ####<a name="section2.3.2"></a>About batching
-As explained in the [programmers guide](#section3), `OrionMongoSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIMongoSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `OrionMongoSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIMongoSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
 ###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
-By default, `OrionMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+By default, `NGSIMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
 ###<a name="section2.3.4"></a>Databases and collections encoding details
-`OrionMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+`NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 * Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
 * Collections names will have the characters `$` encoded as `_`.
@@ -283,8 +283,8 @@ By default, `OrionMongoSink` stores the notification reception timestamp. Nevert
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionSTHSink` class
-`OrionMongoSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSISTHSink` class
+`NGSIMongoSink` extends `NGSIMongoBaseSink`, which as any other NGSI-like sink, extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -292,7 +292,7 @@ A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsi
 
     public void start();
 
-An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMongoSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIMongoSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 

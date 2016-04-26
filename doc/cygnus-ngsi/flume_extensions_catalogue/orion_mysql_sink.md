@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionMySQLSink
+#<a name="top"></a>NGSIMySQLSink
 Content:
 
 * [Functionality](#section1)
@@ -13,12 +13,12 @@ Content:
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
-    * [`OrionMySQLSink` class](#section3.1)
+    * [`NGSIMySQLSink` class](#section3.1)
     * [`MySQLBackendImpl` class](#section3.2)
     * [Authentication and authorization](#section3.3)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionMySQLSink`, or simply `OrionMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIMySQLSink`, or simply `NGSIMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific MySQL data structures.
 
@@ -29,12 +29,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to MySQL data structures
-MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `OrionMySQLSink` each time a Flume event is going to be persisted.
+MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `NGSIMySQLSink` each time a Flume event is going to be persisted.
 
 According to the [naming conventions](./naming_conventions.md), a database named as the `fiware-service` header value within the event is created (if not existing yet).
 
@@ -97,7 +97,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `OrionMySQLSink` will persist the data within the body as:
+Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password:
@@ -134,7 +134,7 @@ Assuming `mysql_username=myuser`, `data_model=dm-by-entity` and `attr_persistenc
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
-If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-entity` and `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password:
@@ -170,7 +170,7 @@ If `data_model=dm-by-entity` and `attr_persistence=colum` then `OrionMySQLSink` 
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     1 row in set (0.00 sec)
 
-If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password:
@@ -207,7 +207,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=row` then `OrionMySQLSi
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
-If `data_model=dm-by-service-path` and `attr_persistence=colum` then `OrionMySQLSink` will persist the data within the body as:
+If `data_model=dm-by-service-path` and `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within the body as:
 
     $ mysql -u myuser -p
     Enter password:
@@ -252,11 +252,11 @@ NOTES:
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionMySQLSink` is configured through the following parameters:
+`NGSIMySQLSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionMySQLSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIMySQLSink</i> |
 | channel | yes | N/A ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -275,7 +275,7 @@ A configuration example could be:
     cygnusagent.sinks = mysql-sink
     cygnusagent.channels = mysql-channel
     ...
-    cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
+    cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
     cygnusagent.sinks.mysql-sink.enable_grouping = false
     cygnusagent.sinks.mysql-sink.enable_lowercase = false
@@ -292,7 +292,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use `OrionMySQLSink` if you are looking for a database storage not growing so much in the mid-long term.
+Use `NGSIMySQLSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 [Top](#top)
 
@@ -314,19 +314,19 @@ In addition, when running in `column` mode, due to the number of notified attrib
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `OrionMySQLSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIMySQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MySQL table. If processing the events one by one, we would need 100 inserts into MySQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MySQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different MySQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `OrionMySQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIMySQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionMySQLSink` class
-As any other NGSI-like sink, `OrionMySQLSink` extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSIMySQLSink` class
+As any other NGSI-like sink, `NGSIMySQLSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -334,7 +334,7 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
 
     public void start();
 
-An implementation of `MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionMySQLSink()` (contructor), `configure()` and `start()`.
+An implementation of `MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIMySQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
@@ -360,6 +360,6 @@ Persists the accumulated context data (in the form of the given field values) re
 [Top](#top)
 
 ###<a name="section3.3"></a>Authentication and authorization
-Current implementation of `OrionMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
+Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
 
 [Top](#top)

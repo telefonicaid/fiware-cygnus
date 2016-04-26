@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionSTHSink
+#<a name="top"></a>NGSISTHSink
 Content:
 
 * [Functionality](#section1)
@@ -14,11 +14,11 @@ Content:
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
         * [Databases and collections encoding details](#section2.3.4)
 * [Implementation details](#section3)
-    * [`OrionSTHSink` class](#section3.1)
+    * [`NGSISTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionSTHSink`, or simply `OrionSTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
+`com.iot.telefonica.cygnus.sinks.NGSISTHSink`, or simply `NGSISTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
 
 * For numeric attribute values:
     * Sum of all the samples.
@@ -40,12 +40,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
-MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `OrionSTHSink` each time a Flume event is going to be persisted.
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSISTHSink` each time a Flume event is going to be persisted.
 
 A database called as the `fiware-service` header value within the event is created (if not existing yet).
 
@@ -89,7 +89,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=false` as configuration parameters, then `OrionSTHSink` will persist the data within the body as:
+Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=false` as configuration parameters, then `NGSISTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -210,17 +210,17 @@ NOTES:
 
 * `mongo` is the MongoDB CLI for querying the data.
 * `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
-* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `OrionRESTHandler`.
+* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `NGSIRestHandler`.
 
 [Top](#top)
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionSTHSink` is configured through the following parameters:
+`NGSISTHSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | com.telefonica.iot.cygnus.sinks.OrionSTHSink |
+| type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -242,7 +242,7 @@ A configuration example could be:
     cygnusagent.sinks = sth-sink
     cygnusagent.channels = sth-channel
     ...
-    cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
+    cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
     cygnusagent.sinks.sth-sink.channel = sth-channel
     cygnusagent.sinks.sth-sink.enable_grouping = false
     cygnusagent.sinks.sth-sink.enable_lowercase = false
@@ -262,7 +262,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use `OrionSTHSink` if you are looking for a Json-based document storage about aggregated data not growing so much in the mid-long term.
+Use `NGSISTHSink` if you are looking for a Json-based document storage about aggregated data not growing so much in the mid-long term.
 
 [Top](#top)
 
@@ -275,23 +275,23 @@ In case of using hashes as part of the collection names and to let the user or d
 [Top](#top)
 
 ###<a name="section2.3.2"></a>About batching
-Despite `OrionSTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
+Despite `NGSISTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
 
 Nevertheless, FIWARE Comet storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of FIWARE Comet (sum, sum2, max and min).
 
 The problem with such an approach (updates versus inserts) is there is no operation in the Mongo API enabling the update of a batch. As much, there exists a `updateMany` operation, but it is about updating many collections with a single data (the updated collections are those matching the given query).
 
-Thus, `OrionSTHSink` does not implement a real batching mechanism as usual. Please observe the batching accumulation is still valid, since many events may be accumulated and processed at the same time, even in the case of configuring a batch size of 1, a single notification may include several context elements. The difference with regard to the other sinks is the events within the batch will be processed one by one after all.
+Thus, `NGSISTHSink` does not implement a real batching mechanism as usual. Please observe the batching accumulation is still valid, since many events may be accumulated and processed at the same time, even in the case of configuring a batch size of 1, a single notification may include several context elements. The difference with regard to the other sinks is the events within the batch will be processed one by one after all.
 
 [Top](#top)
 
 ###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
-By default, `OrionSTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
+By default, `NGSISTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
 ###<a name="section2.3.4"></a>Databases and collections encoding details
-`OrionMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+`NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 * Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
 * Collections names will have the characters `$` encoded as `_`.
@@ -299,8 +299,8 @@ By default, `OrionSTHSink` stores the notification reception timestamp. Neverthe
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionSTHSink` class
-`OrionSTHSink` extends `OrionMongoBaseSink`, which as any other NGSI-like sink, extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSISTHSink` class
+`NGSISTHSink` extends `NGSIMongoBaseSink`, which as any other NGSI-like sink, extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
@@ -308,7 +308,7 @@ A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsi
 
     public void start();
 
-An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionSTHSink()` (contructor), `configure()` and `start()`.
+An implementation of `MongoBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSISTHSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
