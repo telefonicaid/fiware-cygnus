@@ -80,7 +80,7 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    public JsonResponse getSubscriptionsV2byId(String token, 
+    public JsonResponse getSubscriptionsByIdV2(String token, 
             String subscriptionId) throws Exception;
     
 } // StatsBackend
