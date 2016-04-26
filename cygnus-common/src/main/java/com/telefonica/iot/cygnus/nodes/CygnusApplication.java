@@ -211,7 +211,9 @@ public class CygnusApplication extends Application {
             
             if (commandLine.hasOption('g')) {
                 guiPort = new Integer(commandLine.getOptionValue('g'));
-            } // if
+            } else {
+                guiPort = 0;
+            } // if else
             
             int pollingInterval = DEF_POLLING_INTERVAL;
             
