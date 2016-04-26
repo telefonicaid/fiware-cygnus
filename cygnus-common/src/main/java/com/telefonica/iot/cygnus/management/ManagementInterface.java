@@ -132,6 +132,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetGroupingRules(response);
                 } else if (uri.equals("/admin/log")) {
                     handleGetAdminLog(response);
+                } else if (uri.equals("/v1/subscriptions")) {
+                    handleGetSubscriptions(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -392,7 +394,152 @@ public class ManagementInterface extends AbstractHandler {
             response.getWriter().println("{\"success\":\"false\",\"error\":\"" + e.getMessage() + "\"}");
             LOGGER.info(e.getMessage());
         } // try catch
+        
     } // handleGetAdminLog
+    
+    private void handleGetSubscriptions (HttpServletRequest request, 
+            HttpServletResponse response) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        // get the parameters to be updated
+        String ngsiVersion = request.getParameter("ngsi_version");
+        String subscriptionID = request.getParameter("subscription_id");
+        
+        if (ngsiVersion == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (ngsi_version). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (ngsi_version). Check it for errors.");
+            return;
+        } else if (ngsiVersion.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (ngsi_version). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (ngsi_version). Check it for errors.");
+            return;
+        } 
+        
+        if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, invalid parameter (ngsi_version): "
+                + "Must be 1 or 2. Check it for errors.\"}");
+            LOGGER.error("Parse error, invalid parameter (ngsi_version): "
+                + "Must be 1 or 2. Check it for errors.");
+            return;
+        }
+        
+        if (subscriptionID == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (subscription_id). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (subscription_id). Check it for errors.");
+            return;
+        } else if (subscriptionID.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
+            return; 
+        }
+        
+        if (ngsiVersion.equals("1")) {
+            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"GET /v1/subscriptions not implemented.\"}");
+            LOGGER.error("GET /v1/subscriptions not implemented.");
+            return;
+        }
+        
+        BufferedReader reader = request.getReader();
+        String endpointStr = "";
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            endpointStr += line;
+        } // while
+
+        reader.close();
+        
+        // Create a Gson object parsing the Json string
+        Gson gson = new Gson();
+        OrionEndpoint endpoint;
+        
+        try {
+            endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+        } catch (JsonSyntaxException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"}");
+            LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
+            return;
+        } // try catch
+                       
+        // check if the endpoint are valid
+        int err;
+        
+        if (endpoint != null) {
+            err = endpoint.isValid();
+        } else {
+            // missing entire endpoint -> missing endpoint (code nº21)
+            err = 21;
+        } // if else
+        
+        if (err > 0) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            try {
+                manageErrorMsg(err, response);
+                return;
+            } // if
+            catch (Exception e) {
+                Logger.getLogger(e.getMessage());
+            } // try catch
+            
+        } // if
+        
+        LOGGER.debug("Valid Endpoint. Creating request to Orion.");
+        
+        // get host, port and ssl for request
+        String host = endpoint.getHost();
+        String port = endpoint.getPort();
+        boolean ssl = Boolean.valueOf(endpoint.getSsl());
+        String token = endpoint.getAuthToken();
+
+        // Create a orionBackend for request
+        orionBackend = new OrionBackendImpl(host, port, ssl);
+        
+        try {
+            
+            int status = -1;
+            JSONObject orionJson = new JSONObject();
+            
+            JsonResponse orionResponse = orionBackend.
+            getSubscriptionsByIdV2(token, subscriptionID);
+            
+            if (orionResponse != null) {
+                orionJson = orionResponse.getJsonObject();
+                status = orionResponse.getStatusCode();
+            } // if
+
+            LOGGER.debug("Status code got: " + status);
+            
+            if (status == 200) {
+                response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                LOGGER.debug("Subscription received: " + orionJson.toJSONString());
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+            } // if else
+            
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + e.getMessage() + "}");
+        } // try catch
+        
+    } // handleGetSubscriptions
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
