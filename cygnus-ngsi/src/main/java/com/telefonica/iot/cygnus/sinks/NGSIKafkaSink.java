@@ -22,7 +22,7 @@ import com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.I0Itec.zkclient.ZkClient;
@@ -150,73 +150,73 @@ public class NGSIKafkaSink extends NGSISink {
     } // persistBatch
     
     protected String buildTopicName(String service, String servicePath,
-            String entity, String attribute) throws Exception {
-            String name;
+        String entity, String attribute) throws Exception {
+        String name;
 
-            switch (dataModel) {
-                case DMBYSERVICE:
+        switch (dataModel) {
+            case DMBYSERVICE:
+                name = NGSIUtils.encode(service, false, true);
+                break;
+            case DMBYSERVICEPATH:
+                if (servicePath.equals("/")) {
                     name = NGSIUtils.encode(service, false, true);
                     break;
-                case DMBYSERVICEPATH:
-                    if (servicePath.equals("/")) {
-                        name = NGSIUtils.encode(service, false, true);
-                        break;
-                    } else if (servicePath.startsWith("/")) {
-                        name =  NGSIUtils.encode(service, false, true) + "_" 
-                                + NGSIUtils.encode(servicePath, true, false);
-                        break;
-                    } else {
-                        // Impossible to reach this case
-                        throw new CygnusBadConfiguration("Service path must be"
-                                + "'/' or must start with '/'");
-                    } // if else if
-                
-                case DMBYENTITY:
-                    if (servicePath.equals("/")) {
-                        name = NGSIUtils.encode(service, false, true) + "_" 
-                                + NGSIUtils.encode(entity, false, true);
-                        break;
-                    } else if (servicePath.startsWith("/")) {
-                        name = NGSIUtils.encode(service, false, true) + "_" 
-                                + NGSIUtils.encode(servicePath, true, false) + "_" 
-                                + NGSIUtils.encode(entity, false, true);
-                        break;
-                    } else {
-                        // Impossible to reach this case
-                        throw new CygnusBadConfiguration("Service path must be"
-                                + "'/' or must start with '/'");
-                    } // if else if
+                } else if (servicePath.startsWith("/")) {
+                    name =  NGSIUtils.encode(service, false, true) + "_"
+                            + NGSIUtils.encode(servicePath, true, false);
+                    break;
+                } else {
+                    // Impossible to reach this case
+                    throw new CygnusBadConfiguration("Service path must be"
+                            + "'/' or must start with '/'");
+                } // if else if
 
-                case DMBYATTRIBUTE:
-                    if (servicePath.equals("/")) {
-                        name = NGSIUtils.encode(service, false, true) + "_" 
-                                + NGSIUtils.encode(entity, false, true) + "_" 
-                                + NGSIUtils.encode(attribute, false, true);
-                        break;
-                    } else if (servicePath.startsWith("/")) {
-                        name = NGSIUtils.encode(service, false, true) + "_"
-                                + NGSIUtils.encode(servicePath, true, false) + "_"
-                                + NGSIUtils.encode(entity, false, true) + "_"
-                                + NGSIUtils.encode(attribute, false, true);
-                        break;
-                    } else {
-                        // Impossible to reach this case
-                        throw new CygnusBadConfiguration("Service path must be"
-                                + "'/' or must start with '/'");
-                    } // if else if
+            case DMBYENTITY:
+                if (servicePath.equals("/")) {
+                    name = NGSIUtils.encode(service, false, true) + "_"
+                            + NGSIUtils.encode(entity, false, true);
+                    break;
+                } else if (servicePath.startsWith("/")) {
+                    name = NGSIUtils.encode(service, false, true) + "_"
+                            + NGSIUtils.encode(servicePath, true, false) + "_"
+                            + NGSIUtils.encode(entity, false, true);
+                    break;
+                } else {
+                    // Impossible to reach this case
+                    throw new CygnusBadConfiguration("Service path must be"
+                            + "'/' or must start with '/'");
+                } // if else if
 
-                default:
-                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
-            } // switch
+            case DMBYATTRIBUTE:
+                if (servicePath.equals("/")) {
+                    name = NGSIUtils.encode(service, false, true) + "_"
+                            + NGSIUtils.encode(entity, false, true) + "_"
+                            + NGSIUtils.encode(attribute, false, true);
+                    break;
+                } else if (servicePath.startsWith("/")) {
+                    name = NGSIUtils.encode(service, false, true) + "_"
+                            + NGSIUtils.encode(servicePath, true, false) + "_"
+                            + NGSIUtils.encode(entity, false, true) + "_"
+                            + NGSIUtils.encode(attribute, false, true);
+                    break;
+                } else {
+                    // Impossible to reach this case
+                    throw new CygnusBadConfiguration("Service path must be"
+                            + "'/' or must start with '/'");
+                } // if else if
 
-            if (name.length() > NGSIConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building topic name '" + name
-                        + "' and its length is greater than " + NGSIConstants.MAX_NAME_LEN);
-            } // if
+            default:
+                throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                        + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+        } // switch
 
-            return name;
-        } // buildTopic
+        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building topic name '" + name
+                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildTopic
 
     /**
      * Class for aggregating aggregation.
@@ -279,8 +279,8 @@ public class NGSIKafkaSink extends NGSISink {
 
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
-        String topicName = buildTopicName(aggregator.getService(), 
-                aggregator.getServicePath(), aggregator.getEntity(), 
+        String topicName = buildTopicName(aggregator.getService(),
+                aggregator.getServicePath(), aggregator.getEntity(),
                 aggregator.getAttribute()).toLowerCase();
 
         // build the message/record to be sent to Kafka

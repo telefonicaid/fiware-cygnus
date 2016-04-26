@@ -30,22 +30,14 @@ public final class NGSIConstants {
     private NGSIConstants() {
     } // NGSIConstants
     
-    // Http header names
-    public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
-    
-    // Flume header names
+    // Flume header names added by NGSIRestHandler or NGSIGroupingInterceptor
     public static final String FLUME_HEADER_TRANSACTION_ID         = "transaction-id";
     public static final String FLUME_HEADER_GROUPED_SERVICE_PATHS  = "grouped-servicepaths";
     public static final String FLUME_HEADER_NOTIFIED_ENTITIES      = "notified-entities";
     public static final String FLUME_HEADER_GROUPED_ENTITIES       = "grouped-entities";
     public static final String FLUME_HEADER_TIMESTAMP              = "timestamp";
-    
-    // Both HTTP and Flume header names
-    public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
-    public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
-    public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
 
-    // Common fields for sinks/backends
+    // Common fields for sinks
     public static final String RECV_TIME_TS        = "recvTimeTs";
     public static final String RECV_TIME           = "recvTime";
     public static final String FIWARE_SERVICE_PATH = "fiwareServicePath";
@@ -57,40 +49,26 @@ public final class NGSIConstants {
     public static final String ATTR_MD             = "attrMd";
     public static final String ATTR_MD_FILE        = "attrMdFile";
 
-    // Maximum values
-    public static final int MAX_CONNS                   = 500;
-    public static final int MAX_CONNS_PER_ROUTE         = 100;
-    public static final int MAX_NAME_LEN                = 64;
-    public static final int MAX_NAME_LEN_HDFS           = 255;
-    public static final int SERVICE_HEADER_MAX_LEN      = 50;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
-    
-    // Others
-    public static final String EMPTY_MD = "[]";
-
-    // Configuration parameter names
+    // NGSIRestHandler configuration parameter names
     public static final String PARAM_DEFAULT_SERVICE      = "default_service";
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
     public static final String PARAM_NOTIFICATION_TARGET  = "notification_target";
     
-    // NGSISTHSink specific headers
+    // NGSIHDFSSink specific constants
+    public static final int MAX_NAME_LEN_HDFS = 255;
+    
+    // NGSISTHSink specific constants
     public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 113;
     public static final int STH_MIN_HASH_SIZE_IN_BYTES      = 20;
     
-    // NGSIDynamoDBSink specific headers
+    // NGSIDynamoDBSink specific constants
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";
     
-    // NGSIPostgreSQLSink specific headers
+    // NGSIPostgreSQLSink specific constants
     // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public static final int POSTGRESQL_MAX_ID_LEN = 63;
     
-    // NGSICartoDBSink specific headers
+    // NGSICartoDBSink specific constants
     public static final String THE_GEOM = "the_geom";
-    
-    // log4j specific constants
-    public static final String LOG4J_CORR = "correlatorId";
-    public static final String LOG4J_TRANS = "transactionId";
-    public static final String LOG4J_SVC = "service";
-    public static final String LOG4J_SUBSVC = "subservice";
     
 } // NGSIConstants
