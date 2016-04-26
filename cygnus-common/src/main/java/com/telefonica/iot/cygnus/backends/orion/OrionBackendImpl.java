@@ -76,12 +76,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
         // create the http header
         ArrayList<Header> headers = new ArrayList<Header>();
-        headers.add(new BasicHeader("Content-type", "application/json"));
-        headers.add(new BasicHeader("Accept", "application/json"));
-        
-        if (token != null) {
-            headers.add(new BasicHeader("X-Auth-token", token));
-        } // if
+        headers = setHeaders(headers, token);
                 
         String relativeURL = "/v1/unsubscribeContext";
         String subscriptionStr = "{\n" 
@@ -93,13 +88,37 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         JsonResponse response = doRequest("POST", relativeURL, true, headers, subscriptionEnt);
         
         return response;   
-    }
+    } // deleteSubscriptionV1
+    
+    @Override
+    public JsonResponse getSubscriptionsV2byId(String token, 
+            String subscriptionId) throws Exception {
+        
+        // create the http header
+        ArrayList<Header> headers = new ArrayList<Header>();
+        headers = setHeaders(headers, token);
+        
+        String relativeURL = "/v2/subscriptions/" + subscriptionId;
+        JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
+        
+        return response;
+    } // getSubscriptionsV2byId
     
     @Override
     public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception {
         
         // create the http header
         ArrayList<Header> headers = new ArrayList<Header>();
+        headers = setHeaders(headers, token);
+        
+        String relativeURL = "/v2/subscriptions/" + subscriptionId;
+        JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
+        
+        return response;
+        
+    } // deleteSubscriptionV2
+    
+    private ArrayList<Header> setHeaders (ArrayList<Header> headers, String token) {
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         
@@ -107,11 +126,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
             headers.add(new BasicHeader("X-Auth-token", token));
         } // if
         
-        String relativeURL = "/v2/subscriptions/" + subscriptionId;
-        JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
-        
-        return response;
-        
+        return headers;
     }
     
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
