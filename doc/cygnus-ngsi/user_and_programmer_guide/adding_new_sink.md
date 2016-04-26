@@ -2,7 +2,7 @@
 Content:
 
 * [Introduction](#section1)
-* [Base `OrionSink` class](#section2)
+* [Base `NGSISink` class](#section2)
     * [Inherited configuration](#section2.1)
     * [Inherited starting and stoping](#section2.2)
     * [Inherited events consumption](#section2.3)

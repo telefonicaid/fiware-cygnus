@@ -77,7 +77,7 @@ cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
 cygnusagent.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
+cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
 # URL target
 cygnusagent.sources.http-source.handler.notification_target = /notify
 # Default service (service semantic depends on the persistence sink)
@@ -95,11 +95,11 @@ cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus
 cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
-# OrionHDFSSink configuration
+# NGSIHDFSSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
+cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -151,11 +151,11 @@ cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/kr
 cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
-# OrionCKANSink configuration
+# NGSICKANSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
-cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
+cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.ckan-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -180,11 +180,11 @@ cygnusagent.sinks.ckan-sink.batch_timeout = 30
 cygnusagent.sinks.ckan-sink.batch_ttl = 10
 
 # ============================================
-# OrionPostgreSQLSink configuration
+# NGSIPostgreSQLSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
 # sink class, must not be changed
-cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.OrionPostgreSQLSink
+cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.postgresql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -211,11 +211,11 @@ cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 cygnusagent.sinks.postgresql-sink.batch_ttl = 10
 
 # ============================================
-# OrionMySQLSink configuration
+# NGSIMySQLSink configuration
 # channel name from where to read notification events
 cygnusagent.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.OrionMySQLSink
+cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnusagent.sinks.mysql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -240,9 +240,9 @@ cygunsagent.sinks.mysql-sink.batch_timeout = 30
 cygnusagent.sinks.mysql-sink.batch_ttl = 10
 
 # ============================================
-# OrionMongoSink configuration
+# NGSIMongoSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.OrionMongoSink
+cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
 # channel name from where to read notification events
 cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # true if the grouping feature is enabled for this sink, false otherwise
@@ -275,9 +275,9 @@ cygnusagent.sinks.mongo-sink.batch_ttl = 10
 cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
 
 # ============================================
-# OrionSTHSink configuration
+# NGSISTHSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.OrionSTHSink
+cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
 # channel name from where to read notification events
 cygnusagent.sinks.sth-sink.channel = sth-channel
 # true if the grouping feature is enabled for this sink, false otherwise
@@ -306,9 +306,9 @@ cygnusagent.sinks.sth-sink.batch_ttl = 10
 cygnusagent.sinks.sth-sink.ignore_white_spaces = true
 
 #=============================================
-# OrionKafkaSink configuration
+# NGSIKafkaSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.OrionKafkaSink
+cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
 # channel name from where to read notification events
 cygnusagent.sinks.kafka-sink.channel = kafka-channel
 # true if the grouping feature is enabled for this sink, false otherwise
@@ -329,9 +329,9 @@ cygnusagent.sinks.kafka-sink.batch_timeout = 30
 cygnusagent.sinks.kafka-sink.batch_ttl = 10
 
 # ============================================
-# OrionDynamoDBSink configuration
+# NGSIDynamoDBSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.OrionDynamoDBSink
+cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
 # channel name from where to read notification events
 cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
 # AWS Access Key Id

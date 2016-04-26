@@ -14,9 +14,9 @@ Content:
 * [Writing logs](#section6)
 
 ##<a name="section1"></a>Batching
-<i>NOTE: The batching mechanism is currently only available for `OrionHDFSSink` and `OrionMySQLSink`.</i>
+<i>NOTE: The batching mechanism is currently only available for `NGSIHDFSSink` and `NGSIMySQLSink`.</i>
 
-Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `OrionSink`,  the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
+Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`,  the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
 
