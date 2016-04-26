@@ -29,6 +29,7 @@ import com.telefonica.iot.cygnus.http.JettyServer;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.management.ManagementInterface;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -161,6 +162,11 @@ public class CygnusApplication extends Application {
      */
     public static void main(String[] args) {
         try {
+            // Print Cygnus starting trace including version
+            LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
+                    + CommonUtils.getLastCommit());
+            
+            // Define the options to be read
             Options options = new Options();
 
             Option option = new Option("n", "name", true, "the name of this agent");
@@ -189,6 +195,7 @@ public class CygnusApplication extends Application {
             option.setRequired(false);
             options.addOption(option);
 
+            // Read the options
             CommandLineParser parser = new GnuParser();
             CommandLine commandLine = parser.parse(options, args);
 
@@ -222,7 +229,6 @@ public class CygnusApplication extends Application {
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
-            
             if (!configurationFile.exists()) {
                 // if command line invocation, then need to fail fast
                 if (System.getProperty(Constants.SYSPROP_CALLED_FROM_SERVICE) == null) {
@@ -263,7 +269,6 @@ public class CygnusApplication extends Application {
             MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
                         
             // start the Cygnus application
-            LOGGER.info("Starting Cygnus application");
             application.start();
             
             // wait until the references to Flume components are not null
