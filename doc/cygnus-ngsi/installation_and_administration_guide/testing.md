@@ -158,21 +158,21 @@ getOriginator (notify-json-metadata)
 getOriginator (notify-json-simple-unordered)
 getOriginator (notify-json-simple-null-attrs)
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.222 sec
-Running com.telefonica.iot.cygnus.handlers.OrionRestHandlerTest
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
-Testing 'configure' method from class 'OrionRestHandler'
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
-Testing 'getEvents' method from class 'OrionRestHandler' (invalid characters
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Starting transaction (1448445046-433-0000000000)
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Event put in the channel (id=53881443, ttl=10)
-Testing 'getEvents' method from class 'OrionRestHandler' ("root" servicePath name
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Starting transaction (1448445046-433-0000000001)
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
-15/11/25 10:50:46 INFO handlers.OrionRestHandler: Event put in the channel (id=211201404, ttl=10)
+Running com.telefonica.iot.cygnus.handlers.NGSIRestHandlerTest
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
+Testing 'configure' method from class 'NGSIRestHandler'
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
+Testing 'getEvents' method from class 'NGSIRestHandler' (invalid characters
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Starting transaction (1448445046-433-0000000000)
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Event put in the channel (id=53881443, ttl=10)
+Testing 'getEvents' method from class 'NGSIRestHandler' ("root" servicePath name
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Starting transaction (1448445046-433-0000000001)
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
+15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Event put in the channel (id=211201404, ttl=10)
 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 sec
 Running com.telefonica.iot.cygnus.http.JettyServerTest
 15/11/25 10:50:46 INFO mortbay.log: Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
@@ -207,54 +207,54 @@ Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.136 sec
 Running com.telefonica.iot.cygnus.management.ManagementInterfaceTest
 Testing ManagementInterface.handle
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 sec
-Running com.telefonica.iot.cygnus.sinks.OrionCKANSinkTest
-Testing OrionCKANSink.start
+Running com.telefonica.iot.cygnus.sinks.NGSICKANSinkTest
+Testing NGSICKANSink.start
 15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
 15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
 15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
 15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:52 INFO sinks.OrionCKANSink: [null] Startup completed
-Testing OrionCKANSink.processContextResponses (normal resource lengths)
-15/11/25 10:50:52 INFO sinks.OrionCKANSink: [null] Persisting data at OrionCKANSink (orgName=vehicles, pkgName=vehicles_4wheels, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-Testing OrionCKANSink.processContextResponses (too long service name)
-Testing OrionCKANSink.processContextResponses (too long servicePath name)
-Testing OrionCKANSink.processContextResponses (too long destination name)
-Testing OrionCKANSink.processContextResponses ("root" servicePath name)
-15/11/25 10:50:52 INFO sinks.OrionCKANSink: [null] Persisting data at OrionCKANSink (orgName=vehicles, pkgName=vehicles, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-Testing OrionCKANSink.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:52 INFO sinks.OrionCKANSink: [null] Persisting data at OrionCKANSink (orgName=vehicles, pkgName=vehicles_4wheelsSport, resName=sport1, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-15/11/25 10:50:52 INFO sinks.OrionCKANSink: [null] Persisting data at OrionCKANSink (orgName=vehicles, pkgName=vehicles_4wheelsUrban, resName=urban1, data=123456789,1970-01-02T10:17:36.789Z,car2,car,speed,float,"115.8",[])
-Testing OrionCKANSink.configure
+15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Startup completed
+Testing NGSICKANSink.processContextResponses (normal resource lengths)
+15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheels, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
+Testing NGSICKANSink.processContextResponses (too long service name)
+Testing NGSICKANSink.processContextResponses (too long servicePath name)
+Testing NGSICKANSink.processContextResponses (too long destination name)
+Testing NGSICKANSink.processContextResponses ("root" servicePath name)
+15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
+Testing NGSICKANSink.processContextResponses (multiple destinations and fiware-servicePaths)
+15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheelsSport, resName=sport1, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
+15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheelsUrban, resName=urban1, data=123456789,1970-01-02T10:17:36.789Z,car2,car,speed,float,"115.8",[])
+Testing NGSICKANSink.configure
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.476 sec
-Running com.telefonica.iot.cygnus.sinks.OrionHDFSSinkTest
-Testing OrionHDFSSink.start
+Running com.telefonica.iot.cygnus.sinks.NGSIHDFSSinkTest
+Testing NGSIHDFSSink.start
 15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
 15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Startup completed
-Testing OrionHDFSSinkTest.configure
-Testing OrionHDFSSink.persistBatch (json-row file format)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing OrionHDFSSink.persistBatch (json-column file format)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car", "speed":"112.9", "speed_md":[]})
-Testing OrionHDFSSink.persistBatch (csv-row file format)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (123456,1970-01-02T10:17:36.789Z,cars,car1,car,speed,float,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting metadata at OrionHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
-Testing OrionHDFSSink.persistBatch (csv-column file format)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (1970-01-02T10:17:36.789Z,cars,car1,car,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting metadata at OrionHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
-Testing OrionHDFSSink.persistBatch ("root" servicePath name)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles//my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing OrionHDFSSink.persistBatch (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing OrionHDFSSink.persistBatch (null batches)
-Testing OrionHDFSSink.configure (deprecated parameters are used)
-Testing OrionHDFSSink.persistBatch (normal resource lengths)
-15/11/25 10:50:52 INFO sinks.OrionHDFSSink: [null] Persisting data at OrionHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing OrionHDFSSink.persistBatch (too long service name)
-Testing OrionHDFSSink.persistBatch (too long servicePath name)
-Testing OrionHDFSSink.persistBatch (too long destination name)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Startup completed
+Testing NGSIHDFSSinkTest.configure
+Testing NGSIHDFSSink.persistBatch (json-row file format)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
+Testing NGSIHDFSSink.persistBatch (json-column file format)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car", "speed":"112.9", "speed_md":[]})
+Testing NGSIHDFSSink.persistBatch (csv-row file format)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (123456,1970-01-02T10:17:36.789Z,cars,car1,car,speed,float,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting metadata at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
+Testing NGSIHDFSSink.persistBatch (csv-column file format)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (1970-01-02T10:17:36.789Z,cars,car1,car,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting metadata at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
+Testing NGSIHDFSSink.persistBatch ("root" servicePath name)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles//my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
+Testing NGSIHDFSSink.persistBatch (multiple destinations and fiware-servicePaths)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
+Testing NGSIHDFSSink.persistBatch (null batches)
+Testing NGSIHDFSSink.configure (deprecated parameters are used)
+Testing NGSIHDFSSink.persistBatch (normal resource lengths)
+15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
+Testing NGSIHDFSSink.persistBatch (too long service name)
+Testing NGSIHDFSSink.persistBatch (too long servicePath name)
+Testing NGSIHDFSSink.persistBatch (too long destination name)
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 sec
-Running com.telefonica.iot.cygnus.sinks.OrionKafkaSinkTest
+Running com.telefonica.iot.cygnus.sinks.NGSIKafkaSinkTest
 15/11/25 10:50:52 INFO server.ZooKeeperServerMain: Starting server
 15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:zookeeper.version=3.4.5-1392090, built on 09/30/2012 17:52 GMT
 15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:host.name=mac-510380.hi.inet
@@ -276,7 +276,7 @@ Running com.telefonica.iot.cygnus.sinks.OrionKafkaSinkTest
 15/11/25 10:50:52 INFO server.ZooKeeperServer: maxSessionTimeout set to -1
 15/11/25 10:50:53 INFO server.NIOServerCnxnFactory: binding to port 0.0.0.0/0.0.0.0:2181
 15/11/25 10:50:53 INFO persistence.FileTxnSnapLog: Snapshotting: 0x0 to /private/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/1448445052750-0/version-2/snapshot.0
-Testing OrionKafkaSink.start
+Testing NGSIKafkaSink.start
 15/11/25 10:50:54 INFO producer.ProducerConfig: ProducerConfig values: 
 	value.serializer = class org.apache.kafka.common.serialization.StringSerializer
 	key.serializer = class org.apache.kafka.common.serialization.StringSerializer
@@ -327,7 +327,7 @@ Testing OrionKafkaSink.start
 15/11/25 10:50:55 INFO server.ZooKeeperServer: Established session 0x1513e0d89210000 with negotiated timeout 10000 for client /0:0:0:0:0:0:0:1%0:52613
 15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x1513e0d89210000, negotiated timeout = 10000
 15/11/25 10:50:55 INFO zkclient.ZkClient: zookeeper state changed (SyncConnected)
-15/11/25 10:50:55 INFO sinks.OrionKafkaSink: [null] Startup completed
+15/11/25 10:50:55 INFO sinks.NGSIKafkaSink: [null] Startup completed
 15/11/25 10:50:55 INFO server.NIOServerCnxn: Closed socket connection for client /0:0:0:0:0:0:0:1%0:52613 which had sessionid 0x1513e0d89210000
 15/11/25 10:50:55 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
 15/11/25 10:50:55 INFO server.ZooKeeperServer: shutting down
@@ -357,7 +357,7 @@ java.net.ConnectException: Connection refused
 15/11/25 10:50:55 INFO server.ZooKeeperServer: maxSessionTimeout set to -1
 15/11/25 10:50:55 INFO server.NIOServerCnxnFactory: binding to port 0.0.0.0/0.0.0.0:2181
 15/11/25 10:50:55 INFO persistence.FileTxnSnapLog: Snapshotting: 0x0 to /private/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/1448445055801-0/version-2/snapshot.0
-Testing OrionKafkaSink.configure
+Testing NGSIKafkaSink.configure
 15/11/25 10:50:56 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
 15/11/25 10:50:56 INFO server.ZooKeeperServer: shutting down
 15/11/25 10:50:56 INFO server.ZooKeeperServer: shutting down
@@ -397,15 +397,15 @@ Testing OrionKafkaSink.configure
 15/11/25 10:50:57 INFO server.ZooKeeperServer: Established session 0x1513e0d973a0000 with negotiated timeout 10000 for client /0:0:0:0:0:0:0:1%0:52620
 15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x1513e0d973a0000, negotiated timeout = 10000
 15/11/25 10:50:57 INFO zkclient.ZkClient: zookeeper state changed (SyncConnected)
-Testing OrionKafkaSink.persist (topic-per-service)
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Creating topic vehicles at OrionKafkaSink
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Persisting data at OrionKafkaSink. Topic (vehicles), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
-Testing OrionKafkaSink.persist (topic-per-service-path)
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Creating topic 4wheels at OrionKafkaSink
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Persisting data at OrionKafkaSink. Topic (4wheels), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
-Testing OrionKafkaSink.persist (topic-per-destination)
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Creating topic car1_car at OrionKafkaSink
-15/11/25 10:50:57 INFO sinks.OrionKafkaSink: [null] Persisting data at OrionKafkaSink. Topic (car1_car), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
+Testing NGSIKafkaSink.persist (topic-per-service)
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic vehicles at NGSIKafkaSink
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (vehicles), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
+Testing NGSIKafkaSink.persist (topic-per-service-path)
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic 4wheels at NGSIKafkaSink
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (4wheels), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
+Testing NGSIKafkaSink.persist (topic-per-destination)
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic car1_car at NGSIKafkaSink
+15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (car1_car), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
 15/11/25 10:50:57 INFO server.NIOServerCnxn: Closed socket connection for client /0:0:0:0:0:0:0:1%0:52620 which had sessionid 0x1513e0d973a0000
 15/11/25 10:50:57 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
 15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Unable to read additional data from server sessionid 0x1513e0d973a0000, likely server has closed socket, closing socket connection and attempting reconnect
@@ -423,39 +423,39 @@ Testing OrionKafkaSink.persist (topic-per-destination)
 15/11/25 10:50:57 INFO server.FinalRequestProcessor: shutdown of request processor complete
 15/11/25 10:50:57 INFO zkclient.ZkClient: zookeeper state changed (Disconnected)
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.965 sec
-Running com.telefonica.iot.cygnus.sinks.OrionMongoBaseSinkTest
-Testing OrionMongoBaseSink.start
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Startup completed
-Testing OrionMongosink.configure
+Running com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSinkTest
+Testing NGSIMongoBaseSink.start
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Startup completed
+Testing NGSIMongoSink.configure
 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.249 sec
-Running com.telefonica.iot.cygnus.sinks.OrionMongoSinkTest
-Testing OrionMongoSink.processContextResponses (single destination and fiware-servicePath
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
-Testing OrionCKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
+Running com.telefonica.iot.cygnus.sinks.NGSIMongoSinkTest
+Testing NGSIMongoSink.processContextResponses (single destination and fiware-servicePath
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
+Testing NGSICKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 sec
-Running com.telefonica.iot.cygnus.sinks.OrionMySQLSinkTest
-Testing OrionMySQLSink.start
-15/11/25 10:50:58 INFO sinks.OrionMySQLSink: [null] Startup completed
-Testing OrionMySQLSink.configure
-Testing OrionMySQLSinkTest.persistBatch ("root" servicePath name)
-15/11/25 10:50:58 INFO sinks.OrionMySQLSink: [null] Persisting data at OrionMySQLSink. Database (vehicles), Table (my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','','car1','car','speed','float','112.9','[]'))
-Testing OrionMySQLSinkTest.persistBatch (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.OrionMySQLSink: [null] Persisting data at OrionMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
-Testing OrionHDFSSinkTest.persist (null batches)
-Testing OrionMySQLSinkTest.persistBatch (normal resource lengths)
-15/11/25 10:50:58 INFO sinks.OrionMySQLSink: [null] Persisting data at OrionMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
-Testing OrionMySQLSinkTest.persistBatch (too long service name)
-Testing OrionMySQLSinkTest.persistBatch (too long servicePath name)
-Testing OrionMySQLSinkTest.persistBatch (too long destination name)
+Running com.telefonica.iot.cygnus.sinks.NGSIMySQLSinkTest
+Testing NGSIMySQLSink.start
+15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Startup completed
+Testing NGSIMySQLSink.configure
+Testing NGSIMySQLSinkTest.persistBatch ("root" servicePath name)
+15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','','car1','car','speed','float','112.9','[]'))
+Testing NGSIMySQLSinkTest.persistBatch (multiple destinations and fiware-servicePaths)
+15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
+Testing NGSIHDFSSinkTest.persist (null batches)
+Testing NGSIMySQLSinkTest.persistBatch (normal resource lengths)
+15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
+Testing NGSIMySQLSinkTest.persistBatch (too long service name)
+Testing NGSIMySQLSinkTest.persistBatch (too long servicePath name)
+Testing NGSIMySQLSinkTest.persistBatch (too long destination name)
 Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 sec
-Running com.telefonica.iot.cygnus.sinks.OrionSTHSinkTest
-Testing OrionSTHSink.processContextResponses
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
-Testing OrionCKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
-15/11/25 10:50:58 INFO sinks.OrionMongoBaseSink: [null] Persisting data at OrionMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
+Running com.telefonica.iot.cygnus.sinks.NGSISTHSinkTest
+Testing NGSISTHSink.processContextResponses
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
+Testing NGSICKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
+15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 sec
 
 Results :

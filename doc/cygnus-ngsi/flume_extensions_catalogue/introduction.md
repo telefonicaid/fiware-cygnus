@@ -11,7 +11,7 @@ Software developers may also be interested in this catalogue since it may guide 
 #Structure of the document
 The document starts detailing the naming conventions adopted in Cygnus when creating data structures in the different storages. This means those data structure (databases, files, tables, collections, etc) names will derive from a subset of the NGSI-like notified information (mainly fiware-service and fiware-servicePath headers, entityId and entityType).
 
-Then, it is time to explain [`OrionRESTHandler`](./orion_rest_handler.md), the NGSI oriented handler for the http Fume source in charge of translating a NGSI-like notification into a Flume event.
+Then, it is time to explain [`NGSIRestHandler`](./orion_rest_handler.md), the NGSI oriented handler for the http Fume source in charge of translating a NGSI-like notification into a Flume event.
 
 Then, each one of the NGSI oriented sinks is described; for each sink an explanation about the functionality (including how the information within a Flume event is mapped into the storage data structures, according to the above mentioned naming conventions), configuration, uses cases and implementation details are given.
 

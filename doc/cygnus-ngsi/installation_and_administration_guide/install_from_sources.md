@@ -11,14 +11,14 @@ Content:
     * [Known issues](#section4.4)
 * [Installing dependencies](#section5)
     * [Cygnus dependencies](#section5.1)
-    * [OrionCKANSink dependencies](#section5.2)
-    * [OrionHDFSSink dependencies](#section5.3)
-    * [OrionMySQLSink dependencies](#section5.4)
-    * [OrionDynamoDBSink dependencies](#section5.5)
-    * [OrionMongoSink dependencies](#section5.6)
-    * [OrionSTHSink dependencies](#section5.7)
-    * [OrionKafkaSink dependencies](#section5.8)
-    * [OrionTestSink dependencies](#section5.9)
+    * [NGSICKANSink dependencies](#section5.2)
+    * [NGSIHDFSSink dependencies](#section5.3)
+    * [NGSIMySQLSink dependencies](#section5.4)
+    * [NGSIDynamoDBSink dependencies](#section5.5)
+    * [NGSIMongoSink dependencies](#section5.6)
+    * [NGSISTHSink dependencies](#section5.7)
+    * [NGSIKafkaSink dependencies](#section5.8)
+    * [NGSITestSink dependencies](#section5.9)
 
 ##<a name="section1"></a>Prerequisites
 Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install Cygnus.
@@ -157,20 +157,20 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 
 [Top](#top)
 
-###<a name="section5.2"></a>OrionCKANSink dependencies
+###<a name="section5.2"></a>NGSICKANSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|  OrionCKANSink dependencies |   Version    |
+|  NGSICKANSink dependencies |   Version    |
 |:----------------------------|-------------:|
 |          httpclient         |    4.3.1     |
 |           httpcore          |    4.3.1     |
 
 [Top](#top)
 
-###<a name="section5.3"></a>OrionHDFSSink dependencies
+###<a name="section5.3"></a>NGSIHDFSSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|  OrionHDFSSink dependencies  |      Version       |
+|  NGSIHDFSSink dependencies  |      Version       |
 |:-----------------------------|-------------------:|
 |         hadoop-core          |  1.2.1 (or higher) |
 |          hive-exec           |       0.13.0       |
@@ -183,19 +183,19 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 
 [Top](#top)
 
-###<a name="section5.4"></a>OrionMysQLSink dependencies
+###<a name="section5.4"></a>NGSIMySQLSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|  OrionMySQLSink dependencies |   Version   |
+|  NGSIMySQLSink dependencies |   Version   |
 |:-----------------------------|------------:|
 |    mysql-connector-java      |    5.1.31   |
 
 [Top](#top)
 
-###<a name="section5.5"></a>OrionDynamoDBSink dependencies
+###<a name="section5.5"></a>NGSIDynamoDBSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|  OrionDynamoDBSink dependencies |   Version    |
+|  NGSIDynamoDBSink dependencies |   Version    |
 |:--------------------------------|-------------:|
 |           httpclient            |    4.3.1     |
 |             httpcore            |    4.3.1     |
@@ -203,28 +203,28 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
  
 [Top](#top)
 
-###<a name="section5.6"></a>OrionMongoSink dependencies
+###<a name="section5.6"></a>NGSIMongoSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|  OrionMongoSink dependencies |   Version   |
+|  NGSIMongoSink dependencies |   Version   |
 |:-----------------------------|------------:|
 |         mongo-driver         |    3.0.0    |
 
 [Top](#top)
 
-###<a name="section5.7"></a>OrionSTHSink dependencies
+###<a name="section5.7"></a>NGSISTHSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-|   OrionSTHSink dependencies  |   Version   |
+|   NGSISTHSink dependencies  |   Version   |
 |:-----------------------------|------------:|
 |         mongo-driver         |    3.0.0    |
 
 [Top](#top)
 
-###<a name="section5.8"></a>OrionKafkaSink dependencies
+###<a name="section5.8"></a>NGSIKafkaSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-| OrionKafkaSink dependencies |    Version   |
+| NGSIKafkaSink dependencies |    Version   |
 |:----------------------------|-------------:|
 |       kafka-clients         |    0.8.2.0   |
 |          zkclient           |      0.5     |
@@ -232,10 +232,10 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 
 [Top](#top)
 
-###<a name="section5.9"></a>OrionTestSink dependencies
+###<a name="section5.9"></a>NGSITestSink dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus package**:
 
-| OrionTestSink dependencies |   Version   |
+| NGSITestSink dependencies |   Version   |
 |:---------------------------|------------:|
 |        mockito-all         |    1.9.5    |
 |           junit            |     4.11    |

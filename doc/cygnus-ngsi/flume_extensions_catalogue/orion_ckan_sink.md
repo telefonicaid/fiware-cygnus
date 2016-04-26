@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionCKANSink
+#<a name="top"></a>NGSICKANSink
 Content:
 
 * [Functionality](#section1)
@@ -12,12 +12,12 @@ Content:
         * [About the persistence mode](#section2.3.1)
         * [About batching](#section2.3.2)
 * [Programmers guide](#section3)
-    * [`OrionCKANSink` class](#section3.1)
+    * [`NGSICKANSink` class](#section3.1)
     * [`CKANBackendImpl` class](#section3.2)
     * [`CKANCache` class](#section3.3)
 
 ##<a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.OrionCKANSink`, or simply `OrionCKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSICKANSink`, or simply `NGSICKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific CKAN data structures.
 
@@ -28,12 +28,12 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`OrionRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to CKAN data structures
-[CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `OrionCKANSink` each time a Flume event is going to be persisted.
+[CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `NGSICKANSink` each time a Flume event is going to be persisted.
 
 According to the [naming conventions](naming_convetions.md), an organization called as the `fiware-service` header values is created (if not existing yet). The same occurs with a package/dataset named as the `fiware-servicePath` header value.
 
@@ -95,7 +95,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `api_key=myapikey` and `attr_persistence=row` as configuration parameter, then `OrionCKANSink` will persist the data within the body as:
+Assuming `api_key=myapikey` and `attr_persistence=row` as configuration parameter, then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://192.168.80.34:80/api/3/action/datastore_search?resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7"
     {
@@ -179,7 +179,7 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
         }
     }
 
-If `attr_persistence=colum` then `OrionCKANSink` will persist the data within the body as:
+If `attr_persistence=colum` then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://130.206.83.8:80/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986"
     {
@@ -252,11 +252,11 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionCKANSink` is configured through the following parameters:
+`NGSICKANSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.OrionCKANSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. ||
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
@@ -275,7 +275,7 @@ A configuration example could be:
     cygnusagent.sinks = ckan-sink
     cygnusagent.channels = ckan-channel
     ...
-    cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.OrionCKANSink
+    cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
     cygnusagent.sinks.ckan-sink.enable_grouping = false
     cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
@@ -292,7 +292,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use `OrionCKANSink` if you are looking for a database storage not growing so much in the mid-long term.
+Use `NGSICKANSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 [Top](#top)
 
@@ -305,19 +305,19 @@ In addition, when running in `column` mode, due to the number of notified attrib
 [Top](#top)
 
 ####<a name="section2.3.2"></a>About batching
-As explained in the [programmers guide](#section3), `OrionCKANSink` extends `OrionSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSICKANSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same CKAN resource. If processing the events one by one, we would need 100 inserts into CKAN; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination CKAN resource. In the worst case, the whole 100 entities will be about 100 different entities (100 different CKAN resources), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `OrionCKANSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSICKANSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
 
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionCKANSink` class
-As any other NGSI-like sink, `OrionCKANSink` extends the base `OrionSink`. The methods that are extended are:
+###<a name="section3.1"></a>`NGSICKANSink` class
+As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
     
@@ -325,7 +325,7 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
     
     public void start();
 
-An implementation of `CKANBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `OrionCKANSink()` (contructor), `configure()` and `start()`.
+An implementation of `CKANBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSICKANSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
     
@@ -343,14 +343,14 @@ Persists the aggregated context data regarding a single entity's attribute (row 
 [Top](#top)
 
 ###<a name="section3.3"></a>`CKANCache` class
-This class is used to improve the performance of `OrionCKANSink` by caching information about the already created organizations, packages/datasets and resources (and datastores). `CKANCache` implements the `HttpBackend` interface since its methods are able to interact directly with CKAN API when some element of the hierarchy is not cached.
+This class is used to improve the performance of `NGSICKANSink` by caching information about the already created organizations, packages/datasets and resources (and datastores). `CKANCache` implements the `HttpBackend` interface since its methods are able to interact directly with CKAN API when some element of the hierarchy is not cached.
 
-In detail, this is the workflow when `OrionCKANSink` is combined with `CKANCache`:
+In detail, this is the workflow when `NGSICKANSink` is combined with `CKANCache`:
 
-1. `OrionCKANSink`, previously to accessing CKAN API (it consumes a lot of computational resources), queries the cache for the data (stored in memory, faster and efficient), in order to know if the different elements of the hierarchy involved in the persistence operation are already created or not.
+1. `NGSICKANSink`, previously to accessing CKAN API (it consumes a lot of computational resources), queries the cache for the data (stored in memory, faster and efficient), in order to know if the different elements of the hierarchy involved in the persistence operation are already created or not.
 2. If the element is cached, then a single upsert operation is done against the CKAN API.
-3. If the element is not cached, CKAN is queried in order to get the information. If the element was not found, `OrionCKANSink` is informed about that. If the element was found, it is cached for future queries and `OrionCAKNSink` performs an upsert operation against the CKAN API.
-4. If the element was not found in the cache nor in CKAN, it is created by `OrionCKANSink`. Then, an upsert operation is performed.
+3. If the element is not cached, CKAN is queried in order to get the information. If the element was not found, `NGSICKANSink` is informed about that. If the element was found, it is cached for future queries and `NGSICKANSink` performs an upsert operation against the CKAN API.
+4. If the element was not found in the cache nor in CKAN, it is created by `NGSICKANSink`. Then, an upsert operation is performed.
 
 [Top](#top)
 
