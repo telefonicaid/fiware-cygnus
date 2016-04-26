@@ -72,4 +72,15 @@ public interface OrionBackend {
     public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) 
             throws Exception;
     
+    /** 
+     * Gets a current subscription with a given subscription id (Orion v2)
+     * 
+     * @param token
+     * @param subscriptionId
+     * @throws Exception
+     * @return response
+     */
+    public JsonResponse getSubscriptionsV2byId(String token, 
+            String subscriptionId) throws Exception;
+    
 } // StatsBackend
