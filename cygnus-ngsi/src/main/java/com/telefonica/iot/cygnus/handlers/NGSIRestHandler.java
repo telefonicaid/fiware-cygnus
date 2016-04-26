@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -69,9 +68,6 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
     public NGSIRestHandler() {
         // initially, the configuration is meant to be valid
         invalidConfiguration = false;
-        
-        // print Cygnus version
-        LOGGER.info("Cygnus version (" + CommonUtils.getCygnusVersion() + "." + CommonUtils.getLastCommit() + ")");
     } // NGSIRestHandler
     
     /**
