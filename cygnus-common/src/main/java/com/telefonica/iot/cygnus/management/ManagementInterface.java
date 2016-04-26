@@ -515,11 +515,12 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject orionJson = new JSONObject();
             
             JsonResponse orionResponse = orionBackend.
-            getSubscriptionsV2byId(token, subscriptionID);
+            getSubscriptionsByIdV2(token, subscriptionID);
+            
             if (orionResponse != null) {
                 orionJson = orionResponse.getJsonObject();
                 status = orionResponse.getStatusCode();
-            }
+            } // if
 
             LOGGER.debug("Status code got: " + status);
             

@@ -75,8 +75,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
             throws Exception {
         
         // create the http header
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers = setHeaders(headers, token);
+        ArrayList<Header> headers = getHeaders(token);
                 
         String relativeURL = "/v1/unsubscribeContext";
         String subscriptionStr = "{\n" 
@@ -91,12 +90,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // deleteSubscriptionV1
     
     @Override
-    public JsonResponse getSubscriptionsV2byId(String token, 
+    public JsonResponse getSubscriptionsByIdV2(String token, 
             String subscriptionId) throws Exception {
         
         // create the http header
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers = setHeaders(headers, token);
+        ArrayList<Header> headers = getHeaders(token);
         
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
@@ -108,8 +106,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception {
         
         // create the http header
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers = setHeaders(headers, token);
+        ArrayList<Header> headers = getHeaders(token);
         
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
@@ -118,7 +115,8 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
     } // deleteSubscriptionV2
     
-    private ArrayList<Header> setHeaders (ArrayList<Header> headers, String token) {
+    private ArrayList<Header> getHeaders (String token) {
+        ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         
