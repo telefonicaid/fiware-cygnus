@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionRestHandler
+#<a name="top"></a>NGSIRestHandler
 Content:
 
 * [Functionality](#section1)
@@ -8,13 +8,13 @@ Content:
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
 * [Programmers guide](#section3)
-    * [`OrionRestHandler` class](#section3.1)
+    * [`NGSIRestHandler` class](#section3.1)
 
 ##<a name="section1"></a>Functionality
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
-This section explains how a notified NGSI event (an http message) containing context data is converted into a Flume event (an object in memory or a file), suitable for being consumed by any of the Cygnus sinks, thanks to `OrionRestHandler`.
+This section explains how a notified NGSI event (an http message) containing context data is converted into a Flume event (an object in memory or a file), suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
 
-It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `OrionRestHandler` in order to create one, and only one, Flume event object to be put in a sink's channel (mainly, these channels are objects in memory, or files).
+It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one, and only one, Flume event object to be put in a sink's channel (mainly, these channels are objects in memory, or files).
 
 On the one hand, the http message containing the NGSI-like notification will be composed of a set of http headers, and a payload. On the other hand, a Flume event object is composed of a set of headers, and a body. As can be seen, there is a quasi-direct translation among http message and Flume event object:
 
@@ -126,7 +126,7 @@ As said, Flume events are not much more different than the above representation:
 
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
-`OrionRestHandler` is configured through the following parameters:
+`NGSIRestHandler` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
@@ -138,7 +138,7 @@ A configuration example could be:
 
     cygnusagent.sources = http-source
     ...
-    cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
+    cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
     cygnusagent.sources.http-source.notification_target = /notify
     cygnusagent.sources.http-source.default_service = default
     cygnusagent.sources.http-source.default_service_path = /
@@ -146,7 +146,7 @@ A configuration example could be:
 [Top](#top)
 
 ##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`OrionRestHandler` class
+###<a name="section3.1"></a>`NGSIRestHandler` class
 TBD
 
 [Top](#top)

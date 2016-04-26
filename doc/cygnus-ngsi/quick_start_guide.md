@@ -33,7 +33,7 @@ In order to do it permanently, edit `/root/.bash_profile` (root user) or `/etc/p
 
 ##Configuring a test agent
 
-This kind of agent is the simplest one you can configure with Cygnus. It is based on a standard `HTTPSource`, a `MemoryChannel` and a `OrionTestSink`. Don't worry about the configuration details, specially those about the source; simply think on a Http listener waiting for Orion notifications on port TCP/5050 and sending that notifications in the form of Flume events to a testing purpose sink that will not really persist anything in a third-party storage, but will log the notified context data.
+This kind of agent is the simplest one you can configure with Cygnus. It is based on a standard `HTTPSource`, a `MemoryChannel` and a `NGSITestSink`. Don't worry about the configuration details, specially those about the source; simply think on a Http listener waiting for Orion notifications on port TCP/5050 and sending that notifications in the form of Flume events to a testing purpose sink that will not really persist anything in a third-party storage, but will log the notified context data.
 
 (1) Create and edit a `/usr/cygnus/conf/agent_test.conf` file (as a sudoer):
 
@@ -45,7 +45,7 @@ cygnusagent.channels = test-channel
 cygnusagent.sources.http-source.channels = test-channel
 cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 cygnusagent.sources.http-source.port = 5050
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.OrionRestHandler
+cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
 cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = def_servpath
@@ -60,7 +60,7 @@ cygnusagent.channels.test-channel.capacity = 1000
 cygnusagent.channels.test-channel.transactionCapacity = 100
 
 cygnusagent.sinks.test-sink.channel = test-channel
-cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.OrionTestSink
+cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
 cygnusagent.sinks.test-sink.batch_size = 1
 cygnusagent.sinks.test_sink.batch_timeout = 10
 ```
@@ -117,11 +117,11 @@ $ ./notification.sh http://localhost:5050/notify
 
 
 ```
-time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[150] : Starting transaction (1449754282-690-0000000000)
-time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "Room",        "isPattern" : "false",        "id" : "Room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
-time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.OrionRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
-time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionTestSink[176] : [test-sink] Persisting data at OrionTestSink. Data (Processing event={Processing headers={recvTimeTs=1449754309394, fiwareService=def_serv, fiwareServicePath=def_serv_path, destinations=room1_room}, Processing context element={id=Room1, type=Room}, Processing attribute={name=temperature, type=centigrade, value="26.5", metadata=[]}})
-time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.OrionSink[178] : Finishing transaction (1449754282-690-0000000000)
+time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[150] : Starting transaction (1449754282-690-0000000000)
+time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "Room",        "isPattern" : "false",        "id" : "Room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
+time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSITestSink[176] : [test-sink] Persisting data at NGSITestSink. Data (Processing event={Processing headers={recvTimeTs=1449754309394, fiwareService=def_serv, fiwareServicePath=def_serv_path, destinations=room1_room}, Processing context element={id=Room1, type=Room}, Processing attribute={name=temperature, type=centigrade, value="26.5", metadata=[]}})
+time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSISink[178] : Finishing transaction (1449754282-690-0000000000)
 
 ```
 
