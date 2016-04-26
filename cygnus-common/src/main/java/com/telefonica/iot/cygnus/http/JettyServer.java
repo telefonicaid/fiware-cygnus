@@ -48,11 +48,13 @@ public class JettyServer extends Thread {
         conn1.setPort(mgmtIfPort);
         server.addConnector(conn1);
         
-        // add the GUI connector
-        SelectChannelConnector conn2 = new SelectChannelConnector();
-        conn2.setHost("0.0.0.0");
-        conn2.setPort(guiPort);
-        server.addConnector(conn2);
+        if (guiPort != 0) {
+            // add the GUI connector
+            SelectChannelConnector conn2 = new SelectChannelConnector();
+            conn2.setHost("0.0.0.0");
+            conn2.setPort(guiPort);
+            server.addConnector(conn2);
+        } // if
         
         // set the handler
         server.setHandler(handler);
