@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.security.MessageDigest;
@@ -173,9 +174,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String buildDbName(String fiwareService) throws Exception {
         String dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
 
-        if (dbName.length() > NGSIConstants.MAX_NAME_LEN) {
+        if (dbName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
-                    + "than " + NGSIConstants.MAX_NAME_LEN);
+                    + "than " + CommonConstants.MAX_NAME_LEN);
         } // if
 
         return dbName;
