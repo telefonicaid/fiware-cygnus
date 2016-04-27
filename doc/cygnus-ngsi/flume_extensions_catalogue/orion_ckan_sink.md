@@ -363,10 +363,9 @@ In detail, this is the workflow when `NGSICKANSink` is combined with `CKANCache`
 ###<a name="section1"></a>Provisioning a CKAN resource for the column mode
 First of all, you'll need a CKAN organization and package/dataset before creating a resource and an associated datastore in order to persist the data.
 
-Creating an organization, let's say in [`demo.ckan.org`](http://demo.ckan.org/); the organization name is `service`, because our entity will be in that FIWARE service:
+Creating an organization, let's say in [`demo.ckan.org`](http://demo.ckan.org/) for the sake of demonstration, but should be a CKAN deployment of yours; the organization name is `service`, because our entity will be in that FIWARE service:
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/organization_create" -d '{"name":"service"}' -H "Authorization: xxxxxxxx"
-
 ```
 
 Creating a package/dataset within the above organization; the package name is `service_test`, because our entity will be in the FIWARE service `service` and in the FIWARE service path service_test:
