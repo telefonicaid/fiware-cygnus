@@ -398,3 +398,5 @@ The insertion can be checked through the CKAN API as well:
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/datastore_search" -d '{"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7"}' -H "Authorization: xxxxxxxx"
 ```
+
+[Top](#top)
