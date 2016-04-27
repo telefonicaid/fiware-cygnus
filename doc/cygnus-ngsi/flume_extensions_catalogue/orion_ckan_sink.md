@@ -58,8 +58,6 @@ The context attributes within each context response/entity are iterated, and a n
     * `fiwareServicePath`: The notified one or the default one.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
 
 [Top](#top)
 
@@ -360,7 +358,9 @@ In detail, this is the workflow when `NGSICKANSink` is combined with `CKANCache`
 
 ##<a name="section4"></a>Annexes
 
-###<a name="section1"></a>Provisioning a CKAN resource for the column mode
+###<a name="section4.1"></a>Provisioning a CKAN resource for the column mode
+This section is built upon the assumption you are familiar with the CKAN API. If not, please have a look on [it](http://docs.ckan.org/en/latest/api/).
+
 First of all, you'll need a CKAN organization and package/dataset before creating a resource and an associated datastore in order to persist the data.
 
 Creating an organization, let's say in [`demo.ckan.org`](http://demo.ckan.org/) for the sake of demonstration, but should be a CKAN deployment of yours; the organization name is `service`, because our entity will be in that FIWARE service:
