@@ -15,6 +15,8 @@ Content:
     * [`NGSICKANSink` class](#section3.1)
     * [`CKANBackendImpl` class](#section3.2)
     * [`CKANCache` class](#section3.3)
+* [Annexes](#section4)
+    * [Provisioning a CKAN resource for the column mode](#section4.1)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSICKANSink`, or simply `NGSICKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -54,8 +56,6 @@ The context attributes within each context response/entity are iterated, and a n
 * `column`: A single row is upserted for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus four additional fields:
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `fiwareServicePath`: The notified one or the default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
     * `entityId`: Notified entity identifier.
     * `entityType`: Notified entity type.
 
@@ -242,7 +242,7 @@ If `attr_persistence=colum` then `NGSICKANSink` will persist the data within the
                 "start": "/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986",
                 "next": "/api/3/action/datastore_search?offset=100&resource_id=611417a4-8196-4faf-83bc-663c173f6986"
             },
-            "total": 1 
+            "total": 1
         }
     }
 
@@ -302,6 +302,8 @@ Please observe not always the same number of attributes is notified; this depend
 
 In addition, when running in `column` mode, due to the number of notified attributes (and therefore the number of fields to be written within the Datastore) is unknown by Cygnus, the Datastore cannot be automatically created, and must be provisioned previously to the Cygnus execution. That's not the case of the `row` mode since the number of fields to be written is always constant, independently of the number of notified attributes.
 
+Please check the [Annexes](#section4) in order to know how to provision a resource for the column mode.
+
 [Top](#top)
 
 ####<a name="section2.3.2"></a>About batching
@@ -320,15 +322,15 @@ By default, `NGSICKANSink` has a configured batch size and batch accumulation ti
 As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
+
 A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
-    
+
     public void start();
 
 An implementation of `CKANBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSICKANSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -337,7 +339,7 @@ A complete configuration as the described above is read from the given `Context`
 This is a convenience backend class for CKAN that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `CKANBackend` interface (provides the methods that any CKAN backend must implement). Relevant methods are:
 
     public void persist(String orgName, String pkgName, String resName, String aggregation) throws Exception;
-    
+
 Persists the aggregated context data regarding a single entity's attribute (row mode) or a full list of attributes (column mode) within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. This method creates the parts of the hierarchy (organization, package/dataset, resource and datastore) if any of them is missing.
 
 [Top](#top)
@@ -354,3 +356,46 @@ In detail, this is the workflow when `NGSICKANSink` is combined with `CKANCache`
 
 [Top](#top)
 
+##<a name="section4"></a>Annexes
+
+###<a name="section4.1"></a>Provisioning a CKAN resource for the column mode
+This section is built upon the assumption you are familiar with the CKAN API. If not, please have a look on [it](http://docs.ckan.org/en/latest/api/).
+
+First of all, you'll need a CKAN organization and package/dataset before creating a resource and an associated datastore in order to persist the data.
+
+Creating an organization, let's say in [`demo.ckan.org`](http://demo.ckan.org/) for the sake of demonstration, but should be a CKAN deployment of yours; the organization name is `service`, because our entity will be in that FIWARE service:
+```
+$ curl -X POST "http://demo.ckan.org/api/3/action/organization_create" -d '{"name":"service"}' -H "Authorization: xxxxxxxx"
+```
+
+Creating a package/dataset within the above organization; the package name is `service_test`, because our entity will be in the FIWARE service `service` and in the FIWARE service path service_test:
+```
+$ curl -X POST "http://demo.ckan.org/api/3/action/package_create" -d '{"name":"service_test","owner_org":"service"}' -H "Authorization: xxxxxxxx"
+```
+
+Creating a resource within the above package/dataset (the package ID is given in the response to the above package creation request); the name of the resource is `room1_room` because the entity ID will be `room1` and its type `room`:
+```
+$ curl -X POST "http://demo.ckan.org/api/3/action/resource_create" -d '{"name":"room1_room","url":"none","format":"","package_id":"d35fca28-732f-4096-8376-944563f175ba"}' -H "Authorization: xxxxxxxx"
+```
+
+Finally, creating a datastore associated to the above resource and suitable for receiving Cgynus data in column mode (the resource ID is given in the response to the above resource creation request):
+```
+$ curl -X POST "http://demo.ckan.org/api/3/action/datastore_create" -d '{"fields":[{"id":"recvTime","type":"text"}, {"id":"fiwareServicePath","type":"text"}, {"id":"entityId","type":"text"}, {"id":"entityType","type":"text"}, {"id":"temperature","type":"float"}, {"id":"temperature_md","type":"json"}],"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7","force":"true"}' -H "Authorization: xxxxxxxx"
+```
+
+Now, Cygnus is able to persist data for an entity with ID `room1` of type `room` in the `service` service, `service_test` service path:
+```
+time=2016-04-26T15:54:45.753CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[240] : Starting internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
+time=2016-04-26T15:54:45.754CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[256] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2016-04-26T15:55:07.843CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[342] : Batch accumulation time reached, the batch will be processed as it is
+time=2016-04-26T15:55:07.844CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[396] : Batch completed, persisting it
+time=2016-04-26T15:55:07.846CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=persistAggregation | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSICKANSink[419] : [ckan-sink] Persisting data at OrionCKANSink (orgName=service, pkgName=service_test, resName=room1_room, data={"recvTime": "2016-04-26T13:54:45.756Z","fiwareServicePath": "/service_test","entityId": "room1","entityType": "room","temperature": "26.5"})
+time=2016-04-26T15:55:08.948CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[400] : Finishing internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
+```
+
+The insertion can be checked through the CKAN API as well:
+```
+$ curl -X POST "http://demo.ckan.org/api/3/action/datastore_search" -d '{"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7"}' -H "Authorization: xxxxxxxx"
+```
+
+[Top](#top)
