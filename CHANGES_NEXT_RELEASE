@@ -38,4 +38,5 @@
 - [cygnus-ngsi] [task] Refactor de Github repository in a per agent fashion (#864)
 - [cygnus-ngsi] [hardening] Add documentation for API about /v1/subscriptions in ManagementInterface (#808)
 - [cygnus-ngsi] [feature] Add NGSICartoDBSink (#927)
-- [cygnus] [hardening] Add documentation in orion_ckan_sink.md about the creation of resources & datastores for column mode (#971)
+- [cygnus-ngsi] [hardening] Add documentation in ngsi_ckan_sink.md about the creation of resources and datastores for column mode (#971)
+- [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
