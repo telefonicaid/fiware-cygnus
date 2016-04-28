@@ -46,32 +46,14 @@ curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --he
       "contextElement" : {
         "attributes" : [
           {
-            "name" : "temperature",
-            "type" : "centigrade",
-            "value" : "26.5"
+            "name" : "owner",
+            "type" : "string",
+            "value" : "Íñigo"
           }
         ],
         "type" : "Room",
         "isPattern" : "false",
-        "id" : "Room.1"
-      },
-      "statusCode" : {
-        "code" : "200",
-        "reasonPhrase" : "OK"
-      }
-    },
-    {
-      "contextElement" : {
-        "attributes" : [
-          {
-            "name" : "temperature",
-            "type" : "centigrade",
-            "value" : "19.3"
-          }
-        ],
-        "type" : "Room",
-        "isPattern" : "false",
-        "id" : "Room.suite"
+        "id" : "Room1"
       },
       "statusCode" : {
         "code" : "200",
