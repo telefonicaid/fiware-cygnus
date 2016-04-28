@@ -12,6 +12,7 @@ Content:
 * [PUT `/admin/log`](#section9)
 * [POST `/v1/subscriptions`](#section10)
 * [DELETE `/v1/subscriptions`](#section11)
+* [GET `/v1/subscriptions`](#section12)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -415,6 +416,44 @@ Missing fields (empty or not given):
 {"success":"false","error":"Missing endpoint"}
 {"success":"false","error":"Invalid endpoint, field 'host' is missing"}
 {"success":"false","error":"Invalid endpoint, field 'ssl is empty"}
+```
+
+[Top](#top)
+
+##<a name="section12"></a>`GET /v1/subscriptions`
+Gets an existent subscription from Orion, given the ngsi version and the subscription id as a query parameter.
+
+Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+```
+GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+```
+
+Responses:
+
+Valid and current subscription id with the correct ngsi version:
+```
+{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/xxx.xxx.xx.xxx:xxxx\/ngsi10\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
+```
+
+Valid but inexistent subscription id with the correct ngsi version:
+```
+{"success":"false","result" : {{"description":"","error":"subscriptionId does not correspond to an active subscription"}}
+```
+
+Invalid ngsi version:
+```
+{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
+```
+
+Valid but not implemented ngsi version (sending `ngsi_version=1`):
+```
+{"success":"false","error":"GET /v1/subscriptions not implemented."}
+```
+
+Missing or empty parameters:
+```
+{"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors."}
+{"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors."}
 ```
 
 [Top](#top)
