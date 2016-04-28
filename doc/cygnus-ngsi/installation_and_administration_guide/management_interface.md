@@ -12,7 +12,7 @@ Content:
 * [PUT `/admin/log`](#section9)
 * [POST `/v1/subscriptions`](#section10)
 * [DELETE `/v1/subscriptions`](#section11)
-* [GET `/v1/subscription`](#section12)
+* [GET `/v1/subscriptions`](#section12)
 
 ##<a name="section1"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
@@ -423,7 +423,7 @@ Missing fields (empty or not given):
 ##<a name="section12"></a>`GET /v1/subscriptions`
 Gets an existent subscription from Orion, given the ngsi version and the subscription id as a query parameter.
 
-Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2' due to this method is not implemented in version `1`).
+Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
 ```
 GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
 ```
