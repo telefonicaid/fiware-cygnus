@@ -44,8 +44,8 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     } // CartoDBBackendImpl
 
     @Override
-    public void insert(String tableName, String fields, String rows) throws Exception {
-        String query = "INSERT INTO " + tableName + " " + fields + " VALUES " + rows;
+    public void insert(String tableName, String withs, String fields, String rows) throws Exception {
+        String query = withs + "INSERT INTO " + tableName + " " + fields + " VALUES " + rows;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);
