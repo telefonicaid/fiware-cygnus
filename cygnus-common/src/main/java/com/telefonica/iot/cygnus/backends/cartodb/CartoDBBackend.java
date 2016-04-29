@@ -26,10 +26,11 @@ public interface CartoDBBackend {
     /**
      * Inserts the given aggregated data in the give table within the give database.
      * @param tableName
+     * @param withs
      * @param fields
      * @param rows
      * @throws java.lang.Exception
      */
-    void insert(String tableName, String fields, String rows) throws Exception;
+    void insert(String tableName, String withs, String fields, String rows) throws Exception;
     
 } // CartoDBBackend
