@@ -42,6 +42,8 @@ public class NGSICartoDBSink extends NGSISink {
     private boolean ssl;
     private String apiKey;
     private boolean flipCoordinates;
+    private boolean enableRaw;
+    private boolean enableDistance;
     private String schema;
     private CartoDBBackendImpl backend;
     
@@ -129,6 +131,30 @@ public class NGSICartoDBSink extends NGSISink {
             LOGGER.error("[" + this.getName() + "] Invalid configuration (flip_coordinates="
                     + flipCoordinatesStr + ") -- Must be 'true' or 'false'");
         } // if else
+        
+        String enableRawStr = context.getString("enable_raw", "true");
+
+        if (enableRawStr.equals("true") || enableRawStr.equals("false")) {
+            enableRaw = enableRawStr.equals("true");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw="
+                    + enableRawStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw="
+                    + enableRawStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        String enableDistanceStr = context.getString("enable_distance", "false");
+
+        if (enableDistanceStr.equals("true") || enableDistanceStr.equals("false")) {
+            enableDistance = enableDistanceStr.equals("true");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance="
+                    + enableDistanceStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
+                    + enableDistanceStr + ") -- Must be 'true' or 'false'");
+        } // if else
     } // configure
     
     @Override
@@ -158,17 +184,29 @@ public class NGSICartoDBSink extends NGSISink {
 
             // get the sub-batch for this destination
             ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            CartoDBAggregator aggregator = null;
 
-            // get an aggregator for this destination and initialize it
-            CartoDBAggregator aggregator = new CartoDBAggregator();
-            aggregator.initialize(subBatch.get(0));
+            if (enableRaw) {
+                // get an aggregator for this destination and initialize it
+                aggregator = new CartoDBAggregator();
+                aggregator.initialize(subBatch.get(0));
+            } // if
 
             for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+                if (enableRaw && aggregator != null) {
+                    aggregator.aggregate(cygnusEvent);
+                } // if
+                
+                if (enableDistance) {
+                    persistDistanceAnalysis(cygnusEvent);
+                } // if
             } // for
 
-            // persist the aggregation
-            persistAggregation(aggregator);
+            if (enableRaw) {
+                // persist the aggregation
+                persistAggregation(aggregator);
+            } // if
+            
             batch.setPersisted(destination);
         } // for
     } // persistBatch
@@ -332,13 +370,14 @@ public class NGSICartoDBSink extends NGSISink {
     } // CartoDBAggregator
     
     private void persistAggregation(CartoDBAggregator aggregator) throws Exception {
-        String rows = aggregator.getRows();
         //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
+        String withs = "";
         String fields = aggregator.getFields();
+        String rows = aggregator.getRows();
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Data (" + rows + ")");
-        backend.insert(tableName, fields, rows);
+        backend.insert(tableName, withs, fields, rows);
     } // persistAggregation
     
     /*
@@ -397,5 +436,75 @@ public class NGSICartoDBSink extends NGSISink {
 
         return name;
     } // buildTableName
+    
+    private void persistDistanceAnalysis(NGSIEvent event) throws Exception {
+        // iterate on all this context element attributes, if there are attributes
+        ArrayList<ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
+
+        if (contextAttributes == null || contextAttributes.isEmpty()) {
+            return;
+        } // if
+
+        for (ContextAttribute contextAttribute : contextAttributes) {
+            long recvTimeMs = event.getRecvTimeTs();
+            String attrType = contextAttribute.getType();
+            String attrValue = contextAttribute.getContextValue(false);
+            String attrMetadata = contextAttribute.getContextMetadata();
+            String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
+
+            if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
+                String tableName = buildTableName(event.getServicePath(), event.getEntity(),
+                        event.getAttribute()) + "_distance";
+                String withs = ""
+                        + "WITH geom AS ("
+                        + "   SELECT " + location + " AS point"
+                        + "), calcs AS ("
+                        + "   SELECT"
+                        + "      cartodb_id,"
+                        + "      ST_Distance(the_geom::geography, geom.point::geography) AS distance,"
+                        + "      (" + recvTimeMs + " - timeInstant) AS time"
+                        + "   FROM " + tableName + ", geom"
+                        + "   ORDER BY cartodb_id DESC"
+                        + "   LIMIT 1"
+                        + "), speed AS ("
+                        + "   SELECT"
+                        + "      (calcs.distance / NULLIF(calcs.time, 0)) AS curr_speed"
+                        + "   FROM calcs"
+                        + "), inserts AS ("
+                        + "   SELECT"
+                        + "      t1.max_speed,"
+                        + "      t1.min_speed,"
+                        + "      t2.num_samples,"
+                        + "      (-1 * ((-1 * t1.sumDistance) - calcs.distance)) AS sum_dist,"
+                        + "      (-1 * ((-1 * t1.sumTime) - calcs.time)) AS sum_time"
+                        + "   FROM"
+                        + "      ("
+                        + "         SELECT"
+                        + "            GREATEST(speed.curr_speed, maxSpeed) AS max_speed,"
+                        + "            LEAST(speed.curr_speed, minSpeed) AS min_speed,"
+                        + "            sumDistance,"
+                        + "            sumTime"
+                        + "         FROM " + tableName + ", speed"
+                        + "         ORDER BY cartodb_id DESC"
+                        + "         LIMIT 1"
+                        + "      ) AS t1,"
+                        + "      ("
+                        + "         SELECT (-1 * ((-1 * COUNT(*)) - 1)) AS num_samples"
+                        + "         FROM " + tableName
+                        + "      ) AS t2,"
+                        + "      calcs"
+                        + ")";
+                String fields = "(the_geom, currentSpeed, maxSpeed, minSpeed, numSamples, sumDistance, "
+                        + "sumTime, timeInstant)";
+                String rows = "((SELECT point FROM geom),(SELECT curr_speed FROM speed),"
+                        + "(SELECT max_speed FROM inserts),(SELECT min_speed FROM inserts),"
+                        + "(SELECT num_samples FROM inserts),(SELECT sum_dist FROM inserts),"
+                        + "(SELECT sum_time FROM inserts)," + recvTimeMs + ")";
+                LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
+                        + "), Table (" + tableName + "), Data (" + rows + ")");
+                backend.insert(tableName, withs, fields, rows);
+            } // if
+        } // for
+    } // persistDistanceAnalysis
     
 } // NGSICartoDBSink
