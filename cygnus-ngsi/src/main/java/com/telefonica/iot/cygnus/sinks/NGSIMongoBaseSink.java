@@ -21,6 +21,7 @@ import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.security.MessageDigest;
@@ -110,16 +111,28 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dbPrefix = NGSIUtils.encodeSTHDB(context.getString("db_prefix", "sth_"));
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        collectionPrefix = NGSIUtils.encodeSTHCollection(context.getString("collection_prefix", "sth_"));
+        dbPrefix = context.getString("db_prefix", "sth_");
+        
+        if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(dbPrefix)) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (db_prefix=" + dbPrefix + ") "
+                    + "-- Can only contain alphanumerics or underscores");
+        } // if else
+        
+        collectionPrefix = context.getString("collection_prefix", "sth_");
         
         if (collectionPrefix.equals("system.")) {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (collection_prefix="
                 + collectionPrefix + ") -- Cannot be 'system.'");
-        } else {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(dbPrefix)) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collection_prefix="
+                + collectionPrefix + ") -- Can only contain alphanumerics or underscores");
         } // if else
         
         String shouldHashStr = context.getString("should_hash", "false");
@@ -172,7 +185,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
+        String dbName = dbPrefix + fiwareService;
 
         if (dbName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -185,20 +198,17 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     /**
      * Builds a collection name given a fiwareServicePath and a destination. It throws an exception if the naming
      * conventions are violated.
-     * @param dbName
      * @param fiwareServicePath
-     * @param entity
-     * @param attribute
      * @param isAggregated
      * @param entityId
      * @param entityType
+     * @param attrName
      * @param fiwareService
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String dbName, String fiwareServicePath, String entity, String attribute,
-            boolean isAggregated, String entityId, String entityType, String fiwareService)
-        throws Exception {
+    protected String buildCollectionName(String fiwareService, String fiwareServicePath, String entityId,
+            String entityType, String attrName, boolean isAggregated) throws Exception {
         String collectionName;
 
         switch (dataModel) {
@@ -206,13 +216,20 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
                 collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath);
                 break;
             case DMBYENTITY:
-                collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath) + "_"
-                        + NGSIUtils.encodeSTHCollection(entity);
+                collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath)
+                        + NGSIConstants.STH_CONCAT_CHARS
+                        + NGSIUtils.encodeSTHCollection(entityId)
+                        + NGSIConstants.STH_CONCAT_CHARS
+                        + NGSIUtils.encodeSTHCollection(entityType);
                 break;
             case DMBYATTRIBUTE:
                 collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath)
-                        + "_" + NGSIUtils.encodeSTHCollection(entity)
-                        + "_" + NGSIUtils.encodeSTHCollection(attribute);
+                        + NGSIConstants.STH_CONCAT_CHARS
+                        + NGSIUtils.encodeSTHCollection(entityId)
+                        + NGSIConstants.STH_CONCAT_CHARS
+                        + NGSIUtils.encodeSTHCollection(entityType)
+                        + NGSIConstants.STH_CONCAT_CHARS
+                        + NGSIUtils.encodeSTHCollection(attrName);
                 break;
             default:
                 // this should never be reached
@@ -220,6 +237,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         } // switch
 
         if (shouldHash) {
+            String dbName = buildDbName(fiwareService);
             int limit = getHashSizeInBytes(dbName);
 
             if (limit < NGSIConstants.STH_MIN_HASH_SIZE_IN_BYTES) {
@@ -233,7 +251,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             String hash = generateHash(collectionName, limit);
             collectionName = collectionPrefix + hash;
             backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
-                    entityType, attribute, entity);
+                    entityType, attrName);
         } else {
             collectionName = collectionPrefix + collectionName;
 
