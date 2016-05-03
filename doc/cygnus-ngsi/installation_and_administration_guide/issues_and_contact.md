@@ -5,6 +5,7 @@ There are several channels suited for reporting issues and asking for doubts in 
 * Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
 * Personal email:
     * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
+    * [pablo.coellovillalba@telefonica.com](pablo.coellovillalba@telefonica.com) **[Contributor]**
     * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
     * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
     * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
