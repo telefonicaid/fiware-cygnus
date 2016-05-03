@@ -19,7 +19,6 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -71,6 +70,7 @@ public class NGSIMongoBaseSinkTest {
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
                     + "- FAIL - 'system.' value not detected for 'collection_prefix'");
+            throw e;
         } // try catch
     } // testConfigureCollectionPrefixIsNotSystem
     
@@ -94,6 +94,7 @@ public class NGSIMongoBaseSinkTest {
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
                     + "- FAIL - 'collection_prefix=" + collectionPrefix + "' not correctly detected as invalid");
+            throw e;
         } // try catch
     } // testConfigureCollectionPrefixIsLegal
     
@@ -117,6 +118,7 @@ public class NGSIMongoBaseSinkTest {
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
                     + "- FAIL - 'db_prefix=" + dbPrefix + "' not correctly detected as invalid");
+            throw e;
         } // try catch
     } // testConfigureDBPrefixIsLegal
     
