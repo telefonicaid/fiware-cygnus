@@ -24,7 +24,23 @@ package com.telefonica.iot.cygnus.backends.cartodb;
 public interface CartoDBBackend {
     
     /**
-     * Inserts the given aggregated data in the give table within the give database.
+     * Gets it the given table is empty ot not.
+     * @param tableName
+     * @return True if the given table is empty, false otherwise
+     * @throws Exception
+     */
+    boolean isEmpty(String tableName) throws Exception;
+    
+    /**
+     * Creates a table with the given name.
+     * @param tableName
+     * @param fields
+     * @throws Exception
+     */
+    void createTable(String tableName, String fields) throws Exception;
+    
+    /**
+     * Inserts the given rows regarding the given fields in the given table; withs are prefixed to the query.
      * @param tableName
      * @param withs
      * @param fields

@@ -451,58 +451,68 @@ public class NGSICartoDBSink extends NGSISink {
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
             String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
+            String tableName = buildTableName(event.getServicePath(), event.getEntity(), event.getAttribute())
+                    + "_distance";
 
             if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
-                String tableName = buildTableName(event.getServicePath(), event.getEntity(),
-                        event.getAttribute()) + "_distance";
-                String withs = ""
-                        + "WITH geom AS ("
-                        + "   SELECT " + location + " AS point"
-                        + "), calcs AS ("
-                        + "   SELECT"
-                        + "      cartodb_id,"
-                        + "      ST_Distance(the_geom::geography, geom.point::geography) AS distance,"
-                        + "      (" + recvTimeMs + " - timeInstant) AS time"
-                        + "   FROM " + tableName + ", geom"
-                        + "   ORDER BY cartodb_id DESC"
-                        + "   LIMIT 1"
-                        + "), speed AS ("
-                        + "   SELECT"
-                        + "      (calcs.distance / NULLIF(calcs.time, 0)) AS curr_speed"
-                        + "   FROM calcs"
-                        + "), inserts AS ("
-                        + "   SELECT"
-                        + "      t1.max_speed,"
-                        + "      t1.min_speed,"
-                        + "      t2.num_samples,"
-                        + "      (-1 * ((-1 * t1.sumDistance) - calcs.distance)) AS sum_dist,"
-                        + "      (-1 * ((-1 * t1.sumTime) - calcs.time)) AS sum_time"
-                        + "   FROM"
-                        + "      ("
-                        + "         SELECT"
-                        + "            GREATEST(speed.curr_speed, maxSpeed) AS max_speed,"
-                        + "            LEAST(speed.curr_speed, minSpeed) AS min_speed,"
-                        + "            sumDistance,"
-                        + "            sumTime"
-                        + "         FROM " + tableName + ", speed"
-                        + "         ORDER BY cartodb_id DESC"
-                        + "         LIMIT 1"
-                        + "      ) AS t1,"
-                        + "      ("
-                        + "         SELECT (-1 * ((-1 * COUNT(*)) - 1)) AS num_samples"
-                        + "         FROM " + tableName
-                        + "      ) AS t2,"
-                        + "      calcs"
-                        + ")";
-                String fields = "(the_geom, currentSpeed, maxSpeed, minSpeed, numSamples, sumDistance, "
-                        + "sumTime, timeInstant)";
-                String rows = "((SELECT point FROM geom),(SELECT curr_speed FROM speed),"
-                        + "(SELECT max_speed FROM inserts),(SELECT min_speed FROM inserts),"
-                        + "(SELECT num_samples FROM inserts),(SELECT sum_dist FROM inserts),"
-                        + "(SELECT sum_time FROM inserts)," + recvTimeMs + ")";
-                LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
-                        + "), Table (" + tableName + "), Data (" + rows + ")");
-                backend.insert(tableName, withs, fields, rows);
+                if (backend.isEmpty(tableName)) {
+                    String withs = "";
+                    String fields = "(the_geom, currentSpeed, maxSpeed, minSpeed, numSamples, sumDistance, "
+                            + "sumTime, timeInstant)";
+                    String rows = "(" + location + ",0,0,0,1,0,0," + recvTimeMs + ")";
+                    LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
+                            + "), Table (" + tableName + "), Data (" + rows + ")");
+                    backend.insert(tableName, withs, fields, rows);
+                } else {
+                    String withs = ""
+                            + "WITH geom AS ("
+                            + "   SELECT " + location + " AS point"
+                            + "), calcs AS ("
+                            + "   SELECT"
+                            + "      cartodb_id,"
+                            + "      ST_Distance(the_geom::geography, geom.point::geography) AS distance,"
+                            + "      (" + recvTimeMs + " - timeInstant) AS time"
+                            + "   FROM " + tableName + ", geom"
+                            + "   ORDER BY cartodb_id DESC"
+                            + "   LIMIT 1"
+                            + "), speed AS ("
+                            + "   SELECT"
+                            + "      (calcs.distance / NULLIF(calcs.time, 0)) AS curr_speed"
+                            + "   FROM calcs"
+                            + "), inserts AS ("
+                            + "   SELECT"
+                            + "      t1.max_speed,"
+                            + "      t1.min_speed,"
+                            + "      t2.num_samples,"
+                            + "      (-1 * ((-1 * t1.sumDistance) - calcs.distance)) AS sum_dist,"
+                            + "      (-1 * ((-1 * t1.sumTime) - calcs.time)) AS sum_time"
+                            + "   FROM"
+                            + "      ("
+                            + "         SELECT"
+                            + "            GREATEST(speed.curr_speed, maxSpeed) AS max_speed,"
+                            + "            LEAST(speed.curr_speed, minSpeed) AS min_speed,"
+                            + "            sumDistance,"
+                            + "            sumTime"
+                            + "         FROM " + tableName + ", speed"
+                            + "         ORDER BY cartodb_id DESC"
+                            + "         LIMIT 1"
+                            + "      ) AS t1,"
+                            + "      ("
+                            + "         SELECT (-1 * ((-1 * COUNT(*)) - 1)) AS num_samples"
+                            + "         FROM " + tableName
+                            + "      ) AS t2,"
+                            + "      calcs"
+                            + ")";
+                    String fields = "(the_geom, currentSpeed, maxSpeed, minSpeed, numSamples, sumDistance, "
+                            + "sumTime, timeInstant)";
+                    String rows = "((SELECT point FROM geom),(SELECT curr_speed FROM speed),"
+                            + "(SELECT max_speed FROM inserts),(SELECT min_speed FROM inserts),"
+                            + "(SELECT num_samples FROM inserts),(SELECT sum_dist FROM inserts),"
+                            + "(SELECT sum_time FROM inserts)," + recvTimeMs + ")";
+                    LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
+                            + "), Table (" + tableName + "), Data (" + rows + ")");
+                    backend.insert(tableName, withs, fields, rows);
+                } // if else
             } // if
         } // for
     } // persistDistanceAnalysis
