@@ -127,7 +127,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (collection_prefix="
                 + collectionPrefix + ") -- Cannot be 'system.'");
-        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(dbPrefix)) {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(collectionPrefix)) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         } else {
             invalidConfiguration = true;
