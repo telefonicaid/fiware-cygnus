@@ -88,7 +88,7 @@ public class NGSIRestHandlerTest {
     
     /**
      * [NGSIRestHandler.configure] -------- When not configured, the default values are used for non mandatory
- parameters.
+     * parameters.
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
@@ -130,6 +130,56 @@ public class NGSIRestHandlerTest {
             throw e;
         } // try catch
     } // testConfigureNotMandatoryParameters
+    
+    /**
+     * [NGSIRestHandler.configure] -------- The configured default service can only contain alphanumerics and
+     * underscores.
+     */
+    @Test
+    public void testConfigureDefaultServiceIsLegal() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured default service can only contain alphanumerics and underscores");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String configuredDefaultService = "default-service!!";
+        handler.configure(createContext(null, configuredDefaultService, null));
+        
+        try {
+            assertTrue(handler.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured default service '" + configuredDefaultService
+                    + "' was detected as invalid");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured default service '" + configuredDefaultService
+                    + "' was not detected as invalid");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServiceIsLegal
+    
+    /**
+     * [NGSIRestHandler.configure] -------- The configured default service path can only contain alphanumerics
+     * and underscores.
+     */
+    @Test
+    public void testConfigureDefaultServicePathIsLegal() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured default service path can only contain alphanumercis and underscores");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String configuredDefaultServicePath = "/something.?";
+        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        
+        try {
+            assertTrue(handler.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured default service path '" + configuredDefaultServicePath
+                    + "' was detected as invalid");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured default service path '" + configuredDefaultServicePath
+                    + "' was not detected as invalid");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServicePathIsLegal
     
     /**
      * [NGSIRestHandler.configure] -------- The configured default service path must start with '/'.
