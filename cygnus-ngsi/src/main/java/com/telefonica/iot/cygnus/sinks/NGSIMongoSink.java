@@ -152,11 +152,13 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         public void initialize(NGSIEvent cygnusEvent) throws Exception {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
             dbName = buildDbName(service);
-            collectionName = buildCollectionName(dbName, servicePath, entity, attribute, false, null, null,
-                    service);
+            // default concatenation of entityId and entityType wihtin 'entity' is not valid for MongoDB
+            // default concatenation of attrName and attrType within 'attribute' is not valid for MongoDB
+            String entityId = cygnusEvent.getContextElement().getId();
+            String entityType = cygnusEvent.getContextElement().getType();
+            String attrName = cygnusEvent.getContextElement().getAttributes().get(0).getName();
+            collectionName = buildCollectionName(service, servicePath, entityId, entityType, attrName, false);
         } // initialize
         
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
