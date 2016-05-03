@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -55,6 +56,7 @@ public final class CommonUtils {
             "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
             "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
+    private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z0-9_]*$");
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -294,4 +296,12 @@ public final class CommonUtils {
         return res;
     } // getTimeInstant
 
+    /**
+     * Gets is a string is made of alphanumerics and/or underscores.
+     * @param s
+     * @return True is the string is made of alphanumerics and/or underscores, otherwise false.
+     */
+    public static boolean isMAdeOfAlphaNumericsOrUnderscores(String s) {
+        return PATTERN.matcher(s).matches();
+    } // isMAdeOfAlphaNumericsOrUnderscores
 } // CommonUtils
