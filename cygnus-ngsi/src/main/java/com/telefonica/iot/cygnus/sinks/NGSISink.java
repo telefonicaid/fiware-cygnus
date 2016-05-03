@@ -645,7 +645,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                                 + "_" + attr.getName();
                         NGSIEvent cygnusEvent = new NGSIEvent(
                                 recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
-                                attr.getName(), contextElement.filter(destination));
+                                attr.getName(), contextElement.filter(attr.getName()));
                         batch.addEvent(destination, cygnusEvent);
                     } // for
                 } // for
