@@ -163,7 +163,7 @@ public class NGSIRestHandlerTest {
     @Test
     public void testConfigureDefaultServicePathIsLegal() {
         System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
-                + "-------- The configured default service path can only contain alphanumercis and underscores");
+                + "-------- The configured default service path can only contain alphanumerics and underscores");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultServicePath = "/something.?";
         handler.configure(createContext(null, null, configuredDefaultServicePath));
