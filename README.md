@@ -36,5 +36,7 @@ The per agent **Flume Extensions Catalogue** completes the available documentati
 
 Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
 
+Finally, please check our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/) if you want to know how to use our API methods for Cygnus.
+
 ##Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
