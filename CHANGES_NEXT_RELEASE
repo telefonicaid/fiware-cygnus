@@ -39,3 +39,4 @@
 - [cygnus-ngsi] [hardening] Add documentation for API about /v1/subscriptions in ManagementInterface (#808)
 - [cygnus-ngsi] [feature] Add NGSICartoDBSink (#927)
 - [cygnus] [hardening] Add documentation in orion_ckan_sink.md about the creation of resources & datastores for column mode (#971)
+- [cygnus-ngsi] [bug] Fix configuration of grouping rules in quick_start_guide.md (#983)
