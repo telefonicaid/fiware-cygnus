@@ -33,14 +33,11 @@ public class TwitterHDFSSinkTest {
     private final String cosmosPort = "14000";
     private final String hdfsUsername = "user1";
     private final String hdfsPassword = "12345";
+    private final String hdfsFolder = "test_folder";
+    private final String hdfsFile = "test_file.txt";
     private final String oauth2Token = "tokenabcdefghijk";
-    private final String serviceAsNamespace = "false";
-    private final String enableHive = "true";
-    private final String hiveServerVersion = "2";
-    private final String hiveHost = "localhost";
-    private final String hivePort = "10000";
+    private final String enableHive = "false";
     private final String enableKrb5Auth = "false";
-    private final String enableGrouping = "true";
 
     @Before
     public void setUp() throws Exception {
@@ -69,13 +66,8 @@ public class TwitterHDFSSinkTest {
         assertEquals(hdfsUsername, sink.getHDFSUsername());
         assertEquals(hdfsPassword, sink.getHDFSPassword());
         assertEquals(oauth2Token, sink.getOAuth2Token());
-        assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
         assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
-        assertEquals(hiveServerVersion, sink.getHiveServerVersion());
-        assertEquals(hiveHost, sink.getHiveHost());
-        assertEquals(hivePort, sink.getHivePort());
         assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
-        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
     } // testConfigure
 
     /**
@@ -101,15 +93,11 @@ public class TwitterHDFSSinkTest {
         context.put("hdfs_port", cosmosPort);
         context.put("hdfs_username", hdfsUsername);
 
-        context.put("oauth2_token", oauth2Token);
-        context.put("service_as_namespace", serviceAsNamespace);
-        context.put("hive", enableHive);
-        context.put("hive.server_version", hiveServerVersion);
-        context.put("hive.host", hiveHost);
-        context.put("hive.port", hivePort);
+        context.put("hdfs_folder", hdfsFolder);
+        context.put("hdfs_file", hdfsFile);
 
+        context.put("oauth2_token", oauth2Token);
         context.put("krb5_auth", enableKrb5Auth);
-        context.put("enable_grouping", enableGrouping);
         return context;
     } // createContext
 }
