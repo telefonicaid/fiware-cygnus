@@ -1,0 +1,9 @@
+target/
+# IntelliJ local files
+*.idea
+*.iml
+nbactions.xml
+maven-deps/
+.DS_Store
+archived/
+cygnus-ngsi/ignore

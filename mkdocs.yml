@@ -1,0 +1,74 @@
+site_name: fiware-cygnus
+site_url: https://fiware-cygnus.readthedocs.org
+repo_url: https://github.com/telefonicaid/fiware-cygnus.git
+site_description: Cygnus Documentation
+docs_dir: doc
+site_dir: html
+markdown_extensions: [toc,fenced_code]
+use_directory_urls: false
+theme: readthedocs
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+pages:
+  - Home: index.md
+  - 'cygnus-common library':
+      - 'Installation and Administration Guide':
+          - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
+          - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
+          - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
+          - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
+          - 'Flume environmnet configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
+          - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'
+          - 'Running as a process': 'cygnus-common/installation_and_administration_guide/running_as_process.md'
+          - 'Testing': 'cygnus-common/installation_and_administration_guide/testing.md'
+          - 'Logs and alarms': 'cygnus-common/installation_and_administration_guide/logs_and_alarms.md'
+          - 'Management interface': 'cygnus-common/installation_and_administration_guide/management_interface.md'
+          - 'Sanity checks': 'cygnus-common/installation_and_administration_guide/sanity_checks.md'
+          - 'Diagnosis procedures': 'cygnus-common/installation_and_administration_guide/diagnosis_procedures.md'
+          - 'Reporting issues and contact information': 'cygnus-common/installation_and_administration_guide/issues_and_contact.md'
+  - 'cygnus-ngsi agent':
+      - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
+      - 'Installation and Administration Guide':
+          - 'Introduction': 'cygnus-ngsi/installation_and_administration_guide/introduction.md'
+          - 'Installation via RPM': 'cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md'
+          - 'Installation via docker': 'cygnus-ngsi/installation_and_administration_guide/install_with_docker.md'
+          - 'Installation from sources': 'cygnus-ngsi/installation_and_administration_guide/install_from_sources.md'
+          - 'NGSI agent configuration': 'cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md'
+          - 'Grouping Rules configuration': 'cygnus-ngsi/installation_and_administration_guide/grouping_rules_conf.md'
+          - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
+          - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
+          - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
+          - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
+          - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
+          - 'Sanity checks': 'cygnus-ngsi/installation_and_administration_guide/sanity_checks.md'
+          - 'Diagnosis procedures': 'cygnus-ngsi/installation_and_administration_guide/diagnosis_procedures.md'
+          - 'Reporting issues and contact information': 'cygnus-ngsi/installation_and_administration_guide/issues_and_contact.md'
+      - 'User and Programmer Guide':
+          - 'Introduction': 'cygnus-ngsi/user_and_programmer_guide/introduction.md'
+          - 'Connecting Orion Context Broker and Cygnus': 'cygnus-ngsi/user_and_programmer_guide/connecting_orion.md'
+          - 'Adding a new sink': 'cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md'
+          - 'Reporting issues and contact information': 'cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md'
+      - 'Flume extensions catalogue':
+          - 'Introduction': 'cygnus-ngsi/flume_extensions_catalogue/introduction.md'
+          - 'Naming conventions': 'cygnus-ngsi/flume_extensions_catalogue/naming_conventions.md'
+          - 'OrionRESTHandler': 'cygnus-ngsi/flume_extensions_catalogue/orion_rest_handler.md'
+          - 'OrionCKANSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_ckan_sink.md'
+          - 'OrionDynamoDBSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_dynamodb_sink.md'
+          - 'OrionKafkaSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_kafka_sink.md'
+          - 'OrionHDFSSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_hdfs_sink.md'
+          - 'OrionMongoSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_mongo_sink.md'
+          - 'OrionMySQLSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_mysql_sink.md'
+          - 'OrionPostgreSQLSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_postgresql_sink.md'
+          - 'OrionSTHSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_sth_sink.md'
+          - 'OrionTestSink': 'cygnus-ngsi/flume_extensions_catalogue/orion_test_sink.md'
+          - 'GroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/grouping_interceptor.md'
+          - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
+          - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
+  - 'cygnus-twitter agent':
+      - 'Quick Start Guide': 'cygnus-twitter/to_be_done.md'
+      - 'Installation and Administration Guide':
+          - 'To be done': 'cygnus-twitter/to_be_done.md'
+      - 'User and Programmer Guide':
+          - 'To be done': 'cygnus-twitter/to_be_done.md'
+      - 'Flume extensions catalogue':
+          - 'To be done': 'cygnus-twitter/to_be_done.md'
+

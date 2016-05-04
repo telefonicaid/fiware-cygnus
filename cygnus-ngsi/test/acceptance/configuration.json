@@ -1,0 +1,6 @@
+{
+    "path_to_settings_folder":"settings",
+    "grouping_rules_name": "grouping_rules.conf",
+    "log_file": "/var/log/cygnus/cygnus.log",
+    "jenkins": "false"
+}

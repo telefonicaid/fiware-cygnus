@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="5">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript">
+            // pregenerated colors 
+            var pregeneratedColors = ['#0000FF', '#B22222', '#008000', '#FF8C00', '#DA70D6', '#800080', '#F0E68C'];
+            
+            // load the chart package from Google
+            google.charts.load('current', {packages: ['corechart', 'line', 'gauge']});
+            
+            // draw the charts once loaded the page
+            google.charts.setOnLoadCallback(drawCharts);
+            
+            // drawing charts function
+            function drawCharts() {
+                $.ajax({
+                    url: 'http://localhost:8082/stats' // TCP/8082 in order to avoid CORS access control
+                }).done(function(json) {
+                    drawSourceProcessingDeltas(json.stats.sources);
+                });
+                
+                $.ajax({
+                    url: 'http://localhost:8082/points'
+                }).done(function(json) {
+                    drawChannelLoads(json.channel_points);
+                });
+            } // drawCharts
+            
+            function drawSourceProcessingDeltas(sourceStats) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Source name');
+                data.addColumn('number', 'Value');
+                
+                for (var i in sourceStats) {
+                    var source = sourceStats[i];
+                    var delta = 100;
+                    
+                    if (source.num_received_events !== 0) {
+                        delta = 100 * source.num_processed_events / source.num_received_events;
+                    } // if
+                    
+                    var column = [source.name, delta];
+                    console.log(column[0]);
+                    console.log(column[1]);
+                    data.addRow(column);
+                } // for
+              
+                var options = {
+                    width: 400, height: 150,
+                    redFrom: 0, redTo: 10,
+                    yellowFrom:10, yellowTo: 50,
+                    minorTicks: 5
+                };
+
+                var chart = new google.visualization.Gauge(document.getElementById('sources_charts_div'));
+                chart.draw(data, options);
+            } // drawSourceProcessingDeltas
+            
+            function drawChannelLoads(channelPoints) {
+                var chartColors = [];
+                var channelColumns = channelPoints.columns;
+                var channelRows = channelPoints.rows;
+                var data = new google.visualization.DataTable();
+
+                for (var i in channelColumns) {
+                    data.addColumn('number', channelColumns[i]);
+                    chartColors.push(pregeneratedColors[i]);
+                } // for
+
+                data.addRows(channelRows);
+
+                var options = {
+                    hAxis: {
+                        title: 'Time (1 unit time are 5 seconds)'
+                    },
+                    vAxis: {
+                        title: 'Number of events'
+                    },
+                    colors: chartColors
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('channels_charts_div'));
+                chart.draw(data, options);
+            } // drawChannelLoads
+            
+            function drawSinksCharts(points) {
+                
+            } // drawSinksCharts
+        </script>
+    </head>
+    <body>
+        <h1>Cygnus Control Panel (beta)</h1>
+        <h2>Processed notifications at the sources (%)</h2>
+        <div id="sources_charts_div" style="width: 900px; height: 150px"></div>
+        <h2>Channels load</h2>
+        <div id="channels_charts_div" style="width: 900px; height: 500px"></div>
+        <h2>Persisted events at the sinks (%)</h2>
+        <div id="sinks_charts_div" style="width: 900px; height: 500px"></div>
+    </body>
+</html>
