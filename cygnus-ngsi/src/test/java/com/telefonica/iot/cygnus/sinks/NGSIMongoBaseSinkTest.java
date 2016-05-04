@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -51,6 +52,82 @@ public class NGSIMongoBaseSinkTest {
     } // NGSIMongoBaseSinkTest
     
     /**
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' cannot be 'system.'.
+     */
+    @Test
+    public void testConfigureCollectionPrefixIsNotSystem() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'collection_prefix' cannot be 'system.'");
+        String collectionPrefix = "system.";
+        String dbPrefix = "sth_";
+        String dataModel = null; // defaulting
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'system.' value detected for 'collection_prefix'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'system.' value not detected for 'collection_prefix'");
+            throw e;
+        } // try catch
+    } // testConfigureCollectionPrefixIsNotSystem
+    
+    /**
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
+     */
+    @Test
+    public void testConfigureCollectionPrefixIsEncoded() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
+        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
+        String dbPrefix = "sth_";
+        String dataModel = null; // defaulting
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        String encodedCollectionPrefix = NGSIUtils.encodeSTHCollection(collectionPrefix);
+        
+        try {
+            assertTrue(sink.collectionPrefix.equals(encodedCollectionPrefix));
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'collection_prefix=" + collectionPrefix
+                    + "' correctly encoded as '" + encodedCollectionPrefix + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'collection_prefix=" + collectionPrefix
+                    + "' wrongly encoded as '" + encodedCollectionPrefix + "'");
+            throw e;
+        } // try catch
+    } // testConfigureCollectionPrefixIsEncoded
+    
+    /**
+     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbiden characters.
+     */
+    @Test
+    public void testConfigureDBPrefixIsEncoded() {
+        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
+        String dataModel = null; // defaulting
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        String encodedDbPrefix = NGSIUtils.encodeSTHDB(dbPrefix);
+        
+        try {
+            assertTrue(sink.dbPrefix.equals(encodedDbPrefix));
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + encodedDbPrefix + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+                    + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + encodedDbPrefix + "'");
+            throw e;
+        } // try catch
+    } // testConfigureDBPrefixIsEncoded
+    
+    /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
      * data_model=dm-by-service-path, the MongoDB collection name is <prefix>/.
      */
@@ -62,7 +139,7 @@ public class NGSIMongoBaseSinkTest {
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
         String dataModel = "dm-by-service-path";
-        NGSIMongoSink sink = new NGSIMongoSink();
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -105,7 +182,7 @@ public class NGSIMongoBaseSinkTest {
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
         String dataModel = "dm-by-entity";
-        NGSIMongoSink sink = new NGSIMongoSink();
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -150,7 +227,7 @@ public class NGSIMongoBaseSinkTest {
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
         String dataModel = "dm-by-attribute";
-        NGSIMongoSink sink = new NGSIMongoSink();
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         String dbName = "sth_default";
         String fiwareService = "default";
