@@ -15,6 +15,6 @@ If your aim is to contribute to cygnus-common, please refer to the [User and Pro
 [Top](#top)
 
 ##Structure of the document
-Apart from this introduction, this Installation and Administration Guide mainly contains sections about installing, configuring, running and testing cygnus-common. The FIWARE user will also find useful information regarding logs and alarmas, how to manage a Cygnus agent through the RESTful interface and important performance tips. In addition, sanity check procedures (useful to know wether the installation was successful or not) and diagnosis procedures (a set of tips aiming to help when an issue arises) are provided as well.
+Apart from this introduction, this Installation and Administration Guide mainly contains sections about installing, configuring, running and testing cygnus-common. The FIWARE user will also find useful information regarding logs and alarms, how to manage a Cygnus agent through the RESTful interface and important performance tips. In addition, sanity check procedures (useful to know wether the installation was successful or not) and diagnosis procedures (a set of tips aiming to help when an issue arises) are provided as well.
 
 [Top](#top)
