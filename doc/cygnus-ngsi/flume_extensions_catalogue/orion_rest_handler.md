@@ -132,7 +132,7 @@ As said, Flume events are not much more different than the above representation:
 |---|---|---|---|
 | notification\_target | no | `notify/` | Any other configured value must start with `/`. |
 | default\_service | no | `default` | Alphanumerics and underscores are only accepted. | 
-| default\_service\_path | no | `/` | `/` is the root service path (also know as root subservice). Any other configured value must start with `/`. Apart from the initial slash, alphanumerics and underscores are onlyu accepted. |
+| default\_service\_path | no | `/` | `/` is the root service path (also know as root subservice). Any other configured value must start with `/`. Apart from the initial slash, alphanumerics and underscores are only accepted. |
 
 A configuration example could be:
 
