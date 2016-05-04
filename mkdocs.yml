@@ -10,24 +10,33 @@ theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
 pages:
   - Home: index.md
+  - 'cygnus-common library':
+      - 'Installation and Administration Guide':
+          - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
+          - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
+          - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
+          - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
+          - 'Flume environmnet configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
+          - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'
+          - 'Running as a process': 'cygnus-common/installation_and_administration_guide/running_as_process.md'
+          - 'Testing': 'cygnus-common/installation_and_administration_guide/testing.md'
+          - 'Logs and alarms': 'cygnus-common/installation_and_administration_guide/logs_and_alarms.md'
+          - 'Management interface': 'cygnus-common/installation_and_administration_guide/management_interface.md'
+          - 'Sanity checks': 'cygnus-common/installation_and_administration_guide/sanity_checks.md'
+          - 'Diagnosis procedures': 'cygnus-common/installation_and_administration_guide/diagnosis_procedures.md'
+          - 'Reporting issues and contact information': 'cygnus-common/installation_and_administration_guide/issues_and_contact.md'
   - 'cygnus-ngsi agent':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-ngsi/installation_and_administration_guide/introduction.md'
-          - 'Hardware requirements': 'cygnus-ngsi/installation_and_administration_guide/hw_requirements.md'
           - 'Installation via RPM': 'cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md'
           - 'Installation via docker': 'cygnus-ngsi/installation_and_administration_guide/install_with_docker.md'
           - 'Installation from sources': 'cygnus-ngsi/installation_and_administration_guide/install_from_sources.md'
-          - 'Cygnus agent configuration': 'cygnus-ngsi/installation_and_administration_guide/cygnus_agent_conf.md'
-          - 'Flume environmnet configuration': 'cygnus-ngsi/installation_and_administration_guide/flume_env_conf.md'
+          - 'NGSI agent configuration': 'cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md'
           - 'Grouping Rules configuration': 'cygnus-ngsi/installation_and_administration_guide/grouping_rules_conf.md'
-          - 'log4j configuration': 'cygnus-ngsi/installation_and_administration_guide/log4j_conf.md'
           - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
           - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
-          - 'Running as a process': 'cygnus-ngsi/installation_and_administration_guide/running_as_process.md'
           - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
-          - 'Logs and alarms': 'cygnus-ngsi/installation_and_administration_guide/logs_and_alarms.md'
-          - 'Management interface': 'cygnus-ngsi/installation_and_administration_guide/management_interface.md'
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
           - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
           - 'Sanity checks': 'cygnus-ngsi/installation_and_administration_guide/sanity_checks.md'
@@ -62,6 +71,4 @@ pages:
           - 'To be done': 'cygnus-twitter/to_be_done.md'
       - 'Flume extensions catalogue':
           - 'To be done': 'cygnus-twitter/to_be_done.md'
-  - 'cygnus-common library':
-      - 'To be done': 'cygnus-common/to_be_done.md'
 
