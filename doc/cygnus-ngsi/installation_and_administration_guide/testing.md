@@ -8,7 +8,7 @@ Content:
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
-    $ cd fiware-cygnus
+    $ cd fiware-cygnus/cygnus-ngsi
     $ mvn test
     
 You should get an output similat to the following one:
@@ -16,460 +16,286 @@ You should get an output similat to the following one:
 ```
 $ mvn test
 [INFO] Scanning for projects...
-[WARNING] 
-[WARNING] Some problems were encountered while building the effective model for com.telefonica.iot:cygnus:jar:0.10.0_SNAPSHOT
-[WARNING] 'version' uses an unsupported snapshot version format, should be '*-SNAPSHOT' instead. @ line 7, column 12
-[WARNING] 
-[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
-[WARNING] 
-[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
-[WARNING] 
 [INFO]                                                                         
 [INFO] ------------------------------------------------------------------------
-[INFO] Building cygnus 0.10.0_SNAPSHOT
+[INFO] Building cygnus-ngsi 0.13.0_SNAPSHOT
 [INFO] ------------------------------------------------------------------------
-[WARNING] The artifact xml-apis:xml-apis:jar:1.2.01 has been relocated to xerces:xmlParserAPIs:jar:2.6.2
 [INFO] 
-[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ cygnus ---
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ cygnus-ngsi ---
 [debug] execute contextualize
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Copying 2 resources
 [INFO] 
-[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ cygnus ---
-[INFO] Nothing to compile - all classes are up to date
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ cygnus-ngsi ---
+[INFO] Compiling 12 source files to /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/classes
 [INFO] 
-[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ cygnus ---
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ cygnus-ngsi ---
 [debug] execute contextualize
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
-[INFO] skip non existing resourceDirectory /Users/frb/devel/fiware/fiware-cygnus/src/test/resources
+[INFO] skip non existing resourceDirectory /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/src/test/resources
 [INFO] 
-[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ cygnus ---
-[INFO] Nothing to compile - all classes are up to date
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ cygnus-ngsi ---
+[INFO] Compiling 16 source files to /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/test-classes
 [INFO] 
-[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ cygnus ---
-[INFO] Surefire report directory: /Users/frb/devel/fiware/fiware-cygnus/target/surefire-reports
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ cygnus-ngsi ---
+[INFO] Surefire report directory: /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/surefire-reports
 
 -------------------------------------------------------
  T E S T S
 -------------------------------------------------------
-Running com.telefonica.iot.cygnus.backends.ckan.CKANBackendImplTest
-15/11/25 10:50:44 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANBackendImpl.persist (column)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:44 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANBackendImpl.persist (row)
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.365 sec
-Running com.telefonica.iot.cygnus.backends.ckan.CKANCacheTest
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.getOrgId
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.getPkgId
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.getResId
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.isCachedOrg
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.isCachedPkg
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.isCachedRes
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.setOrgId
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.setPkgId
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing CKANCache.setResId
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 sec
-Running com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinaryTest
-Testing HDFSBackendImpl.createFile
-2015-11-25 10:50:45.283 java[2544:112404] Unable to load realm info from SCDynamicStore
-Testing HDFSBackendImpl.append
-Testing HDFSBackendImplBinary.createDir
-Testing HDFSBackendImpl.exists
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.781 sec
-Running com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplRESTTest
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing HDFSBackendImplREST.createFile
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing HDFSBackendImplREST.append
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing HDFSBackendImplREST.createDir
-15/11/25 10:50:45 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:45 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-Testing HDFSBackendImplREST.exists
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 sec
-Running com.telefonica.iot.cygnus.backends.http.JsonResponseTest
-Testing JsonResponseTest.getReasonPhrase
-Testing JsonResponseTest.getLocationHeader
-Testing JsonResponseTest.getStatusCode
-Testing JsonResponseTest.getJsonObject
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
-Running com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImplTest
-Testing MySQLBackend.createTable (within first database
-Testing MySQLBackend.createTable (within second database
-Testing MySQLBackend.insertContextData
-Testing MySQLBackend.createDatabase (first database creation
-Testing MySQLBackend.createDatabase (second database creation
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 sec
-Running com.telefonica.iot.cygnus.channelselectors.RoundRobinChannelSelectorTest
-Testing RoundRobinChannelSelector.getRequiredChannels
-Testing RoundRobinChannelSelector.configure
-Testing RoundRobinChannelSelector.getOptionalChannels
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 sec
 Running com.telefonica.iot.cygnus.containers.NotifyContextRequestTest
-getSubscriptionId (notify-xml-simple)
-getSubscriptionId (notify-xml-compound)
-getSubscriptionId (notify-xml-metadata)
 getSubscriptionId (notify-json-simple)
 getSubscriptionId (notify-json-compound)
 getSubscriptionId (notify-json-metadata)
-getOriginator (notify-xml-simple)
-getOriginator (notify-xml-compound)
-getOriginator (notify-xml-metadata)
 getOriginator (notify-json-simple)
 getOriginator (notify-json-compound)
 getOriginator (notify-json-metadata)
-getOriginator (notify-xml-simple)
-getOriginator (notify-xml-compound)
-getOriginator (notify-xml-compound-nested)
-getOriginator (notify-xml-metadata)
-getOriginator (notify-xml-simple-unordered)
-getOriginator (notify-xml-simple-null-attrs)
 getOriginator (notify-json-simple)
 getOriginator (notify-json-compound)
 getOriginator (notify-json-compound-nested)
 getOriginator (notify-json-metadata)
 getOriginator (notify-json-simple-unordered)
 getOriginator (notify-json-simple-null-attrs)
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.222 sec
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.343 sec
 Running com.telefonica.iot.cygnus.handlers.NGSIRestHandlerTest
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
-Testing 'configure' method from class 'NGSIRestHandler'
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Cygnus version (0.10.0_SNAPSHOT.UNKNOWN)
-Testing 'getEvents' method from class 'NGSIRestHandler' (invalid characters
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Starting transaction (1448445046-433-0000000000)
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Event put in the channel (id=53881443, ttl=10)
-Testing 'getEvents' method from class 'NGSIRestHandler' ("root" servicePath name
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Startup completed
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Starting transaction (1448445046-433-0000000001)
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Received data (<tag1>1</tag1><tag2>2</tag2>)
-15/11/25 10:50:46 INFO handlers.NGSIRestHandler: Event put in the channel (id=211201404, ttl=10)
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 sec
-Running com.telefonica.iot.cygnus.http.JettyServerTest
-15/11/25 10:50:46 INFO mortbay.log: Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
-Testing JettyServer.testConfigure
-Wait 5 seconds before checking the Jetty server is running
-15/11/25 10:50:46 INFO mortbay.log: jetty-6.1.26
-15/11/25 10:50:46 INFO mortbay.log: Started SocketConnector@0.0.0.0:12345
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.086 sec
-Running com.telefonica.iot.cygnus.interceptors.GroupingInterceptorTest
-Testing GroupingInterceptor.initialize
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules read: {    "grouping_rules": [        {            "id": 1,            "fields": [                "entityId",                "entityType"            ],            "regex": "Room\.(\d*)Room",            "destination": "numeric_rooms",            "fiware_service_path": "rooms"        },        {            "id": 2,            "fields": [                "entityId"            ],            "regex": "Car",            "destination": "cars",            "fiware_service_path": "vehicles"        },        {            "id": 3,            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "city_indicators",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": 4        },        {            "id": 5,            "fields": [            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "city_indicators",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": 6,            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": "abc",            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "",            "some_other_field_to_be_ignored": "xxx"        }    ]}
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules syntax is OK
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is missing. It will be discarded. Details={"id":4}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is empty. It will be discarded. Details={"id":5,"some_other_field_to_be_ignored":"xxx","fiware_service_path":"city_indicators","regex":"GARDENS","destination":"gardens","fields":[]}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is empty. It will be discarded. Details={"id":6,"some_other_field_to_be_ignored":"xxx","fiware_service_path":"","regex":"GARDENS","destination":"gardens","fields":["servicePath"]}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, the id is not numeric or it is missing. It will be discarded. Details={"id":"abc","some_other_field_to_be_ignored":"xxx","fiware_service_path":"","regex":"GARDENS","destination":"gardens","fields":["servicePath"]}
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules regex'es have been compiled
-Testing GroupingInterceptor.intercept (grouping_rules.conf exists)
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules read: {    "grouping_rules": [        {            "id": 1,            "fields": [                "entityId",                "entityType"            ],            "regex": "Room\.(\d*)Room",            "destination": "numeric_rooms",            "fiware_service_path": "rooms"        },        {            "id": 2,            "fields": [                "entityId"            ],            "regex": "Car",            "destination": "cars",            "fiware_service_path": "vehicles"        },        {            "id": 3,            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "city_indicators",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": 4        },        {            "id": 5,            "fields": [            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "city_indicators",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": 6,            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "",            "some_other_field_to_be_ignored": "xxx"        },        {            "id": "abc",            "fields": [                "servicePath"            ],            "regex": "GARDENS",            "destination": "gardens",            "fiware_service_path": "",            "some_other_field_to_be_ignored": "xxx"        }    ]}
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules syntax is OK
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is missing. It will be discarded. Details={"id":4}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is empty. It will be discarded. Details={"id":5,"some_other_field_to_be_ignored":"xxx","fiware_service_path":"city_indicators","regex":"GARDENS","destination":"gardens","fields":[]}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, some field is empty. It will be discarded. Details={"id":6,"some_other_field_to_be_ignored":"xxx","fiware_service_path":"","regex":"GARDENS","destination":"gardens","fields":["servicePath"]}
-15/11/25 10:50:51 WARN interceptors.GroupingInterceptor: Invalid grouping rule, the id is not numeric or it is missing. It will be discarded. Details={"id":"abc","some_other_field_to_be_ignored":"xxx","fiware_service_path":"","regex":"GARDENS","destination":"gardens","fields":["servicePath"]}
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: Grouping rules regex'es have been compiled
-Testing GroupingInterceptor.intercept (grouping_rules.conf is not set)
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: No grouping rules read
-Testing GroupingInterceptor.intercept (grouping_rules.conf does not exist)
-15/11/25 10:50:51 ERROR interceptors.GroupingInterceptor: File not found. Details=whatever (No such file or directory))
-15/11/25 10:50:51 INFO interceptors.GroupingInterceptor: No grouping rules read
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.136 sec
-Running com.telefonica.iot.cygnus.management.ManagementInterfaceTest
-Testing ManagementInterface.handle
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 sec
+[OrionRestHandler.generateUniqueId] ------------- When a correlation ID is genereated, both generated correlation ID and generated transaction ID have the same value
+[OrionRestHandler.generateUniqueId] ------  OK  - The generated transaction ID '1234567890-123-1234567890' is equals to the generated correlator ID '1234567890-123-1234567890'
+[OrionRestHandler.configure] -------------------- The configured default service path must start with '/'
+[OrionRestHandler.configure] -------------  OK  - The configured default service path '/something' starts with '/'
+[OrionRestHandler.getEvents] -------------------- When a notification is sent as a Http message, a single Flume event is generated
+[OrionRestHandler.getEvents] -------------  OK  - A single event has been generated
+[OrionRestHandler.getEvents] -------------------- When a the configuration is wrong, no evetns are obtained
+[OrionRestHandler.getEvents] -------------  OK  - No events are processed since the configuration is wrong
+[OrionRestHandler.generateUniqueId] ------------- An internal transaction ID is generated
+[OrionRestHandler.generateUniqueId] ------  OK  - An internal transaction ID 'dd9ea2f8-91dc-45f6-be17-9880136432fb' has been generated
+[OrionRestHandler.configure] -------------------- The configured notification target must start with '/'
+[OrionRestHandler.configure] -------------  OK  - The configured notification target '/notify' starts with '/'
+[OrionRestHandler.configure] -------------------- When not configured, the default values are used for non mandatory parameters
+[OrionRestHandler.configure] -------------  OK  - The default configuration value for 'notification_target' is '/notify'
+[OrionRestHandler.configure] -------------  OK  - The default configuration value for 'default_service' is 'default'
+[OrionRestHandler.configure] -------------  OK  - The default configuration value for 'default_service_path' is '/'
+[OrionRestHandler.getEvents] -------------------- When a Flume event is generated, it contains fiware-service, fiware-servicepath, fiware-correlator and transaction-id headers
+[OrionRestHandler.getEvents] -------------  OK  - The generated Flume event contains 'fiware-service'
+[OrionRestHandler.getEvents] -------------  OK  - The generated Flume event contains 'fiware-servicepath'
+[OrionRestHandler.getEvents] -------------  OK  - The generated Flume event contains 'fiware-correlator'
+[OrionRestHandler.getEvents] -------------  OK  - The generated Flume event contains 'transaction-id'
+[OrionRestHandler.generateUniqueId] ------------- When a correlation ID is not notified, it is generated
+[OrionRestHandler.generateUniqueId] ------  OK  - The transaction ID has been generated
+[OrionRestHandler.getEvents] -------------------- When a notification is sent, the headers are valid
+[OrionRestHandler.getEvents] -------------  OK  - The value for 'Content-Type' header is 'application/json'
+[OrionRestHandler.getEvents] -------------  OK  - The value for 'fiware-servicePath' header starts with '/'
+[OrionRestHandler.getEvents] -------------  OK  - The length of 'fiware-service' header value is  less or equal than '50'
+[OrionRestHandler.getEvents] -------------  OK  - The length of 'fiware-servicePath' header value is less or equal than '50'
+[OrionRestHandler.getEvents] -------------------- When a Flume event is generated, it contains the payload of the Http notification as body
+[OrionRestHandler.getEvents] -------------  OK  - The event body '{"contextResponses":[{"statusCode":{"reasonPhrase":"OK","code":"200"},"contextElement":{"id":"room1","attributes":[{"name":"temperature","value":"26.5","type":"centigrade"}],"type":"Room","isPattern":"false"}}],"originator":"localhost","subscriptionId":"51c0ac9ed714fb3b37d7d5a8"}' is equal to the notification Json '{"contextResponses":[{"statusCode":{"reasonPhrase":"OK","code":"200"},"contextElement":{"id":"room1","attributes":[{"name":"temperature","value":"26.5","type":"centigrade"}],"type":"Room","isPattern":"false"}}],"originator":"localhost","subscriptionId":"51c0ac9ed714fb3b37d7d5a8"}'
+[OrionRestHandler.generateUniqueId] ------------- When a correlator ID is notified, it is reused
+[OrionRestHandler.generateUniqueId] ------  OK  - The notified transaction ID '1234567890-123-1234567890' has been reused
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.43 sec
+Running com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptorTest
+[GroupingInterceptor.intercept] ----------------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities headers
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'fiware-service'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'fiware-servicepath'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'fiware-correlator'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'transaction-id'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'notified-entities'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'grouped-servicepaths'
+[GroupingInterceptor.intercept] ----------  OK  - The generated Flume event contains 'grouped-entities'
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 sec
+Running com.telefonica.iot.cygnus.sinks.NGSICartoDBSinkTest
+[NGSICartoDBSink.configure] --------------------- Configured `flip_coordinates` cannot be different than `true` or `false`
+[NGSICartoDBSink.configure] --------------  OK  - 'flip_coordinates=falso' was detected
+[CartoDBAggregator.initialize] ------------------ When initializing through an initial geolocated event, a table name is created
+[CartoDBAggregator.initialize] -----------  OK  - A table name has been created
+[NGSICartoDBSink.configure] --------------------- Configured 'api_key' cannot be null
+[NGSICartoDBSink.configure] --------------  OK  - null value detected for 'api_key'
+[NGSICartoDBSink.buildTableName] ---------------- When a root service-path is notified/defaulted and data_model is 'dm-by-service-path' the CartoDB table name cannot be created
+[NGSICartoDBSink.buildTableName] ---------  OK  - It was detected the table name could not be created
+[CartoDBAggregator.aggregate] ------------------- When aggregating a single geolocated event, the aggregation values string starts with '(' and finishes with ')'
+[CartoDBAggregator.aggregate] ------------  OK  - '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326),'someValue2','[]')' starts with '('
+[CartoDBAggregator.aggregate] ------------  OK  - '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326),'someValue2','[]')' ends with ')'
+[CartoDBAggregator.initialize] ------------------ When initializing through an initial geolocated event, the aggregation fields string is lower case, starts with '(' and finishes with ')'
+[CartoDBAggregator.initialize] -----------  OK  - '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)' is lower case
+[CartoDBAggregator.initialize] -----------  OK  - '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)' starts with '('
+[CartoDBAggregator.initialize] -----------  OK  - '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)' ends with ')'
+[NGSICartoDBSink.start] ------------------------- When started, a CartoDB backend is created
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/Users/frb/.m2/repository/org/slf4j/slf4j-simple/1.7.21/slf4j-simple-1.7.21.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/frb/.m2/repository/com/telefonica/iot/cygnus-common/0.13.0_SNAPSHOT/cygnus-common-0.13.0_SNAPSHOT.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/frb/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.SimpleLoggerFactory]
+[NGSICartoDBSink.start] ------------------  OK  - A CartoDB backend has been created
+[NGSICartoDBSink.buildTableName] ---------------- When a non root service-path is notified/defaulted and data_model is 'dm-by-service-path' the CartoDB table name is the lower case of <servicePath>
+[NGSICartoDBSink.buildTableName] ---------  OK  - 'somepath' is equals to the lower case of <servicePath>
+[NGSICartoDBSink.configure] --------------------- Independently of the configured value, enable_lowercase is always 'true' by default
+[NGSICartoDBSink.configure] --------------  OK  - 'enable_lowercase=false' was confiured, nevertheless it is always true by default
+[NGSICartoDBSink.buildTableName] ---------------- When a root service-path is notified/defaulted and data_model is 'dm-by-attribute' the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityYype>_<attrName>_<attrType>
+[NGSICartoDBSink.buildTableName] ---------  OK  - 'someid_sometype_somename1_sometype1' is equals to the lower case of <entityId>_<entityType>_<attrName>_<attrType>
+[CartoDBAggregator.aggregate] ------------------- When aggregating a single geolocated event, the aggregation values string contains a value and a metadata value for each attribute in the event except for the geolocation attribute, which is added as a specific value (a point)
+[CartoDBAggregator.initialize] -----------  OK  - '-3.7167, 40.3833' and '{"name":"location","type":"string","value":"WGS84"}' are not in the rows '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326),'someValue2','[]')'
+[CartoDBAggregator.initialize] -----------  OK  - 'someValue2' and '[]' are in the rows '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326),'someValue2','[]')'
+[CartoDBAggregator.initialize] -----------  OK  - 'ST_SetSRID(ST_MakePoint(-3.7167, 40.3833), 4326)' is in the rows '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326),'someValue2','[]')'
+[CartoDBAggregator.initialize] ------------------ When initializing through an initial geolocated event, the aggregation fields string contains a field and a metadata field for each attribute in the event except for the geolocation attribute, which is added as a specific field ('the_geom')
+[CartoDBAggregator.initialize] -----------  OK  - 'somename1' and 'somename1_md' are not in the fields '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)'
+[CartoDBAggregator.initialize] -----------  OK  - 'somename2' and 'somename2_md' are in the fields '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)'
+[CartoDBAggregator.initialize] -----------  OK  - 'the_geom' is in the fields '(recvtime,fiwareservicepath,entityid,entitytype,the_geom,somename2,somename2_md)'
+[CartoDBAggregator.aggregate] ------------------- When aggregating a single geolocated event, if flip_coordinates=true then the_geom field contains a point with exchanged latitude and longitude.
+[CartoDBAggregator.aggregate] ------------  OK  - '('2016-04-20T07:19:55.801Z','somePath','someId','someType',ST_SetSRID(ST_MakePoint(40.3833,-3.7167), 4326),'someValue2','[]')' contains the coordinates '-3.7167, 40.3833' flipped
+[NGSICartoDBSink.buildTableName] ---------------- When a non service-path is notified/defaulted and data_model is 'dm-by-entity' the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityType>
+[NGSICartoDBSink.buildTableName] ---------  OK  - 'someid_sometype' is equals to the lower case of <entityId>_<entityType>
+[NGSICartoDBSink.buildTableName] ---------------- When a non root service-path is notified/defaulted and data_model is 'dm-by-attribute' the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityYype>_<attrName>_<attrType>
+[NGSICartoDBSink.buildTableName] ---------  OK  - 'somepath_someid_sometype_somename1_sometype1' is equals to the lower case of <servicePath>_<entityId>_<entityType>_<attrName>_<attrType>
+[NGSICartoDBSink.buildTableName] ---------------- When a non root service-path is notified/defaulted and data_model is 'dm-by-entity' the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityType>
+[NGSICartoDBSink.buildTableName] ---------  OK  - 'somepath_someid_sometype' is equals to the lower case of <servicePath>_<entityId>_<entityType>
+[NGSICartoDBSink.configure] --------------------- Configured 'endpoint' cannot be null
+[NGSICartoDBSink.configure] --------------  OK  - null value detected for 'endpoint'
+[NGSICartoDBSink.configure] --------------------- Configured 'endpoint' must be a URI using the 'http' or 'https' schema
+[NGSICartoDBSink.configure] --------------  OK  - Invalid or inexistent schema detected for 'endpoint'
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.25 sec
 Running com.telefonica.iot.cygnus.sinks.NGSICKANSinkTest
-Testing NGSICKANSink.start
-15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Startup completed
-Testing NGSICKANSink.processContextResponses (normal resource lengths)
-15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheels, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-Testing NGSICKANSink.processContextResponses (too long service name)
-Testing NGSICKANSink.processContextResponses (too long servicePath name)
-Testing NGSICKANSink.processContextResponses (too long destination name)
-Testing NGSICKANSink.processContextResponses ("root" servicePath name)
-15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles, resName=car1-car, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-Testing NGSICKANSink.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheelsSport, resName=sport1, data=123456789,1970-01-02T10:17:36.789Z,car1,car,speed,float,"112.9",[])
-15/11/25 10:50:52 INFO sinks.NGSICKANSink: [null] Persisting data at NGSICKANSink (orgName=vehicles, pkgName=vehicles_4wheelsUrban, resName=urban1, data=123456789,1970-01-02T10:17:36.789Z,car2,car,speed,float,"115.8",[])
-Testing NGSICKANSink.configure
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.476 sec
+Testing OrionCKANSink.start
+Testing OrionCKANSink.configure
+Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)
+Testing OrionCKANSinkTest.persistBatch (row persistence, disable grouping)
+Testing OrionCKANSinkTest.persistBatch (column attr persistence, enable grouping)
+Testing OrionCKANSinkTest.persistBatch (column attr persistence, disable grouping)
+Testing OrionCKANSink.persistBatch ("root" servicePath name)
+Testing OrionCKANSink.persistBatch (multiple destinations and fiware-servicePaths)
+Testing OrionCKANSinkTest.persistBatch (null batches)
+Testing OrionCKANSink.persisBatch (normal resource lengths)
+Testing OrionCKANSink.persistBatch (too long service name)
+Testing OrionCKANSink.persistBatch (too long servicePath name)
+Testing OrionCKANSink.persistBatch (too long destination name)
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.171 sec
+Running com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSinkTest
+Testing OrionDynamoDBSink.start
+Testing OrionDynamoDBSink.configure
+Testing OrionDynamoDBSink.persistBatch ("root" servicePath name)
+Testing OrionDynamoDBSink.persistBatch (multiple destinations and fiware-servicePaths)
+Testing OrionDynamoDBSink.persist (null batches)
+Testing OrionDynamoDBSink.persistBatch (normal resource lengths)
+Testing OrionDynamoDBSink.persistBatch (too long service name)
+Testing OrionDynamoDBSink.persistBatch (too long servicePath name)
+Testing OrionDynamoDBSink.persistBatch (too long destination name)
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.596 sec
 Running com.telefonica.iot.cygnus.sinks.NGSIHDFSSinkTest
-Testing NGSIHDFSSink.start
-15/11/25 10:50:52 INFO http.HttpClientFactory: Setting max total connections (500)
-15/11/25 10:50:52 INFO http.HttpClientFactory: Settubg default max connections per route (100)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Startup completed
-Testing NGSIHDFSSinkTest.configure
-Testing NGSIHDFSSink.persistBatch (json-row file format)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing NGSIHDFSSink.persistBatch (json-column file format)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car", "speed":"112.9", "speed_md":[]})
-Testing NGSIHDFSSink.persistBatch (csv-row file format)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (123456,1970-01-02T10:17:36.789Z,cars,car1,car,speed,float,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting metadata at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
-Testing NGSIHDFSSink.persistBatch (csv-column file format)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data (1970-01-02T10:17:36.789Z,cars,car1,car,112.9,hdfs:///user/user1/vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting metadata at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars_speed_float/my_cars_speed_float.txt), Data ()
-Testing NGSIHDFSSink.persistBatch ("root" servicePath name)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles//my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing NGSIHDFSSink.persistBatch (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing NGSIHDFSSink.persistBatch (null batches)
-Testing NGSIHDFSSink.configure (deprecated parameters are used)
-Testing NGSIHDFSSink.persistBatch (normal resource lengths)
-15/11/25 10:50:52 INFO sinks.NGSIHDFSSink: [null] Persisting data at NGSIHDFSSink. HDFS file (vehicles/cars/my_cars/my_cars.txt), Data ({"recvTimeTs":"123456","recvTime":"1970-01-02T10:17:36.789Z","fiwareservicepath":"cars","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]})
-Testing NGSIHDFSSink.persistBatch (too long service name)
-Testing NGSIHDFSSink.persistBatch (too long servicePath name)
-Testing NGSIHDFSSink.persistBatch (too long destination name)
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 sec
+Testing OrionHDFSSink.start
+Testing OrionHDFSSinkTest.configure
+Testing OrionHDFSSink.persistBatch (json-row file format)
+Testing OrionHDFSSink.persistBatch (json-column file format)
+Testing OrionHDFSSink.persistBatch (csv-row file format)
+Testing OrionHDFSSink.persistBatch (csv-column file format)
+Testing OrionHDFSSink.persistBatch ("root" servicePath name)
+Testing OrionHDFSSink.persistBatch (multiple destinations and fiware-servicePaths)
+Testing OrionHDFSSink.persistBatch (null batches)
+Testing OrionHDFSSink.configure (deprecated parameters are used)
+Testing OrionHDFSSink.persistBatch (normal resource lengths)
+Testing OrionHDFSSink.persistBatch (too long service name)
+Testing OrionHDFSSink.persistBatch (too long servicePath name)
+Testing OrionHDFSSink.persistBatch (too long destination name)
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.863 sec
 Running com.telefonica.iot.cygnus.sinks.NGSIKafkaSinkTest
-15/11/25 10:50:52 INFO server.ZooKeeperServerMain: Starting server
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:zookeeper.version=3.4.5-1392090, built on 09/30/2012 17:52 GMT
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:host.name=mac-510380.hi.inet
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.version=1.6.0_65
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.vendor=Apple Inc.
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.home=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.class.path=/Users/frb/devel/fiware/fiware-cygnus/target/test-classes:/Users/frb/devel/fiware/fiware-cygnus/target/classes:/Users/frb/.m2/repository/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5.jar:/Users/frb/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/frb/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-core/1.4.0/flume-ng-core-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sdk/1.4.0/flume-ng-sdk-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-configuration/1.4.0/flume-ng-configuration-1.4.0.jar:/Users/frb/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/Users/frb/.m2/repository/com/google/guava/guava/10.0.1/guava-10.0.1.jar:/Users/frb/.m2/repository/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar:/Users/frb/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1.jar:/Users/frb/.m2/repository/commons-codec/commons-codec/1.8/commons-codec-1.8.jar:/Users/frb/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar:/Users/frb/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar:/Users/frb/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar:/Users/frb/.m2/repository/org/apache/avro/avro/1.7.3/avro-1.7.3.jar:/Users/frb/.m2/repository/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3.jar:/Users/frb/.m2/repository/org/apache/avro/avro-ipc/1.7.3/avro-ipc-1.7.3.jar:/Users/frb/.m2/repository/org/apache/velocity/velocity/1.7/velocity-1.7.jar:/Users/frb/.m2/repository/io/netty/netty/3.4.0.Final/netty-3.4.0.Final.jar:/Users/frb/.m2/repository/joda-time/joda-time/2.1/joda-time-2.1.jar:/Users/frb/.m2/repository/org/mortbay/jetty/servlet-api/2.5-20110124/servlet-api-2.5-20110124.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jetty/6.1.26/jetty-6.1.26.jar:/Users/frb/.m2/repository/org/apache/thrift/libthrift/0.7.0/libthrift-0.7.0.jar:/Users/frb/.m2/repository/org/apache/mina/mina-core/2.0.4/mina-core-2.0.4.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-node/1.4.0/flume-ng-node-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sinks/flume-hdfs-sink/1.4.0/flume-hdfs-sink-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sinks/flume-irc-sink/1.4.0/flume-irc-sink-1.4.0.jar:/Users/frb/.m2/repository/org/schwering/irclib/1.10/irclib-1.10.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-channels/flume-jdbc-channel/1.4.0/flume-jdbc-channel-1.4.0.jar:/Users/frb/.m2/repository/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4.jar:/Users/frb/.m2/repository/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar:/Users/frb/.m2/repository/org/apache/derby/derby/10.8.2.2/derby-10.8.2.2.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-channels/flume-file-channel/1.4.0/flume-file-channel-1.4.0.jar:/Users/frb/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/frb/.m2/repository/com/google/protobuf/protobuf-java/2.4.1/protobuf-java-2.4.1.jar:/Users/frb/.m2/repository/log4j/apache-log4j-extras/1.1/apache-log4j-extras-1.1.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.3/jackson-core-asl-1.9.3.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.3/jackson-mapper-asl-1.9.3.jar:/Users/frb/.m2/repository/org/apache/httpcomponents/httpclient/4.2.1/httpclient-4.2.1.jar:/Users/frb/.m2/repository/org/apache/httpcomponents/httpcore/4.2.1/httpcore-4.2.1.jar:/Users/frb/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/Users/frb/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/Users/frb/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/Users/frb/.m2/repository/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar:/Users/frb/.m2/repository/mysql/mysql-connector-java/5.1.31/mysql-connector-java-5.1.31.jar:/Users/frb/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/Users/frb/.m2/repository/org/apache/hadoop/hadoop-core/1.2.1/hadoop-core-1.2.1.jar:/Users/frb/.m2/repository/xmlenc/xmlenc/0.52/xmlenc-0.52.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-core/1.8/jersey-core-1.8.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-json/1.8/jersey-json-1.8.jar:/Users/frb/.m2/repository/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar:/Users/frb/.m2/repository/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar:/Users/frb/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/Users/frb/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.7.1/jackson-jaxrs-1.7.1.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-xc/1.7.1/jackson-xc-1.7.1.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-server/1.8/jersey-server-1.8.jar:/Users/frb/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/frb/.m2/repository/commons-httpclient/commons-httpclient/3.0.1/commons-httpclient-3.0.1.jar:/Users/frb/.m2/repository/org/apache/commons/commons-math/2.1/commons-math-2.1.jar:/Users/frb/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/frb/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/frb/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/frb/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/frb/.m2/repository/commons-net/commons-net/1.4.1/commons-net-1.4.1.jar:/Users/frb/.m2/repository/tomcat/jasper-runtime/5.5.12/jasper-runtime-5.5.12.jar:/Users/frb/.m2/repository/tomcat/jasper-compiler/5.5.12/jasper-compiler-5.5.12.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jsp-api-2.1/6.1.14/jsp-api-2.1-6.1.14.jar:/Users/frb/.m2/repository/org/mortbay/jetty/servlet-api-2.5/6.1.14/servlet-api-2.5-6.1.14.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jsp-2.1/6.1.14/jsp-2.1-6.1.14.jar:/Users/frb/.m2/repository/ant/ant/1.6.5/ant-1.6.5.jar:/Users/frb/.m2/repository/commons-el/commons-el/1.0/commons-el-1.0.jar:/Users/frb/.m2/repository/net/java/dev/jets3t/jets3t/0.6.1/jets3t-0.6.1.jar:/Users/frb/.m2/repository/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar:/Users/frb/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar:/Users/frb/.m2/repository/org/eclipse/jdt/core/3.1.1/core-3.1.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-exec/0.13.0/hive-exec-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-ant/0.13.0/hive-ant-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-metastore/0.13.0/hive-metastore-0.13.0.jar:/Users/frb/.m2/repository/com/jolbox/bonecp/0.8.0.RELEASE/bonecp-0.8.0.RELEASE.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-api-jdo/3.2.6/datanucleus-api-jdo-3.2.6.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-rdbms/3.2.9/datanucleus-rdbms-3.2.9.jar:/Users/frb/.m2/repository/javax/jdo/jdo-api/3.0.1/jdo-api-3.0.1.jar:/Users/frb/.m2/repository/javax/transaction/jta/1.1/jta-1.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-shims/0.13.0/hive-shims-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-common/0.13.0/hive-shims-common-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.20/0.13.0/hive-shims-0.20-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-common-secure/0.13.0/hive-shims-common-secure-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.20S/0.13.0/hive-shims-0.20S-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.23/0.13.0/hive-shims-0.23-0.13.0.jar:/Users/frb/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar:/Users/frb/.m2/repository/org/antlr/antlr-runtime/3.4/antlr-runtime-3.4.jar:/Users/frb/.m2/repository/org/antlr/stringtemplate/3.2.1/stringtemplate-3.2.1.jar:/Users/frb/.m2/repository/antlr/antlr/2.7.7/antlr-2.7.7.jar:/Users/frb/.m2/repository/org/antlr/ST4/4.0.4/ST4-4.0.4.jar:/Users/frb/.m2/repository/org/apache/ant/ant/1.9.1/ant-1.9.1.jar:/Users/frb/.m2/repository/org/apache/ant/ant-launcher/1.9.1/ant-launcher-1.9.1.jar:/Users/frb/.m2/repository/org/apache/commons/commons-compress/1.4.1/commons-compress-1.4.1.jar:/Users/frb/.m2/repository/org/tukaani/xz/1.0/xz-1.0.jar:/Users/frb/.m2/repository/org/apache/thrift/libfb303/0.9.0/libfb303-0.9.0.jar:/Users/frb/.m2/repository/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar:/Users/frb/.m2/repository/jline/jline/0.9.94/jline-0.9.94.jar:/Users/frb/.m2/repository/org/codehaus/groovy/groovy-all/2.1.6/groovy-all-2.1.6.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-core/3.2.10/datanucleus-core-3.2.10.jar:/Users/frb/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-jdbc/0.13.0/hive-jdbc-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-common/0.13.0/hive-common-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-serde/0.13.0/hive-serde-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-service/0.13.0/hive-service-0.13.0.jar:/Users/frb/.m2/repository/net/sf/jpam/jpam/1.1/jpam-1.1.jar:/Users/frb/.m2/repository/org/eclipse/jetty/aggregate/jetty-all/7.6.0.v20120127/jetty-all-7.6.0.v20120127.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1.jar:/Users/frb/.m2/repository/javax/mail/mail/1.4.1/mail-1.4.1.jar:/Users/frb/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-jaspic_1.0_spec/1.0/geronimo-jaspic_1.0_spec-1.0.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-annotation_1.0_spec/1.1.1/geronimo-annotation_1.0_spec-1.1.1.jar:/Users/frb/.m2/repository/asm/asm-commons/3.1/asm-commons-3.1.jar:/Users/frb/.m2/repository/asm/asm-tree/3.1/asm-tree-3.1.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-server/7.2.0.v20101020/jetty-server-7.2.0.v20101020.jar:/Users/frb/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-continuation/7.2.0.v20101020/jetty-continuation-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-http/7.2.0.v20101020/jetty-http-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-io/7.2.0.v20101020/jetty-io-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-util/7.2.0.v20101020/jetty-util-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/mongodb/mongodb-driver/3.0.0/mongodb-driver-3.0.0.jar:/Users/frb/.m2/repository/org/mongodb/mongodb-driver-core/3.0.0/mongodb-driver-core-3.0.0.jar:/Users/frb/.m2/repository/org/mongodb/bson/3.0.0/bson-3.0.0.jar:/Users/frb/.m2/repository/org/apache/kafka/kafka-clients/0.8.2.0/kafka-clients-0.8.2.0.jar:/Users/frb/.m2/repository/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar:/Users/frb/.m2/repository/org/xerial/snappy/snappy-java/1.1.1.6/snappy-java-1.1.1.6.jar:/Users/frb/.m2/repository/com/101tec/zkclient/0.5/zkclient-0.5.jar:/Users/frb/.m2/repository/org/apache/kafka/kafka_2.11/0.8.2.1/kafka_2.11-0.8.2.1.jar:/Users/frb/.m2/repository/org/scala-lang/modules/scala-xml_2.11/1.0.2/scala-xml_2.11-1.0.2.jar:/Users/frb/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar:/Users/frb/.m2/repository/net/sf/jopt-simple/jopt-simple/3.2/jopt-simple-3.2.jar:/Users/frb/.m2/repository/org/scala-lang/modules/scala-parser-combinators_2.11/1.0.2/scala-parser-combinators_2.11-1.0.2.jar:/Users/frb/.m2/repository/org/scala-lang/scala-library/2.11.5/scala-library-2.11.5.jar:/Users/frb/.m2/repository/org/apache/curator/curator-test/2.8.0/curator-test-2.8.0.jar:/Users/frb/.m2/repository/org/javassist/javassist/3.18.1-GA/javassist-3.18.1-GA.jar:
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.library.path=.:/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.io.tmpdir=/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:java.compiler=<NA>
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:os.name=Mac OS X
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:os.arch=x86_64
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:os.version=10.10.5
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:user.name=frb
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:user.home=/Users/frb
-15/11/25 10:50:52 INFO server.ZooKeeperServer: Server environment:user.dir=/Users/frb/devel/fiware/fiware-cygnus
-15/11/25 10:50:52 INFO server.ZooKeeperServer: tickTime set to 3000
-15/11/25 10:50:52 INFO server.ZooKeeperServer: minSessionTimeout set to -1
-15/11/25 10:50:52 INFO server.ZooKeeperServer: maxSessionTimeout set to -1
-15/11/25 10:50:53 INFO server.NIOServerCnxnFactory: binding to port 0.0.0.0/0.0.0.0:2181
-15/11/25 10:50:53 INFO persistence.FileTxnSnapLog: Snapshotting: 0x0 to /private/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/1448445052750-0/version-2/snapshot.0
-Testing NGSIKafkaSink.start
-15/11/25 10:50:54 INFO producer.ProducerConfig: ProducerConfig values: 
-	value.serializer = class org.apache.kafka.common.serialization.StringSerializer
-	key.serializer = class org.apache.kafka.common.serialization.StringSerializer
-	block.on.buffer.full = true
-	retry.backoff.ms = 100
-	buffer.memory = 33554432
-	batch.size = 16384
-	metrics.sample.window.ms = 30000
-	metadata.max.age.ms = 300000
-	receive.buffer.bytes = 32768
-	timeout.ms = 30000
-	max.in.flight.requests.per.connection = 5
-	metric.reporters = []
-	bootstrap.servers = [localhost:9092]
-	client.id = 
-	compression.type = none
-	retries = 0
-	max.request.size = 1048576
-	send.buffer.bytes = 131072
-	acks = 1
-	reconnect.backoff.ms = 10
-	linger.ms = 0
-	metrics.num.samples = 2
-	metadata.fetch.timeout.ms = 60000
-
-15/11/25 10:50:55 INFO zkclient.ZkEventThread: Starting ZkClient event thread.
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:zookeeper.version=3.4.5-1392090, built on 09/30/2012 17:52 GMT
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:host.name=mac-510380.hi.inet
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.version=1.6.0_65
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.vendor=Apple Inc.
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.home=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.class.path=/Users/frb/devel/fiware/fiware-cygnus/target/test-classes:/Users/frb/devel/fiware/fiware-cygnus/target/classes:/Users/frb/.m2/repository/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5.jar:/Users/frb/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/frb/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-core/1.4.0/flume-ng-core-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sdk/1.4.0/flume-ng-sdk-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-configuration/1.4.0/flume-ng-configuration-1.4.0.jar:/Users/frb/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/Users/frb/.m2/repository/com/google/guava/guava/10.0.1/guava-10.0.1.jar:/Users/frb/.m2/repository/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar:/Users/frb/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1.jar:/Users/frb/.m2/repository/commons-codec/commons-codec/1.8/commons-codec-1.8.jar:/Users/frb/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar:/Users/frb/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar:/Users/frb/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar:/Users/frb/.m2/repository/org/apache/avro/avro/1.7.3/avro-1.7.3.jar:/Users/frb/.m2/repository/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3.jar:/Users/frb/.m2/repository/org/apache/avro/avro-ipc/1.7.3/avro-ipc-1.7.3.jar:/Users/frb/.m2/repository/org/apache/velocity/velocity/1.7/velocity-1.7.jar:/Users/frb/.m2/repository/io/netty/netty/3.4.0.Final/netty-3.4.0.Final.jar:/Users/frb/.m2/repository/joda-time/joda-time/2.1/joda-time-2.1.jar:/Users/frb/.m2/repository/org/mortbay/jetty/servlet-api/2.5-20110124/servlet-api-2.5-20110124.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jetty/6.1.26/jetty-6.1.26.jar:/Users/frb/.m2/repository/org/apache/thrift/libthrift/0.7.0/libthrift-0.7.0.jar:/Users/frb/.m2/repository/org/apache/mina/mina-core/2.0.4/mina-core-2.0.4.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-node/1.4.0/flume-ng-node-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sinks/flume-hdfs-sink/1.4.0/flume-hdfs-sink-1.4.0.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-sinks/flume-irc-sink/1.4.0/flume-irc-sink-1.4.0.jar:/Users/frb/.m2/repository/org/schwering/irclib/1.10/irclib-1.10.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-channels/flume-jdbc-channel/1.4.0/flume-jdbc-channel-1.4.0.jar:/Users/frb/.m2/repository/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4.jar:/Users/frb/.m2/repository/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar:/Users/frb/.m2/repository/org/apache/derby/derby/10.8.2.2/derby-10.8.2.2.jar:/Users/frb/.m2/repository/org/apache/flume/flume-ng-channels/flume-file-channel/1.4.0/flume-file-channel-1.4.0.jar:/Users/frb/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/frb/.m2/repository/com/google/protobuf/protobuf-java/2.4.1/protobuf-java-2.4.1.jar:/Users/frb/.m2/repository/log4j/apache-log4j-extras/1.1/apache-log4j-extras-1.1.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.3/jackson-core-asl-1.9.3.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.3/jackson-mapper-asl-1.9.3.jar:/Users/frb/.m2/repository/org/apache/httpcomponents/httpclient/4.2.1/httpclient-4.2.1.jar:/Users/frb/.m2/repository/org/apache/httpcomponents/httpcore/4.2.1/httpcore-4.2.1.jar:/Users/frb/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/Users/frb/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/Users/frb/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/Users/frb/.m2/repository/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar:/Users/frb/.m2/repository/mysql/mysql-connector-java/5.1.31/mysql-connector-java-5.1.31.jar:/Users/frb/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/Users/frb/.m2/repository/org/apache/hadoop/hadoop-core/1.2.1/hadoop-core-1.2.1.jar:/Users/frb/.m2/repository/xmlenc/xmlenc/0.52/xmlenc-0.52.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-core/1.8/jersey-core-1.8.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-json/1.8/jersey-json-1.8.jar:/Users/frb/.m2/repository/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar:/Users/frb/.m2/repository/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar:/Users/frb/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/Users/frb/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.7.1/jackson-jaxrs-1.7.1.jar:/Users/frb/.m2/repository/org/codehaus/jackson/jackson-xc/1.7.1/jackson-xc-1.7.1.jar:/Users/frb/.m2/repository/com/sun/jersey/jersey-server/1.8/jersey-server-1.8.jar:/Users/frb/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/frb/.m2/repository/commons-httpclient/commons-httpclient/3.0.1/commons-httpclient-3.0.1.jar:/Users/frb/.m2/repository/org/apache/commons/commons-math/2.1/commons-math-2.1.jar:/Users/frb/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/frb/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/frb/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/frb/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/frb/.m2/repository/commons-net/commons-net/1.4.1/commons-net-1.4.1.jar:/Users/frb/.m2/repository/tomcat/jasper-runtime/5.5.12/jasper-runtime-5.5.12.jar:/Users/frb/.m2/repository/tomcat/jasper-compiler/5.5.12/jasper-compiler-5.5.12.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jsp-api-2.1/6.1.14/jsp-api-2.1-6.1.14.jar:/Users/frb/.m2/repository/org/mortbay/jetty/servlet-api-2.5/6.1.14/servlet-api-2.5-6.1.14.jar:/Users/frb/.m2/repository/org/mortbay/jetty/jsp-2.1/6.1.14/jsp-2.1-6.1.14.jar:/Users/frb/.m2/repository/ant/ant/1.6.5/ant-1.6.5.jar:/Users/frb/.m2/repository/commons-el/commons-el/1.0/commons-el-1.0.jar:/Users/frb/.m2/repository/net/java/dev/jets3t/jets3t/0.6.1/jets3t-0.6.1.jar:/Users/frb/.m2/repository/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar:/Users/frb/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar:/Users/frb/.m2/repository/org/eclipse/jdt/core/3.1.1/core-3.1.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-exec/0.13.0/hive-exec-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-ant/0.13.0/hive-ant-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-metastore/0.13.0/hive-metastore-0.13.0.jar:/Users/frb/.m2/repository/com/jolbox/bonecp/0.8.0.RELEASE/bonecp-0.8.0.RELEASE.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-api-jdo/3.2.6/datanucleus-api-jdo-3.2.6.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-rdbms/3.2.9/datanucleus-rdbms-3.2.9.jar:/Users/frb/.m2/repository/javax/jdo/jdo-api/3.0.1/jdo-api-3.0.1.jar:/Users/frb/.m2/repository/javax/transaction/jta/1.1/jta-1.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-shims/0.13.0/hive-shims-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-common/0.13.0/hive-shims-common-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.20/0.13.0/hive-shims-0.20-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-common-secure/0.13.0/hive-shims-common-secure-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.20S/0.13.0/hive-shims-0.20S-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/shims/hive-shims-0.23/0.13.0/hive-shims-0.23-0.13.0.jar:/Users/frb/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar:/Users/frb/.m2/repository/org/antlr/antlr-runtime/3.4/antlr-runtime-3.4.jar:/Users/frb/.m2/repository/org/antlr/stringtemplate/3.2.1/stringtemplate-3.2.1.jar:/Users/frb/.m2/repository/antlr/antlr/2.7.7/antlr-2.7.7.jar:/Users/frb/.m2/repository/org/antlr/ST4/4.0.4/ST4-4.0.4.jar:/Users/frb/.m2/repository/org/apache/ant/ant/1.9.1/ant-1.9.1.jar:/Users/frb/.m2/repository/org/apache/ant/ant-launcher/1.9.1/ant-launcher-1.9.1.jar:/Users/frb/.m2/repository/org/apache/commons/commons-compress/1.4.1/commons-compress-1.4.1.jar:/Users/frb/.m2/repository/org/tukaani/xz/1.0/xz-1.0.jar:/Users/frb/.m2/repository/org/apache/thrift/libfb303/0.9.0/libfb303-0.9.0.jar:/Users/frb/.m2/repository/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar:/Users/frb/.m2/repository/jline/jline/0.9.94/jline-0.9.94.jar:/Users/frb/.m2/repository/org/codehaus/groovy/groovy-all/2.1.6/groovy-all-2.1.6.jar:/Users/frb/.m2/repository/org/datanucleus/datanucleus-core/3.2.10/datanucleus-core-3.2.10.jar:/Users/frb/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar:/Users/frb/.m2/repository/org/apache/hive/hive-jdbc/0.13.0/hive-jdbc-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-common/0.13.0/hive-common-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-serde/0.13.0/hive-serde-0.13.0.jar:/Users/frb/.m2/repository/org/apache/hive/hive-service/0.13.0/hive-service-0.13.0.jar:/Users/frb/.m2/repository/net/sf/jpam/jpam/1.1/jpam-1.1.jar:/Users/frb/.m2/repository/org/eclipse/jetty/aggregate/jetty-all/7.6.0.v20120127/jetty-all-7.6.0.v20120127.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1.jar:/Users/frb/.m2/repository/javax/mail/mail/1.4.1/mail-1.4.1.jar:/Users/frb/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-jaspic_1.0_spec/1.0/geronimo-jaspic_1.0_spec-1.0.jar:/Users/frb/.m2/repository/org/apache/geronimo/specs/geronimo-annotation_1.0_spec/1.1.1/geronimo-annotation_1.0_spec-1.1.1.jar:/Users/frb/.m2/repository/asm/asm-commons/3.1/asm-commons-3.1.jar:/Users/frb/.m2/repository/asm/asm-tree/3.1/asm-tree-3.1.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-server/7.2.0.v20101020/jetty-server-7.2.0.v20101020.jar:/Users/frb/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-continuation/7.2.0.v20101020/jetty-continuation-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-http/7.2.0.v20101020/jetty-http-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-io/7.2.0.v20101020/jetty-io-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/eclipse/jetty/jetty-util/7.2.0.v20101020/jetty-util-7.2.0.v20101020.jar:/Users/frb/.m2/repository/org/mongodb/mongodb-driver/3.0.0/mongodb-driver-3.0.0.jar:/Users/frb/.m2/repository/org/mongodb/mongodb-driver-core/3.0.0/mongodb-driver-core-3.0.0.jar:/Users/frb/.m2/repository/org/mongodb/bson/3.0.0/bson-3.0.0.jar:/Users/frb/.m2/repository/org/apache/kafka/kafka-clients/0.8.2.0/kafka-clients-0.8.2.0.jar:/Users/frb/.m2/repository/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar:/Users/frb/.m2/repository/org/xerial/snappy/snappy-java/1.1.1.6/snappy-java-1.1.1.6.jar:/Users/frb/.m2/repository/com/101tec/zkclient/0.5/zkclient-0.5.jar:/Users/frb/.m2/repository/org/apache/kafka/kafka_2.11/0.8.2.1/kafka_2.11-0.8.2.1.jar:/Users/frb/.m2/repository/org/scala-lang/modules/scala-xml_2.11/1.0.2/scala-xml_2.11-1.0.2.jar:/Users/frb/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar:/Users/frb/.m2/repository/net/sf/jopt-simple/jopt-simple/3.2/jopt-simple-3.2.jar:/Users/frb/.m2/repository/org/scala-lang/modules/scala-parser-combinators_2.11/1.0.2/scala-parser-combinators_2.11-1.0.2.jar:/Users/frb/.m2/repository/org/scala-lang/scala-library/2.11.5/scala-library-2.11.5.jar:/Users/frb/.m2/repository/org/apache/curator/curator-test/2.8.0/curator-test-2.8.0.jar:/Users/frb/.m2/repository/org/javassist/javassist/3.18.1-GA/javassist-3.18.1-GA.jar:
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.library.path=.:/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.io.tmpdir=/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:java.compiler=<NA>
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:os.name=Mac OS X
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:os.arch=x86_64
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:os.version=10.10.5
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:user.name=frb
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:user.home=/Users/frb
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Client environment:user.dir=/Users/frb/devel/fiware/fiware-cygnus
-15/11/25 10:50:55 INFO zookeeper.ZooKeeper: Initiating client connection, connectString=localhost:2181 sessionTimeout=10000 watcher=org.I0Itec.zkclient.ZkClient@455dd32a
-15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181. Will not attempt to authenticate using SASL (No se puede localizar una configuraci?n de inicio de sesi?n)
-15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Socket connection established to localhost/0:0:0:0:0:0:0:1:2181, initiating session
-15/11/25 10:50:55 INFO server.NIOServerCnxnFactory: Accepted socket connection from /0:0:0:0:0:0:0:1%0:52613
-15/11/25 10:50:55 INFO server.ZooKeeperServer: Client attempting to establish new session at /0:0:0:0:0:0:0:1%0:52613
-15/11/25 10:50:55 INFO persistence.FileTxnLog: Creating new log file: log.1
-15/11/25 10:50:55 INFO server.ZooKeeperServer: Established session 0x1513e0d89210000 with negotiated timeout 10000 for client /0:0:0:0:0:0:0:1%0:52613
-15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x1513e0d89210000, negotiated timeout = 10000
-15/11/25 10:50:55 INFO zkclient.ZkClient: zookeeper state changed (SyncConnected)
-15/11/25 10:50:55 INFO sinks.NGSIKafkaSink: [null] Startup completed
-15/11/25 10:50:55 INFO server.NIOServerCnxn: Closed socket connection for client /0:0:0:0:0:0:0:1%0:52613 which had sessionid 0x1513e0d89210000
-15/11/25 10:50:55 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
-15/11/25 10:50:55 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:55 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:55 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Unable to read additional data from server sessionid 0x1513e0d89210000, likely server has closed socket, closing socket connection and attempting reconnect
-15/11/25 10:50:55 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:55 INFO server.PrepRequestProcessor: PrepRequestProcessor exited loop!
-15/11/25 10:50:55 INFO server.SyncRequestProcessor: SyncRequestProcessor exited!
-15/11/25 10:50:55 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:55 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:55 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:55 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:55 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:55 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:55 INFO zkclient.ZkClient: zookeeper state changed (Disconnected)
-15/11/25 10:50:55 INFO zookeeper.ClientCnxn: Opening socket connection to server localhost/127.0.0.1:2181. Will not attempt to authenticate using SASL (No se puede localizar una configuraci?n de inicio de sesi?n)
-15/11/25 10:50:55 WARN zookeeper.ClientCnxn: Session 0x1513e0d89210000 for server null, unexpected error, closing socket connection and attempting reconnect
-java.net.ConnectException: Connection refused
-	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
-	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:599)
-	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:350)
-	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
-15/11/25 10:50:55 INFO server.ZooKeeperServerMain: Starting server
-15/11/25 10:50:55 INFO server.ZooKeeperServer: tickTime set to 3000
-15/11/25 10:50:55 INFO server.ZooKeeperServer: minSessionTimeout set to -1
-15/11/25 10:50:55 INFO server.ZooKeeperServer: maxSessionTimeout set to -1
-15/11/25 10:50:55 INFO server.NIOServerCnxnFactory: binding to port 0.0.0.0/0.0.0.0:2181
-15/11/25 10:50:55 INFO persistence.FileTxnSnapLog: Snapshotting: 0x0 to /private/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/1448445055801-0/version-2/snapshot.0
-Testing NGSIKafkaSink.configure
-15/11/25 10:50:56 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
-15/11/25 10:50:56 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:56 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:56 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:56 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:56 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:56 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:56 INFO server.PrepRequestProcessor: PrepRequestProcessor exited loop!
-15/11/25 10:50:56 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:56 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:56 INFO server.SyncRequestProcessor: SyncRequestProcessor exited!
-15/11/25 10:50:56 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:56 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:56 INFO server.ZooKeeperServerMain: Starting server
-15/11/25 10:50:56 INFO server.ZooKeeperServer: tickTime set to 3000
-15/11/25 10:50:56 INFO server.ZooKeeperServer: minSessionTimeout set to -1
-15/11/25 10:50:56 INFO server.ZooKeeperServer: maxSessionTimeout set to -1
-15/11/25 10:50:56 INFO server.NIOServerCnxnFactory: binding to port 0.0.0.0/0.0.0.0:2181
-15/11/25 10:50:56 INFO persistence.FileTxnSnapLog: Snapshotting: 0x0 to /private/var/folders/nr/tjbgf0m95gv7nnspcmgzqp0h0000gq/T/1448445056821-0/version-2/snapshot.0
-15/11/25 10:50:57 INFO server.SessionTrackerImpl: SessionTrackerImpl exited loop!
-15/11/25 10:50:57 INFO server.SessionTrackerImpl: SessionTrackerImpl exited loop!
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181. Will not attempt to authenticate using SASL (No se puede localizar una configuraci?n de inicio de sesi?n)
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Socket connection established to localhost/0:0:0:0:0:0:0:1:2181, initiating session
-15/11/25 10:50:57 INFO server.NIOServerCnxnFactory: Accepted socket connection from /0:0:0:0:0:0:0:1%0:52619
-15/11/25 10:50:57 INFO server.ZooKeeperServer: Client attempting to renew session 0x1513e0d89210000 at /0:0:0:0:0:0:0:1%0:52619
-15/11/25 10:50:57 INFO server.ZooKeeperServer: Invalid session 0x1513e0d89210000 for client /0:0:0:0:0:0:0:1%0:52619, probably expired
-15/11/25 10:50:57 INFO zkclient.ZkClient: zookeeper state changed (Expired)
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Unable to reconnect to ZooKeeper service, session 0x1513e0d89210000 has expired, closing socket connection
-15/11/25 10:50:57 INFO zookeeper.ZooKeeper: Initiating client connection, connectString=localhost:2181 sessionTimeout=10000 watcher=org.I0Itec.zkclient.ZkClient@455dd32a
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: EventThread shut down
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181. Will not attempt to authenticate using SASL (No se puede localizar una configuraci?n de inicio de sesi?n)
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Socket connection established to localhost/0:0:0:0:0:0:0:1:2181, initiating session
-15/11/25 10:50:57 INFO server.NIOServerCnxn: Closed socket connection for client /0:0:0:0:0:0:0:1%0:52619 which had sessionid 0x1513e0d89210000
-15/11/25 10:50:57 INFO server.NIOServerCnxnFactory: Accepted socket connection from /0:0:0:0:0:0:0:1%0:52620
-15/11/25 10:50:57 INFO server.ZooKeeperServer: Client attempting to establish new session at /0:0:0:0:0:0:0:1%0:52620
-15/11/25 10:50:57 INFO persistence.FileTxnLog: Creating new log file: log.1
-15/11/25 10:50:57 INFO server.ZooKeeperServer: Established session 0x1513e0d973a0000 with negotiated timeout 10000 for client /0:0:0:0:0:0:0:1%0:52620
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x1513e0d973a0000, negotiated timeout = 10000
-15/11/25 10:50:57 INFO zkclient.ZkClient: zookeeper state changed (SyncConnected)
-Testing NGSIKafkaSink.persist (topic-per-service)
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic vehicles at NGSIKafkaSink
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (vehicles), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
-Testing NGSIKafkaSink.persist (topic-per-service-path)
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic 4wheels at NGSIKafkaSink
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (4wheels), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
-Testing NGSIKafkaSink.persist (topic-per-destination)
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Creating topic car1_car at NGSIKafkaSink
-15/11/25 10:50:57 INFO sinks.NGSIKafkaSink: [null] Persisting data at NGSIKafkaSink. Topic (car1_car), Data ({"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":123456789}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}})
-15/11/25 10:50:57 INFO server.NIOServerCnxn: Closed socket connection for client /0:0:0:0:0:0:0:1%0:52620 which had sessionid 0x1513e0d973a0000
-15/11/25 10:50:57 INFO server.NIOServerCnxnFactory: NIOServerCnxn factory exited run method
-15/11/25 10:50:57 INFO zookeeper.ClientCnxn: Unable to read additional data from server sessionid 0x1513e0d973a0000, likely server has closed socket, closing socket connection and attempting reconnect
-15/11/25 10:50:57 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:57 INFO server.ZooKeeperServer: shutting down
-15/11/25 10:50:57 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:57 INFO server.SessionTrackerImpl: Shutting down
-15/11/25 10:50:57 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:57 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:57 INFO server.PrepRequestProcessor: Shutting down
-15/11/25 10:50:57 INFO server.SyncRequestProcessor: SyncRequestProcessor exited!
-15/11/25 10:50:57 INFO server.PrepRequestProcessor: PrepRequestProcessor exited loop!
-15/11/25 10:50:57 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:57 INFO server.SyncRequestProcessor: Shutting down
-15/11/25 10:50:57 INFO server.FinalRequestProcessor: shutdown of request processor complete
-15/11/25 10:50:57 INFO zkclient.ZkClient: zookeeper state changed (Disconnected)
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.965 sec
+[OrionKafkaSink.buildTopicName] ----------------- When the root service-path is notified/defaulted and data_model=dm-by-attribute, the Kafka topic name is <service>_<entityId>_<entityType>_<attrName>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service_entityId_entityType_attributeName
+[OrionKafkaSink.buildTopicName] ----------------- When the root service-path is notified/defaulted and data_model=dm-by-entity, the Kafka topic name is <service>_<entityId>_<entityType>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service_entityId_entityType
+[OrionKafkaSink.buildTopicName] ----------------- When a non root service-path is notified/defaulted and data_model=dm-by-service, the Kafka topic name is <service>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equal to service
+[OrionKafkaSink.buildTopicName] ----------------- When the root service-path is notified/defaulted and data_model=dm-by-service-path, the Kafka topic name is <service>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service
+[OrionKafkaSink.buildTopicName] ----------------- When a non root service-path is notified/defaulted and data_model=dm-by-entity, the Kafka topic name is <service>_<service-path>_<entityId>_<entityType>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service_servicePath_entityId_entityType
+[OrionKafkaSink.buildTopicName] ----------------- When a non root service-path is notified/defaulted and data_model=dm-by-service-path, the Kafka topic name is <service>_<service-path>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service_servicePath
+[OrionKafkaSink.buildTopicName] ----------------- When a non root service-path is notified/defaulted and data_model=dm-by-attribute, the Kafka topic name is <service>_<service-path>_<entityId>_<entityType>_<attrName>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service_servicePath_entityId_entityType_attributeName
+[OrionKafkaSink.buildTopicName] ----------------- When the root service-path is notified/defaulted and data_model=dm-by-service, the Kafka topic name is <service>
+[OrionKafkaSink.buildTopicName] ----------  OK  - Created topic is equals to service
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 sec
 Running com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSinkTest
-Testing NGSIMongoBaseSink.start
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Startup completed
-Testing NGSIMongoSink.configure
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.249 sec
+[NGSIMongoBaseSink.buildCollectionName] --------- When / service-path is notified/defaulted and data_model=dm-by-entity, the MongoDBcollections name is <prefix>/_<entityId>_<entityType>
+[NGSIMongoBaseSink.buildCollectionName] --  OK  - 'sth_/_someId_someType' was crated as collection name
+[NGSIMongoBaseSink.buildCollectionName] --------- When / service-path is notified/defaulted and data_model=dm-by-attribute, the MongoDB collections name is <prefix>/_<entityId>_<entityType>_<attrName>_<attrType>
+[NGSIMongoBaseSink.buildCollectionName] --  OK  - 'sth_/_someId_someType_someName_someType' was crated as collection name
+[NGSIMongoBaseSink.buildCollectionName] --------- When / service-path is notified/defaulted and data_model=dm-by-service-path, the MongoDB collection name is <prefix>/
+[NGSIMongoBaseSink.buildCollectionName] --  OK  - 'sth_/' was crated as collection name
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 sec
 Running com.telefonica.iot.cygnus.sinks.NGSIMongoSinkTest
-Testing NGSIMongoSink.processContextResponses (single destination and fiware-servicePath
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
-Testing NGSICKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 sec
+[OrionMongoSink.configure] ---------------------- Configured 'db_prefix' is encoded when having forbiden characters
+[OrionMongoSink.configure] ---------------  OK  - 'db_prefix=this\is/a$prefix.with forbiden"chars:-,' correctly encoded as 'this_is_a_prefix_with_forbiden_chars:-,'
+[OrionMongoSink.configure] ---------------------- Configured 'collection_prefix' cannot be 'system.'
+[OrionMongoSink.configure] ---------------  OK  - 'system.' value detected for 'collection_prefix'
+[OrionMongoSink.configure] ---------------------- Configured 'collection_prefix' is encoded when having forbiden characters
+[OrionMongoSink.configure] ---------------  OK  - 'collection_prefix=this\is/a$prefix.with-forbiden,chars:-.' correctly encoded as 'this\is/a_prefix.with-forbiden,chars:-.'
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 sec
 Running com.telefonica.iot.cygnus.sinks.NGSIMySQLSinkTest
-Testing NGSIMySQLSink.start
-15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Startup completed
-Testing NGSIMySQLSink.configure
-Testing NGSIMySQLSinkTest.persistBatch ("root" servicePath name)
-15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','','car1','car','speed','float','112.9','[]'))
-Testing NGSIMySQLSinkTest.persistBatch (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
-Testing NGSIHDFSSinkTest.persist (null batches)
-Testing NGSIMySQLSinkTest.persistBatch (normal resource lengths)
-15/11/25 10:50:58 INFO sinks.NGSIMySQLSink: [null] Persisting data at NGSIMySQLSink. Database (vehicles), Table (cars_my_cars), Fields ((recvTimeTs,recvTime,fiwareservicepath,entityId,entityType,attrName,attrType,attrValue,attrMd)), Values (('123456789','1970-01-02T10:17:36.789Z','cars','car1','car','speed','float','112.9','[]'))
-Testing NGSIMySQLSinkTest.persistBatch (too long service name)
-Testing NGSIMySQLSinkTest.persistBatch (too long servicePath name)
-Testing NGSIMySQLSinkTest.persistBatch (too long destination name)
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 sec
+Testing OrionMySQLSink.start
+Testing OrionMySQLSink.configure
+Testing OrionMySQLSinkTest.persistBatch ("root" servicePath name)
+Testing OrionMySQLSinkTest.persistBatch (multiple destinations and fiware-servicePaths)
+Testing OrionHDFSSinkTest.persist (null batches)
+Testing OrionMySQLSinkTest.persistBatch (normal resource lengths)
+Testing OrionMySQLSinkTest.persistBatch (too long service name)
+Testing OrionMySQLSinkTest.persistBatch (too long servicePath name)
+Testing OrionMySQLSinkTest.persistBatch (too long destination name)
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.171 sec
+Running com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSinkTest
+Testing OrionPostgreSQLSink.start
+Testing OrionPostgreSQLSink.configure
+Testing OrionPostgreSQLSinkTest.persistBatch ("root" servicePath name)
+Testing OrionPostgreSQLSinkTest.persistBatch (multiple destinations and fiware-servicePaths)
+Testing OrionHDFSSinkTest.persist (null batches)
+Testing OrionPostgreSQLSinkTest.persistBatch (normal resource lengths)
+Testing OrionPostgreSQLSinkTest.persistBatch (too long service name)
+Testing OrionPostgreSQLSinkTest.persistBatch (too long servicePath name)
+Testing OrionPostgreSQLSinkTest.persistBatch (too long destination name)
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.099 sec
+Running com.telefonica.iot.cygnus.sinks.NGSISinkTest
+[OrionSink.start] ------------------------------- The sink starts properly
+[OrionSink.start] ------------------------  OK  - The sink started properly, the lifecycle state is 'START'
+[OrionSink.configure] --------------------------- The configuration becomes invalid upon out-of-the-limits configured values for parameters having a discrete set of accepted values, or numerical values having upper or lower limits
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'batch_size='0' has been detected
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'batch_timeout='0' has been detected
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'batch_ttl='-2' has been detected
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'data_model='dm-by-other' has been detected
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'enable_grouping='falso' has been detected
+[OrionSink.configure] --------------------  OK  - A wrong configuration 'enable_lowercase='verdadero' has been detected
+[OrionSink.configure] --------------------------- When not configured, the default values are used for non mandatory parameters
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_size' is '1'
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_timeout' is '30'
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_ttl' is '10'
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'data_model' is 'dm-by-entity'
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'enable_grouping' is 'false'
+[OrionSink.configure] --------------------  OK  - The default configuration value for 'enable_lowercase' is 'false'
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 sec
 Running com.telefonica.iot.cygnus.sinks.NGSISTHSinkTest
-Testing NGSISTHSink.processContextResponses
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheels_car1-car, Data: 123456,1970-01-02T10:17:36.789Z,car1,car,speed,float,112.9,[]
-Testing NGSICKANSinkTest.processContextResponses (multiple destinations and fiware-servicePaths)
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsSport_sport1, Data: 1429535,1970-01-17T13:05:35.775Z,car1,car,speed,float,112.9,[]
-15/11/25 10:50:58 INFO sinks.NGSIMongoBaseSink: [null] Persisting data at NGSIMongoSink. Database: test_vehicles, Collection: test_/4wheelsUrban_urban1, Data: 1429535,1970-01-17T13:05:35.775Z,car2,car,speed,float,115.8,[]
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 sec
+[OrionSTHSink.configure] ------------------------ Configured 'db_prefix' is encoded when having forbiden characters
+[OrionSTHSink.configure] -----------------  OK  - 'db_prefix=this\is/a$prefix.with forbiden"chars:-.' correctly encoded as 'this_is_a_prefix_with_forbiden_chars:-_'
+[OrionSTHSink.configure) ------------------------ Configured 'collection_prefix' cannot be 'system.'
+[OrionSTHSink.configure] -----------------  OK  - 'system.' value detected for 'collection_prefix'
+[OrionSTHSink.configure] ------------------------ Configured 'collection_prefix' is encoded when having forbiden characters
+[OrionSTHSink.configure] -----------------  OK  - 'collection_prefix=this\is/a$prefix.with-forbiden,chars:-.' correctly encoded as 'this\is/a_prefix.with-forbiden,chars:-.'
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+Running com.telefonica.iot.cygnus.utils.NGSIUtilsTest
+[Utils.getLocation] ----------------------------- When getting a location, a CartoDB point is obtained when passing an attribute of type 'geo:point'
+[Utils.getLocation] ----------------------  OK  - Location 'ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)' obtained for an attribute with metadata '[{"name":"location","value":"WGS84","type":"string"}]' and value '-3.7167, 40.3833'
+[Utils.getLocation] ----------------------------- When getting a location, the original attribute is returned when the attribute type is not geo:point and there is no WGS84 location metadata
+[Utils.getLocation] ----------------------  OK  - Location '-3.7167, 40.3833' obtained for a not geolocated attribute
+[Utils.getLocation] ----------------------------- When getting a location, a CartoDB point is obtained when passing an attribute of type 'geo:point'
+[Utils.getLocation] ----------------------  OK  - Location 'ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)' obtained for an attribute of type 'geo:point' and value '-3.7167, 40.3833'
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
 
 Results :
 
-Tests run: 60, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 22.475s
-[INFO] Finished at: Wed Nov 25 10:50:59 CET 2015
-[INFO] Final Memory: 9M/81M
-[INFO] ------------------------------------------------------------------------
-```
+[INFO] Total time: 16.015s
+[INFO] Finished at: Tue May 03 17:48:48 CEST 2016
+[INFO] Final Memory: 31M/81M
+[INFO] ------------------------------------------------------------------------```
 
 [Top](#top)
 

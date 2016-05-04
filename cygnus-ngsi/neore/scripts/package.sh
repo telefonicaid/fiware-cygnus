@@ -109,7 +109,7 @@ function clean_up_previous_builds() {
 
 function get_name_suffix() {
     # At this moment Cygnus package name only has a Hadoop core version
-    HADOOP_VERSION=$(grep -A1 "hadoop-core" ${BASE_DIR}/pom.xml | tail -1 | tr -d "</version> ")
+    HADOOP_VERSION=$(grep -A1 "hadoop-core" ${BASE_DIR}/../cygnus-common/pom.xml | tail -1 | tr -d "</version> ")
     if [[ -z "${HADOOP_VERSION}" || ${HADOOP_VERSION} == "" ]]; then
         return 1
     fi

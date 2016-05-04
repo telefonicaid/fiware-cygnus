@@ -17,9 +17,9 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
-import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
@@ -50,8 +50,9 @@ public class NGSIMongoSinkTest {
                 + "-------- Configured 'collection_prefix' cannot be 'system.'");
         String collectionPrefix = "system.";
         String dbPrefix = "sth_";
+        String dataModel = null; // defaulting
         NGSIMongoSink sink = new NGSIMongoSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -72,8 +73,9 @@ public class NGSIMongoSinkTest {
                 + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
         String dbPrefix = "sth_";
+        String dataModel = null; // defaulting
         NGSIMongoSink sink = new NGSIMongoSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         String encodedCollectionPrefix = NGSIUtils.encodeSTHCollection(collectionPrefix);
         
         try {
@@ -97,8 +99,9 @@ public class NGSIMongoSinkTest {
                 + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "sth_";
         String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
+        String dataModel = null; // defaulting
         NGSIMongoSink sink = new NGSIMongoSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
         String encodedDbPrefix = NGSIUtils.encodeSTHDB(dbPrefix);
         
         try {
@@ -110,26 +113,5 @@ public class NGSIMongoSinkTest {
                     + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + encodedDbPrefix + "'");
         } // try catch
     } // testConfigureDBPrefixIsEncoded
-    
-    private Context createContext(String collectionPrefix, String dbPrefix) {
-        Context context = new Context();
-        context.put("attr_persistence", "row");
-        context.put("batch_size", "100");
-        context.put("batch_timeout", "30");
-        context.put("batch_ttl", "10");
-        context.put("collection_prefix", collectionPrefix);
-        context.put("collection_size", "0");
-        context.put("data_expiration", "0");
-        context.put("data_model", "dm-by-entity");
-        context.put("db_prefix", dbPrefix);
-        context.put("enable_grouping", "false");
-        context.put("enable_lowercase", "false");
-        context.put("max_documents", "0");
-        context.put("mongo_hosts", "localhost:27017");
-        context.put("mongo_password", "");
-        context.put("mongo_username", "");
-        context.put("should_hash", "false");
-        return context;
-    } // createContext
 
 } // NGSIMongoSinkTest
