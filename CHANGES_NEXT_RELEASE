@@ -41,3 +41,4 @@
 - [cygnus] [hardening] Add documentation in orion_ckan_sink.md about the creation of resources & datastores for column mode (#971)
 - [cygnus-ngsi] [bug] Fix collection name building when data_model is dm-by-service-path in Mongo sinks (#977)
 - [cygnus-ngsi] [bug] Fix attribute-based accumulation (#982)
+- [cygnus-ngsi] [hardening] Force default service and service path to use only alphanumerics and underscores (#985)
