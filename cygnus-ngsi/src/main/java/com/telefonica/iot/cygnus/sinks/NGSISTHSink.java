@@ -84,10 +84,10 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.DMBYSERVICEPATH) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                            fiwareService) + ".aggr").toLowerCase()
-                    : buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                            fiwareService) + ".aggr";
+                    ? (buildCollectionName(fiwareService, fiwareServicePath, null, null, null, true)
+                            + ".aggr").toLowerCase()
+                    : buildCollectionName(fiwareService, fiwareServicePath, null, null, null, true)
+                            + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
@@ -99,10 +99,10 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-entity
         if (dataModel == DataModel.DMBYENTITY) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                            entityId, entityType, fiwareService) + ".aggr").toLowerCase()
-                    : buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                            entityId, entityType, fiwareService) + ".aggr";
+                    ? (buildCollectionName(fiwareService, fiwareServicePath, entityId, entityType,
+                            null, true) + ".aggr").toLowerCase()
+                    : buildCollectionName(fiwareService, fiwareServicePath, entityId, entityType,
+                            null, true) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
@@ -143,10 +143,10 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             // create the collection at this stage, if the data model is collection-per-attribute
             if (dataModel == DataModel.DMBYATTRIBUTE) {
                 collectionName = enableLowercase
-                        ? (buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                                true, entityId, entityType, fiwareService) + ".aggr").toLowerCase()
-                        : buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                                true, entityId, entityType, fiwareService) + ".aggr";
+                        ? (buildCollectionName(fiwareService, fiwareServicePath, entityId, entityType,
+                                attrName, true) + ".aggr").toLowerCase()
+                        : buildCollectionName(fiwareService, fiwareServicePath, entityId, entityType,
+                                attrName, true) + ".aggr";
                 backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 

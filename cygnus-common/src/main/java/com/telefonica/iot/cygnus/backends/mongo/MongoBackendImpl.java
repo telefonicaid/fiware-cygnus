@@ -91,8 +91,8 @@ public class MongoBackendImpl implements MongoBackend {
     } // createDatabase
 
     /**
-     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
-     * if possible.
+     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database.
+     * Time-based limits are set, if possible.
      * @param dbName
      * @param collectionName
      * @param dataExpiration
@@ -556,11 +556,10 @@ public class MongoBackendImpl implements MongoBackend {
      * @param entityId
      * @param entityType
      * @param attrName
-     * @param destination
      * @throws java.lang.Exception
      */
     public void storeCollectionHash(String dbName, String hash, boolean isAggregated, String fiwareService,
-            String fiwareServicePath, String entityId, String entityType, String attrName, String destination)
+            String fiwareServicePath, String entityId, String entityType, String attrName)
         throws Exception {
         // get the database and the collection; the collection is created if not existing
         MongoDatabase db = getDatabase(dbName);
@@ -589,7 +588,7 @@ public class MongoBackendImpl implements MongoBackend {
 
         // do the first update
         BasicDBObject update = buildUpdateForCollectionHash("$setOnInsert", isAggregated, fiwareService,
-                fiwareServicePath, entityId, entityType, attrName, destination);
+                fiwareServicePath, entityId, entityType, attrName);
         LOGGER.debug("Updating data, database=" + dbName + ", collection=collection_names, query="
                 + query.toString() + ", update=" + update.toString());
         UpdateResult res = collection.updateOne(query, update, new UpdateOptions().upsert(true));
@@ -620,7 +619,7 @@ public class MongoBackendImpl implements MongoBackend {
 
     // FIXME: destination is under study
     private BasicDBObject buildUpdateForCollectionHash(String operation, boolean isAggregated, String fiwareService,
-            String fiwareServicePath, String entityId, String entityType, String attrName, String destination) {
+            String fiwareServicePath, String entityId, String entityType, String attrName) {
         BasicDBObject update = new BasicDBObject();
         update.append(operation, new BasicDBObject("dataModel", CommonUtils.getStrDataModel(dataModel)).
                 append("isAggregated", isAggregated).
@@ -628,8 +627,7 @@ public class MongoBackendImpl implements MongoBackend {
                 append("servicePath", fiwareServicePath).
                 append("entityId", entityId).
                 append("entityType", entityType).
-                append("attrName", attrName).
-                append("destination", destination));
+                append("attrName", attrName));
         return update;
     } // buildUpdateForCollectionHash
 

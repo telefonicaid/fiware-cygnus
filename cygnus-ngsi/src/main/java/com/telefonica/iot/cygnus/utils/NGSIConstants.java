@@ -60,6 +60,7 @@ public final class NGSIConstants {
     // NGSISTHSink specific constants
     public static final int STH_MAX_NAMESPACE_SIZE_IN_BYTES = 113;
     public static final int STH_MIN_HASH_SIZE_IN_BYTES      = 20;
+    public static final String STH_CONCAT_CHARS             = ";";
     
     // NGSIDynamoDBSink specific constants
     public static final String DYNAMO_DB_PRIMARY_KEY = "ID";

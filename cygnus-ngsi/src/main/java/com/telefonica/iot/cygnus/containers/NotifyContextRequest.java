@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.containers;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 
 /**

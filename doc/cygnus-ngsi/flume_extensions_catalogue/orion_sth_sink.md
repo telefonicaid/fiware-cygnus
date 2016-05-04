@@ -45,11 +45,15 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
-MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSISTHSink` each time a Flume event is going to be persisted.
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a Flume event is going to be persisted.
 
-A database called as the `fiware-service` header value within the event is created (if not existing yet).
+A database called as the `fiware-service` header value within the event is created (if not existing yet). Please observe only alphanumerics and/or underscores are accepted for the FIWARE service value.
 
-The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+By default (when `data_model` is `dm-by-entity`), the context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. A collection name is built as the concatenation of the `fiware-servicePath` header values within the event and the notified `entityId` and `entityType`, i.e.:
+
+    <fiware-servivePath>;<entityId>;<entityType>
+
+Please observe, unlike any other sink, the above does not get the `notified-entities` header value for appending the entity information to the service path. This is because `OrionMongoSink` uses a special concatenation character: `;`.
 
 The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
@@ -102,9 +106,9 @@ Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=fa
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels_car1_car.aggr
+    sth_/4wheels;car1;car.aggr
     system.indexes
-    > db['sth_/4wheels_car1_car.aggr'].find()
+    > db['sth_/4wheels;car1;car.aggr'].find()
     {
         "_id" : { "attrName" : "speed", "origin" : ISODate("2015-04-20T00:00:00Z"), "resolution" : "hour", "range" : "day", "attrType" : "float" },
         "points" : [
@@ -229,8 +233,8 @@ NOTES:
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
-| db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ | `system.` is not accepted. |
+| db_prefix | no | sth_ | Only alphanumerics and/or underscores. |
+| collection_prefix | no | sth_ | Only alphanumerics and/or underscores. `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |

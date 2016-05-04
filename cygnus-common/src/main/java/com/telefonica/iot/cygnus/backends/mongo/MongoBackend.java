@@ -36,8 +36,8 @@ public interface MongoBackend {
     void createDatabase(String dbName) throws Exception;
 
     /**
-     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
-     * if possible.
+     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database.
+     * Time-based limits are set, if possible.
      * @param dbName
      * @param collectionName
      * @param dataExpiration
@@ -96,10 +96,9 @@ public interface MongoBackend {
      * @param entityId
      * @param entityType
      * @param attrName
-     * @param destination
      * @throws java.lang.Exception
      */
     void storeCollectionHash(String dbName, String hash, boolean isAggregated, String fiwareService,
-            String fiwareServicePath, String entityId, String entityType, String attrName, String destination)
+            String fiwareServicePath, String entityId, String entityType, String attrName)
         throws Exception;
 } // MongoBackend

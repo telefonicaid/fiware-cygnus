@@ -36,9 +36,13 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a Flume event is going to be persisted.
 
-A database called as the `fiware-service` header value within the event is created (if not existing yet).
+A database called as the `fiware-service` header value within the event is created (if not existing yet). Please observe only alphanumerics and/or underscores are accepted for the FIWARE service value.
 
-The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+By default (when `data_model` is `dm-by-entity`), the context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. A collection name is built as the concatenation of the `fiware-servicePath` header values within the event and the notified `entityId` and `entityType`, i.e.:
+
+    <fiware-servivePath>;<entityId>;<entityType>
+
+Please observe, unlike any other sink, the above does not get the `notified-entities` header value for appending the entity information to the service path. This is because `OrionMongoSink` uses a special concatenation character: `;`.
 
 The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
 
@@ -78,7 +82,8 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-According to different combinations of the parameters `datamodel` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
+According to different combinations of the parameters `data_model` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
+
 Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
@@ -92,9 +97,9 @@ Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-e
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels_car1_car
+    sth_/4wheels;car1;car
     system.indexes
-    > db['sth_/4wheels_car1_car'].find()
+    > db['sth_/4wheels;car1;car'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
 
@@ -113,7 +118,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
     > show collections
     sth_/4wheels_car1_car
     system.indexes
-    > db['sth_/4wheels_car1_car'].find()
+    > db['sth_/4wheels;car1;car'].find()
     {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
 
 If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
@@ -171,10 +176,10 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` 
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels_car1_car_speed
-    sth_/4wheels_car1_car_oil_level
+    sth_/4wheels;car1;car;speed
+    sth_/4wheels;car1;car;oil_level
     system.indexes
-    > db['sth_/4wheels_car1_car_speed'].find()
+    > db['sth_/4wheels;car1;car;speed'].find()
      { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "112.9" }
     > db['sth_/4wheels_car1_oil_level'].find()
      { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
@@ -207,8 +212,8 @@ NOTE: `mongo` is the MongoDB CLI for querying the data.
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
-| db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ | `system.` is not accepted. |
+| db_prefix | no | sth_ | Only alphanumerics and/or underscores. |
+| collection_prefix | no | sth_ | Only alphanumerics and/or underscores. `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |

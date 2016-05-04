@@ -35,7 +35,6 @@ public final class NGSIUtils {
     private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
     private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
-    private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[\\/\\\\.\\$\" ]");
     private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("\\$");
     private static final Pattern ENCODEPOSTGRESQLPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     
@@ -75,21 +74,12 @@ public final class NGSIUtils {
     } // encodeHive
     
     /**
-     * Encodes a string replacing all '/', '\', '.', ' ', '"' and '$' by '_'.
-     * @param in
-     * @return The encoded version of the input string
-     */
-    public static String encodeSTHDB(String in) {
-        return ENCODESTHDBPATTERN.matcher(in).replaceAll("_");
-    } // encodeSTHDB
-    
-    /**
-     * Encodes a string replacing all '$' by '_'.
+     * Encodes a string replacing all '$' by '>'.
      * @param in
      * @return The encoded version of the input string
      */
     public static String encodeSTHCollection(String in) {
-        return ENCODESTHCOLLECTIONPATTERN.matcher(in).replaceAll("_");
+        return ENCODESTHCOLLECTIONPATTERN.matcher(in).replaceAll(">");
     } // encodeSTHCollection
     
     /**
