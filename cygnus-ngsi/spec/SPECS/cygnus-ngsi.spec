@@ -1,4 +1,4 @@
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
