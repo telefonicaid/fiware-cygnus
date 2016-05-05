@@ -158,7 +158,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     private void insert(String resId, String records) throws Exception {
         String jsonString = "{ \"resource_id\": \"" + resId
                     + "\", \"records\": [ " + records + " ], "
-                    + "\"method\": \"insert\", "
+                    + "\"method\": \"upsert\", "
                     + "\"force\": \"true\" }";
         String urlPath;
         
