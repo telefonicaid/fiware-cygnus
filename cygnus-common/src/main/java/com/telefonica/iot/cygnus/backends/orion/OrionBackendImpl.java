@@ -45,20 +45,34 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // StatsBackendImpl
 
     @Override
-    public JsonResponse subscribeContext(String subscription, boolean xAuthToken, 
-            String token) throws Exception {
+    public JsonResponse subscribeContextV1(String subscription, String token) 
+            throws Exception {
         
         // create the relative URL
         String relativeURL = "/v1/subscribeContext";
         
-        // create the http headers       
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers.add(new BasicHeader("Content-type", "application/json"));
-        headers.add(new BasicHeader("Accept", "application/json"));
+        // create the http header
+        ArrayList<Header> headers = getHeaders(token);
         
-        if (xAuthToken) {
-            headers.add(new BasicHeader("X-Auth-token", token));
-        } // if
+        // create an entity for request
+        StringEntity entity = new StringEntity(subscription);
+        
+        // do the request
+        JsonResponse response = doRequest("POST", relativeURL, true, headers, entity);
+        
+        // check status code from response
+        return response;
+    } // subscribeContext
+    
+    @Override
+    public JsonResponse subscribeContextV2(String subscription, String token) 
+            throws Exception {
+        
+        // create the relative URL
+        String relativeURL = "/v2/subscriptions";
+        
+        // create the http header
+        ArrayList<Header> headers = getHeaders(token);
         
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);

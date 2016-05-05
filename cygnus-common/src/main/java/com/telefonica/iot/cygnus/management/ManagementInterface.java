@@ -15,6 +15,23 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
+/**
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of fiware-cygnus (FI-WARE project).
+ *
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ */
 
 package com.telefonica.iot.cygnus.management;
 
@@ -26,7 +43,8 @@ import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
-import com.telefonica.iot.cygnus.containers.CygnusSubscription;
+import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV1;
+import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV2;
 import com.telefonica.iot.cygnus.containers.OrionEndpoint;
 import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
@@ -632,7 +650,7 @@ public class ManagementInterface extends AbstractHandler {
 
     private void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
-
+        
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
         String jsonStr = "";
@@ -643,74 +661,163 @@ public class ManagementInterface extends AbstractHandler {
         } // while
 
         reader.close();
+                
+        String ngsiVersion = request.getParameter("ngsi_version");
+        
+        if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
+            LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
+            return;
+        } 
+        
+        if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Parse error, invalid parameter (ngsi_version): "
+                    + "Must be 1 or 2. Check it for errors.\"}");
+            LOGGER.error("Parse error, invalid parameter (ngsi_version): "
+                    + "Must be 1 or 2. Check it for errors.");
+            return;
+        }
 
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
-        CygnusSubscription cygnusSubscription;
-        try {
-            cygnusSubscription = gson.fromJson(jsonStr, CygnusSubscription.class);
-        } catch (JsonSyntaxException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
+        CygnusSubscriptionV1 cygnusSubscriptionv1;
+        CygnusSubscriptionV2 cygnusSubscriptionv2;
+        
+        if (ngsiVersion.equals("1")) {
+            try {
+                cygnusSubscriptionv1 = gson.fromJson(jsonStr, CygnusSubscriptionV1.class);
+            } catch (JsonSyntaxException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
-            LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
-            return;
-        } // try catch
+                LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
+                return;
+            } // try catch
 
-        // check if the subscription and endpoint are valid
-        int err = cygnusSubscription.isValid();
+            // check if the subscription and endpoint are valid
+            int err = cygnusSubscriptionv1.isValid();
 
-        if (err > 0) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+             if (err > 0) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            
+                try {
+                    manageErrorMsg(err, response);
+                    return;
+                } // if
+                 catch (Exception e) {
+                    Logger.getLogger(e.getMessage());
+                 } // try catch
+            
+            } // if
+             
+            LOGGER.debug("Valid CygnusSubscription. Creating request to Orion.");
+
+            // get host, port and ssl for request
+            String host = cygnusSubscriptionv1.getOrionEndpoint().getHost();
+            String port = cygnusSubscriptionv1.getOrionEndpoint().getPort();
+            boolean ssl = Boolean.valueOf(cygnusSubscriptionv1.
+                    getOrionEndpoint().getSsl());
+            String token = cygnusSubscriptionv1.getOrionEndpoint().getAuthToken();
+            
+            // Create a orionBackend for request
+            orionBackend = new OrionBackendImpl(host, port, ssl);
+        
+            // Get /subscription JSON from entire one
+            JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
+            String subscriptionStr = inputJson.get("subscription").toString();
+        
+            JsonResponse orionResponse = null;
+            int status = -1;
+            JSONObject orionJson = new JSONObject();
             
             try {
-                manageErrorMsg(err, response);
-                return;
-            } // if
-            catch (Exception e) {
-                Logger.getLogger(e.getMessage());
+                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token);
+                status = orionResponse.getStatusCode();
+                orionJson = orionResponse.getJsonObject();
+                
+                if (status == 200) {
+                    response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    LOGGER.debug("Subscribed.");
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                } // if else
+                
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
             } // try catch
             
-        } // if
-
-        LOGGER.debug("Valid CygnusSubscription. Creating request to Orion.");
-
-        // get host, port and ssl for request
-        String host = cygnusSubscription.getOrionEndpoint().getHost();
-        String port = cygnusSubscription.getOrionEndpoint().getPort();
-        boolean ssl = Boolean.valueOf(cygnusSubscription.
-                getOrionEndpoint().getSsl());
-        boolean xAuthToken = false;
-        String token = cygnusSubscription.getOrionEndpoint().getAuthToken();
-        
-        if (token != null) {
-            xAuthToken = true;
-        } // if
-
-        // Create a orionBackend for request
-        orionBackend = new OrionBackendImpl(host, port, ssl);
-        
-        // Get /subscription JSON from entire one
-        JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
-        String subscriptionStr = inputJson.get("subscription").toString();
-        
-        try {
-            JsonResponse orionResponse = orionBackend.subscribeContext(subscriptionStr, xAuthToken, token);
-            int status = orionResponse.getStatusCode();
-            JSONObject orionJson = orionResponse.getJsonObject();
+        } else if (ngsiVersion.equals("2")) {
             
-            if (status == 200) {
-                response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-                LOGGER.debug("Subscribed.");
-            } else {
+            try {
+                cygnusSubscriptionv2 = gson.fromJson(jsonStr, CygnusSubscriptionV2.class);
+            } catch (JsonSyntaxException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-            } // if else
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+                LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
+                return;
+            } // try catch
             
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-        } // try catch
+            // check if the subscription and endpoint are valid
+            int err = cygnusSubscriptionv2.isValid();
+
+            if (err > 0) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            
+                try {
+                    manageErrorMsg(err, response);
+                    return;
+                } // if
+                 catch (Exception e) {
+                    Logger.getLogger(e.getMessage());
+                } // try catch
+            
+            } // if
+             
+            LOGGER.debug("Valid CygnusSubscriptionV2. Creating request to Orion.");
+
+            // get host, port and ssl for request
+            String host = cygnusSubscriptionv2.getOrionEndpoint().getHost();
+            String port = cygnusSubscriptionv2.getOrionEndpoint().getPort();
+            boolean ssl = Boolean.valueOf(cygnusSubscriptionv2.
+                    getOrionEndpoint().getSsl());
+            String token = cygnusSubscriptionv2.getOrionEndpoint().getAuthToken();
+            
+            // Create a orionBackend for request
+            orionBackend = new OrionBackendImpl(host, port, ssl);
+        
+            // Get /subscription JSON from entire one
+            JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
+            String subscriptionStr = inputJson.get("subscription").toString();
+        
+            JsonResponse orionResponse = null;
+            int status = -1;
+            JSONObject orionJson = new JSONObject();
+            
+            try {
+                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token);   
+                status = orionResponse.getStatusCode();
+                
+                if (status == 201) {
+                    String location = orionResponse.getLocationHeader().getValue();
+                    response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : { SubscriptionID = " + location.substring(18) + "}");
+                    LOGGER.debug("Subscribed.");
+                } else {
+                    orionJson = orionResponse.getJsonObject();
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : {" + orionJson.toString()+ "}");
+                } // if else
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            } // try catch
+        } // if else if
         
     } // handlePostSubscription
     
@@ -1194,7 +1301,8 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetPoints
     
     private void manageErrorMsg(int err, HttpServletResponse response) throws Exception{
-        switch (err) {
+                
+        switch (err) {            
             // cases of missing endpoint or subscription
             case 11:
                 response.getWriter().println("{\"success\":\"false\","
@@ -1206,10 +1314,7 @@ public class ManagementInterface extends AbstractHandler {
                         + "\"error\":\"Missing endpoint\"}");
                 LOGGER.error("Missing endpoint");
                 return;
-
-            // cases of missing fields in subscription
-
-            // cases for 'entities'
+      
             case 1211:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'entities' is missing\"}");
@@ -1265,28 +1370,25 @@ public class ManagementInterface extends AbstractHandler {
                 LOGGER.error("Invalid subscription, field 'attributes' is missing");
                 return;
 
-            // cases of missing fields in endpoint
-            case 221:
-                response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Invalid endpoint, field 'host' is missing\"}");
-                LOGGER.error("Invalid endpoint, field 'host' is missing");
-                return;
-            case 222:
-                response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Invalid endpoint, field 'port' is missing\"}");
-                LOGGER.error("Invalid endpoint, field 'port' is missing");
-                return;
-            case 223:
-                response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Invalid endpoint, field 'ssl' is missing\"}");
-                LOGGER.error("Invalid endpoint, field 'ssl' is missing");
-                return;
-
-            // cases of empty fields in subscription
             case 131:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'entities' is empty\"}");
                 LOGGER.error("Invalid subscription, field 'entities' is empty");
+                return;
+            case 1311:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'condition' is missing\"}");
+                LOGGER.error("Invalid subscription, field 'condition' is missing");
+                return;
+            case 1312:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'condition' has missing fields\"}");
+                LOGGER.error("Invalid subscription, field 'condition' has missing fields");
+                return;
+            case 1313:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'condition' has empty fields\"}");
+                LOGGER.error("Invalid subscription, field 'condition' has empty fields");
                 return;
             case 132:
                 response.getWriter().println("{\"success\":\"false\","
@@ -1307,6 +1409,82 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'throttling' is empty\"}");
                 LOGGER.error("Invalid subscription, field 'throttling' is empty");
+                return;
+                
+            case 141:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'description' is missing\"}");
+                LOGGER.error("Invalid subscription, field 'description' is missing");
+                return;               
+            case 142:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'description' is empty\"}");
+                LOGGER.error("Invalid subscription, field 'description' is empty");
+                return;
+                
+            case 15111:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'subject' is missing\"}");
+                LOGGER.error("Invalid subscription, field 'subject' is missing");
+                return;                 
+            case 15112:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'subject' is empty\"}");
+                LOGGER.error("Invalid subscription, field 'subject' is empty");
+                return;           
+            case 1512:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'subject' has missing fields\"}");
+                LOGGER.error("Invalid subscription, field 'subject' has missing fields");
+                return;           
+            case 1513:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'subject' has empty fields\"}");
+                LOGGER.error("Invalid subscription, field 'subject' has empty fields");
+                return; 
+             
+            case 1611:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'notification' is missing\"}");
+                LOGGER.error("Invalid subscription, field 'notification' is missing");
+                return; 
+            case 1612:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'notification' has missing fields\"}");
+                LOGGER.error("Invalid subscription, field 'notification' has missing fields");
+                return;    
+            case 1613:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'notification' has empty fields\"}");
+                LOGGER.error("Invalid subscription, field 'notification' has empty fields");
+                return;
+                
+            case 171:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'expires' is missing\"}");
+                LOGGER.error("Invalid subscription, field 'expires' is missing");
+                return;               
+            case 172:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid subscription, field 'expires' is empty\"}");
+                LOGGER.error("Invalid subscription, field 'expires' is empty");
+                return;
+                
+            // cases of missing fields in endpoint
+            case 221:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid endpoint, field 'host' is missing\"}");
+                LOGGER.error("Invalid endpoint, field 'host' is missing");
+                return;
+            case 222:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid endpoint, field 'port' is missing\"}");
+                LOGGER.error("Invalid endpoint, field 'port' is missing");
+                return;
+            case 223:
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Invalid endpoint, field 'ssl' is missing\"}");
+                LOGGER.error("Invalid endpoint, field 'ssl' is missing");
                 return;
 
             // cases of empty fields in endpoint
@@ -1336,14 +1514,14 @@ public class ManagementInterface extends AbstractHandler {
             // case for authtoken missing
             case 51:
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Missing Auth-Token. Required for DELETE subscriptions\"}");
+                        + "\"error\":\"Missing Auth-Token. Required for API methods\"}");
                 LOGGER.error("Invalid endpoint, missing 'xAuthToken'");
                 return;
 
             // case for authtoken empty
             case 52:
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Empty Auth-Token. Required for DELETE subscriptions\"}");
+                        + "\"error\":\"Empty Auth-Token. Required for API methods\"}");
                 LOGGER.error("Invalid endpoint, empty 'xAuthToken'");
                 return;
                 
@@ -1351,7 +1529,8 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription\"}");
                 LOGGER.error("Invalid subscription");
-            } // swtich
-    }
+            } // switch
+        
+    } // manageErrorMsg 
 
 } // ManagementInterface

@@ -37,22 +37,31 @@ public interface OrionBackend {
     // void updateContext(String entityId, String entityType, ArrayList<OrionStats> allAttrStats) throws Exception;
     
     /**
-     * Subscribe to Orion with a given port, host and string with subscription information.
+     * Subscribe to Orion with a given port, host and string with subscription information (v1).
      * 
      * @param cygnusSubscription 
-     * @param xAuthToken 
      * @param token
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContext(String cygnusSubscription, boolean xAuthToken, 
-            String token) throws Exception;
+    JsonResponse subscribeContextV1(String cygnusSubscription, String token) 
+            throws Exception;
+    
+    /**
+     * Subscribe to Orion with a given port, host and string with subscription information (v2).
+     * 
+     * @param cygnusSubscription 
+     * @param token
+     * @throws Exception
+     * @return response
+     */
+    JsonResponse subscribeContextV2(String cygnusSubscription, String token) 
+            throws Exception;
     
     /** 
      * Unsubscribe from Orion with a given subscription id (Orion v1)
      * 
      * @param subscriptionId 
-     * @param xAuthToken 
      * @param token
      * @throws Exception
      * @return response
@@ -64,7 +73,6 @@ public interface OrionBackend {
      * Unsubscribe from Orion with a given subscription id (Orion v2)
      * 
      * @param subscriptionId 
-     * @param xAuthToken 
      * @param token
      * @throws Exception
      * @return response
