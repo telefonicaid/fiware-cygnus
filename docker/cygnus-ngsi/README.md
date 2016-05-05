@@ -10,7 +10,7 @@ Content:
     * [Using a specific configuration](#section3.2)
         * [Editing the docker files](#section3.2.1)
         * [Environment variables](#section3.2.2)
-        * [Using volumnes](#section3.2.3)
+        * [Using volumes](#section3.2.3)
 
 ##<a name="section1"></a>Before starting
 Obviously, you will need docker installed and running in you machine. Please, check [this](https://docs.docker.com/linux/started/) official start guide.
@@ -60,7 +60,7 @@ centos              6                   61bf77ab8841        4 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hu.docker.com) allows running a Cuygnus agent in charge of receiving NGSI-like notifications and persiting them into a MySQL database running at `mysql` host.
+The cygnus-ngsi image (either built from the scratch, either downloaded from hu.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persiting them into a MySQL database running at `mysql` host.
 
 Start a container for this image by typing in a terminal:
 
@@ -178,12 +178,12 @@ Those parameters associated to an environment variable can be easily overwritten
 
 [Top](#top)
 
-####<a name="section3.2.3"></a>Using volumnes 
+####<a name="section3.2.3"></a>Using volumes 
 Another possibility is to start a container with a volume (`-v` option) and map the entire configuraton file within the container with a local version of the file:
 
     $ docker run -v /absolute/path/to/local/agent.conf:/opt/apache-flume/conf/agent.conf cygnus-ngsi
     
-Of course, you can combine volumnes and environment variables overwritting:
+Of course, you can combine volumes and environment variables overwritting:
 
     $ docker run -v /absolute/path/to/local/agent.conf:/opt/apache-flume/conf/agent.conf -e LOG_LEVEL='DEBUG' cygnus-ngsi
     
