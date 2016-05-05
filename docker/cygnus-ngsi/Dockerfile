@@ -24,6 +24,11 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
 ENV CYGNUS_VERSION "0.13.0_SNAPSHOT"
+ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
+ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
+ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
+ENV CYGNUS_LOG_LEVEL "INFO"
+ENV CYGNUS_LOG_APPENDER "console"
 
 ENV GIT_URL_CYGNUS https://github.com/telefonicaid/fiware-cygnus.git
 ENV GIT_REV_CYGNUS develop
@@ -37,12 +42,6 @@ ENV FLUME_VER "1.4.0"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
-
-ENV CONF_PATH "/opt/apache-flume/conf"
-ENV CONF_FILE "/opt/apache-flume/conf/agent.conf"
-ENV AGENT_NAME "cygnus-ngsi"
-ENV LOG_LEVEL "INFO"
-ENV LOG_APPENDER "console"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 
@@ -104,10 +103,14 @@ RUN cd ${CYGNUS_HOME}/cygnus-common && \
     rm -f /opt/${MVN_TGZ} && \
     rm -f /opt/${FLUME_TGZ}
 
+# Copy some files needed for starting cygnus-ngsi
 COPY cygnus-entrypoint.sh /
 COPY agent.conf ${FLUME_HOME}/conf/
+
+# Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
+# Ports used by cygnus-ngsi
 EXPOSE 5050
 EXPOSE 8081
 
