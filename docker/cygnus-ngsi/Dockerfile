@@ -48,7 +48,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 # Add Cyugnus user
 RUN adduser ${CYGNUS_USER}
 
-# Install dependencies (Java, Maven, Flume)
+# Install
 RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     yum clean all && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
@@ -61,37 +61,30 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
-    chown -R cygnus:cygnus ${FLUME_HOME}
-
-# Create Cygnus log folder
-RUN mkdir ${FLUME_HOME}/log
-
-# Instead of re-cloning, copy the fiware-cygnus repo, move there and checkout the propper branch
-COPY . ${CYGNUS_HOME}
-RUN cd ${CYGNUS_HOME} && \
-    git checkout ${GIT_REV_CYGNUS}
-
-# Build and install cygnus-common
-RUN cd ${CYGNUS_HOME}/cygnus-common && \
+    chown -R cygnus:cygnus ${FLUME_HOME} && \
+    # Make a shallow clone to help reduce final image size
+    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    cd ${CYGNUS_HOME} && \
+    git checkout ${GIT_REV_CYGNUS} && \
+    # Build and install cygnus-common
+    cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean compile exec:exec assembly:single && \
     cp target/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/libext/ && \
-    ${MVN_HOME}/bin/mvn install:install-file -Dfile=${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=${CYGNUS_VERSION} -Dpackaging=jar -DgeneratePom=false
-
-# Build and install cygnus-ngsi
-RUN cd ${CYGNUS_HOME}/cygnus-ngsi && \
+    ${MVN_HOME}/bin/mvn install:install-file -Dfile=${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=${CYGNUS_VERSION} -Dpackaging=jar -DgeneratePom=false && \
+    # Build and install cygnus-ngsi
+    cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn clean compile exec:exec assembly:single && \
-    cp target/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/
-
-# Install Cygnus Application script
-RUN cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
-    chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng
-
-# Instantiate some configuration files
-RUN cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
-    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf
-
-# Cleanup to thin the final image
-RUN cd ${CYGNUS_HOME}/cygnus-common && \
+    cp target/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
+    # Install Cygnus Application script
+    cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
+    chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
+    # Instantiate some configuration files
+    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
+    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
+    # Create Cygnus log folder
+    mkdir ${FLUME_HOME}/log && \
+    # Cleanup to thin the final image
+    cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn clean && \
