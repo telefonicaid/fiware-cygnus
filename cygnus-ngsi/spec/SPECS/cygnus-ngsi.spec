@@ -1,4 +1,4 @@
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 # 
 # This file is part of fiware-cygnus (FI-WARE project).
 # 
@@ -14,21 +14,18 @@
 # 
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
-Summary:          Package for cygnus component
-Name:             cygnus
+Summary:          Package for Cygnus NGSI component
+Name:             cygnus-ngsi
 Version:          %{_product_version}
 Release:          %{_product_release}
 License:          AGPLv3
 BuildRoot:        %{_topdir}/BUILDROOT/
 BuildArch:        x86_64
-Requires(post):   /sbin/chkconfig, /usr/sbin/useradd
-Requires(preun):  /sbin/chkconfig, /sbin/service
-Requires(postun): /sbin/service
+Requires:         cygnus-common = %{_product_version}-%{_product_release}
 Group:            Applications/cygnus
 Vendor:           Telefonica I+D
-Provides:         cygnus%{_name_suffix} = %{_product_version}-%{_product_release}
+Provides:         cygnus-ngsi = %{_product_version}-%{_product_release}
 
-%define _rpmfilename %%{ARCH}/%%{NAME}%{_name_suffix}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 %description
 This connector is a (conceptual) derivative work of ngsi2cosmos, and implements
@@ -37,14 +34,13 @@ a Flume-based connector for context data coming from Orion Context Broker.
 # Project information 
 %define _project_name cygnus
 %define _project_user cygnus
-%define _service_name cygnus
 
 # improve package speed avoiding jar repack
 %define __jar_repack %{nil}
 
 # System folders
 # _sourcedir =${topdir}/SOURCES
-%define _srcdir %{_sourcedir}/../../../
+%define _srcdir %{_sourcedir}/../../
 %define _install_dir /usr
 %define _project_install_dir %{_install_dir}/%{_project_name}
 
@@ -75,87 +71,18 @@ cp -R  %{_srcdir}/src \
 cp -R %{_sourcedir}/* %{_builddir}
 
 # -------------------------------------------------------------------------------------------- #
-# Build section:
-# -------------------------------------------------------------------------------------------- #
-%build
-# Read from BUILD, write into BUILD
-
-
-# -------------------------------------------------------------------------------------------- #
-# pre-install section:
-# -------------------------------------------------------------------------------------------- #
-%pre
-# Read from BUILD, write into BUILDROOT
-
-echo "[INFO] Creating %{_project_user} user"
-getent group  %{_project_user} >/dev/null || groupadd -r %{_project_user}
-getent passwd %{_project_user} >/dev/null || useradd -r -g %{_project_user} -m -s /bin/bash -c 'Cygnus user account' %{_project_user}
-
-# -------------------------------------------------------------------------------------------- #
 # Install section:
 # -------------------------------------------------------------------------------------------- #
 %install
 # Read from BUILD and write into BUILDROOT
 # RPM_BUILD_ROOT = BUILDROOT
 
+mkdir -p %{_build_root_project}/conf
+
 echo "[INFO] Installing the %{name}"
 
-echo "[INFO] Creating the directories"
-mkdir -p %{_build_root_project}/init.d
-# Create folder to store the PID (used by the Service)
-mkdir -p %{buildroot}/var/run/%{_project_name}
-# Create log folder
-mkdir -p %{buildroot}/${_log_dir}
-# Create /etc/cron.d directory
-mkdir -p %{buildroot}/etc/cron.d
-# Create /etc/logrotate.d directory
-mkdir -p %{buildroot}/etc/logrotate.d
-# create /etc/cygnus
-mkdir -p %{buildroot}/etc/%{_project_name}
-# create /etc/init.d
-mkdir -p %{buildroot}/etc/init.d
-# create /usr/bin
-mkdir -p %{buildroot}/usr/bin
-
 cp -R %{_builddir}/usr/cygnus/*                       %{_build_root_project}
-cp %{_builddir}/init.d/%{_service_name}               %{_build_root_project}/init.d/%{_service_name}
 cp %{_builddir}/config/*                              %{_build_root_project}/conf/
-cp %{_builddir}/cron.d/cleanup_old_cygnus_logfiles    %{buildroot}/etc/cron.d
-cp %{_builddir}/logrotate.d/logrotate-cygnus-daily    %{buildroot}/etc/logrotate.d
-
-ln -s %{_project_install_dir}/init.d/%{_service_name}  %{buildroot}/etc/init.d/%{_service_name}
-ln -s %{_project_install_dir}/conf                     %{buildroot}/etc/%{_project_name}/conf
-ln -s %{_project_install_dir}/bin/flume-ng             %{buildroot}/usr/bin/flume-ng
-
-# -------------------------------------------------------------------------------------------- #
-# post-install section:
-# -------------------------------------------------------------------------------------------- #
-%post
-
-#Logs
-echo "[INFO] Creating log directory"
-mkdir -p %{_log_dir}
-chown %{_project_user}:%{_project_user} %{_log_dir}
-chmod g+s %{_log_dir}
-setfacl -d -m g::rwx %{_log_dir}
-setfacl -d -m o::rx %{_log_dir}
-
-echo "Done"
-
-# -------------------------------------------------------------------------------------------- #
-# pre-uninstall section:
-# -------------------------------------------------------------------------------------------- #
-%preun
-
-/sbin/service %{_service_name} stop
-
-
-# -------------------------------------------------------------------------------------------- #
-# post-uninstall section:
-# clean section:
-# -------------------------------------------------------------------------------------------- #
-%postun
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -166,14 +93,8 @@ rm -rf $RPM_BUILD_ROOT
 # -------------------------------------------------------------------------------------------- #
 %files
 %defattr(755,%{_project_user},%{_project_user},755)
-%attr(0644, root, root) /etc/cron.d/cleanup_old_cygnus_logfiles
-%attr(0644, root, root) /etc/logrotate.d/logrotate-cygnus-daily
-%attr(0777, root, root) /etc/cygnus/conf
-%attr(0777, root, root) /etc/init.d/cygnus
-%attr(0777, root, root) /usr/bin/flume-ng
 
 %{_project_install_dir}
-/var/run/%{_project_name}
 
 %changelog
 * Tue Mar 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 0.13.0
