@@ -41,5 +41,6 @@
 - [cygnus-ngsi] [bug] Fix configuration of grouping rules in quick_start_guide.md (#983)
 - [cygnus-ngsi] [bug] Fix collection name building when data_model is dm-by-service-path in Mongo sinks (#977)
 - [cygnus-ngsi] [bug] Fix attribute-based accumulation (#982)
+- [cygnus-ngsi] [bug] Pass the API and GUI ports as parameters, instead of hardcoding them in ManagementInterface.java (#995)
 - [cygnus-ngsi] [hardening] Force default service and service path to use only alphanumerics and underscores (#985)
 - [cygnus] [hardening] Update README.md with link to apiary documentation (#892)
