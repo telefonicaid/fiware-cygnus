@@ -23,15 +23,15 @@ Start by cloning the `fiware-cygnus` repository:
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     
-Change directory to `docker/cygnus-ngsi`:
+Change directory to `fiware-cygnus`:
 
-    $ cd docker/cygnus-ngsi
+    $ cd fiware-cygnus
     
 And run the following command:
 
-    $ docker build -t cygnus-ngsi .
+    $ docker build -t cygnus-ngsi -f docker/cygnus-ngsi/Dockerfile .
     
-You can check the available images at your docker by typing:
+Once finished (it may take a time), you can check the available images at your docker by typing:
 
 ```
 $ docker images
