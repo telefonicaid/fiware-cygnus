@@ -62,8 +62,8 @@ Each folder MUST have, at least, the following subdirectories and files:
 * `src/` → functional code and unit tests
 * `docker/` → everything about deploying Cygnus by means of Docker
 * `test/` → acceptance tests, e2e tests, performance tests, others
-* `neore/` or `re/` → everything about installing Cygnus by means of a RPM
 * `conf/` → templates for configuration files required to run the agent
+* `spec/` → spec file for generating a RPM
 * `pom.xml` → Maven’s Project Object Model
 
 A folder with common content named `cygnus-common` MUST exist. It will be a Maven project in charge of building a Cygnus common library that SHOULD be used by all the agents, enforcing the reusability of code.
@@ -94,11 +94,11 @@ The <i>issues</i> section of the main repository MUST be used for tracking all t
 
 The name of each issue MUST follow the following format:
 
-    [<agent name>] [feature|hardening|bug|task] <short description>
+    [<agent name>][feature|hardening|bug|task] <short description>
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    [cygnus-ngsi] [hardening] [grouping rules] Precompile patterns from regexes
+    [cygnus-ngsi][hardening][grouping rules] Precompile patterns from regexes
 
 Alternatively, labels for each agent and task type SHOULD be created.
 
@@ -141,11 +141,11 @@ Other tests MAY be included (acceptance, e2e, performance).
 
 Every contribution/PR MUST also add a new line in a special file within the root of the main repository, `CHANGES_NEXT_RELEASE`. The format of each line MUST follow this format:
 
-    - [<agent name>] [feature|hardening|bug|task] <short description> (#<issue number>)
+    - [<agent name>][feature|hardening|bug|task] <short description> (#<issue number>)
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    - [cygnus-ngsi] [hardening] [grouping rules] Precompile regexes (#209)
+    - [cygnus-ngsi][hardening][grouping rules] Precompile regexes (#209)
 
 [Top](#top)
 
@@ -157,13 +157,13 @@ The `fiware-cygnus/telefonica_checkstyle.xml` file MUST be configured in any Int
 ###<a name="section3.8"></a>Commits and squashing
 Commits within PRs MUST include a comment following this format:
 
-    [#<issue number>] [<agent name>] <short description>
+    [<issue number>][<agent name>] <short description>
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    [#873] [cygnus-ngsi] Update CHANGES_NEXT_RELEASE
-    [#873] [cygnus-ngsi] Add support for pattern storage
-    [#873] [cygnus-ngsi] Add regex compilation
+    [873][cygnus-ngsi] Update CHANGES_NEXT_RELEASE
+    [873][cygnus-ngsi] Add support for pattern storage
+    [873][cygnus-ngsi] Add regex compilation
 
 With regards to the [squashing policy](https://help.github.com/articles/configuring-pull-request-merge-squashing), the main repository MUST be configured with the <i>Allow Squash Merging</i> option.
 
@@ -188,24 +188,37 @@ Obtaining a new release MUST imply creating a new branch  `release/0.X.0` direct
 
 Releases MUST be published in the <i>releases</i> section of the main repository.
 
+As a result of the release, `CHANGES_NEXT_RELEASE` file MUST be emptied in Github repo.
+
 ##<a name="section4"></a>Deployers
 ###<a name="section4.1"></a>RPMs
-As said, each agent MUST provide scripts for creating RPMs. Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
+There MUST exist a `rpm/` folder at the root of the main repository. A packaging script MUST generate a RPM based on the spec file of each Cygnus agent, including `cygnus-common`. Such a spec file MUST live at the `spec` subfolder within the agent folder.
+
+Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
 
 Agents' RPMs MUST depend on `cygnus-common` RPM, which MUST be in charge of installing not only the common classes to all the agents, but installing Apache Flume, default configuration templates and provisioning the Cygnus plugin. `cygnus-common` RPM is typically uploaded to `http://repositories.testbed.fiware.org` as well.
+
+All RPMs spec files (spec for `cygnus-common` and any other agent) MUST contain a copy of the content of `CHANGES_NEXT_RELEASE` file.
 
 [Top](#top)
 
 ###<a name="section4.2"></a>Dockers
-As said, each agent MUST provide Docker files. Upon releasing, these files MUST be updated to the new Cygnus version and uploaded to `https://hub.docker.com/r/fiware/` with a version tag.
+There MUST exist a `docker/` folder at the root of the main repository. Every Cygnus agent MUST include a docker subfolder as per the following rules:
 
-Agents' Docker files MUST contain `cygnus-common`, default configuration templates, Apache Flume and the Cygnus plugin provisioned.
+* `docker/cygnus-common`
+* `docker/cygnus-ngsi`
+* `docker/cygnus-twitter`
+* ...
+
+Each docker subfolder MUST contain at least a `Dockerfile` file. Agents' dockerfiles MUST contain `cygnus-common`, default configuration templates, Apache Flume and the Cygnus plugin provisioned.
+
+Upon releasing, images for the agents MUST be uploaded to `https://hub.docker.com/r/fiware/` with a version and agent tag.
 
 [Top](#top)
 
 ##<a name="section5"></a>Documentation
 ###<a name="section5.1"></a>Repository documentation
-There MUST exist a `doc/` folder at the root of the main repository. Every Cygnus agent MUST include a documentation folder as per the following rules:
+There MUST exist a `doc/` folder at the root of the main repository. Every Cygnus agent MUST include a documentation subfolder as per the following rules:
 
 * `doc/cygnus-common`
 * `doc/cygnus-ngsi`
