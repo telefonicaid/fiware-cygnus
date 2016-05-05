@@ -17,8 +17,10 @@
 #
 
 FROM centos:6
+
 MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 
+# Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
 ENV CYGNUS_VERSION "0.13.0_SNAPSHOT"
@@ -43,9 +45,9 @@ ENV LOG_LEVEL "INFO"
 ENV LOG_APPENDER "console"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
-WORKDIR /opt
 
-RUN adduser --comment "${CYGNUS_USER}" ${CYGNUS_USER}
+# Add Cyugnus user
+RUN adduser ${CYGNUS_USER}
 
 # Install dependencies (Java, Maven, Flume)
 RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
@@ -65,9 +67,9 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
 # Create Cygnus log folder
 RUN mkdir ${FLUME_HOME}/log
 
-# Clone fiware-cygnus
-RUN git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
-    cd ${CYGNUS_HOME} && \
+# Instead of re-cloning, copy the fiware-cygnus repo, move there and checkout the propper branch
+COPY . ${CYGNUS_HOME}
+RUN cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS}
 
 # Build and install cygnus-common
