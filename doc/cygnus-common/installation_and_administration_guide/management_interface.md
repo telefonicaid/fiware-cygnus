@@ -16,7 +16,7 @@ Content:
 * [GET `/v1/subscriptions`](#section13)
 
 ##<a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well. There you will find not ony this specification but you will find some tools for playing with the API methods.
+This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
 
 [Top](#top)
 
