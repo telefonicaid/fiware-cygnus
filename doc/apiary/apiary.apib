@@ -367,49 +367,49 @@ Error list (HTTP response code in parenthesis):
                "error":"Missing endpoint"
        }
 
-       ### Deletes a current subscription to Orion [DELETE /v1/subscriptions]
+### Deletes a current subscription to Orion [DELETE /v1/subscriptions]
 
-       + Parameters
++ Parameters
 
-              + ngsi_version: 1 or 2 (Defines the Orion API's version)
-              + subscription_id: <subscriptionId> (Subscription's identificator)
+      + ngsi_version: 1 or 2 (Defines the Orion API's version)
+      + subscription_id: <subscriptionId> (Subscription's identificator)
 
-       + Request
++ Request
 
-              DELETE http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>
+      DELETE http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>
 
-       + Response 204 (application/json)
++ Response 204 (application/json)
 
-              {"success":"true","result" : {" Subscription deleted "}}
+      {"success":"true","result" : {" Subscription deleted "}}
 
-       + Response 400 (application/json)
++ Response 400 (application/json)
 
-              {"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
+      {"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
 
-              {"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
+      {"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
 
-       + Response 400 (application/json)
++ Response 400 (application/json)
 
-              {"success":"false","result" : {
-                      {"subscriptionId":"571872a9c0585c7451571be4","statusCode":{
-                              "code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"
-                             }
-                         }
-                    }
-               }
+      {"success":"false","result" : {
+              {"subscriptionId":"571872a9c0585c7451571be4","statusCode":{
+                      "code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"
+                     }
+                 }
+            }
+       }
 
-       + Response 400 (application/json)
++ Response 400 (application/json)
 
-              {"success":"false","result" : {
-                      {"description":"The requested subscription has not been found. Check id","error":"NotFound"}
-                   }
-              }
+      {"success":"false","result" : {
+              {"description":"The requested subscription has not been found. Check id","error":"NotFound"}
+           }
+      }
 
-       + Response 400 (application/json)
++ Response 400 (application/json)
 
-              {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
+      {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
 
-              {"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
+      {"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
 
 ## Group Admin API
 
