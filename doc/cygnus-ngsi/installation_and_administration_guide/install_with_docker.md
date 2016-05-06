@@ -1,4 +1,4 @@
 #Installing Cygnus with docker
 
-Please, refer to [this](https://github.com/telefonicaid/fiware-cygnus/blob/master/docker/README.md) document if you want to build Cygnus as a docker application.
+Please, refer to [root docker documentation](docker/cygnus-ngsi/README.md) if you want to use a docker image for cygnus-ngsi.
 
