@@ -77,6 +77,8 @@ public class ManagementInterface extends AbstractHandler {
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
+    private final int apiPort;
+    private final int guiPort;
     private static int numPoints = 0;
     private static String sourceRows = "";
     private static String channelRows = "";
@@ -89,9 +91,11 @@ public class ManagementInterface extends AbstractHandler {
      * @param sources
      * @param channels
      * @param sinks
+     * @param apiPort
+     * @param guiPort
      */
     public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
-            Channel> channels, ImmutableMap<String, SinkRunner> sinks) {
+            Channel> channels, ImmutableMap<String, SinkRunner> sinks, int apiPort, int guiPort) {
         this.configurationFile = configurationFile;
 
         try {
@@ -105,6 +109,8 @@ public class ManagementInterface extends AbstractHandler {
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
+        this.apiPort = apiPort;
+        this.guiPort = guiPort;
     } // ManagementInterface
 
     @Override
@@ -123,7 +129,7 @@ public class ManagementInterface extends AbstractHandler {
         String method = request.getMethod();
         LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
 
-        if (port == 8081) {
+        if (port == apiPort) {
             if (method.equals("GET")) {
                 if (uri.equals("/v1/version")) {
                     handleGetVersion(response);
@@ -162,7 +168,7 @@ public class ManagementInterface extends AbstractHandler {
             } else if (method.equals("DELETE")) {
                 if (uri.equals("/v1/groupingrules")) {
                     handleDeleteGroupingRules(request, response);
-                } else if (uri.equals("/v1/subscriptions")){
+                } else if (uri.equals("/v1/subscriptions")) {
                     handleDeleteSubscription(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -172,7 +178,7 @@ public class ManagementInterface extends AbstractHandler {
                 response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
-        } else if (port == 8082) {
+        } else if (port == guiPort) {
             if (method.equals("GET")) {
                 if (uri.equals("/")) {
                     handleGetGUI(response);
@@ -398,8 +404,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleGetAdminLog
     
-    private void handleGetSubscriptions (HttpServletRequest request, 
-            HttpServletResponse response) throws IOException {
+    private void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         
         // get the parameters to be updated
@@ -418,7 +423,7 @@ public class ManagementInterface extends AbstractHandler {
                 + "\"error\":\"Parse error, empty parameter (ngsi_version). Check it for errors.\"}");
             LOGGER.error("Parse error, empty parameter (ngsi_version). Check it for errors.");
             return;
-        } 
+        } // if else
         
         if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -428,7 +433,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                 + "Must be 1 or 2. Check it for errors.");
             return;
-        }
+        } // if
         
         if (subscriptionID == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -441,8 +446,8 @@ public class ManagementInterface extends AbstractHandler {
             response.getWriter().println("{\"success\":\"false\","
                 + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors.\"}");
             LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
-            return; 
-        }
+            return;
+        } // if else
         
         if (ngsiVersion.equals("1")) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -450,7 +455,7 @@ public class ManagementInterface extends AbstractHandler {
                 + "\"error\":\"GET /v1/subscriptions not implemented.\"}");
             LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
-        }
+        } // if
         
         BufferedReader reader = request.getReader();
         String endpointStr = "";
@@ -492,11 +497,9 @@ public class ManagementInterface extends AbstractHandler {
             try {
                 manageErrorMsg(err, response);
                 return;
-            } // if
-            catch (Exception e) {
+            } catch (Exception e) {
                 Logger.getLogger(e.getMessage());
             } // try catch
-            
         } // if
         
         LOGGER.debug("Valid Endpoint. Creating request to Orion.");
@@ -824,7 +827,7 @@ public class ManagementInterface extends AbstractHandler {
                 + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
             LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
             return;
-        } 
+        } // if
         
         if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -834,7 +837,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                     + "Must be 1 or 2. Check it for errors.");
             return;
-        } 
+        } // if
                 
         LOGGER.debug("Subscription id = " + subscriptionId);
          
@@ -879,11 +882,9 @@ public class ManagementInterface extends AbstractHandler {
             try {
                 manageErrorMsg(err, response);
                 return;
-            } // if
-            catch (Exception e) {
+            } catch (Exception e) {
                 Logger.getLogger(e.getMessage());
             } // try catch
-            
         } // if
         
         LOGGER.debug("Valid Endpoint. Creating request to Orion.");
@@ -908,8 +909,8 @@ public class ManagementInterface extends AbstractHandler {
                     deleteSubscriptionV1(subscriptionId, token);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
-                    JSONObject statusCode = (JSONObject) orionJson.get("statusCode");       
-                    String code = (String) statusCode.get("code");                   
+                    JSONObject statusCode = (JSONObject) orionJson.get("statusCode");
+                    String code = (String) statusCode.get("code");
                     status = Integer.parseInt(code);
                 } // if
             } else if (ngsiVersion.equals("2")) {
@@ -1517,3 +1518,4 @@ public class ManagementInterface extends AbstractHandler {
     } // manageErrorMsg 
 
 } // ManagementInterface
+
