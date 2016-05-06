@@ -282,10 +282,11 @@ Responses:
 
 ##<a name="section10"></a>`POST /v1/subscriptions`
 
-Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
+Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details. The use of a query parameter is neccesary because the subscription method is different between versions. Note that the JSON has a different structure from version 1 to version 2.
 
+Using `ngsi_version=1` as a query parameter:
 ```
-POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=1"
 {
     "subscription":{
           "entities": [
@@ -364,6 +365,77 @@ Invalid JSON (Empty field and missing field)
 }
 
 
+```
+
+Using `ngsi_version=2` as a query parameter:
+```
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=2"
+{
+    "subscription":{
+        "description": "One subscription to rule them all",
+        "subject": {
+            "entities": [
+              {
+                  "idPattern": ".*",
+                  "type": "Room"
+                }
+              ],
+              "condition": {
+                  "attrs": [
+                    "temperature"
+                  ],
+                  "expression": {
+                      "q": "temperature>40"
+                  }
+              }
+        },
+        "notification": {
+            "http": {
+                "url": "http://localhost:1234"
+            },
+            "attrs": [
+                "temperature",
+                "humidity"
+            ]
+        },
+          "expires": "2016-05-05T14:00:00.00Z",
+          "throttling": 5
+    },
+    "endpoint":{
+        "host":"orion.lab.fiware.org",
+        "port":"1026",
+        "ssl":"false",
+        "xauthtoken":"QsENv67AJj7blC2qJ0YvfSc5hMWYrs"
+    }
+}'
+```
+
+Responses:
+
+Valid Subscription:
+```
+{
+    "success":"true",
+    "result" : {
+        SubscriptionID = 572ae23d20e1387832ed98d0
+    }
+}
+```
+
+Invalid subscription (Missing field in this case):
+```
+{
+    "success":"false",
+    "error":"Invalid subscription, field 'subject' is missing"
+}
+```
+
+Invalid JSON:
+```
+{
+    "success":"false",
+    "error":"Parse error, malformed Json. Check it for errors."
+}
 ```
 
 Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
