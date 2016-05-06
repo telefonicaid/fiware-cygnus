@@ -199,7 +199,7 @@ Error list (HTTP response code in parenthesis):
 
 + Request
 
-       DELETE "http://<cygnus_host>:<management_port>/v1/groupingrules?id=2"
+       DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
 
 + Response 200 (application/json)
 
@@ -210,11 +210,15 @@ Error list (HTTP response code in parenthesis):
 
 ## Group Subscriptions API
 
-### Creates a new subscription to Orion [POST /v1/subscriptions]
+### Creates a new subscription to Orion (ngsi_version = 1) [POST /v1/subscriptions]
+
++ Parameters
+
+       + ngsi_version: 1 (Defines the Orion API's version)
 
 + Request
 
-       POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
+       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=1"
        {
            "subscription":{
            "entities": [
@@ -287,6 +291,166 @@ Error list (HTTP response code in parenthesis):
             "error":"Invalid subscription, field 'notifyConditions' is missing"
         }
 
+### Creates a new subscription to Orion (ngsi_version = 2) [POST /v1/subscriptions]
+
++ Parameters
+
+       + ngsi_version: 2 (Defines the Orion API's version)
+
++ Request
+
+       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsi_version>"
+       {
+               "subscription":{
+                       "description": "One subscription to rule them all",
+                       "subject": {
+                               "entities": [
+                                       {
+                                               "idPattern": ".*",
+                                               "type": "Room"
+                                       }
+                               ],
+                               "condition": {
+                                       "attrs": [
+                                              "temperature"
+                                       ],
+                                       "expression": {
+                                               "q": "temperature>40"
+                                       }
+                               }
+                       },
+                       "notification": {
+                              "http": {
+                                      "url": "http://localhost:1234"
+                               },
+                               "attrs": [
+                                       "temperature",
+                                       "humidity"
+                               ]
+                       },
+                       "expires": "2016-05-05T14:00:00.00Z","throttling": 5
+               },
+               "endpoint":{
+                       "host":"orion.lab.fiware.org",
+                       "port":"1026",
+                       "ssl":"false",
+                       "xauthtoken":"QsENv67AJj7blC2qJ0YvfSc5hMWYrs"
+               }
+       }
+
++ Response 201 (application/json)
+
+       {
+               "success":"true",
+               "result" : {
+                       "SubscriptionID" : "572ae23d20e1387832ed98d0"
+               }
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Invalid subscription, field 'xxxxxx' is missing"
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Invalid subscription, field 'xxxxxx' has missing fields"
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Missing endpoint"
+       }
+
+### Gets a current subscription [GET /v1/subscriptions]
+
++ Parameters
+
+       + ngsi_version: 2 (Defines the Orion API's version)
+       + subscription_id: <subscriptionId> (Subscription's identificator)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>
+       {
+               "host":"orion.lab.fi-ware.org",
+               "port":"1026",
+               "ssl":"false",
+               "xauthtoken":"QsENv67AJj7blC2rt54ESc5hMWYrs"
+       }
+
++ Response 200 (application/json)
+
+       {
+               "success":"true",
+               "result" : {
+                       {
+                               "notification":{
+                                       "lastNotification":"2015-07-28T22:24:33.00Z",
+                                       "timesSent":8122767998226748692,
+                                       "callback":"http:\/\/xxx.xxx.xx.xxx:xxxx\/ngsi10\/notifyContext",
+                                       "attributes":[
+                                       ]
+                               },
+                               "expires":"2016-09-25T08:17:47.00Z",
+                               "subject":{
+                                       "condition":{
+                                               "expression":{
+                                                       "q":"",
+                                                       "geometry":"",
+                                                       "coords":"",
+                                                       "georel":""
+                                               },
+                                               "attributes":[
+                                                       "TimeInstant"
+                                               ]
+                                       },
+                                       "entities":[
+                                               {
+                                                       "id":"",
+                                                       "type":"sevilla:fountain",
+                                                       "idPattern":"patternId"
+                                               }
+                                       ]
+                               },
+                               "id":"54325022q469a3873d30oe95",
+                               "status":"active"
+                       }
+               }
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "result" : {
+                       {
+                               "description":"",
+                               "error":"subscriptionId does not correspond to an active subscription"
+                       }
+               }
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"GET /v1/subscriptions not implemented."
+       }
+
 
 ### Deletes a current subscription to Orion [DELETE /v1/subscriptions]
 
@@ -297,40 +461,64 @@ Error list (HTTP response code in parenthesis):
 
 + Request
 
-       DELETE http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>
+       DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>"
 
 + Response 204 (application/json)
 
-       {"success":"true","result" : {" Subscription deleted "}}
-
-+ Response 400 (application/json)
-
-       {"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
-
-       {"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
-
-+ Response 400 (application/json)
-
-       {"success":"false","result" : {
-               {"subscriptionId":"571872a9c0585c7451571be4","statusCode":{
-                       "code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"
-                      }
-                  }
-             }
-        }
-
-+ Response 400 (application/json)
-
-       {"success":"false","result" : {
-               {"description":"The requested subscription has not been found. Check id","error":"NotFound"}
-            }
+       {
+               "success":"true",
+               "result" : {
+                       " Subscription deleted "
+               }
        }
 
-+ Response 400 (application/json)
++ Response 400 (application/json) [Bad parameters]
 
-       {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
+       {
+               "success":"false",
+               "error":"Parse error, wrong parameter (subscription_id). Check it for errors."
+       }
 
-       {"success":"false","error":"Missing Auth-Token. Required for DELETE subscriptions"}
++ Response 400 (application/json) [Wrong subscription id in v1]
+
+       {
+               "success":"false",
+               "result" : {
+                       {
+                             "subscriptionId":"571872a9c0585c7451571be4",
+                             "statusCode":{
+                                   "code":"404",
+                                   "reasonPhrase":"No context element found",
+                                   "details":"subscriptionId: \/571872a9c0585c7451571be4\/"
+                             }
+                       }
+               }
+       }
+
++ Response 400 (application/json) [Wrong subscription id in v2]
+
+       {
+               "success":"false",
+               "result" : {
+                       {
+                             "description":"The requested subscription has not been found. Check id","error":"NotFound"
+                       }
+               }
+       }
+
++ Response 400 (application/json) [Empty authentication token]
+
+       {
+               "success":"false",
+               "error":"Empty Auth-Token. Required for API methods"
+       }
+
++ Response 400 (application/json) [Missing authentication token]
+
+       {
+               "success":"false",
+               "error":"Missing Auth-Token. Required for API methods"
+       }
 
 
 ## Group Admin API
