@@ -1,20 +1,26 @@
 #<a name="top"></a>Management interface
 Content:
 
-* [GET `/v1/version`](#section1)
-* [GET `/v1/stats`](#section2)
-* [PUT `/v1/stats`](#section3)
-* [GET `/v1/groupingrules`](#section4)
-* [POST `/v1/groupingrules`](#section5)
-* [PUT `/v1/groupingrules`](#section6)
-* [DELETE `/v1/groupingrules`](#section7)
-* [GET `/admin/log`](#section8)
-* [PUT `/admin/log`](#section9)
-* [POST `/v1/subscriptions`](#section10)
-* [DELETE `/v1/subscriptions`](#section11)
-* [GET `/v1/subscriptions`](#section12)
+* [Apiary version of this document](#section1)
+* [GET `/v1/version`](#section2)
+* [GET `/v1/stats`](#section3)
+* [PUT `/v1/stats`](#section4)
+* [GET `/v1/groupingrules`](#section5)
+* [POST `/v1/groupingrules`](#section6)
+* [PUT `/v1/groupingrules`](#section7)
+* [DELETE `/v1/groupingrules`](#section8)
+* [GET `/admin/log`](#section9)
+* [PUT `/admin/log`](#section10)
+* [POST `/v1/subscriptions`](#section11)
+* [DELETE `/v1/subscriptions`](#section12)
+* [GET `/v1/subscriptions`](#section13)
 
-##<a name="section1"></a>`GET /v1/version`
+##<a name="section1"></a>Apiary version of this document
+This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well. There you will find not ony this specification but you will find some tools for playing with the API methods.
+
+[Top](#top)
+
+##<a name="section2"></a>`GET /v1/version`
 Gets the version of the running software, including the last Git commit:
 
 ```
@@ -32,7 +38,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section2"></a>`GET /v1/stats`
+##<a name="section3"></a>`GET /v1/stats`
 Gets statistics about the configured Flume components. It is important to note <b>in order to gathering statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
 
 Regarding the sources, it returns:
@@ -108,7 +114,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section3"></a>`PUT /v1/stats`
+##<a name="section4"></a>`PUT /v1/stats`
 Resets the statistics about the configured Flume components. It is important to note <b>in order to reset statistics from the channels</b>, these must be of type `com.telefonica.iot.cygnus.channels.CygnusMemoryChannel` or `com.telefonica.iot.cygnus.channels.CygnusFileChannel`.
 
 ```
@@ -123,7 +129,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section4"></a>`GET /v1/groupingrules`
+##<a name="section5"></a>`GET /v1/groupingrules`
 Gets the configured [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
@@ -160,7 +166,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section5"></a>`POST /v1/groupingrules`
+##<a name="section6"></a>`POST /v1/groupingrules`
 Adds a new rule, passed as a Json in the payload, to the [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
 
 ```
@@ -183,7 +189,7 @@ Please observe the `id` field is not passed as part of the posted Json. This is 
 
 [Top](#top)
 
-##<a name="section6"></a>`PUT /v1/groupingrules`
+##<a name="section7"></a>`PUT /v1/groupingrules`
 Updates an already existent [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
 
 ```
@@ -204,7 +210,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section7"></a>`DELETE /v1/groupingrules`
+##<a name="section8"></a>`DELETE /v1/groupingrules`
 Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
 
 ```
@@ -219,7 +225,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section8"></a>`GET /admin/log`
+##<a name="section9"></a>`GET /admin/log`
 Gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts).
 
 ```
@@ -253,7 +259,7 @@ Responses:
 
 [Top](#top)
 
-##<a name="section9"></a>`PUT /admin/log`
+##<a name="section10"></a>`PUT /admin/log`
 Updates the logging level of Cygnus, given the logging level as a query parameter.
 
 Valid logging levels are `DEBUG`, `INFO`, `WARNING` (`WARN` also works), `ERROR` and `FATAL`.
@@ -280,7 +286,7 @@ Responses:
 
 [Top](#top)
 
-##<a name="section10"></a>`POST /v1/subscriptions`
+##<a name="section11"></a>`POST /v1/subscriptions`
 
 Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -312,11 +318,13 @@ POST "http://<cygnus_host>:<management_port>/v1/subscriptions"
           "ssl":"false",
           "xauthtoken":"234123123123123"
     }
-}'
+}
 ```
+
 Responses:
 
 Valid subscription:
+
 ```
 {
     "success":"true",
@@ -332,7 +340,8 @@ Valid subscription:
 }
 ```
 
-Invalid subscription (Unknown fields in this case)
+Invalid subscription (Unknown fields in this case):
+
 ```
 {
     "success":"true",
@@ -351,7 +360,8 @@ Invalid subscription (Unknown fields in this case)
 }
 ```
 
-Invalid JSON (Empty field and missing field)
+Invalid JSON (Empty field and missing field):
+
 ```
 {
     "success":"false",
@@ -362,15 +372,13 @@ Invalid JSON (Empty field and missing field)
     "success":"false",
     "error":"Invalid subscription, field 'notifyConditions' is missing"
 }
-
-
 ```
 
 Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
 
 [Top](#top)
 
-##<a name="section11"></a>`DELETE /v1/subscriptions`
+##<a name="section12"></a>`DELETE /v1/subscriptions`
 
 Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
@@ -381,12 +389,14 @@ DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=
 Responses:
 
 Subscriptions deleted in v1 and v2:
+
 ```
 {"success":"true","result" : {" Subscription deleted "}
 
 ```
 
 Wrong parameter:
+
 ```
 {"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
 
@@ -394,6 +404,7 @@ Wrong parameter:
 ```
 
 Wrong subscription ID:
+
 ```
 [NGSI v1]
 
@@ -405,6 +416,7 @@ Wrong subscription ID:
 ```
 
 Empty or missing authentication token:
+
 ```
 {"success":"false","error":"Empty Auth-Token. Required for DELETE subscriptions"}
 
@@ -412,6 +424,7 @@ Empty or missing authentication token:
 ```
 
 Missing fields (empty or not given):
+
 ```
 {"success":"false","error":"Missing endpoint"}
 {"success":"false","error":"Invalid endpoint, field 'host' is missing"}
@@ -420,10 +433,11 @@ Missing fields (empty or not given):
 
 [Top](#top)
 
-##<a name="section12"></a>`GET /v1/subscriptions`
+##<a name="section13"></a>`GET /v1/subscriptions`
 Gets an existent subscription from Orion, given the ngsi version and the subscription id as a query parameter.
 
 Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+
 ```
 GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
 ```
@@ -431,26 +445,31 @@ GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiV
 Responses:
 
 Valid and current subscription id with the correct ngsi version:
+
 ```
 {"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/xxx.xxx.xx.xxx:xxxx\/ngsi10\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
 ```
 
 Valid but inexistent subscription id with the correct ngsi version:
+
 ```
 {"success":"false","result" : {{"description":"","error":"subscriptionId does not correspond to an active subscription"}}
 ```
 
 Invalid ngsi version:
+
 ```
 {"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
 ```
 
 Valid but not implemented ngsi version (sending `ngsi_version=1`):
+
 ```
 {"success":"false","error":"GET /v1/subscriptions not implemented."}
 ```
 
 Missing or empty parameters:
+
 ```
 {"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors."}
 {"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors."}

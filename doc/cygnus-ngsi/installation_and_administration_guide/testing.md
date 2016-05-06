@@ -295,7 +295,8 @@ Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Total time: 16.015s
 [INFO] Finished at: Tue May 03 17:48:48 CEST 2016
 [INFO] Final Memory: 31M/81M
-[INFO] ------------------------------------------------------------------------```
+[INFO] ------------------------------------------------------------------------
+```
 
 [Top](#top)
 
