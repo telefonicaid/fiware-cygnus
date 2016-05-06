@@ -60,7 +60,7 @@ public class ManagementInterfaceTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        managementInterface = new ManagementInterface(new File(""), null, null, null);
+        managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getRequestURI()).thenReturn(requestURI);
