@@ -57,6 +57,6 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 | httpcore | 4.3.1 | Overwrites the one bundled in Apache Flume |
 | log4j | 1.2.17 | Logging |
 | slf4j-simple | 1.7.21 | Logging |
-| cygnus-common | 0.13.0 | |
+| cygnus-common | latest | |
 
 [Top](#top)
