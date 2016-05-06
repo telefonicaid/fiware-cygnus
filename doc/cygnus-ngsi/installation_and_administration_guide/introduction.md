@@ -5,7 +5,7 @@ cygnus-ngsi is a connector in charge of persisting [Orion](https://github.com/te
 
 cygnus-ngsi uses the subscription/notification feature of Orion. A subscription is made in Orion on behalf of cygnus-ngsi, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
 
-Internally, cygnus-ngsi is based on [Apache Flume](http://flume.apache.org/), which is used through **cygnus-common**. In fact, cygnus-ngsi is a Flume agent, which is basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
+Internally, cygnus-ngsi is based on [Apache Flume](http://flume.apache.org/), which is used through **cygnus-common** and which cygnus-ngsi depends on. In fact, cygnus-ngsi is a Flume agent, which is basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
 
 Current stable release is able to persist Orion context data in:
 

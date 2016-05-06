@@ -16,7 +16,7 @@ pages:
           - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
           - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
           - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
-          - 'Flume environmnet configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
+          - 'Flume environment configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
           - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'
           - 'Running as a process': 'cygnus-common/installation_and_administration_guide/running_as_process.md'
           - 'Testing': 'cygnus-common/installation_and_administration_guide/testing.md'
