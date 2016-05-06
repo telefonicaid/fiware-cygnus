@@ -5,7 +5,7 @@
 
     <groupId>com.telefonica.iot</groupId>
     <artifactId>cygnus-ngsi</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0_SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cygnus-ngsi</name>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.0_SNAPSHOT</version>
         </dependency>
     </dependencies>
 
