@@ -574,4 +574,4 @@ public class CygnusSubscriptionV2 {
 
     } // isValid  
     
-} // CygnusSubscriptionV1
+} // CygnusSubscriptionV2
