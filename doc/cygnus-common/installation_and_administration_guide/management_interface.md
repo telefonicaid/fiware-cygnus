@@ -12,6 +12,8 @@ Content:
 * [GET `/admin/log`](#section9)
 * [PUT `/admin/log`](#section10)
 * [POST `/v1/subscriptions`](#section11)
+  * [`NGSI Version 1`](#section11.1)
+  * [`NGSI Version 2`](#section11.2)
 * [DELETE `/v1/subscriptions`](#section12)
 * [GET `/v1/subscriptions`](#section13)
 
@@ -287,12 +289,12 @@ Responses:
 [Top](#top)
 
 ##<a name="section11"></a>`POST /v1/subscriptions`
+###<a name="section11.1"></a> `NGSI Version 1`
 
-Creates a new subscription to Orion. The Json passed in the payload contains the Json subscription itself and Orion's endpoint details. The use of a query parameter is neccesary because the subscription method is different between versions. Note that the JSON has a different structure from version 1 to version 2.
+Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
-Using `ngsi_version=1` as a query parameter:
 ```
-POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=1"
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions&ngsi_version=1"
 {
     "subscription":{
           "entities": [
@@ -327,75 +329,51 @@ Responses:
 Valid subscription:
 
 ```
-{
-    "success":"true",
-    "result" : {
-        {
-            "subscribeResponse":{
-                  "duration":"P1M",
-                  "throttling":"PT5S",
-                  "subscriptionId":"56f9081c3c6fb7e9d2a912a0"
-            }
-        }
-    }
-}
+{"success":"true","result" : {{"subscribeResponse":{"duration":"P1M","throttling":"PT5S","subscriptionId":"56f9081c3c6fb7e9d2a912a0"}}}}
 ```
 
 Invalid subscription (Unknown fields in this case):
 
 ```
-{
-    "success":"true",
-    "result" :
-        {
-            "subscribeError":
-                  {
-                      "errorCode":
-                            {
-                                "code":"400",
-                                "reasonPhrase":"Bad Request",
-                                "details":"JSON Parse Error: unknown field: \/extraField"
-                            }
-                  }
-      }
-}
+{"success":"true","result" :{"subscribeError":{"errorCode":{"code":"400","reasonPhrase":"Bad Request","details":"JSON Parse Error: unknown field: \/extraField"}}}
 ```
 
 Invalid JSON (Empty field and missing field):
 
 ```
-{
-    "success":"false",
-    "error":"Invalid subscription, field 'duration' is empty"
-}
+{"success":"false","error":"Invalid subscription, field 'duration' is empty"}
 
-{
-    "success":"false",
-    "error":"Invalid subscription, field 'notifyConditions' is missing"
-}
+{"success":"false","error":"Invalid subscription, field 'notifyConditions' is missing"
 ```
 
-Using `ngsi_version=2` as a query parameter:
+Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
+
+[Top](#top)
+
+###<a name="section11.2"></a> `NGSI Version 2`
+
+Creates a new subscription to Orion given the version of NGSI (`ngsi_version=2` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
+
 ```
-POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=2"
+POST "http://<cygnus_host>:<management_port>/v1/subscriptions&ngsi_version=2"
 {
     "subscription":{
         "description": "One subscription to rule them all",
         "subject": {
             "entities": [
-              {
-                  "idPattern": ".*",
-                  "type": "Room"
+                {
+                    "idPattern": ".*",
+                    "type": "Room"
                 }
-              ],
-              "condition": {
-                  "attrs": [
+            ],
+            "condition": {
+                "attrs": [
                     "temperature"
-                  ],
-                  "expression": {
+                ],
+                "expression": {
                       "q": "temperature>40"
-                  }
-              }
+                }
+            }
         },
         "notification": {
             "http": {
@@ -406,44 +384,38 @@ POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=2"
                 "humidity"
             ]
         },
-          "expires": "2016-05-05T14:00:00.00Z",
-          "throttling": 5
+        "expires": "2016-05-05T14:00:00.00Z",
+        "throttling": 5
     },
     "endpoint":{
-        "host":"orion.lab.fiware.org",
-        "port":"1026",
+        "host":"<endpoint_host>",
+        "port":"<endpoint_port>",
         "ssl":"false",
         "xauthtoken":"QsENv67AJj7blC2qJ0YvfSc5hMWYrs"
     }
-}'
+}
 ```
 
 Responses:
 
-Valid Subscription:
+Valid subscription:
+
 ```
-{
-    "success":"true",
-    "result" : {
-        SubscriptionID = 572ae23d20e1387832ed98d0
-    }
-}
+{"success":"true","result" : {"SubscriptionID" : "572ae23d20e1387832ed98d0"}}
 ```
 
-Invalid subscription (Missing field in this case):
+Invalid subscription (Unknown fields in this case):
+
 ```
-{
-    "success":"false",
-    "error":"Invalid subscription, field 'subject' is missing"
-}
+{"success":"false","error":"Parse error, malformed Json. Check it for errors."}
 ```
 
-Invalid JSON:
+Invalid JSON (e.g. Missing fields or invalid endpoint):
+
 ```
-{
-    "success":"false",
-    "error":"Parse error, malformed Json. Check it for errors."
-}
+{"success":"false","error":"Invalid subscription, field 'xxxxxx' is missing"}
+
+{"success":"false","error":"Missing endpoint"}
 ```
 
 Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
