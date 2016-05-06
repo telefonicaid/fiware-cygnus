@@ -20,22 +20,21 @@ package com.telefonica.iot.cygnus.containers;
 
 import java.util.ArrayList;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.containers.OrionEndpoint;
 
 /**
  *
  * @author pcoello25
  */
-public class CygnusSubscription {
+public class CygnusSubscriptionV1 {
     
     private final OrionSubscription subscription;
     private final OrionEndpoint endpoint;
-    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusSubscription.class);    
+    private static final CygnusLogger LOGGER = new CygnusLogger(CygnusSubscriptionV1.class);    
     
-    public CygnusSubscription() {
+    public CygnusSubscriptionV1() {
         subscription = new OrionSubscription();
         endpoint = new OrionEndpoint();
-    } // CygnusSubscription
+    } // CygnusSubscriptionV1
     
     public OrionSubscription getOrionSubscription() {
         return subscription;
@@ -46,11 +45,11 @@ public class CygnusSubscription {
     } // getEndpoint
     
     public class OrionSubscription {
-        private ArrayList<SubscriptionEntity> entities;
-        private ArrayList<String> attributes;
+        private final ArrayList<SubscriptionEntity> entities;
+        private final ArrayList<String> attributes;
         private String reference;
         private String duration;
-        private ArrayList<SubscriptionConditions> notifyConditions;
+        private final ArrayList<SubscriptionConditions> notifyConditions;
         private String throttling;
         
         public OrionSubscription() {
@@ -59,44 +58,7 @@ public class CygnusSubscription {
             notifyConditions = new ArrayList<SubscriptionConditions>();
         } // OrionSubscription
         
-        public ArrayList<SubscriptionEntity> getSubscriptionEntity() {
-            return entities;
-        } // getSubscriptionEntity
-        
-        public ArrayList<String> getSubscriptionAtrributes() {
-            return attributes;
-        } // getSubscriptionAtrributes
-        
-        public ArrayList<SubscriptionConditions> getSubscriptionConditions() {
-            return notifyConditions;
-        } // getSubscriptionConditions
-        
-        public String getReference() {
-            return reference;
-        } // getReference
-        
-        public String getDuration() {
-            return duration;
-        } // getDuration
-        
-        public String getThrottling() {
-            return throttling;
-        } // getThrottling
-        
         public int isValid () {
-            // get entities arrayList
-             entities = this.getSubscriptionEntity();
-
-            // get attributes arrayList
-            attributes = this.getSubscriptionAtrributes();
-
-            // get conditions arrayList
-            notifyConditions = this.getSubscriptionConditions();
-
-            // get throttling,reference and duration
-            reference = this.getReference();
-            duration = this.getDuration();
-            throttling = this.getThrottling();
 
             // check error messages from subfields of subscription 
             int entitiesMsg = isEntitiesValid(entities);
@@ -204,6 +166,76 @@ public class CygnusSubscription {
             LOGGER.debug("Valid subscription");
             return 0;
         } // isValid
+        
+        private int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
+                
+            boolean emptyFields = true;
+            boolean validFields = true;
+
+            if ((entities == null) || (entities.isEmpty())) {
+                LOGGER.debug("Field 'entities' is missing");
+                return 1;
+            } // if
+
+            for (SubscriptionEntity entity : entities) {
+                String type = entity.getEntityType();
+                String isPattern = entity.getPattern();
+                String id = entity.getId();
+
+                validFields &= ((type != null) && (isPattern != null) && (id != null));
+                emptyFields &= validFields && ((type.length() == 0) || (isPattern.length() == 0) || 
+                    (id.length() == 0)); 
+            } // for
+
+            // check if entities contains all the required fields
+            if (!validFields) {
+                LOGGER.debug("There are missing fields in entities");
+                return 2;
+            } // if
+
+            // check if entities has any empty field
+            if (emptyFields) {
+                LOGGER.debug("There are empty fields in entities");
+                return 3;
+            } // if
+
+            LOGGER.debug("Valid entities");
+            return 0;
+        } // isEntitiesValid
+        
+        private int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions) {
+        
+            boolean validFields = true;
+            boolean emptyFields = true;
+
+            if ((conditions == null)|| (conditions.isEmpty())) {
+                LOGGER.debug("Field 'notifyConditions' is missing");
+                return 1;
+            } // if
+
+            for (SubscriptionConditions condition : conditions) {
+
+                String type = condition.getCondType();
+                ArrayList<String> values = condition.getCondValues();
+                validFields &= ((type != null) && (values != null));
+                emptyFields &= validFields && (type.length() == 0);
+            } // for
+
+            // check if notifyConditions contains all the required fields
+            if (!validFields) {
+               LOGGER.debug("There are missing fields in notifyConditions");
+               return 2;
+            } // if
+
+            // check if notifyConditions has any empty field
+            if (emptyFields) {
+                LOGGER.debug("There are empty fields in notifyConditions");
+                return 3;
+            } // if
+
+            LOGGER.debug("Valid notifyConditions");
+            return 0;
+        } // isNotifyConditionsValid
         
     } // OrionSubscription
     
@@ -358,76 +390,6 @@ public class CygnusSubscription {
         LOGGER.debug("Valid input JSON.");
         return 0;
 
-    } // isValid
+    } // isValid  
     
-    private int isEntitiesValid (ArrayList<SubscriptionEntity> entities) {
-                
-        boolean emptyFields = true;
-        boolean validFields = true;
-        
-        if ((entities == null) || (entities.isEmpty())) {
-            LOGGER.debug("Field 'entities' is missing");
-            return 1;
-        } // if
-        
-        for (SubscriptionEntity entity : entities) {
-            String type = entity.getEntityType();
-            String isPattern = entity.getPattern();
-            String id = entity.getId();
-            
-            validFields &= ((type != null) && (isPattern != null) && (id != null));
-            emptyFields &= validFields && ((type.length() == 0) || (isPattern.length() == 0) || 
-                (id.length() == 0)); 
-        } // for
-        
-        // check if entities contains all the required fields
-        if (!validFields) {
-            LOGGER.debug("There are missing fields in entities");
-            return 2;
-        } // if
-        
-        // check if entities has any empty field
-        if (emptyFields) {
-            LOGGER.debug("There are empty fields in entities");
-            return 3;
-        } // if
-        
-        LOGGER.debug("Valid entities");
-        return 0;
-    } // isEntitiesValid
-    
-    private int isNotifyConditionsValid (ArrayList<SubscriptionConditions> conditions) {
-        
-        boolean validFields = true;
-        boolean emptyFields = true;
-                
-        if ((conditions == null)|| (conditions.isEmpty())) {
-            LOGGER.debug("Field 'notifyConditions' is missing");
-            return 1;
-        } // if
-        
-        for (SubscriptionConditions condition : conditions) {
-            
-            String type = condition.getCondType();
-            ArrayList<String> values = condition.getCondValues();
-            validFields &= ((type != null) && (values != null));
-            emptyFields &= validFields && (type.length() == 0);
-        } // for
-        
-        // check if notifyConditions contains all the required fields
-        if (!validFields) {
-           LOGGER.debug("There are missing fields in notifyConditions");
-           return 2;
-        } // if
-        
-        // check if notifyConditions has any empty field
-        if (emptyFields) {
-            LOGGER.debug("There are empty fields in notifyConditions");
-            return 3;
-        } // if
-        
-        LOGGER.debug("Valid notifyConditions");
-        return 0;
-    } // isNotifyConditionsValid  
-    
-} // CygnusSubscription
+} // CygnusSubscriptionV1
