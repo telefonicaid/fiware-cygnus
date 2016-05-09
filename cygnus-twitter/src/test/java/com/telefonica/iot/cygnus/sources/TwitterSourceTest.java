@@ -1,13 +1,16 @@
 package com.telefonica.iot.cygnus.sources;
 
-import org.apache.flume.*;
+import org.apache.flume.Channel;
+import org.apache.flume.Context;
+import org.apache.flume.Sink;
+import org.apache.flume.SinkRunner;
+import org.apache.flume.ChannelSelector;
 import org.apache.flume.channel.ChannelProcessor;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.channel.ReplicatingChannelSelector;
 import org.apache.flume.conf.Configurables;
 import org.apache.flume.sink.DefaultSinkProcessor;
 import org.apache.flume.sink.LoggerSink;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -16,19 +19,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author jpalanca
  */
-
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterSourceTest {
 
-    private String consumerKey = "asdfghjkl";
-    private String consumerSecret = "qwertyuiop";
+    private String consumerKey = "iAtYJ4HpUVfIUoNnif1DA";
+    private String consumerSecret = "172fOpzuZoYzNYaU3mMYvE8m8MEyLbztOdbrUolU";
     private String accessToken = "zxcvbnm";
     private String accessTokenSecret = "1234567890";
+    private String top_left_latitude = "40.748433";
+    private String top_left_longitude = "-73.985656";
+    private String bottom_right_latitude = "40.758611";
+    private String bottom_right_longitude = "-73.979167";
+    private String keywords = "keywords, more_keywords";
+    private double[][] coordinates = {{-73.985656, 40.748433}, {-73.979167, 40.758611}};
+    private String[] keywords_array = {"keywords", "more_keywords"};
 
 
     @Test
@@ -38,32 +48,29 @@ public class TwitterSourceTest {
         context.put("consumerSecret", consumerSecret);
         context.put("accessToken", accessToken);
         context.put("accessTokenSecret", accessTokenSecret);
+        context.put("top_left_latitude", top_left_latitude);
+        context.put("top_left_longitude", top_left_longitude);
+        context.put("bottom_right_latitude", bottom_right_latitude);
+        context.put("bottom_right_longitude", bottom_right_longitude);
+        context.put("keywords", keywords);
+
         context.put("maxBatchDurationMillis", "1000");
 
         TwitterSource source = new TwitterSource();
         source.configure(context);
 
-        assertEquals(consumerKey, source.getConsumerKey()[0]);
+        assertEquals(consumerKey, source.getConsumerKey());
         assertEquals(consumerSecret, source.getConsumerSecret());
         assertEquals(accessToken, source.getAccessToken());
         assertEquals(accessTokenSecret, source.getAccessTokenSecret());
+        assertArrayEquals(coordinates, source.getCoordinates());
+        assertArrayEquals(keywords_array, source.getKeywords());
+
     }
 
-    /* From flume v1.7.0 */
+    // From flume v1.7.0
     @Test
     public void testBasic() throws Exception {
-        String consumerKey = System.getProperty("twitter.consumerKey");
-        Assume.assumeNotNull(consumerKey);
-
-        String consumerSecret = System.getProperty("twitter.consumerSecret");
-        Assume.assumeNotNull(consumerSecret);
-
-        String accessToken = System.getProperty("twitter.accessToken");
-        Assume.assumeNotNull(accessToken);
-
-        String accessTokenSecret = System.getProperty("twitter.accessTokenSecret");
-        Assume.assumeNotNull(accessTokenSecret);
-
         Context context = new Context();
         context.put("consumerKey", consumerKey);
         context.put("consumerSecret", consumerSecret);
@@ -94,7 +101,7 @@ public class TwitterSourceTest {
         source.setChannelProcessor(chp);
         source.start();
 
-        Thread.sleep(5000);
+        Thread.sleep(500);
         source.stop();
         sinkRunner.stop();
         sink.stop();
