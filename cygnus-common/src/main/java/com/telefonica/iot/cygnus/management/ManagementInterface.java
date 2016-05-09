@@ -29,7 +29,6 @@ import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV1;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV2;
 import com.telefonica.iot.cygnus.containers.OrionEndpoint;
-import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -64,7 +63,9 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
-
+import com.telefonica.iot.cygnus.handlers.CygnusHandler;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import org.slf4j.MDC;
 /**
  *
  * @author frb
@@ -456,7 +457,11 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
         } // if
-        
+
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+                setCorrelator(request));
+                
         BufferedReader reader = request.getReader();
         String endpointStr = "";
         String line;
@@ -558,6 +563,10 @@ public class ManagementInterface extends AbstractHandler {
         } // while
 
         reader.close();
+        
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+                setCorrelator(request)); 
 
         // check the Json syntax of the new rule
         JSONParser jsonParser = new JSONParser();
@@ -641,7 +650,7 @@ public class ManagementInterface extends AbstractHandler {
         BufferedReader reader = request.getReader();
         String jsonStr = "";
         String line;
-
+        
         while ((line = reader.readLine()) != null) {
             jsonStr += line;
         } // while
@@ -667,6 +676,10 @@ public class ManagementInterface extends AbstractHandler {
                     + "Must be 1 or 2. Check it for errors.");
             return;
         }
+        
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+                setCorrelator(request)); 
 
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -852,6 +865,10 @@ public class ManagementInterface extends AbstractHandler {
 
         reader.close();
         
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+                setCorrelator(request));
+        
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
         OrionEndpoint endpoint;
@@ -1035,6 +1052,10 @@ public class ManagementInterface extends AbstractHandler {
         } // while
 
         reader.close();
+        
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+                setCorrelator(request)); 
 
         // get the rule ID to be updated
         long id = new Long(request.getParameter("id"));
@@ -1167,6 +1188,10 @@ public class ManagementInterface extends AbstractHandler {
 
         // get the rule ID to be deleted
         long id = new Long(request.getParameter("id"));
+        
+        // set the given header to the response or create it
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
+            setCorrelator(request)); 
 
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -1516,6 +1541,21 @@ public class ManagementInterface extends AbstractHandler {
             } // switch
         
     } // manageErrorMsg 
+    
+    private String setCorrelator (HttpServletRequest request) {
+        // Get an internal transaction ID.
+        String transId = CommonUtils.generateUniqueId(null, null);
+        
+        // Get also a correlator ID if not sent in the notification. Id correlator ID is not notified
+        // then correlator ID and transaction ID must have the same value.
+        String corrId = CommonUtils.generateUniqueId
+               (request.getHeader(CommonConstants.HEADER_CORRELATOR_ID), transId);
+        
+        // set the given header to the response or create it
+        MDC.put(CommonConstants.LOG4J_CORR, corrId);
+        MDC.put(CommonConstants.LOG4J_TRANS, transId);
+        return corrId;
+    } // setCorrelator
 
 } // ManagementInterface
 

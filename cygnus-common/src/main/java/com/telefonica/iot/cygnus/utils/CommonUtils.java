@@ -32,7 +32,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Pattern;
+import static org.eclipse.jetty.ajp.Ajp13PacketMethods.LOCK;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -304,5 +306,22 @@ public final class CommonUtils {
     public static boolean isMAdeOfAlphaNumericsOrUnderscores(String s) {
         return PATTERN.matcher(s).matches();
     } // isMAdeOfAlphaNumericsOrUnderscores
+    
+    /**
+     * Generates a new unique identifier. The format for this notifiedId is:
+     * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
+     * @param notifiedId An alrady existent identifier, most probably a notified one
+     * @param transactionId An already existent internal identifier
+     * @return A new unique identifier
+     */
+    public static String generateUniqueId(String notifiedId, String transactionId) {
+        if (notifiedId != null) {
+            return notifiedId;
+        } else if (transactionId != null) {
+            return transactionId;
+        } else {
+            return UUID.randomUUID().toString();
+        } // else
+    } // generateUniqueId
 
 } // CommonUtils
