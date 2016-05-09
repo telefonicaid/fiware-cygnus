@@ -203,11 +203,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
 
         switch (dataModel) {
             case DMBYSERVICEPATH:
-                if (fiwareServicePath.equals("/")) {
-                    throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
-                            + "dm-by-service-path data model");
-                } // if
-                
                 collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath);
                 break;
             case DMBYENTITY:

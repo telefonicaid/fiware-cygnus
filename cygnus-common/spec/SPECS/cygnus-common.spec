@@ -14,8 +14,8 @@
 # 
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
-Summary:          Package for cygnus component
-Name:             cygnus
+Summary:          Package for Cygnus common component
+Name:             cygnus-common
 Version:          %{_product_version}
 Release:          %{_product_release}
 License:          AGPLv3
@@ -26,13 +26,13 @@ Requires(preun):  /sbin/chkconfig, /sbin/service
 Requires(postun): /sbin/service
 Group:            Applications/cygnus
 Vendor:           Telefonica I+D
-Provides:         cygnus%{_name_suffix} = %{_product_version}-%{_product_release}
+Provides:         cygnus-common%{_name_suffix} = %{_product_version}-%{_product_release}
 
 %define _rpmfilename %%{ARCH}/%%{NAME}%{_name_suffix}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 %description
-This connector is a (conceptual) derivative work of ngsi2cosmos, and implements
-a Flume-based connector for context data coming from Orion Context Broker.
+This connector is a (conceptual) derivative work of ngsi2cosmos, and implements 
+a Flume-based connector common base for context data coming from several sources.
 
 # Project information 
 %define _project_name cygnus
@@ -44,7 +44,7 @@ a Flume-based connector for context data coming from Orion Context Broker.
 
 # System folders
 # _sourcedir =${topdir}/SOURCES
-%define _srcdir %{_sourcedir}/../../../
+%define _srcdir %{_sourcedir}/../../
 %define _install_dir /usr
 %define _project_install_dir %{_install_dir}/%{_project_name}
 
@@ -58,7 +58,6 @@ a Flume-based connector for context data coming from Orion Context Broker.
 # prep section, setup macro:
 # -------------------------------------------------------------------------------------------- #
 %prep
-# read from SOURCES, write into BUILD
 
 echo "[INFO] Preparing installation"
 # Create rpm/BUILDROOT folder
@@ -73,12 +72,6 @@ cp -R  %{_srcdir}/src \
 
 # Copy "extra files" from rpm/SOURCES to rpm/BUILDROOT
 cp -R %{_sourcedir}/* %{_builddir}
-
-# -------------------------------------------------------------------------------------------- #
-# Build section:
-# -------------------------------------------------------------------------------------------- #
-%build
-# Read from BUILD, write into BUILD
 
 
 # -------------------------------------------------------------------------------------------- #
@@ -176,6 +169,54 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri May 06 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.0.0
+- [cygnus-ngsi] [feature] Add Cygnus GUI (#829)
+- [cygnus-ngsi] [bug] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)
+- [cygnus-ngsi] [feature] Add support for string-based aggregation (occurences) in OrionSTHSink (#547)
+- [cygnus-ngsi] [hardening] Use precompiled regexes in Utils.encode() and Utils.encodeHive() (#818)
+- [cygnus-ngsi] [hardening] Remove a temporal fix regarding Orion <= 0.10.0 in OrionRESTHandler (#840)
+- [cygnus-ngsi] [hardening] Add an efficient function for converting ArrayList to String in Utils.java (#841)
+- [cygnus-ngsi] [bug] Fix the way a set of notified attributes are processed in OrionMySQLSink, no order must be assumed (#855)
+- [cygnus-ngsi] [feature] Remove support for XML notifications in all sinks and in the documentation (#448)
+- [cygnus-ngsi] [bug] Fix wrong class name in configuration section of OrionSTHSink.md (#852)
+- [cygnus-ngsi] [feature] When notified, use the TimeInstant metadata instead of the reception time (#859)
+- [cygnus-ngsi] [hardening] Add docker and support badges to the README (#858)
+- [cygnus-ngsi] [hardening] Add a management API method for reseting the statistics (#851)
+- [cygnus-ngsi] [feature] Reuse a notified Correlator ID when notified, otherwise generate it (#843)
+- [cygnus-ngsi] [hardening] Remove deprecated configuration parameters in OrionHDFSSink (#868)
+- [cygnus-ngsi] [feature] When configured, ignore white space-based string attributes (#678)
+- [cygnus-ngsi] [bug] Fix processing of splited Http responses in HttpBackend (#875)
+- [cygnus-ngsi] [feature] Add /v1/subscriptions route to API (#808)
+- [cygnus-ngsi] [hardening] Improve the different elements naming when notified/default service path is / (#877)
+- [cygnus-ngsi] [feature] Add implementation for /admin/log route (#807)
+- [cygnus-ngsi] [bug] Fix some wrong links in the documentation (#885)
+- [cygnus-ngsi] [hardening] Add missing components to the list of components having a restricted logging level in log4j.properties.template (#882)
+- [cygnus-ngsi] [hardening] Set external dependencies logging level to WARN in lo4j.properties.template (#881)
+- [cygnus-ngsi] [bug] Fix wrong data conversion from SQL timestamp to ISO 8601 UTC when a year must be decreased (#873)
+- [cygnus-ngsi] [bug] Add support for ISO 8601 timestamps containing 6 microsecond digits (#906)
+- [cygnus-ngsi] [hardening] Check the service-paths within grouping rules start with / (#901)
+- [cygnus-ngsi] [hardening] Use MongoDB accepted character set in OrionMongoSink and OrionSTHSink (#898)
+- [cygnus-ngsi] [hardening] Expand topic name in OrionKafkaSink (#880)
+- [cygnus-ngsi] [bug] Remove 'Z' character (UTC mark) when encoding the reception time in OrionMySQLSink (#909)
+- [cygnus-ngsi] [hardening] Create a backend for OrionKafkaSink (#912)
+- [cygnus-ngsi] [hardening] Invalidate configurations instead of exiting Cygnus upon wrong configuration (#917)
+- [cygnus-ngsi] [hardening] Add support for SQL timestamps with microseconds in Utils.getTimeInstant (#922)
+- [cygnus-ngsi] [hardening] Remove the user-agent header, and consider content-type as a Http-only header (#920)
+- [cygnus-ngsi] [hardening] Precompile the regexes once read in GroupingRules.java (#928)
+- [cygnus-ngsi] [hardening] Add an internal Transaction ID (#930)
+- [cygnus-ngsi] [bug] Add support for multi-valued Fiware-ServicePath within notifications (#923)
+- [cygnus-ngsi] [hardening] Replace all references to "STH" with "FIWARE Comet" (#573)
+- [cygnus-ngsi] [hardening] Use UUIDv4 in the generation of correlator and transaction IDs in OrionRestHandler (#931)
+- [cygnus-ngsi] [task] Refactor de Github repository in a per agent fashion (#864)
+- [cygnus-ngsi] [feature] Add NGSICartoDBSink (#927)
+- [cygnus] [hardening] Add documentation in orion_ckan_sink.md about the creation of resources & datastores for column mode (#971)
+- [cygnus-ngsi] [bug] Fix configuration of grouping rules in quick_start_guide.md (#983)
+- [cygnus-ngsi] [bug] Fix collection name building when data_model is dm-by-service-path in Mongo sinks (#977)
+- [cygnus-ngsi] [bug] Fix attribute-based accumulation (#982)
+- [cygnus-ngsi] [bug] Pass the API and GUI ports as parameters, instead of hardcoding them in ManagementInterface.java (#995)
+- [cygnus-ngsi] [hardening] Force default service and service path to use only alphanumerics and underscores (#985)
+- [cygnus] [hardening] Update README.md with link to apiary documentation (#892)
+
 * Tue Mar 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 0.13.0
 - [FEATURE] Add /stats route to the Management Interface (#737)
 - [FEATURE] Add /groupingrules route to the Management Interface (#745)

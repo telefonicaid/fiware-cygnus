@@ -208,10 +208,10 @@ public class CygnusApplication extends Application {
                 return;
             } // if
             
-            int mgmtIfPort = DEF_MGMT_IF_PORT;
+            int apiPort = DEF_MGMT_IF_PORT;
             
             if (commandLine.hasOption('p')) {
-                mgmtIfPort = new Integer(commandLine.getOptionValue('p'));
+                apiPort = new Integer(commandLine.getOptionValue('p'));
             } // if
             
             int guiPort = DEF_GUI_PORT;
@@ -219,7 +219,7 @@ public class CygnusApplication extends Application {
             if (commandLine.hasOption('g')) {
                 guiPort = new Integer(commandLine.getOptionValue('g'));
             } else {
-                guiPort = 0;
+                guiPort = 0; // this disables the GUI for the time being
             } // if else
             
             int pollingInterval = DEF_POLLING_INTERVAL;
@@ -283,9 +283,9 @@ public class CygnusApplication extends Application {
             } // try catch
             
             // start the Management Interface, passing references to Flume components
-            LOGGER.info("Starting a Jetty server listening on port " + mgmtIfPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(mgmtIfPort, guiPort, new ManagementInterface(configurationFile,
-                    sourcesRef, channelsRef, sinksRef));
+            LOGGER.info("Starting a Jetty server listening on port " + apiPort + " (Management Interface)");
+            mgmtIfServer = new JettyServer(apiPort, guiPort, new ManagementInterface(configurationFile,
+                    sourcesRef, channelsRef, sinksRef, apiPort, guiPort));
             mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)

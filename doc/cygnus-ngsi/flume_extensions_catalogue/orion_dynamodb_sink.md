@@ -16,7 +16,6 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIDynamoDBSink` class](#section3.1)
     * [`DynamoDBBackendImpl` class](#section3.2)
-* [Reporting issues and contact information](#section4)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIDynamoDBSink`, or simply `NGSIDynamoDBSink` is a sink designed to persist NGSI-like context data events within a [DynamoDB database](https://aws.amazon.com/dynamodb/) in [Amazon Web Services](https://aws.amazon.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -231,17 +230,3 @@ Current implementation of `NGSIDynamoDBSink` relies on the [AWS access keys](htt
 
 [Top](#top)
 
-##<a name="section4"></a>Reporting issues and contact information
-There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
-
-* Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
-* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
-* Personal email:
-    * [francisco.romerobueno@telefonica.com](mailto:francisco.romerobueno@telefonica.com) **[Main contributor]**
-    * [fermin.galanmarquez@telefonica.com](mailto:fermin.galanmarquez@telefonica.com) **[Contributor]**
-    * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
-    * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
-
-**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
-
-[Top](#top)

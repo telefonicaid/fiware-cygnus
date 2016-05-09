@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -122,9 +123,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
                     + "' parameter length greater than " + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
-        } else {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultService)) {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
                     + defaultService + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
+                    + "' parameter can only contain alphanumerics or underscores)");
         } // if else
         
         defaultServicePath = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE_PATH, "/");
@@ -137,10 +142,14 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
                     + "' must start with '/')");
-        } else {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultServicePath.substring(1))) {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH + "="
                     + defaultServicePath + ")");
-        } // if else
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' parameter can only contain alphanumerics or underscores");
+        } // else
         
         LOGGER.info("Startup completed");
     } // configure

@@ -21,7 +21,7 @@
 #################################################
 
 function download_flume(){
-    # download form artifactory and unzip it into ${RPM_BASE_DIR}
+    # download artifact from external URL and unzip it into ${RPM_BASE_DIR}
     _logStage "######## Preparing the apache-flume component... ########"
 
     local ARTIFACT_FLUME_URL=${1}
@@ -79,25 +79,33 @@ function download_flume(){
 
 function copy_cygnus_startup_script(){
     _logStage "######## Copying the cygnus startup script into the apache-flume... ########"
-    rm ${RPM_PRODUCT_SOURCE_DIR}/bin/flume-ng
-    cp $BASE_DIR/target/classes/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
+    rm -rf ${RPM_PRODUCT_SOURCE_DIR}/bin/cygnus-flume-ng
+    cp ${BASE_DIR}/cygnus-common/src/main/resources/cygnus-flume-ng ${RPM_PRODUCT_SOURCE_DIR}/bin
 }
 
-function copy_cygnus_to_flume(){
-    _logStage "######## Copying the cygnus jar into the apache-flume... ########"
+function copy_cygnus_jar_to_flume_directory(){
+    local component_name=${1}
+    _logStage "######## Copying the ${component_name} jar into the apache-flume... ########"
     mkdir -p ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus
-    mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
-    mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
-    cp $BASE_DIR/target/cygnus-ngsi-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
-    cp $BASE_DIR/../cygnus-common/target/cygnus-common-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+    if [[ ${component_name} == "cygnus-common" ]]; then
+        mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+        cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+    else
+        mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+        cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+    fi
 }
 
 function copy_cygnus_conf() {
-    _logStage "######## Copying cygnus template config files to destination config directory... ########"
-    rm -rf {RPM_SOURCE_DIR}/config 
+    local component_name=${1}
+    _logStage "######## Copying ${component_name} template config files to destination config directory... ########"
+    rm -rf ${RPM_SOURCE_DIR}/config 
     mkdir -p ${RPM_SOURCE_DIR}/config
-    cp ${BASE_DIR}/conf/* ${RPM_SOURCE_DIR}/config/ # templates are copied
-    cp ${BASE_DIR}/../cygnus-common/conf/log4j.properties.template ${RPM_SOURCE_DIR}/config/log4j.properties # log4j is effectively templated
+    cp ${BASE_DIR}/${component_name}/conf/* ${RPM_SOURCE_DIR}/config/ # templates are copied
+    if [[ -f ${RPM_SOURCE_DIR}/config/log4j.properties.template ]]; then
+        mv ${RPM_SOURCE_DIR}/config/log4j.properties.template ${RPM_SOURCE_DIR}/config/log4j.properties
+    fi
+    mv ${RPM_SOURCE_DIR}/config/README.md ${RPM_SOURCE_DIR}/config/README-${component_name}.md 
 }
 
 function clean_up_previous_builds() {
@@ -109,7 +117,7 @@ function clean_up_previous_builds() {
 
 function get_name_suffix() {
     # At this moment Cygnus package name only has a Hadoop core version
-    HADOOP_VERSION=$(grep -A1 "hadoop-core" ${BASE_DIR}/pom.xml | tail -1 | tr -d "</version> ")
+    HADOOP_VERSION=$(grep -A1 "hadoop-core" ${BASE_DIR}/cygnus-common/pom.xml | tail -1 | tr -d "</version> ")
     if [[ -z "${HADOOP_VERSION}" || ${HADOOP_VERSION} == "" ]]; then
         return 1
     fi
@@ -126,7 +134,7 @@ function usage() {
     printf "\n" >&2
     printf "    -h                    show usage\n" >&2
     printf "    -v VERSION            Mandatory parameter. Version for rpm product preferably in format x.y.z \n" >&2
-    printf "    -r RELEASE            Optional parameter. Release for product. I.E. 0.ge58dffa \n" >&2
+    printf "    -r RELEASE            Mandatory parameter. Release for product. I.E. 0.ge58dffa \n" >&2
     printf "    -u ARTIFACT_URL       Optional parameter. Url to server that contains flume package. Default value is http://archive.apache.org/dist/flume/1.4.0/ \n" >&2
     printf "    -a ARTIFACT_NAME      Optional parameter. Artifact name. Default value is apache-flume-1.4.0-bin.tar.gz. It is important that artifact be in .tar.gz format\n" >&2
     printf "\n" >&2
@@ -160,33 +168,16 @@ do
 done
 
 # Setting folders this scrtipt is in neore/scripts BASE_DIR. Note: $0/.. is CWD
-BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../../..)
-RPM_BASE_DIR="${BASE_DIR}/neore/rpm"
-RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
-RPM_PRODUCT_SOURCE_DIR="${RPM_SOURCE_DIR}/usr/cygnus/"
+BASE_DIR=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' $0/../..)
 
 # Import the colors for deployment script
-source ${BASE_DIR}/neore/scripts/colors_shell.sh
-
-_log "#### BASE_DIR = $BASE_DIR ####"
-_log "#### RPM_BASE_DIR = $RPM_BASE_DIR ####"
-_log "#### RPM_SOURCE_DIR = $RPM_SOURCE_DIR ####"
-_log "#### RPM_PRODUCT_SOURCE_DIR=$RPM_PRODUCT_SOURCE_DIR ####"
-
-_log "#### Creating output folder ####"
-[[ -d "${BASE_DIR}/target" ]] || mkdir -p "${BASE_DIR}/target"
+source ${BASE_DIR}/rpm/colors_shell.sh
 
 # check user
-
 if [[ $(id -u) == "0" ]]; then
 	_logError "${0}: shouldn't be executed as root"
 	exit 1
 fi
-
-describe_tags="$(git describe --tags --long 2>/dev/null)"
-GIT_PRODUCT_RELEASE="${describe_tags#*-}"
-GIT_PRODUCT_RELEASE="${GIT_PRODUCT_RELEASE#*-}"
-GIT_PRODUCT_RELEASE=$(echo ${GIT_PRODUCT_RELEASE} | sed -e "s@-@.@g")
 
 
 if [[ ! -z ${VERSION_ARG} ]]; then
@@ -200,7 +191,9 @@ fi
 if [[ ! -z ${RELEASE_ARG} ]]; then
 	PRODUCT_RELEASE=${RELEASE_ARG}
 else
-	PRODUCT_RELEASE=${GIT_PRODUCT_RELEASE}
+    _logError "A product release must be specified with -r parameter."
+    usage
+    exit 2
 fi
 
 if [[ -z ${ARTIFACT_URL} ]]; then
@@ -215,40 +208,51 @@ _logStage "######## Setting the environment... ########"
 
 
 _log "#### Iterate over every SPEC file ####"
-if [[ -d "${RPM_BASE_DIR}" ]]; then
 
-	clean_up_previous_builds 
+for SPEC_FILE in $(find "${BASE_DIR}" -type f -name *.spec)
+do
 
-	download_flume ${ARTIFACT_URL} ${ARTIFACT_NAME}
-	[[ $? -ne 0 ]] && exit 1
+    RPM_BASE_DIR="$(dirname ${SPEC_FILE})"
+    RPM_BASE_DIR=${RPM_BASE_DIR%*SPECS} # remove trailing SPECS 
+    RPM_SOURCE_DIR="${RPM_BASE_DIR}/SOURCES"
+    RPM_PRODUCT_SOURCE_DIR="${RPM_SOURCE_DIR}/usr/cygnus/"
 
-    copy_cygnus_startup_script
-    [[ $? -ne 0 ]] && _logError "Cygnus startup script copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+    CYGNUS_COMPONENT_NAME=${RPM_BASE_DIR%*/spec/}
+    CYGNUS_COMPONENT_NAME=${CYGNUS_COMPONENT_NAME##*/}
 
-	copy_cygnus_to_flume
-	[[ $? -ne 0 ]] && _logError "Cygnus jar copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
-	copy_cygnus_conf
-	[[ $? -ne 0 ]] && exit 1
+    clean_up_previous_builds 
+
+    if [[ ${CYGNUS_COMPONENT_NAME} == "cygnus-common" ]]; then 
+
+        download_flume ${ARTIFACT_URL} ${ARTIFACT_NAME}
+        [[ $? -ne 0 ]] && exit 1
+
+        copy_cygnus_startup_script
+        [[ $? -ne 0 ]] && _logError "Cygnus startup script copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
 
         get_name_suffix
         [[ $? -ne 0 ]] && _logError "Can't get the name suffix" && exit 1
- 
-	_logStage "######## Executing the rpmbuild ... ########"
-	rm -rf ${RPM_BASE_DIR}/BUILD
-	rm -rf ${RPM_BASE_DIR}/BUILDROOT
-	for SPEC_FILE in $(find "${RPM_BASE_DIR}" -type f -name *.spec)
-	do
-		_log "#### Packaging using: ${SPEC_FILE}... ####"
-		# Execute command to create RPM
-		RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX} "
-		_log "Rpm construction command: ${RPM_BUILD_COMMAND}"
-		rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX} 
-		_logStage "######## rpmbuild finished! ... ########"
-	done
 
-# _logStage "######## Moving to target folder... ########"
-# find "${RPM_BASE_DIR}/RPMS" -type f -name '*.rpm' -exec cp {} "${BASE_DIR}/target" \;
-fi
+    else 
+        # dummy NAME_SUFFIX
+        NAME_SUFFIX="dummy_suffix"
+    fi
+
+    copy_cygnus_jar_to_flume_directory ${CYGNUS_COMPONENT_NAME}
+    [[ $? -ne 0 ]] && _logError "Cygnus jar copy has failed. Did you run 'mvn clean compile exec:exec assembly:single'? Does the version in pom.xml file match $PRODUCT_VERSION?" && exit 1
+
+    copy_cygnus_conf ${CYGNUS_COMPONENT_NAME}
+    [[ $? -ne 0 ]] && exit 1
+
+    _logStage "######## Executing the rpmbuild ... ########"
+
+    _log "#### Packaging using: ${SPEC_FILE}... ####"
+    # Execute command to create RPM
+    RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}"
+    _log "Rpm construction command: ${RPM_BUILD_COMMAND}"
+    rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}
+    _logStage "######## rpmbuild finished! ... ########"
+done
 
 _logStage "######## RPM Stage Finished! ... ########"
