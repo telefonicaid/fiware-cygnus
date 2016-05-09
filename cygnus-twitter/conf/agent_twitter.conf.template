@@ -27,13 +27,13 @@
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnusagent.sources = twitter-source
-cygnusagent.sinks = hdfs-sink mysql-sink postgresql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink
-cygnusagent.channels = hdfs-channel mysql-channel postgresql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel
+cygnusagent.sinks = hdfs-sink
+cygnusagent.channels = hdfs-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.twitter-source.channels = hdfs-channel mysql-channel postgresql-channel ckan-channel mongo-channel sth-channel kafka-channel
+cygnusagent.sources.twitter-source.channels = hdfs-channel
 # source class, must not be changed
 cygnusagent.sources.twitter-source.type = com.telefonica.iot.cygnus.sources.TwitterSource
 # keywords
@@ -43,6 +43,10 @@ cygnusagent.sources.twitter-source.type = com.telefonica.iot.cygnus.sources.Twit
 # cygnusagent.sources.twitter-source.top_left_longitude = -73.985656
 # cygnusagent.sources.twitter-source.bottom_right_latitude = 40.758611
 # cygnusagent.sources.twitter-source.bottom_right_longitude = -73.979167
+# cygnusagent.sources.twitter-source.consumerKey =
+# cygnusagent.sources.twitter-source.consumerSecret =
+# cygnusagent.sources.twitter-source.accessToken =
+# cygnusagent.sources.twitter-source.accessTokenSecret =
 
 # ============================================
 # TwitterHDFSSink configuration
