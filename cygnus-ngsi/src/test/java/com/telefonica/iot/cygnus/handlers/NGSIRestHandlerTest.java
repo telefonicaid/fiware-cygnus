@@ -77,7 +77,7 @@ public class NGSIRestHandlerTest {
         String[] headerNames = {"Content-Type", "fiware-service", "fiware-servicePath"};
         when(mockHttpServletRequest.getHeaderNames()).thenReturn(
                 Collections.enumeration(new ArrayList(Arrays.asList(headerNames))));
-        when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json");
+        when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
         when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
         notification = CommonUtilsForTests.createNotification();
@@ -245,7 +245,7 @@ public class NGSIRestHandlerTest {
             handler.getEvents(mockHttpServletRequest);
             assertTrue(true);
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                    + "-  OK  - The value for 'Content-Type' header is 'application/json'");
+                    + "-  OK  - The value for 'Content-Type' header is 'application/json; charset=utf-8'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
@@ -257,7 +257,7 @@ public class NGSIRestHandlerTest {
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                        + "- FAIL - The value for 'Content-Type' is not 'application/json'");
+                        + "- FAIL - The value for 'Content-Type' is not 'application/json; charset=utf-8'");
             } else if (e.getMessage().contains("header value must start with '/'")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The value for 'fiware-servicePath' does not start with '/'");
