@@ -42,6 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 
 /**
  *
@@ -457,7 +458,7 @@ public class NGSIRestHandlerTest {
         System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
                 + "-------- An internal transaction ID is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
-        String generatedTransId = handler.generateUniqueId(null, null);
+        String generatedTransId = CommonUtils.generateUniqueId(null, null);
         
         try {
             assertTrue(generatedTransId != null);
@@ -481,7 +482,7 @@ public class NGSIRestHandlerTest {
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1111111111-111-1111111111";
         String notifiedCorrId = "1234567890-123-1234567890";
-        String generatedCorrId = handler.generateUniqueId(notifiedCorrId, generatedTransId);
+        String generatedCorrId = CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId);
         
         try {
             assertEquals(notifiedCorrId, generatedCorrId);
@@ -507,7 +508,7 @@ public class NGSIRestHandlerTest {
         String notifiedCorrId = null;
         
         try {
-            assertTrue(handler.generateUniqueId(notifiedCorrId, generatedTransId) != null);
+            assertTrue(CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId) != null);
             System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
                     + "-  OK  - The transaction ID has been generated");
         } catch (AssertionError e) {
@@ -529,7 +530,7 @@ public class NGSIRestHandlerTest {
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1234567890-123-1234567890";
         String notifiedCorrId = null;
-        String generatedCorrId = handler.generateUniqueId(notifiedCorrId, generatedTransId);
+        String generatedCorrId = CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId);
         
         try {
             assertEquals(generatedTransId, generatedCorrId);
