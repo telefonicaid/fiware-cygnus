@@ -67,7 +67,7 @@ Attending to the above architecture, the content of `/usr/cygnus/conf/cygnus_1.c
         cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
 ```
 
-    These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
+These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
 
 ```
                      -------------- north-east
