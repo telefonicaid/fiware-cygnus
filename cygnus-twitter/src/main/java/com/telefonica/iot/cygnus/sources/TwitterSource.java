@@ -124,12 +124,12 @@ public class TwitterSource extends AbstractSource
         String keywords;
 
 
-        //First corrdinate
+        //Top-left coordinate
         top_left_latitude = context.getString("top_left_latitude");
         top_left_longitude = context.getString("top_left_longitude");
         LOGGER.info("Top-left coordinate: '" + top_left_latitude + " " + top_left_longitude + "'");
 
-        //Second coordinate
+        //Bottom-right coordinate
         bottom_right_latitude = context.getString("bottom_right_latitude");
         bottom_right_longitude = context.getString("bottom_right_longitude");
         LOGGER.info("Bottom-right coordinate: '" + bottom_right_latitude + " " + bottom_right_longitude + "'");
@@ -248,11 +248,11 @@ public class TwitterSource extends AbstractSource
 
             if (have_coordinate_filter) {
                 filterQuery.locations(coordinates);
-                LOGGER.info("\nCoordinates added to filter query: {}\n", coordinates);
+                LOGGER.info("\nCoordinates added to filter query: {}\n", Arrays.toString(coordinates));
             }
             if (have_keyword_filter) {
                 filterQuery.track(splitKeywords);
-                LOGGER.info("\nKeywords added to filter query: {}\n", splitKeywords);
+                LOGGER.info("\nKeywords added to filter query: {}\n", Arrays.toString(splitKeywords));
             }
             twitterStream.filter(filterQuery);
         }
