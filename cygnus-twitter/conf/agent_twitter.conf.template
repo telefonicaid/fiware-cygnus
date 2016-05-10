@@ -39,10 +39,10 @@ cygnusagent.sources.twitter-source.type = com.telefonica.iot.cygnus.sources.Twit
 # keywords
 # cygnusagent.sources.twitter-source.keywords = keyword1, keyword2, keyword3
 # Coordinates for filter query
-# cygnusagent.sources.twitter-source.south_west_latitude = 40.748433
-# cygnusagent.sources.twitter-source.south_west_longitude = -73.985656
-# cygnusagent.sources.twitter-source.north_east_latitude = 40.758611
-# cygnusagent.sources.twitter-source.north_east_longitude = -73.979167
+# cygnusagent.sources.twitter-source.south_west_latitude = 39.4247692
+# cygnusagent.sources.twitter-source.south_west_longitude = -0.4315448
+# cygnusagent.sources.twitter-source.north_east_latitude = 39.5038788
+# cygnusagent.sources.twitter-source.north_east_longitude = -0.3124204
 # cygnusagent.sources.twitter-source.consumerKey =
 # cygnusagent.sources.twitter-source.consumerSecret =
 # cygnusagent.sources.twitter-source.accessToken =

@@ -262,9 +262,6 @@ public class TwitterSource extends AbstractSource
             LOGGER.info("Filter Query created: {}", filterQuery.toString());
         }
 
-
-        twitterStream.sample();
-
         LOGGER.info("Twitter source {} started.", getName());
 
         super.start();
