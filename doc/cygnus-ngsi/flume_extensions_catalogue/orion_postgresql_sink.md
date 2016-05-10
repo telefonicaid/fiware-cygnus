@@ -247,6 +247,8 @@ Creates a table, given its name, if not existing within the given database. The 
 
 Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
 
+It must be said this backend implementation enforces UTF-8 encoding through the usage of `charSet=UTF-8` property when getting a connection via the JDBC driver.
+
 [Top](#top)
 
 ###<a name="section3.3"></a>Authentication and authorization
