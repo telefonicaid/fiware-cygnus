@@ -32,10 +32,10 @@ public class TwitterSourceTest {
     private String consumerSecret = "172fOpzuZoYzNYaU3mMYvE8m8MEyLbztOdbrUolU";
     private String accessToken = "zxcvbnm";
     private String accessTokenSecret = "1234567890";
-    private String top_left_latitude = "40.748433";
-    private String top_left_longitude = "-73.985656";
-    private String bottom_right_latitude = "40.758611";
-    private String bottom_right_longitude = "-73.979167";
+    private String south_west_latitude = "40.748433";
+    private String south_west_longitude = "-73.985656";
+    private String north_east_latitude = "40.758611";
+    private String north_east_longitude = "-73.979167";
     private String keywords = "keywords, more_keywords";
     private double[][] coordinates = {{-73.985656, 40.748433}, {-73.979167, 40.758611}};
     private String[] keywords_array = {"keywords", "more_keywords"};
@@ -48,10 +48,10 @@ public class TwitterSourceTest {
         context.put("consumerSecret", consumerSecret);
         context.put("accessToken", accessToken);
         context.put("accessTokenSecret", accessTokenSecret);
-        context.put("top_left_latitude", top_left_latitude);
-        context.put("top_left_longitude", top_left_longitude);
-        context.put("bottom_right_latitude", bottom_right_latitude);
-        context.put("bottom_right_longitude", bottom_right_longitude);
+        context.put("south_west_latitude", south_west_latitude);
+        context.put("south_west_longitude", south_west_longitude);
+        context.put("north_east_latitude", north_east_latitude);
+        context.put("north_east_longitude", north_east_longitude);
         context.put("keywords", keywords);
 
         context.put("maxBatchDurationMillis", "1000");
@@ -63,7 +63,7 @@ public class TwitterSourceTest {
         assertEquals(consumerSecret, source.getConsumerSecret());
         assertEquals(accessToken, source.getAccessToken());
         assertEquals(accessTokenSecret, source.getAccessTokenSecret());
-        assertArrayEquals(coordinates, source.getCoordinates());
+        assertArrayEquals(coordinates, source.getBoundingBox());
         assertArrayEquals(keywords_array, source.getKeywords());
 
     }

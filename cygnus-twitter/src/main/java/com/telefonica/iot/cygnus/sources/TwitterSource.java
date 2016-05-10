@@ -54,7 +54,7 @@ public class TwitterSource extends AbstractSource
     private String consumerSecret;
     private String accessToken;
     private String accessTokenSecret;
-    private double[][] coordinates;
+    private double[][] bounding_box;
     private String[] splitKeywords;
 
 
@@ -94,8 +94,8 @@ public class TwitterSource extends AbstractSource
         return accessTokenSecret;
     }
 
-    double[][] getCoordinates() {
-        return coordinates;
+    double[][] getBoundingBox() {
+        return bounding_box;
     }
 
     String[] getKeywords() {
@@ -115,39 +115,42 @@ public class TwitterSource extends AbstractSource
         LOGGER.info("Access Token Secret: '" + accessTokenSecret + "'");
 
 
-        String top_left_latitude;
-        String top_left_longitude;
+        String south_west_latitude;
+        String south_west_longitude;
 
-        String bottom_right_latitude;
-        String bottom_right_longitude;
+        String north_east_latitude;
+        String north_east_longitude;
 
         String keywords;
 
 
         //Top-left coordinate
-        top_left_latitude = context.getString("top_left_latitude");
-        top_left_longitude = context.getString("top_left_longitude");
-        LOGGER.info("Top-left coordinate: '" + top_left_latitude + " " + top_left_longitude + "'");
+        south_west_latitude = context.getString("south_west_latitude");
+        south_west_longitude = context.getString("south_west_longitude");
+        LOGGER.info("South-West coordinate: '" + south_west_latitude + " " + south_west_longitude + "'");
 
         //Bottom-right coordinate
-        bottom_right_latitude = context.getString("bottom_right_latitude");
-        bottom_right_longitude = context.getString("bottom_right_longitude");
-        LOGGER.info("Bottom-right coordinate: '" + bottom_right_latitude + " " + bottom_right_longitude + "'");
+        north_east_latitude = context.getString("north_east_latitude");
+        north_east_longitude = context.getString("north_east_longitude");
+        LOGGER.info("North-East coordinate: '" + north_east_latitude + " " + north_east_longitude + "'");
 
         keywords = context.getString("keywords");
         LOGGER.info("Keywords:            '" + keywords + "'");
 
+        if (south_west_latitude != null && south_west_longitude != null && north_east_latitude != null && north_east_longitude != null) {
+            double latitude1 = Double.parseDouble(south_west_latitude);
+            double longitude1 = Double.parseDouble(south_west_longitude);
 
-        if (top_left_latitude != null && top_left_longitude != null && bottom_right_latitude != null && bottom_right_longitude != null) {
-            double latitude1 = Double.parseDouble(top_left_latitude);
-            double longitude1 = Double.parseDouble(top_left_longitude);
+            double latitude2 = Double.parseDouble(north_east_latitude);
+            double longitude2 = Double.parseDouble(north_east_longitude);
 
-            double latitude2 = Double.parseDouble(bottom_right_latitude);
-            double longitude2 = Double.parseDouble(bottom_right_longitude);
+            bounding_box = new double[][]{
+                    new double[]{longitude1, latitude1}, // south-west
+                    new double[]{longitude2, latitude2}  // north-east
+            };
 
-            coordinates = new double[][]{{longitude1, latitude1}, {longitude2, latitude2}};
-
-            LOGGER.info("Coordinates:         '" + coordinates[0][0] + " " + coordinates[0][1] + " " + coordinates[1][0] + " " + coordinates[1][1] + "'");
+            LOGGER.info("Coordinates:         '" + bounding_box[0][0] + " " + bounding_box[0][1] +
+                                            " "  + bounding_box[1][0] + " " + bounding_box[1][1] + "'");
             have_filters = true;
             have_coordinate_filter = true;
         }
@@ -247,15 +250,16 @@ public class TwitterSource extends AbstractSource
             FilterQuery filterQuery = new FilterQuery();
 
             if (have_coordinate_filter) {
-                filterQuery.locations(coordinates);
-                LOGGER.info("\nCoordinates added to filter query: {}\n",
-                        coordinates[0][0] + " " + coordinates[0][1] + " " + coordinates[1][0] + " " + coordinates[1][1]);
+                filterQuery.locations(bounding_box);
+                LOGGER.info("Coordinates added to filter query: {}",
+                        bounding_box[0][0] + " " + bounding_box[0][1] + " " + bounding_box[1][0] + " " + bounding_box[1][1]);
             }
             if (have_keyword_filter) {
                 filterQuery.track(splitKeywords);
-                LOGGER.info("\nKeywords added to filter query: {}\n", Arrays.toString(splitKeywords));
+                LOGGER.info("Keywords added to filter query: {}", Arrays.toString(splitKeywords));
             }
             twitterStream.filter(filterQuery);
+            LOGGER.info("Filter Query created: {}", filterQuery.toString());
         }
 
 
@@ -285,7 +289,7 @@ public class TwitterSource extends AbstractSource
                     statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
         }
         else {
-            LOGGER.info("geolocation: " + statusGeoLocation);
+            LOGGER.info("geolocation: null");
         }
 
         String jsonTweet = DataObjectFactory.getRawJSON(status);
