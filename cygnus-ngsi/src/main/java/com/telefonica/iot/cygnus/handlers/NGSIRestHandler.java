@@ -195,7 +195,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
                 corrId = headerValue;
             } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json")) {
+                if (!headerValue.contains("application/json; charset=utf-8")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
@@ -227,8 +227,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // check if received content type is null
         if (contentType == null) {
-            LOGGER.warn("Missing content type. Required application/json.");
-            throw new HTTPBadRequestException("Missing content type. Required application/json.");
+            LOGGER.warn("Missing content type. Required 'application/json; charset=utf-8'");
+            throw new HTTPBadRequestException("Missing content type. Required 'application/json; charset=utf-8'");
         } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
