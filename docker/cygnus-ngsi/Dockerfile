@@ -82,7 +82,7 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
     # Create Cygnus log folder
-    mkdir ${FLUME_HOME}/log && \
+    mkdir /var/log/cygnus && \
     # Cleanup to thin the final image
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean && \
