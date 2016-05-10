@@ -52,40 +52,40 @@ So, the starting point is choosing the internal architecture of the Cygnus agent
 Attending to the above architecture, the content of `/usr/cygnus/conf/cygnus_1.conf` will specify the following parameters:
 
 * The source:
-        `cygnus-twitter.sources.http-source.type = org.telefonica.iot.cygnus.sources.TwitterSource`
+`cygnus-twitter.sources.http-source.type = org.telefonica.iot.cygnus.sources.TwitterSource`
 
 * The keyworks (hashtags) that are used in the twitter query to filter tweets with an specific keyword(s):
         
-        `cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3`
+`cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3`
 
 * The coordinates to specify the spatial area where the source will collect geo-located tweets. The coordinates will be used in the twitter query:
 
-        ```
+```
         cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
         cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
         cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
         cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
-        ```
+```
 
     These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
 
-        ```
+```
                      -------------- north-east
                     |                  |
                     |                  |
                     |                  |
                south-west ------------   
         
-        ```
+```
 
  * The credentials used to connect with Twitter API:
 
-        ```
+```
         cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxx
         cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxx
         cygnus-twitter.sources.twitter-source.accessToken = xxxxxxx
         cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxx
-        ```
+```
 
 * Parameters associated to the sinks. Currently, for the `cygnus-twitter` agent, the only sink defined is the `HDFS sink`. The `HDFS sink` parameters that appear in the configuration file and are directly related to `twitter-agent` are:
 `hdfs_folder`: to declare the folder where the tweets file will be created.
