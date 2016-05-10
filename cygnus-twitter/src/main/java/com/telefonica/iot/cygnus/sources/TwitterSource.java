@@ -248,7 +248,8 @@ public class TwitterSource extends AbstractSource
 
             if (have_coordinate_filter) {
                 filterQuery.locations(coordinates);
-                LOGGER.info("\nCoordinates added to filter query: {}\n", Arrays.toString(coordinates));
+                LOGGER.info("\nCoordinates added to filter query: {}\n",
+                        coordinates[0][0] + " " + coordinates[0][1] + " " + coordinates[1][0] + " " + coordinates[1][1]);
             }
             if (have_keyword_filter) {
                 filterQuery.track(splitKeywords);
@@ -278,7 +279,14 @@ public class TwitterSource extends AbstractSource
         String username = status.getUser().getScreenName();
         LOGGER.info("username: '" + username + "'");
         GeoLocation statusGeoLocation = status.getGeoLocation();
-        LOGGER.info("geolocation: '" + statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
+        if (statusGeoLocation != null)
+        {
+            LOGGER.info("geolocation: '" +
+                    statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
+        }
+        else {
+            LOGGER.info("geolocation: " + statusGeoLocation);
+        }
 
         String jsonTweet = DataObjectFactory.getRawJSON(status);
         totalTextIndexed += jsonTweet.length();
