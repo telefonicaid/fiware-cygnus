@@ -275,14 +275,10 @@ public class TwitterSource extends AbstractSource
 
 
     private String getStringJSONTweet(Status status) {
-        User user = status.getUser();
         String username = status.getUser().getScreenName();
         LOGGER.info("username: '" + username + "'");
-        String profileLocation = user.getLocation();
-        LOGGER.info("proflocation: '" + profileLocation + "'");
-
-        String content = status.getText();
-        LOGGER.info(" \n" + content + " \n");
+        GeoLocation statusGeoLocation = status.getGeoLocation();
+        LOGGER.info("geolocation: '" + statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
 
         String jsonTweet = DataObjectFactory.getRawJSON(status);
         totalTextIndexed += jsonTweet.length();
