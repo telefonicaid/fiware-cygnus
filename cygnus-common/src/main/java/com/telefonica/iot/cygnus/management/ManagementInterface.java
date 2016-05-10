@@ -29,6 +29,7 @@ import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV1;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV2;
 import com.telefonica.iot.cygnus.containers.OrionEndpoint;
+import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -63,7 +64,6 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
-import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import org.slf4j.MDC;
 /**

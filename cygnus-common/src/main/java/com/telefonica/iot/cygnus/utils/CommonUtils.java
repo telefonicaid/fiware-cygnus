@@ -34,7 +34,6 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import static org.eclipse.jetty.ajp.Ajp13PacketMethods.LOCK;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
