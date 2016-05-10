@@ -1,4 +1,4 @@
-#<a name="top"></a>OrionHDFSSink
+# <a name="top"></a>TwitterHDFSSink
 Content:
 
 * [Functionality](#section1)
@@ -11,7 +11,7 @@ Content:
         * [About the binary backend](#section2.3.2)
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
-    * [`OrionHDFSSink` class](#section3.1)
+    * [`TwitterHDFSSink` class](#section3.1)
     * [`HDFSBackendImpl` class](#section3.2)
     * [OAuth2 authentication](#section3.3)
     * [Kerberos authentication](#section3.4)
@@ -70,8 +70,8 @@ Hive is currently not supported in this version of the `TwitterHDFSSink`.
 | krb5_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
 | krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
-| hdfs_folder | yes |  | The folder where the file with tweets will be stored. |
-| hdfs_file | yes |  | The name of the file where tweets will be stored. This file will be created inside the `hdfs_folder` |
+| hdfs_folder | yes | N/A | The folder where the file with tweets will be stored. |
+| hdfs_file | yes | N/A | The name of the file where tweets will be stored. This file will be created inside the `hdfs_folder` |
 
 A configuration example could be:
 

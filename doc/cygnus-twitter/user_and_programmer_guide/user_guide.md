@@ -50,7 +50,7 @@ Once the parameters related to the source are defined, the file continues defini
 
 `hdfs_folder`: to declare the folder where the tweets file will be created.
 
-`hdfs_file`: to declare the file where tweets will be stored inside the `hdfs_folder`_
+`hdfs_file`: to declare the file where tweets will be stored inside the `hdfs_folder`
 
 
 
