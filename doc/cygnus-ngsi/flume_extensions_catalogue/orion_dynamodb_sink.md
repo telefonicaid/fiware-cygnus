@@ -15,7 +15,7 @@ Content:
         * [Throughput in DynamoDB](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIDynamoDBSink` class](#section3.1)
-    * [`DynamoDBBackendImpl` class](#section3.2)
+    * [Authentication and authorization](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIDynamoDBSink`, or simply `NGSIDynamoDBSink` is a sink designed to persist NGSI-like context data events within a [DynamoDB database](https://aws.amazon.com/dynamodb/) in [Amazon Web Services](https://aws.amazon.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -212,20 +212,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`DynamoDBBackendImpl` class
-This is a convenience backend class for DynamoDB that implements the `DynamoDBBackend` interface (provides the methods that any DynamoDB backend must implement). Relevant methods are:
-    
-    public void createTable(String tableName, String primaryKey) throws Exception;
-    
-Creates a table, given its name, if not existing within the DynamoDB user space. The field acting as primary key must be given as well.
-    
-    void putItems(String tableName, ArrayList<Item> aggregation) throws Exception;
-    
-Puts, in the given table, as many items as contained within the given aggregation.
-
-[Top](#top)
-
-###<a name="section3.3"></a>Authentication and authorization
+###<a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIDynamoDBSink` relies on the [AWS access keys](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html) mechanism.
 
 [Top](#top)

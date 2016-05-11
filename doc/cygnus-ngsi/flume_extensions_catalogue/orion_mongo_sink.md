@@ -15,7 +15,6 @@ Content:
          * [Databases and collections encoding details](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
-    * [`MongoBackend` class](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMongoSink`, or simply `NGSIMongoSink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -297,26 +296,5 @@ An implementation of `MongoBackend` is created. This must be done at the `start(
     public void configure(Context);
 
 A complete configuration as the described above is read from the given `Context` instance.
-
-[Top](#top)
-
-###<a name="section3.2"></a>`MongoBackend` class
-This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
-
-    public void createDatabase(String dbName) throws Exception;
-
-Creates a database, given its name, if not exists.
-
-    public void createCollection(String dbName, String collectionName) throws Exception;
-
-Creates a collection, given its name, if not exists in the given database.
-
-    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
-
-Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for a single attribute. See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
-
-    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, Map<String, String> attrs, Map<String, String> mds) throws Exception
-
-Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for multiple attributes. See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 [Top](#top)

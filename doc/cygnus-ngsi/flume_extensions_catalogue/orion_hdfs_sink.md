@@ -15,9 +15,8 @@ Content:
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSIHDFSSink` class](#section3.1)
-    * [`HDFSBackendImpl` class](#section3.2)
-    * [OAuth2 authentication](#section3.3)
-    * [Kerberos authentication](#section3.4)
+    * [OAuth2 authentication](#section3.2)
+    * [Kerberos authentication](#section3.3)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIHDFSSink`, or simply `NGSIHDFSSink` is a sink designed to persist NGSI-like context data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -298,36 +297,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`HDFSBackendImpl` class
-This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement). Relevant methods are:
-
-    public void createDir(String dirPath) throws Exception;
-
-Creates a HDFS directory, given its path.
-
-    public void createFile(String filePath, String data) throws Exception;
-
-Creates a HDFS file, given its path, and writes initial data to it.
-
-    public void append(String filePath, String data) throws Exception;
-
-Appends new data to an already existent given HDFS file.
-
-    public boolean exists(String filePath) throws Exception;
-
-Checks if a HDFS file, given its path, exists ot not.
-
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String tag) throws Exception;
-
-Provisions a Hive table with data stored using constant 8-fields. This is usually invoked for `*-row`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_row`).
-
-    public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
-
-Provisions a Hive table with data stored using the given variable length fields. This is usually invoked for `*-column`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_column`).
-
-[Top](#top)
-
-###<a name="section3.3"></a>OAuth2 authentication
+###<a name="section3.2"></a>OAuth2 authentication
 [OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
 
 A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
@@ -346,7 +316,7 @@ As you can see, your FIWARE Lab credentials are required in the payload, in the 
 
 [Top](#top)
 
-###<a name="section3.4"></a>Kerberos authentication
+###<a name="section3.3"></a>Kerberos authentication
 Hadoop Distributed File System (HDFS) can be remotely managed through a REST API called [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html). This API may be used without any kind of security (in this case, it is enough knowing a valid HDFS user name in order to access this user HDFS space), or a Kerberos infrastructure may be used for authenticating the users.
 
 [Kerberos](http://web.mit.edu/kerberos/) is an authentication protocol created by MIT, current version is 5. It is based in symmetric key cryptography and a trusted third party, the Kerberos servers themselves. The protocol is as easy as authenticating to the Authentication Server (AS), which forwards the user to the Key Distribution Center (KDC) with a ticket-granting ticket (TGT) that can be used to retrieve the definitive client-to-server ticket. This ticket can then be used for authentication purposes against a service server (in both directions).
