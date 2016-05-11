@@ -2,3 +2,4 @@
 - [cygnus-common,cygnus-ngsi][hardening] Add sanity checks and diagnosis procedures (#627, #628)
 - [cygnus-ngsi][bug] Fix logging folder creation in Dockerfile (#1009)
 - [cygnus] [bug] Fix errors in apiary.apib file (#1011)
+- [cygnus] [doc] Move backend documentation to cygnus-common (#1013)
