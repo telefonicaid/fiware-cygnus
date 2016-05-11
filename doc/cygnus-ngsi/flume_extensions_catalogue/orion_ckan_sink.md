@@ -342,6 +342,8 @@ This is a convenience backend class for CKAN that extends the `HttpBackend` abst
 
 Persists the aggregated context data regarding a single entity's attribute (row mode) or a full list of attributes (column mode) within the datastore associated to the given resource. This resource belongs to the given package/dataset, which in the end belongs to the given organization as well. This method creates the parts of the hierarchy (organization, package/dataset, resource and datastore) if any of them is missing.
 
+It must be said this backend implementation enforces UTF-8 encoding through the usage of a `Content-Type` http header with a value of `application/json; charset=utf-8`.
+
 [Top](#top)
 
 ###<a name="section3.3"></a>`CKANCache` class

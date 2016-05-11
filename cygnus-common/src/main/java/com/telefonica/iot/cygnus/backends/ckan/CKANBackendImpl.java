@@ -446,7 +446,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws Exception {
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        return doRequest(method, urlPath, true, headers, new StringEntity(jsonString));
+        headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
+        return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
 
 } // CKANBackendImpl

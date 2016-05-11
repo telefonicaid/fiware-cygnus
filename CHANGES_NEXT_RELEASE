@@ -1,3 +1,4 @@
+- [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
 - [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)
 - [cygnus-common,cygnus-ngsi][hardening] Add sanity checks and diagnosis procedures (#627, #628)
 - [cygnus-ngsi][bug] Fix logging folder creation in Dockerfile (#1009)

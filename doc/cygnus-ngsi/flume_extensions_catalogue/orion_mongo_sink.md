@@ -319,4 +319,6 @@ Inserts a new document in the given collection within the given database. Such a
 
 Inserts a new document in the given collection within the given database. Such a document contains all the information regarding a single notification for multiple attributes. See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
+Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.
+
 [Top](#top)

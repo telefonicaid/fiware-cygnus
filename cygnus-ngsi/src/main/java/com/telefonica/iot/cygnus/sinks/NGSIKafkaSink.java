@@ -149,6 +149,15 @@ public class NGSIKafkaSink extends NGSISink {
         } // for
     } // persistBatch
     
+    /**
+     * Builds the topic name.
+     * @param service
+     * @param servicePath
+     * @param entity
+     * @param attribute
+     * @return
+     * @throws Exception
+     */
     protected String buildTopicName(String service, String servicePath,
         String entity, String attribute) throws Exception {
         String name;

@@ -183,4 +183,6 @@ The implementation of a class dealing with the details of the backend is given b
 
 Which sends a [`ProducerRecord`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html) object to the configured topic.
 
+Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the topics. It will responsability of the Kafka consumer to convert the bytes read into UTF-8.
+
 [Top](#top)

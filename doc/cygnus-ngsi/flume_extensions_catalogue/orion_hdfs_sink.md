@@ -298,8 +298,8 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`HDFSBackendImpl` class
-This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement). Relevant methods are:
+###<a name="section3.2"></a>`HDFSBackendImplREST` class
+This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (which provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (which provides the methods that any HDFS backend must implement). Relevant methods are:
 
     public void createDir(String dirPath) throws Exception;
 
@@ -324,6 +324,13 @@ Provisions a Hive table with data stored using constant 8-fields. This is usuall
     public void provisionHiveTable(FileFormat fileFormat, String dirPath, String fields, String tag) throws Exception;
 
 Provisions a Hive table with data stored using the given variable length fields. This is usually invoked for `*-column`-like mode storage within the given HDFS path. A tag can be added to the end of the table name (usually `_column`).
+
+It must be said this backend implementation enforces UTF-8 encoding through the usage of a `Content-Type` http header with a value of `text/plain; charset=utf-8`.
+
+[Top](#top)
+
+###<a name="section3.2"></a>`HDFSBackendImplBinary` class
+The same than above, but using the HDFS Java API.
 
 [Top](#top)
 

@@ -64,7 +64,7 @@ public class KafkaBackendImpl implements KafkaBackend {
     public void createTopic(String topic, int partitions, int replicationFactor) {
         ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, new Properties());
-        LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions 
+        LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions
                 + " , " + "replication factor: " + replicationFactor + ".");
     } // createTopic
 
@@ -74,6 +74,10 @@ public class KafkaBackendImpl implements KafkaBackend {
         LOGGER.debug("Record: '" + record + "' sent to Kafka.");
     } // send
     
+    /**
+     * Sets the Kafka producer.
+     * @param producer
+     */
     protected void setKafkaProducer(KafkaProducer producer) {
         LOGGER.debug("Setting the producer to the backend.");
         this.kafkaProducer = producer;
