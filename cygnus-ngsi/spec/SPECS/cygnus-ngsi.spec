@@ -137,7 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi] [hardening] Use UUIDv4 in the generation of correlator and transaction IDs in OrionRestHandler (#931)
 - [cygnus-ngsi] [task] Refactor de Github repository in a per agent fashion (#864)
 - [cygnus-ngsi] [feature] Add NGSICartoDBSink (#927)
-- [cygnus] [hardening] Add documentation in orion_ckan_sink.md about the creation of resources & datastores for column mode (#971)
+- [cygnus] [hardening] Add documentation in ngsi_ckan_sink.md about the creation of resources & datastores for column mode (#971)
 - [cygnus-ngsi] [bug] Fix configuration of grouping rules in quick_start_guide.md (#983)
 - [cygnus-ngsi] [bug] Fix collection name building when data_model is dm-by-service-path in Mongo sinks (#977)
 - [cygnus-ngsi] [bug] Fix attribute-based accumulation (#982)

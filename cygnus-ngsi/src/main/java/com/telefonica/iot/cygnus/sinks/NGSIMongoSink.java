@@ -31,7 +31,7 @@ import org.apache.flume.Context;
  * @author xdelox
  * 
  * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mongo_sink.md
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_mongo_sink.md
  */
 public class NGSIMongoSink extends NGSIMongoBaseSink {
     
