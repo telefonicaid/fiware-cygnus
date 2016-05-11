@@ -26,3 +26,5 @@ This class enumerates the methods any [MongoDB](https://www.mongodb.com/) backen
 This is a convenience backend class for MongoDB that implements the `MongoBackend` interface described above.
 
 `MongoBackendImpl` really wraps the [MongoDB driver for Java](https://docs.mongodb.com/ecosystem/drivers/java/).
+
+Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.

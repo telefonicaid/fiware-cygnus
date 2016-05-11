@@ -22,3 +22,5 @@ This class enumerates the methods any [HDFS](https://hadoop.apache.org/docs/curr
 This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface described above.
 
 `HDFSBackendImpl` really wraps the [WebHDFS API](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
+
+It must be said this backend implementation enforces UTF-8 encoding through the usage of a `Content-Type` http header with a value of `text/plain; charset=utf-8`.

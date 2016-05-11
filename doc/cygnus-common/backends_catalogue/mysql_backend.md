@@ -18,3 +18,5 @@ This class enumerates the methods any [MySQL](https://www.mysql.com/) backend im
 This is a convenience backend class for MySQL that implements the `MySQLBackend` interface described above.
 
 `MySQLBackendImpl` really wraps the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).
+
+It must be said this backend implementation enforces UTF-8 encoding through the usage of `useUnicode=true` and  `characterEncoding=UTF-8` properties when getting a connection via the JDBC driver.

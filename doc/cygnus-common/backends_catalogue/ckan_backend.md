@@ -11,6 +11,8 @@ This is a convenience backend class for CKAN that extends the `HttpBackend` abst
 
 `CKANBackendImpl` really wraps the [CKAN API](http://docs.ckan.org/en/latest/api/).
 
+It must be said this backend implementation enforces UTF-8 encoding through the usage of a `Content-Type` http header with a value of `application/json; charset=utf-8`.
+
 ##`CKANCache` class
 This class is used to improve the performance of `NGSICKANSink` by caching information about the already created organizations, packages/datasets and resources (and datastores). `CKANCache` implements the `HttpBackend` interface since its methods are able to interact directly with CKAN API when some element of the hierarchy is not cached.
 
