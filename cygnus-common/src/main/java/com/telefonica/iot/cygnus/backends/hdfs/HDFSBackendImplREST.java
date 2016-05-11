@@ -18,12 +18,10 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
-import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
@@ -81,6 +79,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         if (oauth2Token != null && oauth2Token.length() > 0) {
             headers = new ArrayList<Header>();
             headers.add(new BasicHeader("X-Auth-Token", oauth2Token));
+            headers.add(new BasicHeader("Content-Type", "text/plain; charset=utf-8"));
         } else {
             headers = null;
         } // if else
@@ -124,7 +123,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         } // if
         
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doRequest("PUT", absoluteURL, false, headers, new StringEntity(data + "\n", "UTF-8"));
     
         // check the status
         if (response.getStatusCode() != 201) {
@@ -157,7 +156,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         } // if
 
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
-        response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n"));
+        response = doRequest("POST", absoluteURL, false, headers, new StringEntity(data + "\n", "UTF-8"));
         
         // check the status
         if (response.getStatusCode() != 200) {
