@@ -59,7 +59,7 @@ Hive is currently not supported in this version of the `TwitterHDFSSink`.
 | backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
-| hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
+| hdfs_username | yes | N/A | An already existent user in HDFS. |
 | hdfs_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
