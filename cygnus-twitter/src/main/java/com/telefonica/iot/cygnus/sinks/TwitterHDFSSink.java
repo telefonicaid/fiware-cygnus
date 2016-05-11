@@ -367,7 +367,7 @@ public class TwitterHDFSSink extends TwitterSink {
         String hdfsFile = aggregator.getFile(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at TwitterHDFSSink. HDFS file ("
-                + hdfsFile + "), Data (" + aggregation + ")");
+                + hdfsFile + ")");
 
         if (persistenceBackend.exists(hdfsFile)) {
             persistenceBackend.append(hdfsFile, aggregation);
