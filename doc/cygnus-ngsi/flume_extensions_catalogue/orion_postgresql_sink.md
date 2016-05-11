@@ -14,8 +14,7 @@ Content:
         * [About batching](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSIPostgreSQLSink` class](#section3.1)
-    * [`PostgreSQLBackendImpl` class](#section3.2)
-    * [Authentication and authorization](#section3.3)
+    * [Authentication and authorization](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -232,26 +231,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`PostgreSQLBackendImpl` class
-This is a convenience backend class for PostgreSQL that implements the `PostgreSQLBackend` interface (provides the methods that any PostgreSQL backend must implement). Relevant methods are:
-
-    public void createSchema(String schemaName) throws Exception;
-
-Creates a database, given its name, if not existing.
-
-    public void createTable(String schemaName, String tableName, String fieldNames) throws Exception;
-
-Creates a table, given its name, if not existing within the given database. The field names are given as well.
-
-    void insertContextData(String schemaName, String tableName, String fieldNames, String fieldValues) throws Exception;
-
-Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
-
-It must be said this backend implementation enforces UTF-8 encoding through the usage of `charSet=UTF-8` property when getting a connection via the JDBC driver.
-
-[Top](#top)
-
-###<a name="section3.3"></a>Authentication and authorization
+###<a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
 
 [Top](#top)

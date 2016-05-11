@@ -12,7 +12,6 @@ Content:
         * [About batching](#section2.3.1)
 * [Programmers guide](#section3)
     * [`NGSIKafkaSink` class](#section3.1)
-    * [`KafkaProducer` class (backend)](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIKafkaSink`, or simply `NGSIKafkaSink` is a sink designed to persist NGSI-like context data events within a [Apache Kafka](http://kafka.apache.org/) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -173,16 +172,5 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
     public void configure(Context);
 
 A complete configuration as the one described above is read from the given `Context` instance.
-
-[Top](#top)
-
-###<a name="section3.2"></a>`KafkaProducer` class (backend)
-The implementation of a class dealing with the details of the backend is given by Kafka itself through the [`KafkaProducer`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html) class. Thus, the sink has been developed by invoking the methods within that class, specially:
-
-    public send(ProducerRecord<K,V>);
-
-Which sends a [`ProducerRecord`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html) object to the configured topic.
-
-Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the topics. It will responsability of the Kafka consumer to convert the bytes read into UTF-8.
 
 [Top](#top)

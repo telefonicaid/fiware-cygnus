@@ -25,6 +25,18 @@ pages:
           - 'Sanity checks': 'cygnus-common/installation_and_administration_guide/sanity_checks.md'
           - 'Diagnosis procedures': 'cygnus-common/installation_and_administration_guide/diagnosis_procedures.md'
           - 'Reporting issues and contact information': 'cygnus-common/installation_and_administration_guide/issues_and_contact.md'
+      - 'Backends catalogue':
+          - 'Introduction': 'cygnus-common/backends_catalogue/introduction.md'
+          - 'CKAN backend': 'cygnus-common/backends_catalogue/ckan_backend.md'
+          - 'DynamoDB backend': 'cygnus-common/backends_catalogue/dynamodb_backend.md'
+          - 'HDFS backend': 'cygnus-common/backends_catalogue/hdfs_backend.md'
+          - 'Hive backend': 'cygnus-common/backends_catalogue/hive_backend.md'
+          - 'Http backend': 'cygnus-common/backends_catalogue/http_backend.md'
+          - 'Kafka backend': 'cygnus-common/backends_catalogue/kafka_backend.md'
+          - 'MongoDB backend': 'cygnus-common/backends_catalogue/mongodb_backend.md'
+          - 'MySQL backend': 'cygnus-common/backends_catalogue/mysql_backend.md'
+          - 'Orion backend': 'cygnus-common/backends_catalogue/orion_backend.md'
+          - 'PostgreSQL backend': 'cygnus-common/backends_catalogue/postgresql_backend.md'
   - 'cygnus-ngsi agent':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
