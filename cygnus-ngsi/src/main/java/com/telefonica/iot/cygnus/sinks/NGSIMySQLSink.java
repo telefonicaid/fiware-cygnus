@@ -37,7 +37,7 @@ import org.apache.flume.Context;
  * @author frb
  * 
  * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_mysql_sink.md
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_mysql_sink.md
  */
 public class NGSIMySQLSink extends NGSISink {
     

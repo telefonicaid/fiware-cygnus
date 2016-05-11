@@ -45,7 +45,7 @@ import org.json.simple.parser.JSONParser;
  * @author frb
  *
  * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_hdfs_sink.md
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_hdfs_sink.md
  */
 public class NGSIHDFSSink extends NGSISink {
 

@@ -3,16 +3,16 @@
 * [Introduction](./introduction.md)
 * [Naming conventions](./naming_conventions.md)
 * Http source handlers
-    * [NGSIRestHandler](./orion_rest_handler.md)
+    * [NGSIRestHandler](./ngsi_rest_handler.md)
 * Sinks
-    * [NGSICKANSink](./orion_ckan_sink.md)
-    * [NGSIDynamoDBSink](./orion_dynamodb_sink.md)
-    * [NGSIKafkaSink](./orion_kafka_sink.md)
-    * [NGSIHDFSSink](./orion_hdfs_sink.md)
-    * [NGSIMongoSink](./orion_mongo_sink.md)
-    * [NGSIMySQLSink](./orion_mysql_sink.md)
-    * [NGSISTHSink](./orion_sth_sink.md)
-    * [NGSITestSink](./orion_test_sink.md)
+    * [NGSICKANSink](./ngsi_ckan_sink.md)
+    * [NGSIDynamoDBSink](./ngsi_dynamodb_sink.md)
+    * [NGSIKafkaSink](./ngsi_kafka_sink.md)
+    * [NGSIHDFSSink](./ngsi_hdfs_sink.md)
+    * [NGSIMongoSink](./ngsi_mongo_sink.md)
+    * [NGSIMySQLSink](./ngsi_mysql_sink.md)
+    * [NGSISTHSink](./ngsi_sth_sink.md)
+    * [NGSITestSink](./ngsi_test_sink.md)
 * Interceptors
     * [GroupingInterceptor](./grouping_interceptor.md)
 * Channel selectors

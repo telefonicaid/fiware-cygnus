@@ -2,7 +2,7 @@
 ##`HDFSBackend` interface
 This class enumerates the methods any [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) backend implementation must expose. In this case, the following ones:
 
-   void createDir(String dirPath) throws Exception;
+    void createDir(String dirPath) throws Exception;
 
 > Creates a HDFS directory, given its path.
 
