@@ -362,7 +362,7 @@ public class TwitterHDFSSink extends TwitterSink {
     } // JSONRowAggregator
 
     private void persistAggregation(HDFSAggregator aggregator) throws Exception {
-        String aggregation = aggregator.getAggregation();
+        String aggregation = aggregator.getAggregation().trim();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
 
