@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.json.DataObjectFactory;
 
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
@@ -122,7 +121,6 @@ public class TwitterSource extends AbstractSource
         String north_east_longitude;
 
         String keywords;
-
 
         //Top-left coordinate
         south_west_latitude = context.getString("south_west_latitude");
@@ -289,7 +287,7 @@ public class TwitterSource extends AbstractSource
             LOGGER.info("geolocation: null");
         }
 
-        String jsonTweet = DataObjectFactory.getRawJSON(status);
+        String jsonTweet = TwitterObjectFactory.getRawJSON(status);
         totalTextIndexed += jsonTweet.length();
 
         return jsonTweet;
