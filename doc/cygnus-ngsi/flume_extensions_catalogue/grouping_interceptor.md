@@ -105,7 +105,7 @@ The grouping rules file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there
 The usage of such an Interceptor is:
 
     cygnusagent.sources.http-source.interceptors = gi <other-interceptors>
-    cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+    cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
     cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = [FLUME_HOME_DIR]/conf/grouping_rules.conf
 
 It is <b>very important</b> to configure the <b>absolute path to the grouping rules file</b>.
