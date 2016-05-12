@@ -11,7 +11,7 @@ Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly co
 
     $ sudo service cygnus stop
 
-Previous commands afefcts to **all** of Cygnus instances configured. If only one instance is wanted to be managed by the service script then the instance identifier after the action must be specified:
+Previous commands afects to **all** of Cygnus instances configured. If only one instance is wanted to be managed by the service script then the instance identifier after the action must be specified:
 
     $ sudo service cygnus status <id>
 
