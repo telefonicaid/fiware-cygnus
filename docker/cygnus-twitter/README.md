@@ -43,7 +43,7 @@ centos              6                   61bf77ab8841        4 weeks ago         
 [Top](#top)
 
 ###<a name="section2.2"></a>Using docker hub image
-Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus):
+Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus-twitter):
 
     $ docker pull fiware/cygnus-twitter
     
@@ -60,16 +60,16 @@ centos              6                   61bf77ab8841        4 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hu.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persiting them into a MySQL database running at `mysql` host.
+The cygnus-twitter image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving tweets from Twitter and persiting them into a HDFS storage.
 
 Start a container for this image by typing in a terminal:
 
     $ docker run cygnus-twitter
     
-Immediatelly after, you will start seeing cygnus-ngsi logging traces:
+Immediatelly after, you will start seeing cygnus-twitter logging traces:
 
 ```
-+ exec /usr/lib/jvm/java-1.6.0/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/opt/apache-flume/conf:/opt/apache-flume/lib/*:/opt/apache-flume/plugins.d/cygnus/lib/*:/opt/apache-flume/plugins.d/cygnus/libext/*' -Djava.library.path= com.telefonica.iot.cygnus.nodes.CygnusApplication -f /opt/apache-flume/conf/agent.conf -n cygnus-ngsi
++ exec /usr/lib/jvm/java-1.6.0/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/opt/apache-flume/conf:/opt/apache-flume/lib/*:/opt/apache-flume/plugins.d/cygnus/lib/*:/opt/apache-flume/plugins.d/cygnus/libext/*' -Djava.library.path= com.telefonica.iot.cygnus.nodes.CygnusApplication -f /opt/apache-flume/conf/agent.conf -n cygnus-twitter
 SLF4J: Class path contains multiple SLF4J bindings.
 SLF4J: Found binding in [jar:file:/opt/apache-flume/lib/slf4j-log4j12-1.6.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
 SLF4J: Found binding in [jar:file:/opt/apache-flume/plugins.d/cygnus/lib/cygnus-twitter-0.1.0_SNAPSHOT-jar-with-dependencies.jar!/org/slf4j/impl/StaticLoggerBinder.class]
@@ -78,7 +78,7 @@ SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 time=2016-05-05T09:57:55.150UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp= | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[166] : Starting Cygnus, version 0.13.0_SNAPSHOT.5200773899b468930e82df4a0b34d44fd4632893
 ...
 ...
-time=2016-05-05T09:57:56.287UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
+time=2016-05-05T09:57:56.287UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-twitter | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
 ```
     
 You can check the running container (in a second terminal shell):

@@ -1,9 +1,4 @@
-#<a name="top"></a>Cygnus-twitter
-[![License badge](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![Documentation badge](https://readthedocs.org/projects/fiware-cygnus/badge/?version=latest)](http://fiware-cygnus.readthedocs.org/en/latest/?badge=latest)
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus/)
-[![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
-[![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
+# <a name="top"></a>Cygnus-twitter
 
 * [Welcome to Cygnus-twitter](#section1)
 * [Basic operation](#section2)
@@ -26,8 +21,6 @@ Current stable release is able to persist Twitter data in:
 
 * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
-You may consider to visit [Cygnus-twitter User and Programmer Guide](doc/cygnus-twitter/user_and_programmer_guide/README.md) before going deep into the details.
-
 [Top](#top)
 
 ##<a name="section2"></a>Basic operation
@@ -36,7 +29,6 @@ You may consider to visit [Cygnus-twitter User and Programmer Guide](doc/cygnus-
 * HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
 [Top](#top)
-
 
 ###<a name="section2.3"></a>Configuration
 Cygnus-twitter is a tool with a high degree of configuration required for properly running it.
@@ -54,43 +46,39 @@ Attending to the above architecture, the content of `/usr/cygnus/conf/cygnus_1.c
 * The source:
 `cygnus-twitter.sources.http-source.type = org.telefonica.iot.cygnus.sources.TwitterSource`
 
-* The keyworks (hashtags) that are used in the twitter query to filter tweets with an specific keyword(s):
-        
+* The keyworks (hashtags) that are used in the twitter query to filter tweets with an specific keyword(s):     
 `cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3`
 
 * The coordinates to specify the spatial area where the source will collect geo-located tweets. The coordinates will be used in the twitter query:
-
 ```
-        cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
-        cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
-        cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
-        cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
+cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
+cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
+cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
+cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
 ```
 
-These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
-
-```
+    These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
+    ```
                      -------------- north-east
                     |                  |
                     |                  |
                     |                  |
                south-west ------------   
         
-```
+    ```
 
  * The credentials used to connect with Twitter API:
-
 ```
-        cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxx
-        cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxx
-        cygnus-twitter.sources.twitter-source.accessToken = xxxxxxx
-        cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxx
+cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxx
+cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxx
+cygnus-twitter.sources.twitter-source.accessToken = xxxxxxx
+cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxx
 ```
 
 * Parameters associated to the sinks. Currently, for the `cygnus-twitter` agent, the only sink defined is the `HDFS sink`. The `HDFS sink` parameters that appear in the configuration file and are directly related to `twitter-agent` are:
-`hdfs_folder`: to declare the folder where the tweets file will be created.
-`hdfs_file`: to declare the file where tweets will be stored inside the `hdfs_folder`
-
+    * `hdfs_folder`: to declare the folder where the tweets file will be created.
+    * `hdfs_file`: to declare the file where tweets will be stored inside the `hdfs_folder`
+    
 ```
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
@@ -124,7 +112,6 @@ cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxxx
 cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessToken = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxxx
-
 # ============================================
 # OrionHDFSSink configuration
 # channel name from where to read notification events
@@ -180,7 +167,6 @@ cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file (ignored if krb5_auth is false)
 cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
-
 #=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
@@ -193,7 +179,7 @@ cygnus-twitter.channels.hdfs-channel.transactionCapacity = 100
 
 Check the [User and Programmer Guide](./doc/user_and_programmer_guide/introduction.md) for configurations involving real data storages such as HDFS.
 
-
+[Top](#top)
 
 ###<a name="section2.5"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
@@ -203,8 +189,6 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
     $ mvn test
 
 [Top](#top)
-
-
 
 ###<a name="section2.7"></a>Management API overview
 Run the following `curl` in order to get the version (assuming Cygnus runs on `localhost`):
@@ -265,19 +249,18 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-
 ##<a name="section5"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
-  <tr><td rowspan="7">TwitterHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
-  <tr><td>Multiple HDFS endpoint setup</td><td>0.1.0</td></tr>
-  <tr><td>Kerberos support</td><td>0.1.0</td></tr>
-  <tr><td>OAuth2 support</td><td>0.1.0</td></tr>
-  <tr><td>enable/disable Hive</td><td>0.1.0</td></tr>
-  <tr><td>HDFSBackendImplBinary</td><td>0.1.0</td></tr>
-  <tr><td>Batching mechanism</td><td>0.1.0</td></tr>
-  <tr><td rowspan="2">All sinks</td><td>enable/disable forced lower case</td><td>0.1.0</td></tr>
-  <tr><td>Per batch TTL</td><td>0.1.0</td></tr>
+  <tr><td rowspan="7">TwitterHDFSSink</td><td>First implementation</td><td>1.1.0</td></tr>
+  <tr><td>Multiple HDFS endpoint setup</td><td>1.1.0</td></tr>
+  <tr><td>Kerberos support</td><td>1.1.0</td></tr>
+  <tr><td>OAuth2 support</td><td>1.1.0</td></tr>
+  <tr><td>enable/disable Hive</td><td>1.1.0</td></tr>
+  <tr><td>HDFSBackendImplBinary</td><td>1.1.0</td></tr>
+  <tr><td>Batching mechanism</td><td>1.1.0</td></tr>
+  <tr><td rowspan="2">All sinks</td><td>enable/disable forced lower case</td><td>1.1.0</td></tr>
+  <tr><td>Per batch TTL</td><td>1.1.0</td></tr>
 </table>
 
 [Top](#top)
