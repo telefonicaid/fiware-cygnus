@@ -18,13 +18,12 @@
 
 FROM centos:6
 
-MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
+MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
 ENV CYGNUS_VERSION "1.0.0_SNAPSHOT"
-ENV CYGNUS_TWITTER_VERSION "0.1.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"
@@ -75,7 +74,7 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     # Build and install cygnus-twitter
     cd ${CYGNUS_HOME}/cygnus-twitter && \
     ${MVN_HOME}/bin/mvn clean compile exec:exec assembly:single && \
-    cp target/cygnus-twitter-${CYGNUS_TWITTER_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
+    cp target/cygnus-twitter-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
     # Install Cygnus Application script
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
