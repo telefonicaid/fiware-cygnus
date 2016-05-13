@@ -5,7 +5,7 @@
 
     <groupId>com.telefonica.iot</groupId>
     <artifactId>cygnus-twitter</artifactId>
-    <version>0.1.0_SNAPSHOT</version>
+    <version>1.0.0_SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cygnus-twitter</name>
@@ -34,98 +34,12 @@
             <groupId>org.apache.flume</groupId>
             <artifactId>flume-ng-node</artifactId>
             <version>1.4.0</version>
-        </dependency>    
-        <!-- Required in order to overwrite the versions bundled in Apache Flume -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libthrift</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-        <!-- Required by the ManagementInterface -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <!-- Required by the Management Interface and CygnusGropuingRule(s) -->
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <!-- Required by MySQLBackendImpl at runtime -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.31</version>
-        </dependency>
-        <!-- Required by PostgreSQLBackendImpl at runtime -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.4-1202-jdbc41</version>
-            <type>jar</type>
         </dependency>
         <!-- Required for logging -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
-        </dependency>
-        <!-- Required by HDFSBackendImplBinary -->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>1.2.1</version>
-        </dependency>
-        <!-- Required by HiveBackendImpl at runtime -->
-        <dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-exec</artifactId>
-            <version>0.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-jdbc</artifactId>
-            <version>0.13.0</version>
-        </dependency>
-        <!-- Required by MongoBackendImpl -->
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <!-- Required by KafkaBackendImpl -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>0.8.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.101tec</groupId>
-            <artifactId>zkclient</artifactId>
-            <version>0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
-            <version>0.8.2.1</version>
-        </dependency>
-        <!-- Required by DynamoDBBackendImpl -->
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.10.32</version>
         </dependency>
         <!-- Required by any agent -->
         <dependency>
