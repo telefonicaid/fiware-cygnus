@@ -40,14 +40,17 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to CartoDB data structures
-CartoDB is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (una per project within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a Flume event is going to be persisted.
+CartoDB is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (one per user within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a Flume event is going to be persisted.
 
 [Top](#top)
 
 ####<a name="section1.2.1"></a>PostgreSQL databases and schemas naming conventions
-PostgreSQL databases and schemas are already created by CartoDB upon organization and project request, respectively. Thus, it is up to CartoDB to define the naming conventions for these elements.
+PostgreSQL databases and schemas are already created by CartoDB upon organization and username request, respectively. Thus, it is up to CartoDB to define the naming conventions for these elements; specifically:
 
-Here it is asseumed the notified/default FIWARE service maps the PostgreSQL schema/project name.
+* Organization must... ?
+* Username must only contain lowercase letters, numbers and the dash symbol (`-`).
+
+Here it is assumed the notified/default FIWARE service maps the PostgreSQL schema/username, ensuring this way multitenancy and data isolation. This multitenancy approach is complemented by the usage of a configuration file holding the mapping between FIWARE service/CartoDB username and API Key (please, check the [Configuration](#section2.1) section).
 
 [Top](#top)
 
@@ -55,8 +58,8 @@ Here it is asseumed the notified/default FIWARE service maps the PostgreSQL sche
 The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation charated is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity and entity's attribute, the notified/default FIWARE service path, the notified entityId and entityType, and the attribute name and type are concatenated in order to compose the table name. The concatenation charated is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity and entity's attribute, the notified/default FIWARE service path, the notified entityId and entityType, and the attribute name and type are concatenated in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
 It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
 
@@ -174,7 +177,7 @@ The PostgreSQL table names will be, depending on the configured data model, the 
 Let's assume a table name `4wheels_car1_car` (data model by entity, non-root service path). The data stored within this table would be:
 
 ```
-curl "https://myproject.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -237,7 +240,7 @@ curl "https://myproject.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&
 Let's assume a table name `4wheels_car1_car` (data model by entity, non-root service path) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
 
 ```
-curl "https://myproject.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -380,8 +383,7 @@ curl "https://myproject.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
-| endpoint | yes | N/A | URL format: `http(s)://<project>.cartodb.com` |
-| api\_key | yes | N/A ||
+| keys_conf_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys. |
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
 | enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
@@ -398,8 +400,8 @@ cygnus-ngsi.channels = cartodb-channel
 cygnus-ngsi.sinks.raw-sink.channel = cartodb-channel
 cygnus-ngsi.sinks.raw-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
 cygnus-ngsi.sinks.raw-sink.enable_grouping = false
-cygnus-ngsi.sinks.raw-sink.endpoint = https://myproject.cartodb.com
-cygnus-ngsi.sinks.raw-sink.api_key = abcdef0123456789
+cygnus-ngsi.sinks.raw-sink.enable_lowercase = false
+cygnus-ngsi.sinks.raw-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
 cygnus-ngsi.sinks.raw-sink.flip_coordinates = true
 cygnus-ngsi.sinks.raw-sink.enable_raw = true
 cygnus-ngsi.sinks.raw-sink.enable_distance = false
@@ -450,6 +452,6 @@ Coming soon.
 [Top](#top)
 
 ###<a name="section3.2"></a>Authentication and authorization
-Authentication is done by means of a API key related to the project. Once authenticated, the client is only allowed to create, read, update and delete PostgreSQL tables in the project space (PostgreSQL schema) within the organization (PostgreSQL database).
+Authentication is done by means of an API key related to the username. Once authenticated, the client is only allowed to create, read, update and delete PostgreSQL tables in the user space (PostgreSQL schema) within the organization (PostgreSQL database).
 
 [Top](#top)
