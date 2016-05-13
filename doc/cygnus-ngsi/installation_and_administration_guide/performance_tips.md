@@ -16,7 +16,7 @@ Content:
 ##<a name="section1"></a>Batching
 <i>NOTE: The batching mechanism is currently only available for `NGSIHDFSSink` and `NGSIMySQLSink`.</i>
 
-Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`,  the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
+Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`, the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
 
@@ -24,7 +24,7 @@ Obviously, not all the events will always regard to the same unique entity, and 
 
 Nevertheless, a couple of risks arise when using batches:
 
-* The first one is the last batch may never get built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be preocessed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+* The first one is the last batch may never get built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be processed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 * The second one is the data within the batch may be lost if Cygnus crashes or it is stopped while accumulating it. Please observe until the batch size (or the timeout) is reached the data within the batch is not persisted and it exists nowhere in the data workflow (the NGSI source -typically Orion Context Broker- most probably will not have a copy of the data anymore once it has been notified). There is an under study [issue](https://github.com/telefonicaid/fiware-cygnus/issues/566) regarding this.
 
 By default, all the sinks have a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. These are the parameters all the sinks have for these purpose:
@@ -39,19 +39,19 @@ Nevertheless, as explained above, it is highly recommended to increase at least 
 ##<a name="section2"></a>Sink parallelization
 Most of the processing effort done by Cygnus is located at the sinks, and these elements can be a bottleneck if not configured appropriately.
 
-Basic Cygnus configuration is about a source writting Flume events into a single channel where a single sink consumes those events:
+Basic Cygnus configuration is about a source writing Flume events into a single channel where a single sink consumes those events:
 
     cygnusagent.sources = mysource
     cygnusagent.sinks = mysink
     cygnusagent.channels = mychannel
-    
+
     cygnusagent.sources.mysource.type = ...
     cygnusagent.sources.mysource.channels = mychannel
     ... other source configurations...
 
     cygnusagent.channels.mychannel.type = ...
     ... other channel configurations...
-    
+
     cygnusagent.sinks.mysink.type = ...
     cygnusagent.sinks.mysink.channel = mychannel
     ... other sink configurations...
@@ -66,18 +66,18 @@ You can simply add more sinks consuming events from the same single channel. Thi
     cygnusagent.sources = mysource
     cygnusagent.sinks = mysink1 mysink2 mysink3 ...
     cygnusagent.channels = mychannel
-    
+
     cygnusagent.sources.mysource.type = ...
     cygnusagent.sources.mysource.channels = mychannel
     ... other source configurations...
 
     cygnusagent.channels.mychannel.type = ...
     ... other channel configurations...
-    
+
     cygnusagent.sinks.mysink1.type = ...
     cygnusagent.sinks.mysink1.channel = mychannel
     ... other sink configurations...
-    
+
     cygnusagent.sinks.mysink2.type = ...
     cygnusagent.sinks.mysink2.channel = mychannel
     ... other sink configurations...
@@ -87,7 +87,7 @@ You can simply add more sinks consuming events from the same single channel. Thi
     ... other sink configurations...
 
     ... other sinks configurations...
-    
+
 [Top](#top)
 
 ###<a name="section2.2"></a>Multiple sinks, multiple channels
@@ -104,7 +104,7 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
     cygnusagent.sources = mysource
     cygnusagent.sinks = mysink1 mysink2 mysink3
     cygnusagent.channels = mychannel1 mychannel2 mychannel3
-    
+
     cygnusagent.sources.mysource.type = ...
     cygnusagent.sources.mysource.channels = mychannel1 mychannel2 mychannel3 ...
     cygnusagent.sources.mysource.selector.type = com.telefonica.iot.cygnus.channelselectors.RoundRobinChannelSelector
@@ -122,11 +122,11 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
 
     cygnusagent.channels.mychannel3.type = ...
     ... other channel configurations...
-    
+
     cygnusagent.sinks.mysink1.type = ...
     cygnusagent.sinks.mysink1.channel = mychannel1
     ... other sink configurations...
-    
+
     cygnusagent.sinks.mysink2.type = ...
     cygnusagent.sinks.mysink2.channel = mychannel2
     ... other sink configurations...
@@ -145,15 +145,15 @@ Basically, the custom <i>Channel Selector</i> type must be configured, together 
 [Top](#top)
 
 ###<a name="section2.3"></a>Why the `LoadBalancingSinkProcessor` is not suitable
-[This](http://flume.apache.org/FlumeUserGuide.html#load-balancing-sink-processor) Flume <i>Sink Processor</i> is not suitable for our parallelization purposes due to the load balancing is done in a sequential way. I.e. either in a round robin-like configuration of the load balancer either in a ramdom way, the sinks are used one by one and not at the same time.
+[This](http://flume.apache.org/FlumeUserGuide.html#load-balancing-sink-processor) Flume <i>Sink Processor</i> is not suitable for our parallelization purposes due to the load balancing is done in a sequential way. I.e. either in a round robin-like configuration of the load balancer either in a random way, the sinks are used one by one and not at the same time.
 
 [Top](#top)
 
 ##<a name="section3"></a>Channel considerations
 ###<a name="section3.1"></a>Channel type
-The most important thing when designing a channel for Cygnus (in general, a Flume-based application) is the tradeoff between speed and reliability. This applies especialy to the channels.
+The most important thing when designing a channel for Cygnus (in general, a Flume-based application) is the tradeoff between speed and reliability. This applies especially to the channels.
 
-On the one hand, the `MemoryChannel` is a very fast channel since it is implemented directly in memory, but it is not reliable at all if, for instance, Cygnus crashes for any reason and it is recovered by a third party system (let's say <i>Monit</i>): in that case the Flume events put into the memory-based channel before the crash are lost. On the other hand, the `FileChannel` and `JDBCChannel` are very reliable since there is a permanent support for the data in terms of OS files or RDBM tables, respectively. Nevertheless, they are slower than a `MemoryChannel` sice the I/O is done against the HDD and not against the memory.
+On the one hand, the `MemoryChannel` is a very fast channel since it is implemented directly in memory, but it is not reliable at all if, for instance, Cygnus crashes for any reason and it is recovered by a third party system (let's say <i>Monit</i>): in that case the Flume events put into the memory-based channel before the crash are lost. On the other hand, the `FileChannel` and `JDBCChannel` are very reliable since there is a permanent support for the data in terms of OS files or RDBM tables, respectively. Nevertheless, they are slower than a `MemoryChannel` since the I/O is done against the HDD and not against the memory.
 
 [Top](#top)
 
@@ -162,7 +162,7 @@ There are no empirical tests showing a decrease of the performance if the channe
 
 Such large capacities are only required when the Flume sources are faster than the Flume sinks (and even in that case, sooner or later, the channels will get full) or a lot of processing retries are expected within the sinks (see next section).
 
-In order to calculate the appropiate capacity, just have in consideration the following parameters:
+In order to calculate the appropriate capacity, just have in consideration the following parameters:
 
 * The amount of events to be put into the channel by the sources per unit time (let's say 1 minute).
 * The amount of events to be gotten from the channel by the sinks per unit time.
@@ -171,7 +171,7 @@ In order to calculate the appropiate capacity, just have in consideration the fo
 [Top](#top)
 
 ##<a name="section4"></a>Events TTL
-Every Flume event managed by Cygnus has associated a <i>Time-To-Live</i> (TTL), a number specifying how many times that event can be reinjected in the channel the sink got it from. Events are reinjected when a processing error occurs (for instance, the persistence system is not available, there has been a communication breakdown, etc.). This TTL has to be configured very carefully since large TTLs may lead to a quick channel capacity exhaustion, and once reached that capacity new events cannot be put into the channel. In addition, the more large is the TTL, the more will decrease the performance of the Cygnus instance since both new fresh events will have to coexist with old not processed events in the queue. 
+Every Flume event managed by Cygnus has associated a <i>Time-To-Live</i> (TTL), a number specifying how many times that event can be reinjected in the channel the sink got it from. Events are reinjected when a processing error occurs (for instance, the persistence system is not available, there has been a communication breakdown, etc.). This TTL has to be configured very carefully since large TTLs may lead to a quick channel capacity exhaustion, and once reached that capacity new events cannot be put into the channel. In addition, the more large is the TTL, the more will decrease the performance of the Cygnus instance since both new fresh events will have to coexist with old not processed events in the queue.
 
 If you don't care about not processed events, you may configure a 0 TTL, obtaining the maximum performance regarding this aspect.
 
@@ -180,21 +180,20 @@ If you don't care about not processed events, you may configure a 0 TTL, obtaini
 ##<a name="section5"></a>Grouping rules
 The grouping rules feature is a powerful tool for <i>routing</i> your data, i.e. deciding the right destination (HDFS file, MySQL table, CKAN resource) for your context data; on the contrary, the default destination is used, i.e. the concatenation of the entity identifier and the entity type.
 
-As you may suppose, the usage of the grouping rules is slower than using the default. This is because the destination is decided after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many groupin rules as you want/need.
+As you may suppose, the usage of the grouping rules is slower than using the default. This is because the destination is decided after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many grouping rules as you want/need.
 
 Nevertheless, you may write your grouping rules in a smart way:
 
 * Place the most probably grouping rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
-* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belog to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
+* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
 [Top](#top)
 
 ##<a name="section6"></a>Writing logs
-Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debuging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level. Logs are totaly disabled by using the `OFF` level.
+Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debugging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level. Logs are totally disabled by using the `OFF` level.
 
-Logging level Cygnus run with is configured in `/usr/cugnus/conf/log4.properties`. `INFO` is configured by dafault:
+Logging level Cygnus run with is configured in `/usr/cygnus/conf/log4j.properties`. `INFO` is configured by default:
 
      flume.root.logger=INFO,LOGFILE
 
 [Top](#top)
-

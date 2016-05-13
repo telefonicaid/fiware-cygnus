@@ -334,7 +334,7 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 [Top](#top)
 
 ####`conf/cygnus.conf`
-This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
+This file can be built from the distributed `conf/cygnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
     cygnusagent.sinks.hdfs-sink.krb5_auth = true
