@@ -30,7 +30,7 @@ ENV CYGNUS_AGENT_NAME "cygnus-twitter"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 
-ENV GIT_URL_CYGNUS "https://github.com/javipalanca/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "develop"
 
 ENV MVN_VER "3.2.5"
@@ -45,7 +45,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 
-# Add Cyugnus user
+# Add Cygnus user
 RUN adduser ${CYGNUS_USER}
 
 # Install
@@ -80,7 +80,6 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
     # Instantiate some configuration files
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
-    #cp ${CYGNUS_HOME}/cygnus-twitter/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
     # Create Cygnus log folder
     mkdir /var/log/cygnus && \
     # Cleanup to thin the final image
