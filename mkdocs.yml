@@ -37,6 +37,7 @@ pages:
           - 'MySQL backend': 'cygnus-common/backends_catalogue/mysql_backend.md'
           - 'Orion backend': 'cygnus-common/backends_catalogue/orion_backend.md'
           - 'PostgreSQL backend': 'cygnus-common/backends_catalogue/postgresql_backend.md'
+          - 'CartoDB backend': 'cygnus-common/backends_catalogue/cartodb_backend.md'
   - 'cygnus-ngsi agent':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
