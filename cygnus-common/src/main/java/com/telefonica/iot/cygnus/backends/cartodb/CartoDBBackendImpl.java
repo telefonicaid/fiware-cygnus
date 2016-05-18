@@ -60,8 +60,8 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
         
         JSONArray rows = (JSONArray) response.getJsonObject().get("rows");
         JSONObject countRow = (JSONObject) rows.get(0);
-        String count = (String) countRow.get("count");
-        return count.equals("0");
+        Long count = (Long) countRow.get("count");
+        return (count == 0);
     } // isEmpty
 
     @Override
