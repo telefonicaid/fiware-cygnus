@@ -33,11 +33,12 @@ public interface CartoDBBackend {
     
     /**
      * Creates a table with the given name.
+     * @param schema
      * @param tableName
      * @param fields
      * @throws Exception
      */
-    void createTable(String tableName, String fields) throws Exception;
+    void createTable(String schema, String tableName, String fields) throws Exception;
     
     /**
      * Inserts the given rows regarding the given fields in the given table; withs are prefixed to the query.

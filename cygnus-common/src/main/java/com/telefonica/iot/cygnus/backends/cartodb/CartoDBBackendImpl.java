@@ -65,13 +65,24 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     } // isEmpty
 
     @Override
-    public void createTable(String tableName, String fields) throws Exception {
+    public void createTable(String schema, String tableName, String fields) throws Exception {
+        // Create the table
         String query = "CREATE TABLE " + tableName + " " + fields;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);
 
-        // check the status
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
+        } // if
+        
+        // CartoDBfy the table
+        query = "SELECT cdb_cartodbfytable('" + schema + "', '" + tableName + "')";
+        encodedQuery = URLEncoder.encode(query, "UTF-8");
+        relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
+        response = doRequest("GET", relativeURL, true, null, null);
+
         if (response.getStatusCode() != 200) {
             throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
