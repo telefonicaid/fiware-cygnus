@@ -484,7 +484,7 @@ public class NGSICartoDBSink extends NGSISink {
                             + "sumTime float, sumSpeed float, sum2Distance float, sum2Time float, sum2Speed float, "
                             + "maxDistance float, minDistance float, maxTime float, minTime float, maxSpeed float, "
                             + "minSpeed float, numSamples bigint)";
-                    backend.createTable(tableName, typedFields);
+                    backend.createTable(schema, tableName, typedFields);
                 } catch (Exception e) {
                     String withs = "";
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
