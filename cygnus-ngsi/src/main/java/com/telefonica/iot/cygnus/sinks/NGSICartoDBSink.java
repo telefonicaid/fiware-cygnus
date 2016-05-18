@@ -475,8 +475,8 @@ public class NGSICartoDBSink extends NGSISink {
                     + "_distance";
 
             if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
-                // Create the table... the cost of checking if it exists and creating it is higher than directly
-                // attempting to create it. If existing, nothing will be re-created
+                // Try creating the table... the cost of checking if it exists and creating it is higher than directly
+                // attempting to create it. If existing, nothing will be re-created and the new values will be inserted
                 
                 try {
                     String typedFields = "(recvTimeMs bigint, fiwareServicePath text, entityId text, entityType text, "
@@ -485,7 +485,8 @@ public class NGSICartoDBSink extends NGSISink {
                             + "maxDistance float, minDistance float, maxTime float, minTime float, maxSpeed float, "
                             + "minSpeed float, numSamples bigint)";
                     backend.createTable(schema, tableName, typedFields);
-                } catch (Exception e) {
+                    
+                    // Once created, insert the first row
                     String withs = "";
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
@@ -495,82 +496,81 @@ public class NGSICartoDBSink extends NGSISink {
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backend.insert(tableName, withs, fields, rows);
-                    continue;
+                } catch (Exception e) {
+                    String withs = ""
+                            + "WITH geom AS ("
+                            + "   SELECT " + location + " AS point"
+                            + "), calcs AS ("
+                            + "   SELECT"
+                            + "      cartodb_id,"
+                            + "      ST_Distance(the_geom::geography, geom.point::geography) AS stage_distance,"
+                            + "      (" + recvTimeMs + " - recvTimeMs) AS stage_time"
+                            + "   FROM " + tableName + ", geom"
+                            + "   ORDER BY cartodb_id DESC"
+                            + "   LIMIT 1"
+                            + "), speed AS ("
+                            + "   SELECT"
+                            + "      (calcs.stage_distance / NULLIF(calcs.stage_time, 0)) AS stage_speed"
+                            + "   FROM calcs"
+                            + "), inserts AS ("
+                            + "   SELECT"
+                            + "      (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) AS sum_dist,"
+                            + "      (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) AS sum_time,"
+                            + "      (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) AS sum_speed,"
+                            + "      (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) "
+                            + "          * (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) AS sum2_dist,"
+                            + "      (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) "
+                            + "          * (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) AS sum2_time,"
+                            + "      (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) "
+                            + "          * (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) AS sum2_speed,"
+                            + "      t1.max_distance,"
+                            + "      t1.min_distance,"
+                            + "      t1.max_time,"
+                            + "      t1.min_time,"
+                            + "      t1.max_speed,"
+                            + "      t1.min_speed,"
+                            + "      t2.num_samples"
+                            + "   FROM"
+                            + "      ("
+                            + "         SELECT"
+                            + "            GREATEST(calcs.stage_distance, maxDistance) AS max_distance,"
+                            + "            LEAST(calcs.stage_distance, minDistance) AS min_distance,"
+                            + "            GREATEST(calcs.stage_time, maxTime) AS max_time,"
+                            + "            LEAST(calcs.stage_time, minTime) AS min_time,"
+                            + "            GREATEST(speed.stage_speed, maxSpeed) AS max_speed,"
+                            + "            LEAST(speed.stage_speed, minSpeed) AS min_speed,"
+                            + "            sumDistance,"
+                            + "            sumTime,"
+                            + "            sumSpeed"
+                            + "         FROM " + tableName + ", speed, calcs"
+                            + "         ORDER BY " + tableName + ".cartodb_id DESC"
+                            + "         LIMIT 1"
+                            + "      ) AS t1,"
+                            + "      ("
+                            + "         SELECT (-1 * ((-1 * COUNT(*)) - 1)) AS num_samples"
+                            + "         FROM " + tableName
+                            + "      ) AS t2,"
+                            + "      speed,"
+                            + "      calcs"
+                            + ")";
+                    String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
+                            + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
+                            + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
+                    String rows = "(" + recvTimeMs + ",'" + event.getServicePath() + "','" + event.getEntity() + "','"
+                            + event.getEntity() + "',"
+                            + "(SELECT point FROM geom),(SELECT stage_distance FROM calcs),"
+                            + "(SELECT stage_time FROM calcs),(SELECT stage_speed FROM speed),"
+                            + "(SELECT sum_dist FROM inserts),(SELECT sum_time FROM inserts),"
+                            + "(SELECT sum_speed FROM inserts),(SELECT sum2_dist FROM inserts),"
+                            + "(SELECT sum2_time FROM inserts),(SELECT sum2_speed FROM inserts),"
+                            + "(SELECT max_distance FROM inserts),(SELECT min_distance FROM inserts),"
+                            + "(SELECT max_time FROM inserts),(SELECT min_time FROM inserts),"
+                            + "(SELECT max_speed FROM inserts),(SELECT min_speed FROM inserts),"
+                            + "(SELECT num_samples FROM inserts))";
+                    LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
+                            + "), Table (" + tableName + "), Data (" + rows + ")");
+                    backend.insert(tableName, withs, fields, rows);
                 } // try catch
-                    
-                String withs = ""
-                        + "WITH geom AS ("
-                        + "   SELECT " + location + " AS point"
-                        + "), calcs AS ("
-                        + "   SELECT"
-                        + "      cartodb_id,"
-                        + "      ST_Distance(the_geom::geography, geom.point::geography) AS stage_distance,"
-                        + "      (" + recvTimeMs + " - recvTimeMs) AS stage_time"
-                        + "   FROM " + tableName + ", geom"
-                        + "   ORDER BY cartodb_id DESC"
-                        + "   LIMIT 1"
-                        + "), speed AS ("
-                        + "   SELECT"
-                        + "      (calcs.stage_distance / NULLIF(calcs.stage_time, 0)) AS stage_speed"
-                        + "   FROM calcs"
-                        + "), inserts AS ("
-                        + "   SELECT"
-                        + "      (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) AS sum_dist,"
-                        + "      (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) AS sum_time,"
-                        + "      (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) AS sum_speed,"
-                        + "      (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) "
-                        + "          * (-1 * ((-1 * t1.sumDistance) - calcs.stage_distance)) AS sum2_dist,"
-                        + "      (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) "
-                        + "          * (-1 * ((-1 * t1.sumTime) - calcs.stage_time)) AS sum2_time,"
-                        + "      (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) "
-                        + "          * (-1 * ((-1 * t1.sumSpeed) - speed.stage_speed)) AS sum2_speed,"
-                        + "      t1.max_distance,"
-                        + "      t1.min_distance,"
-                        + "      t1.max_time,"
-                        + "      t1.min_time,"
-                        + "      t1.max_speed,"
-                        + "      t1.min_speed,"
-                        + "      t2.num_samples"
-                        + "   FROM"
-                        + "      ("
-                        + "         SELECT"
-                        + "            GREATEST(calcs.stage_distance, maxDistance) AS max_distance,"
-                        + "            LEAST(calcs.stage_distance, minDistance) AS min_distance,"
-                        + "            GREATEST(calcs.stage_time, maxTime) AS max_time,"
-                        + "            LEAST(calcs.stage_time, minTime) AS min_time,"
-                        + "            GREATEST(speed.stage_speed, maxSpeed) AS max_speed,"
-                        + "            LEAST(speed.stage_speed, minSpeed) AS min_speed,"
-                        + "            sumDistance,"
-                        + "            sumTime,"
-                        + "            sumSpeed"
-                        + "         FROM " + tableName + ", speed, calcs"
-                        + "         ORDER BY " + tableName + ".cartodb_id DESC"
-                        + "         LIMIT 1"
-                        + "      ) AS t1,"
-                        + "      ("
-                        + "         SELECT (-1 * ((-1 * COUNT(*)) - 1)) AS num_samples"
-                        + "         FROM " + tableName
-                        + "      ) AS t2,"
-                        + "      speed,"
-                        + "      calcs"
-                        + ")";
-                String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
-                        + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
-                        + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
-                String rows = "(" + recvTimeMs + ",'" + event.getServicePath() + "','" + event.getEntity() + "','"
-                        + event.getEntity() + "',"
-                        + "(SELECT point FROM geom),(SELECT stage_distance FROM calcs),"
-                        + "(SELECT stage_time FROM calcs),(SELECT stage_speed FROM speed),"
-                        + "(SELECT sum_dist FROM inserts),(SELECT sum_time FROM inserts),"
-                        + "(SELECT sum_speed FROM inserts),(SELECT sum2_dist FROM inserts),"
-                        + "(SELECT sum2_time FROM inserts),(SELECT sum2_speed FROM inserts),"
-                        + "(SELECT max_distance FROM inserts),(SELECT min_distance FROM inserts),"
-                        + "(SELECT max_time FROM inserts),(SELECT min_time FROM inserts),"
-                        + "(SELECT max_speed FROM inserts),(SELECT min_speed FROM inserts),"
-                        + "(SELECT num_samples FROM inserts))";
-                LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
-                        + "), Table (" + tableName + "), Data (" + rows + ")");
-                backend.insert(tableName, withs, fields, rows);
             } // if
         } // for
     } // persistDistanceAnalysis
