@@ -60,7 +60,7 @@ centos              6                   61bf77ab8841        6 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-common image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of log messages at INFO level, known as [logger-sink](https://flume.apache.org/FlumeUserGuide.html#logger-sink).
+The cygnus-common image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of logging messages at INFO level. This is because the default agent configuration runs a [logger-sink](https://flume.apache.org/FlumeUserGuide.html#logger-sink).
 
 Start a container for this image by typing in a terminal:
 
