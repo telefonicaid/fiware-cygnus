@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -55,6 +57,7 @@ public final class CommonUtils {
             "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
             "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
+    private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z0-9_]*$");
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -293,5 +296,31 @@ public final class CommonUtils {
         
         return res;
     } // getTimeInstant
+    
+    /**
+     * Gets is a string is made of alphanumerics and/or underscores.
+     * @param s
+     * @return True is the string is made of alphanumerics and/or underscores, otherwise false.
+     */
+    public static boolean isMAdeOfAlphaNumericsOrUnderscores(String s) {
+        return PATTERN.matcher(s).matches();
+    } // isMAdeOfAlphaNumericsOrUnderscores
+    
+    /**
+     * Generates a new unique identifier. The format for this notifiedId is:
+     * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
+     * @param notifiedId An alrady existent identifier, most probably a notified one
+     * @param transactionId An already existent internal identifier
+     * @return A new unique identifier
+     */
+    public static String generateUniqueId(String notifiedId, String transactionId) {
+        if (notifiedId != null) {
+            return notifiedId;
+        } else if (transactionId != null) {
+            return transactionId;
+        } else {
+            return UUID.randomUUID().toString();
+        } // else
+    } // generateUniqueId
 
 } // CommonUtils

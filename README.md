@@ -1,9 +1,13 @@
 #Cygnus
 [![License badge](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Documentation badge](https://readthedocs.org/projects/fiware-cygnus/badge/?version=latest)](http://fiware-cygnus.readthedocs.org/en/latest/?badge=latest)
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus/)
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
+<br>
+<br>
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus-common/) (cygnus-common)
+<br>
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi/) (cygnus-ngsi)
 
 ##Welcome
 This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
@@ -21,9 +25,11 @@ Current stable release is able to persist the following sources of data in the f
     * [MySQL](https://www.mysql.com/), the well-know relational database manager.
     * [CKAN](http://ckan.org/), an Open Data platform.
     * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-    * [FIWARE Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+    * [FIWARE Comet (STH)](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
     * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
+    * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+    * [CartoDB](https://cartodb.com/), the database specialized in geolocated data.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
@@ -35,6 +41,11 @@ Nevertheless, both the **Installation and Administration Guide** and the **User 
 The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
 
 Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
+
+Finally, please check our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/) if you want to know how to use our API methods for Cygnus.
+
+##Licensing
+Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](./LICENSE).
 
 ##Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).

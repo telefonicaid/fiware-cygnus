@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -35,7 +36,6 @@ import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
-import java.util.UUID;
 
 /**
  *
@@ -122,9 +122,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
                     + "' parameter length greater than " + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
-        } else {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultService)) {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
                     + defaultService + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
+                    + "' parameter can only contain alphanumerics or underscores)");
         } // if else
         
         defaultServicePath = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE_PATH, "/");
@@ -137,10 +141,14 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
                     + "' must start with '/')");
-        } else {
+        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultServicePath.substring(1))) {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH + "="
                     + defaultServicePath + ")");
-        } // if else
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
+                    + "' parameter can only contain alphanumerics or underscores");
+        } // else
         
         LOGGER.info("Startup completed");
     } // configure
@@ -186,7 +194,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
                 corrId = headerValue;
             } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json")) {
+                if (!headerValue.contains("application/json; charset=utf-8")) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
@@ -218,8 +226,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // check if received content type is null
         if (contentType == null) {
-            LOGGER.warn("Missing content type. Required application/json.");
-            throw new HTTPBadRequestException("Missing content type. Required application/json.");
+            LOGGER.warn("Missing content type. Required 'application/json; charset=utf-8'");
+            throw new HTTPBadRequestException("Missing content type. Required 'application/json; charset=utf-8'");
         } // if
         
         // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
@@ -227,11 +235,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         MDC.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
         // Get an internal transaction ID.
-        String transId = generateUniqueId(null, null);
+        String transId = CommonUtils.generateUniqueId(null, null);
         
         // Get also a correlator ID if not sent in the notification. Id correlator ID is not notified
         // then correlator ID and transaction ID must have the same value.
-        corrId = generateUniqueId(corrId, transId);
+        corrId = CommonUtils.generateUniqueId(corrId, transId);
         
         // Store both of them in the log4j Mapped Diagnostic Context (MDC), this way it will be accessible
         // by the whole source code.
@@ -279,27 +287,5 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         numProcessedEvents++;
         return eventList;
     } // getEvents
-    
-    /**
-     * Generates a new unique identifier. The format for this notifiedId is:
-     * bootTimeSecond-bootTimeMilliseconds-transactionCount%10000000000
-     * @param notifiedId An alrady existent identifier, most probably a notified one
-     * @param transactionId An already existent internal identifier
-     * @return A new unique identifier
-     */
-    protected String generateUniqueId(String notifiedId, String transactionId) {
-        if (notifiedId != null) {
-            return notifiedId;
-        } else if (transactionId != null) {
-            return transactionId;
-        } else {
-            // Check this SOF link: A bug doesn't allow to uuid be thread-safe
-            // For that reason we use LOCK in order to avoid problems with treads
-            // http://stackoverflow.com/questions/7212635/is-java-util-uuid-thread-safe
-            synchronized (LOCK) {
-                return UUID.randomUUID().toString();
-            } // synchronized
-        } // else
-    } // generateUniqueId
  
 } // NGSIRestHandler

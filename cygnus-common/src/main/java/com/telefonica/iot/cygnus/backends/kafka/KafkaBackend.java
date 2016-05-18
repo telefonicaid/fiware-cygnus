@@ -29,7 +29,7 @@ public interface KafkaBackend {
     /**
      * Check if a topic exists.
      * @param topic
-     * @return 
+     * @return
      * @throws Exception
      */
     boolean topicExists(String topic) throws Exception;
@@ -38,13 +38,13 @@ public interface KafkaBackend {
      * Create a topic.
      * @param topic
      * @param partitions
-     * @param replicationFactor 
+     * @param replicationFactor
      */
     void createTopic(String topic, int partitions, int replicationFactor);
     
     /**
      * Send a record.
-     * @param record 
+     * @param record
      */
     void send(ProducerRecord<String, String> record);
     

@@ -42,6 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 
 /**
  *
@@ -77,7 +78,7 @@ public class NGSIRestHandlerTest {
         String[] headerNames = {"Content-Type", "fiware-service", "fiware-servicePath"};
         when(mockHttpServletRequest.getHeaderNames()).thenReturn(
                 Collections.enumeration(new ArrayList(Arrays.asList(headerNames))));
-        when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json");
+        when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
         when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
         notification = CommonUtilsForTests.createNotification();
@@ -130,6 +131,56 @@ public class NGSIRestHandlerTest {
             throw e;
         } // try catch
     } // testConfigureNotMandatoryParameters
+    
+    /**
+     * [NGSIRestHandler.configure] -------- The configured default service can only contain alphanumerics and
+     * underscores.
+     */
+    @Test
+    public void testConfigureDefaultServiceIsLegal() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured default service can only contain alphanumerics and underscores");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String configuredDefaultService = "default-service!!";
+        handler.configure(createContext(null, configuredDefaultService, null));
+        
+        try {
+            assertTrue(handler.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured default service '" + configuredDefaultService
+                    + "' was detected as invalid");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured default service '" + configuredDefaultService
+                    + "' was not detected as invalid");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServiceIsLegal
+    
+    /**
+     * [NGSIRestHandler.configure] -------- The configured default service path can only contain alphanumerics
+     * and underscores.
+     */
+    @Test
+    public void testConfigureDefaultServicePathIsLegal() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                + "-------- The configured default service path can only contain alphanumerics and underscores");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String configuredDefaultServicePath = "/something.?";
+        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        
+        try {
+            assertTrue(handler.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "-  OK  - The configured default service path '" + configuredDefaultServicePath
+                    + "' was detected as invalid");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+                    + "- FAIL - The configured default service path '" + configuredDefaultServicePath
+                    + "' was not detected as invalid");
+            throw e;
+        } // try catch
+    } // testConfigureDefaultServicePathIsLegal
     
     /**
      * [NGSIRestHandler.configure] -------- The configured default service path must start with '/'.
@@ -195,7 +246,7 @@ public class NGSIRestHandlerTest {
             handler.getEvents(mockHttpServletRequest);
             assertTrue(true);
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                    + "-  OK  - The value for 'Content-Type' header is 'application/json'");
+                    + "-  OK  - The value for 'Content-Type' header is 'application/json; charset=utf-8'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
@@ -207,7 +258,7 @@ public class NGSIRestHandlerTest {
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                        + "- FAIL - The value for 'Content-Type' is not 'application/json'");
+                        + "- FAIL - The value for 'Content-Type' is not 'application/json; charset=utf-8'");
             } else if (e.getMessage().contains("header value must start with '/'")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The value for 'fiware-servicePath' does not start with '/'");
@@ -407,7 +458,7 @@ public class NGSIRestHandlerTest {
         System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
                 + "-------- An internal transaction ID is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
-        String generatedTransId = handler.generateUniqueId(null, null);
+        String generatedTransId = CommonUtils.generateUniqueId(null, null);
         
         try {
             assertTrue(generatedTransId != null);
@@ -431,7 +482,7 @@ public class NGSIRestHandlerTest {
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1111111111-111-1111111111";
         String notifiedCorrId = "1234567890-123-1234567890";
-        String generatedCorrId = handler.generateUniqueId(notifiedCorrId, generatedTransId);
+        String generatedCorrId = CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId);
         
         try {
             assertEquals(notifiedCorrId, generatedCorrId);
@@ -457,7 +508,7 @@ public class NGSIRestHandlerTest {
         String notifiedCorrId = null;
         
         try {
-            assertTrue(handler.generateUniqueId(notifiedCorrId, generatedTransId) != null);
+            assertTrue(CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId) != null);
             System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
                     + "-  OK  - The transaction ID has been generated");
         } catch (AssertionError e) {
@@ -479,7 +530,7 @@ public class NGSIRestHandlerTest {
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1234567890-123-1234567890";
         String notifiedCorrId = null;
-        String generatedCorrId = handler.generateUniqueId(notifiedCorrId, generatedTransId);
+        String generatedCorrId = CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId);
         
         try {
             assertEquals(generatedTransId, generatedCorrId);

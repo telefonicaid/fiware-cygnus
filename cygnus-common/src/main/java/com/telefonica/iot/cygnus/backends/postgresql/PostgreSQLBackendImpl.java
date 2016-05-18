@@ -47,12 +47,14 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * Constructor.
      * @param postgresqlHost
      * @param postgresqlPort
+     * @param postgresqlDatabase
      * @param postgresqlUsername
      * @param postgresqlPassword
      */
-    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, 
-                                 String postgresqlUsername, String postgresqlPassword) {
-        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword);
+    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase,
+            String postgresqlUsername, String postgresqlPassword) {
+        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername,
+                postgresqlPassword);
     } // PostgreSQLBackendImpl
 
     /**
@@ -97,9 +99,10 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
     } // createSchema
 
     /**
-     * Creates a table, given its name, if not exists in the given schema
+     * Creates a table, given its name, if not exists in the given schema.
      * @param schemaName
      * @param tableName
+     * @param typedFieldNames
      * @throws Exception
      */
     @Override
@@ -177,6 +180,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // if
     } // closePostgreSQLObjects
 
+    /**
+     * Driver class.
+     */
     protected class PostgreSQLDriver {
 
         private final HashMap<String, Connection> connections;
@@ -187,14 +193,15 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         private final String postgresqlPassword;
 
         /**
-         * Constructor
+         * Constructor.
          * @param postgresqlHost
          * @param postgresqlPort
+         * @param postgresqlDatabase
          * @param postgresqlUsername
          * @param postgresqlPassword
          */
         public PostgreSQLDriver(String postgresqlHost, String postgresqlPort,
-               String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword) {
+                String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword) {
             connections = new HashMap<String, Connection>();
             this.postgresqlHost = postgresqlHost;
             this.postgresqlPort = postgresqlPort;
@@ -261,11 +268,13 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             Class.forName(DRIVER_NAME);
 
             // return a connection based on the PostgreSQL JDBC driver
-            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort + "/" + this.postgresqlDatabase;
+            String url = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort
+                    + "/" + this.postgresqlDatabase;
             Properties props = new Properties();
             props.setProperty("user", this.postgresqlUsername);
             props.setProperty("password", this.postgresqlPassword);
             props.setProperty("sslmode", "disable");
+            props.setProperty("charSet", "UTF-8");
 
             LOGGER.debug("Connecting to " + url);
             return DriverManager.getConnection(url, props);
