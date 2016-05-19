@@ -24,7 +24,7 @@ package com.telefonica.iot.cygnus.backends.cartodb;
 public interface CartoDBBackend {
     
     /**
-     * Gets it the given table is empty ot not.
+     * Gets if the given table is empty ot not.
      * @param tableName
      * @return True if the given table is empty, false otherwise
      * @throws Exception
