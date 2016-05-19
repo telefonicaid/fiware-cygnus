@@ -252,6 +252,51 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableDitanceOK
     
     /**
+     * [NGSICartoDBSink.configure] -------- Configured `data_model` cannot be different than `dm-by-service-path`
+     * or `dm-by-entity`.
+     */
+    @Test
+    public void testConfigureDataModelOK() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Configured `data_model` cannot be different than `dm-by-service-path` or `dm-by-entity`");
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-service";
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-service' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-service' was not detected");
+            throw e;
+        } // try catch
+        
+        dataModel = "dm-by-attribute";
+        sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-attribute' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-attribute' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureDataModelOK
+    
+    /**
      * [NGSICartoDBSink.start] -------- When started, a CartoDB backend is created.
      */
     @Test
@@ -372,53 +417,6 @@ public class NGSICartoDBSinkTest {
     } // testBuildDBNameNonRootServicePathDataModelByEntity
     
     /**
-     * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted
-     * and data_model is 'dm-by-attribute' the CartoDB table name is the lower
-     * case of \<servicePath\>_\<entityId\>_\<entityYype\>_\<attrName\>_\<attrType\>.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testBuildDBNameNonRootServicePathDataModelByAttribute() throws Exception {
-        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-attribute' the CartoDB table name is the lower case of "
-                + "<servicePath>_<entityId>_<entityYype>_<attrName>_<attrType>");
-        String endpoint = "https://localhost";
-        String apiKey = "1234567890abcdef";
-        String dataModel = "dm-by-attribute";
-        String enableLowercase = null; // default one
-        String flipCoordinates = null; // default one
-        String enableRaw = null; // default one
-        String enableDistance = null; // default one
-        NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
-        String servicePath = "/somePath";
-        String entity = "someId_someType";
-        String attribute = "someName1_someType1";
-        
-        try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
-        
-            try {
-                assertEquals("somepath_someid_sometype_somename1_sometype1", builtTableName);
-                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "<servicePath>_<entityId>_<entityType>_<attrName>_<attrType>");
-            } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "<servicePath>_<entityId>_<entityType>_<attrName>_<attrType>");
-                throw e;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                    + "- FAIL - There was some problem when building the table name");
-            throw e;
-        } // try catch
-    } // testBuildDBNameNonRootServicePathDataModelByAttribute
-    
-    /**
      * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the CartoDB table name cannot be created.
      * @throws java.lang.Exception
@@ -499,53 +497,6 @@ public class NGSICartoDBSinkTest {
             throw e;
         } // try catch
     } // testBuildDBNameRootServicePathDataModelByEntity
-    
-    /**
-     * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted
-     * and data_model is 'dm-by-attribute' the CartoDB table name is the lower
-     * case of \<servicePath\>_\<entityId\>_\<entityYype\>_\<attrName\>_\<attrType\>.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testBuildDBNameRootServicePathDataModelByAttribute() throws Exception {
-        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-attribute' the CartoDB table name is the lower case of "
-                + "<servicePath>_<entityId>_<entityYype>_<attrName>_<attrType>");
-        String endpoint = "https://localhost";
-        String apiKey = "1234567890abcdef";
-        String dataModel = "dm-by-attribute";
-        String enableLowercase = null; // default one
-        String flipCoordinates = null; // default one
-        String enableRaw = null; // default one
-        String enableDistance = null; // default one
-        NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
-        String servicePath = "/";
-        String entity = "someId_someType";
-        String attribute = "someName1_someType1";
-        
-        try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
-        
-            try {
-                assertEquals("someid_sometype_somename1_sometype1", builtTableName);
-                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "<entityId>_<entityType>_<attrName>_<attrType>");
-            } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "<entityId>_<entityType>_<attrName>_<attrType>");
-                throw e;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                    + "- FAIL - There was some problem when building the table name");
-            throw e;
-        } // try catch
-    } // testBuildDBNameRootServicePathDataModelByAttribute
     
     /**
      * [CartoDBAggregator.initialize] -------- When initializing through an initial geolocated event, a table
