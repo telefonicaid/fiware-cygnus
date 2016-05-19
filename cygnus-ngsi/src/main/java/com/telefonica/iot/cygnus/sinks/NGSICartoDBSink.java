@@ -457,7 +457,12 @@ public class NGSICartoDBSink extends NGSISink {
     
     private void persistDistanceAnalysis(NGSIEvent event)
         throws Exception {
-        // iterate on all this context element attributes, if there are attributes
+        // Get some values
+        String servicePath = event.getServicePath();
+        String entityId = event.getContextElement().getId();
+        String entityType = event.getContextElement().getType();
+        
+        // Iterate on all this context element attributes, if there are attributes
         ArrayList<ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
 
         if (contextAttributes == null || contextAttributes.isEmpty()) {
@@ -491,9 +496,8 @@ public class NGSICartoDBSink extends NGSISink {
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
-                    String rows = "(" + recvTimeMs + ",'" + event.getServicePath() + "','" + event.getEntity() + "','"
-                            + event.getEntity() + "'," + location
-                            + ",0,0,0,0,0,0,0,0,0,-999999,999999,-999999,999999,-999999,999999,1)";
+                    String rows = "(" + recvTimeMs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
+                            + location + ",0,0,0,0,0,0,0,0,0,-999999,999999,-999999,999999,-999999,999999,1)";
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backend.insert(tableName, withs, fields, rows);
@@ -557,8 +561,7 @@ public class NGSICartoDBSink extends NGSISink {
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
-                    String rows = "(" + recvTimeMs + ",'" + event.getServicePath() + "','" + event.getEntity() + "','"
-                            + event.getEntity() + "',"
+                    String rows = "(" + recvTimeMs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
                             + "(SELECT point FROM geom),(SELECT stage_distance FROM calcs),"
                             + "(SELECT stage_time FROM calcs),(SELECT stage_speed FROM speed),"
                             + "(SELECT sum_dist FROM inserts),(SELECT sum_time FROM inserts),"
