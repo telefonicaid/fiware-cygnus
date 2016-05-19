@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
@@ -69,6 +70,14 @@ public class NGSICartoDBSink extends NGSISink {
         
         // Impose enable ower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
+        
+        // Check the data model is not different than dm-by-service-path or dm-by-entity
+        if (dataModel == DataModel.DMBYSERVICE || dataModel == DataModel.DMBYATTRIBUTE) {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (data_model="
+                    + dataModel.toString() + ") -- Must be 'dm-by-service-path' or 'dm-by-entity'");
+            return;
+        } // if else
         
         // Read NGSICartoDB specific configuration
         String endpoint = context.getString("endpoint");
@@ -425,15 +434,9 @@ public class NGSICartoDBSink extends NGSISink {
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                         + NGSIUtils.encodePostgreSQL(entity, false);
                 break;
-            case DMBYATTRIBUTE:
-                truncatedServicePath = NGSIUtils.encodePostgreSQL(servicePath, true);
-                name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                        + NGSIUtils.encodePostgreSQL(entity, false)
-                        + '_' + NGSIUtils.encodePostgreSQL(attribute, false);
-                break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                        + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                        + "'. Please, use DMBYSERVICEPATH or DMBYENTITY");
         } // switch
         
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
