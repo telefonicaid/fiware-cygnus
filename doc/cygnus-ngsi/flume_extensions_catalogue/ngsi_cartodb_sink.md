@@ -7,7 +7,7 @@ Content:
         * [PostgreSQL databases and schemas naming conventions](#section1.2.1)
         * [PostgreSQL tables naming conventions](#section1.2.2)
         * [Raw-based storing](#section1.2.3)
-        * [Distance-based storing (beta)](#section1.2.4)
+        * [Distance-based storing](#section1.2.4)
     * [Example](#section1.3)
         * [Flume event](#section1.3.1)
         * [Table names](#section1.3.2)
@@ -65,10 +65,10 @@ It must be said PostgreSQL only accepts alphanumeric characters and the undersco
 
 The following table summarizes the table name composition:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
-|---|---|---|---|
-| `/` | N/A | `<entityId>_<entityType>` | `<entityId>_<entityType>_<attrName>_<attrType>` |
-| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityId>_<entityType>_<attrName>_<attrType>` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | N/A | `<entityId>_<entityType>` |
+| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
 
 [Top](#top)
 
@@ -88,7 +88,7 @@ A single insert is composed for each notified entity, containing such insert the
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Distance-based storing (beta)
+####<a name="section1.2.4"></a>Distance-based storing
 If `enable_distance` parameter is set to `true` (by default, this kind of storing is not run) then the notified data is processed based on a distance analysis. As said, the linear distance and elapsed time with regards to the previous geolocation of the entity is obtained, and this information is used to update certain aggregations: total amount of distance, total amount of time and many others. The speed is obtained as well as the result of dividing the distance by the time, and such speed calculation is used as well for updating certain aggregations.
 
 The final goal is to **pre-compute a set of distance-based measures** as a function of the geolocation of an entity, allowing for querying about <i>"the total amount of time this entity took to arrive to this point"</i>, or <i>"which was the average speed of this entity when passing through this point"</i>, etc. **without performing any computation at querying time**.
@@ -166,10 +166,10 @@ Assuming the following Flume event is created from a notified NGSI context data 
 ####<a name="section1.3.2"></a>Table names
 The PostgreSQL table names will be, depending on the configured data model, the following ones:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
-|---|---|---|---|
-| `/` | N/A | `car1_car` | `car1_car_speed_float`<br>`car1_car_oil_level_float` |
-| `/4wheels` | `4wheels` | `4wheels_car1_car` | `4wheels_car1_car_speed_float`<br>`4wheels_car1_car_oil_level_float` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | N/A | `car1_car` |
+| `/4wheels` | `4wheels` | `4wheels_car1_car` |
     
 [Top](#top)
 
@@ -382,8 +382,8 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car
 | channel | yes | N/A ||
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data_model | no | dm-by-entity |  <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
-| keys_conf_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys. |
+| data_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
+| keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys. |
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
 | enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
