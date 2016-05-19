@@ -25,13 +25,12 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import org.apache.flume.Context;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author cardiealb
  *
- * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/orion_hdfs_sink.md
  */
 public class TwitterHDFSSink extends TwitterSink {
 
@@ -45,8 +44,8 @@ public class TwitterHDFSSink extends TwitterSink {
     private String port;
     private String username;
     private String password;
-    private String hdfs_folder;
-    private String hdfs_file;
+    private String hdfsFolder;
+    private String hdfsFile;
     private String oauth2Token;
     private boolean enableKrb5;
     private String krb5User;
@@ -104,7 +103,6 @@ public class TwitterHDFSSink extends TwitterSink {
     protected String getOAuth2Token() {
         return oauth2Token;
     } // getOAuth2Token
-
 
     protected boolean getEnableHive() {
         return false;
@@ -170,8 +168,8 @@ public class TwitterHDFSSink extends TwitterSink {
 
         String hdfsFolder = context.getString("hdfs_folder");
         if (hdfsFolder != null && hdfsFolder.length() > 0) {
-            hdfs_folder = hdfsFolder;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_folder=" + hdfs_folder + ")");
+            this.hdfsFolder = hdfsFolder;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfsFolder=" + this.hdfsFolder + ")");
         } else {
             LOGGER.error("[" + this.getName() + "] No folder provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
@@ -179,13 +177,12 @@ public class TwitterHDFSSink extends TwitterSink {
 
         String hdfsFile = context.getString("hdfs_file");
         if (hdfsFile != null && hdfsFile.length() > 0) {
-            hdfs_file = hdfsFile;
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_file=" + hdfs_file + ")");
+            this.hdfsFile = hdfsFile;
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfsFile=" + this.hdfsFile + ")");
         } else {
             LOGGER.error("[" + this.getName() + "] No filename provided. Cygnus can continue, but HDFS sink will not "
                     + "properly work!");
         } // if else
-
 
         oauth2Token = context.getString("oauth2_token");
 
@@ -267,36 +264,35 @@ public class TwitterHDFSSink extends TwitterSink {
     } // start
 
     @Override
-    void persistBatch(TwitterBatch batch) throws Exception {
+    void persistBatch(ArrayList<TwitterEvent> batch) throws Exception {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
 
         // get an aggregator for this destination and initialize it
-        HDFSAggregator aggregator = new JSONRowAggregator();
+        HDFSAggregator aggregator = new HDFSAggregator();
 
-        ArrayList<TwitterEvent> subBatch = batch.getBatch();
-        aggregator.initialize(hdfs_folder, hdfs_file);
-        for (TwitterEvent cygnusEvent : subBatch) {
+        aggregator.initialize(hdfsFolder, hdfsFile);
+        for (TwitterEvent cygnusEvent : batch) {
             aggregator.aggregate(cygnusEvent);
         } // for
 
         // persist the aggregation
         persistAggregation(aggregator);
-
-
     } // persistBatch
 
     /**
-     * Class for aggregating aggregation.
+     * Class for aggregating batches in JSON rows.
      */
-    private abstract class HDFSAggregator {
+    private class HDFSAggregator {
 
         // string containing the data aggregation
         protected String aggregation;
         protected String hdfsFolder;
         protected String hdfsFile;
+        private String newLine = "\n";
+        private Pattern regex = Pattern.compile(newLine);
 
         public HDFSAggregator() {
             aggregation = "";
@@ -322,26 +318,11 @@ public class TwitterHDFSSink extends TwitterSink {
             } // if else
         } // getFile
 
-        public void initialize(String hdfs_folder, String hdfs_file) throws Exception {
-            hdfsFolder = hdfs_folder;
-            hdfsFile = hdfsFolder + "/" + hdfs_file;
+        public void initialize(String hdfsFolder, String hdfsFile) throws Exception {
+            this.hdfsFolder = hdfsFolder;
+            this.hdfsFile = this.hdfsFolder + "/" + hdfsFile;
         } // initialize
 
-        public abstract void aggregate(TwitterEvent cygnusEvent) throws Exception;
-
-    } // HDFSAggregator
-
-    /**
-     * Class for aggregating batches in JSON row mode.
-     */
-    private class JSONRowAggregator extends HDFSAggregator {
-
-        @Override
-        public void initialize(String hdfs_folder, String hdfs_file) throws Exception {
-            super.initialize(hdfs_folder, hdfs_file);
-        } // initialize
-
-        @Override
         public void aggregate(TwitterEvent cygnusEvent) throws Exception {
 
             // get the event data (tweet)
@@ -356,10 +337,10 @@ public class TwitterHDFSSink extends TwitterSink {
         } // aggregate
 
         private String tweet2row(String eventData) {
-            return eventData.replaceAll("\n", "") + "\n";
+            return regex.matcher(eventData).replaceAll("") + newLine;
         }
 
-    } // JSONRowAggregator
+    } // HDFSAggregator
 
     private void persistAggregation(HDFSAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation().trim();

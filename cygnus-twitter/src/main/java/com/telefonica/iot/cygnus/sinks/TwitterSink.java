@@ -25,7 +25,6 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -115,14 +114,12 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
         return enableLowercase;
     } // getEnableLowerCase
 
-
     protected boolean getInvalidConfiguration() {
         return invalidConfiguration;
     } // getInvalidConfiguration
 
     @Override
     public void configure(Context context) {
-
 
         String enableLowercaseStr = context.getString("enable_lowercase", "false");
 
@@ -215,7 +212,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
             persistBatch(rollbackedAccumulation.getBatch());
             LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
             rollbackedAccumulations.remove(0);
-            numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
+            numPersistedEvents += rollbackedAccumulation.getBatch().size();
             return Status.READY;
         } catch (Exception e) {
             LOGGER.debug(Arrays.toString(e.getStackTrace()));
@@ -327,7 +324,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
             } // if
 
             LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
-            numPersistedEvents += accumulator.getBatch().getNumEvents();
+            numPersistedEvents += accumulator.getBatch().size();
             accumulator.initialize(new Date().getTime());
             txn.commit();
             txn.close();
@@ -395,7 +392,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
     private class Accumulator implements Cloneable {
 
         // accumulated events
-        private TwitterBatch batch;
+        private ArrayList<TwitterEvent> batch;
         private long accStartDate;
         private int accIndex;
         private String accTransactionIds;
@@ -405,7 +402,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
          * Constructor.
          */
         public Accumulator() {
-            batch = new TwitterBatch();
+            batch = new ArrayList<TwitterEvent>();
             accStartDate = 0;
             accIndex = 0;
             accTransactionIds = null;
@@ -424,7 +421,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
             this.accIndex = accIndex;
         } // setAccIndex
 
-        public TwitterBatch getBatch() {
+        public ArrayList<TwitterEvent> getBatch() {
             return batch;
         } // getBatch
 
@@ -441,7 +438,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
 
 
             TwitterEvent cygnusEvent = new TwitterEvent(eventData);
-            batch.addEvent(cygnusEvent);
+            batch.add(cygnusEvent);
 
         } // accumulate
 
@@ -452,7 +449,7 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
         public void initialize(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
             // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
-            batch = new TwitterBatch();
+            batch = new ArrayList<TwitterEvent>();
             accStartDate = startDateMs;
             accIndex = 0;
             accTransactionIds = "";
@@ -477,6 +474,6 @@ public abstract class TwitterSink extends CygnusSink implements Configurable {
      * @param batch
      * @throws Exception
      */
-    abstract void persistBatch(TwitterBatch batch) throws Exception;
+    abstract void persistBatch(ArrayList<TwitterEvent> batch) throws Exception;
 
 } // TwitterSink
