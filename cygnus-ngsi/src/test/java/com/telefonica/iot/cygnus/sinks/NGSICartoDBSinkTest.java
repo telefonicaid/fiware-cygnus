@@ -226,7 +226,7 @@ public class NGSICartoDBSinkTest {
      * [NGSICartoDBSink.configure] -------- Configured `enable_distance` cannot be different than `true` or `false`.
      */
     @Test
-    public void testConfigureEnableDitanceOK() {
+    public void testConfigureEnableDistanceOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                 + "-------- Configured `enable_distance` cannot be different than `true` or `false`");
         String endpoint = "https://localhost";
@@ -249,7 +249,7 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - 'enable_distance=falso' was not detected");
             throw e;
         } // try catch
-    } // testConfigureEnableDitanceOK
+    } // testConfigureEnableDistanceOK
     
     /**
      * [NGSICartoDBSink.configure] -------- Configured `data_model` cannot be different than `dm-by-service-path`

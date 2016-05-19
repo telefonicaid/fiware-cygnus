@@ -499,7 +499,9 @@ public class NGSICartoDBSink extends NGSISink {
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
                     String rows = "(" + recvTimeMs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
-                            + location + ",0,0,0,0,0,0,0,0,0,-999999,999999,-999999,999999,-999999,999999,1)";
+                            + location + ",0,0,0,0,0,0,0,0,0," + Float.MIN_VALUE + "," + Float.MAX_VALUE + ","
+                            + Float.MIN_VALUE + "," + Float.MAX_VALUE + "," + Float.MIN_VALUE + "," + Float.MAX_VALUE
+                            + ",1)";
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backend.insert(tableName, withs, fields, rows);
