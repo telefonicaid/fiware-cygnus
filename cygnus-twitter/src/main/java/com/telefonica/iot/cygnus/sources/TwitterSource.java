@@ -1,21 +1,20 @@
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+/**
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * <p>
+ * This file is part of fiware-cygnus (FI-WARE project).
+ * <p>
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ * <p>
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+ * http://www.gnu.org/licenses/.
+ * <p>
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
 package com.telefonica.iot.cygnus.sources;
@@ -45,17 +44,16 @@ public class TwitterSource extends AbstractSource
     private TwitterStream twitterStream;
     private List<Event> eventBatch = new ArrayList<Event>();
 
-    private boolean have_filters = false;
-    private boolean have_coordinate_filter = false;
-    private boolean have_keyword_filter = false;
+    private boolean haveFilters = false;
+    private boolean haveCoordinateFilter = false;
+    private boolean haveKeywordFilter = false;
 
     private String consumerKey;
     private String consumerSecret;
     private String accessToken;
     private String accessTokenSecret;
-    private double[][] bounding_box;
+    private double[][] boundingBox;
     private String[] splitKeywords;
-
 
     private long documentCount = 0;
     private long startTime = 0;
@@ -64,11 +62,8 @@ public class TwitterSource extends AbstractSource
     private long skippedDocs = 0;
     private long batchEndTime = 0;
 
-
     private int maxBatchSize = 1000;
     private int maxBatchDurationMillis = 1000;
-
-    // Fri May 14 02:52:55 +0000 2010
 
     private DecimalFormat numFormatter = new DecimalFormat("###,###.###");
 
@@ -77,11 +72,11 @@ public class TwitterSource extends AbstractSource
     private static final Logger LOGGER = LoggerFactory.getLogger(TwitterSource.class);
 
 
-    String getConsumerKey(){
+    String getConsumerKey() {
         return consumerKey;
     }
 
-    String getConsumerSecret(){
+    String getConsumerSecret() {
         return consumerSecret;
     }
 
@@ -94,7 +89,7 @@ public class TwitterSource extends AbstractSource
     }
 
     double[][] getBoundingBox() {
-        return bounding_box;
+        return boundingBox;
     }
 
     String[] getKeywords() {
@@ -113,44 +108,42 @@ public class TwitterSource extends AbstractSource
         LOGGER.info("Access Token:        '" + accessToken + "'");
         LOGGER.info("Access Token Secret: '" + accessTokenSecret + "'");
 
-
-        String south_west_latitude;
-        String south_west_longitude;
-
-        String north_east_latitude;
-        String north_east_longitude;
-
+        String southWestLatitude;
+        String southWestLongitude;
+        String northEastLatitude;
+        String northEastLongitude;
         String keywords;
 
         //Top-left coordinate
-        south_west_latitude = context.getString("south_west_latitude");
-        south_west_longitude = context.getString("south_west_longitude");
-        LOGGER.info("South-West coordinate: '" + south_west_latitude + " " + south_west_longitude + "'");
+        southWestLatitude = context.getString("south_west_latitude");
+        southWestLongitude = context.getString("south_west_longitude");
+        LOGGER.info("South-West coordinate: '" + southWestLatitude + " " + southWestLongitude + "'");
 
         //Bottom-right coordinate
-        north_east_latitude = context.getString("north_east_latitude");
-        north_east_longitude = context.getString("north_east_longitude");
-        LOGGER.info("North-East coordinate: '" + north_east_latitude + " " + north_east_longitude + "'");
+        northEastLatitude = context.getString("north_east_latitude");
+        northEastLongitude = context.getString("north_east_longitude");
+        LOGGER.info("North-East coordinate: '" + northEastLatitude + " " + northEastLongitude + "'");
 
         keywords = context.getString("keywords");
         LOGGER.info("Keywords:            '" + keywords + "'");
 
-        if (south_west_latitude != null && south_west_longitude != null && north_east_latitude != null && north_east_longitude != null) {
-            double latitude1 = Double.parseDouble(south_west_latitude);
-            double longitude1 = Double.parseDouble(south_west_longitude);
+        if (southWestLatitude != null && southWestLongitude != null
+                && northEastLatitude != null && northEastLongitude != null) {
+            double latitude1 = Double.parseDouble(southWestLatitude);
+            double longitude1 = Double.parseDouble(southWestLongitude);
 
-            double latitude2 = Double.parseDouble(north_east_latitude);
-            double longitude2 = Double.parseDouble(north_east_longitude);
+            double latitude2 = Double.parseDouble(northEastLatitude);
+            double longitude2 = Double.parseDouble(northEastLongitude);
 
-            bounding_box = new double[][]{
-                    new double[]{longitude1, latitude1}, // south-west
-                    new double[]{longitude2, latitude2}  // north-east
+            boundingBox = new double[][]{
+                new double[]{longitude1, latitude1}, // south-west
+                new double[]{longitude2, latitude2}  // north-east
             };
 
-            LOGGER.info("Coordinates:         '" + bounding_box[0][0] + " " + bounding_box[0][1] +
-                                            " "  + bounding_box[1][0] + " " + bounding_box[1][1] + "'");
-            have_filters = true;
-            have_coordinate_filter = true;
+            LOGGER.info("Coordinates:         '" + boundingBox[0][0] + " " + boundingBox[0][1]
+                    + " " + boundingBox[1][0] + " " + boundingBox[1][1] + "'");
+            haveFilters = true;
+            haveCoordinateFilter = true;
         }
 
         if (keywords != null) {
@@ -161,11 +154,10 @@ public class TwitterSource extends AbstractSource
                 }
 
                 LOGGER.info("keywords:            {}", Arrays.toString(splitKeywords));
-                have_filters = true;
-                have_keyword_filter = true;
+                haveFilters = true;
+                haveKeywordFilter = true;
             }
         }
-
 
         maxBatchSize = context.getInteger("maxBatchSize", maxBatchSize);
         maxBatchDurationMillis = context.getInteger("maxBatchDurationMillis",
@@ -180,7 +172,6 @@ public class TwitterSource extends AbstractSource
         cb.setJSONStoreEnabled(true);
 
         twitterStream = new TwitterStreamFactory(cb.build()).getInstance();
-
 
     }
 
@@ -203,14 +194,11 @@ public class TwitterSource extends AbstractSource
 
                 eventBatch.add(event);
 
-                if (eventBatch.size() >= maxBatchSize ||
-                        System.currentTimeMillis() >= batchEndTime) {
+                if (eventBatch.size() >= maxBatchSize || System.currentTimeMillis() >= batchEndTime) {
                     batchEndTime = System.currentTimeMillis() + maxBatchDurationMillis;
 
                     channel.processEventBatch(eventBatch); // send batch of events (one per tweet) to the flume sink
                     eventBatch.clear();
-
-
                 }
 
                 documentCount++;
@@ -220,7 +208,6 @@ public class TwitterSource extends AbstractSource
                 if ((documentCount % STATS_INTERVAL) == 0) {
                     logStats();
                 }
-
             }
 
             // This listener will ignore everything except for new tweets
@@ -244,15 +231,15 @@ public class TwitterSource extends AbstractSource
         twitterStream.addListener(listener);
 
 
-        if (have_filters) {
+        if (haveFilters) {
             FilterQuery filterQuery = new FilterQuery();
 
-            if (have_coordinate_filter) {
-                filterQuery.locations(bounding_box);
+            if (haveCoordinateFilter) {
+                filterQuery.locations(boundingBox);
                 LOGGER.info("Coordinates added to filter query: {}",
-                        bounding_box[0][0] + " " + bounding_box[0][1] + " " + bounding_box[1][0] + " " + bounding_box[1][1]);
+                       boundingBox[0][0] + " " + boundingBox[0][1] + " " + boundingBox[1][0] + " " + boundingBox[1][1]);
             }
-            if (have_keyword_filter) {
+            if (haveKeywordFilter) {
                 filterQuery.track(splitKeywords);
                 LOGGER.info("Keywords added to filter query: {}", Arrays.toString(splitKeywords));
             }
@@ -278,14 +265,10 @@ public class TwitterSource extends AbstractSource
         String username = status.getUser().getScreenName();
         LOGGER.info("username: '" + username + "'");
         GeoLocation statusGeoLocation = status.getGeoLocation();
-        if (statusGeoLocation != null)
-        {
-            LOGGER.info("geolocation: '" +
-                    statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
-        }
-        else {
-            LOGGER.info("geolocation: null");
-        }
+        if (statusGeoLocation != null) {
+            LOGGER.info("geolocation: '"
+                    + statusGeoLocation.getLatitude() + ", " + statusGeoLocation.getLongitude() + "'");
+        } else { LOGGER.info("geolocation: null"); }
 
         String jsonTweet = TwitterObjectFactory.getRawJSON(status);
         totalTextIndexed += jsonTweet.length();
@@ -311,6 +294,5 @@ public class TwitterSource extends AbstractSource
         LOGGER.info(String.format("There were %s exceptions ignored: ",
                 numFormatter.format(exceptionCount)));
     }
-
 
 }
