@@ -59,7 +59,6 @@ The name of these tables depends on the configured data model (see the [Configur
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity and entity's attribute, the notified/default FIWARE service path, the notified entityId and entityType, and the attribute name and type are concatenated in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
 It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
 
