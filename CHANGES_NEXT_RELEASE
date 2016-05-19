@@ -7,3 +7,4 @@
 - [cygnus] [feature] Add cygnus-common docker (#1021)
 - [cygnus] [doc] Add CartoDB related documentation (#1016)
 - [cygnus] [hardening] Add service port and api port as environment variables to Dockerfiles (#1020)
+- [cygnus-ngsi] [feature] Add distance analysis support to NGSICartoDBSink (#1026)
