@@ -42,8 +42,8 @@ public class NGSICartoDBSink extends NGSISink {
     private boolean ssl;
     private String apiKey;
     private boolean flipCoordinates;
-    private boolean enableRaw;
-    private boolean enableDistance;
+    protected boolean enableRaw;
+    protected boolean enableDistance;
     private String schema;
     private CartoDBBackendImpl backend;
     
@@ -67,7 +67,7 @@ public class NGSICartoDBSink extends NGSISink {
         // Read NGSISink general configuration
         super.configure(context);
         
-        // impose enable ower case, since PostgreSQL only accepts lower case
+        // Impose enable ower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
         
         // Read NGSICartoDB specific configuration
@@ -198,13 +198,13 @@ public class NGSICartoDBSink extends NGSISink {
                 } // if
                 
                 if (enableDistance) {
-                    persistDistanceAnalysis(cygnusEvent);
+                    persistDistanceEvent(cygnusEvent);
                 } // if
             } // for
 
             if (enableRaw) {
                 // persist the aggregation
-                persistAggregation(aggregator);
+                persistRawAggregation(aggregator);
             } // if
             
             batch.setPersisted(destination);
@@ -387,17 +387,6 @@ public class NGSICartoDBSink extends NGSISink {
         
     } // CartoDBAggregator
     
-    private void persistAggregation(CartoDBAggregator aggregator) throws Exception {
-        //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
-        String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
-        String withs = "";
-        String fields = aggregator.getFields();
-        String rows = aggregator.getRows();
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
-                + "), Table (" + tableName + "), Data (" + rows + ")");
-        backend.insert(tableName, withs, fields, rows);
-    } // persistAggregation
-    
     /*
     private String buildDbName(String service) throws Exception {
         String name = NGSIUtils.encodePostgreSQL(service, false);
@@ -455,8 +444,18 @@ public class NGSICartoDBSink extends NGSISink {
         return name;
     } // buildTableName
     
-    private void persistDistanceAnalysis(NGSIEvent event)
-        throws Exception {
+    private void persistRawAggregation(CartoDBAggregator aggregator) throws Exception {
+        //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
+        String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
+        String withs = "";
+        String fields = aggregator.getFields();
+        String rows = aggregator.getRows();
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
+                + "), Table (" + tableName + "), Data (" + rows + ")");
+        backend.insert(tableName, withs, fields, rows);
+    } // persistRawAggregation
+    
+    private void persistDistanceEvent(NGSIEvent event) throws Exception {
         // Get some values
         String servicePath = event.getServicePath();
         String entityId = event.getContextElement().getId();
@@ -577,6 +576,6 @@ public class NGSICartoDBSink extends NGSISink {
                 } // try catch
             } // if
         } // for
-    } // persistDistanceAnalysis
+    } // persistDistanceEvent
     
 } // NGSICartoDBSink
