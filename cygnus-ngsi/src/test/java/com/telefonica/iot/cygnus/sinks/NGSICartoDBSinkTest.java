@@ -59,8 +59,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -85,8 +88,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -111,8 +117,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -138,8 +147,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = "false";
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -162,10 +174,13 @@ public class NGSICartoDBSinkTest {
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
-        String enableLowercase = "false";
+        String enableLowercase = null; // default one
         String flipCoordinates = "falso";
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -179,6 +194,64 @@ public class NGSICartoDBSinkTest {
     } // testConfigureFlipCoordinatesOK
     
     /**
+     * [NGSICartoDBSink.configure] -------- Configured `enable_raw` cannot be different than `true` or `false`.
+     */
+    @Test
+    public void testConfigureEnableRawOK() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Configured `enable_raw` cannot be different than `true` or `false`");
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default value
+        String enableRaw = "falso";
+        String enableDistance = null; // default one
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'enable_raw=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'enable_raw=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableRawOK
+    
+    /**
+     * [NGSICartoDBSink.configure] -------- Configured `enable_distance` cannot be different than `true` or `false`.
+     */
+    @Test
+    public void testConfigureEnableDistanceOK() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Configured `enable_distance` cannot be different than `true` or `false`");
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = "falso";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'enable_distance=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'enable_distance=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableDistanceOK
+    
+    /**
      * [NGSICartoDBSink.start] -------- When started, a CartoDB backend is created.
      */
     @Test
@@ -190,8 +263,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -221,8 +297,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-service-path";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -262,8 +341,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/somePath";
         String entity = "someId_someType";
         String attribute = null; // irrelevant for this test
@@ -306,8 +388,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-attribute";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/somePath";
         String entity = "someId_someType";
         String attribute = "someName1_someType1";
@@ -348,8 +433,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-service-path";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -382,8 +470,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/";
         String entity = "someId_someType";
         String attribute = null; // irrelevant for this test
@@ -426,8 +517,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-attribute";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         String servicePath = "/";
         String entity = "someId_someType";
         String attribute = "someName1_someType1";
@@ -469,8 +563,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -522,8 +619,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -594,8 +694,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -668,8 +771,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -748,8 +854,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -811,8 +920,11 @@ public class NGSICartoDBSinkTest {
         String dataModel = "dm-by-entity";
         String enableLowercase = null; // default one
         String flipCoordinates = "true";
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
         NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates));
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -848,15 +960,17 @@ public class NGSICartoDBSinkTest {
     } // testAggregateCoordinatesAreFlipped
     
     private Context createContext(String endpoint, String apiKey, String dataModel, String enableLowercase,
-            String flipCoordinates) {
+            String flipCoordinates, String enableRaw, String enableDistance) {
         Context context = new Context();
         context.put("api_key", apiKey);
         context.put("batch_size", "100");
         context.put("batch_timeout", "30");
         context.put("batch_ttl", "10");
         context.put("data_model", dataModel);
+        context.put("enable_distance", enableDistance);
         context.put("enable_grouping", "false");
         context.put("enable_lowercase", enableLowercase);
+        context.put("enable_raw", enableRaw);
         context.put("endpoint", endpoint);
         context.put("flip_coordinates", flipCoordinates);
         return context;

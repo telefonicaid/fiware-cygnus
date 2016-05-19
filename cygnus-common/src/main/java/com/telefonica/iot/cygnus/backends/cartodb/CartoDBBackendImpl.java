@@ -21,6 +21,8 @@ import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import java.net.URLEncoder;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -42,10 +44,54 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
         super(new String[]{host}, port, ssl, false, null, null, null, null);
         this.apiKey = apiKey;
     } // CartoDBBackendImpl
+    
+    @Override
+    public boolean isEmpty(String tableName) throws Exception {
+        String query = "SELECT COUNT(*) FROM " + tableName;
+        String encodedQuery = URLEncoder.encode(query, "UTF-8");
+        String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
+        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
+
+        // check the status
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
+        } // if
+        
+        JSONArray rows = (JSONArray) response.getJsonObject().get("rows");
+        JSONObject countRow = (JSONObject) rows.get(0);
+        Long count = (Long) countRow.get("count");
+        return (count == 0);
+    } // isEmpty
 
     @Override
-    public void insert(String tableName, String fields, String rows) throws Exception {
-        String query = "INSERT INTO " + tableName + " " + fields + " VALUES " + rows;
+    public void createTable(String schema, String tableName, String fields) throws Exception {
+        // Create the table
+        String query = "CREATE TABLE " + tableName + " " + fields;
+        String encodedQuery = URLEncoder.encode(query, "UTF-8");
+        String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
+        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
+
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
+        } // if
+        
+        // CartoDBfy the table
+        query = "SELECT cdb_cartodbfytable('" + schema + "', '" + tableName + "')";
+        encodedQuery = URLEncoder.encode(query, "UTF-8");
+        relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
+        response = doRequest("GET", relativeURL, true, null, null);
+
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
+        } // if
+    } // createTable
+    
+    @Override
+    public void insert(String tableName, String withs, String fields, String rows) throws Exception {
+        String query = withs + "INSERT INTO " + tableName + " " + fields + " VALUES " + rows;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);
