@@ -87,12 +87,12 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableLowercaseAlwaysTrue
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured `flip_coordinates` cannot be different than `true` or `false`.
+     * [NGSICartoDBSink.configure] -------- Configured 'flip_coordinates' cannot be different than 'true' or 'false'.
      */
     @Test
     public void testConfigureFlipCoordinatesOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured `flip_coordinates` cannot be different than `true` or `false`");
+                + "-------- Configured 'flip_coordinates' cannot be different than 'true' or 'false'");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -117,12 +117,12 @@ public class NGSICartoDBSinkTest {
     } // testConfigureFlipCoordinatesOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured `enable_raw` cannot be different than `true` or `false`.
+     * [NGSICartoDBSink.configure] -------- Configured 'enable_raw' cannot be different than 'true' or 'false'.
      */
     @Test
     public void testConfigureEnableRawOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured `enable_raw` cannot be different than `true` or `false`");
+                + "-------- Configured 'enable_raw' cannot be different than 'true' or 'false'");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -147,12 +147,12 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableRawOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured `enable_distance` cannot be different than `true` or `false`.
+     * [NGSICartoDBSink.configure] -------- Configured 'enable_distance' cannot be different than 'true' or 'false'.
      */
     @Test
     public void testConfigureEnableDistanceOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured `enable_distance` cannot be different than `true` or `false`");
+                + "-------- Configured 'enable_distance' cannot be different than 'true' or 'false'");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -177,12 +177,12 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableDistanceOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured `keys_conf_file` cannot be empty.
+     * [NGSICartoDBSink.configure] -------- Configured 'keys_conf_file' cannot be empty.
      */
     @Test
     public void testConfigureKeysConfFileOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured `keys_conf_file` cannot be empty");
+                + "-------- Configured 'keys_conf_file' cannot be empty");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -198,10 +198,10 @@ public class NGSICartoDBSinkTest {
         try {
             assertTrue(sink.invalidConfiguration);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - 'enable_distance=falso' was detected");
+                    + "-  OK  - Empty 'keys_conf_file' was detected");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - 'enable_distance=falso' was not detected");
+                    + "- FAIL - Empty 'keys_conf_file' was not detected");
             throw e;
         } // try catch
     } // testConfigureKeysConfFileOK
