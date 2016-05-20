@@ -78,10 +78,10 @@ public class NGSICartoDBSinkTest {
         try {
             assertTrue(sink.enableLowercase);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - 'enable_lowercase=false' was confiured, nevertheless it is always true by default");
+                    + "-  OK  - 'enable_lowercase=false' was configured, nevertheless it is always true by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - 'enable_lowercase=false' was confiured and it is really false");
+                    + "- FAIL - 'enable_lowercase=false' was configured and it is really false");
             throw e;
         } // try catch
     } // testConfigureEnableLowercaseAlwaysTrue
