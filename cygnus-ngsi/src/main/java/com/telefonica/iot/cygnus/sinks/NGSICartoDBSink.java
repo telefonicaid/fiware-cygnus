@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -77,6 +78,14 @@ public class NGSICartoDBSink extends NGSISink {
         
         // Impose enable lower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
+        
+        // Check the data model is not different than dm-by-service-path or dm-by-entity
+        if (dataModel == DataModel.DMBYSERVICE || dataModel == DataModel.DMBYATTRIBUTE) {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (data_model="
+                    + dataModel.toString() + ") -- Must be 'dm-by-service-path' or 'dm-by-entity'");
+            return;
+        } // if else
         
         // Read other configuration parameters
         keysConfFile = context.getString("keys_conf_file");
@@ -435,7 +444,7 @@ public class NGSICartoDBSink extends NGSISink {
         } // aggregate
         
     } // CartoDBAggregator
-    
+
     private void persistRawAggregation(CartoDBAggregator aggregator) throws Exception {
         //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
@@ -573,6 +582,12 @@ public class NGSICartoDBSink extends NGSISink {
         } // for
     } // persistDistanceEvent
     
+    /**
+     * Builds a schema name for CartoDB given a service.
+     * @param service
+     * @return The schema name for CartoDB
+     * @throws Exception
+     */
     protected String buildSchemaName(String service) throws Exception {
         String name = NGSIUtils.encodePostgreSQL(service, false);
 
