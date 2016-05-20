@@ -25,11 +25,12 @@ public interface CartoDBBackend {
     
     /**
      * Gets if the given table is empty ot not.
+     * @param schema
      * @param tableName
      * @return True if the given table is empty, false otherwise
      * @throws Exception
      */
-    boolean isEmpty(String tableName) throws Exception;
+    boolean isEmpty(String schema, String tableName) throws Exception;
     
     /**
      * Creates a table with the given name.
@@ -42,12 +43,13 @@ public interface CartoDBBackend {
     
     /**
      * Inserts the given rows regarding the given fields in the given table; withs are prefixed to the query.
+     * @param schema
      * @param tableName
      * @param withs
      * @param fields
      * @param rows
      * @throws java.lang.Exception
      */
-    void insert(String tableName, String withs, String fields, String rows) throws Exception;
+    void insert(String schema, String tableName, String withs, String fields, String rows) throws Exception;
     
 } // CartoDBBackend
