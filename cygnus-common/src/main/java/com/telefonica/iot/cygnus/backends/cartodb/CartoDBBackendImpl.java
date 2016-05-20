@@ -37,8 +37,8 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
      * Constructor.
      * @param host
      * @param port
-     * @param apiKey
      * @param ssl
+     * @param apiKey
      */
     public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey) {
         super(new String[]{host}, port, ssl, false, null, null, null, null);
@@ -46,8 +46,8 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     } // CartoDBBackendImpl
     
     @Override
-    public boolean isEmpty(String tableName) throws Exception {
-        String query = "SELECT COUNT(*) FROM " + tableName;
+    public boolean isEmpty(String schema, String tableName) throws Exception {
+        String query = "SELECT COUNT(*) FROM " + schema + "." + tableName;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);
@@ -67,7 +67,7 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     @Override
     public void createTable(String schema, String tableName, String fields) throws Exception {
         // Create the table
-        String query = "CREATE TABLE " + tableName + " " + fields;
+        String query = "CREATE TABLE " + schema + "." + tableName + " " + fields;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);
@@ -90,8 +90,8 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     } // createTable
     
     @Override
-    public void insert(String tableName, String withs, String fields, String rows) throws Exception {
-        String query = withs + "INSERT INTO " + tableName + " " + fields + " VALUES " + rows;
+    public void insert(String schema, String tableName, String withs, String fields, String rows) throws Exception {
+        String query = withs + "INSERT INTO " + schema + "." + tableName + " " + fields + " VALUES " + rows;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
         JsonResponse response = doRequest("GET", relativeURL, true, null, null);

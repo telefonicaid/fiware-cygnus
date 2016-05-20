@@ -18,17 +18,12 @@
 package com.telefonica.iot.cygnus.interceptors;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import com.telefonica.iot.cygnus.utils.JsonUtils;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -49,24 +44,26 @@ public class CygnusGroupingRules {
         lastIndex = 0;
         
         // read the grouping rules file
-        // a JSONParse(groupingRulesFileName) method cannot be used since the file may contain comment lines
-        // starting by the '#' character (comments)
-        String jsonStr = readGroupingRulesFile(groupingRulesFileName);
-
-        if (jsonStr == null) {
-            LOGGER.info("No grouping rules have been read");
+        String jsonStr;
+        
+        try {
+            jsonStr = JsonUtils.readJsonFile(groupingRulesFileName);
+        } catch (Exception e) {
+            LOGGER.info("No grouping rules have been read. Details: " + e.getMessage());
             return;
-        } // if
+        } // try catch
 
         LOGGER.info("Grouping rules read: " + jsonStr);
 
         // parse the Json containing the grouping rules
-        JSONArray jsonGroupingRules = (JSONArray) parseGroupingRules(jsonStr);
-
-        if (jsonGroupingRules == null) {
-            LOGGER.warn("Grouping rules syntax has errors");
+        JSONArray jsonGroupingRules;
+        
+        try {
+            jsonGroupingRules = (JSONArray) JsonUtils.parseJsonString(jsonStr).get("grouping_rules");
+        } catch (Exception e) {
+            LOGGER.warn("Grouping rules syntax has errors. Details: " + e.getMessage());
             return;
-        } // if
+        } // try catch
 
         LOGGER.info("Grouping rules syntax is OK");
 
@@ -239,53 +236,5 @@ public class CygnusGroupingRules {
             } // if else
         } // for
     } // setRules
-    
-    private String readGroupingRulesFile(String groupingRulesFileName) {
-        if (groupingRulesFileName == null) {
-            return null;
-        } // if
-
-        String jsonStr = "";
-        BufferedReader reader;
-
-        try {
-            reader = new BufferedReader(new FileReader(groupingRulesFileName));
-        } catch (FileNotFoundException e) {
-            LOGGER.error("File not found. Details=" + e.getMessage() + ")");
-            return null;
-        } // try catch
-
-        String line;
-
-        try {
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("#") || line.length() == 0) {
-                    continue;
-                } // if
-
-                jsonStr += line;
-            } // while
-
-            return jsonStr;
-        } catch (IOException e) {
-            LOGGER.error("Error while reading the Json-based grouping rules file. Details=" + e.getMessage() + ")");
-            return null;
-        } // try catch
-    } // readGroupingRulesFile
-
-    private JSONArray parseGroupingRules(String jsonStr) {
-        if (jsonStr == null) {
-            return null;
-        } // if
-
-        JSONParser jsonParser = new JSONParser();
-
-        try {
-            return (JSONArray) ((JSONObject) jsonParser.parse(jsonStr)).get("grouping_rules");
-        } catch (ParseException e) {
-            LOGGER.error("Error while parsing the Json-based grouping rules file. Details=" + e.getMessage());
-            return null;
-        } // try catch
-    } // parseGroupingRules
 
 } // CygnusGroupingRules
