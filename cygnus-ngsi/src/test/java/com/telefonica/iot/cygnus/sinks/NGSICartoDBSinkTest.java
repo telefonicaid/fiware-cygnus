@@ -25,6 +25,9 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata
 import com.telefonica.iot.cygnus.sinks.NGSICartoDBSink.CartoDBAggregator;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
@@ -32,7 +35,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -40,99 +45,15 @@ import org.junit.Test;
  */
 public class NGSICartoDBSinkTest {
     
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+    
     /**
      * Constructor.
      */
     public NGSICartoDBSinkTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
     } // NGSICartoDBSinkTest
-    
-    /**
-     * [NGSICartoDBSink.configure] -------- Configured 'endpoint' cannot be null.
-     */
-    @Test
-    public void testConfigureEndpointIsNotNull() {
-        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured 'endpoint' cannot be null");
-        String endpoint = null;
-        String apiKey = "1234567890abcdef";
-        String dataModel = null; // default one
-        String enableLowercase = null; // default one
-        String flipCoordinates = null; // default one
-        String enableRaw = null; // default one
-        String enableDistance = null; // default one
-        NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
-        
-        try {
-            assertTrue(sink.invalidConfiguration);
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - null value detected for 'endpoint'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - null value not detected for 'endpoint'");
-            throw e;
-        } // try catch
-    } // testConfigureEndpointIsNotNull
-    
-    /**
-     * [NGSICartoDBSink.configure] -------- Configured 'endpoint' must be a URI using the 'http' or 'https' schema.
-     */
-    @Test
-    public void testConfigureEndpointUsesHttpSchema() {
-        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured 'endpoint' must be a URI using the 'http' or 'https' schema");
-        String endpoint = "localhost:443";
-        String apiKey = "1234567890abcdef";
-        String dataModel = null; // default one
-        String enableLowercase = null; // default one
-        String flipCoordinates = null; // default one
-        String enableRaw = null; // default one
-        String enableDistance = null; // default one
-        NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
-        
-        try {
-            assertTrue(sink.invalidConfiguration);
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - Invalid or inexistent schema detected for 'endpoint'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - Invalid or inexistent schema not detected for 'endpoint'");
-            throw e;
-        } // try catch
-    } // testConfigureEndpointIsNotNull
-    
-    /**
-     * [NGSICartoDBSink.configure] -------- Configured 'api_key' cannot be null.
-     */
-    @Test
-    public void testConfigureApiKeyIsNotNull() {
-        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured 'api_key' cannot be null");
-        String endpoint = "https://localhost";
-        String apiKey = null;
-        String dataModel = null; // default one
-        String enableLowercase = null; // default one
-        String flipCoordinates = null; // default one
-        String enableRaw = null; // default one
-        String enableDistance = null; // default one
-        NGSICartoDBSink sink = new NGSICartoDBSink();
-        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
-        
-        try {
-            assertTrue(sink.invalidConfiguration);
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - null value detected for 'api_key'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - null value not detected for 'api_key'");
-            throw e;
-        } // try catch
-    } // testConfigureApiKeyIsNotNull
     
     /**
      * [NGSICartoDBSink.configure] -------- Independently of the configured value, enable_lowercase is always 'true'
@@ -149,9 +70,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -178,9 +100,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = "falso";
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -207,9 +130,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default value
         String enableRaw = "falso";
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -235,10 +159,11 @@ public class NGSICartoDBSinkTest {
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
+        String keysConfFile = "/keys.conf";
         String enableDistance = "falso";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -252,12 +177,56 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableDistanceOK
     
     /**
-     * [NGSICartoDBSink.start] -------- When started, a CartoDB backend is created.
+     * [NGSICartoDBSink.configure] -------- Configured `keys_conf_file` cannot be empty.
+     */
+    @Test
+    public void testConfigureKeysConfFileOK() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Configured `keys_conf_file` cannot be empty");
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default_one
+        String keysConfFile = null; // empty file
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        
+        try {
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'enable_distance=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'enable_distance=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureKeysConfFileOK
+    
+    /**
+     * [NGSICartoDBSink.start] -------- When started, a CartoDB backend is created from a valid keys file.
      */
     @Test
     public void testStartBackendCreated() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
-                + "-------- When started, a CartoDB backend is created");
+                + "-------- When started, a CartoDB backend is created from a valid keys file");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -265,14 +234,15 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
         try {
-            assertTrue(sink.getBackend() != null);
+            assertTrue(sink.getBackends() != null);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
                     + "-  OK  - A CartoDB backend has been created");
         } catch (AssertionError e) {
@@ -282,6 +252,376 @@ public class NGSICartoDBSinkTest {
         } // try catch
     } // testStartBackendCreated
     
+    /**
+     * [NGSICartoDBSink.start] -------- Username field must appear within an entry in the keys file.
+     */
+    @Test
+    public void testStartUsernameNotNullKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Username field must appear within an entry in the keys file");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"endpoint\":\"http://frb.com\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Null username has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Null username has not been detected");
+            throw e;
+        } // try catch
+    } // testStartUsernameNotNullKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Username within an entry in the keys file cannot be empty.
+     */
+    @Test
+    public void testStartUsernameNotEmptyKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Username within an entry in the keys file cannot be empty");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"\",\"endpoint\":\"http://frb.com\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Empty username has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Empty username has not been detected");
+            throw e;
+        } // try catch
+    } // testStartUsernameNotEmptyKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Endpoint field must appear within an entry in the keys file.
+     */
+    @Test
+    public void testStartEndpointNotNullKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Endpoint field must appear within an entry in the keys file");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Null endpoint has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Null endpoint has not been detected");
+            throw e;
+        } // try catch
+    } // testStartEndpointNotNullKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Endpoint within an entry in the keys file cannot be empty.
+     */
+    @Test
+    public void testStartEndpointNotEmptyKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Endpoint within an entry in the keys file cannot be empty");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Empty endpoint has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Empty endpoint has not been detected");
+            throw e;
+        } // try catch
+    } // testStartEndpointNotEmptyKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Endpoint within an entry in the keys file must be a URI using the http or
+     * https schema.
+     */
+    @Test
+    public void testStartEndpointSchemaOKKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Endpoint within an entry in the keys file must be a URI using the http or https schema");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"htt://frb.com\",\"key\":\"xxx\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Invalid 'htt' schema in the endpoint has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Invalid 'htt' schema in the endpoint has not been detected");
+            throw e;
+        } // try catch
+    } // testStartEndpointSchemaOKKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Key field must appear within an entry in the keys file.
+     */
+    @Test
+    public void testStartKeyNotNullKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Key field must appear within an entry in the keys file");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Null key has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Null key has not been detected");
+            throw e;
+        } // try catch
+    } // testStartKeyNotNullKeysFile
+    
+    /**
+     * [NGSICartoDBSink.start] -------- Key within an entry in the keys file cannot be empty.
+     */
+    @Test
+    public void testStartKeyNotEmptyKeysFile() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                + "-------- Key within an entry in the keys file cannot be empty");
+        File file;
+        
+        try {
+            file = folder.newFile("keys.conf");
+            PrintWriter out = new PrintWriter(file);
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\",\"key\":\"\"}]}");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - There was some problem when mocking the keys file");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = file.getAbsolutePath();
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        sink.setChannel(new MemoryChannel());
+        sink.start();
+        
+        try {
+            assertEquals(null, sink.getBackends());
+            assertTrue(sink.invalidConfiguration);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "-  OK  - Empty key has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.start]")
+                    + "- FAIL - Empty key has not been detected");
+            throw e;
+        } // try catch
+    } // testStartKeyNotEmptyKeysFile
+    
+    /**
+     * [NGSICartoDBSink.buildSchemaName] -------- The schema name is equals to the notified/defaulted service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildSchemaName() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
+                + "-------- The schema name is equals to the notified/defaulted service");
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = null; // default one
+        String enableLowercase = null; // default one
+        String flipCoordinates = null; // default one
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String service = "someService";
+        
+        try {
+            String builtSchemaName = sink.buildSchemaName(service);
+        
+            try {
+                assertEquals("someservice", builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
+                        + "-  OK  - '" + builtSchemaName + "' is equals to the lower case of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
+                        + "- FAIL - '" + builtSchemaName + "' is not equals to the lower case of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
+                    + "- FAIL - There was some problem when building the schema name");
+            throw e;
+        } // try catch
+    } // testBuildSchemaName
+
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the CartoDB table name is lower case of <service-path>.
@@ -299,9 +639,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -343,9 +684,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/somePath";
         String entity = "someId_someType";
         String attribute = null; // irrelevant for this test
@@ -390,9 +732,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/somePath";
         String entity = "someId_someType";
         String attribute = "someName1_someType1";
@@ -435,9 +778,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -472,9 +816,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/";
         String entity = "someId_someType";
         String attribute = null; // irrelevant for this test
@@ -519,9 +864,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         String servicePath = "/";
         String entity = "someId_someType";
         String attribute = "someName1_someType1";
@@ -565,9 +911,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -621,9 +968,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -696,9 +1044,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -773,9 +1122,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -856,9 +1206,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -922,9 +1273,10 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = "true";
         String enableRaw = null; // default one
         String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
-                enableDistance));
+                enableDistance, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -960,7 +1312,7 @@ public class NGSICartoDBSinkTest {
     } // testAggregateCoordinatesAreFlipped
     
     private Context createContext(String endpoint, String apiKey, String dataModel, String enableLowercase,
-            String flipCoordinates, String enableRaw, String enableDistance) {
+            String flipCoordinates, String enableRaw, String enableDistance, String keysConfFile) {
         Context context = new Context();
         context.put("api_key", apiKey);
         context.put("batch_size", "100");
@@ -973,6 +1325,7 @@ public class NGSICartoDBSinkTest {
         context.put("enable_raw", enableRaw);
         context.put("endpoint", endpoint);
         context.put("flip_coordinates", flipCoordinates);
+        context.put("keys_conf_file", keysConfFile);
         return context;
     } // createContext
     
