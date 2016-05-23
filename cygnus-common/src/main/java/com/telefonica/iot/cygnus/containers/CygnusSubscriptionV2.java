@@ -61,9 +61,7 @@ public class CygnusSubscriptionV2 {
             // check error messages from subfields of subscription 
             int subjectMsg = isSubjectValid(subject);
             int notificationMsg = isNotificationValid(notification);
-            
-            LOGGER.info("subject: " + subjectMsg + ", notification: " + notificationMsg);
-                        
+                                    
             // check if entire subscription is emtpy        
             if ((description == null) && (subjectMsg == 11) && 
                     (notificationMsg == 1) &&  (expires == null)
@@ -194,9 +192,7 @@ public class CygnusSubscriptionV2 {
             // get error numbers of each field
             int conditionMsg = isConditionValid(condition);
             int entitiesMsg = isEntitiesValid(entities);
-            
-            LOGGER.info("conditions: " + conditionMsg + ", entities: " + entitiesMsg);
-                        
+                                    
             if ((conditionMsg == 1) && (entitiesMsg == 1)) {
                 LOGGER.debug("Field 'subject' is empty");
                 return 12;
@@ -253,9 +249,7 @@ public class CygnusSubscriptionV2 {
         } // isSubjectsValid
         
         private int isNotificationValid (Notification notification) {
-            
-            LOGGER.info(notification);
-            
+                        
             if (notification == null) {
                 LOGGER.debug("Field 'notification' is missing");
                 return 1;
@@ -264,13 +258,8 @@ public class CygnusSubscriptionV2 {
             SubscriptionHttp http = notification.getHttp();
             ArrayList<String> attrs = notification.getAttrs();
             
-            LOGGER.info(http == null);
-            LOGGER.info("http: " + http.toString());
-            
             int httpMsg = isHttpValid(http); 
-            
-            LOGGER.info("httpMessage: " + httpMsg);
-            
+                        
             if ((attrs == null) || (httpMsg == 1)){
                 LOGGER.debug("Field 'notification' has missing fields");
                 return 2;
@@ -343,15 +332,11 @@ public class CygnusSubscriptionV2 {
                 String type = entity.getEntityType();
                 String isPattern = entity.getIdPattern();
                 
-                LOGGER.info("type: " + type + ", pattern: " + isPattern);
-
                 validFields &= ((type != null) && (isPattern != null));
                 emptyFields &= validFields && ((type.length() == 0) || 
                         (isPattern.length() == 0)); 
             } // for
             
-            LOGGER.info("ENTITIES: Valid: " + validFields + ", empty: " + emptyFields);
-
             // check if entities contains all the required fields
             if (!validFields) {
                 LOGGER.debug("There are missing fields in entities");
@@ -491,8 +476,6 @@ public class CygnusSubscriptionV2 {
         int subscriptionMsg = orionSubscription.isValid();  
         int endpointMsg = orionEndpoint.isValid();
         
-        LOGGER.info("Subs: " + subscriptionMsg + ", Endpoint: " + endpointMsg);
-
         switch (subscriptionMsg) {
             // case of missing entire subscription
             case 11:
