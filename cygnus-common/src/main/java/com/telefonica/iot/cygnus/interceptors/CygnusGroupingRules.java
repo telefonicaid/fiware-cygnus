@@ -32,30 +32,27 @@ import org.json.simple.JSONObject;
 public class CygnusGroupingRules {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CygnusGroupingRules.class);
-    private LinkedList<CygnusGroupingRule> groupingRules;
-    private long lastIndex;
+    private LinkedList<CygnusGroupingRule> groupingRules = new LinkedList<CygnusGroupingRule>();
+    private long lastIndex = 0;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
      */
     public CygnusGroupingRules(String groupingRulesFileName) {
-        groupingRules = new LinkedList<CygnusGroupingRule>();
-        lastIndex = 0;
-        
-        // read the grouping rules file
+        // Read the grouping rules file
         String jsonStr;
         
         try {
             jsonStr = JsonUtils.readJsonFile(groupingRulesFileName);
         } catch (Exception e) {
-            LOGGER.info("No grouping rules have been read. Details: " + e.getMessage());
+            LOGGER.warn("No grouping rules have been read. Details: " + e.getMessage());
             return;
         } // try catch
 
         LOGGER.info("Grouping rules read: " + jsonStr);
 
-        // parse the Json containing the grouping rules
+        // Parse the Json containing the grouping rules
         JSONArray jsonGroupingRules;
         
         try {
@@ -67,10 +64,50 @@ public class CygnusGroupingRules {
 
         LOGGER.info("Grouping rules syntax is OK");
 
-        // create a list of grouping rules, with precompiled regex
+        // Create a list of grouping rules, with precompiled regex
         setRules(jsonGroupingRules);
-        LOGGER.info("Grouping rules regex'es have been compiled");
+        
+        if (groupingRules.isEmpty()) {
+            LOGGER.warn("Grouping rules discarded due to missing or empty values");
+        } else {
+            LOGGER.info("Grouping rules loaded in memory");
+        } // if else
     } // CygnusGroupingRules
+
+    private void setRules(JSONArray jsonRules) {
+        for (Object jsonGroupingRule : jsonRules) {
+            JSONObject jsonRule = (JSONObject) jsonGroupingRule;
+            int err = CygnusGroupingRule.isValid(jsonRule, false);
+
+            if (err == 0) {
+                CygnusGroupingRule rule = new CygnusGroupingRule(jsonRule);
+                groupingRules.add(rule);
+                lastIndex = rule.getId();
+            } else {
+                switch (err) {
+                    case 1:
+                        LOGGER.debug("Invalid grouping rule, some field is missing. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    case 2:
+                        LOGGER.debug("Invalid grouping rule, some field is empty. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    case 3:
+                        LOGGER.debug("Invalid grouping rule, some field is not allowed. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                        break;
+                    case 4:
+                        LOGGER.debug("Invalid grouping rule, the fiware-servicePath does not start with '/'. "
+                                + "It will be discarded. Details:" + jsonRule.toJSONString());
+                        break;
+                    default:
+                        LOGGER.debug("Invalid grouping rule. It will be discarded. Details:"
+                                + jsonRule.toJSONString());
+                } // switch
+            } // if else
+        } // for
+    } // setRules
     
     /**
      * Gets the rule matching the given string.
@@ -199,42 +236,13 @@ public class CygnusGroupingRules {
     protected LinkedList<CygnusGroupingRule> getRules() {
         return groupingRules;
     } // getRules
-
-    private void setRules(JSONArray jsonRules) {
-        groupingRules = new LinkedList<CygnusGroupingRule>();
-
-        for (Object jsonGroupingRule : jsonRules) {
-            JSONObject jsonRule = (JSONObject) jsonGroupingRule;
-            int err = CygnusGroupingRule.isValid(jsonRule, false);
-
-            if (err == 0) {
-                CygnusGroupingRule rule = new CygnusGroupingRule(jsonRule);
-                groupingRules.add(rule);
-                lastIndex = rule.getId();
-            } else {
-                switch (err) {
-                    case 1:
-                        LOGGER.warn("Invalid grouping rule, some field is missing. It will be discarded. Details:"
-                                + jsonRule.toJSONString());
-                        break;
-                    case 2:
-                        LOGGER.warn("Invalid grouping rule, some field is empty. It will be discarded. Details:"
-                                + jsonRule.toJSONString());
-                        break;
-                    case 3:
-                        LOGGER.warn("Invalid grouping rule, some field is not allowed. It will be discarded. Details:"
-                                + jsonRule.toJSONString());
-                        break;
-                    case 4:
-                        LOGGER.warn("Invalid grouping rule, the fiware-servicePath does not start with '/'. "
-                                + "It will be discarded. Details:" + jsonRule.toJSONString());
-                        break;
-                    default:
-                        LOGGER.warn("Invalid grouping rule. It will be discarded. Details:"
-                                + jsonRule.toJSONString());
-                } // switch
-            } // if else
-        } // for
-    } // setRules
+    
+    /**
+     * Gets the last index used for indexing rules. It is protected since it is only used by the tests.
+     * @return
+     */
+    protected long getLastIndex() {
+        return lastIndex;
+    } // getLastIndex
 
 } // CygnusGroupingRules
