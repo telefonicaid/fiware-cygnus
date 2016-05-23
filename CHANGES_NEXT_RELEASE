@@ -11,3 +11,4 @@
 - [cygnus-ngsi] [feature] Add multitenancy support to NGSICartoDBSink (#1028)
 - [cygnus-ngsi] [hardening] Remove data model by attribute support in NGSICartoDBSink (#1030)
 - [cygnus-common] [bug] Fixed error when POST a CygnusSubscription without subscription field (#1034)
+- [cygnus] [doc] Update the sink docs regarding the naming conventions (#630)
