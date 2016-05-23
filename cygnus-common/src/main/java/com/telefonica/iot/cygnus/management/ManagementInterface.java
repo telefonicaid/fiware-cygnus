@@ -1315,6 +1315,11 @@ public class ManagementInterface extends AbstractHandler {
             // cases of missing endpoint or subscription
             case 11:
                 response.getWriter().println("{\"success\":\"false\","
+                        + "\"error\":\"Empty subscription\"}");
+                LOGGER.error("Empty subscription");
+                return;
+            case 12:
+                response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Missing subscription\"}");
                 LOGGER.error("Missing subscription");
                 return;
