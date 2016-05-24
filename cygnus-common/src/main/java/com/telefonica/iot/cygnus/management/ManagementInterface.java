@@ -643,8 +643,9 @@ public class ManagementInterface extends AbstractHandler {
         LOGGER.debug("Rule added. Grouping rules after adding the new rule: " + rulesStr);
     } // handlePostGroupingRules
 
-    private void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
         
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -689,6 +690,7 @@ public class ManagementInterface extends AbstractHandler {
         if (ngsiVersion.equals("1")) {
             try {
                 cygnusSubscriptionv1 = gson.fromJson(jsonStr, CygnusSubscriptionV1.class);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
@@ -755,6 +757,7 @@ public class ManagementInterface extends AbstractHandler {
             
             try {
                 cygnusSubscriptionv2 = gson.fromJson(jsonStr, CygnusSubscriptionV2.class);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
@@ -820,7 +823,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePostSubscription
     
-    private void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
@@ -875,6 +878,7 @@ public class ManagementInterface extends AbstractHandler {
         
         try {
             endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -1315,11 +1319,6 @@ public class ManagementInterface extends AbstractHandler {
             // cases of missing endpoint or subscription
             case 11:
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"error\":\"Empty subscription\"}");
-                LOGGER.error("Empty subscription");
-                return;
-            case 12:
-                response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Missing subscription\"}");
                 LOGGER.error("Missing subscription");
                 return;
@@ -1561,6 +1560,15 @@ public class ManagementInterface extends AbstractHandler {
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
         return corrId;
     } // setCorrelator
+    
+    
+    /**
+     * SetOrionBackend: Sets a given orionBackend.
+     * 
+     * @param orionBackend
+     */
+    protected void setOrionBackend(OrionBackendImpl orionBackend) {
+        this.orionBackend = orionBackend;
+    } // setOrionBackend
 
 } // ManagementInterface
-
