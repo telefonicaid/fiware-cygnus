@@ -4,7 +4,16 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to CKAN data structures](#section1.2)
+        * [Organizations naming conventions](#section1.2.1)
+        * [Package/dataset naming conventions](#section1.2.2)
+        * [Resource naming conventions](#section1.2.3)
+        * [Row-like storing](#section1.2.4)
+        * [Column-like storing](#section1.2.5)
     * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Organization, dataset and resource names](#section1.3.2)
+        * [Raw-like storing](#section1.3.3)
+        * [Column-like storing](#section1.3.4)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -35,10 +44,28 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to CKAN data structures
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `NGSICKANSink` each time a Flume event is going to be persisted.
 
-According to the [naming conventions](naming_convetions.md), an organization called as the `fiware-service` header values is created (if not existing yet). The same occurs with a package/dataset named as the `fiware-servicePath` header value.
+[Top](#top)
 
-The context responses/entities within the container are iterated, and a resource named as the `destination` header value is created (if not yet existing). A datastore associated to the resource is created as well.
+####<a name="section1.2.1"></a>Organizations naming conventions
+An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
+[Top](#top)
+
+####<a name="section1.2.2"></a>Packages/datasets naming conventions
+A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
+
+Please observe if the notified/defaulted FIWARE service path is the root one, i.e. `/`, then the package/dataset name is equals to the organization name.
+
+The concatenation character is the underscore, `_`.
+
+[Top](#top)
+
+####<a name="section1.2.3"></a>Resources naming conventions
+CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.4"></a>Raw-like storing
 The context attributes within each context response/entity are iterated, and a new data row is upserted in the datastore related to the resource. The format for this append depends on the configured persistence mode:
 
 * `row`: A data row is upserted for each notified context attribute. This kind of row will always contain 8 fields:
@@ -51,6 +78,10 @@ The context attributes within each context response/entity are iterated, and a n
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
     * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+
+[Top](#top)
+
+####<a name="section1.2.4"></a>Column-like storing
 * `column`: A single row is upserted for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus four additional fields:
     * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `fiwareServicePath`: The notified one or the default one.
