@@ -63,34 +63,39 @@ The concatenation character is the underscore, `_`.
 ####<a name="section1.2.3"></a>Resources naming conventions
 CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules) within the Flume event.
 
+It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resoruce above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
+
 [Top](#top)
 
-####<a name="section1.2.4"></a>Raw-like storing
-The context attributes within each context response/entity are iterated, and a new data row is upserted in the datastore related to the resource. The format for this append depends on the configured persistence mode:
+####<a name="section1.2.4"></a>Row-like storing
+Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
-* `row`: A data row is upserted for each notified context attribute. This kind of row will always contain 8 fields:
-    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-    * `attrName`: Notified attribute name.
-    * `attrType`: Notified attribute type.
-    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-    * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+* `recvTimeTs`: UTC timestamp expressed in miliseconds.
+* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* `attrName`: Notified attribute name.
+* `attrType`: Notified attribute type.
+* `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
 
 [Top](#top)
 
 ####<a name="section1.2.4"></a>Column-like storing
-* `column`: A single row is upserted for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, called `<attrName>`, and other for the metadata, called `<attrName>_md`), plus four additional fields:
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: The notified one or the default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
+Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
+
+* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: The notified one or the default one.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+*  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+*  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -123,8 +128,15 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
+    
+[Top](#top)
 
-Assuming `api_key=myapikey` and `attr_persistence=row` as configuration parameter, then `NGSICKANSink` will persist the data within the body as:
+####<a section="1.3.2"></a>Organization, dataset and resource names
+
+[Top](#top)
+
+####<a section="1.3.2"></a>Row-like storing
+Assuming `attr_persistence=row` as configuration parameter, then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://192.168.80.34:80/api/3/action/datastore_search?resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7"
     {
@@ -208,6 +220,9 @@ Assuming `api_key=myapikey` and `attr_persistence=row` as configuration paramete
         }
     }
 
+[Top](#top)
+
+####<a section="1.3.2"></a>Column-like storing
 If `attr_persistence=colum` then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://130.206.83.8:80/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986"
@@ -372,26 +387,31 @@ This section is built upon the assumption you are familiar with the CKAN API. If
 First of all, you'll need a CKAN organization and package/dataset before creating a resource and an associated datastore in order to persist the data.
 
 Creating an organization, let's say in [`demo.ckan.org`](http://demo.ckan.org/) for the sake of demonstration, but should be a CKAN deployment of yours; the organization name is `service`, because our entity will be in that FIWARE service:
+
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/organization_create" -d '{"name":"service"}' -H "Authorization: xxxxxxxx"
 ```
 
-Creating a package/dataset within the above organization; the package name is `service_test`, because our entity will be in the FIWARE service `service` and in the FIWARE service path service_test:
+Creating a package/dataset within the above organization; the package name is `service_test`, because our entity will be in the FIWARE service `service` and in the FIWARE service path service\_test:
+
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/package_create" -d '{"name":"service_test","owner_org":"service"}' -H "Authorization: xxxxxxxx"
 ```
 
 Creating a resource within the above package/dataset (the package ID is given in the response to the above package creation request); the name of the resource is `room1_room` because the entity ID will be `room1` and its type `room`:
+
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/resource_create" -d '{"name":"room1_room","url":"none","format":"","package_id":"d35fca28-732f-4096-8376-944563f175ba"}' -H "Authorization: xxxxxxxx"
 ```
 
 Finally, creating a datastore associated to the above resource and suitable for receiving Cgynus data in column mode (the resource ID is given in the response to the above resource creation request):
+
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/datastore_create" -d '{"fields":[{"id":"recvTime","type":"text"}, {"id":"fiwareServicePath","type":"text"}, {"id":"entityId","type":"text"}, {"id":"entityType","type":"text"}, {"id":"temperature","type":"float"}, {"id":"temperature_md","type":"json"}],"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7","force":"true"}' -H "Authorization: xxxxxxxx"
 ```
 
 Now, Cygnus is able to persist data for an entity with ID `room1` of type `room` in the `service` service, `service_test` service path:
+
 ```
 time=2016-04-26T15:54:45.753CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[240] : Starting internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
 time=2016-04-26T15:54:45.754CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[256] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
@@ -402,6 +422,7 @@ time=2016-04-26T15:55:08.948CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc379
 ```
 
 The insertion can be checked through the CKAN API as well:
+
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/datastore_search" -d '{"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7"}' -H "Authorization: xxxxxxxx"
 ```
