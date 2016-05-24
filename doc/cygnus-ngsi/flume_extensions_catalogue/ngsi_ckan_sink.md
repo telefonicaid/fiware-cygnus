@@ -61,7 +61,7 @@ The concatenation character is the underscore, `_`.
 [Top](#top)
 
 ####<a name="section1.2.3"></a>Resources naming conventions
-CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules) within the Flume event.
+CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resoruce above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
 

@@ -69,7 +69,7 @@ The following table summarizes the table name composition:
 | `/` | N/A | `<entityId>_<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules) within the Flume event.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
 [Top](#top)
 
