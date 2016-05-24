@@ -59,32 +59,31 @@ public class ManagementInterfaceTest {
 
         public StatusExposingServletResponse(HttpServletResponse response) {
             super(response);
-        }
+        } // StatusExposingServletResponse
 
         @Override
         public void sendError(int sc) throws IOException {
             httpStatus = sc;
             super.sendError(sc);
-        }
+        } // sendError
 
         @Override
         public void sendError(int sc, String msg) throws IOException {
             httpStatus = sc;
             super.sendError(sc, msg);
-        }
-
+        } // sendError
 
         @Override
         public void setStatus(int sc) {
             httpStatus = sc;
             super.setStatus(sc);
-        }
+        } // setStatus
 
         public int getStatus() {
             return httpStatus;
-        }
+        } // getStatus
 
-    }
+    } // StatusExposingServletResponse
     
     // mocks
     @Mock
@@ -221,9 +220,9 @@ public class ManagementInterfaceTest {
              
         try {
             managementInterface.handlePostSubscription(mockRequestV1, responseWrapper);
-        } catch (Exception x) {
+        } catch (Exception e) {
             System.out.println("There was some problem when handling the POST subscription");
-            throw x;
+            throw e;
         } // try catch
         
         try {
@@ -249,9 +248,9 @@ public class ManagementInterfaceTest {
         
         try {
             managementInterface.handlePostSubscription(mockRequestV2, responseWrapper);
-        } catch (Exception x) {
+        } catch (Exception e) {
             System.out.println("There was some problem when handling the POST subscription");
-            throw x;
+            throw e;
         } // try catch
         
         try {

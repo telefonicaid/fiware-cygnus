@@ -1560,6 +1560,12 @@ public class ManagementInterface extends AbstractHandler {
         return corrId;
     } // setCorrelator
     
+    
+    /**
+     * SetOrionBackend: Sets a given orionBackend.
+     * 
+     * @param orionBackend
+     */
     protected void setOrionBackend(OrionBackendImpl orionBackend) {
         this.orionBackend = orionBackend;
     } // setOrionBackend
