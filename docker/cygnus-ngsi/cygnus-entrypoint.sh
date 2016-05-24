@@ -18,8 +18,8 @@
 #
 
 # Change the MySQL user and password in the agent configuration file
-sed -i '/cygnus-ngsi.sinks.mysql-sink.mysql_username/c cygnus-ngsi.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} agent.conf
-sed -i '/cygnus-ngsi.sinks.mysql-sink.mysql_password/c cygnus-ngsi.sinks.mysql-sink.mysql_password = '${CYGNUS_MYSQL_PASS} agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password = '${CYGNUS_MYSQL_PASS} ${FLUME_HOME}/conf/agent.conf
 
 # Run the Cygnus command
 ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER}
