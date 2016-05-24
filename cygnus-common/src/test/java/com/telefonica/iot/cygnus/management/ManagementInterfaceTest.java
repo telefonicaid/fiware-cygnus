@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,9 +18,14 @@
 
 package com.telefonica.iot.cygnus.management;
 
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,25 +36,77 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*; // this is required by "when" like functions
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import javax.servlet.http.HttpServletResponseWrapper;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 
 /**
  *
  * @author frb
  */
+
 @RunWith(MockitoJUnitRunner.class)
 public class ManagementInterfaceTest {
     
-    // instance to be tested
-    private ManagementInterface managementInterface;
+    public ManagementInterfaceTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    }
+    
+    public class StatusExposingServletResponse extends HttpServletResponseWrapper {
+
+        private int httpStatus;
+
+        public StatusExposingServletResponse(HttpServletResponse response) {
+            super(response);
+        } // StatusExposingServletResponse
+
+        @Override
+        public void sendError(int sc) throws IOException {
+            httpStatus = sc;
+            super.sendError(sc);
+        } // sendError
+
+        @Override
+        public void sendError(int sc, String msg) throws IOException {
+            httpStatus = sc;
+            super.sendError(sc, msg);
+        } // sendError
+
+        @Override
+        public void setStatus(int sc) {
+            httpStatus = sc;
+            super.setStatus(sc);
+        } // setStatus
+
+        public int getStatus() {
+            return httpStatus;
+        } // getStatus
+
+    } // StatusExposingServletResponse
     
     // mocks
     @Mock
-    private HttpServletRequest mockRequest;
+    protected HttpServletRequest mockRequest;
     @Mock
     private HttpServletResponse mockResponse;
+    @Mock
+    private OrionBackendImpl orionBackend;
     
     // constants
     private final String requestURI = "/v1/version";
+    private final String postURIv1 = "/v1/subscriptions?ngsi_version=1";
+    private final String postURIv2 = "/v1/subscriptions?ngsi_version=2";
+    private final HttpServletResponse response = mock(HttpServletResponse.class);
+    private final HttpServletRequest mockRequestV1 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestNoSubscriptionV1 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestEmptyFieldV1 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestMissingFieldV1 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestNoSubscriptionV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestEmptyFieldV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestMissingFieldV2 = mock(HttpServletRequest.class);
+    
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -59,21 +116,84 @@ public class ManagementInterfaceTest {
      */
     @Before
     public void setUp() throws Exception {
-        // set up the instance of the tested class
-        managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        // Define subscriptions for each case
+        String subscriptionV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"duration\": \"P1M\",\"notifyConditions\": [{\"type\": \"ONCHANGE\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String subscriptionV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"2016-05-05T14:00:00.00Z\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String missingSubscriptionV1 = "{\"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String missingSubscriptionV2 = "{\"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String subsEmptyfieldV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"duration\": \"P1M\",\"notifyConditions\": [{\"type\": \"\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String subsMissingfieldV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"notifyConditions\": [{\"type\": \"ONCHANGE\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String subsEmptyfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String subsV2MissingfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
+        
+        // Define the readers with the subscriptions 
+        BufferedReader readerV1 = new BufferedReader(new StringReader(subscriptionV1));
+        BufferedReader readerV2 = new BufferedReader(new StringReader(subscriptionV2));
+        BufferedReader readerMissingSubsV1 = new BufferedReader(new StringReader(missingSubscriptionV1));
+        BufferedReader readerMissingSubsV2 = new BufferedReader(new StringReader(missingSubscriptionV2));
+        BufferedReader readerEmptyFieldV1 = new BufferedReader(new StringReader(subsEmptyfieldV1));
+        BufferedReader readerMissingFieldV1 = new BufferedReader(new StringReader(subsMissingfieldV1));
+        BufferedReader readerEmptyFieldV2 = new BufferedReader(new StringReader(subsEmptyfieldV2));
+        BufferedReader readerMissingFieldV2 = new BufferedReader(new StringReader(subsV2MissingfieldV2));
+        PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());      
         
         // set up the behaviour of the mocked classes
         when(mockRequest.getRequestURI()).thenReturn(requestURI);
         when(mockRequest.getMethod()).thenReturn("GET");
-        when(mockResponse.getWriter()).thenReturn(new PrintWriter(System.out));
-    } // setUp
+        
+        when(mockRequestV1.getRequestURI()).thenReturn(postURIv1);
+        when(mockRequestV1.getMethod()).thenReturn("POST");
+        when(mockRequestV1.getReader()).thenReturn(readerV1);
+        when(mockRequestV1.getParameter("ngsi_version")).thenReturn("1");
+        
+        when(mockRequestV2.getRequestURI()).thenReturn(postURIv2);
+        when(mockRequestV2.getMethod()).thenReturn("POST");
+        when(mockRequestV2.getReader()).thenReturn(readerV2);
+        when(mockRequestV2.getParameter("ngsi_version")).thenReturn("2");
+        
+        when(mockRequestNoSubscriptionV1.getRequestURI()).thenReturn(postURIv1);
+        when(mockRequestNoSubscriptionV1.getMethod()).thenReturn("POST");
+        when(mockRequestNoSubscriptionV1.getReader()).thenReturn(readerMissingSubsV1);
+        when(mockRequestNoSubscriptionV1.getParameter("ngsi_version")).thenReturn("1");
+        
+        when(mockRequestNoSubscriptionV2.getRequestURI()).thenReturn(postURIv2);
+        when(mockRequestNoSubscriptionV2.getMethod()).thenReturn("POST");
+        when(mockRequestNoSubscriptionV2.getReader()).thenReturn(readerMissingSubsV2);
+        when(mockRequestNoSubscriptionV2.getParameter("ngsi_version")).thenReturn("2");
+        
+        when(mockRequestEmptyFieldV1.getRequestURI()).thenReturn(postURIv1);
+        when(mockRequestEmptyFieldV1.getMethod()).thenReturn("POST");
+        when(mockRequestEmptyFieldV1.getReader()).thenReturn(readerEmptyFieldV1);
+        when(mockRequestEmptyFieldV1.getParameter("ngsi_version")).thenReturn("1");
+        
+        when(mockRequestMissingFieldV1.getRequestURI()).thenReturn(postURIv1);
+        when(mockRequestMissingFieldV1.getMethod()).thenReturn("POST");
+        when(mockRequestMissingFieldV1.getReader()).thenReturn(readerMissingFieldV1);
+        when(mockRequestMissingFieldV1.getParameter("ngsi_version")).thenReturn("1");
+        
+        when(mockRequestEmptyFieldV2.getRequestURI()).thenReturn(postURIv2);
+        when(mockRequestEmptyFieldV2.getMethod()).thenReturn("POST");
+        when(mockRequestEmptyFieldV2.getReader()).thenReturn(readerEmptyFieldV2);
+        when(mockRequestEmptyFieldV2.getParameter("ngsi_version")).thenReturn("2");
+        
+        when(mockRequestMissingFieldV2.getRequestURI()).thenReturn(postURIv2);
+        when(mockRequestMissingFieldV2.getMethod()).thenReturn("POST");
+        when(mockRequestMissingFieldV2.getReader()).thenReturn(readerMissingFieldV2);
+        when(mockRequestMissingFieldV2.getParameter("ngsi_version")).thenReturn("2");
+        
+        when(response.getWriter()).thenReturn(writer);
+        
+} // setUp
     
     /**
      * Test of handle method, of class ManagementInterface.
      */
     @Test
     public void testHandle() {
-        System.out.println("Testing ManagementInterface.handle");
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- Testing ManagementInterface.handle");
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         
         try {
             managementInterface.handle(null, mockRequest, mockResponse, 1);
@@ -84,6 +204,225 @@ public class ManagementInterfaceTest {
         } finally {
             assertTrue(true);
         } // try catch
+        
     } // testHandle
+    
+    /**
+     * [ManagementInterface] -------- 'POST method posts a valid subscription (ngsi_version = 1)'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostMethodPostAValidSubscriptionV1() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 1)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);
+             
+        try {
+            managementInterface.handlePostSubscription(mockRequestV1, responseWrapper);
+        } catch (Exception e) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostAValidSubscriptionV1
+    
+    /**
+     * [ManagementInterface] -------- 'POST method posts a valid subscription (ngsi_version = 2)'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostMethodPostAValidSubscriptionV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestV2, responseWrapper);
+        } catch (Exception e) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostAValidSubscriptionV2
+    
+    /**
+     * [ManagementInterface] -------- 'POST method doesn't find a subscription (ngsi_version = 1)'.
+     */
+    @Test
+    public void testPostMethodPostHasNotSubscriptionV1() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 1)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestNoSubscriptionV1, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasNotSubscriptionV1
+    
+    /**
+     * [ManagementInterface] -------- 'POST method doesn't find a subscription (ngsi_version = 2)'.
+     */
+    @Test
+    public void testPostMethodPostHasNotSubscriptionV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestNoSubscriptionV2, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasNotSubscriptionV2
+    
+    /**
+     * [ManagementInterface] -------- 'POST method post a subscription with any empty field (ngsi_version = 1)'.
+     */
+    @Test
+    public void testPostMethodPostHasEmptyFieldsV1() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 1)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestEmptyFieldV1, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasEmptyFieldsV1
+    
+    /**
+     * [ManagementInterface] -------- 'POST method post a subscription with any empty field (ngsi_version = 2)'.
+     */
+    @Test
+    public void testPostMethodPostHasEmptyFieldsV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestEmptyFieldV2, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasEmptyFieldsV2
+    
+    /**
+     * [ManagementInterface] -------- 'POST method post a subscription with any missing field (ngsi_version = 1)'.
+     */
+    @Test
+    public void testPostMethodPostHasMissingFieldsV1() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 1)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestEmptyFieldV1, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasMissingFieldsV1
+    
+    /**
+     * [ManagementInterface] -------- 'POST method post a subscription with any missing field (ngsi_version = 2)'.
+     */
+    @Test
+    public void testPostMethodPostHasMissingFieldsV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handlePostSubscription(mockRequestMissingFieldV2, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the POST subscription");
+            throw x;
+        } // try catch
+        
+        try {
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            throw e;
+        } // try catch
+        
+    } // testPostMethodPostHasMissingFieldsV2
     
 } // ManagementInterfaceTest
