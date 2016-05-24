@@ -823,7 +823,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePostSubscription
     
-    private void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
@@ -878,6 +878,7 @@ public class ManagementInterface extends AbstractHandler {
         
         try {
             endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
