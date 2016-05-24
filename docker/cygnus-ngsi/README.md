@@ -174,7 +174,11 @@ This gives you total control on the docker image.
 ####<a name="section3.2.2"></a>Environment variables
 Those parameters associated to an environment variable can be easily overwritten in the command line using the `-e` option. For instance, if you want to change the log4j logging level, simply run:
 
-    $ docker run -e LOG_LEVEL='DEBUG' cygnus-ngsi
+    $ docker run -e CYGNUS_LOG_LEVEL='DEBUG' cygnus-ngsi
+    
+Or if you want to configure non empty MySQL user and password:
+
+    $ docker run -e CYGNUS_MYSQL_USER='myuser' -e CYGNUS_MYSQL_PASS='mypass' cygnus-ngsi
 
 [Top](#top)
 
