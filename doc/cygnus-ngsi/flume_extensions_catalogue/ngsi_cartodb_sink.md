@@ -35,7 +35,7 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
@@ -69,6 +69,8 @@ The following table summarizes the table name composition:
 | `/` | N/A | `<entityId>_<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
 
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
 [Top](#top)
 
 ####<a name="section1.2.3"></a>Raw-based storing
@@ -76,7 +78,7 @@ Regarding the specific data stored within the tables, if `enable_raw` parameter 
 
 A single insert is composed for each notified entity, containing such insert the following fields:
 
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
