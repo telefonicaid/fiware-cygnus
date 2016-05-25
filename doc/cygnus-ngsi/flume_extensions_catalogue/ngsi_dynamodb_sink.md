@@ -74,7 +74,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.

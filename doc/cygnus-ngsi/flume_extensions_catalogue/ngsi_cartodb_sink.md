@@ -78,7 +78,7 @@ Regarding the specific data stored within the tables, if `enable_raw` parameter 
 
 A single insert is composed for each notified entity, containing such insert the following fields:
 
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.

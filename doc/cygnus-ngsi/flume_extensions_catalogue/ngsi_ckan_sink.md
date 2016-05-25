@@ -63,7 +63,7 @@ The concatenation character is the underscore, `_`.
 ####<a name="section1.2.3"></a>Resources naming conventions
 CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resoruce above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
+It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
 
 [Top](#top)
 
@@ -71,7 +71,7 @@ It must be noticed a CKAN Datastore (and a viewer) is also created and associate
 Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
