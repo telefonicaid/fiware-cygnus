@@ -99,6 +99,7 @@ public class ManagementInterfaceTest {
     private final String postURIv2 = "/v1/subscriptions?ngsi_version=2";
     private final String deleteURIv1 = "/v1/subscriptions?ngsi_version=1&subscription_id=12345";
     private final String deleteURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
+    private final String getURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
     private final HttpServletResponse response = mock(HttpServletResponse.class);
     private final HttpServletRequest mockRequestV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockRequestV2 = mock(HttpServletRequest.class);
@@ -110,6 +111,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockRequestMissingFieldV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteSubscriptionV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteSubscriptionV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetSubscriptionV2 = mock(HttpServletRequest.class);
     
     
     /**
@@ -124,27 +126,26 @@ public class ManagementInterfaceTest {
         // Define subscriptions for each case
         String subscriptionV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"duration\": \"P1M\",\"notifyConditions\": [{\"type\": \"ONCHANGE\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subscriptionV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"2016-05-05T14:00:00.00Z\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
-        String missingSubscriptionV1 = "{\"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
-        String missingSubscriptionV2 = "{\"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
+        String missingSubscription = "{\"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsEmptyfieldV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"duration\": \"P1M\",\"notifyConditions\": [{\"type\": \"\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsMissingfieldV1 = "{\"subscription\":{\"entities\": [{\"type\": \"Trainer\",\"isPattern\": \"false\",\"id\": \"Trainer1\"}],\"attributes\": [],\"reference\": \"http://localhost:5050/notify\",\"notifyConditions\": [{\"type\": \"ONCHANGE\",\"condValues\": []}],\"throttling\": \"PT5S\"}, \"endpoint\":{\"host\":\"orion.lab.fi-ware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsEmptyfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsV2MissingfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
-        String subscriptionDeleteV1 = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
-        String subscriptionDeleteV2 = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
+        String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
+        String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
         
         // Define the readers with the subscriptions 
         BufferedReader readerV1 = new BufferedReader(new StringReader(subscriptionV1));
         BufferedReader readerV2 = new BufferedReader(new StringReader(subscriptionV2));
-        BufferedReader readerMissingSubsV1 = new BufferedReader(new StringReader(missingSubscriptionV1));
-        BufferedReader readerMissingSubsV2 = new BufferedReader(new StringReader(missingSubscriptionV2));
+        BufferedReader readerMissingSubsV1 = new BufferedReader(new StringReader(missingSubscription));
+        BufferedReader readerMissingSubsV2 = new BufferedReader(new StringReader(missingSubscription));
         BufferedReader readerEmptyFieldV1 = new BufferedReader(new StringReader(subsEmptyfieldV1));
         BufferedReader readerMissingFieldV1 = new BufferedReader(new StringReader(subsMissingfieldV1));
         BufferedReader readerEmptyFieldV2 = new BufferedReader(new StringReader(subsEmptyfieldV2));
         BufferedReader readerMissingFieldV2 = new BufferedReader(new StringReader(subsV2MissingfieldV2));
-        BufferedReader readerDeleteSubscriptionV1 = new BufferedReader(new StringReader(subscriptionDeleteV1));
-        BufferedReader readerDeleteSubscriptionV2 = new BufferedReader(new StringReader(subscriptionDeleteV2));
+        BufferedReader readerDeleteSubscription = new BufferedReader(new StringReader(subscriptionDelete));
+        BufferedReader readerGetSubscription = new BufferedReader(new StringReader(subscriptionGet));
         PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());      
         
         JsonResponse responseDeleteV1 = new JsonResponse(null, 200, deleteURIv1, null);
@@ -196,20 +197,26 @@ public class ManagementInterfaceTest {
         
         when(mockDeleteSubscriptionV1.getRequestURI()).thenReturn(deleteURIv1);
         when(mockDeleteSubscriptionV1.getMethod()).thenReturn("DELETE");
-        when(mockDeleteSubscriptionV1.getReader()).thenReturn(readerDeleteSubscriptionV1);
+        when(mockDeleteSubscriptionV1.getReader()).thenReturn(readerDeleteSubscription);
         when(mockDeleteSubscriptionV1.getParameter("ngsi_version")).thenReturn("1");
         when(mockDeleteSubscriptionV1.getParameter("subscription_id")).thenReturn("12345");
         
         when(mockDeleteSubscriptionV2.getRequestURI()).thenReturn(deleteURIv2);
         when(mockDeleteSubscriptionV2.getMethod()).thenReturn("DELETE");
-        when(mockDeleteSubscriptionV2.getReader()).thenReturn(readerDeleteSubscriptionV2);
+        when(mockDeleteSubscriptionV2.getReader()).thenReturn(readerDeleteSubscription);
         when(mockDeleteSubscriptionV2.getParameter("ngsi_version")).thenReturn("2");
         when(mockDeleteSubscriptionV2.getParameter("subscription_id")).thenReturn("12345");
         
+        when(mockGetSubscriptionV2.getRequestURI()).thenReturn(getURIv2);
+        when(mockGetSubscriptionV2.getMethod()).thenReturn("GET");
+        when(mockGetSubscriptionV2.getReader()).thenReturn(readerGetSubscription);
+        when(mockGetSubscriptionV2.getParameter("ngsi_version")).thenReturn("2");
+        when(mockGetSubscriptionV2.getParameter("subscription_id")).thenReturn("12345");
+        
         when(response.getWriter()).thenReturn(writer);
         
-        when(orionBackend.deleteSubscriptionV1(subscriptionDeleteV1, token)).thenReturn(responseDeleteV1);
-        when(orionBackend.deleteSubscriptionV2(subscriptionDeleteV2, token)).thenReturn(responseDeleteV2);
+        when(orionBackend.deleteSubscriptionV1(subscriptionDelete, token)).thenReturn(responseDeleteV1);
+        when(orionBackend.deleteSubscriptionV2(subscriptionDelete, token)).thenReturn(responseDeleteV2);
         
 } // setUp
     
@@ -505,5 +512,32 @@ public class ManagementInterfaceTest {
         } // try catch
         
     } // testDeleteMethodsDeletesASubscriptionV2
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a subscription (ngsi_version = 2)'.
+     */
+    @Test
+    public void testGetMethodsGetsASubscriptionV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'GET method gets a subscription (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handleGetSubscriptions(mockGetSubscriptionV2, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the GET subscription");
+            throw x;
+        } // try catch
+                
+        try {
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription got");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
+            throw e;
+        } // try catch
+        
+    } // testGetMethodsGetsASubscriptionV2
     
 } // ManagementInterfaceTest
