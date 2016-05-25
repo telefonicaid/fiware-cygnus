@@ -82,7 +82,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 ####<a name="section1.2.3"></a>Json column-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `json-column` then a single Json document is composed for the whole notified entity, containing the following fields:
 
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: The notified one or default one.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
