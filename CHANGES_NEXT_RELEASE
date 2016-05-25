@@ -13,3 +13,4 @@
 - [cygnus-common] [bug] Fixed error when POST a CygnusSubscription without subscription field (#1034)
 - [cygnus] [doc] Update the sink docs regarding the naming conventions (#630)
 - [cygnus-ngsi] [hardening] Change default credentials for docker MySQL agent (#1038)
+- [cygnus-ngsi] [feature] Add MongoDB and STH sinks to docker agent (#1044)
