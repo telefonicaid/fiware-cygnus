@@ -33,6 +33,8 @@ ENV CYGNUS_SERVICE_PORT "5050"
 ENV CYGNUS_API_PORT "8081"
 ENV CYGNUS_MYSQL_USER "mysql"
 ENV CYGNUS_MYSQL_PASS "mysql"
+ENV CYGNUS_MONGO_USER "mongo"
+ENV CYGNUS_MONGO_PASS "mongo"
 
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "develop"
