@@ -86,4 +86,14 @@ public interface OrionBackend {
      */
     JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId) throws Exception;
     
+    /**
+     * Gets all current subscriptions in the system (v2).
+     * 
+     * @param token
+     * @param subscriptionId
+     * @throws Exception
+     * @return response
+     */
+    JsonResponse getSubscriptionsV2(String token, String subscriptionId) throws Exception;
+    
 } // StatsBackend

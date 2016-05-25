@@ -140,6 +140,17 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
         return headers;
     }
+
+    @Override
+    public JsonResponse getSubscriptionsV2(String token, String subscriptionId) throws Exception {
+    // create the http header
+        ArrayList<Header> headers = getHeaders(token);
+        
+        String relativeURL = "/v2/subscriptions";
+        JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
+        
+        return response;
+    } // getSubscriptionsV2
     
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     /**

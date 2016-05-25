@@ -408,6 +408,9 @@ public class ManagementInterface extends AbstractHandler {
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         
+        // flag for use get all or get one subscription
+        Boolean getAllSubscriptions = false;
+        
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
         String subscriptionID = request.getParameter("subscription_id");
@@ -436,20 +439,6 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
         
-        if (subscriptionID == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (subscription_id). Check it for errors.\"}");
-            LOGGER.error("Parse error, missing parameter (subscription_id). Check it for errors.");
-            return;
-        } else if (subscriptionID.equals("")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors.\"}");
-            LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
-            return;
-        } // if else
-        
         if (ngsiVersion.equals("1")) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
             response.getWriter().println("{\"success\":\"false\","
@@ -457,6 +446,16 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
         } // if
+        
+        if (subscriptionID == null) {
+            getAllSubscriptions = true;
+        } else if (subscriptionID.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
+            return;
+        } // if else
 
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
@@ -508,7 +507,11 @@ public class ManagementInterface extends AbstractHandler {
             } // try catch
         } // if
         
-        LOGGER.debug("Valid Endpoint. Creating request to Orion.");
+        if (getAllSubscriptions) {
+            LOGGER.debug("Valid Endpoint. Creating request to Orion (GET all subscriptions).");
+        } else {
+            LOGGER.debug("Valid Endpoint. Creating request to Orion (GET subsription by id).");
+        }
         
         // get host, port and ssl for request
         String host = endpoint.getHost();
@@ -519,35 +522,71 @@ public class ManagementInterface extends AbstractHandler {
         // Create a orionBackend for request
         orionBackend = new OrionBackendImpl(host, port, ssl);
         
-        try {
+        if (getAllSubscriptions)  {
             
-            int status = -1;
-            JSONObject orionJson = new JSONObject();
-            
-            JsonResponse orionResponse = orionBackend.
-            getSubscriptionsByIdV2(token, subscriptionID);
-            
-            if (orionResponse != null) {
-                orionJson = orionResponse.getJsonObject();
-                status = orionResponse.getStatusCode();
-            } // if
+            try { 
+                int status = -1;
+                JSONObject orionJson = new JSONObject();
 
-            LOGGER.debug("Status code got: " + status);
+                JsonResponse orionResponse = orionBackend.
+                getSubscriptionsV2(token, subscriptionID);
+                
+                LOGGER.debug("PASADO EL GETSUBSCRIPTIONSV2");
+
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    status = orionResponse.getStatusCode();
+                } // if
+
+                LOGGER.debug("Status code got: " + status);
+
+                if (status == 200) {
+                    response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    LOGGER.debug("Subscription received: " + orionJson.toJSONString());
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                } // if else
             
-            if (status == 200) {
-                response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-                LOGGER.debug("Subscription received: " + orionJson.toJSONString());
-            } else {
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
                 response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-            } // if else
+                                + "\"result\" : {" + e.getMessage() + "}");
+            } // try catch
             
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + e.getMessage() + "}");
-        } // try catch
+        } else {
+            
+            try { 
+                int status = -1;
+                JSONObject orionJson = new JSONObject();
+
+                JsonResponse orionResponse = orionBackend.
+                getSubscriptionsByIdV2(token, subscriptionID);
+
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    status = orionResponse.getStatusCode();
+                } // if
+
+                LOGGER.debug("Status code got: " + status);
+
+                if (status == 200) {
+                    response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    LOGGER.debug("Subscription received: " + orionJson.toJSONString());
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                } // if else
+            
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+                response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + e.getMessage() + "}");
+            } // try catch
+            
+        }
         
     } // handleGetSubscriptions
 
