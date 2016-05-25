@@ -58,9 +58,9 @@ Since the unique data model accepted for `NGSIHDFSSink` is per entity (see the [
     
 is created (if not existing yet) for each notified entity, where `<hdfs_username>` is a configuration parameter about a HDFS superuser, `<fiware-service>` and `<fiware-servicePath>` are notified as Http headers (or defaulted in NGSIRestHandler), and `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-Then, fir each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set. Any forbiden character will be replaced with underscore `_`.
+Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set. Any forbidden character will be replaced with underscore `_`.
 
 [Top](#top)
 
@@ -95,7 +95,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-row` then the notified data is stored attribute by attribute, composing a CSV record for each one of them. Each record contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
@@ -109,7 +109,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 ####<a name="section1.2.5"></a>CSV column-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-column` then a single CSV record is composed for the whole notified entity, containing the following fields:
 
-* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
 * `fiwareServicePath`: The notified one or default one.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
