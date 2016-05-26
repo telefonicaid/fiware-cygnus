@@ -50,7 +50,7 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities "
                 + "headers");
-        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("");
+        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("", false);
         groupingInterceptor.initialize();
         Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();
