@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -284,7 +285,14 @@ public abstract class HttpBackend {
                 
                 if (!res.isEmpty()) {
                     JSONParser jsonParser = new JSONParser();
-                    jsonPayload = (JSONObject) jsonParser.parse(res);
+                    
+                    if (res.startsWith("[")) {
+                        Object object = jsonParser.parse(res);
+                        jsonPayload = new JSONObject();
+                        jsonPayload.put("result", (JSONArray) object);
+                    } else {
+                        jsonPayload = (JSONObject) jsonParser.parse(res);
+                    } // if else
                 } // if
             } // if
 
