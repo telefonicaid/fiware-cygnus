@@ -196,7 +196,7 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else {
-            LOGGER.debug("Attending a request in a non expected port!!");
+            LOGGER.info("Attending a request in a non expected port: " + port);
         } // if else
     } // handle
 
