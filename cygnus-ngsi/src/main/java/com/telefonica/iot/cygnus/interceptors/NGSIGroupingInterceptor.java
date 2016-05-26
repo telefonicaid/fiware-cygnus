@@ -177,10 +177,10 @@ public class NGSIGroupingInterceptor implements Interceptor {
             
             if (groupingRulesFileNameTmp != null && groupingRulesFileNameTmp.length() > 0) {
                 groupingRulesFileName = groupingRulesFileNameTmp;
-                LOGGER.debug("[de] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
             } else {
                 groupingRulesFileName = null;
-                LOGGER.debug("[de] Defaulting to grouping_rules_file=null");
+                LOGGER.debug("[gi] Defaulting to grouping_rules_file=null");
             } // if else
         } // configure
  
