@@ -174,18 +174,13 @@ public class NGSIGroupingInterceptor implements Interceptor {
         @Override
         public void configure(Context context) {
             String groupingRulesFileNameTmp = context.getString("grouping_rules_conf_file");
-            String matchingTableFileName = context.getString("matching_table");
             
             if (groupingRulesFileNameTmp != null && groupingRulesFileNameTmp.length() > 0) {
                 groupingRulesFileName = groupingRulesFileNameTmp;
-                LOGGER.debug("[de] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
-            } else if (matchingTableFileName != null && matchingTableFileName.length() > 0) {
-                groupingRulesFileName = matchingTableFileName;
-                LOGGER.debug("[de] Reading configuration (matching_table=" + groupingRulesFileName + ")"
-                        + " -- DEPRECATED, use grouping_rules_file instead");
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
             } else {
                 groupingRulesFileName = null;
-                LOGGER.debug("[de] Defaulting to grouping_rules_file=null");
+                LOGGER.debug("[gi] Defaulting to grouping_rules_file=null");
             } // if else
         } // configure
  
