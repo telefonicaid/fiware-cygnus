@@ -44,14 +44,14 @@ public class NGSIGroupingInterceptor implements Interceptor {
     private final String groupingRulesFileName;
     private CygnusGroupingRules groupingRules;
     private ConfigurationReader configurationReader;
-    private Boolean invalidConfiguration = false;
+    private boolean invalidConfiguration = false;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
      * @param invalidConfiguration
      */
-    public NGSIGroupingInterceptor(String groupingRulesFileName, Boolean invalidConfiguration) {
+    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean invalidConfiguration) {
         this.groupingRulesFileName = groupingRulesFileName;
         this.invalidConfiguration = invalidConfiguration;
     } // NGSIGroupingInterceptor
@@ -191,7 +191,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
      */
     public static class Builder implements Interceptor.Builder {
         private String groupingRulesFileName;
-        private Boolean invalidConfiguration;
+        private boolean invalidConfiguration;
  
         @Override
         public void configure(Context context) {
@@ -211,7 +211,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
             return new NGSIGroupingInterceptor(groupingRulesFileName, invalidConfiguration);
         } // build
         
-        protected Boolean getInvalidConfiguration() {
+        protected boolean getInvalidConfiguration() {
             return invalidConfiguration;
         }
         
