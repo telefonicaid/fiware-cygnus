@@ -44,13 +44,16 @@ public class NGSIGroupingInterceptor implements Interceptor {
     private final String groupingRulesFileName;
     private CygnusGroupingRules groupingRules;
     private ConfigurationReader configurationReader;
+    private boolean invalidConfiguration = false;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
+     * @param invalidConfiguration
      */
-    public NGSIGroupingInterceptor(String groupingRulesFileName) {
+    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean invalidConfiguration) {
         this.groupingRulesFileName = groupingRulesFileName;
+        this.invalidConfiguration = invalidConfiguration;
     } // NGSIGroupingInterceptor
     
     /**
@@ -63,106 +66,124 @@ public class NGSIGroupingInterceptor implements Interceptor {
     
     @Override
     public void initialize() {
-        groupingRules = new CygnusGroupingRules(groupingRulesFileName);
-        configurationReader = new ConfigurationReader(30000);
-        configurationReader.start();
+        if (!invalidConfiguration) {
+            groupingRules = new CygnusGroupingRules(groupingRulesFileName);
+            configurationReader = new ConfigurationReader(30000);
+            configurationReader.start();
+        }
     } // initialize
     
     @Override
     public Event intercept(Event event) {
-        LOGGER.debug("Event intercepted, id=" + event.hashCode());
         
-        // get the original headers and body
-        Map<String, String> headers = event.getHeaders();
-        String body = new String(event.getBody());
-        
-        // get some original header values
-        String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-        
-        // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
-        // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
-        NotifyContextRequest notification;
-        Gson gson = new Gson();
+        if (invalidConfiguration) {
+            return event;
+        } else {
+            LOGGER.debug("Event intercepted, id=" + event.hashCode());
 
-        try {
-            notification = gson.fromJson(body, NotifyContextRequest.class);
-        } catch (Exception e) {
-            LOGGER.error("Runtime error (" + e.getMessage() + ")");
-            return null;
-        } // try catch
+            // get the original headers and body
+            Map<String, String> headers = event.getHeaders();
+            String body = new String(event.getBody());
+
+            // get some original header values
+            String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+
+            // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
+            // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
+            NotifyContextRequest notification;
+            Gson gson = new Gson();
+
+            try {
+                notification = gson.fromJson(body, NotifyContextRequest.class);
+            } catch (Exception e) {
+                LOGGER.error("Runtime error (" + e.getMessage() + ")");
+                return null;
+            } // try catch
+
+            // iterate on the context responses and notified service paths
+            ArrayList<String> defaultDestinations = new ArrayList<String>();
+            ArrayList<String> groupedDestinations = new ArrayList<String>();
+            ArrayList<String> groupedServicePaths = new ArrayList<String>();
+            ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses = notification.getContextResponses();
+
+            if (contextResponses == null || contextResponses.isEmpty()) {
+                LOGGER.warn("No context responses within the notified entity, nothing is done");
+                return null;
+            } // if
+
+            String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
+
+            for (int i = 0; i < contextResponses.size(); i++) {
+                NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
+                NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
+
+                // get the matching rule
+                CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath, contextElement.getId(),
+                        contextElement.getType());
+
+                if (matchingRule == null) {
+                    groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
+                    groupedServicePaths.add(splitedNotifiedServicePaths[i]);
+                } else {
+                    groupedDestinations.add((String) matchingRule.getDestination());
+                    groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
+                } // if else
+
+                defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
+            } // for
+
+            // set the final header values
+            String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
+            headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
+                    + ", value=" + defaultDestinationsStr + ")");
+            String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
+            headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
+                    + ", value=" + groupedDestinationsStr + ")");
+            String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
+            headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+                    + ", value=" + groupedServicePathsStr + ")");
+            event.setHeaders(headers);
+            LOGGER.debug("Event put in the channel, id=" + event.hashCode());
+            return event;
+        } // if else
         
-        // iterate on the context responses and notified service paths
-        ArrayList<String> defaultDestinations = new ArrayList<String>();
-        ArrayList<String> groupedDestinations = new ArrayList<String>();
-        ArrayList<String> groupedServicePaths = new ArrayList<String>();
-        ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses = notification.getContextResponses();
-        
-        if (contextResponses == null || contextResponses.isEmpty()) {
-            LOGGER.warn("No context responses within the notified entity, nothing is done");
-            return null;
-        } // if
-        
-        String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
-        
-        for (int i = 0; i < contextResponses.size(); i++) {
-            NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
-            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
-            
-            // get the matching rule
-            CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath, contextElement.getId(),
-                    contextElement.getType());
-            
-            if (matchingRule == null) {
-                groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-                groupedServicePaths.add(splitedNotifiedServicePaths[i]);
-            } else {
-                groupedDestinations.add((String) matchingRule.getDestination());
-                groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
-            } // if else
-            
-            defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
-        } // for
-        
-        // set the final header values
-        String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
-                + ", value=" + defaultDestinationsStr + ")");
-        String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
-                + ", value=" + groupedDestinationsStr + ")");
-        String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
-                + ", value=" + groupedServicePathsStr + ")");
-        event.setHeaders(headers);
-        LOGGER.debug("Event put in the channel, id=" + event.hashCode());
-        return event;
     } // intercept
  
     @Override
     public List<Event> intercept(List<Event> events) {
-        List<Event> interceptedEvents = new ArrayList<Event>(events.size());
+
+        if (invalidConfiguration) {
+            return events;
+        } else {
+            List<Event> interceptedEvents = new ArrayList<Event>(events.size());
         
-        for (Event event : events) {
-            Event interceptedEvent = intercept(event);
-            interceptedEvents.add(interceptedEvent);
-        } // for
+            for (Event event : events) {
+                Event interceptedEvent = intercept(event);
+                interceptedEvents.add(interceptedEvent);
+            } // for
  
-        return interceptedEvents;
+            return interceptedEvents;
+        } // if else
+        
     } // intercept
  
     @Override
     public void close() {
-        configurationReader.signalForStop();
+        if (!invalidConfiguration) {
+            configurationReader.signalForStop();
         
-        try {
-            configurationReader.join();
-        } catch (InterruptedException e) {
-            LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
-                    + e.getMessage());
-        } // try catch
+            try {
+                 configurationReader.join();
+            } catch (InterruptedException e) {
+                 LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
+                        + e.getMessage());
+            } // try catch
+            
+        } // if
+        
     } // close
  
     /**
@@ -170,29 +191,30 @@ public class NGSIGroupingInterceptor implements Interceptor {
      */
     public static class Builder implements Interceptor.Builder {
         private String groupingRulesFileName;
+        private boolean invalidConfiguration;
  
         @Override
         public void configure(Context context) {
             String groupingRulesFileNameTmp = context.getString("grouping_rules_conf_file");
-            String matchingTableFileName = context.getString("matching_table");
             
             if (groupingRulesFileNameTmp != null && groupingRulesFileNameTmp.length() > 0) {
                 groupingRulesFileName = groupingRulesFileNameTmp;
-                LOGGER.debug("[de] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
-            } else if (matchingTableFileName != null && matchingTableFileName.length() > 0) {
-                groupingRulesFileName = matchingTableFileName;
-                LOGGER.debug("[de] Reading configuration (matching_table=" + groupingRulesFileName + ")"
-                        + " -- DEPRECATED, use grouping_rules_file instead");
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
             } else {
-                groupingRulesFileName = null;
-                LOGGER.debug("[de] Defaulting to grouping_rules_file=null");
+                invalidConfiguration = true;
+                LOGGER.debug("[gi] Grouping rules file cannot be empty or null");
             } // if else
         } // configure
  
         @Override
         public Interceptor build() {
-            return new NGSIGroupingInterceptor(groupingRulesFileName);
+            return new NGSIGroupingInterceptor(groupingRulesFileName, invalidConfiguration);
         } // build
+        
+        protected boolean getInvalidConfiguration() {
+            return invalidConfiguration;
+        }
+        
     } // Builder
     
     /**

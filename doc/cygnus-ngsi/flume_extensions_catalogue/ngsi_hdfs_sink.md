@@ -4,8 +4,20 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to HDFS data structures](#section1.2)
-    * [Hive](#section1.3)
-    * [Example](#section1.4)
+        * [HDFS paths naming conventions](#section1.2.1)
+        * [Json row-like storing](#section1.2.2)
+        * [Json column-like storing](#section1.2.3)
+        * [CSV row-like storing](#section1.2.4)
+        * [CSV column-like storing](#section1.2.5)
+        * [Hive](#section1.2.6)
+    * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Path names](#section1.3.2)
+        * [Json row-like storing](#section1.3.3)
+        * [Json column-like storing](#section1.3.4)
+        * [CSV row-like storing](#section1.3.5)
+        * [CSV column-like storing](#section1.3.6)
+        * [Hive storing](#section1.3.7)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -37,53 +49,84 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to HDFS data structures
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `NGSIHDFSSink` each time a Flume event is going to be persisted.
 
-According to the [naming conventions](./naming_conventions.md), a folder named `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>` is created (if not existing yet), where `<hdfs_username>` is a configuration parameter, and `<fiware_service>`, `<fiware-servicePath>` and `<destination>` values are got from the event headers.
+[Top](#top)
 
-Then, the context responses/entities within the event body are iterated, and a file named `<destination>.txt` is created (if not yet existing) under the above directory, where `<destination>` value is got from the event headers.
+####<a name="section1.2.1"></a>HDFS paths naming conventions
+Since the unique data model accepted for `NGSIHDFSSink` is per entity (see the [Configuration](#section2.1) section for more details), a HDFS folder:
 
-The context attributes within each context response/entity are iterated, and a one or more lines are appended to the current file. The format for this append depends on the configured persistence mode:
+    /user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>
+    
+is created (if not existing yet) for each notified entity, where `<hdfs_username>` is a configuration parameter about a HDFS superuser, `<fiware-service>` and `<fiware-servicePath>` are notified as Http headers (or defaulted in NGSIRestHandler), and `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-* `json-row`: A JSON line is added for each notified context attribute. This kind of line will always contain 8 fields:
-    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-    * `attrName`: Notified attribute name.
-    * `attrType`: Notified attribute type.
-    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
-    * `attrMd`: It contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, an empty array `[]` is inserted).
-* `json-column`: A single JSON line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`), plus four additional fields:
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: The notified one or default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-* `csv-row`: A CSV line is added for each notified context attribute. As `json-row`, this kind of line will always contain 8 fields:
-    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-    * `attrName`: Notified attribute name.
-    * `attrType`: Notified attribute type.
-    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 this can be a JSON object or JSON array.
-    * `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field sepator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
-* `csv-column`: A single CSV line is added for all the notified context attributes. This kind of line will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md_file` and containing the name of the HDFS file storing such metadata as explained above), plus four additional fields:
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: The notified one or default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
+Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set. Any forbidden character will be replaced with underscore `_`.
 
 [Top](#top)
 
-###<a name="section1.3"></a>Hive
+####<a name="section1.2.2"></a>Json row-like storing
+Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `json-row` (default storing mode) then the notified data is stored attribute by attribute, composing a Json document for each one of them. Each append contains the following fields:
+
+* `recvTimeTs`: UTC timestamp expressed in miliseconds.
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* `attrName`: Notified attribute name.
+* `attrType`: Notified attribute type.
+* `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be JSON object or JSON array.
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in JSON (if the attribute hasn't metadata, an empty array `[]` is inserted).
+
+[Top](#top)
+
+####<a name="section1.2.3"></a>Json column-like storing
+Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `json-column` then a single Json document is composed for the whole notified entity, containing the following fields:
+
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: The notified one or default one.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+* For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+
+[Top](#top)
+
+####<a name="section1.2.4"></a>CSV row-like storing
+Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-row` then the notified data is stored attribute by attribute, composing a CSV record for each one of them. Each record contains the following fields:
+
+* `recvTimeTs`: UTC timestamp expressed in miliseconds.
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* `attrName`: Notified attribute name.
+* `attrType`: Notified attribute type.
+* `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 this can be a JSON object or JSON array.
+* `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field sepator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
+
+[Top](#top)
+
+####<a name="section1.2.5"></a>CSV column-like storing
+Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-column` then a single CSV record is composed for the whole notified entity, containing the following fields:
+
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: The notified one or default one.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+* For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+
+[Top](#top)
+
+####<a name="section1.2.6"></a>Hive
 A special feature regarding HDFS persisted data is the posssibility to exploit it through Hive, a SQL-like querying system. `NGSIHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
 
 The fields regarding each data row match the fields of the JSON documents/CSV records appended to the HDFS files. In the case of JSON, they are deserialized by using a [JSON serde](https://github.com/rcongiu/Hive-JSON-Serde). In the case of CSV they are deserialized by the delimiter fields specified in the table creation.
 
 [Top](#top)
 
-###<a name="section1.4"></a>Example
+###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -117,29 +160,41 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `batch_size=1`, `hdfs_username=myuser`, `service_as_namespace=false` and `file_format=json-row` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body as:
+[Top](#top)
+
+####<a name="section1.3.2"></a>Path names
+Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
-    {"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
+    
+[Top](#top)
 
-If `file_format=json-colum` then `NGSIHDFSSink` will persist the data within the body as:
+####<a name="section1.3.3"></a>Json row-like storing
+A pair of Json documents are appended to the above file, one per attribute:
 
-    $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    {"recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
+```
+{"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"speed","attrType":"float","attrValue":"112.9","attrMd":[]}
+{"recvTimeTs":"1429535775","recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","attrName":"oil_level","attrType":"float","attrValue":"74.6","attrMd":[]}
+```
 
-If `file_format=csv-row` then `NGSIHDFSSink` will persist the data within the body as:
+[Top](#top)
 
-    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
-    1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+####<a name="section1.3.4"></a>Json column-like storing
+A single Json document is appended to the above file, containing all the attributes:
+ 
+```
+{"recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
+```
 
-If `file_format=csv-column` then `NGSIHDFSSink` will persist the data within the body as:
+[Top](#top)
 
-    $ hadoop fs -cat /user/myser/vehicles/4wheels/car1_car/car1_car.txt
-    2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
+####<a name="section1.3.5"></a>CSV row-like storing
+A pair of CSV records are appended to the above file, one per attribute:
 
-NOTE: `hadoop fs -cat` is the HDFS equivalent to the Unix command `cat`.
+```
+1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,speed,float,112.9,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt
+1429535775,2015-04-20T12:13:22.41.124Z,4wheels,car1,car,oil_level,float,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt
+```
 
 Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
 
@@ -155,6 +210,32 @@ then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_spe
     1429535775,manufacturer,string,acme
     1429535775,installation_year,integer,2014
 
+[Top](#top)
+
+####<a name="section1.3.6"></a>CSV column-like storing
+A single CSV record is appended to the above file, containing all the attributes:
+
+```
+2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
+```
+
+Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
+
+In the case the metadata for the `speed` attribute was, for instance:
+
+    [
+       {"name": "manufacturer", "type": "string", "value": "acme"},
+       {"name": "installation_year", "type": "integer", "value": 2014}
+    ]
+
+then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt` file content would be:
+
+    1429535775,manufacturer,string,acme
+    1429535775,installation_year,integer,2014
+
+[Top](#top)
+
+####<a name="section1.3.7"></a>Hive storing
 With respect to Hive, the content of the tables in the `json-row`, `json-column`, `csv-row` and `csv-column` modes, respectively, is:
 
     $ hive
@@ -228,7 +309,6 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
     cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
     cygnusagent.sinks.hdfs-sink.service_as_namespace = false
-    cygnusagent.sinks.hdfs-sink.file_format = json-column
     cygnusagent.sinks.hdfs-sink.batch_size = 100
     cygnusagent.sinks.hdfs-sink.batch_timeout = 30
     cygnusagent.sinks.hdfs-sink.batch_ttl = 10
