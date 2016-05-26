@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -478,7 +479,7 @@ public class NGSICartoDBSink extends NGSISink {
             String attrMetadata = contextAttribute.getContextMetadata();
             String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
             String tableName = buildTableName(event.getServicePath(), event.getEntity(), event.getAttribute())
-                    + "_distance";
+                    + CommonConstants.CONCATENATOR + "distance";
 
             if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
                 // Try creating the table... the cost of checking if it exists and creating it is higher than directly
@@ -621,14 +622,14 @@ public class NGSICartoDBSink extends NGSISink {
                 break;
             case DMBYENTITY:
                 String truncatedServicePath = NGSIUtils.encodePostgreSQL(servicePath, true);
-                name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
                         + NGSIUtils.encodePostgreSQL(entity, false);
                 break;
             case DMBYATTRIBUTE:
                 truncatedServicePath = NGSIUtils.encodePostgreSQL(servicePath, true);
-                name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                        + NGSIUtils.encodePostgreSQL(entity, false)
-                        + '_' + NGSIUtils.encodePostgreSQL(attribute, false);
+                name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
+                        + NGSIUtils.encodePostgreSQL(entity, false) + CommonConstants.CONCATENATOR
+                        + NGSIUtils.encodePostgreSQL(attribute, false);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
