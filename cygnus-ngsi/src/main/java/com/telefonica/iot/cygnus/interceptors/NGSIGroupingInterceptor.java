@@ -172,14 +172,18 @@ public class NGSIGroupingInterceptor implements Interceptor {
  
     @Override
     public void close() {
-        configurationReader.signalForStop();
+        if (!invalidConfiguration) {
+            configurationReader.signalForStop();
         
-        try {
-            configurationReader.join();
-        } catch (InterruptedException e) {
-            LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
-                    + e.getMessage());
-        } // try catch
+            try {
+                 configurationReader.join();
+            } catch (InterruptedException e) {
+                 LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
+                        + e.getMessage());
+            } // try catch
+            
+        } // if
+        
     } // close
  
     /**
@@ -206,6 +210,11 @@ public class NGSIGroupingInterceptor implements Interceptor {
         public Interceptor build() {
             return new NGSIGroupingInterceptor(groupingRulesFileName, invalidConfiguration);
         } // build
+        
+        protected Boolean getInvalidConfiguration() {
+            return invalidConfiguration;
+        }
+        
     } // Builder
     
     /**
