@@ -202,7 +202,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
                 LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
             } else {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Grouping rules file cannot be empty");
+                LOGGER.debug("[gi] Grouping rules file cannot be empty or null");
             } // if else
         } // configure
  
