@@ -125,7 +125,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if
 
         response.setContentType("text/html;charset=utf-8");
-        int port = request.getServerPort();
+        int port = request.getLocalPort();
         String uri = request.getRequestURI();
         String method = request.getMethod();
         LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
@@ -196,7 +196,7 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else {
-            LOGGER.debug("Attending a request in a non expected port!!");
+            LOGGER.info("Attending a request in a non expected port: " + port);
         } // if else
     } // handle
 
