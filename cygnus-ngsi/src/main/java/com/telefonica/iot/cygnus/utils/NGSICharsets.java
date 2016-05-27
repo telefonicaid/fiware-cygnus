@@ -43,7 +43,23 @@ public final class NGSICharsets {
             
             if (code >= 65 && code <= 90) { // A-Z --> a-z
                 out += (char) (code + 32);
-            } else if (code >= 97 && code <= 122) { // a-z --> a-z
+            } else if (code >= 97 && code <= 119) { // a-w --> a-w
+                out += c;
+            } else if (c == 'x') {
+                String next4;
+            
+                if (i + 4 < in.length()) {
+                    next4 = in.substring(i + 1, i + 5);
+                } else {
+                    next4 = "abcd"; // whatever except a unicode
+                } // if else
+            
+                if (next4.matches("^[0-9]{4}$")) { // x --> xx
+                    out += "xx";
+                } else { // x --> x
+                    out += c;
+                } // if else
+            } else if (code == 121 || code == 122) { // yz --> yz
                 out += c;
             } else if (code >= 48 && code <= 57) { // 0-9 --> 0-9
                 out += c;

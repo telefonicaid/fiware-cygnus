@@ -59,14 +59,14 @@ public class NGSICharsetsTest {
     } // testCartoDBEncodeUpperChars
     
     /**
-     * [NGSICharsets.cartoDBEncode] -------- Lower case not accented characters are not encoded.
+     * [NGSICharsets.cartoDBEncode] -------- Lower case not accented characters except 'x' are not encoded.
      */
     @Test
     public void testCartoDBEncodeLowerCase() {
         System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
                 + "-------- Lower case not accented characters are not encoded");
-        String in = "abcdefghijklmnopqrstuvwxyz";
-        String expected = "abcdefghijklmnopqrstuvwxyz";
+        String in = "abcdefghijklmnopqrstuvwyz";
+        String expected = "abcdefghijklmnopqrstuvwyz";
         String out = NGSICharsets.cartoDBEncode(in);
         
         try {
@@ -123,6 +123,50 @@ public class NGSICharsetsTest {
             throw e;
         } // try catch
     } // testCartoDBEncodeUnderscore
+    
+    /**
+     * [NGSICharsets.cartoDBEncode] -------- A single 'x' is not encoded.
+     */
+    @Test
+    public void testCartoDBEncodeSinglex() {
+        System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                + "-------- 'x' is not encoded");
+        String in = "x";
+        String expected = "x";
+        String out = NGSICharsets.cartoDBEncode(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "- FAIL - '" + in + "' has encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testCartoDBEncodeSinglex
+    
+    /**
+     * [NGSICharsets.cartoDBEncode] -------- "x0000" is encoded (escaped) as "xx0000".
+     */
+    @Test
+    public void testCartoDBEncodex0000() {
+        System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                + "-------- 'x' is encoded (escaped) as 'xx'");
+        String in = "x0000";
+        String expected = "xx0000";
+        String out = NGSICharsets.cartoDBEncode(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "-  OK  - '" + in + "' has been encoded as '" + expected + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "' instead of '" + expected + "'");
+            throw e;
+        } // try catch
+    } // testCartoDBEncodex0000
     
     /**
      * [NGSICharsets.cartoDBEncode] -------- Non lower case alphanumerics and undersocre are encoded.
