@@ -40,7 +40,55 @@ public class NGSIGroupingInterceptorTest {
         LogManager.getRootLogger().setLevel(Level.FATAL);
     } // NGSIGroupingInterceptorTest
     
-     /**
+    /**
+     * [GroupingInterceptor.Builder.configure] -------- Not mandatory parameters get the default value on configure().
+     */
+    @Test
+    public void testBuilderConfigureDefaultValues() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- Not mandatory parameters get the default value on configure()");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = "/grouping_rules.conf";
+        String enableNewEncoding = null; // default value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(!builder.getEnableNewEncoding());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - 'enable_new_encoding' is configured to 'false' by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - 'enable_new_encoding' is not configured to 'false' by default");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureDefaultValues
+    
+    /**
+     * [GroupingInterceptor.Builder.configure] -------- When configured, enable_new_encoding must be 'true' or 'false'.
+     */
+    @Test
+    public void testBuilderConfigureEnableNewEncodingOK() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- When configured, enable_new_encoding must be 'true' or 'false'");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = "/grouping_rules.conf";
+        String enableNewEncoding = "falso"; // wrong value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(builder.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - 'enable_new_encoding=falso' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - 'enable_new_encoding=falso' has not been detected");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureEnableNewEncodingOK
+    
+    /**
      * [GroupingInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be empty.
      */
     @Test
@@ -89,9 +137,9 @@ public class NGSIGroupingInterceptorTest {
     } // testBuilderConfigureGroupingRulesConfFileNotNull
     
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains fiware-service,
- fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath and
- grouped-entities headers.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains
+     * fiware-service, fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath
+     * and grouped-entities headers.
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
@@ -99,7 +147,7 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities "
                 + "headers");
-        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("", false);
+        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("", false, false);
         groupingInterceptor.initialize();
         Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();

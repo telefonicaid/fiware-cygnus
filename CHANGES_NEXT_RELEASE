@@ -16,4 +16,5 @@
 - [cygnus-ngsi] [feature] Add MongoDB and STH sinks to docker agent (#1044)
 - [cygnus-ngsi] [hardening] Remove support to deprecated 'matching_table' parameter (#1048)
 - [cygnus-ngsi] [hardening] Add checks for invalid configuration in NGSIGroupingInterceptor.java (#1049)
+- [cygnus-ngsi] [hardening] Add support for new encoding mechanism (#1029)
 - [cygnus-common] [bug] Getting API port fails when using port forwarding (#1055)

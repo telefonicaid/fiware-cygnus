@@ -67,4 +67,7 @@ public final class CommonConstants {
     public static final String LOG4J_SUBSVC = "subservice";
     public static final String LOG4J_COMP = "agent";
     
+    // encoding
+    public static final String CONCATENATOR = "x0000";
+    
 } // CommonConstants
