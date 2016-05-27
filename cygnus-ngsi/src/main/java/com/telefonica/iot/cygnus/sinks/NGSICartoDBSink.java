@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -590,7 +591,7 @@ public class NGSICartoDBSink extends NGSISink {
      * @throws Exception
      */
     protected String buildSchemaName(String service) throws Exception {
-        String name = NGSIUtils.encodePostgreSQL(service, false);
+        String name = NGSICharsets.cartoDBEncode(service);
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
             throw new CygnusBadConfiguration("Building schema name '" + name
@@ -618,18 +619,18 @@ public class NGSICartoDBSink extends NGSISink {
                             + "dm-by-service-path data model");
                 } // if
 
-                name = NGSIUtils.encodePostgreSQL(servicePath, true);
+                name = NGSICharsets.cartoDBEncode(servicePath.substring(1));
                 break;
             case DMBYENTITY:
-                String truncatedServicePath = NGSIUtils.encodePostgreSQL(servicePath, true);
+                String truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath.substring(1));
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSIUtils.encodePostgreSQL(entity, false);
+                        + NGSICharsets.cartoDBEncode(entity);
                 break;
             case DMBYATTRIBUTE:
-                truncatedServicePath = NGSIUtils.encodePostgreSQL(servicePath, true);
+                truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath.substring(1));
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSIUtils.encodePostgreSQL(entity, false) + CommonConstants.CONCATENATOR
-                        + NGSIUtils.encodePostgreSQL(attribute, false);
+                        + NGSICharsets.cartoDBEncode(entity) + CommonConstants.CONCATENATOR
+                        + NGSICharsets.cartoDBEncode(attribute);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
