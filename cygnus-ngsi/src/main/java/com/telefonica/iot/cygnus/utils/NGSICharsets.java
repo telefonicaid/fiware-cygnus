@@ -65,6 +65,8 @@ public final class NGSICharsets {
                 out += c;
             } else if (c == '_') { // _ --> _
                 out += c;
+            } else if (c == '=') { // = --> x0000
+                out += "x0000";
             } else { // --> xUNICODE
                 String hex = Integer.toHexString(code);
                 out += "x" + ("0000" + hex).substring(hex.length());

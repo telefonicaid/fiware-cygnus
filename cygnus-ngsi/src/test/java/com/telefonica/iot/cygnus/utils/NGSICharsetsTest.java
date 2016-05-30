@@ -125,12 +125,34 @@ public class NGSICharsetsTest {
     } // testCartoDBEncodeUnderscore
     
     /**
+     * [NGSICharsets.cartoDBEncode] -------- '=' (internal concatenator) is encoded as "x0000" (public concatenator).
+     */
+    @Test
+    public void testCartoDBEncodeEquals() {
+        System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                + "-------- '=' (internal concatenator) is encoded as \"x0000\" (public concatenator)");
+        String in = "=";
+        String expected = "x0000";
+        String out = NGSICharsets.cartoDBEncode(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "-  OK  - '" + in + "' has been encoded as '" + expected + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
+                    + "- FAIL - '" + in + "' has not been encoded as '" + out + "' instead of '" + expected + "'");
+            throw e;
+        } // try catch
+    } // testCartoDBEncodeEquals
+    
+    /**
      * [NGSICharsets.cartoDBEncode] -------- A single 'x' is not encoded.
      */
     @Test
     public void testCartoDBEncodeSinglex() {
         System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
-                + "-------- 'x' is not encoded");
+                + "-------- A single 'x' is not encoded");
         String in = "x";
         String expected = "x";
         String out = NGSICharsets.cartoDBEncode(in);
@@ -152,7 +174,7 @@ public class NGSICharsetsTest {
     @Test
     public void testCartoDBEncodex0000() {
         System.out.println(getTestTraceHead("[NGSICharsets.cartoDBEncode]")
-                + "-------- 'x' is encoded (escaped) as 'xx'");
+                + "-------- \"x0000\" is encoded (escaped) as \"xx0000\"");
         String in = "x0000";
         String expected = "xx0000";
         String out = NGSICharsets.cartoDBEncode(in);
@@ -203,8 +225,9 @@ public class NGSICharsetsTest {
             throw e;
         } // try catch
         
-        in = ":;<=>?@";
-        expected = "x003ax003bx003cx003dx003ex003fx0040";
+        // '=' has been excluded from here since it is not notified by Orion and it is used as concatenator
+        in = ":;<>?@";
+        expected = "x003ax003bx003cx003ex003fx0040";
         out = NGSICharsets.cartoDBEncode(in);
         
         try {
