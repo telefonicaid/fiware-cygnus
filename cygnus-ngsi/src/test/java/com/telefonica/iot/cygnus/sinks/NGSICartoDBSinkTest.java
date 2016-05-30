@@ -735,7 +735,7 @@ public class NGSICartoDBSinkTest {
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
                 enableDistance, keysConfFile));
         String servicePath = "/somePath";
-        String entity = "someIdx0000someType";
+        String entity = "someId=someType"; // using the internal concatenator
         String attribute = null; // irrelevant for this test
         
         try {
