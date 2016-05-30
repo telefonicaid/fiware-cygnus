@@ -150,7 +150,7 @@ public abstract class HttpBackend {
         } // if else
     } // doRequest
         
-    private JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
+    protected JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
         throws Exception {
         HttpResponse httpRes = null;
         HttpRequestBase request = null;
