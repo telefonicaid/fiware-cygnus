@@ -55,21 +55,21 @@ Here it is assumed the notified/default FIWARE service maps the PostgreSQL schem
 [Top](#top)
 
 ####<a name="section1.2.2"></a>PostgreSQL tables naming conventions
-The name of these tables depend on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
+The name of these tables depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In adddition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
-It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character.
+It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character. For instance, the initial slash (`/`) of the FIWARE service path is encoded as `x002f`.
 
 The following table summarizes the table name composition:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | N/A | `<entityId>x0000<entityType>[x0000distance]` |
-| `/<svcPath>` | `<svcPath>[x0000distance]` | `<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
+| `/` | `x002f` | `x002f<entityId>x0000<entityType>[x0000distance]` |
+| `/<svcPath>` | `x002f<svcPath>[x0000distance]` | `x002f<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -171,8 +171,8 @@ The PostgreSQL table names will be, depending on the configured data model and a
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | N/A | `car1x0000car[x0000distance]` |
-| `/4wheels` | `4wheels[x0000distance]` | `4wheelsx0000car1x0000car[x0000distance]` |
+| `/` | `x002f` | `x002fcar1x0000car[x0000distance]` |
+| `/4wheels` | `x002f4wheels[x0000distance]` | `x002f4wheelsx0000car1x0000car[x0000distance]` |
     
 [Top](#top)
 
