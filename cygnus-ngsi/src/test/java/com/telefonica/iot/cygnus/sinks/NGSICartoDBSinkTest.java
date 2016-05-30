@@ -97,7 +97,7 @@ public class NGSICartoDBSinkTest {
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
         String enableLowercase = null; // default one
-        String flipCoordinates = "falso";
+        String flipCoordinates = "falso"; // wrong value
         String enableRaw = null; // default one
         String enableDistance = null; // default one
         String keysConfFile = "/keys.conf";
@@ -128,7 +128,7 @@ public class NGSICartoDBSinkTest {
         String dataModel = null; // default one
         String enableLowercase = null; // default one
         String flipCoordinates = null; // default value
-        String enableRaw = "falso";
+        String enableRaw = "falso"; // wrong value
         String enableDistance = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
@@ -160,7 +160,7 @@ public class NGSICartoDBSinkTest {
         String flipCoordinates = null; // default one
         String enableRaw = null; // default one
         String keysConfFile = "/keys.conf";
-        String enableDistance = "falso";
+        String enableDistance = "falso"; // wrong value
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
                 enableDistance, keysConfFile));
@@ -715,14 +715,14 @@ public class NGSICartoDBSinkTest {
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted
      * and data_model is 'dm-by-entity' the CartoDB table name is the lower case of
-     * \<service-path\>_\<entity_id\>_\<entity_type\>.
+     * \<service-path\>x0000\<entity_id\>x0000\<entity_type\>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameNonRootServicePathDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is 'dm-by-entity' "
-                + "the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityType>");
+                + "the CartoDB table name is the lower case of <servicePath>x0000<entityId>x0000<entityType>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-entity";
@@ -735,21 +735,21 @@ public class NGSICartoDBSinkTest {
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
                 enableDistance, keysConfFile));
         String servicePath = "/somePath";
-        String entity = "someId_someType";
+        String entity = "someIdx0000someType";
         String attribute = null; // irrelevant for this test
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("somepath_someid_sometype", builtTableName);
+                assertEquals("somepathx0000someidx0000sometype", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "<servicePath>_<entityId>_<entityType>");
+                        + "<servicePath>x0000<entityId>x0000<entityType>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "<servicePath>_<entityId>_<entityType>");
+                        + "<servicePath>x0000<entityId>x0000<entityType>");
                 throw e;
             } // try catch
         } catch (Exception e) {

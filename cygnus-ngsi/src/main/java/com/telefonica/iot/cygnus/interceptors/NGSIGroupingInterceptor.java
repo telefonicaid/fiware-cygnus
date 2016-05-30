@@ -43,16 +43,20 @@ public class NGSIGroupingInterceptor implements Interceptor {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGroupingInterceptor.class);
     private final String groupingRulesFileName;
     private CygnusGroupingRules groupingRules;
+    private final boolean enableNewEncoding;
     private ConfigurationReader configurationReader;
     private boolean invalidConfiguration = false;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
+     * @param enableNewEncoding
      * @param invalidConfiguration
      */
-    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean invalidConfiguration) {
+    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean enableNewEncoding,
+            boolean invalidConfiguration) {
         this.groupingRulesFileName = groupingRulesFileName;
+        this.enableNewEncoding = enableNewEncoding;
         this.invalidConfiguration = invalidConfiguration;
     } // NGSIGroupingInterceptor
     
@@ -70,7 +74,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
             groupingRules = new CygnusGroupingRules(groupingRulesFileName);
             configurationReader = new ConfigurationReader(30000);
             configurationReader.start();
-        }
+        } // if
     } // initialize
     
     @Override
@@ -104,7 +108,8 @@ public class NGSIGroupingInterceptor implements Interceptor {
             ArrayList<String> defaultDestinations = new ArrayList<String>();
             ArrayList<String> groupedDestinations = new ArrayList<String>();
             ArrayList<String> groupedServicePaths = new ArrayList<String>();
-            ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses = notification.getContextResponses();
+            ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses =
+                    notification.getContextResponses();
 
             if (contextResponses == null || contextResponses.isEmpty()) {
                 LOGGER.warn("No context responses within the notified entity, nothing is done");
@@ -118,18 +123,22 @@ public class NGSIGroupingInterceptor implements Interceptor {
                 NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
 
                 // get the matching rule
-                CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath, contextElement.getId(),
-                        contextElement.getType());
+                CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath,
+                        contextElement.getId(), contextElement.getType());
 
                 if (matchingRule == null) {
-                    groupedDestinations.add(contextElement.getId() + "_" + contextElement.getType());
+                    groupedDestinations.add(contextElement.getId()
+                            + (enableNewEncoding ? CommonConstants.CONCATENATOR : "_")
+                            + contextElement.getType());
                     groupedServicePaths.add(splitedNotifiedServicePaths[i]);
                 } else {
                     groupedDestinations.add((String) matchingRule.getDestination());
                     groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
                 } // if else
 
-                defaultDestinations.add(contextElement.getId() + "_" + contextElement.getType());
+                defaultDestinations.add(contextElement.getId()
+                        + (enableNewEncoding ? CommonConstants.CONCATENATOR : "_")
+                        + contextElement.getType());
             } // for
 
             // set the final header values
@@ -154,7 +163,6 @@ public class NGSIGroupingInterceptor implements Interceptor {
  
     @Override
     public List<Event> intercept(List<Event> events) {
-
         if (invalidConfiguration) {
             return events;
         } else {
@@ -167,7 +175,6 @@ public class NGSIGroupingInterceptor implements Interceptor {
  
             return interceptedEvents;
         } // if else
-        
     } // intercept
  
     @Override
@@ -176,14 +183,12 @@ public class NGSIGroupingInterceptor implements Interceptor {
             configurationReader.signalForStop();
         
             try {
-                 configurationReader.join();
+                configurationReader.join();
             } catch (InterruptedException e) {
-                 LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
+                LOGGER.error("There was a problem while joining the ConfigurationReader. Details: "
                         + e.getMessage());
             } // try catch
-            
         } // if
-        
     } // close
  
     /**
@@ -191,29 +196,48 @@ public class NGSIGroupingInterceptor implements Interceptor {
      */
     public static class Builder implements Interceptor.Builder {
         private String groupingRulesFileName;
+        private boolean enableNewEncoding;
         private boolean invalidConfiguration;
  
         @Override
         public void configure(Context context) {
-            String groupingRulesFileNameTmp = context.getString("grouping_rules_conf_file");
+            groupingRulesFileName = context.getString("grouping_rules_conf_file");
             
-            if (groupingRulesFileNameTmp != null && groupingRulesFileNameTmp.length() > 0) {
-                groupingRulesFileName = groupingRulesFileNameTmp;
-                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
-            } else {
+            if (groupingRulesFileName == null) {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Grouping rules file cannot be empty or null");
+                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = null) -- Must be configured");
+            } else if (groupingRulesFileName.length() == 0) {
+                invalidConfiguration = true;
+                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = ) -- Cannot be empty");
+            } else {
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
             } // if else
+
+            String enableNewEncodingStr = context.getString("enable_new_encoding", "false");
+
+            if (enableNewEncodingStr.equals("true") || enableNewEncodingStr.equals("false")) {
+                enableNewEncoding = Boolean.valueOf(enableNewEncodingStr);
+                LOGGER.debug("[gi] Reading configuration (enable_new_encoding="
+                        + enableNewEncodingStr + ")");
+            }  else {
+                invalidConfiguration = true;
+                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding="
+                        + enableNewEncodingStr + ") -- Must be 'true' or 'false'");
+            }  // if else
         } // configure
  
         @Override
         public Interceptor build() {
-            return new NGSIGroupingInterceptor(groupingRulesFileName, invalidConfiguration);
+            return new NGSIGroupingInterceptor(groupingRulesFileName, enableNewEncoding, invalidConfiguration);
         } // build
+        
+        protected boolean getEnableNewEncoding() {
+            return enableNewEncoding;
+        } // getEnableNewEncoding
         
         protected boolean getInvalidConfiguration() {
             return invalidConfiguration;
-        }
+        } // getInvalidConfiguration
         
     } // Builder
     
