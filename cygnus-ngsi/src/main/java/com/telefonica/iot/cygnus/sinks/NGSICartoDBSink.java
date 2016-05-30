@@ -614,20 +614,15 @@ public class NGSICartoDBSink extends NGSISink {
         
         switch(dataModel) {
             case DMBYSERVICEPATH:
-                if (servicePath.equals("/")) {
-                    throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
-                            + "dm-by-service-path data model");
-                } // if
-
-                name = NGSICharsets.cartoDBEncode(servicePath.substring(1));
+                name = NGSICharsets.cartoDBEncode(servicePath);
                 break;
             case DMBYENTITY:
-                String truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath.substring(1));
+                String truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
                         + NGSICharsets.cartoDBEncode(entity);
                 break;
             case DMBYATTRIBUTE:
-                truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath.substring(1));
+                truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
                         + NGSICharsets.cartoDBEncode(entity) + CommonConstants.CONCATENATOR
                         + NGSICharsets.cartoDBEncode(attribute);

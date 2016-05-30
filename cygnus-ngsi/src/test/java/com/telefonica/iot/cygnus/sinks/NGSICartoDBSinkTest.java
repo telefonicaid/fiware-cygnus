@@ -670,14 +670,14 @@ public class NGSICartoDBSinkTest {
 
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the CartoDB table name is lower case of <service-path>.
+     * data_model is 'dm-by-service-path' the CartoDB table name is the lower case of x002f<service-path>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameNonRootServicePathDataModelByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the CartoDB table name is the lower case of <servicePath>");
+                + "'dm-by-service-path' the CartoDB table name is the lower case of of x002f<service-path>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-service-path";
@@ -697,12 +697,12 @@ public class NGSICartoDBSinkTest {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("somepath", builtTableName);
+                assertEquals("x002fsomepath", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of <servicePath>");
+                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of x002f<service-path>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of <servicePath>");
+                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of x002f<service-path>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -715,14 +715,14 @@ public class NGSICartoDBSinkTest {
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted
      * and data_model is 'dm-by-entity' the CartoDB table name is the lower case of
-     * \<service-path\>x0000\<entity_id\>x0000\<entity_type\>.
+     * x002f\<service-path\>x0000\<entity_id\>x0000\<entity_type\>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameNonRootServicePathDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is 'dm-by-entity' "
-                + "the CartoDB table name is the lower case of <servicePath>x0000<entityId>x0000<entityType>");
+                + "the CartoDB table name is the lower case of x002f<servicePath>x0000<entityId>x0000<entityType>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-entity";
@@ -742,14 +742,14 @@ public class NGSICartoDBSinkTest {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("somepathx0000someidx0000sometype", builtTableName);
+                assertEquals("x002fsomepathx0000someidx0000sometype", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "<servicePath>x0000<entityId>x0000<entityType>");
+                        + "x002f<servicePath>x0000<entityId>x0000<entityType>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "<servicePath>x0000<entityId>x0000<entityType>");
+                        + "x002f<servicePath>x0000<entityId>x0000<entityType>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -761,14 +761,14 @@ public class NGSICartoDBSinkTest {
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the CartoDB table name cannot be created.
+     * data_model is 'dm-by-service-path' the CartoDB table name is x002f.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameRootServicePathDataModelByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the CartoDB table name cannot be created");
+                + "'dm-by-service-path' the CartoDB table name is x002f");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-service-path";
@@ -785,28 +785,35 @@ public class NGSICartoDBSinkTest {
         String attribute = null; // irrelevant for this test
         
         try {
-            sink.buildTableName(servicePath, entity, attribute);
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                    + "- FAIL - It was not detected the table name could not be created");
-            assertTrue(false);
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            
+            try {
+                assertEquals("x002f", builtTableName);
+                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to x002f");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to x002f");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            assertTrue(true);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                    + "-  OK  - It was detected the table name could not be created");
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
         } // try catch
     } // testBuildDBNameRootServicePathDataModelByServicePath
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted
      * and data_model is 'dm-by-entity' the CartoDB table name is the lower case of
-     * \<service-path\>_\<entity_id\>_\<entity_type\>.
+     * x002f\<service-path\>_\<entity_id\>_\<entity_type\>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameRootServicePathDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non service-path is notified/defaulted and data_model is 'dm-by-entity' "
-                + "the CartoDB table name is the lower case of <servicePath>_<entityId>_<entityType>");
+                + "the CartoDB table name is the lower case of x002fx0000<entityId>x0000<entityType>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-entity";
@@ -819,21 +826,21 @@ public class NGSICartoDBSinkTest {
         sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
                 enableDistance, keysConfFile));
         String servicePath = "/";
-        String entity = "someId_someType";
+        String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("someid_sometype", builtTableName);
+                assertEquals("x002fx0000someidx0000sometype", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "<entityId>_<entityType>");
+                        + "x002fx0000<entityId>x0000<entityType>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "<entityId>_<entityType>");
+                        + "x002fx0000<entityId>x0000<entityType>");
                 throw e;
             } // try catch
         } catch (Exception e) {
