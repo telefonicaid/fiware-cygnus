@@ -55,19 +55,21 @@ Here it is assumed the notified/default FIWARE service maps the PostgreSQL schem
 [Top](#top)
 
 ####<a name="section1.2.2"></a>PostgreSQL tables naming conventions
-The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+The name of these tables depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
+The above applies both if `enable_raw` or `enable_distance` es set to `true`. In adddition, the distance analysis mode adds the sufix `x0000distance` to the table name.
+
+It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character. For instance, the initial slash (`/`) of the FIWARE service path is encoded as `x002f`.
 
 The following table summarizes the table name composition:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | N/A | `<entityId>_<entityType>` |
-| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
+| `/` | `x002f` | `x002f<entityId>x0000<entityType>[x0000distance]` |
+| `/<svcPath>` | `x002f<svcPath>[x0000distance]` | `x002f<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -165,20 +167,20 @@ Assuming the following Flume event is created from a notified NGSI context data 
 [Top](#top)
 
 ####<a name="section1.3.2"></a>Table names
-The PostgreSQL table names will be, depending on the configured data model, the following ones:
+The PostgreSQL table names will be, depending on the configured data model and analysis mode, the following ones:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | N/A | `car1_car` |
-| `/4wheels` | `4wheels` | `4wheels_car1_car` |
+| `/` | `x002f` | `x002fcar1x0000car[x0000distance]` |
+| `/4wheels` | `x002f4wheels[x0000distance]` | `x002f4wheelsx0000car1x0000car[x0000distance]` |
     
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
-Let's assume a table name `4wheels_car1_car` (data model by entity, non-root service path). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsx0000car1x0000car` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000car&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -238,10 +240,10 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car
 [Top](#top)
 
 ####<a name="section1.3.4"></a>Distance-based storing
-Let's assume a table name `4wheels_car1_car` (data model by entity, non-root service path) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsx0000car1x0000carx0000distance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheels_car1_car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000carx0000distance&api_key=abcdef0123456789"
 {
   "rows": [
     {
