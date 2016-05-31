@@ -100,6 +100,7 @@ public class ManagementInterfaceTest {
     private final String deleteURIv1 = "/v1/subscriptions?ngsi_version=1&subscription_id=12345";
     private final String deleteURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
     private final String getURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
+    private final String getAllURIv2 = "/v1/subscriptions?ngsi_version=2";
     private final HttpServletResponse response = mock(HttpServletResponse.class);
     private final HttpServletRequest mockRequestV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockRequestV2 = mock(HttpServletRequest.class);
@@ -112,6 +113,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockDeleteSubscriptionV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetSubscriptionV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetAllSubscriptionsV2 = mock(HttpServletRequest.class);
     
     
     /**
@@ -132,7 +134,7 @@ public class ManagementInterfaceTest {
         String subsEmptyfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsV2MissingfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
-        String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
+        String subscriptionGet = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
         
         // Define the readers with the subscriptions 
@@ -212,6 +214,11 @@ public class ManagementInterfaceTest {
         when(mockGetSubscriptionV2.getReader()).thenReturn(readerGetSubscription);
         when(mockGetSubscriptionV2.getParameter("ngsi_version")).thenReturn("2");
         when(mockGetSubscriptionV2.getParameter("subscription_id")).thenReturn("12345");
+        
+        when(mockGetAllSubscriptionsV2.getRequestURI()).thenReturn(getAllURIv2);
+        when(mockGetAllSubscriptionsV2.getMethod()).thenReturn("GET");
+        when(mockGetAllSubscriptionsV2.getReader()).thenReturn(readerGetSubscription);
+        when(mockGetAllSubscriptionsV2.getParameter("ngsi_version")).thenReturn("2");
         
         when(response.getWriter()).thenReturn(writer);
         
@@ -539,5 +546,33 @@ public class ManagementInterfaceTest {
         } // try catch
         
     } // testGetMethodsGetsASubscriptionV2
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets all subscriptions (ngsi_version = 2)'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodsGetsAllSubscriptionsV2() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'GET method gets all subscriptions (ngsi_version = 2)'.");
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        managementInterface.setOrionBackend(orionBackend);        
+        
+        try {
+            managementInterface.handleGetSubscriptions(mockGetAllSubscriptionsV2, responseWrapper);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the GET subscription");
+            throw x;
+        } // try catch
+                
+        try {
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription got");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
+            throw e;
+        } // try catch
+        
+    } // testGetMethodsGetsAllSubscriptionsV2
     
 } // ManagementInterfaceTest
