@@ -4,7 +4,13 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to MongoDB data structures](#section1.2)
+        * [MongoDB databases naming conventions](#section1.2.1)
+        * [MongoDB collections naming conventions](#section1.2.2)
+        * [Storing](#section1.2.3)
     * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Database and table names](#section1.3.2)
+        * [Storing](#section1.3.3)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -16,6 +22,7 @@ Content:
 * [Implementation details](#section3)
     * [`NGSISTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
+    * [Authentication and authorization](#section3.3)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSISTHSink`, or simply `NGSISTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
@@ -47,15 +54,57 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSISTHSink` each time a Flume event is going to be persisted.
 
-A database called as the `fiware-service` header value within the event is created (if not existing yet).
+[Top](#top)
 
-The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. the collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+####<a name="section1.2.1"></a>MongoDB databases and collections naming conventions
+A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
-The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the collection names, so they will be replaced by underscore, `_`.
+
+[Top](#top)
+
+####<a name="section1.2.2"></a>MongoDB collections naming conventions
+The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
+
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.  The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
+
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`.
+
+The following table summarizes the table name composition (assuming default `sth_` prefix):
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_/.aggr` | `sth_/<entityId>_<entityType>.aggr` | `sth_/<entityId>_<entityType>_<attrName>.aggr` |
+| `/<svcPath>.aggr` | `sth_/<svcPath>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>_<attrName>.aggr` |
+
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.3"></a>Storing
+As said, `NGSISTHSink` has been designed for pre-aggregating certain statistics about entities and their attributes:
+
+* For numeric attribute values:
+    * Sum of all the samples.
+    * Sum of the square value of all the samples.
+    * Maximum value among all the samples.
+    * Minimum value among all the samples.
+* Number of occurrences for string attribute values.
+
+This is done by changing the <i>usual</i> behaviour of a NGSI-like sink: instead of appending more and more information elements, a set of information elements (in this case, Json documents within the collections) are created once, and updated many.
+
+There will be at least (see below about the <i>origin</i>) a Json document for each <i>resolution</i> handled by `NGSISTHSink`: month, day, hour, minute and second. For each one of these documents, there will be as many <i>offset</i> fields as the resolution denotes, e.g. for a resolution of "day" ther will be 24 offsets, for a resolution of "second" there will be 60 offsets. Initially, these offsets will be setup to 0 (for numeric aggregations), or `{}` for string aggregations, and as long notifications arrive, these values will be updated depending on the resolution and the offset within that resolution the notification was receieved.
+
+Each one of the Json documents (each one for each resolution) will also have an <i>origin</i>, the time for which the aggregated information applies. For instance, for a resolution of "minute" a valid origin could be `2015-03-01T13:00:00.000Z`, meaning the 13th hour of March, the 3rd, 2015. There may be another Json document having a differetn origin for the same resolution, e.g. `2015-03-01T14:00:00.000Z`, meaning the 14th hour of March, the 3rd, 2015. The origin is stored using UTC time to avoid locale issues.
+
+Finally, each document will save the number of <i>samples</i> that were used for updating it. This is useful when getting values such as the average, which is the <i>sum</i> divided by the number of samples.
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -89,7 +138,22 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=false` as configuration parameters, then `NGSISTHSink` will persist the data within the body as:
+[Top](#top)
+
+####<a name="section1.3.2"></a>Database and collection names
+A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
+
+Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_/.aggr` | `sth_/car1_car.aggr` | `sth_/car1_car_speed.aggr`<br>`sth_/car1_car_oil_level.aggr` |
+| `/4wheels` | `sth_/4wheels.aggr` | `sth_/4wheels_car1_car.aggr` | `sth_/4wheels_car1_car_speed.aggr`<br>`sth_/4wheels_car1_car_oil_level.aggr` |
+
+[Top](#top)
+
+####<a name="section1.3.3"></a>Storing
+Assuming `data_model=dm-by-entity` as configuration parameter, then `NGSISTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -205,12 +269,6 @@ Assuming `mongo_username=myuser`, `data_model=dm-by-entity` and  `should_hash=fa
             { "offset" : 31, "samples" : 0, "sum" : 0, "sum2" : 0, "min" : Infinity, "max" : -Infinity }
         ]
     }
-
-NOTES:
-
-* `mongo` is the MongoDB CLI for querying the data.
-* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
-* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `NGSIRestHandler`.
 
 [Top](#top)
 
@@ -332,5 +390,10 @@ Creates a collection, given its name, if not exists in the given database.
 Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.
+
+[Top](#top)
+
+###<a name="section3.3"></a>Authentication and authorization
+Current implementation of `NGSIMongoSink` relies on the username and password credentials created at the MongoDB endpoint.
 
 [Top](#top)

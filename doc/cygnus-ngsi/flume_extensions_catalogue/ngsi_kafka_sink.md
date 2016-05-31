@@ -45,7 +45,7 @@ A Kafka topic is created (number of partitions 1) if not yet existing depending 
 * Data model by service (`data_model=dm-by-service`). As the data model name denotes, the notified FIWARE service (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service is stored in this unique topic.
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique topic. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name and type in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
 It must be said there is no known character set accepted and/or forbiden for Kafka.
 
@@ -53,8 +53,8 @@ The following table summarizes the topic name composition:
 
 | FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|---|
-| `/` | `<svc>` | N/A | `<entityId>_<entityType>` | `<entityId>_<entityType>_<attrName>_<attrType>` |
-| `/<svcPath>` | `<svc>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityId>_<entityType>_<attrName>_<attrType>` |
+| `/` | `<svc>` | N/A | `<entityId>_<entityType>` | `<entityId>_<entityType>_<attrName>` |
+| `/<svcPath>` | `<svc>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityId>_<entityType>_<attrName>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -107,17 +107,17 @@ The topic names will be, depending on the configured data model, the following o
 
 | FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|---|
-| `/` | `vehicles` | N/A | `car1_car` | `car1_car_speed_float`<br>`car1_car_oil_level_float` |
-| `/4wheels` | `vehicles` | `4wheels` | `4wheels_car1_car` | `4wheels_car1_car_speed_float`<br>`4wheels_car1_car_oil_level_float` |
+| `/` | `vehicles` | N/A | `car1_car` | `car1_car_speed`<br>`car1_car_oil_level` |
+| `/4wheels` | `vehicles` | `4wheels` | `4wheels_car1_car` | `4wheels_car1_car_speed`<br>`4wheels_car1_car_oil_level` |
 
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Storing
-Let's assume a topic name `vehicles_4wheels_car1_car_speed_float` (data model by attribute, non-root service path). The data stored within this topic would be:
+Let's assume a topic name `vehicles_4wheels_car1_car_speed` (data model by attribute, non-root service path). The data stored within this topic would be:
 
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_speed_float --from-beginning
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_speed --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_oil_level_float --from-beginning
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_oil_level --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
 
 [Top](#top)
