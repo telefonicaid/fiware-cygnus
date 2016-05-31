@@ -128,7 +128,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
 
                 if (matchingRule == null) {
                     groupedDestinations.add(contextElement.getId()
-                            + (enableNewEncoding ? CommonConstants.CONCATENATOR : "_")
+                            + (enableNewEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
                             + contextElement.getType());
                     groupedServicePaths.add(splitedNotifiedServicePaths[i]);
                 } else {
@@ -137,7 +137,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
                 } // if else
 
                 defaultDestinations.add(contextElement.getId()
-                        + (enableNewEncoding ? CommonConstants.CONCATENATOR : "_")
+                        + (enableNewEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
                         + contextElement.getType());
             } // for
 

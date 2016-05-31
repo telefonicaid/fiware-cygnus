@@ -37,7 +37,6 @@ public final class NGSIUtils {
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[\\/\\\\.\\$\" ]");
     private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("\\$");
-    private static final Pattern ENCODEPOSTGRESQLPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -91,22 +90,6 @@ public final class NGSIUtils {
     public static String encodeSTHCollection(String in) {
         return ENCODESTHCOLLECTIONPATTERN.matcher(in).replaceAll("_");
     } // encodeSTHCollection
-    
-    /**
-     * Encodes a tring replacing all ' ' with '_'.
-     * @param in
-     * @param deleteSlash
-     * @return
-     */
-    public static String encodePostgreSQL(String in, boolean deleteSlash) {
-        // PostgreSQL is case insensitive:
-        // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
-        if (deleteSlash) {
-            return ENCODEPOSTGRESQLPATTERN.matcher(in.substring(1)).replaceAll("_").toLowerCase();
-        } else {
-            return ENCODEPOSTGRESQLPATTERN.matcher(in).replaceAll("_").toLowerCase();
-        } // else
-    } // encodePostgreSQL
     
     /**
      * Gets the geolocation value, ready for insertion in CartoDB, given a NGSI attribute value and its metadata.
