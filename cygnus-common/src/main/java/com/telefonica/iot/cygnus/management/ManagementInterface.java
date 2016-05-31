@@ -409,7 +409,7 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("json;charset=utf-8");
         
         // flag for use get all or get one subscription
-        Boolean getAllSubscriptions = false;
+        boolean getAllSubscriptions = false;
         
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
@@ -531,8 +531,6 @@ public class ManagementInterface extends AbstractHandler {
                 JsonResponse orionResponse = orionBackend.
                 getSubscriptionsV2(token, subscriptionID);
                 
-                LOGGER.debug("PASADO EL GETSUBSCRIPTIONSV2");
-
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
