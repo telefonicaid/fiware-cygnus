@@ -108,9 +108,9 @@ public class HttpBackendTest {
         
         try {
             httpBackend.doRequest("GET", normalURL, headers, normalEntity);
-            System.out.println(getTestTraceHead("[HttpBackend]") + "-  OK  - Succesfully got");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + "-  OK  - Succesfully got");
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend]") + " - FAIL - There was some problem when handling the request.");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - FAIL - There was some problem when handling the request.");
             throw e;
         } // try catch
         
@@ -124,9 +124,9 @@ public class HttpBackendTest {
         
         try {
             httpBackend.doRequest("GET", arrayURL, headers, arrayEntity);
-            System.out.println(getTestTraceHead("[HttpBackend]") + "-  OK  - Succesfully got");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + "-  OK  - Succesfully got");
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend]") + " - FAIL - There was some problem when handling the request.");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - FAIL - There was some problem when handling the request.");
             throw e;
         } // try catch
         
