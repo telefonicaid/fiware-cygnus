@@ -537,7 +537,7 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
                         + "\"result\" : { \"There was some problem when handling the response\" }");
-                    LOGGER.debug("There was som problem when handling the response");
+                    LOGGER.debug("There was some problem when handling the response");
                     return;
                 } // if else
 
@@ -573,7 +573,7 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
                         + "\"result\" : { \"There was some problem when handling the response\" }");
-                    LOGGER.debug("There was som problem when handling the response");
+                    LOGGER.debug("There was some problem when handling the response");
                     return;
                 } // if else
 
