@@ -570,7 +570,12 @@ public class ManagementInterface extends AbstractHandler {
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
-                } // if
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                    LOGGER.debug("There was som problem when handling the response");
+                    return;
+                } // if else
 
                 LOGGER.debug("Status code got: " + status);
 
