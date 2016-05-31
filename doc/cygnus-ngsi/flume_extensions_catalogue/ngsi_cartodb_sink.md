@@ -58,7 +58,7 @@ Here it is assumed the notified/default FIWARE service maps the PostgreSQL schem
 The name of these tables depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In adddition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
@@ -177,10 +177,10 @@ The PostgreSQL table names will be, depending on the configured data model and a
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
-Let's assume a table name `4wheelsx0000car1x0000car` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsx0000car1x0000car` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheelsx0000car1x0000car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000car&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -240,10 +240,10 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheelsx0000car1
 [Top](#top)
 
 ####<a name="section1.3.4"></a>Distance-based storing
-Let's assume a table name `4wheelsx0000car1x0000carx0000distance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsx0000car1x0000carx0000distance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from 4wheelsx0000car1x0000carx0000distance&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000carx0000distance&api_key=abcdef0123456789"
 {
   "rows": [
     {
