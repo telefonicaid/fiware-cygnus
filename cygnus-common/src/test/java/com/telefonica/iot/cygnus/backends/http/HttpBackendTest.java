@@ -53,7 +53,7 @@ public class HttpBackendTest {
     } // HttpBackendImpl
     
     @Mock
-    HttpClient httpclient; // TBD create setHttpClient en httpBackend
+    HttpClient httpclient; 
     
     // instance to be tested
     private HttpBackend httpBackend;
@@ -102,7 +102,7 @@ public class HttpBackendTest {
     
     @Test
     public void testDoRequestWithNormalResponse() throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend]") + "- Testing HttpBackend.doRequest - 'Gets a valid JSONResponse'");
+        System.out.println(getTestTraceHead("[HttpBackend]") + "- Testing HttpBackend.doRequest - 'Gets a valid Json object based JSONResponse'");
         httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null);
         httpBackend.setHttpClient(httpclient);
         
@@ -118,7 +118,7 @@ public class HttpBackendTest {
     
     @Test
     public void testDoRequestWithArrayResponse () throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend]") + "- Testing HttpBackend.doRequest - 'Gets a valid JSONArray'");
+        System.out.println(getTestTraceHead("[HttpBackend]") + "- Testing HttpBackend.doRequest - 'Gets a valid Json array based JSONResponse'");
         httpBackend = new HttpBackendImpl(host, arrayURL, false, false, null, null, null, null);
         httpBackend.setHttpClient(httpclient);
         
