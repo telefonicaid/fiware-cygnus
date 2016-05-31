@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -148,8 +149,20 @@ public abstract class HttpBackend {
             } // if else
         } // if else
     } // doRequest
+    
+    /**
+     * Does a Http request given a method, a relative URL, a list of headers and the payload
+     * Protected method due to it's used by the tests.
+     * 
+     * @param method
+     * @param url
+     * @param headers
+     * @param entity
+     * @return 
+     * @throws java.lang.Exception
+     */
         
-    private JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
+    protected JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
         throws Exception {
         HttpResponse httpRes = null;
         HttpRequestBase request = null;
@@ -284,7 +297,14 @@ public abstract class HttpBackend {
                 
                 if (!res.isEmpty()) {
                     JSONParser jsonParser = new JSONParser();
-                    jsonPayload = (JSONObject) jsonParser.parse(res);
+                    
+                    if (res.startsWith("[")) {
+                        Object object = jsonParser.parse(res);
+                        jsonPayload = new JSONObject();
+                        jsonPayload.put("result", (JSONArray) object);
+                    } else {
+                        jsonPayload = (JSONObject) jsonParser.parse(res);
+                    } // if else
                 } // if
             } // if
 
