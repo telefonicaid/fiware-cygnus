@@ -442,7 +442,7 @@ public class ManagementInterface extends AbstractHandler {
         if (ngsiVersion.equals("1")) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"GET /v1/subscriptions not implemented.\"}");
+                + "\"error\":\"GET /v1/subscriptions not implemented for NGSI version 1.\"}");
             LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
         } // if
@@ -525,16 +525,21 @@ public class ManagementInterface extends AbstractHandler {
         if (getAllSubscriptions)  {
             
             try { 
-                int status = -1;
+                int status;
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                getSubscriptionsV2(token, subscriptionID);
-                
+                        getSubscriptionsV2(token, subscriptionID);
+                                
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
-                } // if
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                    LOGGER.debug("There was som problem when handling the response");
+                    return;
+                } // if else
 
                 LOGGER.debug("Status code got: " + status);
 
@@ -560,7 +565,7 @@ public class ManagementInterface extends AbstractHandler {
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                getSubscriptionsByIdV2(token, subscriptionID);
+                        getSubscriptionsByIdV2(token, subscriptionID);
 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
