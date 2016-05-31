@@ -62,8 +62,8 @@ pages:
           - 'Reporting issues and contact information': 'cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md'
       - 'Flume extensions catalogue':
           - 'Introduction': 'cygnus-ngsi/flume_extensions_catalogue/introduction.md'
-          - 'Naming conventions': 'cygnus-ngsi/flume_extensions_catalogue/naming_conventions.md'
           - 'OrionRESTHandler': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_rest_handler.md'
+          - 'OrionCartoDBSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_cartodb_sink.md'
           - 'OrionCKANSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_ckan_sink.md'
           - 'OrionDynamoDBSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_dynamodb_sink.md'
           - 'OrionKafkaSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_kafka_sink.md'
