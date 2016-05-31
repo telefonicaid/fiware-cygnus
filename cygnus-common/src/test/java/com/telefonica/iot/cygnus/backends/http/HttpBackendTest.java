@@ -118,7 +118,7 @@ public class HttpBackendTest {
     
     @Test
     public void testDoRequestWithArrayResponse () throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - 'Gets a valid Json array based JSONResponse'");
+        System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - Gets a valid Json array based JSONResponse");
         httpBackend = new HttpBackendImpl(host, arrayURL, false, false, null, null, null, null);
         httpBackend.setHttpClient(httpclient);
         
