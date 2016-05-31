@@ -134,7 +134,7 @@ public class ManagementInterfaceTest {
         String subsEmptyfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsV2MissingfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
-        String subscriptionGet = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
+        String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
         
         // Define the readers with the subscriptions 
@@ -232,7 +232,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testHandle() {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- Testing ManagementInterface.handle");
+        System.out.println(getTestTraceHead("[ManagementInterface.handle]") + " - Testing ManagementInterface.handle");
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         
         try {
@@ -253,7 +253,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method posts a valid subscription (ngsi_version = 1)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
@@ -267,9 +267,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid subscription");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -281,7 +281,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method posts a valid subscription (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
@@ -295,9 +295,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid subscription");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -308,7 +308,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method doesn't find a subscription (ngsi_version = 1)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -322,9 +322,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription not found");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -335,7 +335,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method doesn't find a subscription (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -349,9 +349,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription not found");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -362,7 +362,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method post a subscription with empty fields (ngsi_version = 1)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -376,9 +376,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription has empty fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -389,7 +389,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method post a subscription with empty fields (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -403,9 +403,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription has empty fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -416,7 +416,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method post a subscription with missing fields (ngsi_version = 1)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -430,9 +430,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription has missing fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -443,7 +443,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - 'POST method post a subscription with missing fields (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -457,9 +457,9 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Subscription has missing fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid subscription");
             throw e;
         } // try catch
         
@@ -471,7 +471,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'DELETE method deletes a subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - 'DELETE method deletes a subscription (ngsi_version = 1)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -485,9 +485,9 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription deleted");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - Subscription deleted");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Subscription exists yet");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - Subscription exists yet");
             throw e;
         } // try catch
         
@@ -498,7 +498,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'DELETE method deletes a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - 'DELETE method deletes a subscription (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -512,9 +512,9 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription deleted");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - Subscription deleted");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Subscription exists yet");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - Subscription exists yet");
             throw e;
         } // try catch
         
@@ -525,7 +525,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testGetMethodsGetsASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'GET method gets a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - 'GET method gets a subscription (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -539,9 +539,9 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription got");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - Subscription got");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - There are some problems with your request");
             throw e;
         } // try catch
         
@@ -553,7 +553,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testGetMethodsGetsAllSubscriptionsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'GET method gets all subscriptions (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - 'GET method gets all subscriptions (ngsi_version = 2)'.");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -567,9 +567,9 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription got");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - Subscription got");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - There are some problems with your request");
             throw e;
         } // try catch
         
