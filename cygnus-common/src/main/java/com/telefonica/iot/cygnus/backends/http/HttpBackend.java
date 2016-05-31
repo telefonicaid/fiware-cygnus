@@ -149,6 +149,18 @@ public abstract class HttpBackend {
             } // if else
         } // if else
     } // doRequest
+    
+    /**
+     * Does a Http request given a method, a relative URL, a list of headers and the payload
+     * Protected method due to it's used by the tests.
+     * 
+     * @param method
+     * @param url
+     * @param headers
+     * @param entity
+     * @return 
+     * @throws java.lang.Exception
+     */
         
     protected JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
         throws Exception {
