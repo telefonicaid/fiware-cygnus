@@ -484,7 +484,7 @@ Missing fields (empty or not given):
 
 Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
 
-Valid NGSI versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+Valid NGSI versions are `1` and `2` (this method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
 
 ```
 GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
