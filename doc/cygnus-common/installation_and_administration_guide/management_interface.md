@@ -16,6 +16,8 @@ Content:
   * [`NGSI Version 2`](#section11.2)
 * [DELETE `/v1/subscriptions`](#section12)
 * [GET `/v1/subscriptions`](#section13)
+  * [GET subscription by ID](#section13.1)
+  * [GET all subscriptions](#section13.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -478,6 +480,8 @@ Missing fields (empty or not given):
 [Top](#top)
 
 ##<a name="section13"></a>`GET /v1/subscriptions`
+###<a name="section13.1"></a> GET subscription by ID
+
 Gets an existent subscription from Orion, given the ngsi version and the subscription id as a query parameter.
 
 Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
@@ -517,6 +521,45 @@ Missing or empty parameters:
 ```
 {"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors."}
 {"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors."}
+```
+
+[Top](#top)
+
+###<a name="section13.2"></a> GET all subscriptions
+
+Gets all existent subscriptions from Orion, given the ngsi version as a query parameter.
+
+Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+
+```
+GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+```
+
+Responses:
+
+Valid and current subscription id with the correct ngsi version:
+
+```
+{"success":"true","result" : {{"result":[{"notification":{"lastNotification":"2015-07-28T22:23:30.00Z","timesSent":7126568376946155044,"http":{"url":"http:\/\/130.206.82.120:1026\/ngsi10\/notifyContext"},"attrs":[]},"expires":"2016-09-13T09:27:15.00Z","subject":{"condition":{"attrs":["chlorine"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"Sevilla:FUENTES:"}]},"id":"54228e731860a3873d395d66","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"http":{"url":"http:\/\/130.206.82.120:1026\/ngsi10\/notifyContext"},"attrs":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"attrs":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"Sevilla:FUENTES"}]},"id":"5432502b1860a3873d395e95","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:24:53.00Z","timesSent":8786703474088345564,"http":{"url":"http:\/\/130.206.83.12:1026\/ngsi10\/notifyContext"},"attrs":[]},"expires":"2035-01-06T09:11:45.00Z","subject":{"condition":{"attrs":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"Sevilla:FUENTES"}]},"id":"553614511860a3f429e3fd80","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:25:01.00Z","timesSent":8785875184958230546,"http":{"url":"http:\/\/130.206.83.12:1026\/ngsi10\/notifyContext"},"attrs":[]},"expires":"2035-01-06T09:27:18.00Z","subject":{"condition":{"attrs":["TimeInstant","longitude","latitude"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"Sevilla:FUENTES:"}]},"id":"553617f61860a3f429e3fd85","status":"active"},{"notification":{"lastNotification":"2016-04-11T13:24:19.00Z","timesSent":7918500433202332193,"http":{"url":"http:\/\/52.16.174.229:2700"},"attrs":[]},"expires":"2016-07-11T21:33:03.00Z","subject":{"condition":{"attrs":["sound"]},"entities":[{"id":"","type":"santander:sound","idPattern":"urn:smartsantander:testbed:.*"}]},"id":"55a2dd0f9a3bb06493b38fef","status":"active"},{"notification":{"lastNotification":"2016-04-11T13:24:19.00Z","timesSent":8793806529804560773,"http":{"url":"http:\/\/52.16.174.229:2735\/sound"},"attrs":[]},"expires":"2016-07-27T08:43:13.00Z","subject":{"condition":{"attrs":["sound"]},"entities":[{"id":"","type":"santander:sound","idPattern":"urn:smartsantander:testbed:.*"}]},"id":"55b740a1760b7a367c9c7bd1","status":"active"},{"notification":{"lastNotification":"2016-04-11T13:24:19.00Z","timesSent":8793414191782978685,"http":{"url":"http:\/\/lmctmlgw7thh.runscope.net\/sound"},"attrs":[]},"expires":"2016-07-27T08:46:15.00Z","subject":{"condition":{"attrs":["sound"]},"entities":[{"id":"","type":"santander:sound","idPattern":"urn:smartsantander:testbed:.*"}]},"id":"55b74157760b7a367c9c7bd2","status":"active"},{"notification":{"http":{"url":"http:\/\/130.206.123.223:5050\/notify"},"attrs":["taxiId","time","lat","lon","status"]},"expires":"2016-09-03T10:43:17.00Z","subject":{"condition":{"attrs":["time"]},"entities":[{"id":"","type":"Taxi","idPattern":".*"}]},"id":"55f00d453de71c949d1422e1","status":"active"},{"notification":{"http":{"url":"http:\/\/130.206.123.223:5050\/notify"},"attrs":["taxiId","time","lat","lon","status"]},"expires":"2016-09-03T11:22:52.00Z","throttling":1,"subject":{"condition":{"attrs":["time"]},"entities":[{"id":"","type":"Taxi","idPattern":".*"}]},"id":"55f0168c3de71c949d1422e2","status":"active"},{"notification":{"lastNotification":"2016-03-09T22:10:04.00Z","timesSent":8512673826141801965,"http":{"url":"http:\/\/130.206.123.223:5050\/notify"},"attrs":["taxiId","time","lat","lon","status"]},"expires":"2016-09-03T11:26:58.00Z","throttling":1,"subject":{"condition":{"attrs":["time"]},"entities":[{"id":"","type":"Taxi","idPattern":".*"}]},"id":"55f017823de71c949d1422e3","status":"active"},{"notification":{"lastNotification":"2015-09-24T14:56:08.00Z","timesSent":8040851773959392932,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T13:30:50.00Z","subject":{"condition":{"attrs":["status"]},"entities":[{"id":"40.64059722.944096","type":"location","idPattern":""}]},"id":"5603fb0aebf4aa5a1588cd21","status":"active"},{"notification":{"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T14:10:26.00Z","subject":{"condition":{"attrs":["status"]},"entities":[{"id":"crowdId","type":"crowd","idPattern":""}]},"id":"56040452ebf4aa5a1588cd22","status":"active"},{"notification":{"lastNotification":"2015-09-24T14:11:30.00Z","timesSent":8040851773959392932,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T14:10:54.00Z","subject":{"condition":{"attrs":["observations"]},"entities":[{"id":"crowdId","type":"crowd","idPattern":""}]},"id":"5604046eebf4aa5a1588cd23","status":"active"},{"notification":{"lastNotification":"2015-09-24T14:24:04.00Z","timesSent":8040851773959392932,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T14:23:15.00Z","subject":{"condition":{"attrs":["status"]},"entities":[{"id":"40.64059781.944096","type":"location","idPattern":""}]},"id":"56040753ebf4aa5a1588cd24","status":"active"},{"notification":{"lastNotification":"2015-09-24T14:25:21.00Z","timesSent":7512234279060279666,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T14:25:20.00Z","subject":{"condition":{"attrs":["status"]},"entities":[{"id":"40.64059777777.944096","type":"location","idPattern":""}]},"id":"560407d0ebf4aa5a1588cd25","status":"active"},{"notification":{"lastNotification":"2015-09-24T15:12:36.00Z","timesSent":7512234279060279666,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-21T15:12:36.00Z","subject":{"condition":{"attrs":["status"]},"entities":[{"id":"40.64059712.944096","type":"location","idPattern":""}]},"id":"560412e4ebf4aa5a1588cd26","status":"active"},{"notification":{"lastNotification":"2015-09-25T12:44:22.00Z","timesSent":8231085825504083150,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-22T10:37:15.00Z","subject":{"condition":{"attrs":["aqiText"]},"entities":[{"id":"40.64368522.963004","type":"location","idPattern":""}]},"id":"560523dbf0ad42c03e86d912","status":"active"},{"notification":{"lastNotification":"2015-09-25T12:44:40.00Z","timesSent":7901856702247101528,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-22T10:42:07.00Z","subject":{"condition":{"attrs":["aqiText"]},"entities":[{"id":"40.60113922.960463","type":"location","idPattern":""}]},"id":"560524fff0ad42c03e86d918","status":"active"},{"notification":{"lastNotification":"2015-09-25T12:44:39.00Z","timesSent":6886708066761051270,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-22T10:43:10.00Z","subject":{"condition":{"attrs":["aqiText"]},"entities":[{"id":"40.64059922.944096","type":"location","idPattern":""}]},"id":"5605253ef0ad42c03e86d91b","status":"active"},{"notification":{"lastNotification":"2015-09-25T12:44:39.00Z","timesSent":8578622459237801700,"http":{"url":"http:\/\/exasa.gr\/various\/test.php"},"attrs":[]},"expires":"2025-09-22T10:43:14.00Z","subject":{"condition":{"attrs":["aqiText"]},"entities":[{"id":"40.62371522.957265","type":"location","idPattern":""}]},"id":"56052542f0ad42c03e86d91c","status":"active"}]}}
+
+```
+
+Invalid ngsi version:
+
+```
+{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
+```
+
+Valid but not implemented ngsi version (sending `ngsi_version=1`):
+
+```
+{"success":"false","error":"GET /v1/subscriptions not implemented for NGSI version 1."}
+```
+
+Missing or empty parameters:
+
+```
+{"success":"false","error":"Invalid endpoint, field 'ssl' is missing"}
 ```
 
 [Top](#top)
