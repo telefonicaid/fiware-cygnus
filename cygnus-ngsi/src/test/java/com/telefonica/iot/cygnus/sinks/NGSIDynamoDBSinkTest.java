@@ -220,69 +220,6 @@ public class NGSIDynamoDBSinkTest {
     } // testPersistNullBatches
 
     /**
-     * Test of persistBath method, of class NGSIDynamoDBSink. Special resources length are tested.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testPersistResourceLengths() throws Exception {
-        // common objects
-        Context context = createContext();
-        
-        System.out.println("Testing OrionDynamoDBSink.persistBatch (normal resource lengths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionDynamoDBSink.persistBatch (too long service name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionDynamoDBSink.persistBatch (too long servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionDynamoDBSink.persistBatch (too long destination name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-    } // testPersistResourceLengths
-    
-    /**
      * Test of persistBatch method, of class NGSIDynamoDBSink. Special service and service-path are tested.
      * @throws java.lang.Exception
      */
