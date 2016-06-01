@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -61,6 +62,8 @@ public class TwitterSourceTest {
 
     @Test
     public void testConfigure() {
+        System.out.println(getTestTraceHead("[TwitterSourceTest.configure]")
+                + "-------- Configure Twitter parameters.");
         Context context = new Context();
         context.put("consumerKey", consumerKey);
         context.put("consumerSecret", consumerSecret);
@@ -77,18 +80,27 @@ public class TwitterSourceTest {
         TwitterSource source = new TwitterSource();
         source.configure(context);
 
-        assertEquals(consumerKey, source.getConsumerKey());
-        assertEquals(consumerSecret, source.getConsumerSecret());
-        assertEquals(accessToken, source.getAccessToken());
-        assertEquals(accessTokenSecret, source.getAccessTokenSecret());
-        assertArrayEquals(coordinates, source.getBoundingBox());
-        assertArrayEquals(keywords_array, source.getKeywords());
-
+        try {
+            assertEquals(consumerKey, source.getConsumerKey());
+            assertEquals(consumerSecret, source.getConsumerSecret());
+            assertEquals(accessToken, source.getAccessToken());
+            assertEquals(accessTokenSecret, source.getAccessTokenSecret());
+            assertArrayEquals(coordinates, source.getBoundingBox());
+            assertArrayEquals(keywords_array, source.getKeywords());
+            System.out.println(getTestTraceHead("[TwitterSourceTest.configure]")
+                    + "-  OK  - Twitter parameters detected in context.");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[TwitterSourceTest.configure]")
+                    + "- FAIL - Twitter parameters not detected in context.");
+            throw e;
+        } // try catch
     }
 
     // From flume v1.7.0
     @Test
     public void testBasic() throws Exception {
+        System.out.println(getTestTraceHead("[TwitterSourceTest.basic]")
+                + "-------- Start source.");
         Context context = new Context();
         context.put("consumerKey", consumerKey);
         context.put("consumerSecret", consumerSecret);
@@ -117,10 +129,19 @@ public class TwitterSourceTest {
         rcs.setChannels(Collections.singletonList(channel));
         ChannelProcessor chp = new ChannelProcessor(rcs);
         source.setChannelProcessor(chp);
-        source.start();
 
-        Thread.sleep(500);
-        source.stop();
+        try {
+            source.start();
+
+            Thread.sleep(500);
+            source.stop();
+            System.out.println(getTestTraceHead("[TwitterSourceTest.basic]")
+                    + "-  OK  - Twitter source started properly.");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[TwitterSourceTest.basic]")
+                    + "- FAIL - Twitter source could not start.");
+            throw e;
+        } // try catch
         sinkRunner.stop();
         sink.stop();
     }

@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -76,16 +77,25 @@ public class TwitterHDFSSinkTest {
      */
     @Test
     public void testConfigure() {
-        System.out.println("Testing TwitterHDFSSinkTest.configure");
+        System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.configure]")
+                + "-------- Configure HDFS parameters.");
         Context context = createContext();
         sink.configure(context);
-        assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
-        assertEquals(cosmosPort, sink.getHDFSPort());
-        assertEquals(hdfsUsername, sink.getHDFSUsername());
-        assertEquals(hdfsPassword, sink.getHDFSPassword());
-        assertEquals(oauth2Token, sink.getOAuth2Token());
-        assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
-        assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
+        try {
+            assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
+            assertEquals(cosmosPort, sink.getHDFSPort());
+            assertEquals(hdfsUsername, sink.getHDFSUsername());
+            assertEquals(hdfsPassword, sink.getHDFSPassword());
+            assertEquals(oauth2Token, sink.getOAuth2Token());
+            assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
+            assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
+            System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.configure]")
+                    + "-  OK  - HDFS parameters detected in context.");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.configure]")
+                    + "- FAIL - HDFS parameters not detected in context.");
+            throw e;
+        } // try catch
     } // testConfigure
 
     /**
@@ -93,13 +103,22 @@ public class TwitterHDFSSinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println("Testing TwitterHDFSSink.start");
+        System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.start]")
+                + "-------- Start HDFS sink.");
         Context context = createContext();
         sink.configure(context);
         sink.setChannel(new MemoryChannel());
         sink.start();
-        assertTrue(sink.getPersistenceBackend() != null);
-        assertEquals(LifecycleState.START, sink.getLifecycleState());
+        try {
+            assertTrue(sink.getPersistenceBackend() != null);
+            assertEquals(LifecycleState.START, sink.getLifecycleState());
+            System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.start]")
+                    + "-  OK  - HDFS sink started.");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[TwitterHDFSSinkTest.start]")
+                    + "- FAIL - HDFS sink could not start.");
+            throw e;
+        } // try catch
     } // testStart
 
 
