@@ -1,7 +1,7 @@
 #<a name="top"></a>Introduction
-This document describes how to use Cygnus-twitter once it has been [installed](../installation_and_administration_guide/introduction.md) and how it works.
+This document describes how to use cygnus-twitter once it has been [installed](../installation_and_administration_guide/introduction.md) and how it works.
 
-Cygnus-twitter is a Cygnus agent (i.e., a flume agent) that has as source tweets and it can have different sinks. Right now, the HDFS sink is already implemented.
+cygnus-twitter is a Cygnus agent (i.e., a flume agent) that has as source tweets and it can have different sinks. Right now, the HDFS sink is already implemented.
 
 ##<a name="top"></a>Configuration file
 From the point of view of the user, the main differences with respect to the Cygnus-ngsi agent are in the configuration file `agent_<id>.conf`. In this file, the first difference is the source that is a twitter source:
