@@ -23,7 +23,6 @@ import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import org.apache.flume.Context;
 
 /**
@@ -32,7 +31,7 @@ import org.apache.flume.Context;
  */
 public class NGSISTHSink extends NGSIMongoBaseSink {
     
-    private final boolean[] resolutions = {false, false, false, false, false};
+    protected final boolean[] resolutions = {false, false, false, false, false};
 
     /**
      * Constructor.
