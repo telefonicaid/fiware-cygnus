@@ -16,6 +16,8 @@ Content:
   * [`NGSI Version 2`](#section11.2)
 * [DELETE `/v1/subscriptions`](#section12)
 * [GET `/v1/subscriptions`](#section13)
+  * [GET subscription by ID](#section13.1)
+  * [GET all subscriptions](#section13.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -478,9 +480,11 @@ Missing fields (empty or not given):
 [Top](#top)
 
 ##<a name="section13"></a>`GET /v1/subscriptions`
-Gets an existent subscription from Orion, given the ngsi version and the subscription id as a query parameter.
+###<a name="section13.1"></a> GET subscription by ID
 
-Valid ngsi versions are `1` and `2` (This method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
+
+Valid NGSI versions are `1` and `2` (this method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
 
 ```
 GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>&subscription_id=<subscriptionId>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
@@ -488,25 +492,25 @@ GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiV
 
 Responses:
 
-Valid and current subscription id with the correct ngsi version:
+Valid and current subscription id with the correct NGSI version:
 
 ```
-{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/xxx.xxx.xx.xxx:xxxx\/ngsi10\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
+{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/192.168.64.111\/ngsi23\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
 ```
 
-Valid but inexistent subscription id with the correct ngsi version:
+Valid but inexistent subscription id with the correct NGSI version:
 
 ```
 {"success":"false","result" : {{"description":"","error":"subscriptionId does not correspond to an active subscription"}}
 ```
 
-Invalid ngsi version:
+Invalid NGSI version:
 
 ```
 {"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
 ```
 
-Valid but not implemented ngsi version (sending `ngsi_version=1`):
+Valid but not implemented NGSI version (sending `ngsi_version=1`):
 
 ```
 {"success":"false","error":"GET /v1/subscriptions not implemented."}
@@ -517,6 +521,45 @@ Missing or empty parameters:
 ```
 {"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors."}
 {"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors."}
+```
+
+[Top](#top)
+
+###<a name="section13.2"></a> GET all subscriptions
+
+Gets all existent subscriptions from Orion, given the NGSI version as a query parameter.
+
+Valid NGSI versions are `1` and `2` (this method only works with `ngsi_version=2` due to this method is not implemented in version `1`).
+
+```
+GET "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsiVersion>" -d '{"host":"<host>", "port":"<port>", "ssl":"false", "xauthtoken":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+```
+
+Responses:
+
+When a valid subscription ID and an accepted NGSI version is used:
+
+```
+{"success":"true","result" : {{"result":[{"notification":{"lastNotification":"2015-07-28T22:23:30.00Z","timesSent":7126568376946155044,"http":{"url":"http:\/\/192.168.83.112:1026\/ngsi23\/notifyContext"},"attrs":[]},"expires":"2016-09-13T09:27:15.00Z","subject":{"condition":{"attrs":["temperature"]},"entities":[{"id":"","type":"city:lights","idPattern":"City:LUCES:"}]},"id":"54228e7318sddf233as323sd","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"http":{"url":"http:\/\/192.168.83.112:1026\/ngsi21\/notifyContext"},"attrs":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"attrs":["noise"]},"entities":[{"id":"","type":"city:fountain","idPattern":"City:LUCES"}]}}]}}}
+
+```
+
+When an invalid NGSI version is used:
+
+```
+{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
+```
+
+When a valid but not implemented NGSI version (sending `ngsi_version=1`):
+
+```
+{"success":"false","error":"GET /v1/subscriptions not implemented for NGSI version 1."}
+```
+
+When there are missing or empty parameters:
+
+```
+{"success":"false","error":"Invalid endpoint, field 'ssl' is missing"}
 ```
 
 [Top](#top)
