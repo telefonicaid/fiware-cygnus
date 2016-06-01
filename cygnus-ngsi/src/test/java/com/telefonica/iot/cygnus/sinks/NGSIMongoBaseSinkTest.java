@@ -129,7 +129,7 @@ public class NGSIMongoBaseSinkTest {
     
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
-     * data_model=dm-by-service-path, the MongoDB collection name is <prefix>/.
+     * data_model=dm-by-service-path, the MongoDB collection name is \<prefix\>/.
      */
     @Test
     public void testBuildCollectionNameDMByServicePathRootServicePath() {
@@ -172,7 +172,7 @@ public class NGSIMongoBaseSinkTest {
     
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
-     * data_model=dm-by-entity, the MongoDB collections name is <prefix>/_<entityId>_<entityType>.
+     * data_model=dm-by-entity, the MongoDB collections name is \<prefix\>/_\<entityId\>_\<entityType\>.
      */
     @Test
     public void testBuildCollectionNameDMByEntityRootServicePath() {
@@ -217,7 +217,7 @@ public class NGSIMongoBaseSinkTest {
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
      * data_model=dm-by-attribute, the MongoDB collections name is
-     * <prefix>/_<entityId>_<entityType>_<attrName>_<attrType>.
+     * \<prefix\>/_\<entityId\>_\<entityType\>_\<attrName\>_\<attrType\>.
      */
     @Test
     public void testBuildCollectionNameDMByAttributeRootServicePath() {

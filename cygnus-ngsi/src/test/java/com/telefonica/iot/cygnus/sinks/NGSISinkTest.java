@@ -228,7 +228,7 @@ public class NGSISinkTest {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[OrionSink.configure]")
                     + "-  OK  - A wrong configuration 'enable_grouping='"
-+ configuredEnableGrouping + "' has been detected");
+                    + configuredEnableGrouping + "' has been detected");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionSink.configure]")
                     + "- FAIL - A wrong configuration 'enable_grouping='"

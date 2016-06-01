@@ -292,8 +292,8 @@ public class NGSIHDFSSinkTest {
     @Test
     public void testPersistFileFormats() {
         // common objects
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath,
+                normalGroupedDestination, singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         System.out.println("Testing OrionHDFSSink.persistBatch (json-row file format)");
         String fileFormat = "json-row";

@@ -228,10 +228,10 @@ public class NGSICKANSinkTest {
     @Test
     public void testPersistAttrPersistence() {
         // common objects
-        NGSIBatch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        NGSIBatch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath,
+                normalDefaultDestination, singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath,
+                normalGroupedDestination, singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
         
         System.out.println("Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)");
         attrPersistence = "row";
