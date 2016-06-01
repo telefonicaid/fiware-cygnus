@@ -495,7 +495,7 @@ Responses:
 Valid and current subscription id with the correct NGSI version:
 
 ```
-{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/xxx.xxx.xx.xxx:xxxx\/ngsi10\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
+{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/192.168.64.111\/ngsi23\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
 ```
 
 Valid but inexistent subscription id with the correct NGSI version:
@@ -540,7 +540,7 @@ Responses:
 When a valid subscription ID and an accepted NGSI version is used:
 
 ```
-{"success":"true","result" : {{"result":[{"notification":{"lastNotification":"2015-07-28T22:23:30.00Z","timesSent":7126568376946155044,"http":{"url":"http:\/\/210.126.83.112:1026\/ngsi23\/notifyContext"},"attrs":[]},"expires":"2016-09-13T09:27:15.00Z","subject":{"condition":{"attrs":["temperature"]},"entities":[{"id":"","type":"city:lights","idPattern":"City:LUCES:"}]},"id":"54228e7318sddf233as323sd","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"http":{"url":"http:\/\/210.116.83.112:1026\/ngsi21\/notifyContext"},"attrs":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"attrs":["noise"]},"entities":[{"id":"","type":"city:fountain","idPattern":"City:LUCES"}]}}]}}}
+{"success":"true","result" : {{"result":[{"notification":{"lastNotification":"2015-07-28T22:23:30.00Z","timesSent":7126568376946155044,"http":{"url":"http:\/\/192.168.83.112:1026\/ngsi23\/notifyContext"},"attrs":[]},"expires":"2016-09-13T09:27:15.00Z","subject":{"condition":{"attrs":["temperature"]},"entities":[{"id":"","type":"city:lights","idPattern":"City:LUCES:"}]},"id":"54228e7318sddf233as323sd","status":"active"},{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"http":{"url":"http:\/\/192.168.83.112:1026\/ngsi21\/notifyContext"},"attrs":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"attrs":["noise"]},"entities":[{"id":"","type":"city:fountain","idPattern":"City:LUCES"}]}}]}}}
 
 ```
 
