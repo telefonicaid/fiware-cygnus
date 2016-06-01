@@ -22,15 +22,15 @@ Obviously, you will need docker installed and running in you machine. Please, ch
 Start by cloning the `fiware-cygnus` repository:
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
-    
+
 Change directory:
 
     $ cd fiware-cygnus/docker/cygnus-ngsi
-    
+
 And run the following command:
 
     $ docker build -t cygnus-ngsi .
-    
+
 Once finished (it may take a while), you can check the available images at your docker by typing:
 
 ```
@@ -43,10 +43,10 @@ centos              6                   61bf77ab8841        4 weeks ago         
 [Top](#top)
 
 ###<a name="section2.2"></a>Using docker hub image
-Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus):
+Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus-ngsi):
 
     $ docker pull fiware/cygnus-ngsi
-    
+
 It can be listed the same way than above:
 
 ```
@@ -60,13 +60,13 @@ centos              6                   61bf77ab8841        4 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hu.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persiting them into a MySQL database running at `mysql` host.
+The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into a MySQL database running at `mysql` host.
 
 Start a container for this image by typing in a terminal:
 
     $ docker run cygnus-ngsi
-    
-Immediatelly after, you will start seeing cygnus-ngsi logging traces:
+
+Immediately after, you will start seeing cygnus-ngsi logging traces:
 
 ```
 + exec /usr/lib/jvm/java-1.6.0/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/opt/apache-flume/conf:/opt/apache-flume/lib/*:/opt/apache-flume/plugins.d/cygnus/lib/*:/opt/apache-flume/plugins.d/cygnus/libext/*' -Djava.library.path= com.telefonica.iot.cygnus.nodes.CygnusApplication -f /opt/apache-flume/conf/agent.conf -n cygnus-ngsi
@@ -80,7 +80,7 @@ time=2016-05-05T09:57:55.150UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | f
 ...
 time=2016-05-05T09:57:56.287UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
 ```
-    
+
 You can check the running container (in a second terminal shell):
 
 ```
@@ -95,15 +95,15 @@ You can check the IP address of the container above by doing:
 $ docker inspect 9ce0f09f5676 | grep \"IPAddress\"
         "IPAddress": "172.17.0.13",
 ```
-    
+
 Once the IP address of the container is gotten, you may ask for the Cygnus version (in a second terminal shell):
 
 ```
-$ $ curl "http://172.17.0.13:8081/v1/version"
+$ curl "http://172.17.0.13:8081/v1/version"
 {"success":"true","version":"0.13.0_SNAPSHOT.5200773899b468930e82df4a0b34d44fd4632893"}
 ```
-    
-Even, you may send a NGSI-like notification emulation (please, check the notificacion examples at [cygnus-ngsi](cygnus-ngsi/resources/ngsi-examples):
+
+Even, you may send a NGSI-like notification emulation (please, check the notification examples at [cygnus-ngsi](cygnus-ngsi/resources/ngsi-examples)):
 
 ```
 $ ./notification.sh http://172.17.0.13:5050/notify
@@ -118,11 +118,11 @@ $ ./notification.sh http://172.17.0.13:5050/notify
 > Fiware-Service: default
 > Fiware-ServicePath: /
 > Content-Length: 460
-> 
+>
 < HTTP/1.1 200 OK
 < Transfer-Encoding: chunked
 < Server: Jetty(6.1.26)
-< 
+<
 * Connection #0 to host 172.17.0.13 left intact
 * Closing connection #0
 ```
@@ -153,7 +153,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 [Top](#top)
 
 ###<a name="section3.2"></a>Using a specific configuration
-As seen above, the default configuation distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
+As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * It only works for building historical context data in MySQL.
 * The endpoint for MySQL is `mysql`.
@@ -174,17 +174,21 @@ This gives you total control on the docker image.
 ####<a name="section3.2.2"></a>Environment variables
 Those parameters associated to an environment variable can be easily overwritten in the command line using the `-e` option. For instance, if you want to change the log4j logging level, simply run:
 
-    $ docker run -e LOG_LEVEL='DEBUG' cygnus-ngsi
+    $ docker run -e CYGNUS_LOG_LEVEL='DEBUG' cygnus-ngsi
+    
+Or if you want to configure non empty MySQL user and password:
+
+    $ docker run -e CYGNUS_MYSQL_USER='myuser' -e CYGNUS_MYSQL_PASS='mypass' cygnus-ngsi
 
 [Top](#top)
 
-####<a name="section3.2.3"></a>Using volumes 
-Another possibility is to start a container with a volume (`-v` option) and map the entire configuraton file within the container with a local version of the file:
+####<a name="section3.2.3"></a>Using volumes
+Another possibility is to start a container with a volume (`-v` option) and map the entire configuration file within the container with a local version of the file:
 
     $ docker run -v /absolute/path/to/local/agent.conf:/opt/apache-flume/conf/agent.conf cygnus-ngsi
-    
-Of course, you can combine volumes and environment variables overwritting:
+
+Of course, you can combine volumes and environment variables overwriting:
 
     $ docker run -v /absolute/path/to/local/agent.conf:/opt/apache-flume/conf/agent.conf -e LOG_LEVEL='DEBUG' cygnus-ngsi
-    
+
 [Top](#top)

@@ -27,9 +27,11 @@ Current stable release is able to persist Orion context data in:
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [FIWARE Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+* [FIWARE Comet (STH)](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
+* [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+* [CartoDB](https://cartodb.com/), the database specialized in geolocated data.
 
 You may consider to visit [cygnus-ngsi Quick Start Guide](doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
@@ -95,7 +97,7 @@ cygnusagent.sources.http-source.handler.default_service_path = def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 10
 cygnusagent.sources.http-source.interceptors = ts gi
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.GroupingInterceptor$Builder
+cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
 cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 cygnusagent.channels.test-channel.type = memory
@@ -138,7 +140,7 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
 [Top](#top)
 
 ###<a name="section2.6"></a>e2e testing
-cygnus-ngsi works by receiving NGSI-like notifications, which are finaly persisted. In order to test this, you can run any of the notificacion scripts located in the [resources folder](./resources/ngsi-examples) of this repo, which emulate certain notification types.
+cygnus-ngsi works by receiving NGSI-like notifications, which are finally persisted. In order to test this, you can run any of the notification scripts located in the [resources folder](./resources/ngsi-examples) of this repo, which emulate certain notification types.
 
 ```
 $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservicepath
@@ -229,11 +231,11 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 
 * [Installation with docker](doc/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
 * [Installation from sources](doc/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified, e.g. the `hadoop-core` libraries.
-* [Running as a process](doc/installation_and_administration_guide/running_as_process.md). Running cygus-ngsi as a process is very useful for testing and debuging purposes.
+* [Running as a process](doc/installation_and_administration_guide/running_as_process.md). Running cygus-ngsi as a process is very useful for testing and debugging purposes.
 * [Management Interface](doc/installation_and_administration_guide/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
 * [Pattern-based grouping](doc/). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events. It creates specific `fiware-servicePath` per notified context element as well.
 * [Multi-instance](doc/installation_and_administration_guide/configuration.md). Several instances of cygus-ngsi can be run as a service.
-* [Performance tips](doc/installation_and_administration_guide/performance_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtaint the best from cygus-ngsi.
+* [Performance tips](doc/installation_and_administration_guide/performance_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtain the best from cygus-ngsi.
 * [New sink development](doc/user_and_programmer_guide/adding_new_sink.md). Addressed to those developers aiming to contribute to cygus-ngsi with new sinks.
 
 [Top](#top)

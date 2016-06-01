@@ -40,7 +40,7 @@ public class CygnusGroupingRuleTest {
     } // CygnusGroupingRuleTest
     
     /**
-     * [Groupingrule.isValid] -------- fiware-servicePath field in a grouping rule must start with '/'.
+     * [GroupingRule.isValid] -------- fiware-servicePath field in a grouping rule must start with '/'.
      */
     @Test
     public void testFiwareServicePathStartsWithSlash() {
@@ -62,7 +62,7 @@ public class CygnusGroupingRuleTest {
     } // testFiwareServicePathStartsWithSlash
     
     /**
-     * [Groupingrule.getXXXX] -------- Rule's attributes are not null.
+     * [GroupingRule.getXXXX] -------- Rule's attributes are not null.
      */
     @Test
     public void testIfGetsAreNotNull() {
@@ -75,7 +75,7 @@ public class CygnusGroupingRuleTest {
         // Create the rule for doing the tests
         CygnusGroupingRule rule = new CygnusGroupingRule(jsonObject);
         
-        try { 
+        try {
             assertTrue(rule.getPattern() != null);
             System.out.println(getTestTraceHead("[GroupingRule.getPattern]")
                     + "-  OK  - Rule’s pattern is not null");
@@ -85,7 +85,7 @@ public class CygnusGroupingRuleTest {
             throw e;
         } // try catch
         
-        try { 
+        try {
             assertTrue(rule.getId() > 0L);
             System.out.println(getTestTraceHead("[GroupingRule.getId]")
                     + "-  OK  - Rule’s id is upper than 0");
@@ -95,7 +95,7 @@ public class CygnusGroupingRuleTest {
             throw e;
         } // try catch
         
-        try { 
+        try {
             assertTrue(rule.getFields() != null);
             System.out.println(getTestTraceHead("[GroupingRule.getFields]")
                     + "-  OK  - Rule’s fields are not null");
@@ -105,7 +105,7 @@ public class CygnusGroupingRuleTest {
             throw e;
         } // try catch
         
-        try { 
+        try {
             assertTrue(rule.getRegex() != null);
             System.out.println(getTestTraceHead("[GroupingRule.getRegex]")
                     + "-  OK  - Rule’s regex is not null");
@@ -115,7 +115,7 @@ public class CygnusGroupingRuleTest {
             throw e;
         } // try catch
         
-        try { 
+        try {
             assertTrue(rule.getDestination() != null);
             System.out.println(getTestTraceHead("[GroupingRule.getDestination]")
                     + "-  OK  - Rule’s destination is not null");
@@ -125,7 +125,7 @@ public class CygnusGroupingRuleTest {
             throw e;
         } // try catch
         
-        try { 
+        try {
             assertTrue(rule.getNewFiwareServicePath() != null);
             System.out.println(getTestTraceHead("[GroupingRule.getNewFiwareServicePath]")
                     + "-  OK  - Rule’s newFiwareServicePath is not null");
@@ -137,7 +137,7 @@ public class CygnusGroupingRuleTest {
            
     } // testIfGetsAreNotNull
     
-    public JSONObject createJsonObject() {
+    private JSONObject createJsonObject() {
         JSONObject jsonRule = new JSONObject();
         JSONArray fields = new JSONArray();
         fields.add("entityId");

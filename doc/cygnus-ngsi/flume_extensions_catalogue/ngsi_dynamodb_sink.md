@@ -4,6 +4,10 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to DynamoDB data structures](#section1.2)
+        * [DynamoDB databases naming conventions](#section1.2.1)
+        * [DynamoDB tables naming conventions](#section1.2.2)
+        * [Row-like storing](#section1.2.3)
+        * [Column-like storing](#section1.2.4)
     * [Example](#section1.3)
 * [Administrator guide](#section2)
     * [Configuration](#section2.1)
@@ -15,7 +19,7 @@ Content:
         * [Throughput in DynamoDB](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIDynamoDBSink` class](#section3.1)
-    * [`DynamoDBBackendImpl` class](#section3.2)
+    * [Authentication and authorization](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIDynamoDBSink`, or simply `NGSIDynamoDBSink` is a sink designed to persist NGSI-like context data events within a [DynamoDB database](https://aws.amazon.com/dynamodb/) in [Amazon Web Services](https://aws.amazon.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -29,41 +33,72 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to `com.iot.telefonica.cygnus.handlers.NGSIRestHandler`. Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
-
-Since this is a common task done by Cygnus independently of the final backend, it is documented in [this](from_ngsi_events_to_flume_events.md) other independent document.
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to DynamoDB data structures
 DynamoDB organizes the data in tables of data items. All the tables are locaed within the same *default database*, i.e. the Amazon Web Services user space. Such organization is exploited by `NGSIDynamoDBSink` each time a Flume event is going to be persisted.
 
-The context responses/entities within the notification are iterated, and a table is created (if not yet existing) within the *default database* whose name depends on the configured table type:
+[Top](#top)
 
-* `table-by-destination`. A table named as the concatenation of `<fiware-service>_<fiware_servicePath>_<destination>` is created (if not yet existing). These values are notified as http headers.
-* `table-by-service-path`. A table named as the `<fiware-service>_<fiware-servicePath>` is created (if not yet existing). These values are notified as http headers.
+####<a name="section1.2.1"></a>DynamoDB databases naming conventions
+As said, there is a DynamoDB database per Amazon user. The [name of these users](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html) must be alphanumeric, including the following common characters: `+`, `=`, `,`, `.`, `@`, `_` and `-`.
 
-The context attributes within each context response/entity are iterated as well, and a new data item (or items) is inserted in the current table. The format for this item depends on the configured persistence mode:
+Current version of the sink does not support multitenancy, that means only an Amazon user space (and thus only a database) can be used. Such a user space is specified in the configuration (please, check the [Configuration](#section2.1) section), and therefore it is not necessary an exact match among the Amazon user space name and the FIWARE service path. Nevertheless, it is expected future versions of the sink will implement multitenancy; in that case it will be mandatory both FIWARE service and Amazon user space name match in order to correctly <i>route</i> each service data to the appropriate Amazon user.
 
-* `row`: An item is added for each notified context attribute. This kind of item will always contain 8 fields:
-    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-    * `attrName`: Notified attribute name.
-    * `attrType`: Notified attribute type.
-    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-    * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
-* `column`: A single data item is added for all the notified context attributes. This kind of item will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and other for the metadata, named `<attrName>_md`), plus four additional fields:
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: The notified one or the default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
+[Top](#top)
+
+####<a name="section1.2.2"></a>DynamoDB tables naming conventions
+The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+
+In both cases, the notified/defaulted FIWARE service is prefixed to the table name.
+
+It must be said DynamoDB [only accepts](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.html) alphanumerics and `_`, `-` and `.`. All the other characters will be escaped to underscore (`_`) when composing the table names.
+
+The following table summarizes the table name composition:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | `<svc>` | `<svc>_<entityId>_<entityType>` |
+| `/<svcPath>` | `<svc>_<svcPath>` | `<svc>_<svcPath>_<entityId>_<entityType>` |
+
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.3"></a>Row-like storing
+Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
+
+* `recvTimeTs`: UTC timestamp expressed in miliseconds.
+* `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* `attrName`: Notified attribute name.
+* `attrType`: Notified attribute type.
+* `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+
+[Top](#top)
+
+####<a name="section1.2.4"></a>Column-like storing
+Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
+
+* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: The notified one or the default one.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+*  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+*  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -96,23 +131,31 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
+    
+[Top](#top)
 
-And assuming `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIDynamoDBSink` will persist the data within the body as:
+####<a name="section1.3.2"></a>Table names
+The DynamoDB table names will be, depending on the configured data model, the following ones:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | `vehicles` | `vehicles_car1_car` |
+| `/4wheels` | `vehicles_4wheels` | `vehicles_4wheels_car1_car` |
+    
+[Top](#top)
+
+####<a name="section1.3.3"></a>Raw-based storing
+Let's assume a table name `vehicles_4wheels_car1_car` (data model by entity, non-root service path) and `attr_persistence=row` as configuration parameter. The data stored within this table would be:
 
 ![](../images/dynamodb_row_destination.jpg)
 
-If `data_model=dm-by-entity` and `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within the body as:
+[Top](#top)
+
+####<a name="section1.3.3"></a>Column-based storing
+If `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within the body as:
 
 ![](../images/dynamodb_column_destination.jpg)
 
-If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIDynamoDBSink` will persist the data within the body as:
-
-![](../images/dynamodb_row_servicepath.jpg)
-
-If `data_model=dm-by-service-path` and `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within the body as:
-
-![](../images/dynamodb_column_servicepath.jpg)
-    
 [Top](#top)
 
 ##<a name="section2"></a>Administrator guide
@@ -212,20 +255,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`DynamoDBBackendImpl` class
-This is a convenience backend class for DynamoDB that implements the `DynamoDBBackend` interface (provides the methods that any DynamoDB backend must implement). Relevant methods are:
-    
-    public void createTable(String tableName, String primaryKey) throws Exception;
-    
-Creates a table, given its name, if not existing within the DynamoDB user space. The field acting as primary key must be given as well.
-    
-    void putItems(String tableName, ArrayList<Item> aggregation) throws Exception;
-    
-Puts, in the given table, as many items as contained within the given aggregation.
-
-[Top](#top)
-
-###<a name="section3.3"></a>Authentication and authorization
+###<a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIDynamoDBSink` relies on the [AWS access keys](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html) mechanism.
 
 [Top](#top)

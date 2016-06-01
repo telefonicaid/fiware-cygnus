@@ -23,15 +23,21 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.0.0"
+ENV CYGNUS_VERSION "1.1.0"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
+ENV CYGNUS_SERVICE_PORT "5050"
+ENV CYGNUS_API_PORT "8081"
+ENV CYGNUS_MYSQL_USER "mysql"
+ENV CYGNUS_MYSQL_PASS "mysql"
+ENV CYGNUS_MONGO_USER "mongo"
+ENV CYGNUS_MONGO_PASS "mongo"
 
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "release/1.0.0"
+ENV GIT_REV_CYGNUS "release/1.1.0"
 
 ENV MVN_VER "3.2.5"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
@@ -82,7 +88,7 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
     # Create Cygnus log folder
-    mkdir ${FLUME_HOME}/log && \
+    mkdir /var/log/cygnus && \
     # Cleanup to thin the final image
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean && \
@@ -104,6 +110,5 @@ COPY agent.conf ${FLUME_HOME}/conf/
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
-EXPOSE 5050
-EXPOSE 8081
-
+EXPOSE ${CYGNUS_SERVICE_PORT}
+EXPOSE ${CYGNUS_API_PORT}

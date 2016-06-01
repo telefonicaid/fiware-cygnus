@@ -19,9 +19,7 @@
 package com.telefonica.iot.cygnus.backends.dynamo;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  *

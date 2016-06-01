@@ -4,7 +4,12 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to Kafka data structures](#section1.2)
+        * [Topics naming conventions](#section1.2.1)
+        * [Storing](#section1.2.2)
     * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Topic names](#section1.3.2)
+        * [Storing](#section1.3.3)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -12,7 +17,6 @@ Content:
         * [About batching](#section2.3.1)
 * [Programmers guide](#section3)
     * [`NGSIKafkaSink` class](#section3.1)
-    * [`KafkaProducer` class (backend)](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIKafkaSink`, or simply `NGSIKafkaSink` is a sink designed to persist NGSI-like context data events within a [Apache Kafka](http://kafka.apache.org/) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -26,23 +30,43 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to Kafka data structures
 [Apache Kafka organizes](http://kafka.apache.org/documentation.html#introduction) the data in topics (a category or feed name to which messages are published). Such organization is exploited by `NGSIKafkaSink` each time a Flume event is going to be persisted.
 
+[Top](#top)
+
+####<a name="section1.2.1"></a>Topics naming conventions
 A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured data model:
 
-* `dm-by-attribute`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>_<entityId>_<entityType>_<attributeName>` is created for each notified attribute.
-* `dm-by-entity`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>_<entityId>_<entityType>` is created, where values are got from the event headers.
-* `dm-by-service-path`. A topic named `<fiware-service>_<fiware_servicePath_without_slash>` is created, where `<fiware-servicePath>` value is got from the event headers.
-* `dm-by-service`. A topic named `<fiware-service>` is created, where `<fiware-service>` value is got from the event headers.
+* Data model by service (`data_model=dm-by-service`). As the data model name denotes, the notified FIWARE service (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service is stored in this unique topic.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique topic. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
-The context responses/entities within the container are iterated, and they are serialized in the Kafka topic as JSON documents.
+It must be said there is no known character set accepted and/or forbiden for Kafka.
+
+The following table summarizes the topic name composition:
+
+| FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|---|
+| `/` | `<svc>` | N/A | `<entityId>_<entityType>` | `<entityId>_<entityType>_<attrName>` |
+| `/<svcPath>` | `<svc>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityId>_<entityType>_<attrName>` |
+
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.2"></a>Storing
+Flume events structure is <i>stringified</i> as a Json object containing an array of headers and another object containing the Json data as it is notified by the NGSI-like source.
+
+[Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -76,29 +100,25 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `data_model=dm-by-attribute` as configuration parameter, then `NGSIKafkaSink` will persist the data as:
+[Top](#top)
+
+####<a name="section1.3.2"></a>Topic names
+The topic names will be, depending on the configured data model, the following ones:
+
+| FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|---|
+| `/` | `vehicles` | N/A | `car1_car` | `car1_car_speed`<br>`car1_car_oil_level` |
+| `/4wheels` | `vehicles` | `4wheels` | `4wheels_car1_car` | `4wheels_car1_car_speed`<br>`4wheels_car1_car_oil_level` |
+
+[Top](#top)
+
+####<a name="section1.3.3"></a>Storing
+Let's assume a topic name `vehicles_4wheels_car1_car_speed` (data model by attribute, non-root service path). The data stored within this topic would be:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_speed --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_oil_level --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-
-If `data_model=dm-by-entity` then `NGSIKafkaSink` will persist the data as:
-
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-
-If `data_model=dm-by-service-path` then `NGSIKafkaSink` will persist the data as:
-
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-
-If `data_model=dm-by-service` then `NGSIKafkaSink` will persist the data as:
-
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles --from-beginning
-    {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"},{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
-
-NOTE: `bin/kafka-console-consumer.sh` is a script distributed with Kafka that runs a Kafka consumer.
 
 [Top](#top)
 
@@ -173,14 +193,5 @@ A `Batch` contanins a set of `CygnusEvent` objects, which are the result of pars
     public void configure(Context);
 
 A complete configuration as the one described above is read from the given `Context` instance.
-
-[Top](#top)
-
-###<a name="section3.2"></a>`KafkaProducer` class (backend)
-The implementation of a class dealing with the details of the backend is given by Kafka itself through the [`KafkaProducer`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html) class. Thus, the sink has been developed by invoking the methods within that class, specially:
-
-    public send(ProducerRecord<K,V>);
-
-Which sends a [`ProducerRecord`](http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html) object to the configured topic.
 
 [Top](#top)

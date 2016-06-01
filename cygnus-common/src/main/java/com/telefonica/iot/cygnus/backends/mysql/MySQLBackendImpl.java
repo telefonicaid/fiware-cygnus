@@ -266,8 +266,8 @@ public class MySQLBackendImpl implements MySQLBackend {
             // return a connection based on the MySQL JDBC driver
             LOGGER.debug("Connecting to jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName + "?user="
                     + mysqlUsername + "&password=XXXXXXXXXX");
-            return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName,
-                    mysqlUsername, mysqlPassword);
+            return DriverManager.getConnection("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName
+                    + "?useUnicode=true&characterEncoding=UTF-8", mysqlUsername, mysqlPassword);
         } // createConnection
         
     } // MySQLDriver

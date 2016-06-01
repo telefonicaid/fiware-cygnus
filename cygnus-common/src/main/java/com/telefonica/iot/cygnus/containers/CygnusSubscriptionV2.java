@@ -61,13 +61,51 @@ public class CygnusSubscriptionV2 {
             // check error messages from subfields of subscription 
             int subjectMsg = isSubjectValid(subject);
             int notificationMsg = isNotificationValid(notification);
-                        
-            // check if entire subscription is missing        
+                                    
+            // check if entire subscription is emtpy        
             if ((description == null) && (subjectMsg == 11) && 
                     (notificationMsg == 1) &&  (expires == null)
                     && (throttling == null)) {
-                LOGGER.debug("Missing subscription in the request");
+                LOGGER.debug("Empty subscription in the request");
                 return 11;
+            } // if
+            
+            // check if entire subscription is missing
+            if ((description == null) && (subjectMsg == 2) &&
+                    (notificationMsg == 2) && (expires == null)
+                    && (throttling == null)) {
+                LOGGER.debug("Missing subscription in the request");
+                return 12;
+            }
+            
+            if (subjectMsg == 1211) {
+                LOGGER.debug("Field 'entities' is missing in the subscription");
+                return 1211;
+            } // if
+            
+            if (subjectMsg == 1212) {
+                LOGGER.debug("Field 'entities' has missing fields in the subscription");
+                return 1212;
+            } // if
+            
+            if (subjectMsg == 1213) {
+                LOGGER.debug("Field 'entities' has empty fields in the subscription");
+                return 1213;
+            } // if
+            
+            if (subjectMsg == 1311) {
+                LOGGER.debug("Field 'condition' is missing in the subscription");
+                return 1311;
+            } // if
+            
+            if (subjectMsg == 1312) {
+                LOGGER.debug("Field 'condition' has missing fields in the subscription");
+                return 1312;
+            } // if
+            
+            if (subjectMsg == 1313) {
+                LOGGER.debug("Field 'condition' has empty fields in the subscription");
+                return 1313;
             } // if
             
             if (description == null) {
@@ -120,36 +158,6 @@ public class CygnusSubscriptionV2 {
                 return 1513;
             } // if
             
-            if (subjectMsg == 1211) {
-                LOGGER.debug("Field 'entities' is missing in the subscription");
-                return 1211;
-            } // if
-            
-            if (subjectMsg == 1212) {
-                LOGGER.debug("Field 'entities' has missing fields in the subscription");
-                return 1212;
-            } // if
-            
-            if (subjectMsg == 1213) {
-                LOGGER.debug("Field 'entities' has empty fields in the subscription");
-                return 1213;
-            } // if
-            
-            if (subjectMsg == 1311) {
-                LOGGER.debug("Field 'condition' is missing in the subscription");
-                return 1311;
-            } // if
-            
-            if (subjectMsg == 1312) {
-                LOGGER.debug("Field 'condition' has missing fields in the subscription");
-                return 1312;
-            } // if
-            
-            if (subjectMsg == 1313) {
-                LOGGER.debug("Field 'condition' has empty fields in the subscription");
-                return 1313;
-            } // if
-            
             if (notificationMsg == 1) {
                 LOGGER.debug("Field 'notification' is missing in the subscription");
                 return 1611;
@@ -184,7 +192,7 @@ public class CygnusSubscriptionV2 {
             // get error numbers of each field
             int conditionMsg = isConditionValid(condition);
             int entitiesMsg = isEntitiesValid(entities);
-                        
+                                    
             if ((conditionMsg == 1) && (entitiesMsg == 1)) {
                 LOGGER.debug("Field 'subject' is empty");
                 return 12;
@@ -241,15 +249,18 @@ public class CygnusSubscriptionV2 {
         } // isSubjectsValid
         
         private int isNotificationValid (Notification notification) {
-            
+                        
             if (notification == null) {
                 LOGGER.debug("Field 'notification' is missing");
                 return 1;
             } // if 
             
-            int httpMsg = isHttpValid(notification.getHttp());  
+            SubscriptionHttp http = notification.getHttp();
+            ArrayList<String> attrs = notification.getAttrs();
             
-            if ((notification.getAttrs() == null) || (httpMsg == 1)){
+            int httpMsg = isHttpValid(http); 
+                        
+            if ((attrs == null) || (httpMsg == 1)){
                 LOGGER.debug("Field 'notification' has missing fields");
                 return 2;
             } // if
@@ -265,15 +276,19 @@ public class CygnusSubscriptionV2 {
         
         private int isHttpValid (SubscriptionHttp http) {
             
-            if (http == null) {
+            String url = http.getUrl();
+            
+            if (url == null) {   
                 LOGGER.debug("Field 'http' is missing");
                 return 1;
-            } // if
-            
-            if (http.getUrl().length() == 0) {
-                LOGGER.debug("Field 'http' is empty");
-                return 2;
-            } // if
+            } else {
+                
+                if (url.length() == 0) {
+                    LOGGER.debug("Field 'http' is empty");
+                    return 2;
+                } // if
+                
+            } // if else
             
             LOGGER.debug("Valid http");
             return 0;
@@ -304,23 +319,24 @@ public class CygnusSubscriptionV2 {
         } // isConditionValid
         
         private int isEntitiesValid (ArrayList<Entity> entities) {
-            boolean emptyFields = true;
-            boolean validFields = true;
 
             if (entities == null) {
                 LOGGER.debug("Field 'entities' is missing");
                 return 1;
             } // if
+            
+            boolean validFields = !entities.isEmpty();
+            boolean emptyFields = true;
 
             for (Entity entity : entities) {
                 String type = entity.getEntityType();
                 String isPattern = entity.getIdPattern();
-
+                
                 validFields &= ((type != null) && (isPattern != null));
                 emptyFields &= validFields && ((type.length() == 0) || 
                         (isPattern.length() == 0)); 
             } // for
-
+            
             // check if entities contains all the required fields
             if (!validFields) {
                 LOGGER.debug("There are missing fields in entities");
@@ -459,12 +475,15 @@ public class CygnusSubscriptionV2 {
         
         int subscriptionMsg = orionSubscription.isValid();  
         int endpointMsg = orionEndpoint.isValid();
-
+        
         switch (subscriptionMsg) {
             // case of missing entire subscription
             case 11:
+                LOGGER.debug("Subscription is empty");
+                return 11;     
+            case 12: 
                 LOGGER.debug("Subscription is missing");
-                return 11;
+                return 12;
                 
             case 1211:
                 LOGGER.debug("Field 'entities' is missing in the subscription");

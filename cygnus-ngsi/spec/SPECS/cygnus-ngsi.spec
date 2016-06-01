@@ -1,17 +1,17 @@
 # Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
-# 
+#
 # This file is part of fiware-cygnus (FI-WARE project).
-# 
+#
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
 # later version.
 # fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
 # details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
 # http://www.gnu.org/licenses/.
-# 
+#
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
 Summary:          Package for Cygnus NGSI component
@@ -31,7 +31,7 @@ Provides:         cygnus-ngsi = %{_product_version}-%{_product_release}
 This connector is a (conceptual) derivative work of ngsi2cosmos, and implements
 a Flume-based connector for context data coming from Orion Context Broker.
 
-# Project information 
+# Project information
 %define _project_name cygnus
 %define _project_user cygnus
 
@@ -97,6 +97,29 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Jun 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.1.0
+- [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
+- [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)
+- [cygnus-common,cygnus-ngsi][hardening] Add sanity checks and diagnosis procedures (#627, #628)
+- [cygnus-ngsi][bug] Fix logging folder creation in Dockerfile (#1009)
+- [cygnus] [bug] Fix errors in apiary.apib file (#1011)
+- [cygnus] [doc] Move backend documentation to cygnus-common (#1013)
+- [cygnus] [feature] Add cygnus-common docker (#1021)
+- [cygnus] [doc] Add CartoDB related documentation (#1016)
+- [cygnus] [hardening] Add service port and api port as environment variables to Dockerfiles (#1020)
+- [cygnus-ngsi] [feature] Add distance analysis support to NGSICartoDBSink (#1026)
+- [cygnus-ngsi] [feature] Add multitenancy support to NGSICartoDBSink (#1028)
+- [cygnus-ngsi] [hardening] Remove data model by attribute support in NGSICartoDBSink (#1030)
+- [cygnus-common] [bug] Fixed error when POST a CygnusSubscription without subscription field (#1034)
+- [cygnus] [doc] Update the sink docs regarding the naming conventions (#630)
+- [cygnus-ngsi] [hardening] Change default credentials for docker MySQL agent (#1038)
+- [cygnus-ngsi] [feature] Add MongoDB and STH sinks to docker agent (#1044)
+- [cygnus-ngsi] [hardening] Remove support to deprecated 'matching_table' parameter (#1048)
+- [cygnus-ngsi] [hardening] Add checks for invalid configuration in NGSIGroupingInterceptor.java (#1049)
+- [cygnus-common] [hardening] Change the creation of the Json payload of the response in HttpBackend (#1052)
+- [cygnus-ngsi] [hardening] Add support for new encoding mechanism (#1029)
+- [cygnus-common] [bug] Getting API port fails when using port forwarding (#1055)
+
 * Fri May 06 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.0.0
 - [cygnus-ngsi] [feature] Add Cygnus GUI (#829)
 - [cygnus-ngsi] [bug] Fix default authentication parameters in OrionMySQLSink and OrionPostgreSQLSink (#837)

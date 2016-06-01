@@ -4,7 +4,16 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to PostgreSQL data structures](#section1.2)
+        * [PostgreSQL databases naming conventions](#section1.2.1)
+        * [PostgreSQL schemas naming conventions](#section1.2.2)
+        * [PostgreSQL tables naming conventions](#section1.2.3)
+        * [Row-like storing](#section1.2.4)
+        * [Column-like storing](#section1.2.5)
     * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Database, schema and table names](#section1.3.2)
+        * [Row-like storing](#section1.3.3)
+        * [Column-like storing](#section1.3.4)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -12,10 +21,10 @@ Content:
         * [About the table type and its relation with the grouping rules](#section2.3.1)
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
+        * [Time zone information](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIPostgreSQLSink` class](#section3.1)
-    * [`PostgreSQLBackendImpl` class](#section3.2)
-    * [Authentication and authorization](#section3.3)
+    * [Authentication and authorization](#section3.2)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -29,43 +38,77 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./orion_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to PostgreSQL data structures
 PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreSQLSink` each time a Flume event is going to be persisted.
 
+[Top](#top)
+
+####<a name="section1.2.1"></a>PostgreSQL databases naming conventions
 Previous to any operation with PostgreSQL you need to create the database to be used.
 
-According to the [naming conventions](./naming_conventions.md), a schema named as the `fiware-service` header value within the event is created (if not existing yet).
+It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
 
-Then, the context responses/entities within the container are iterated, and a table is created (if not yet existing) within the above schema whose name depends on the configured data model:
+[Top](#top)
 
-* `dm-by-entity`. A table named as the concatenation of `<fiware_servicePath>_<destination>` is created (if not yet existing).
-* `dm-by-service-path`. A table named as the `<fiware-servicePath>` is created (if not yet existing).
+####<a name="section1.2.2"></a>PostgreSQL schemas naming conventions
+A schema named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
-The context attributes within each context response/entity are iterated, and a new data row (or rows) is inserted in the current table. The format for this row depends on the configured persistence mode:
+It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
 
-* `row`: A data row is added for each notified context attribute. This kind of row will always contain 8 fields:
-    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
-    * `attrName`: Notified attribute name.
-    * `attrType`: Notified attribute type.
-    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-    * `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
-    * `column`: A single data row is added for all the notified context attributes. This kind of row will contain two fields per each entity's attribute (one for the value, named `<attrName>`, and other for the metadata, named `<attrName>_md`), plus four additional fields:
-    * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
-    * `fiwareServicePath`: The notified one or the default one.
-    * `entityId`: Notified entity identifier.
-    * `entityType`: Notified entity type.
+[Top](#top)
+
+####<a name="section1.2.3"></a>PostgreSQL tables naming conventions
+The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+
+It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be escaped to underscore (`_`) when composing the table names.
+
+The following table summarizes the table name composition:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | N/A | `<entityId>_<entityType>` |
+| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
+
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.4"></a>Row-like storing
+Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
+
+* `recvTimeTs`: UTC timestamp expressed in miliseconds.
+* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: Notified fiware-servicePath, or the default configured one if not notified.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+* `attrName`: Notified attribute name.
+* `attrType`: Notified attribute type.
+* `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+    
+[Top](#top)
+
+####<a name="section1.2.5"></a>Column-like storing
+Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
+    
+* `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+* `fiwareServicePath`: The notified one or the default one.
+* `entityId`: Notified entity identifier.
+* `entityType`: Notified entity type.
+*  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+*  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -99,7 +142,24 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-Assuming `postgresql_username=myuser`, `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIPostgreSQLSink` will persist the data within the body as:
+[Top](#top)
+
+####<a name="section1.3.2"></a>Database, schema and table names
+The PostgreSQL database name will be of the user's choice.
+
+The PostgreSQL schema will always be `vehicles`.
+
+The PostgreSQL table names will be, depending on the configured data model, the following ones:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | N/A | `car1_car` |
+| `/4wheels` | `4wheels` | `4wheels_car1_car` |
+
+[Top](#top)
+
+####<a name="section1.3.3"></a>Row-like storing
+Assuming `attr_persistence=row` as configuration parameters, then `NGSIPostgreSQLSink` will persist the data within the body as:
 
     $ psql -U myuser
     psql (9.5.0)
@@ -121,7 +181,6 @@ Assuming `postgresql_username=myuser`, `data_model=dm-by-entity` and `attr_persi
      vehicles | 4wheels_car1_car  | table | postgres
     (1 row)
 
-
     postgresql> select * from vehicles.4wheels_car1_car;
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     | recvTimeTs | recvTime                   | fiwareServicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
@@ -131,10 +190,10 @@ Assuming `postgresql_username=myuser`, `data_model=dm-by-entity` and `attr_persi
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     2 row in set (0.00 sec)
 
-NOTES:
+[Top](#top)
 
-* `psql` is the PostgreSQL CLI for querying the data.
-* Time zone information is not added in PostgreSQL timestamps since PostgreSQL stores that information as a environment variable. PostgreSQL timestamps are stored in UTC time.
+####<a name="section1.3.4"></a>Column-like storing
+Coming soon.
 
 [Top](#top)
 
@@ -214,6 +273,11 @@ By default, `NGSIPostgreSQLSink` has a configured batch size and batch accumulat
 
 [Top](#top)
 
+####<a name="section2.3.4"></a>Time zone information
+Time zone information is not added in PostgreSQL timestamps since PostgreSQL stores that information as a environment variable. PostgreSQL timestamps are stored in UTC time.
+
+[Top](#top)
+
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSIPostgreSQLSink` class
 As any other NGSI-like sink, `NGSIPostgreSQLSink` extends the base `NGSISink`. The methods that are extended are:
@@ -232,24 +296,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`PostgreSQLBackendImpl` class
-This is a convenience backend class for PostgreSQL that implements the `PostgreSQLBackend` interface (provides the methods that any PostgreSQL backend must implement). Relevant methods are:
-
-    public void createSchema(String schemaName) throws Exception;
-
-Creates a database, given its name, if not existing.
-
-    public void createTable(String schemaName, String tableName, String fieldNames) throws Exception;
-
-Creates a table, given its name, if not existing within the given database. The field names are given as well.
-
-    void insertContextData(String schemaName, String tableName, String fieldNames, String fieldValues) throws Exception;
-
-Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
-
-[Top](#top)
-
-###<a name="section3.3"></a>Authentication and authorization
+###<a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
 
 [Top](#top)
