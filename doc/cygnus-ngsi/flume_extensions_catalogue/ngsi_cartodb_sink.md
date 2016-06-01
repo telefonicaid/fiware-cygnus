@@ -62,7 +62,7 @@ The name of these tables depends on the configured data model and analysis mode 
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In adddition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
-It must be said PostgreSQL only accepts alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character. For instance, the initial slash (`/`) of the FIWARE service path is encoded as `x002f`.
+It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character. For instance, the initial slash (`/`) of the FIWARE service path is encoded as `x002f`.
 
 The following table summarizes the table name composition:
 

@@ -4,17 +4,27 @@ Content:
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
     * [Mapping Flume events to MongoDB data structures](#section1.2)
+        * [MongoDB databases naming conventions](#section1.2.1)
+        * [MongoDB collections naming conventions](#section1.2.2)
+        * [Row-like storing](#section1.2.3)
+        * [Column-like storing](#section1.2.4)
     * [Example](#section1.3)
+        * [Flume event](#section1.3.1)
+        * [Database and table names](#section1.3.2)
+        * [Row-like storing](#section1.3.3)
+        * [Column-like storing](#section1.3.4)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-         * [Hashing based collections](#section2.3.1)
-         * [About batching](#section2.3.2)
-         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-         * [Databases and collections encoding details](#section2.3.4)
+        * [Hashing based collections](#section2.3.1)
+        * [About batching](#section2.3.2)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
+        * [Databases and collections encoding details](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
+    * [`NGSIMongoBackend` class](#section3.2)
+    * [Authentication and authorization](#section3.3)
 
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMongoSink`, or simply `NGSIMongoSink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -35,15 +45,81 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a Flume event is going to be persisted.
 
-A database called as the `fiware-service` header value within the event is created (if not existing yet).
+[Top](#top)
 
-The context responses/entities within the container are iterated, and a collection is created (if not yet existing) for each unit data. The collection is called as the concatenation of the `fiware-servicePath`_`destination` headers values within the event.
+####<a name="section1.2.1"></a>MongoDB databases and collections naming conventions
+A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
-The context attributes within each context response/entity are iterated, and a new Json document is appended to the current collection.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the collection names, so they will be replaced by underscore, `_`.
+
+[Top](#top)
+
+####<a name="section1.2.2"></a>MongoDB collections naming conventions
+The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
+
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated. The configured prefix is prepended to the collection name.
+
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`.
+
+The following table summarizes the table name composition (assuming default `sth_` prefix):
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_/` | `sth_/<entityId>_<entityType>` | `sth_/<entityId>_<entityType>_<attrName>` |
+| `/<svcPath>` | `sth_/<svcPath>` | `sth_/<svcPath>_<entityId>_<entityType>` | `sth_/<svcPath>_<entityId>_<entityType>_<attrName>` |
+
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+
+[Top](#top)
+
+####<a name="section1.2.3"></a>Row-like storing
+Regarding the specific data stored within the above collections, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing a Json document for each one of them. Each document contains a variable number of fields, depending on the configured `data_model`:
+
+* Data model by service path:
+    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
+    * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
+    * `attrName`: Notified attribute name.
+    * `attrType`: Notified attribute type.
+    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+* Data model by entity:
+    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
+    * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `attrName`: Notified attribute name.
+    * `attrType`: Notified attribute type.
+    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+* Data model by attribute:
+    * `recvTimeTs`: UTC timestamp expressed in miliseconds.
+    * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
+    * `attrType`: Notified attribute type.
+    * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    
+[Top](#top)
+
+####<a name="section1.2.4"></a>Column-like storing
+Regarding the specific data stored within the above collections, if `attr_persistence` parameter is set to `column` then a single Json document is composed for the whole notified entity. Each document contains a variable number of fields, depending on the configured `data_model`:
+
+* Data model by service path:
+    * `recvTime`: Timestamp in human-readable format (Similar to [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601), but avoiding the `Z` character denoting UTC, since all MySQL timestamps are supposed to be in UTC format).
+    * `fiwareServicePath`: The notified one or the default one.
+    * `entityId`: Notified entity identifier.
+    * `entityType`: Notified entity type.
+    *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+    *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+* Data model by entity:
+    * `recvTime`: Timestamp in human-readable format (Similar to [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601), but avoiding the `Z` character denoting UTC, since all MySQL timestamps are supposed to be in UTC format).
+    * `fiwareServicePath`: The notified one or the default one.
+    *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
+    *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+* Data model by attribute. **This combination has no sense, so it is avoided.**
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
+####<a name="section1.3.1"></a>Flume event
 Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     flume-event={
@@ -53,11 +129,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -77,45 +153,22 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	    }
     }
 
-According to different combinations of the parameters `datamodel` and `attr_persistence`, the system will persist the data in different ways, as we will describe below.
-Assuming `mongo_username=myuser` and `should_hash=false` and `data_model=dm-by-entity` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
+[Top](#top)
 
-    $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
-    connecting to: test
-    > show databases
-    admin              (empty)
-    local              0.031GB
-    sth_vehicles       0.031GB
-    test               0.031GB
-    > use vehicles
-    switched to db vehicles
-    > show collections
-    sth_/4wheels_car1_car
-    system.indexes
-    > db['sth_/4wheels_car1_car'].find()
-    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
-    { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
+####<a name="section1.3.2"></a>Database and collection names
+A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
 
-If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
+Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones:
 
-    $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
-    connecting to: test
-    > show databases
-    admin              (empty)
-    local              0.031GB
-    sth_vehicles       0.031GB
-    test               0.031GB
-    > use vehicles
-    switched to db vehicles
-    > show collections
-    sth_/4wheels_car1_car
-    system.indexes
-    > db['sth_/4wheels_car1_car'].find()
-    {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_/` | `sth_/car1_car` | `sth_/car1_car_speed`<br>`sth_/car1_car_oil_level` |
+| `/4wheels` | `sth_/4wheels` | `sth_/4wheels_car1_car` | `sth_/4wheels_car1_car_speed`<br>`sth_/4wheels_car1_car_oil_level` |
 
-If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body in the same collection (i.e. `4wheels`) for all the entities of the same service path as:
+[Top](#top)
+
+####<a name="section1.3.3"></a>Row-like storing
+Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -133,13 +186,8 @@ If `data_model=dm-by-service-path` and `attr_persistence=row` then `NGSIMongoSin
     > db['sth_/4wheels'].find()
     { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
     { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
-    { "_id" : ObjectId("5534d143fa701f0be751db84"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car2", "entityType" : "car", "attrName" : "speed", "attrType" : "float", "attrValue" : "123.0" }
-    { "_id" : ObjectId("5534d143fa701f0be751db85"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car2", "entityType" : "car", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "40.9" }
 
-Note: The first two documents were generated by the above flume-event, while the last two documents (`"entityId" : "car2"`) were originated by another event (not shown here).
-We have left these documents in order to show that the same collection stores data of different entities, unlike what it happens with other value of `data_model` parameter.
-
-Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data as:
+If `data_model=dm-by-entity` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -152,11 +200,12 @@ Similarly, if `data_model=dm-by-service-path` and `attr_persistence=column` then
     > use vehicles
     switched to db vehicles
     > show collections
-    sth_/4wheels
+    sth_/4wheels_car1_car
     system.indexes
-    > db['sth_/4wheels'].find()
-    { "_id" : ObjectId("5534d143fa701f0be751db86"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "speed" : "112.9", "oil_level" : "74.6" }
-
+    > db['sth_/4wheels_car1_car'].find()
+    { "_id" : ObjectId("5534d143fa701f0be751db82"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "speed", "attrType" : "float", "attrValue" : "112.9" }
+    { "_id" : ObjectId("5534d143fa701f0be751db83"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrName" : "oil_level", "attrType" : "float", "attrValue" : "74.6" }
+    
 If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
@@ -178,15 +227,44 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` 
     > db['sth_/4wheels_car1_oil_level'].find()
      { "_id" : ObjectId("5534d143fa701f0be751db87"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "attrType" : "float", "attrValue" : "74.6" }
 
-Finally, the pair of parameters `data_model=dm-by-attribute` and `attr_persistence=column` has no palpable sense if used together, thus **DON'T USE IT**. In this case, in fact, `NGSIMongoSink` will not persist anything; only a warning will be logged.
+[Top](#top)
 
-NOTES:
+####<a name="section1.3.4"></a>Column-like storing
+If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
-* `mongo` is the MongoDB CLI for querying the data.
-* `sth_` prefix is added by default when no database nor collection prefix is given (see next section for more details).
-* This sink adds the original '/' initial character to the `fiware-servicePath`, which was removed by `NGSIRestHandler`.
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels
+    system.indexes
+    > db['sth_/4wheels'].find()
+    { "_id" : ObjectId("5534d143fa701f0be751db86"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "entityId" : "car1", "entityType" : "car", "speed" : "112.9", "oil_level" : "74.6" }
 
-NOTE: `mongo` is the MongoDB CLI for querying the data.
+If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
+
+    $ mongo -u myuser -p
+    MongoDB shell version: 2.6.9
+    connecting to: test
+    > show databases
+    admin              (empty)
+    local              0.031GB
+    sth_vehicles       0.031GB
+    test               0.031GB
+    > use vehicles
+    switched to db vehicles
+    > show collections
+    sth_/4wheels_car1_car
+    system.indexes
+    > db['sth_/4wheels_car1_car'].find()
+    {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
 
 [Top](#top)
 
@@ -296,5 +374,29 @@ An implementation of `MongoBackend` is created. This must be done at the `start(
     public void configure(Context);
 
 A complete configuration as the described above is read from the given `Context` instance.
+
+[Top](#top)
+
+###<a name="section3.2"></a>`MongoBackend` class
+This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
+
+    public void createDatabase(String dbName) throws Exception;
+
+Creates a database, given its name, if not exists.
+
+    public void createCollection(String dbName, String collectionName) throws Exception;
+
+Creates a collection, given its name, if not exists in the given database.
+
+    public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
+
+Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+
+Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.
+
+[Top](#top)
+
+###<a name="section3.3"></a>Authentication and authorization
+Current implementation of `NGSIMongoSink` relies on the username and password credentials created at the MongoDB endpoint.
 
 [Top](#top)
