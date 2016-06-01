@@ -1040,76 +1040,40 @@ public class NGSIHDFSSink extends NGSISink {
     } // provisionHive
 
     /**
-     * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
-     * violated.
+     * Builds the first level of a HDFS path given a fiwareService.
      * @param fiwareService
-     * @return
-     * @throws Exception
+     * @return The first level of a HDFS path
      */
-    private String buildFirstLevel(String fiwareService) throws Exception {
-        String firstLevel = NGSIUtils.encode(fiwareService, false, true);
-
-        if (firstLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
-                    + "and its length is greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return firstLevel;
+    private String buildFirstLevel(String fiwareService) {
+        return NGSIUtils.encode(fiwareService, false, true);
     } // buildFirstLevel
 
     /**
-     * Builds the second level of a HDFS path given given a fiwareService and a destination. It throws an exception if
-     * the naming conventions are violated.
+     * Builds the second level of a HDFS path given given a fiwareService and a destination.
      * @param fiwareService
      * @param destination
-     * @return
-     * @throws Exception
+     * @return The second level of a HDFS path
      */
-    private String buildSecondLevel(String fiwareServicePath) throws Exception {
-        String secondLevel = NGSIUtils.encode(fiwareServicePath, false, false);
-
-        if (secondLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
-                    + "its length is greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return secondLevel;
+    private String buildSecondLevel(String fiwareServicePath) {
+        return NGSIUtils.encode(fiwareServicePath, false, false);
     } // buildSecondLevel
 
     /**
-     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
-     * violated.
+     * Builds the third level of a HDFS path given a destination.
      * @param destination
-     * @return
-     * @throws Exception
+     * @return The third level of a HDFS path
      */
     private String buildThirdLevel(String destination) throws Exception {
-        String thirdLevel = NGSIUtils.encode(destination, false, true);
-
-        if (thirdLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
-                    + "greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return thirdLevel;
+        return NGSIUtils.encode(destination, false, true);
     } // buildThirdLevel
 
     /**
-     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
-     * violated.
+     * Builds the third level of a HDFS path for metadata given a destination.
      * @param destination
-     * @return
-     * @throws Exception
+     * @return The third level of a HDFS path for metadata
      */
     private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
-        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
-
-        if (thirdLevelMd.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
-                    + "greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return thirdLevelMd;
+        return destination + "_" + attrName + "_" + attrType;
     } // buildThirdLevelMd
 
 } // NGSIHDFSSink

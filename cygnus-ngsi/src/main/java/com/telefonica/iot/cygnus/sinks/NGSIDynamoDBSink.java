@@ -357,11 +357,6 @@ public class NGSIDynamoDBSink extends NGSISink {
                             + "'. Please, use DMBYSERVICEPATH or DMBYENTITY");
         } // switch
 
-        if (tableName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building tableName '" + tableName
-                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
         return tableName;
     } // buildTableName
 

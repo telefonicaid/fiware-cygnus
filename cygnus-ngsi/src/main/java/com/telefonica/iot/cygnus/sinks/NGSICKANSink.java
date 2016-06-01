@@ -21,7 +21,6 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -429,18 +428,10 @@ public class NGSICKANSink extends NGSISink {
     /**
      * Builds an organization name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
-     * @return
-     * @throws Exception
+     * @return An organization name
      */
-    private String buildOrgName(String fiwareService) throws Exception {
-        String orgName = NGSIUtils.encode(fiwareService, false, true);
-
-        if (orgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
-                    + "greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
-        return orgName;
+    private String buildOrgName(String fiwareService) {
+        return NGSIUtils.encode(fiwareService, false, true);
     } // buildOrgName
 
     /**
@@ -448,10 +439,9 @@ public class NGSICKANSink extends NGSISink {
      * conventions are violated.
      * @param fiwareService
      * @param fiwareServicePath
-     * @return
-     * @throws Exception
+     * @return A package name
      */
-    private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
+    private String buildPkgName(String fiwareService, String fiwareServicePath) {
         String pkgName;
 
         if (fiwareServicePath.equals("/")) {
@@ -460,29 +450,16 @@ public class NGSICKANSink extends NGSISink {
             pkgName = NGSIUtils.encode(fiwareService, false, true) + NGSIUtils.encode(fiwareServicePath, false, true);
         } // if else
 
-        if (pkgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
-                    + ") and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
         return pkgName;
     } // buildPkgName
 
     /**
      * Builds a resource name given a destination. It throws an exception if the naming conventions are violated.
      * @param destination
-     * @return
-     * @throws Exception
+     * @return A resource name
      */
-    private String buildResName(String destination) throws Exception {
-        String resName = NGSIUtils.encode(destination, false, true);
-
-        if (resName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
-                    + "than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
-        return resName;
+    private String buildResName(String destination) {
+        return NGSIUtils.encode(destination, false, true);
     } // buildResName
 
 } // NGSICKANSink

@@ -168,18 +168,10 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     /**
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
-     * @return
-     * @throws Exception
+     * @return A database name
      */
-    protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
-
-        if (dbName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
-                    + "than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
-        return dbName;
+    protected String buildDbName(String fiwareService) {
+        return dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
     } // buildDbName
 
     /**
@@ -236,11 +228,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
                     entityType, attribute, entity);
         } else {
             collectionName = collectionPrefix + collectionName;
-
-            if (collectionName.getBytes().length > NGSIConstants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
-                LOGGER.error("");
-                return null;
-            } // if
         } // if else
 
         return collectionName;

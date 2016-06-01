@@ -155,7 +155,7 @@ public class NGSIKafkaSink extends NGSISink {
      * @param servicePath
      * @param entity
      * @param attribute
-     * @return
+     * @return The topic name
      * @throws Exception
      */
     protected String buildTopicName(String service, String servicePath,
@@ -219,13 +219,8 @@ public class NGSIKafkaSink extends NGSISink {
                         + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
         } // switch
 
-        if (name.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building topic name '" + name
-                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
         return name;
-    } // buildTopic
+    } // buildTopicName
 
     /**
      * Class for aggregating aggregation.

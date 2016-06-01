@@ -298,15 +298,8 @@ public class NGSIMySQLSink extends NGSISink {
             tableName = buildTableName();
         } // initialize
         
-        private String buildDbName() throws Exception {
-            String name = NGSIUtils.encode(service, false, true);
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building database name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
-
-            return name;
+        private String buildDbName() {
+            return NGSIUtils.encode(service, false, true);
         } // buildDbName
         
         private String buildTableName() throws Exception {
@@ -336,11 +329,6 @@ public class NGSIMySQLSink extends NGSISink {
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                             + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
             } // switch
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building table name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
 
             return name;
         } // buildTableName

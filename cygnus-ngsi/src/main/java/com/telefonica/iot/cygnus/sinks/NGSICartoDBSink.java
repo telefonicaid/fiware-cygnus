@@ -588,17 +588,9 @@ public class NGSICartoDBSink extends NGSISink {
      * Builds a schema name for CartoDB given a service.
      * @param service
      * @return The schema name for CartoDB
-     * @throws Exception
      */
-    protected String buildSchemaName(String service) throws Exception {
-        String name = NGSICharsets.cartoDBEncode(service);
-
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
-            throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
-        } // if
-
-        return name;
+    protected String buildSchemaName(String service) {
+        return NGSICharsets.cartoDBEncode(service);
     } // buildSchemaName
     
     /**
@@ -607,7 +599,7 @@ public class NGSICartoDBSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The table name for CartoDB
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
         String name;
@@ -631,11 +623,6 @@ public class NGSICartoDBSink extends NGSISink {
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                         + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
         } // switch
-        
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
-            throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
-        } // if
 
         return name;
     } // buildTableName
