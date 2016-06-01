@@ -532,7 +532,7 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription got");
+            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription obtained");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
             throw e;

@@ -541,7 +541,7 @@ public class ManagementInterface extends AbstractHandler {
                     return;
                 } // if else
 
-                LOGGER.debug("Status code got: " + status);
+                LOGGER.debug("Status code obtained: " + status);
 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
@@ -577,7 +577,7 @@ public class ManagementInterface extends AbstractHandler {
                     return;
                 } // if else
 
-                LOGGER.debug("Status code got: " + status);
+                LOGGER.debug("Status code obtained: " + status);
 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
@@ -991,7 +991,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } // if else
             
-            LOGGER.debug("Status code got: " + status);
+            LOGGER.debug("Status code obtained: " + status);
             
             if ((status == 204) || (status == 200)) {
                 response.getWriter().println("{\"success\":\"true\","
