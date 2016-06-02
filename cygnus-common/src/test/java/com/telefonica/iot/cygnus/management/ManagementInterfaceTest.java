@@ -106,7 +106,6 @@ public class ManagementInterfaceTest {
     private final String deleteURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
     private final String getURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
     private final String getAllURIv2 = "/v1/subscriptions?ngsi_version=2";
-    private final String getAgentParameters = "/admin/configuration/agent/path/to/agent.conf";
     private final HttpServletResponse response = mock(HttpServletResponse.class);
     private final HttpServletRequest mockRequestV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockRequestV2 = mock(HttpServletRequest.class);
@@ -120,8 +119,6 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockDeleteSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetAllSubscriptionsV2 = mock(HttpServletRequest.class);
-    private final HttpServletRequest mockGetAllAgentParameters = mock(HttpServletRequest.class);
-    
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -144,40 +141,6 @@ public class ManagementInterfaceTest {
         String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
         
-        // Define string for mocked agent
-        String agentStr = "cygnusagent.sources = http-source\n" +
-                       "cygnusagent.sinks = mysql-sink\n" +
-                       "cygnusagent.channels = mysql-channel\n" +
-                       "\n" +
-                       "cygnusagent.sources.http-source.channels = mysql-channel\n" +
-                       "cygnusagent.sources.http-source.type = source.source.http.HTTPSource\n" +
-                       "cygnusagent.sources.http-source.port = 5050\n" +
-                       "cygnusagent.sources.http-source.handler = handler\n" +
-                       "cygnusagent.sources.http-source.handler.notification_target = /notify\n" +
-                       "cygnusagent.sources.http-source.handler.default_service = service\n" +
-                       "cygnusagent.sources.http-source.handler.default_service_path = servpath\n" +
-                       "cygnusagent.sources.http-source.handler.events_ttl = 4\n" +
-                       "cygnusagent.sources.http-source.interceptors = ts gi\n" +
-                       "cygnusagent.sources.http-source.interceptors.ts.type = timestamp\n" +
-                       "cygnusagent.sources.http-source.interceptors.gi.type = cygnus.interceptors\n" +
-                       "cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /path/to/conf/file\n" +
-                       "\n" +
-                       "cygnusagent.channels.mysql-channel.type = memory\n" +
-                       "cygnusagent.channels.mysql-channel.capacity = 1000\n" +
-                       "cygnusagent.channels.mysql-channel.transactionCapacity = 100\n" +
-                       "\n" +
-                       "cygnusagent.sinks.mysql-sink.type = cygnus.sinks\n" +
-                       "cygnusagent.sinks.mysql-sink.channel = mysql-channel\n" +
-                       "cygnusagent.sinks.mysql-sink.enable_grouping = false\n" +
-                       "cygnusagent.sinks.mysql-sink.mysql_host = globalhost\n" +
-                       "cygnusagent.sinks.mysql-sink.mysql_port = 3456\n" +
-                       "cygnusagent.sinks.mysql-sink.mysql_username = someuser\n" +
-                       "cygnusagent.sinks.mysql-sink.mysql_password = somepass\n" +
-                       "cygnusagent.sinks.mysql-sink.data_model = dm-by-some-path\n" +
-                       "cygnusagent.sinks.mysql-sink.attr_persistence = some\n" +
-                       "cygnusagent.sinks.mysql-sink.batch_size = 1\n" +
-                       "cygnusagent.sinks.mysql-sink.batch_timeout = 10";
-        
         // Define the readers with the subscriptions 
         BufferedReader readerV1 = new BufferedReader(new StringReader(subscriptionV1));
         BufferedReader readerV2 = new BufferedReader(new StringReader(subscriptionV2));
@@ -189,7 +152,6 @@ public class ManagementInterfaceTest {
         BufferedReader readerMissingFieldV2 = new BufferedReader(new StringReader(subsV2MissingfieldV2));
         BufferedReader readerDeleteSubscription = new BufferedReader(new StringReader(subscriptionDelete));
         BufferedReader readerGetSubscription = new BufferedReader(new StringReader(subscriptionGet));
-        BufferedReader readerGetAgentParameters = new BufferedReader(new StringReader(agentStr));
         PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());      
         
         JsonResponse responseDeleteV1 = new JsonResponse(null, 200, deleteURIv1, null);
@@ -261,10 +223,6 @@ public class ManagementInterfaceTest {
         when(mockGetAllSubscriptionsV2.getMethod()).thenReturn("GET");		
         when(mockGetAllSubscriptionsV2.getReader()).thenReturn(readerGetSubscription);		
         when(mockGetAllSubscriptionsV2.getParameter("ngsi_version")).thenReturn("2");
-        
-        when(mockGetAllAgentParameters.getRequestURI()).thenReturn(getAgentParameters);
-        when(mockGetAllAgentParameters.getMethod()).thenReturn("GET");
-        when(mockGetAllAgentParameters.getReader()).thenReturn(readerGetAgentParameters);
         
         when(response.getWriter()).thenReturn(writer);
         
