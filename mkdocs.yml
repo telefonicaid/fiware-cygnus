@@ -90,5 +90,7 @@ pages:
           - 'Reporting issues and contact information': 'cygnus-twitter/user_and_programmer_guide/issues_and_contact.md'
       - 'Flume extensions catalogue':
           - 'Introduction': 'cygnus-twitter/flume_extensions_catalogue/introduction.md'
+          - 'TwitterSource': 'cygnus-twitter/flume_extensions_catalogue/twitter_source.md'
           - 'TwitterHDFSink': 'cygnus-twitter/flume_extensions_catalogue/twitter_hdfs_sink.md'
           - 'Reporting issues and contact information': 'cygnus-twitter/flume_extensions_catalogue/issues_and_contact.md'
+      - 'Quick Start Guide': 'cygnus-twitter/quick_start_guide.md'
