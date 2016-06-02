@@ -1,1 +1,2 @@
 - [cygnus-ngsi] [hardening] Remove element (tables, collections, files, etc) length checks (#407)
+- [cygnus-ngsi] [hardening] Do configurable the accepted resolutions in NGSISTHSink (#940)
