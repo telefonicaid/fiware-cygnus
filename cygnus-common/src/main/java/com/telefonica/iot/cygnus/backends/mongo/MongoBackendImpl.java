@@ -200,11 +200,13 @@ public class MongoBackendImpl implements MongoBackend {
      * @param attrType
      * @param attrValue
      * @param attrMd
+     * @param resolutions
      * @throws Exception
      */
     @Override
     public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
-            String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd)
+            String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd,
+            boolean[] resolutions)
         throws Exception {
         // preprocess some values
         GregorianCalendar calendar = new GregorianCalendar();
@@ -212,16 +214,30 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeInMillis(recvTimeTs);
 
         // insert the data in an aggregated fashion for each resolution type
-        insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                attrName, attrType, attrValue, Resolution.SECOND);
-        insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                attrName, attrType, attrValue, Resolution.MINUTE);
-        insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                attrName, attrType, attrValue, Resolution.HOUR);
-        insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                attrName, attrType, attrValue, Resolution.DAY);
-        insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                attrName, attrType, attrValue, Resolution.MONTH);
+        if (resolutions[0]) {
+            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
+                    attrName, attrType, attrValue, Resolution.SECOND);
+        } // if
+        
+        if (resolutions[1]) {
+            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
+                    attrName, attrType, attrValue, Resolution.MINUTE);
+        } // if
+        
+        if (resolutions[2]) {
+            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
+                    attrName, attrType, attrValue, Resolution.HOUR);
+        } // if
+        
+        if (resolutions[3]) {
+            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
+                    attrName, attrType, attrValue, Resolution.DAY);
+        } // if
+        
+        if (resolutions[4]) {
+            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
+                    attrName, attrType, attrValue, Resolution.MONTH);
+        } // if
     } // insertContextDataAggregated
 
     /**

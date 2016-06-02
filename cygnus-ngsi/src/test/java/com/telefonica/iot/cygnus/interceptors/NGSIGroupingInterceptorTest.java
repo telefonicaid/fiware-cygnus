@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.interceptors;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.createEvent;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.util.Map;
+import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -40,9 +41,105 @@ public class NGSIGroupingInterceptorTest {
     } // NGSIGroupingInterceptorTest
     
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains fiware-service,
- fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath and
- grouped-entities headers.
+     * [GroupingInterceptor.Builder.configure] -------- Not mandatory parameters get the default value on configure().
+     */
+    @Test
+    public void testBuilderConfigureDefaultValues() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- Not mandatory parameters get the default value on configure()");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = "/grouping_rules.conf";
+        String enableNewEncoding = null; // default value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(!builder.getEnableNewEncoding());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - 'enable_new_encoding' is configured to 'false' by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - 'enable_new_encoding' is not configured to 'false' by default");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureDefaultValues
+    
+    /**
+     * [GroupingInterceptor.Builder.configure] -------- When configured, enable_new_encoding must be 'true' or 'false'.
+     */
+    @Test
+    public void testBuilderConfigureEnableNewEncodingOK() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- When configured, enable_new_encoding must be 'true' or 'false'");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = "/grouping_rules.conf";
+        String enableNewEncoding = "falso"; // wrong value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(builder.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - 'enable_new_encoding=falso' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - 'enable_new_encoding=falso' has not been detected");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureEnableNewEncodingOK
+    
+    /**
+     * [GroupingInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be empty.
+     */
+    @Test
+    public void testBuilderConfigureGroupingRulesConfFileNotEmpty() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- Configured 'grouping_rules_conf_file' cannot be empty");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = ""; // wrong value
+        String enableNewEncoding = null; // default value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(builder.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - Empty 'grouping_rules_conf_file' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - Empty 'grouping_rules_conf_file' has not been detected");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureGroupingRulesConfFileNotEmpty
+    
+    /**
+     * [GroupingInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be null.
+     */
+    @Test
+    public void testBuilderConfigureGroupingRulesConfFileNotNull() {
+        System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                + "-------- Configured 'grouping_rules_conf_file' cannot be null");
+        NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
+        String groupingRulesConfFile = null; // wrong value
+        String enableNewEncoding = null; // default value
+        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        builder.configure(context);
+        
+        try {
+            assertTrue(builder.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "-  OK  - Null 'grouping_rules_conf_file' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.Builder.configure]")
+                    + "- FAIL - Null 'grouping_rules_conf_file' has not been detected");
+            throw e;
+        } // try catch
+    } // testBuilderConfigureGroupingRulesConfFileNotNull
+    
+    /**
+     * [NGSIGroupingInterceptor.getEvents] -------- When a Flume event is put in the channel, it contains
+     * fiware-service, fiware-servicepath, fiware-correlator, transaction-id, notified-entities, grouped-servicepath
+     * and grouped-entities headers.
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
@@ -50,7 +147,7 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- When a Flume event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, notified-entities, grouped-servicepaths and grouped-entities "
                 + "headers");
-        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("");
+        NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("", false, false);
         groupingInterceptor.initialize();
         Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();
@@ -125,5 +222,12 @@ public class NGSIGroupingInterceptorTest {
             throw e7;
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
+    
+    private Context createBuilderContext(String enableNewEncoding, String groupingRulesConfFile) {
+        Context context = new Context();
+        context.put("enable_new_encoding", enableNewEncoding);
+        context.put("grouping_rules_conf_file", groupingRulesConfFile);
+        return context;
+    } // createBuilderContext
 
 } // NGSIGroupingInterceptorTest

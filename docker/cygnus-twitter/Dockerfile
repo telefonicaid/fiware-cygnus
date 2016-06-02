@@ -30,7 +30,7 @@ ENV CYGNUS_AGENT_NAME "cygnus-twitter"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/javipalanca/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "develop"
 
 ENV MVN_VER "3.2.5"

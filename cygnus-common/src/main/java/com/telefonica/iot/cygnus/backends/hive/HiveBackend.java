@@ -28,20 +28,20 @@ public interface HiveBackend {
      * @param dbName
      * @return True if the database could be created, false otherwise.
      */
-    public boolean doCreateDatabase(String dbName);
+    boolean doCreateDatabase(String dbName);
     
     /**
      * Creates a HiveQL external table.
      * @param query
      * @return True if the table could be created, false otherwise.
      */
-    public boolean doCreateTable(String query);
+    boolean doCreateTable(String query);
     
     /**
      * Executes a HiveQL sentence.
      * @param query
      * @return True if the query succeded, false otherwise.
      */
-    public boolean doQuery(String query);
+    boolean doQuery(String query);
     
 } // HiveBackend

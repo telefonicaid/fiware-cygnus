@@ -125,7 +125,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if
 
         response.setContentType("text/html;charset=utf-8");
-        int port = request.getServerPort();
+        int port = request.getLocalPort();
         String uri = request.getRequestURI();
         String method = request.getMethod();
         LOGGER.info("Management interface request. Method: " + method + ", URI: " + uri);
@@ -196,7 +196,7 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println(method + " " + uri + " Not implemented");
             } // if else
         } else {
-            LOGGER.debug("Attending a request in a non expected port!!");
+            LOGGER.info("Attending a request in a non expected port: " + port);
         } // if else
     } // handle
 
@@ -405,8 +405,11 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleGetAdminLog
     
-    private void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
+        
+        // flag for use get all or get one subscription
+        boolean getAllSubscriptions = false;
         
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
@@ -436,12 +439,16 @@ public class ManagementInterface extends AbstractHandler {
             return;
         } // if
         
-        if (subscriptionID == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        if (ngsiVersion.equals("1")) {
+            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (subscription_id). Check it for errors.\"}");
-            LOGGER.error("Parse error, missing parameter (subscription_id). Check it for errors.");
+                + "\"error\":\"GET /v1/subscriptions not implemented for NGSI version 1.\"}");
+            LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
+        } // if
+        
+        if (subscriptionID == null) {
+            getAllSubscriptions = true;
         } else if (subscriptionID.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -449,14 +456,6 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
             return;
         } // if else
-        
-        if (ngsiVersion.equals("1")) {
-            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-            response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"GET /v1/subscriptions not implemented.\"}");
-            LOGGER.error("GET /v1/subscriptions not implemented.");
-            return;
-        } // if
 
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
@@ -478,6 +477,7 @@ public class ManagementInterface extends AbstractHandler {
         
         try {
             endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -507,7 +507,11 @@ public class ManagementInterface extends AbstractHandler {
             } // try catch
         } // if
         
-        LOGGER.debug("Valid Endpoint. Creating request to Orion.");
+        if (getAllSubscriptions) {
+            LOGGER.debug("Valid Endpoint. Creating request to Orion (GET all subscriptions).");
+        } else {
+            LOGGER.debug("Valid Endpoint. Creating request to Orion (GET subsription by id).");
+        }
         
         // get host, port and ssl for request
         String host = endpoint.getHost();
@@ -518,35 +522,79 @@ public class ManagementInterface extends AbstractHandler {
         // Create a orionBackend for request
         orionBackend = new OrionBackendImpl(host, port, ssl);
         
-        try {
+        if (getAllSubscriptions)  {
             
-            int status = -1;
-            JSONObject orionJson = new JSONObject();
-            
-            JsonResponse orionResponse = orionBackend.
-            getSubscriptionsByIdV2(token, subscriptionID);
-            
-            if (orionResponse != null) {
-                orionJson = orionResponse.getJsonObject();
-                status = orionResponse.getStatusCode();
-            } // if
+            try { 
+                int status;
+                JSONObject orionJson = new JSONObject();
 
-            LOGGER.debug("Status code got: " + status);
+                JsonResponse orionResponse = orionBackend.
+                        getSubscriptionsV2(token, subscriptionID);
+                                
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    status = orionResponse.getStatusCode();
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                    LOGGER.debug("There was some problem when handling the response");
+                    return;
+                } // if else
+
+                LOGGER.debug("Status code obtained: " + status);
+
+                if (status == 200) {
+                    response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    LOGGER.debug("Subscription received: " + orionJson.toJSONString());
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                } // if else
             
-            if (status == 200) {
-                response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-                LOGGER.debug("Subscription received: " + orionJson.toJSONString());
-            } else {
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
                 response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
-            } // if else
+                                + "\"result\" : {" + e.getMessage() + "}");
+            } // try catch
             
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + e.getMessage() + "}");
-        } // try catch
+        } else {
+            
+            try { 
+                int status = -1;
+                JSONObject orionJson = new JSONObject();
+
+                JsonResponse orionResponse = orionBackend.
+                        getSubscriptionsByIdV2(token, subscriptionID);
+
+                if (orionResponse != null) {
+                    orionJson = orionResponse.getJsonObject();
+                    status = orionResponse.getStatusCode();
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                    LOGGER.debug("There was some problem when handling the response");
+                    return;
+                } // if else
+
+                LOGGER.debug("Status code obtained: " + status);
+
+                if (status == 200) {
+                    response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    LOGGER.debug("Subscription received: " + orionJson.toJSONString());
+                } else {
+                    response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                } // if else
+            
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+                response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : {" + e.getMessage() + "}");
+            } // try catch
+            
+        }
         
     } // handleGetSubscriptions
 
@@ -643,8 +691,9 @@ public class ManagementInterface extends AbstractHandler {
         LOGGER.debug("Rule added. Grouping rules after adding the new rule: " + rulesStr);
     } // handlePostGroupingRules
 
-    private void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
         
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -689,6 +738,7 @@ public class ManagementInterface extends AbstractHandler {
         if (ngsiVersion.equals("1")) {
             try {
                 cygnusSubscriptionv1 = gson.fromJson(jsonStr, CygnusSubscriptionV1.class);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
@@ -755,6 +805,7 @@ public class ManagementInterface extends AbstractHandler {
             
             try {
                 cygnusSubscriptionv2 = gson.fromJson(jsonStr, CygnusSubscriptionV2.class);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
@@ -820,7 +871,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePostSubscription
     
-    private void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
@@ -875,6 +926,7 @@ public class ManagementInterface extends AbstractHandler {
         
         try {
             endpoint = gson.fromJson(endpointStr, OrionEndpoint.class);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -939,7 +991,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } // if else
             
-            LOGGER.debug("Status code got: " + status);
+            LOGGER.debug("Status code obtained: " + status);
             
             if ((status == 204) || (status == 200)) {
                 response.getWriter().println("{\"success\":\"true\","
@@ -1556,6 +1608,15 @@ public class ManagementInterface extends AbstractHandler {
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
         return corrId;
     } // setCorrelator
+    
+    
+    /**
+     * SetOrionBackend: Sets a given orionBackend.
+     * 
+     * @param orionBackend
+     */
+    protected void setOrionBackend(OrionBackendImpl orionBackend) {
+        this.orionBackend = orionBackend;
+    } // setOrionBackend
 
 } // ManagementInterface
-

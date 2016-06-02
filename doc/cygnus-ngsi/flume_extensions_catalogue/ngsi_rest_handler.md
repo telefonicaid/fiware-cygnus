@@ -7,6 +7,7 @@ Content:
     * [Example](#section1.3)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
+    * [Accepted character set](#section2.2)
 * [Programmers guide](#section3)
     * [`NGSIRestHandler` class](#section3.1)
 
@@ -142,6 +143,13 @@ A configuration example could be:
     cygnusagent.sources.http-source.notification_target = /notify
     cygnusagent.sources.http-source.default_service = default
     cygnusagent.sources.http-source.default_service_path = /
+
+[Top](#top)
+
+###<a name="section2.2"></a>Accepted character set
+This handler for NGSI only works with UTF-8 encoding. Thus, notifications must send a `Content-Type` header with `application/json; charset=utf-8` as value. Any other content type wont be considered and the notification will be discarded.
+
+It is expected UTF-8 character set is maintained by all the Flume elements in the configuration, in order the final sinks (or their backend abstractions, if they exist) compose their writes/inserts/upserts by properly specifying this kind of encoding.
 
 [Top](#top)
 

@@ -39,56 +39,61 @@ public interface OrionBackend {
     /**
      * Subscribe to Orion with a given port, host and string with subscription information (v1).
      * 
-     * @param cygnusSubscription 
+     * @param cygnusSubscription
      * @param token
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV1(String cygnusSubscription, String token) 
-            throws Exception;
+    JsonResponse subscribeContextV1(String cygnusSubscription, String token) throws Exception;
     
     /**
      * Subscribe to Orion with a given port, host and string with subscription information (v2).
      * 
-     * @param cygnusSubscription 
+     * @param cygnusSubscription
      * @param token
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV2(String cygnusSubscription, String token) 
-            throws Exception;
+    JsonResponse subscribeContextV2(String cygnusSubscription, String token) throws Exception;
     
-    /** 
-     * Unsubscribe from Orion with a given subscription id (Orion v1)
+    /**
+     * Unsubscribe from Orion with a given subscription id (v1).
      * 
-     * @param subscriptionId 
+     * @param subscriptionId
      * @param token
      * @throws Exception
      * @return response
      */
-    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token) 
-            throws Exception;
+    JsonResponse deleteSubscriptionV1(String subscriptionId, String token) throws Exception;
     
-    /** 
-     * Unsubscribe from Orion with a given subscription id (Orion v2)
+    /**
+     * Unsubscribe from Orion with a given subscription id (v2).
      * 
-     * @param subscriptionId 
+     * @param subscriptionId
      * @param token
      * @throws Exception
      * @return response
      */
-    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) 
-            throws Exception;
+    JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception;
     
-    /** 
-     * Gets a current subscription with a given subscription id (Orion v2)
+    /**
+     * Gets a current subscription with a given subscription id (v2).
      * 
      * @param token
      * @param subscriptionId
      * @throws Exception
      * @return response
      */
-    public JsonResponse getSubscriptionsByIdV2(String token, 
-            String subscriptionId) throws Exception;
+    JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId) throws Exception;
+    
+    /**
+     * Gets all current subscriptions in the system (v2).
+     * 
+     * @param token
+     * @param subscriptionId
+     * @throws Exception
+     * @return response
+     */
+    JsonResponse getSubscriptionsV2(String token, String subscriptionId) throws Exception;
     
 } // StatsBackend
