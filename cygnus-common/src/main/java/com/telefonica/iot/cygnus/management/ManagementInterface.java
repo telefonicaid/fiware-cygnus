@@ -65,6 +65,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import java.io.FileInputStream;
+import java.util.Properties;
 import org.slf4j.MDC;
 /**
  *
@@ -81,11 +83,11 @@ public class ManagementInterface extends AbstractHandler {
     private final int apiPort;
     private final int guiPort;
     private static int numPoints = 0;
-    private static String sourceRows = "";
+    private static final String sourceRows = "";
     private static String channelRows = "";
-    private static String sinkRows = "";
+    private static final String sinkRows = "";
     private OrionBackendImpl orionBackend;
-
+    
     /**
      * Constructor.
      * @param configurationFile
@@ -142,6 +144,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminLog(response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleGetSubscriptions(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handleGetAdminParameters(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -597,6 +601,34 @@ public class ManagementInterface extends AbstractHandler {
         }
         
     } // handleGetSubscriptions
+    
+    protected void handleGetAdminParameters(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        
+        response.setContentType("json;charset=utf-8");
+        String pathToFile = request.getRequestURI().substring(26);
+        File file = new File(pathToFile);
+                
+        if (file.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(fileInputStream);
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("agent", properties);
+
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : {\n" + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } else {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handleGetAdminParameters
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
