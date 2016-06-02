@@ -153,7 +153,7 @@ Regarding the collection names, the MongoDB collection names will be, depending 
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Storing
-Assuming `data_model=dm-by-entity` as configuration parameter, then `NGSISTHSink` will persist the data within the body as:
+Assuming `data_model=dm-by-entity` and all the possible resolutions as configuration parameters (see section [Configuration](#section2.1) for more details), then `NGSISTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
     MongoDB shell version: 2.6.9
@@ -289,6 +289,7 @@ Assuming `data_model=dm-by-entity` as configuration parameter, then `NGSISTHSink
 | should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
 | collection_prefix | no | sth_ | `system.` is not accepted. |
+| resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -311,6 +312,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
     cygnusagent.sinks.sth-sink.should_hash = false
+    cygnusagent.sinks.sth-sink.resolutions = month,day
     cygnusagent.sinks.sth-sink.batch_size = 100
     cygnusagent.sinks.sth-sink.batch_timeout = 30
     cygnusagent.sinks.sth-sink.batch_ttl = 10
