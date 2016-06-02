@@ -23,12 +23,15 @@ import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
+import org.apache.flume.Context;
 
 /**
  *
  * @author frb
  */
 public class NGSISTHSink extends NGSIMongoBaseSink {
+    
+    protected final boolean[] resolutions = {false, false, false, false, false};
 
     /**
      * Constructor.
@@ -36,6 +39,31 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
     public NGSISTHSink() {
         super();
     } // NGSISTHSink
+    
+    @Override
+    public void configure(Context context) {
+        String resolutionsStr = context.getString("resolutions", "month,day,hour,minute,second");
+        String[] resolutionsArray = resolutionsStr.split(",");
+        
+        for (String resolution : resolutionsArray) {
+            if (resolution.trim().equals("month")) {
+                resolutions[4] = true;
+            } else if (resolution.trim().equals("day")) {
+                resolutions[3] = true;
+            } else if (resolution.trim().equals("hour")) {
+                resolutions[2] = true;
+            } else if (resolution.trim().equals("minute")) {
+                resolutions[1] = true;
+            } else if (resolution.trim().equals("second")) {
+                resolutions[0] = true;
+            } else {
+                LOGGER.warn("[" + this.getName() + "] Unknown resolution " + resolution);
+            } // if else
+        } // for
+        
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (resolutions=" + resolutionsStr + ")");
+        super.configure(context);
+    } // configure
     
     @Override
     public void persistBatch(NGSIBatch batch) throws Exception {
@@ -156,7 +184,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                     + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);
             backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
-                    entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                    entityId, entityType, attrName, attrType, attrValue, attrMetadata, resolutions);
         } // for
     } // persistOne
     
