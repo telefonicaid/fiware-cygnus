@@ -649,14 +649,14 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"Param '" + param + "' not found in the agent\" }"); 
+                        + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
                     return;
                 } // if else
                 
             } // if else
             
             response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : {" + jsonObject + "}");
+                    + "\"result\" : " + jsonObject + "");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
