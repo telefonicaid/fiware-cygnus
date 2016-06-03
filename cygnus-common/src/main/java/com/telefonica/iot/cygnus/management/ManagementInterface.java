@@ -610,20 +610,18 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("json;charset=utf-8");
         boolean allParameters = false;
         
-        String paramName = request.getParameter("param_name");
+        String param = request.getParameter("param");
         
-        if (paramName == null) {
+        if (param == null) {
             allParameters = true;
-        } else if (paramName.equals("")) {
+        } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
                 + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
             LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
             return;
         } // if else
-        
-        System.out.println("paramName: " + paramName); 
-        
+                
         String pathToFile;
         
         if (v1) {
@@ -644,15 +642,14 @@ public class ManagementInterface extends AbstractHandler {
             if (allParameters) {
                 jsonObject.put("agent", properties);
             } else {
-                
-                String property = properties.getProperty(paramName);
+                String property = properties.getProperty(param);
                 
                 if (property != null) {
-                    jsonObject.put(paramName, properties.getProperty(paramName));
+                    jsonObject.put(param, properties.getProperty(param));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"Param '" + paramName + "' not found in the agent\" }"); 
+                        + "\"result\" : { \"Param '" + param + "' not found in the agent\" }"); 
                     return;
                 } // if else
                 
