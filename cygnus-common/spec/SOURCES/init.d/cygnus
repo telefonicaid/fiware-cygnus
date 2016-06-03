@@ -71,7 +71,7 @@ cygnus_start()
             continue
         fi
 
-        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent -p ${ADMIN_PORT} --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME}  -Dflume.log.file=${LOGFILE_NAME} &>> /var/log/cygnus/${LOGFILE_NAME} & echo \$! > ${CYGNUS_PID_FILE}"
+        CYGNUS_COMMAND="${FLUME_EXECUTABLE} agent -p ${ADMIN_PORT} --conf ${CONFIG_FOLDER} -f ${CONFIG_FILE} -n ${AGENT_NAME}  -Dflume.log.file=${LOGFILE_NAME} -Duser.timezone=UTC &>> /var/log/cygnus/${LOGFILE_NAME} & echo \$! > ${CYGNUS_PID_FILE}"
         su ${CYGNUS_USER} -c "${CYGNUS_COMMAND}"
         sleep 2 # wait some time to know if flume is still alive
         PID=$(cat ${CYGNUS_PID_FILE})        
