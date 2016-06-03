@@ -145,7 +145,9 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleGetSubscriptions(request, response);
                 } else if (uri.startsWith("/admin/configuration/agent")) {
-                    handleGetAdminParameters(request, response);
+                    handleGetAdminParameters(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handleGetAdminParameters(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -602,10 +604,18 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleGetSubscriptions
     
-    protected void handleGetAdminParameters(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleGetAdminParameters(HttpServletRequest request, HttpServletResponse response, boolean v1) 
+            throws IOException {
         
         response.setContentType("json;charset=utf-8");
-        String pathToFile = request.getRequestURI().substring(26);
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = request.getRequestURI().substring(29);
+        } else {
+            pathToFile = request.getRequestURI().substring(26);
+        } // if else 
+        
         File file = new File(pathToFile);
                 
         if (file.exists()) {
