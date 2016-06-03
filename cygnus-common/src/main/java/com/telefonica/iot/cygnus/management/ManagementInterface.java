@@ -608,6 +608,22 @@ public class ManagementInterface extends AbstractHandler {
             boolean v1) throws IOException {
         
         response.setContentType("json;charset=utf-8");
+        boolean allParameters = false;
+        
+        String paramName = request.getParameter("param_name");
+        
+        if (paramName == null) {
+            allParameters = true;
+        } else if (paramName.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
+            return;
+        } // if else
+        
+        System.out.println("paramName: " + paramName); 
+        
         String pathToFile;
         
         if (v1) {
@@ -624,10 +640,26 @@ public class ManagementInterface extends AbstractHandler {
             properties.load(fileInputStream);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("agent", properties);
-
+            
+            if (allParameters) {
+                jsonObject.put("agent", properties);
+            } else {
+                
+                String property = properties.getProperty(paramName);
+                
+                if (property != null) {
+                    jsonObject.put(paramName, properties.getProperty(paramName));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"Param '" + paramName + "' not found in the agent\" }"); 
+                    return;
+                } // if else
+                
+            } // if else
+            
             response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : {\n" + jsonObject + "}");
+                    + "\"result\" : {" + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
