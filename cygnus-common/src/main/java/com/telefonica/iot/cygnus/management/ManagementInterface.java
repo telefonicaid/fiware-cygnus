@@ -608,6 +608,20 @@ public class ManagementInterface extends AbstractHandler {
             boolean v1) throws IOException {
         
         response.setContentType("json;charset=utf-8");
+        boolean allParameters = false;
+        
+        String param = request.getParameter("param");
+        
+        if (param == null) {
+            allParameters = true;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
+            return;
+        } // if else
+                
         String pathToFile;
         
         if (v1) {
@@ -624,10 +638,25 @@ public class ManagementInterface extends AbstractHandler {
             properties.load(fileInputStream);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("agent", properties);
-
+            
+            if (allParameters) {
+                jsonObject.put("agent", properties);
+            } else {
+                String property = properties.getProperty(param);
+                
+                if (property != null) {
+                    jsonObject.put(param, properties.getProperty(param));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
+                    return;
+                } // if else
+                
+            } // if else
+            
             response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : {\n" + jsonObject + "}");
+                    + "\"result\" : " + jsonObject + "");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
