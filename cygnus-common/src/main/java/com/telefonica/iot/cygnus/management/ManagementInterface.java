@@ -66,7 +66,11 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.io.FileInputStream;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
+import org.json.simple.JSONArray;
 import org.slf4j.MDC;
 /**
  *
@@ -168,6 +172,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutGroupingRules(request, response);
                 } else if (uri.equals("/admin/log")) {
                     handlePutAdminLog(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1304,6 +1312,73 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Log level missing in the request");
         } // if else
     } // handlePutAdminLog
+    
+    protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = request.getRequestURI().substring(29);
+        } else {
+            pathToFile = request.getRequestURI().substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(pathToFile));
+            properties.put(param, newValue);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + properties.toString() + "");
+            LOGGER.debug(properties.toString());
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+            PrintWriter printWriter = new PrintWriter(file);
+            Enumeration names = properties.propertyNames();
+            Enumeration values = properties.elements();
+            while ((names.hasMoreElements()) && (values.hasMoreElements())) { 
+                String name = (String) names.nextElement();
+                String value = (String) values.nextElement();
+                printWriter.println(name + " = " + value);
+            }
+            printWriter.close();
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePutAdminConfigurationAgent
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
