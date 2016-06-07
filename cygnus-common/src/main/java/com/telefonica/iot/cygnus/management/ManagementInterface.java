@@ -66,11 +66,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.io.FileInputStream;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
-import org.json.simple.JSONArray;
 import org.slf4j.MDC;
 /**
  *
