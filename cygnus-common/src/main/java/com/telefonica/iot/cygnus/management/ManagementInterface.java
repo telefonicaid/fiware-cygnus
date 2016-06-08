@@ -66,6 +66,11 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import org.slf4j.MDC;
 /**
@@ -168,6 +173,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutGroupingRules(request, response);
                 } else if (uri.equals("/admin/log")) {
                     handlePutAdminLog(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1305,6 +1314,69 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutAdminLog
     
+    protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = request.getRequestURI().substring(29);
+        } else {
+            pathToFile = request.getRequestURI().substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            properties.put(param, newValue);
+                        
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("agent", properties);
+            
+            orderedPrinting(properties, file);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePutAdminConfigurationAgent
+    
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -1689,5 +1761,102 @@ public class ManagementInterface extends AbstractHandler {
     protected void setOrionBackend(OrionBackendImpl orionBackend) {
         this.orionBackend = orionBackend;
     } // setOrionBackend
+    
+    /** 
+     * OrderedPrintWriter: Creates a writer with the original order's agent file.
+     * 
+     * @param printWriter
+     * @param properties 
+     */
+    private void orderedPrinting(Properties properties, File file) throws FileNotFoundException {
+                
+        PrintWriter printWriter = new PrintWriter(file);
+        String agentName = "";
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String[] nameParts = name.split("\\.");
+            agentName = nameParts[0];
+            break;
+        } // for
+                
+        ArrayList<String> sourceNames = null;
+        ArrayList<String> channelNames = null;
+        ArrayList<String> sinkNames=  null;
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String value = (String) properties.getProperty(name);
+            
+            if (name.equals(agentName + ".sources")) {
+                sourceNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+            if (name.equals(agentName + ".channels")) {
+                channelNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+            if (name.equals(agentName + ".sinks")) {
+                sinkNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+            printWriter.println();
+            
+        } // for
+        
+        for (String sourceName : sourceNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".sources." + sourceName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+
+        } // for
+        
+        for (String channelName : channelNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".channels." + channelName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+
+        } // for
+        
+        for (String sinkName : sinkNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".sinks." + sinkName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+
+        } // for
+        
+        printWriter.close();
+        
+    } // orderedPrinting
 
 } // ManagementInterface
