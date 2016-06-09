@@ -997,16 +997,15 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            boolean exists = false;
             
             for (Object key: properties.keySet()) {
                 String name = (String) key;
                 
                 if (name.equals(param)) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : { \"Parameter already existing in configuration.\" }");
                     LOGGER.debug("Parameter already existing in configuration.");
-                    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                     return;
                 } // if
                 
@@ -1016,7 +1015,7 @@ public class ManagementInterface extends AbstractHandler {
                         
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("agent", properties);
-            
+                        
             orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
@@ -1885,9 +1884,9 @@ public class ManagementInterface extends AbstractHandler {
                 printWriter.println(name + " = " + value);
             } // if
             
-            printWriter.println();
-            
         } // for
+        
+        printWriter.println();
         
         for (String sourceName : sourceNames) {
             
