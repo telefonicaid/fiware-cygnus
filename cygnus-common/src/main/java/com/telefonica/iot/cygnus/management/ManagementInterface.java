@@ -162,6 +162,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostGroupingRules(request, response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handlePostSubscription(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handlePostAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handlePostAdminConfigurationAgent(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -950,6 +954,82 @@ public class ManagementInterface extends AbstractHandler {
         } // if else if
         
     } // handlePostSubscription
+    
+    protected void handlePostAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = request.getRequestURI().substring(29);
+        } else {
+            pathToFile = request.getRequestURI().substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    jsonObject.put("agent", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    return;
+                } // if
+                
+            } // for
+            
+            properties.put(param, newValue);                       
+            jsonObject.put("agent", properties);                        
+            orderedPrinting(properties, file);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePostAdminConfigurationAgent
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -1803,9 +1883,9 @@ public class ManagementInterface extends AbstractHandler {
                 printWriter.println(name + " = " + value);
             } // if
             
-            printWriter.println();
-            
         } // for
+        
+        printWriter.println();
         
         for (String sourceName : sourceNames) {
             
