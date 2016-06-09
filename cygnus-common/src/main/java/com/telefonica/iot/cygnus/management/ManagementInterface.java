@@ -997,25 +997,24 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
             
             for (Object key: properties.keySet()) {
                 String name = (String) key;
                 
                 if (name.equals(param)) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    jsonObject.put("agent", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : { \"Parameter already existing in configuration.\" }");
-                    LOGGER.debug("Parameter already existing in configuration.");
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
                     return;
                 } // if
                 
             } // for
             
-            properties.put(param, newValue);
-                        
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("agent", properties);
-                        
+            properties.put(param, newValue);                       
+            jsonObject.put("agent", properties);                        
             orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
