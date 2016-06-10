@@ -325,6 +325,12 @@ Invalid path to the agent:
 {"success":"false","result" : { "File not found in the path received" }
 ```
 
+Invalid agent file name:
+
+```
+{"success":"false","error":"Agent file name must start with 'agent_'."}
+```
+
 [Top](#top)
 
 ###<a name="section11.2"></a>`GET` a single parameter
@@ -359,6 +365,12 @@ Parameter not found in the agent:
 
 ```
 {"success":"false","result" : {"Param 'cygnusagent.sinks.mysql-sink.new_parameter' not found in the agent"}
+```
+
+Invalid agent file name:
+
+```
+{"success":"false","error":"Agent file name must start with 'agent_'."}
 ```
 
 [Top](#top)
@@ -397,6 +409,12 @@ Existing value in the agent:
 {"success":"false","result" : {"agent":{"cygnusagent.sinks.mysql-sink.mysql_port":"3306","cygnusagent.channels.mysql-channel.transactionCapacity":"100","cygnusagent.sources.http-source.interceptors.gi.type":"com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder","cygnusagent.sources.http-source.handler.default_service":"def_service","cygnusagent.sources.http-source.interceptors":"ts gi","cygnusagent.sinks.mysql-sink.mysql_host":"localhost","cygnusagent.sources.http-source.type":"org.apache.flume.source.http.HTTPSource","cygnusagent.sources.http-source.handler.default_service_path":"\/def_servpath","cygnusagent.sources.http-source.handler.notification_target":"\/notify","cygnusagent.sinks.mysql-sink.enable_grouping":"true","cygnusagent.sinks.mysql-sink.mysql_password":"","cygnusagent.channels.aux-channel.capacity":"1000","cygnusagent.sources":"http-source","cygnusagent.channels.mysql-channel.capacity":"1000","cygnusagent.sinks.mysql-sink.type":"com.telefonica.iot.cygnus.sinks.NGSIMySQLSink","cygnusagent.sources.http-source.interceptors.ts.type":"timestamp","cygnusagent.channels.aux-channel.type":"memory","cygnusagent.sinks.mysql-sink.batch_timeout":"10","cygnusagent.sources.http-source.port":"5050","cygnusagent.sinks.mysql-sink.mysql_username":"root","cygnusagent.sinks.mysql-sink.batch_size":"1","cygnusagent.sinks.mysql-sink.channel":"mysql-channel","cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file":"\/cygnus\/apache-flume-1.4.0-bin\/conf\/grouping_rules.conf","cygnusagent.channels.mysql-channel.type":"memory","cygnusagent.channels.aux-channel.transactionCapacity":"100","cygnusagent.sources.http-source.channels":"mysql-channel","cygnusagent.sources.http-source.handler.events_ttl":"2","cygnusagent.sources.http-source.handler":"com.telefonica.iot.cygnus.handlers.NGSIRestHandler","cygnusagent.sinks.mysql-sink.data_model":"dm-by-attribute","cygnusagent.sinks.mysql-sink.my_new_param":"my_new_value","cygnusagent.sinks":"mysql-sink","cygnusagent.sinks.mysql-sink.attr_persistence":"row","cygnusagent.channels":"mysql-channel aux-channel"}}}
 ```
 
+Invalid agent file name:
+
+```
+{"success":"false","error":"Agent file name must start with 'agent_'."}
+```
+
 [Top](#top)
 
 ##<a name="section13"></a>`PUT /admin/configuration/agent`
@@ -425,6 +443,12 @@ Invalid path to the agent:
 
 ```
 {"success":"false","result" : { "File not found in the path received" }
+```
+
+Invalid agent file name:
+
+```
+{"success":"false","error":"Agent file name must start with 'agent_'."}
 ```
 
 Below you can see the tested agent after the `PUT` method.
@@ -507,6 +531,12 @@ Parameter not found in the agent:
 
 ```
 {"success":"false","result" : {"agent":{"cygnusagent.sinks.mysql-sink.mysql_port":"3306","cygnusagent.channels.mysql-channel.transactionCapacity":"100","cygnusagent.sinks.mysql-sink.new_parameter":"new_value","cygnusagent.sources.http-source.interceptors.gi.type":"com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder","cygnusagent.sources.http-source.handler.default_service":"def_service","cygnusagent.sources.http-source.interceptors":"ts gi","cygnusagent.sinks.mysql-sink.mysql_host":"localhost","cygnusagent.sources.http-source.type":"org.apache.flume.source.http.HTTPSource","cygnusagent.sources.http-source.handler.default_service_path":"\/def_servpath","cygnusagent.sources.http-source.handler.notification_target":"\/notify","cygnusagent.sinks.mysql-sink.enable_grouping":"true","cygnusagent.sinks.mysql-sink.mysql_password":"","cygnusagent.channels.aux_channel1.capacity":"1000","cygnusagent.sources":"http-source","cygnusagent.channels.mysql-channel.capacity":"1000","cygnusagent.sinks.mysql-sink.type":"com.telefonica.iot.cygnus.sinks.NGSIMySQLSink","cygnusagent.sources.http-source.interceptors.ts.type":"timestamp","cygnusagent.channels.aux_channel1.type":"memory","cygnusagent.sinks.mysql-sink.batch_timeout":"10","cygnusagent.sources.http-source.port":"5050","cygnusagent.sinks.mysql-sink.batch_size":"1","cygnusagent.sinks.mysql-sink.mysql_username":"root","cygnusagent.sinks.mysql-sink.channel":"mysql-channel","cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file":"\/cygnus\/apache-flume-1.4.0-bin\/conf\/grouping_rules.conf","cygnusagent.channels.mysql-channel.type":"memory","cygnusagent.channels.aux_channel1.transactionCapacity":"100","cygnusagent.sources.http-source.channels":"mysql-channel","cygnusagent.sources.http-source.handler.events_ttl":"2","cygnusagent.sources.http-source.handler":"com.telefonica.iot.cygnus.handlers.NGSIRestHandler","cygnusagent.sinks.mysql-sink.data_model":"dm-by-attribute","cygnusagent.sinks":"mysql-sink","cygnusagent.sinks.mysql-sink.attr_persistence":"row","cygnusagent.channels":"mysql-channel aux_channel1"}}}
+```
+
+Invalid agent file name:
+
+```
+{"success":"false","error":"Agent file name must start with 'agent_'."}
 ```
 
 [Top](#top)
