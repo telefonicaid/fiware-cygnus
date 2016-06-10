@@ -410,7 +410,7 @@ PUT "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apa
 There are a second option for `GET` a single parameter, using `/v1/admin/configuration/agent`. Both have the same behaviour, you are free to use either of them.
 
 ```
-PUT "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.new_param&value=new_value"
+PUT "http://<cygnus_host>:<management_port>/v1/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.new_param&value=new_value"
 ```
 
 Responses:
@@ -486,7 +486,7 @@ DELETE "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/
 There are a second option for `DELETE` a single parameter, using `/v1/admin/configuration/agent`. Both have the same behaviour, you are free to use either of them.
 
 ```
-DELETE "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.new_param"
+DELETE "http://<cygnus_host>:<management_port>/v1/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.new_param"
 ```
 
 Responses:
