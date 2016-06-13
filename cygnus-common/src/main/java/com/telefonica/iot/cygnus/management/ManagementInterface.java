@@ -626,6 +626,16 @@ public class ManagementInterface extends AbstractHandler {
         boolean allParameters = false;
         
         String param = request.getParameter("param");
+        String url = request.getRequestURI();     
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
         
         if (param == null) {
             allParameters = true;
@@ -640,9 +650,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if else 
         
         File file = new File(pathToFile);
@@ -963,6 +973,16 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -989,9 +1009,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
@@ -1177,6 +1197,16 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("json;charset=utf-8");
         
         String param = request.getParameter("param");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1195,9 +1225,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
@@ -1472,6 +1502,16 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1498,9 +1538,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
@@ -2010,5 +2050,15 @@ public class ManagementInterface extends AbstractHandler {
         printWriter.close();
         
     } // orderedPrinting
+    
+    /** 
+    * getFileName: Gets the name of the agent from the given path.
+    * 
+    * @param url 
+    */
+    private String getFileName (String url) {
+        String[] pathElements = url.split("/");
+        return pathElements[pathElements.length - 1];
+    } // getFileName
 
 } // ManagementInterface
