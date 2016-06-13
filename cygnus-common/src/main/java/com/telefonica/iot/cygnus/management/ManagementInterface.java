@@ -69,8 +69,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 import org.slf4j.MDC;
 /**
@@ -190,6 +188,10 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteGroupingRules(request, response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleDeleteSubscription(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handleDeleteAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handleDeleteAdminConfigurationAgent(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -624,6 +626,16 @@ public class ManagementInterface extends AbstractHandler {
         boolean allParameters = false;
         
         String param = request.getParameter("param");
+        String url = request.getRequestURI();     
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
         
         if (param == null) {
             allParameters = true;
@@ -638,9 +650,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if else 
         
         File file = new File(pathToFile);
@@ -961,6 +973,16 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -987,9 +1009,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
@@ -1169,6 +1191,86 @@ public class ManagementInterface extends AbstractHandler {
         } // try catch
         
     } // handleDeleteSubscription
+    
+    private void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(29);
+        } else {
+            pathToFile = url.substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
+            boolean paramExists = false;
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    paramExists = true;
+                } // if
+                
+            } // for
+            
+            properties.remove(param);                                           
+            jsonObject.put("agent", properties);                  
+            orderedPrinting(properties, file);
+            
+            response.setStatus(HttpServletResponse.SC_OK); 
+            
+            if (paramExists) {
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : " + jsonObject + "}");
+            } // if else
+            
+            LOGGER.debug(jsonObject);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch    
+        
+    } // handleDeleteAdminConfigurationAgent
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -1400,6 +1502,16 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1426,9 +1538,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
@@ -1938,5 +2050,15 @@ public class ManagementInterface extends AbstractHandler {
         printWriter.close();
         
     } // orderedPrinting
+    
+    /** 
+    * getFileName: Gets the name of the agent from the given path.
+    * 
+    * @param url 
+    */
+    private String getFileName (String url) {
+        String[] pathElements = url.split("/");
+        return pathElements[pathElements.length - 1];
+    } // getFileName
 
 } // ManagementInterface
