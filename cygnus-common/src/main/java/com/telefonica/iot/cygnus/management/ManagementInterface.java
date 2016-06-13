@@ -1197,6 +1197,16 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("json;charset=utf-8");
         
         String param = request.getParameter("param");
+        String url = request.getRequestURI();
+     
+        String fileName = getFileName(url);
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1215,9 +1225,9 @@ public class ManagementInterface extends AbstractHandler {
         String pathToFile;
         
         if (v1) {
-            pathToFile = request.getRequestURI().substring(29);
+            pathToFile = url.substring(29);
         } else {
-            pathToFile = request.getRequestURI().substring(26);
+            pathToFile = url.substring(26);
         } // if
                 
         File file = new File(pathToFile);
