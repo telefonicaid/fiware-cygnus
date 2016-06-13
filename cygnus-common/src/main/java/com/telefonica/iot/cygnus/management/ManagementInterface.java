@@ -626,9 +626,9 @@ public class ManagementInterface extends AbstractHandler {
         boolean allParameters = false;
         
         String param = request.getParameter("param");
-        String url = request.getRequestURI();
-     
+        String url = request.getRequestURI();     
         String fileName = getFileName(url);
+        
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -974,8 +974,8 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-     
         String fileName = getFileName(url);
+        
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -1198,8 +1198,8 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();
-     
         String fileName = getFileName(url);
+        
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
@@ -1503,8 +1503,8 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-     
         String fileName = getFileName(url);
+        
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
