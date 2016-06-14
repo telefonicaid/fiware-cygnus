@@ -119,6 +119,11 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockDeleteSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetAllSubscriptionsV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetAllAgentParameters = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPostOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPutOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockDeleteOneAgentParameter = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -229,7 +234,62 @@ public class ManagementInterfaceTest {
         when(orionBackend.deleteSubscriptionV1(subscriptionDelete, token)).thenReturn(responseDeleteV1);
         when(orionBackend.deleteSubscriptionV2(subscriptionDelete, token)).thenReturn(responseDeleteV2);
         
-} // setUp
+        File fileGetAll;
+        
+        try {
+            fileGetAll = folder.newFile("agent_cygnus_all.conf");
+            PrintWriter out = new PrintWriter(fileGetAll);
+            out.println("cygnusagent.sources = http-source\n" +
+                       "cygnusagent.sinks = mysql-sink\n" +
+                       "cygnusagent.channels = mysql-channel");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        File fileGetOnePutPostDelete;
+        
+        try {
+            fileGetOnePutPostDelete = folder.newFile("agent_cygnus_rest.conf");
+            PrintWriter out = new PrintWriter(fileGetOnePutPostDelete);
+            out.println("cygnusagent.sources = http-source\n" +
+                       "cygnusagent.sinks = mysql-sink\n" +
+                       "cygnusagent.channels = mysql-channel\n" +
+                       "cygnusagent.delete_param = delete_value");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        when(mockGetAllAgentParameters.getMethod()).thenReturn("GET");
+        when(mockGetAllAgentParameters.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetAll.getAbsolutePath());
+        
+        when(mockGetOneAgentParameter.getMethod()).thenReturn("GET");
+        when(mockGetOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.sources");
+        when(mockGetOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockPostOneAgentParameter.getMethod()).thenReturn("POST");
+        when(mockPostOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.put_parameter");
+        when(mockPostOneAgentParameter.getParameter("value")).thenReturn("put_value");
+        when(mockPostOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockPutOneAgentParameter.getMethod()).thenReturn("PUT");
+        when(mockPutOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.post_parameter");
+        when(mockPutOneAgentParameter.getParameter("value")).thenReturn("post_value");
+        when(mockPutOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockDeleteOneAgentParameter.getMethod()).thenReturn("DELETE");
+        when(mockDeleteOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.delete_param");
+        when(mockDeleteOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+    } // setUp
     
     /**
      * Test of handle method, of class ManagementInterface.
@@ -622,5 +682,166 @@ public class ManagementInterfaceTest {
          } // try catch		
          		
      } // testGetMethodsGetsAllSubscriptionsV2
+     
+     /**
+     * [ManagementInterface] -------- 'GET method gets parameters of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsAllAgentConfigurationParameters() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - GET "
+                + "method gets all agent configuration parameters.");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET subscription");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " -  "
+                     + "OK  - All agent configuration parameters obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testGetMethodGetsAllAgentConfigurationParameters
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - GET "
+                + "method gets one agent configuration parameter.");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET subscription");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testGetMethodGetsOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'POST method posts a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostMethodPostOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - POST "
+                + "method post a single parameter in an agent configuration file'.");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePostAdminConfigurationAgent(mockPostOneAgentParameter, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the POST subscription");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter posted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testPostMethodPostOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'PUT method puts a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutMethodPutOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - PUT "
+                + "method puts a single parameter in an agent configuration file.");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePutAdminConfigurationAgent(mockPutOneAgentParameter, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the POST subscription");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter put");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testPutMethodPutOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'DELETE method deletes a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDeleteMethodDeleteOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - DELETE "
+                + "method deletes a single parameter in an agent configuration file'.");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleDeleteAdminConfigurationAgent(mockDeleteOneAgentParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the DELETE subscription");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter deleted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testDeleteMethodDeleteOneAgentConfigurationParameter
     
 } // ManagementInterfaceTest
