@@ -884,7 +884,7 @@ public class ManagementInterfaceTest {
                      + "OK  - An agent configuration file not starting with 'agent_' has been detected");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " - "
-                     + "FAIL - There are some problems with your request");		
+                     + "FAIL - An agent configuration file not starting with 'agent_' has not been detected");		
              throw e;		
          } // try catch	
     
