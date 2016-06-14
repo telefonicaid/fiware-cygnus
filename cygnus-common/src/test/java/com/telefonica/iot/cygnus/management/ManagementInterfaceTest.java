@@ -690,7 +690,7 @@ public class ManagementInterfaceTest {
     @Test
     public void testGetMethodGetsAllAgentConfigurationParameters() throws Exception {
         System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - GET "
-                + "method gets all agent configuration parameters'.");
+                + "method gets all agent configuration parameters.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -722,7 +722,7 @@ public class ManagementInterfaceTest {
     @Test
     public void testGetMethodGetsOneAgentConfigurationParameter() throws Exception {
         System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - GET "
-                + "method gets one agent configuration parameter'.");
+                + "method gets one agent configuration parameter.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -786,7 +786,7 @@ public class ManagementInterfaceTest {
     @Test
     public void testPutMethodPutOneAgentConfigurationParameter() throws Exception {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - PUT "
-                + "method puts a single parameter in an agent configuration file'.");
+                + "method puts a single parameter in an agent configuration file.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
