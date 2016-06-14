@@ -1192,7 +1192,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleDeleteSubscription
     
-    private void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
+    protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         response.setContentType("json;charset=utf-8");
         
