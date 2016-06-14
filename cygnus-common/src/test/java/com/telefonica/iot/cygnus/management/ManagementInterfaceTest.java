@@ -309,7 +309,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testHandle() {
-        System.out.println(getTestTraceHead("[ManagementInterface.handle]") + " -  Testing ManagementInterface.handle");        
+        System.out.println(getTestTraceHead("[ManagementInterface.handle]") + " - Testing ManagementInterface.handle");        
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         
         try {
@@ -330,7 +330,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method posts a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
                 + "valid subscription (ngsi_version = 1).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -345,7 +345,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - Valid "
                     + "subscription");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid "
@@ -361,7 +361,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method posts a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
                 + "valid subscription (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -370,14 +370,14 @@ public class ManagementInterfaceTest {
         try {
             managementInterface.handlePostSubscription(mockRequestV2, responseWrapper);
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - Valid "
                     + "subscription");
             throw e;
         } // try catch
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - Valid "
                     + "subscription");        
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid "
@@ -393,7 +393,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method doesn't "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
                 + "find a subscription (ngsi_version = 1).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -408,7 +408,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription not found");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -424,7 +424,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method doesn't "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
                 + "find a subscription (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -439,7 +439,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription not found");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -455,7 +455,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method post a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with empty fields (ngsi_version = 1).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -470,7 +470,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription has empty fields");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -486,7 +486,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method post a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with empty fields (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -501,7 +501,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription has empty fields");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -517,7 +517,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method post a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with missing fields (ngsi_version = 1).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -532,7 +532,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription has missing fields");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -548,7 +548,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  POST method post a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with missing fields (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -563,7 +563,7 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - OK  - "
                     + "Subscription has missing fields");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
@@ -579,7 +579,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  DELETE method "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
                 + "deletes a subscription (ngsi_version = 1).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -594,7 +594,7 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - OK  - "
                     + "Subscription deleted");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - "
@@ -610,7 +610,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  DELETE method "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
                 + "deletes a subscription (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -625,7 +625,7 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - OK  - "
                     + "Subscription deleted");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - "
@@ -641,7 +641,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testGetMethodsGetsASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  GET method gets a "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets a "
                 + "subscription (ngsi_version = 2).");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -656,7 +656,7 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - "
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - OK  - "
                     + "Subscription obtained");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - There are "
@@ -672,7 +672,7 @@ public class ManagementInterfaceTest {
       */		
      @Test		
      public void testGetMethodsGetsAllSubscriptionsV2() throws Exception {		
-         System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  GET method gets "
+         System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets "
                  + "all subscriptions (ngsi_version = 2).");	         
          StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);		
          ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);		
@@ -687,7 +687,7 @@ public class ManagementInterfaceTest {
                  		
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - "
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - OK  - "
                      + "Subscription obtained");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - "
@@ -703,7 +703,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testGetMethodGetsAllAgentConfigurationParameters() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " -  GET "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - GET "
                 + "method gets all agent configuration parameters.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
@@ -719,7 +719,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - "
                      + "OK  - All agent configuration parameters obtained");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - "
@@ -735,7 +735,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testGetMethodGetsOneAgentConfigurationParameter() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " -  GET "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - GET "
                 + "method gets one agent configuration parameter.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
@@ -751,7 +751,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - "
                      + "OK  - Agent configuration parameter obtained");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - "
@@ -767,7 +767,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostOneAgentConfigurationParameter() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " -  POST "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - POST "
                 + "method post a single parameter in an agent configuration file'.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
@@ -783,7 +783,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - "
                      + "OK  - Agent configuration parameter posted");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - "
@@ -799,7 +799,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPutMethodPutOneAgentConfigurationParameter() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " -  PUT "
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - PUT "
                 + "method puts a single parameter in an agent configuration file.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
@@ -815,7 +815,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - "
                      + "OK  - Agent configuration parameter put");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - "
@@ -831,7 +831,7 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodDeleteOneAgentConfigurationParameter() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " -  DELETE "
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - DELETE "
                 + "method deletes a single parameter in an agent configuration file'.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
@@ -848,7 +848,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - "
                      + "OK  - Agent configuration parameter deleted");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - "
@@ -865,7 +865,7 @@ public class ManagementInterfaceTest {
     @Test
     public void testAgentBadConfigurationFileName() throws Exception {
         System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") +
-                  " -  Agent configuration doesn't start with 'agent_'.");
+                  " - Agent configuration doesn't start with 'agent_'.");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
@@ -880,7 +880,7 @@ public class ManagementInterfaceTest {
          
          try {		
              assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());		
-             System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " -  "
+             System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " - "
                      + "OK  - An agent configuration file not starting with 'agent_' has been detected");		
          } catch (AssertionError e) {		
              System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " - "
