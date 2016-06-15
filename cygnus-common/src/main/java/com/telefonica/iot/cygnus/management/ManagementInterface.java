@@ -726,7 +726,6 @@ public class ManagementInterface extends AbstractHandler {
             pathToFile = url.substring(29);
         } // if else 
         
-        System.out.println("PATHTOFILE: " + pathToFile);
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
