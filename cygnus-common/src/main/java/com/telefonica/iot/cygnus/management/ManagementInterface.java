@@ -151,6 +151,10 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationAgent(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/agent")) {
                     handleGetAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handleGetAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handleGetAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -693,6 +697,81 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handleGetAdminParameters
+    
+    protected void handleGetAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        
+        response.setContentType("json;charset=utf-8");
+        boolean allParameters = false;
+        
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();     
+        String fileName = getFileName(url);
+        
+        if (param == null) {
+            allParameters = true;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if else 
+        
+        System.out.println("PATHTOFILE: " + pathToFile);
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+        
+        File file = new File(pathToFile);
+                
+        if (file.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(fileInputStream);
+
+            JSONObject jsonObject = new JSONObject();
+            
+            if (allParameters) {
+                jsonObject.put("instance", properties);
+            } else {
+                String property = properties.getProperty(param);
+                
+                if (property != null) {
+                    jsonObject.put(param, properties.getProperty(param));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : {\"Param '" + param + "' not found in the instance\"}"); 
+                    return;
+                } // if else
+                
+            } // if else
+            
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } else {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handleGetAdminConfigurationInstance
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
