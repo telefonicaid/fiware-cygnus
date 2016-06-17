@@ -232,14 +232,14 @@ public class ManagementInterface extends AbstractHandler {
     } // handle
 
     private void handleGetVersion(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
                 + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
 
     private void handleGetStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         String jsonStr = "{\"success\":\"true\",\"stats\":{\"sources\":[";
         boolean first = true;
@@ -373,7 +373,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetStats
 
     private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
@@ -397,7 +397,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetGroupingRules
     
     private void handleGetAdminLog(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         try {
             Level level = LogManager.getRootLogger().getLevel();
@@ -437,7 +437,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // flag for use get all or get one subscription
         boolean getAllSubscriptions = false;
@@ -632,7 +632,7 @@ public class ManagementInterface extends AbstractHandler {
     protected void handleGetAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
@@ -707,7 +707,7 @@ public class ManagementInterface extends AbstractHandler {
     protected void handleGetAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
@@ -778,7 +778,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetAdminConfigurationInstance
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -871,7 +871,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePostGroupingRules
 
     protected void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         
         // read the new rule wanted to be added
@@ -1052,7 +1052,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePostAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
@@ -1138,7 +1138,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param").toUpperCase();
         String newValue = request.getParameter("value");
@@ -1214,7 +1214,7 @@ public class ManagementInterface extends AbstractHandler {
             
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\" : {\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else    
@@ -1222,7 +1222,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePostAdminConfigurationInstance
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
@@ -1362,7 +1362,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();
@@ -1441,7 +1441,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleDeleteAdminConfigurationAgent
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         for (String key : sources.keySet()) {
             Source source;
@@ -1522,7 +1522,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutStats
 
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -1621,7 +1621,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutGroupingRules
     
     private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
@@ -1666,7 +1666,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
@@ -1739,7 +1739,7 @@ public class ManagementInterface extends AbstractHandler {
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // get the rule ID to be deleted
         long id = new Long(request.getParameter("id"));
@@ -1808,7 +1808,7 @@ public class ManagementInterface extends AbstractHandler {
     } // getGroupingRulesConfFile
 
     private void handleGetGUI(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
         String indexJSP = "";
@@ -1838,7 +1838,7 @@ public class ManagementInterface extends AbstractHandler {
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cygnusChannel = (CygnusChannel) channel;
                 point += "," + cygnusChannel.getNumEvents();
-            } // if
+            } // if12
         } // for
 
         point += "]";
@@ -1856,7 +1856,7 @@ public class ManagementInterface extends AbstractHandler {
         numPoints++;
 
         // return the points
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println(
                 "{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":[" + sourceRows + "]},"
