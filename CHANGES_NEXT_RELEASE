@@ -4,3 +4,4 @@
 - [cygnus-common] [hardening] Add /admin/configuration/agent/path/to/agent.conf route to API (#893)
 - [cygnus-common] [hardening] Add /admin/configuration/instance/path/to/instance.conf route to API (#894)
 - [cygnus-twitter] [feature] Log time in UTC format (#1071)
+- [cygnus-twitter] Add documentation about logs and alarms (#1092)
