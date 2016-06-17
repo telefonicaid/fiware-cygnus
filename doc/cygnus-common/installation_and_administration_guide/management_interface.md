@@ -639,10 +639,16 @@ PUT "http://<cygnus_host>:<management_port>/v1/admin/configuration/instance/usr/
 
 Responses:
 
-Valid path to the agent configuration file:
+Valid path to the instance configuration file. Adding `NEW_PARAM` with value `old_value`:
 
 ```
-{"success":"true","result" : {"agent":{"cygnusagent.sinks.mysql-sink.mysql_port":"3306","cygnusagent.channels.mysql-channel.transactionCapacity":"100","cygnusagent.sources.http-source.interceptors.gi.type":"com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder","cygnusagent.sources.http-source.handler.default_service":"def_service","cygnusagent.sources.http-source.interceptors":"ts gi","cygnusagent.sinks.mysql-sink.mysql_host":"localhost","cygnusagent.sources.http-source.type":"org.apache.flume.source.http.HTTPSource","cygnusagent.sources.http-source.handler.default_service_path":"\/def_servpath","cygnusagent.sources.http-source.handler.notification_target":"\/notify","cygnusagent.sinks.mysql-sink.enable_grouping":"true","cygnusagent.sinks.mysql-sink.mysql_password":"","cygnusagent.channels.aux_channel1.capacity":"1000","cygnusagent.sources":"http-source","cygnusagent.channels.mysql-channel.capacity":"1000","cygnusagent.sinks.mysql-sink.type":"com.telefonica.iot.cygnus.sinks.NGSIMySQLSink","cygnusagent.sources.http-source.interceptors.ts.type":"timestamp","cygnusagent.channels.aux_channel1.type":"memory","cygnusagent.sinks.mysql-sink.batch_timeout":"10","cygnusagent.sources.http-source.port":"5050","cygnusagent.sinks.mysql-sink.mysql_username":"root","cygnusagent.sinks.mysql-sink.batch_size":"1","cygnusagent.sinks.mysql-sink.channel":"mysql-channel","cygnusagent.channels.aux_channel2.type":"memory","cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file":"\/cygnus\/apache-flume-1.4.0-bin\/conf\/grouping_rules.conf","cygnusagent.channels.mysql-channel.type":"memory","cygnusagent.channels.aux_channel1.transactionCapacity":"100","cygnusagent.sources.http-source.channels":"mysql-channel","cygnusagent.sources.http-source.handler.events_ttl":"2","cygnusagent.sources.http-source.handler":"com.telefonica.iot.cygnus.handlers.NGSIRestHandler","cygnusagent.channels.aux_channel2.transactionCapacity":"100","cygnusagent.channels.aux_channel2.capacity":"1000","cygnusagent.sinks.mysql-sink.data_model":"dm-by-attribute","cygnusagent.sinks":"mysql-sink","cygnusagent.sinks.mysql-sink.attr_persistence":"row","cygnusagent.channels":"mysql-channel aux_channel1 aux_channel2"}}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"old_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+```
+
+Valid path to the instance configuration file. Updating `NEW_PARAM` with value `new_value`:
+
+```
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"new_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
 ```
 
 Invalid path to the instance configuration file:
@@ -651,56 +657,60 @@ Invalid path to the instance configuration file:
 {"success":"false","result" : {"Invalid path for a instance configuration file"}
 ```
 
-Invalid agent configuration file name:
+Instance configuration file not found:
 
 ```
-{"success":"false","error":"Agent file name must start with 'agent_'."}
+{"success":"false","result" : {"File not found in the path received"}
 ```
 
-Below you can see the tested agent configuration file after the `PUT` method.
+Below you can see the tested instance configuration file after the `PUT` method.
 
 ```
-cygnusagent.sources = http-source
-cygnusagent.sinks = mysql-sink
-cygnusagent.channels = mysql-channel aux_channel1 aux_channel2
+#####
+#
+# Configuration file for apache-flume
+#
+#####
+# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FI-WARE project).
+#
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-cygnusagent.sources.http-source.handler.default_service = def_service
-cygnusagent.sources.http-source.interceptors = ts gi
-cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
-cygnusagent.sources.http-source.handler.default_service_path = /def_servpath
-cygnusagent.sources.http-source.handler.notification_target = /notify
-cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.port = 5050
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /cygnus/apache-flume-1.4.0-bin/conf/grouping_rules.conf
-cygnusagent.sources.http-source.channels = mysql-channel
-cygnusagent.sources.http-source.handler.events_ttl = 2
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+# Which is the config file
+CONFIG_FILE=/usr/cygnus/conf/agent.conf
 
-cygnusagent.channels.mysql-channel.transactionCapacity = 100
-cygnusagent.channels.mysql-channel.capacity = 1000
-cygnusagent.channels.mysql-channel.type = memory
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters
+# naming conventions, e.g. it appears in .sources.http-source.channels=...
+AGENT_NAME=cygnusagent
 
-cygnusagent.channels.aux_channel1.capacity = 1000
-cygnusagent.channels.aux_channel1.type = memory
-cygnusagent.channels.aux_channel1.transactionCapacity = 100
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081
 
-cygnusagent.channels.aux_channel2.type = memory
-cygnusagent.channels.aux_channel2.transactionCapacity = 100
-cygnusagent.channels.aux_channel2.capacity = 1000
+# Where is the config folder
+CONFIG_FOLDER=/usr/cygnus/conf
 
-cygnusagent.sinks.mysql-sink.mysql_port = 3306
-cygnusagent.sinks.mysql-sink.mysql_host = localhost
-cygnusagent.sinks.mysql-sink.enable_grouping = true
-cygnusagent.sinks.mysql-sink.mysql_password =
-cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
-cygnusagent.sinks.mysql-sink.batch_timeout = 10
-cygnusagent.sinks.mysql-sink.mysql_username = root
-cygnusagent.sinks.mysql-sink.batch_size = 1
-cygnusagent.sinks.mysql-sink.channel = mysql-channel
-cygnusagent.sinks.mysql-sink.new_parameter = new_value
-cygnusagent.sinks.mysql-sink.data_model = dm-by-attribute
-cygnusagent.sinks.mysql-sink.attr_persistence = row
+OLD_CONFIG=true
+
+# Name of the logfile located at /var/log/cygnus. It is important to putthe extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+
+# Who to run cygnus as. Note that you may need to use root if you want
+# to run cygnus in a privileged port (<1024)
+CYGNUS_USER=cygnus
+
+# Polling interval (seconds) for the configuration reloading
+POLLING_INTERVAL=30
 ```
 
 [Top](#top)
