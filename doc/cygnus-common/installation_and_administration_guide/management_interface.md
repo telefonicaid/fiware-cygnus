@@ -12,18 +12,21 @@ Content:
 * [GET `/admin/log`](#section9)
 * [PUT `/admin/log`](#section10)
 * [GET `/admin/configuration`](#section11)
-  * [GET all paramters](#section11.1)
+  * [GET all parameters](#section11.1)
   * [GET a single parameter](#section11.2)
 * [POST `/admin/configuration/agent`](#section12)
 * [PUT `/admin/configuration/agent`](#section13)
 * [DELETE `/admin/configuration/agent`](#section14)
-* [POST `/v1/subscriptions`](#section15)
-  * [`NGSI Version 1`](#section15.1)
-  * [`NGSI Version 2`](#section15.2)
-* [DELETE `/v1/subscriptions`](#section16)
-* [GET `/v1/subscriptions`](#section17)
-  * [GET subscription by ID](#section17.1)
-  * [GET all subscriptions](#section17.2)
+* [GET `/admin/configuration/instance`](#section15)
+  * [GET all parameters](#section15.1)
+  * [GET a single parameter](#section15.2)
+* [POST `/v1/subscriptions`](#section16)
+  * [`NGSI Version 1`](#section16.1)
+  * [`NGSI Version 2`](#section16.2)
+* [DELETE `/v1/subscriptions`](#section17)
+* [GET `/v1/subscriptions`](#section18)
+  * [GET subscription by ID](#section18.1)
+  * [GET all subscriptions](#section18.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -341,7 +344,7 @@ Gets a single parameter from an agent given the path to the configuration file a
 GET "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf&param=<param_name>"
 ```
 
-There are a second option for `GET` a single parameter, using `/v1/admin/configuration/agent`. Both have the same behaviour, you are free to use either of them.
+NOTE: Using the `/v1/admin/configuration/agent` path behaves the same way.
 
 ```
 GET "http://<cygnus_host>:<management_port>/v1/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf&param=<param_name>"
@@ -383,7 +386,7 @@ Posts a single parameter if it doesn't exist in the agent given the path to the 
 POST "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.my_new_param&value=my_new_value"
 ```
 
-There are a second option for `GET` a single parameter, using `/v1/admin/configuration/agent`. Both have the same behaviour, you are free to use either of them.
+NOTE: Using the `/v1/admin/configuration/agent` path behaves the same way.
 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.my_new_param&value=my_new_value"
@@ -425,7 +428,7 @@ Puts a single parameter if it doesn't exist or update it if already exists in th
 PUT "http://<cygnus_host>:<management_port>/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.my_new_param&value=my_new_value"
 ```
 
-There are a second option for `GET` a single parameter, using `/v1/admin/configuration/agent`. Both have the same behaviour, you are free to use either of them.
+NOTE: Using the `/v1/admin/configuration/agent` path behaves the same way.
 
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/configuration/agent/cygnus/apache-flume-1.4.0-bin/conf/agent_cygnus.conf?param=cygnusagent.sinks.mysql-sink.new_param&value=new_value"
@@ -541,8 +544,86 @@ Invalid agent configuration file name:
 
 [Top](#top)
 
-##<a name="section15"></a>`POST /v1/subscriptions`
-###<a name="section15.1"></a> `NGSI Version 1`
+##<a name="section15"></a>`GET /admin/configuration/instance`
+###<a name="section15.1"></a>`GET` all parameters
+
+Gets all the parameters from an instance given the path to the configuration file as the URI within the URL. The path to the instance must be with `/usr/cygnus/conf`.
+
+```
+GET "http://<cygnus_host>:<management_port>/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf"
+```
+
+NOTE: Using the `/v1/admin/configuration/instance` path behaves the same way.
+
+```
+GET "http://<cygnus_host>:<management_port>/v1/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf"
+```
+
+Responses:
+
+Valid path to the instance configuration file:
+```
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}
+```
+
+Invalid path to the instance configuration file:
+
+```
+{"success":"false","result" : {"Invalid path for a instance configuration file"}
+```
+
+Instance configuration file not found:
+
+```
+{"success":"false","result" : {"File not found in the path received"}
+```
+
+[Top](#top)
+
+###<a name="section15.2"></a>`GET` a single parameter
+
+Gets a single parameter from an instance given the path to the configuration file as the URI within the URL and the name of the parameter as a query parameter. The path to the instance must be with `/usr/cygnus/conf`.
+
+```
+GET "http://<cygnus_host>:<management_port>/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>"
+```
+
+NOTE: Using the `/v1/admin/configuration/instance` path behaves the same way.
+
+```
+GET "http://<cygnus_host>:<management_port>/v1/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>"
+```
+
+Responses:
+
+Valid path to the instance configuration file:
+
+```
+{"success":"true","result" : {"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf"}
+```
+
+Invalid path to the instance configuration file:
+
+```
+{"success":"false","result" : {"Invalid path for a instance configuration file"}
+```
+
+Parameter not found in the instance configuration file:
+
+```
+{"success":"false","result" : {"Param 'CONFIG_FOLDER_FILE' not found in the instance"}
+```
+
+Instance configuration file not found:
+
+```
+{"success":"false","result" : {"File not found in the path received"}
+```
+
+[Top](#top)
+
+##<a name="section16"></a>`POST /v1/subscriptions`
+###<a name="section16.1"></a> `NGSI Version 1`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -603,7 +684,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-###<a name="section15.2"></a> `NGSI Version 2`
+###<a name="section16.2"></a> `NGSI Version 2`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=2` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -675,7 +756,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-##<a name="section16"></a>`DELETE /v1/subscriptions`
+##<a name="section17"></a>`DELETE /v1/subscriptions`
 
 Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
@@ -730,8 +811,8 @@ Missing fields (empty or not given):
 
 [Top](#top)
 
-##<a name="section17"></a>`GET /v1/subscriptions`
-###<a name="section17.1"></a> GET subscription by ID
+##<a name="section18"></a>`GET /v1/subscriptions`
+###<a name="section18.1"></a> GET subscription by ID
 
 Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
 
@@ -776,7 +857,7 @@ Missing or empty parameters:
 
 [Top](#top)
 
-###<a name="section17.2"></a> GET all subscriptions
+###<a name="section18.2"></a> GET all subscriptions
 
 Gets all existent subscriptions from Orion, given the NGSI version as a query parameter.
 
