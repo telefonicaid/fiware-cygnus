@@ -69,6 +69,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.MDC;
 /**
@@ -168,6 +170,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostAdminConfigurationAgent(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/agent")) {
                     handlePostAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, true); 
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1129,6 +1135,91 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handlePostAdminConfigurationAgent
+    
+    protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param").toUpperCase();
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    jsonObject.put("instance", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    return;
+                } // if
+                
+            } // for
+            
+            properties.put(param, newValue);                       
+            jsonObject.put("instance", properties);                        
+            instancePrinting(properties, file);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePostAdminConfigurationInstance
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -2128,6 +2219,55 @@ public class ManagementInterface extends AbstractHandler {
         
     } // orderedPrinting
     
+    private void instancePrinting (Properties properties, File file) throws FileNotFoundException {
+        
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.println("#####\n" 
+                    +  "#\n" 
+                    +  "# Configuration file for apache-flume\n" 
+                    +  "#\n" 
+                    +  "#####\n" 
+                    +  "# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U\n" 
+                    +  "# \n" 
+                    +  "# This file is part of fiware-cygnus (FI-WARE project).\n" 
+                    +  "# \n" 
+                    +  "# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of "
+                    + "the GNU Affero General\n" 
+                    +  "# Public License as published by the Free Software Foundation, either version 3 of the License,"
+                    + " or (at your option) any\n" 
+                    +  "# later version.\n" 
+                    +  "# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; "
+                    + "without even the implied\n" 
+                    +  "# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General "
+                    + "Public License for more\n" 
+                    +  "# details.\n" 
+                    +  "# \n" 
+                    +  "# You should have received a copy of the GNU Affero General Public License along with "
+                    + "fiware-cygnus. If not, see\n" 
+                    +  "# http://www.gnu.org/licenses/.\n" 
+                    +  "# \n" 
+                    +  "# For those usages not covered by the GNU Affero General Public License please contact with "
+                    + "iot_support at tid dot es\n");
+
+        Map<String, String> descriptions = getDescriptionsMap();
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String value = (String) properties.getProperty(name);
+            
+            if (descriptions.containsKey(name)) {
+                String description = (String) descriptions.get(name);
+                printWriter.println(description);
+            } // if 
+            
+            printWriter.println(name + "=" + value);
+            printWriter.println();
+        } // for
+        
+        printWriter.close();
+        
+    } // instancePrinting
+    
     /** 
     * getFileName: Gets the name of the agent from the given path.
     * 
@@ -2137,5 +2277,27 @@ public class ManagementInterface extends AbstractHandler {
         String[] pathElements = url.split("/");
         return pathElements[pathElements.length - 1];
     } // getFileName
+    
+    /**
+     * getDescriptionsMap: return a map with basic descriptions in a instance configuration file.
+     * 
+     */
+    private Map<String,String> getDescriptionsMap () {
+        
+        Map<String, String> descriptions = new HashMap<String, String>();
+        descriptions.put("CYGNUS_USER", "# Who to run cygnus as. Note that you may need to use root if you want\n" 
+                                        + "# to run cygnus in a privileged port (<1024)");
+        descriptions.put("CONFIG_FOLDER", "# Where is the config folder");
+        descriptions.put("CONFIG_FILE", "# Which is the config file");
+        descriptions.put("AGENT_NAME", "# Name of the agent. The name of the agent is not trivial, since it is the "
+                                        + "base for the Flume parameters \n# naming conventions, e.g. it appears "
+                                        + "in .sources.http-source.channels=...");
+        descriptions.put("LOGFILE_NAME", "# Name of the logfile located at /var/log/cygnus. It is important to put"
+                                        + "the extension '.log' in order to the log rotation works properly");
+        descriptions.put("ADMIN_PORT", "# Administration port. Must be unique per instance");
+        descriptions.put("POLLING_INTERVAL", "# Polling interval (seconds) for the configuration reloading");
+        return descriptions;
+        
+    } // getDescriptionMap
 
 } // ManagementInterface
