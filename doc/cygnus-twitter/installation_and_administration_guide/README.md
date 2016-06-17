@@ -9,4 +9,5 @@
 * Running:
     * [Running from cmd](./running.md)
 * [Testing](./testing.md)
+* [Logs and alarm](./logs_and_alarms.md)
 * [Reporting issues and contact information](./issues_and_contact.md)
