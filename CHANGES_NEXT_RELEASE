@@ -2,3 +2,4 @@
 - [cygnus-ngsi] [hardening] Do configurable the accepted resolutions in NGSISTHSink (#940)
 - [cygnus-ngsi] [feature] Log time in UTC format (#1071)
 - [cygnus-common] [hardening] Add /admin/configuration/agent/path/to/agent.conf route to API (#893)
+- [cygnus-common] [hardening] Add /admin/configuration/instance/path/to/instance.conf route to API (#894)
