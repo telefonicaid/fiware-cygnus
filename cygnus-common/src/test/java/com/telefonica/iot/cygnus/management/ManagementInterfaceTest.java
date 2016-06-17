@@ -40,6 +40,8 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -85,6 +87,9 @@ public class ManagementInterfaceTest {
 
     } // StatusExposingServletResponse
     
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+    
     // mocks
     @Mock
     protected HttpServletRequest mockRequest;
@@ -100,6 +105,7 @@ public class ManagementInterfaceTest {
     private final String deleteURIv1 = "/v1/subscriptions?ngsi_version=1&subscription_id=12345";
     private final String deleteURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
     private final String getURIv2 = "/v1/subscriptions?ngsi_version=2&subscription_id=12345";
+    private final String getAllURIv2 = "/v1/subscriptions?ngsi_version=2";
     private final HttpServletResponse response = mock(HttpServletResponse.class);
     private final HttpServletRequest mockRequestV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockRequestV2 = mock(HttpServletRequest.class);
@@ -112,7 +118,13 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockDeleteSubscriptionV1 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteSubscriptionV2 = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetSubscriptionV2 = mock(HttpServletRequest.class);
-    
+    private final HttpServletRequest mockGetAllSubscriptionsV2 = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetAllAgentParameters = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPostOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPutOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockDeleteOneAgentParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockRequestBadFileName = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -132,7 +144,7 @@ public class ManagementInterfaceTest {
         String subsEmptyfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"expires\": \"\",\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subsV2MissingfieldV2 = "{\"subscription\":{\"description\": \"One subscription to rule them all\",\"subject\": {\"entities\": [{\"idPattern\": \".*\",\"type\": \"Room\"}],\"condition\": {\"attrs\": [\"temperature\"],\"expression\": {\"q\": \"temperature>40\"}}},\"notification\": {\"http\": {\"url\": \"http://localhost:1234\"},\"attrs\": [\"temperature\",\"humidity\"]},\"throttling\": 5}, \"endpoint\":{\"host\":\"orion.lab.fiware.org\", \"port\":\"1026\", \"ssl\":\"false\", \"xauthtoken\":\"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}}";
         String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
-        String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";        
+        String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
         
         // Define the readers with the subscriptions 
@@ -213,19 +225,91 @@ public class ManagementInterfaceTest {
         when(mockGetSubscriptionV2.getParameter("ngsi_version")).thenReturn("2");
         when(mockGetSubscriptionV2.getParameter("subscription_id")).thenReturn("12345");
         
+        when(mockGetAllSubscriptionsV2.getRequestURI()).thenReturn(getAllURIv2);		
+        when(mockGetAllSubscriptionsV2.getMethod()).thenReturn("GET");		
+        when(mockGetAllSubscriptionsV2.getReader()).thenReturn(readerGetSubscription);		
+        when(mockGetAllSubscriptionsV2.getParameter("ngsi_version")).thenReturn("2");
+        
         when(response.getWriter()).thenReturn(writer);
         
         when(orionBackend.deleteSubscriptionV1(subscriptionDelete, token)).thenReturn(responseDeleteV1);
         when(orionBackend.deleteSubscriptionV2(subscriptionDelete, token)).thenReturn(responseDeleteV2);
         
-} // setUp
+        File fileGetAll;
+        
+        try {
+            fileGetAll = folder.newFile("agent_cygnus_all.conf");
+            PrintWriter out = new PrintWriter(fileGetAll);
+            out.println("cygnusagent.sources = http-source\n" +
+                       "cygnusagent.sinks = mysql-sink\n" +
+                       "cygnusagent.channels = mysql-channel");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        File fileGetOnePutPostDelete;
+        
+        try {
+            fileGetOnePutPostDelete = folder.newFile("agent_cygnus_rest.conf");
+            PrintWriter out = new PrintWriter(fileGetOnePutPostDelete);
+            out.println("cygnusagent.sources = http-source\n" +
+                       "cygnusagent.sinks = mysql-sink\n" +
+                       "cygnusagent.channels = mysql-channel\n" +
+                       "cygnusagent.delete_param = delete_value");
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        File fileBadFileName;
+        
+        try {
+            fileBadFileName = folder.newFile("cygnus_agent.conf");
+        } catch (IOException e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        when(mockGetAllAgentParameters.getMethod()).thenReturn("GET");
+        when(mockGetAllAgentParameters.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetAll.getAbsolutePath());
+        
+        when(mockGetOneAgentParameter.getMethod()).thenReturn("GET");
+        when(mockGetOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.sources");
+        when(mockGetOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockPostOneAgentParameter.getMethod()).thenReturn("POST");
+        when(mockPostOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.put_parameter");
+        when(mockPostOneAgentParameter.getParameter("value")).thenReturn("put_value");
+        when(mockPostOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockPutOneAgentParameter.getMethod()).thenReturn("PUT");
+        when(mockPutOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.post_parameter");
+        when(mockPutOneAgentParameter.getParameter("value")).thenReturn("post_value");
+        when(mockPutOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockDeleteOneAgentParameter.getMethod()).thenReturn("DELETE");
+        when(mockDeleteOneAgentParameter.getParameter("param")).thenReturn("cygnusagent.delete_param");
+        when(mockDeleteOneAgentParameter.getRequestURI()).thenReturn("/admin/configuration/agent/" 
+                    + fileGetOnePutPostDelete.getAbsolutePath());
+        
+        when(mockRequestBadFileName.getMethod()).thenReturn("GET");
+        when(mockRequestBadFileName.getRequestURI()).thenReturn("/admin/configuration/agent/"
+                    + fileBadFileName.getAbsolutePath());
+        
+    } // setUp
     
     /**
      * Test of handle method, of class ManagementInterface.
      */
     @Test
     public void testHandle() {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- Testing ManagementInterface.handle");
+        System.out.println(getTestTraceHead("[ManagementInterface.handle]") + " - Testing ManagementInterface.handle");        
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         
         try {
@@ -246,7 +330,8 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
+                + "valid subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
@@ -260,9 +345,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+                    + "subscription");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid "
+                    + "subscription");
             throw e;
         } // try catch
         
@@ -274,7 +361,8 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testPostMethodPostAValidSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method posts a valid subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
+                + "valid subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
@@ -282,15 +370,18 @@ public class ManagementInterfaceTest {
         try {
             managementInterface.handlePostSubscription(mockRequestV2, responseWrapper);
         } catch (Exception e) {
-            System.out.println("There was some problem when handling the POST subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+                    + "subscription");
             throw e;
         } // try catch
         
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Valid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - Valid "
+                    + "subscription");        
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - Invalid "
+                    + "subscription");
             throw e;
         } // try catch
         
@@ -298,10 +389,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method doesn't find a subscription (ngsi_version = 1)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
+                + "find a subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -315,9 +408,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription not found");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -325,10 +420,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method doesn't find a subscription (ngsi_version = 2)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasNotSubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method doesn't find a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
+                + "find a subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -342,9 +439,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription not found");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription not found");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -352,10 +451,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method post a subscription with any empty field (ngsi_version = 1)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
+                + "subscription with empty fields (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -369,9 +470,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription has empty fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -379,10 +482,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method post a subscription with any empty field (ngsi_version = 2)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasEmptyFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with empty fields (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
+                + "subscription with empty fields (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -396,9 +501,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has empty fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription has empty fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -406,10 +513,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method post a subscription with any missing field (ngsi_version = 1)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
+                + "subscription with missing fields (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -423,9 +532,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription has missing fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -433,10 +544,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'POST method post a subscription with any missing field (ngsi_version = 2)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPostMethodPostHasMissingFieldsV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'POST method post a subscription with missing fields (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
+                + "subscription with missing fields (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -450,9 +563,11 @@ public class ManagementInterfaceTest {
         
         try {
             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription has missing fields");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " -  OK  - "
+                    + "Subscription has missing fields");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Invalid subscription");
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - FAIL - "
+                    + "Invalid subscription");
             throw e;
         } // try catch
         
@@ -464,7 +579,8 @@ public class ManagementInterfaceTest {
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV1() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'DELETE method deletes a subscription (ngsi_version = 1)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
+                + "deletes a subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -478,9 +594,11 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription deleted");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - "
+                    + "Subscription deleted");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Subscription exists yet");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - "
+                    + "Subscription exists yet");
             throw e;
         } // try catch
         
@@ -488,10 +606,12 @@ public class ManagementInterfaceTest {
     
     /**
      * [ManagementInterface] -------- 'DELETE method delete a subscription (ngsi_version = 1)'.
+     * @throws java.lang.Exception
      */
     @Test
     public void testDeleteMethodsDeletesASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'DELETE method deletes a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
+                + "deletes a subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -505,20 +625,24 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription deleted");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " -  OK  - "
+                    + "Subscription deleted");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - Subscription exists yet");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - FAIL - "
+                    + "Subscription exists yet");
             throw e;
         } // try catch
         
     } // testDeleteMethodsDeletesASubscriptionV2
     
     /**
+     * @throws java.lang.Exception
      * [ManagementInterface] -------- 'GET method gets a subscription (ngsi_version = 2)'.
      */
     @Test
     public void testGetMethodsGetsASubscriptionV2() throws Exception {
-        System.out.println(getTestTraceHead("[ManagementInterface]") + "- 'GET method gets a subscription (ngsi_version = 2)'.");
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets a "
+                + "subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
@@ -532,12 +656,238 @@ public class ManagementInterfaceTest {
                 
         try {
             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());
-            System.out.println(getTestTraceHead("[ManagementInterface]") + "-  OK  - Subscription obtained");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - "
+                    + "Subscription obtained");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[ManagementInterface]") + " - FAIL - There are some problems with your request");
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - There are "
+                    + "some problems with your request");
             throw e;
         } // try catch
         
     } // testGetMethodsGetsASubscriptionV2
+    
+    /**		
+      * [ManagementInterface] -------- 'GET method gets all subscriptions (ngsi_version = 2)'.		
+      * @throws java.lang.Exception		
+      */		
+     @Test		
+     public void testGetMethodsGetsAllSubscriptionsV2() throws Exception {		
+         System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets "
+                 + "all subscriptions (ngsi_version = 2)");	         
+         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);		
+         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);		
+         managementInterface.setOrionBackend(orionBackend);        		
+         		
+         try {		
+             managementInterface.handleGetSubscriptions(mockGetAllSubscriptionsV2, responseWrapper);		
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET subscription");		
+             throw x;		
+         } // try catch		
+                 		
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " -  OK  - "
+                     + "Subscription obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - FAIL - "
+                     + "There are some problems with your request");		
+             throw e;		
+         } // try catch		
+         		
+     } // testGetMethodsGetsAllSubscriptionsV2
+     
+     /**
+     * [ManagementInterface] -------- 'GET method gets parameters of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsAllAgentConfigurationParameters() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - GET "
+                + "method gets all agent configuration parameters");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " -  "
+                     + "OK  - All agent configuration parameters obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetAgentConfParams]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testGetMethodGetsAllAgentConfigurationParameters
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - GET "
+                + "method gets one agent configuration parameter");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testGetMethodGetsOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'POST method posts a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostMethodPostOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - POST "
+                + "method post a single parameter in an agent configuration file");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePostAdminConfigurationAgent(mockPostOneAgentParameter, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the POST request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter posted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testPostMethodPostOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'PUT method puts a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutMethodPutOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - PUT "
+                + "method puts a single parameter in an agent configuration file");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePutAdminConfigurationAgent(mockPutOneAgentParameter, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the PUT request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter put");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testPutMethodPutOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'DELETE method deletes a single parameter in a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDeleteMethodDeleteOneAgentConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - DELETE "
+                + "method deletes a single parameter in an agent configuration file");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleDeleteAdminConfigurationAgent(mockDeleteOneAgentParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the DELETE request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " -  "
+                     + "OK  - Agent configuration parameter deleted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneAgentConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+    
+    } // testDeleteMethodDeleteOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'Agent configuration file name starts with "agent_"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testAgentBadConfigurationFileName() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") +
+                  " - Agent configuration doesn't start with 'agent_'");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleDeleteAdminConfigurationAgent(mockRequestBadFileName, responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " -  "
+                     + "OK  - An agent configuration file not starting with 'agent_' has been detected");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleAgentConfFileName]") + " - "
+                     + "FAIL - An agent configuration file not starting with 'agent_' has not been detected");		
+             throw e;		
+         } // try catch	
+    
+    } // testAgentBadConfigurationFileName
     
 } // ManagementInterfaceTest
