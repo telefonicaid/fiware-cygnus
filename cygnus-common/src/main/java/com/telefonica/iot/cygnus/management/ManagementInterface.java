@@ -739,7 +739,6 @@ public class ManagementInterface extends AbstractHandler {
             FileInputStream fileInputStream = new FileInputStream(file);
             Properties properties = new Properties();
             properties.load(fileInputStream);
-
             JSONObject jsonObject = new JSONObject();
             
             if (allParameters) {
@@ -765,7 +764,7 @@ public class ManagementInterface extends AbstractHandler {
             
         } else {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\" : {\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else    
