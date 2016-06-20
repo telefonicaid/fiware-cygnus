@@ -1184,12 +1184,12 @@ public class ManagementInterface extends AbstractHandler {
         } // if
                 
         File file = new File(pathToFile);
-        Map<String, String> descriptions = readDescriptions(file);
         
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            JSONObject jsonObject = new JSONObject();
+            JSONObject jsonObject = new JSONObject();          
+            Map<String, String> descriptions = readDescriptions(file);
             
             for (Object key: properties.keySet()) {
                 String name = (String) key;
