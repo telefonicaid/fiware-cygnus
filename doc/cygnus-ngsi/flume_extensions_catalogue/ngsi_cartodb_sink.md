@@ -457,7 +457,7 @@ It is mandatory the entities aimed to be handled by this sink have a geolocated 
 [Top](#top)
 
 ####<a name="section2.3.2"></a>Multitenancy support
-Different than other NGSI sinks, where a single authorized user is able to create user sapces and write data on behalf of all the other users (who can only read the data), this sink requires the writting credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user accouint creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
+Different than other NGSI sinks, where a single authorized user is able to create user sapces and write data on behalf of all the other users (who can only read the data), this sink requires the writting credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
 
 [Top](#top)
 
