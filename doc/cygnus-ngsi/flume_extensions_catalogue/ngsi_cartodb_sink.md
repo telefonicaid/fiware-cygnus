@@ -18,7 +18,8 @@ Content:
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
         * [`NGSICartoDBSink` and non-geolocated entities](#section2.3.1)
-        * [Batching](#section2.3.2)
+        * [Multitenancy support](#section2.3.1)
+        * [Batching](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSICartoDBSSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -414,6 +415,26 @@ cygnus-ngsi.sinks.raw-sink.batch_timeout = 5
 cygnus-ngsi.sinks.raw-sink.batch_ttl = 0
 ```
 
+An example of CartoDB keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):
+
+```
+$ cat /usr/cygnus/conf/cartodb_keys.conf
+{
+   "cartodb_keys": [
+      {
+         "username": "user1",
+         "endpoint": "https://user1.cartodb.com",
+         "key": "1234567890abcdef"
+      },
+      {
+         "username": "user2",
+         "endpoint": "https://user2.cartodb.com",
+         "key": "abcdef1234567890"
+      }
+   ]
+}
+```
+
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
@@ -435,7 +456,12 @@ It is mandatory the entities aimed to be handled by this sink have a geolocated 
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>Batching
+####<a name="section2.3.2"></a>Multitenancy support
+Different than other NGSI sinks, where a single authorized user is able to create user sapces and write data on behalf of all the other users (who can only read the data), this sink requires the writting credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user accouint creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
+
+[Top](#top)
+
+####<a name="section2.3.3"></a>Batching
 As explained in the [programmers guide](#section3), `NGSICartoDBSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same CartoDB table. If processing the events one by one, we would need 100 inserts in CartoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination CartoDB table. In the worst case, the whole 100 entities will be about 100 different entities (100 different CartoDB destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
