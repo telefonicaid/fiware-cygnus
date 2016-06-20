@@ -84,6 +84,7 @@ pages:
           - 'Twitter agent configuration': 'cygnus-twitter/installation_and_administration_guide/configuration.md'
           - 'Running from cmd': 'cygnus-twitter/installation_and_administration_guide/running.md'
           - 'Testing': 'cygnus-twitter/installation_and_administration_guide/testing.md'
+          - 'Logs and alarms': 'cygnus-twitter/installation_and_administration_guide/logs_and_alarms.md'
           - 'Reporting issues and contact information': 'cygnus-twitter/installation_and_administration_guide/issues_and_contact.md'
       - 'User and Programmer Guide':
           - 'Programmer Guide': 'cygnus-twitter/user_and_programmer_guide/programmer_guide.md'

@@ -20,7 +20,8 @@ Content:
 * [GET `/admin/configuration/instance`](#section15)
   * [GET all parameters](#section15.1)
   * [GET a single parameter](#section15.2)
-* [PUT `/admin/configuration/instance`](#section16)
+* [POST `/admin/configuration/instance`](#sectionX)
+* [PUT `/admin/configuration/instance`](#section17)
 * [POST `/v1/subscriptions`](#section17)
   * [`NGSI Version 1`](#section17.1)
   * [`NGSI Version 2`](#section17.2)
@@ -623,7 +624,49 @@ Instance configuration file not found:
 
 [Top](#top)
 
-##<a name="section15"></a>`PUT /admin/configuration/instance`
+##<a name="section16"></a>`POST /admin/configuration/instance`
+
+Posts a single parameter if it doesn't exist in the instance given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
+
+```
+POST "http://<cygnus_host>:<management_port>/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>&value=<param_value>"
+```
+
+NOTE: Using the `/v1/admin/configuration/instance` path behaves the same way.
+
+```
+POST "http://<cygnus_host>:<management_port>/v1/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>&value=<param_value>"
+```
+
+Responses:
+
+Valid path to the instance configuration file:
+
+```
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT_2":"8082","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+```
+
+Invalid path to the instance configuration file:
+
+```
+{"success":"false","result" : {"Invalid path for a instance configuration file"}
+```
+
+Existing value in the instance configuration file:
+
+```
+{"success":"false","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT":"8081","CYGNUS_USER":"cygnus","LOGFILE_NAME":"cygnus.log","POLLING_INTERVAL":"30"}}}
+```
+
+Instance configuration file not found:
+
+```
+{"success":"false","result" : {"File not found in the path received"}
+```
+
+[Top](#top)
+
+##<a name="section17"></a>`PUT /admin/configuration/instance`
 
 Puts a single parameter if it doesn't exist or update it if already exists in the instance given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
 
