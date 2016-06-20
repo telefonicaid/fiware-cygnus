@@ -72,11 +72,7 @@ public final class CommonConstants {
     public static final String CONCATENATOR = "x0000";
     
     // Header for API uses
-    public static final String INSTANCE_HEADER = "#####\n" 
-                                    + "#\n" 
-                                    + "# Configuration file for apache-flume\n" 
-                                    + "#\n" 
-                                    + "#####\n" 
+    public static final String CYGNUS_IPR_HEADER = "#####\n"  
                                     + "# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U\n" 
                                     + "# \n" 
                                     + "# This file is part of fiware-cygnus (FI-WARE project).\n" 

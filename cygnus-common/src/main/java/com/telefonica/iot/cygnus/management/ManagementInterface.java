@@ -2225,14 +2225,8 @@ public class ManagementInterface extends AbstractHandler {
             throws FileNotFoundException {
                 
         PrintWriter printWriter = new PrintWriter(file);      
-        boolean hasHeader = Boolean.valueOf(descriptions.get("hasHeader"));
-        
-        if (!hasHeader) {
-            printWriter.println(descriptions.get("header"));
-        } else {
-            printWriter.println(CommonConstants.INSTANCE_HEADER);
-            printWriter.println();
-        } // if else
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER);
+        printWriter.println();
         
         for (Object key : properties.keySet()) {
             String name = (String) key;
@@ -2267,31 +2261,13 @@ public class ManagementInterface extends AbstractHandler {
     private Map<String,String> readDescriptions(File file) throws IOException {
                 
         // read the comments and the properties
-        BufferedReader readerHeader = new BufferedReader(new FileReader(file));
-        BufferedReader readerbody = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new FileReader(file));
         String header = "";
         String description = "";
         String line;
         Map<String,String> descriptions = new HashMap<String,String>();
-        
-        while ((line = readerHeader.readLine()) != null) {
-                        
-            if (line.startsWith("#")) {
-                header += line + "\n";
-            } // if
-            
-            if (line.isEmpty()) {
-                descriptions.put("hasHeader", "true");
-                descriptions.put("header", header);
-                break;
-            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
-                descriptions.put("header", "false");
-            } // if else
-        } // while
-        
-        readerHeader.close();
 
-        while ((line = readerbody.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             
             if (line.startsWith("#")) {
                 description += line + "\n";
@@ -2308,7 +2284,7 @@ public class ManagementInterface extends AbstractHandler {
             
         } // while
         
-        readerbody.close();
+        reader.close();
         return descriptions;
     }
     
