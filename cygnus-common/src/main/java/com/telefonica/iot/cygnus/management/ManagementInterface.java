@@ -1138,6 +1138,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
+        
         response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param").toUpperCase();
@@ -1183,7 +1184,8 @@ public class ManagementInterface extends AbstractHandler {
         } // if
                 
         File file = new File(pathToFile);
-                
+        Map<String, String> descriptions = readDescriptions(file);
+        
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
@@ -1205,7 +1207,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.put(param, newValue);                       
             jsonObject.put("instance", properties);                        
-            instancePrinting(properties, file);
+            instancePrinting(properties, file, descriptions);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -2219,37 +2221,18 @@ public class ManagementInterface extends AbstractHandler {
         
     } // orderedPrinting
     
-    private void instancePrinting (Properties properties, File file) throws FileNotFoundException {
+    private void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
+            throws FileNotFoundException {
+                
+        PrintWriter printWriter = new PrintWriter(file);      
+        boolean hasHeader = Boolean.valueOf(descriptions.get("hasHeader"));
         
-        PrintWriter printWriter = new PrintWriter(file);
-        printWriter.println("#####\n" 
-                    +  "#\n" 
-                    +  "# Configuration file for apache-flume\n" 
-                    +  "#\n" 
-                    +  "#####\n" 
-                    +  "# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U\n" 
-                    +  "# \n" 
-                    +  "# This file is part of fiware-cygnus (FI-WARE project).\n" 
-                    +  "# \n" 
-                    +  "# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of "
-                    + "the GNU Affero General\n" 
-                    +  "# Public License as published by the Free Software Foundation, either version 3 of the License,"
-                    + " or (at your option) any\n" 
-                    +  "# later version.\n" 
-                    +  "# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; "
-                    + "without even the implied\n" 
-                    +  "# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General "
-                    + "Public License for more\n" 
-                    +  "# details.\n" 
-                    +  "# \n" 
-                    +  "# You should have received a copy of the GNU Affero General Public License along with "
-                    + "fiware-cygnus. If not, see\n" 
-                    +  "# http://www.gnu.org/licenses/.\n" 
-                    +  "# \n" 
-                    +  "# For those usages not covered by the GNU Affero General Public License please contact with "
-                    + "iot_support at tid dot es\n");
-
-        Map<String, String> descriptions = getDescriptionsMap();
+        if (!hasHeader) {
+            printWriter.println(descriptions.get("header"));
+        } else {
+            printWriter.println(CommonConstants.INSTANCE_HEADER);
+            printWriter.println();
+        } // if else
         
         for (Object key : properties.keySet()) {
             String name = (String) key;
@@ -2257,7 +2240,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (descriptions.containsKey(name)) {
                 String description = (String) descriptions.get(name);
-                printWriter.println(description);
+                printWriter.print(description);
             } // if 
             
             printWriter.println(name + "=" + value);
@@ -2279,25 +2262,54 @@ public class ManagementInterface extends AbstractHandler {
     } // getFileName
     
     /**
-     * getDescriptionsMap: return a map with basic descriptions in a instance configuration file.
      * 
      */
-    private Map<String,String> getDescriptionsMap () {
+    private Map<String,String> readDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader readerHeader = new BufferedReader(new FileReader(file));
+        BufferedReader readerbody = new BufferedReader(new FileReader(file));
+        String header = "";
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new HashMap<String,String>();
         
-        Map<String, String> descriptions = new HashMap<String, String>();
-        descriptions.put("CYGNUS_USER", "# Who to run cygnus as. Note that you may need to use root if you want\n" 
-                                        + "# to run cygnus in a privileged port (<1024)");
-        descriptions.put("CONFIG_FOLDER", "# Where is the config folder");
-        descriptions.put("CONFIG_FILE", "# Which is the config file");
-        descriptions.put("AGENT_NAME", "# Name of the agent. The name of the agent is not trivial, since it is the "
-                                        + "base for the Flume parameters \n# naming conventions, e.g. it appears "
-                                        + "in .sources.http-source.channels=...");
-        descriptions.put("LOGFILE_NAME", "# Name of the logfile located at /var/log/cygnus. It is important to put"
-                                        + "the extension '.log' in order to the log rotation works properly");
-        descriptions.put("ADMIN_PORT", "# Administration port. Must be unique per instance");
-        descriptions.put("POLLING_INTERVAL", "# Polling interval (seconds) for the configuration reloading");
-        return descriptions;
+        while ((line = readerHeader.readLine()) != null) {
+                        
+            if (line.startsWith("#")) {
+                header += line + "\n";
+            } // if
+            
+            if (line.isEmpty()) {
+                descriptions.put("hasHeader", "true");
+                descriptions.put("header", header);
+                break;
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                descriptions.put("header", "false");
+            } // if else
+        } // while
         
-    } // getDescriptionMap
+        readerHeader.close();
 
+        while ((line = readerbody.readLine()) != null) {
+            
+            if (line.startsWith("#")) {
+                description += line + "\n";
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                String[] nameValue = line.split("=");
+                String name = nameValue[0];
+                descriptions.put(name, description);
+                description = "";
+            } // if
+            
+        } // while
+        
+        readerbody.close();
+        return descriptions;
+    }
+    
 } // ManagementInterface
