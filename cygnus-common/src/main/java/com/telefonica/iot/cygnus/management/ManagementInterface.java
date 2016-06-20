@@ -69,6 +69,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.MDC;
 /**
@@ -168,6 +170,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostAdminConfigurationAgent(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/agent")) {
                     handlePostAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, true); 
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -226,14 +232,14 @@ public class ManagementInterface extends AbstractHandler {
     } // handle
 
     private void handleGetVersion(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
                 + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
 
     private void handleGetStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         String jsonStr = "{\"success\":\"true\",\"stats\":{\"sources\":[";
         boolean first = true;
@@ -367,7 +373,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetStats
 
     private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
@@ -391,7 +397,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetGroupingRules
     
     private void handleGetAdminLog(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         try {
             Level level = LogManager.getRootLogger().getLevel();
@@ -431,7 +437,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // flag for use get all or get one subscription
         boolean getAllSubscriptions = false;
@@ -626,7 +632,7 @@ public class ManagementInterface extends AbstractHandler {
     protected void handleGetAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
@@ -701,7 +707,7 @@ public class ManagementInterface extends AbstractHandler {
     protected void handleGetAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
@@ -772,7 +778,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetAdminConfigurationInstance
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -865,7 +871,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePostGroupingRules
 
     protected void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         
         // read the new rule wanted to be added
@@ -1046,7 +1052,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePostAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
@@ -1130,8 +1136,95 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePostAdminConfigurationAgent
     
+    protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        
+        String param = request.getParameter("param").toUpperCase();
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+                
+        File file = new File(pathToFile);
+        
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();          
+            Map<String, String> descriptions = readDescriptions(file);
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    jsonObject.put("instance", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    return;
+                } // if
+                
+            } // for
+            
+            properties.put(param, newValue);                       
+            jsonObject.put("instance", properties);                        
+            instancePrinting(properties, file, descriptions);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : {\"File not found in the path received\"}");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePostAdminConfigurationInstance
+    
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
@@ -1271,7 +1364,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();
@@ -1350,7 +1443,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleDeleteAdminConfigurationAgent
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         for (String key : sources.keySet()) {
             Source source;
@@ -1431,7 +1524,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutStats
 
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -1530,7 +1623,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutGroupingRules
     
     private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
@@ -1575,7 +1668,7 @@ public class ManagementInterface extends AbstractHandler {
     
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
@@ -1648,7 +1741,7 @@ public class ManagementInterface extends AbstractHandler {
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // get the rule ID to be deleted
         long id = new Long(request.getParameter("id"));
@@ -1717,7 +1810,7 @@ public class ManagementInterface extends AbstractHandler {
     } // getGroupingRulesConfFile
 
     private void handleGetGUI(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
         String indexJSP = "";
@@ -1747,7 +1840,7 @@ public class ManagementInterface extends AbstractHandler {
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cygnusChannel = (CygnusChannel) channel;
                 point += "," + cygnusChannel.getNumEvents();
-            } // if
+            } // if12
         } // for
 
         point += "]";
@@ -1765,7 +1858,7 @@ public class ManagementInterface extends AbstractHandler {
         numPoints++;
 
         // return the points
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println(
                 "{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":[" + sourceRows + "]},"
@@ -2128,6 +2221,30 @@ public class ManagementInterface extends AbstractHandler {
         
     } // orderedPrinting
     
+    private void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
+            throws FileNotFoundException {
+                
+        PrintWriter printWriter = new PrintWriter(file);      
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER);
+        printWriter.println();
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String value = (String) properties.getProperty(name);
+            
+            if (descriptions.containsKey(name)) {
+                String description = (String) descriptions.get(name);
+                printWriter.print(description);
+            } // if 
+            
+            printWriter.println(name + "=" + value);
+            printWriter.println();
+        } // for
+        
+        printWriter.close();
+        
+    } // instancePrinting
+    
     /** 
     * getFileName: Gets the name of the agent from the given path.
     * 
@@ -2137,5 +2254,38 @@ public class ManagementInterface extends AbstractHandler {
         String[] pathElements = url.split("/");
         return pathElements[pathElements.length - 1];
     } // getFileName
+    
+    /**
+     * 
+     */
+    private Map<String,String> readDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String header = "";
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new HashMap<String,String>();
 
+        while ((line = reader.readLine()) != null) {
+            
+            if (line.startsWith("#")) {
+                description += line + "\n";
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                String[] nameValue = line.split("=");
+                String name = nameValue[0];
+                descriptions.put(name, description);
+                description = "";
+            } // if
+            
+        } // while
+        
+        reader.close();
+        return descriptions;
+    }
+    
 } // ManagementInterface
