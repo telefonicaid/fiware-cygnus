@@ -1809,7 +1809,7 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"result\" : {\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
+        } // try catch   
         
     } // handlePutAdminConfigurationInstance
     

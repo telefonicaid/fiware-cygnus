@@ -20,7 +20,7 @@ Content:
 * [GET `/admin/configuration/instance`](#section15)
   * [GET all parameters](#section15.1)
   * [GET a single parameter](#section15.2)
-* [POST `/admin/configuration/instance`](#sectionX)
+* [POST `/admin/configuration/instance`](#section16)
 * [PUT `/admin/configuration/instance`](#section17)
 * [POST `/v1/subscriptions`](#section17)
   * [`NGSI Version 1`](#section17.1)
@@ -710,11 +710,7 @@ Below you can see the tested instance configuration file after the `PUT` method.
 
 ```
 #####
-#
-# Configuration file for apache-flume
-#
-#####
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 #
 # This file is part of fiware-cygnus (FI-WARE project).
 #
