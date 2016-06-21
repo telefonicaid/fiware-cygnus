@@ -189,6 +189,10 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutAdminConfigurationAgent(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/agent")) {
                     handlePutAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handlePutAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handlePutAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1738,6 +1742,76 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handlePutAdminConfigurationAgent
+    
+    protected void handlePutAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param").toUpperCase();
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            Map<String, String> descriptions = readDescriptions(file);
+            properties.put(param, newValue);                                   
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("instance", properties);            
+            instancePrinting(properties, file, descriptions);                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : {\"File not found in the path received\"}");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch   
+        
+    } // handlePutAdminConfigurationInstance
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {

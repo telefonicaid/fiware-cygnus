@@ -21,13 +21,14 @@ Content:
   * [GET all parameters](#section15.1)
   * [GET a single parameter](#section15.2)
 * [POST `/admin/configuration/instance`](#section16)
-* [POST `/v1/subscriptions`](#section17)
-  * [`NGSI Version 1`](#section17.1)
-  * [`NGSI Version 2`](#section17.2)
-* [DELETE `/v1/subscriptions`](#section18)
-* [GET `/v1/subscriptions`](#section19)
-  * [GET subscription by ID](#section19.1)
-  * [GET all subscriptions](#section19.2)
+* [PUT `/admin/configuration/instance`](#section17)
+* [POST `/v1/subscriptions`](#section18)
+  * [`NGSI Version 1`](#section18.1)
+  * [`NGSI Version 2`](#section18.2)
+* [DELETE `/v1/subscriptions`](#section19)
+* [GET `/v1/subscriptions`](#section20)
+  * [GET subscription by ID](#section20.1)
+  * [GET all subscriptions](#section20.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -665,8 +666,96 @@ Instance configuration file not found:
 
 [Top](#top)
 
-##<a name="section17"></a>`POST /v1/subscriptions`
-###<a name="section17.1"></a> `NGSI Version 1`
+##<a name="section17"></a>`PUT /admin/configuration/instance`
+
+Puts a single parameter if it doesn't exist or update it if already exists in the instance given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
+
+```
+PUT "http://<cygnus_host>:<management_port>/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>&value=<param_value>"
+```
+
+NOTE: Using the `/v1/admin/configuration/instance` path behaves the same way.
+
+```
+PUT "http://<cygnus_host>:<management_port>/v1/admin/configuration/instance/usr/cygnus/conf/cygnus_instance.conf?param=<param_name>&value=<param_value>"
+```
+
+Responses:
+
+Valid path to the instance configuration file. Adding `NEW_PARAM` with value `old_value`:
+
+```
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"old_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+```
+
+Valid path to the instance configuration file. Updating `NEW_PARAM` with value `new_value`:
+
+```
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnusagent","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"new_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+```
+
+Invalid path to the instance configuration file:
+
+```
+{"success":"false","result" : {"Invalid path for a instance configuration file"}
+```
+
+Instance configuration file not found:
+
+```
+{"success":"false","result" : {"File not found in the path received"}
+```
+
+Below you can see the tested instance configuration file after the `PUT` method.
+
+```
+#####
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FI-WARE project).
+#
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+
+# Which is the config file
+CONFIG_FILE=/usr/cygnus/conf/agent.conf
+
+# Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters
+# naming conventions, e.g. it appears in .sources.http-source.channels=...
+AGENT_NAME=cygnusagent
+
+# Administration port. Must be unique per instance
+ADMIN_PORT=8081
+
+# Where is the config folder
+CONFIG_FOLDER=/usr/cygnus/conf
+
+OLD_CONFIG=true
+
+# Name of the logfile located at /var/log/cygnus. It is important to putthe extension '.log' in order to the log rotation works properly
+LOGFILE_NAME=cygnus.log
+
+# Who to run cygnus as. Note that you may need to use root if you want
+# to run cygnus in a privileged port (<1024)
+CYGNUS_USER=cygnus
+
+# Polling interval (seconds) for the configuration reloading
+POLLING_INTERVAL=30
+```
+
+[Top](#top)
+
+##<a name="section18"></a>`POST /v1/subscriptions`
+###<a name="section18.1"></a> `NGSI Version 1`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -727,7 +816,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-###<a name="section17.2"></a> `NGSI Version 2`
+###<a name="section18.2"></a> `NGSI Version 2`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=2` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -799,7 +888,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-##<a name="section18"></a>`DELETE /v1/subscriptions`
+##<a name="section19"></a>`DELETE /v1/subscriptions`
 
 Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
@@ -854,8 +943,8 @@ Missing fields (empty or not given):
 
 [Top](#top)
 
-##<a name="section19"></a>`GET /v1/subscriptions`
-###<a name="section19.1"></a> GET subscription by ID
+##<a name="section20"></a>`GET /v1/subscriptions`
+###<a name="section20.1"></a> GET subscription by ID
 
 Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
 
@@ -900,7 +989,7 @@ Missing or empty parameters:
 
 [Top](#top)
 
-###<a name="section19.2"></a> GET all subscriptions
+###<a name="section20.2"></a> GET all subscriptions
 
 Gets all existent subscriptions from Orion, given the NGSI version as a query parameter.
 
