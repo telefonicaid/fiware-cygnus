@@ -22,13 +22,13 @@ Content:
   * [GET a single parameter](#section15.2)
 * [POST `/admin/configuration/instance`](#section16)
 * [PUT `/admin/configuration/instance`](#section17)
-* [POST `/v1/subscriptions`](#section17)
-  * [`NGSI Version 1`](#section17.1)
-  * [`NGSI Version 2`](#section17.2)
-* [DELETE `/v1/subscriptions`](#section18)
-* [GET `/v1/subscriptions`](#section19)
-  * [GET subscription by ID](#section19.1)
-  * [GET all subscriptions](#section19.2)
+* [POST `/v1/subscriptions`](#section18)
+  * [`NGSI Version 1`](#section18.1)
+  * [`NGSI Version 2`](#section18.2)
+* [DELETE `/v1/subscriptions`](#section19)
+* [GET `/v1/subscriptions`](#section20)
+  * [GET subscription by ID](#section20.1)
+  * [GET all subscriptions](#section20.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -754,8 +754,8 @@ POLLING_INTERVAL=30
 
 [Top](#top)
 
-##<a name="section17"></a>`POST /v1/subscriptions`
-###<a name="section17.1"></a> `NGSI Version 1`
+##<a name="section18"></a>`POST /v1/subscriptions`
+###<a name="section18.1"></a> `NGSI Version 1`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -816,7 +816,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-###<a name="section17.2"></a> `NGSI Version 2`
+###<a name="section18.2"></a> `NGSI Version 2`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=2` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -888,7 +888,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-##<a name="section18"></a>`DELETE /v1/subscriptions`
+##<a name="section19"></a>`DELETE /v1/subscriptions`
 
 Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
@@ -943,8 +943,8 @@ Missing fields (empty or not given):
 
 [Top](#top)
 
-##<a name="section19"></a>`GET /v1/subscriptions`
-###<a name="section19.1"></a> GET subscription by ID
+##<a name="section20"></a>`GET /v1/subscriptions`
+###<a name="section20.1"></a> GET subscription by ID
 
 Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
 
@@ -989,7 +989,7 @@ Missing or empty parameters:
 
 [Top](#top)
 
-###<a name="section19.2"></a> GET all subscriptions
+###<a name="section20.2"></a> GET all subscriptions
 
 Gets all existent subscriptions from Orion, given the NGSI version as a query parameter.
 
