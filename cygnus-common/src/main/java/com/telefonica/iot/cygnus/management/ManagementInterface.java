@@ -70,6 +70,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.slf4j.MDC;
@@ -206,6 +207,10 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationAgent(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/agent")) {
                     handleDeleteAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handleDeleteAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handleDeleteAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -745,7 +750,7 @@ public class ManagementInterface extends AbstractHandler {
         
         File file = new File(pathToFile);
                 
-        if (file.exists()) {
+        try {
             FileInputStream fileInputStream = new FileInputStream(file);
             Properties properties = new Properties();
             properties.load(fileInputStream);
@@ -768,14 +773,14 @@ public class ManagementInterface extends AbstractHandler {
             } // if else
             
             response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "");
+                    + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
-        } else {
+        } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"File not found in the path received\"}");
-            LOGGER.debug("File not found in the path received");
+                    + "\"result\" : {\"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else    
         
@@ -1145,7 +1150,7 @@ public class ManagementInterface extends AbstractHandler {
         
         response.setContentType("application/json; charset=utf-8");
         
-        String param = request.getParameter("param").toUpperCase();
+        String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
         String fileName = getFileName(url);
@@ -1425,6 +1430,77 @@ public class ManagementInterface extends AbstractHandler {
             jsonObject.put("agent", properties);                  
             orderedPrinting(properties, file);
             
+            response.setStatus(HttpServletResponse.SC_OK); 
+            
+            if (paramExists) {
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : " + jsonObject + "}");
+            } // if else
+            
+            LOGGER.debug(jsonObject);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch    
+        
+    } // handleDeleteAdminConfigurationAgent
+    
+    protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            Map<String,String> descriptions = readDescriptions(file);
+            JSONObject jsonObject = new JSONObject();
+            boolean paramExists = false;
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    paramExists = true;
+                } // if
+                
+            } // for
+            
+            properties.remove(param);                                           
+            jsonObject.put("agent", properties);                  
+            instancePrinting(properties, file, descriptions);  
             response.setStatus(HttpServletResponse.SC_OK); 
             
             if (paramExists) {
@@ -1747,7 +1823,7 @@ public class ManagementInterface extends AbstractHandler {
             boolean v1) throws IOException {
         response.setContentType("json;charset=utf-8");
         
-        String param = request.getParameter("param").toUpperCase();
+        String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
         String fileName = getFileName(url);
@@ -2339,7 +2415,7 @@ public class ManagementInterface extends AbstractHandler {
         String header = "";
         String description = "";
         String line;
-        Map<String,String> descriptions = new HashMap<String,String>();
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
 
         while ((line = reader.readLine()) != null) {
             
