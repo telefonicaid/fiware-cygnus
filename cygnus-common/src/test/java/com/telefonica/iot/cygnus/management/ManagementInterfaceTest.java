@@ -132,6 +132,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockGetAllInstanceParameters = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetOneInstanceParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPutOneInstanceParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPostOneInstanceParameter = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -338,6 +339,12 @@ public class ManagementInterfaceTest {
         when(mockPutOneInstanceParameter.getParameter("param")).thenReturn("RANDOM_PARAM");
         when(mockPutOneInstanceParameter.getParameter("value")).thenReturn("false");
         when(mockPutOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance" 
+                    + instanceGetAll.getAbsolutePath());
+        
+        when(mockPostOneInstanceParameter.getMethod()).thenReturn("POST");
+        when(mockPostOneInstanceParameter.getParameter("param")).thenReturn("POSTED_PARAM");
+        when(mockPostOneInstanceParameter.getParameter("value")).thenReturn("posted_value");
+        when(mockPostOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance"
                     + instanceGetAll.getAbsolutePath());
         
     } // setUp
@@ -905,6 +912,41 @@ public class ManagementInterfaceTest {
          } // try catch	
     
     } // testPostMethodPostOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostMethodPostsOneInstanceConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneInstanceConfParam]") + " - POST "
+                + "method posts one instance configuration parameter");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePutAdminConfigurationInstance(mockPutOneInstanceParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the POST request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneInstanceConfParam]") + " -  "
+                     + "OK  - Instance configuration parameter posted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePostOneInstanceConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+         
+         folder.delete();
+    
+    } // testPutMethodPutsOneInstanceConfigurationParameter
     
     /**
      * [ManagementInterface] -------- 'PUT method puts a single parameter in a given agent configuration file'.
