@@ -131,6 +131,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockRequestBadFileName = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetAllInstanceParameters = mock(HttpServletRequest.class);
     private final HttpServletRequest mockGetOneInstanceParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPutOneInstanceParameter = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -320,7 +321,8 @@ public class ManagementInterfaceTest {
         BufferedWriter out = new BufferedWriter(new FileWriter(instanceGetAll));
         out.write("LOGFILE_NAME=cygnus.log\n" +
                   "ADMIN_PORT=8081\n" +
-                  "POLLING_INTERVAL=30");
+                  "POLLING_INTERVAL=30\n +"
+                + "RANDOM_PARAM=true");
         out.close();
         
         when(mockGetAllInstanceParameters.getMethod()).thenReturn("GET");
@@ -331,6 +333,12 @@ public class ManagementInterfaceTest {
         when(mockGetOneInstanceParameter.getParameter("param")).thenReturn("ADMIN_PORT");
         when(mockGetOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance" 
                     + instanceGetAll.getAbsolutePath()); 
+        
+        when(mockPutOneInstanceParameter.getMethod()).thenReturn("PUT");
+        when(mockPutOneInstanceParameter.getParameter("param")).thenReturn("RANDOM_PARAM");
+        when(mockPutOneInstanceParameter.getParameter("value")).thenReturn("false");
+        when(mockPutOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance" 
+                    + instanceGetAll.getAbsolutePath());
         
     } // setUp
     
@@ -929,6 +937,41 @@ public class ManagementInterfaceTest {
          } // try catch	
     
     } // testPutMethodPutOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutMethodPutsOneInstanceConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneInstanceConfParam]") + " - PUT "
+                + "method puts one instance configuration parameter");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handlePutAdminConfigurationInstance(mockPutOneInstanceParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the PUT request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneInstanceConfParam]") + " -  "
+                     + "OK  - Instance configuration parameter put");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handlePutOneInstanceConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+         
+         folder.delete();
+    
+    } // testPutMethodPutsOneInstanceConfigurationParameter
     
     /**
      * [ManagementInterface] -------- 'DELETE method deletes a single parameter in a given agent configuration file'.
