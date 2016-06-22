@@ -70,6 +70,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.slf4j.MDC;
@@ -749,7 +750,7 @@ public class ManagementInterface extends AbstractHandler {
         
         File file = new File(pathToFile);
                 
-        if (file.exists()) {
+        try {
             FileInputStream fileInputStream = new FileInputStream(file);
             Properties properties = new Properties();
             properties.load(fileInputStream);
@@ -772,14 +773,14 @@ public class ManagementInterface extends AbstractHandler {
             } // if else
             
             response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "");
+                    + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
-        } else {
+        } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"File not found in the path received\"}");
-            LOGGER.debug("File not found in the path received");
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else    
         
@@ -1149,7 +1150,7 @@ public class ManagementInterface extends AbstractHandler {
         
         response.setContentType("application/json; charset=utf-8");
         
-        String param = request.getParameter("param").toUpperCase();
+        String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
         String fileName = getFileName(url);
@@ -1450,7 +1451,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleDeleteAdminConfigurationAgent
     
-            protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+    protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
             boolean v1) throws IOException {
         
         response.setContentType("application/json; charset=utf-8");
@@ -1822,7 +1823,7 @@ public class ManagementInterface extends AbstractHandler {
             boolean v1) throws IOException {
         response.setContentType("json;charset=utf-8");
         
-        String param = request.getParameter("param").toUpperCase();
+        String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
         String fileName = getFileName(url);
@@ -2414,7 +2415,7 @@ public class ManagementInterface extends AbstractHandler {
         String header = "";
         String description = "";
         String line;
-        Map<String,String> descriptions = new HashMap<String,String>();
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
 
         while ((line = reader.readLine()) != null) {
             
