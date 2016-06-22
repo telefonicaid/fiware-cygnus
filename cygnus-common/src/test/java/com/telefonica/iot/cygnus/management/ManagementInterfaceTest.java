@@ -37,9 +37,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*; // this is required by "when" like functions
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -89,6 +92,7 @@ public class ManagementInterfaceTest {
     
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+    public TemporaryFolder folderInstance = new TemporaryFolder();
     
     // mocks
     @Mock
@@ -125,6 +129,8 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockPutOneAgentParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteOneAgentParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockRequestBadFileName = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetAllInstanceParameters = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetOneInstanceParameter = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -302,7 +308,37 @@ public class ManagementInterfaceTest {
         when(mockRequestBadFileName.getRequestURI()).thenReturn("/admin/configuration/agent/"
                     + fileBadFileName.getAbsolutePath());
         
+        File instanceGetAll;
+        folderInstance.create();
+        instanceGetAll = folderInstance.newFolder("usr");
+        instanceGetAll.mkdir();
+        instanceGetAll = folderInstance.newFolder("usr/cygnus");
+        instanceGetAll.mkdir();
+        instanceGetAll = folderInstance.newFolder("usr/cygnus/conf");
+        instanceGetAll.mkdir();
+        instanceGetAll = folderInstance.newFile("usr/cygnus/conf/cygnus_instance.conf");
+        BufferedWriter out = new BufferedWriter(new FileWriter(instanceGetAll));
+        out.write("LOGFILE_NAME=cygnus.log\n" +
+                  "ADMIN_PORT=8081\n" +
+                  "POLLING_INTERVAL=30");
+        out.close();
+        
+        when(mockGetAllInstanceParameters.getMethod()).thenReturn("GET");
+        when(mockGetAllInstanceParameters.getRequestURI()).thenReturn("/admin/configuration/instance" 
+                    + instanceGetAll.getAbsolutePath());
+        
+        when(mockGetOneInstanceParameter.getMethod()).thenReturn("GET");
+        when(mockGetOneInstanceParameter.getParameter("param")).thenReturn("ADMIN_PORT");
+        when(mockGetOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance" 
+                    + instanceGetAll.getAbsolutePath()); 
+        
     } // setUp
+    
+    @After
+    public void cleanUp() throws Exception {
+        folder.delete();
+        folderInstance.delete();
+    }
     
     /**
      * Test of handle method, of class ManagementInterface.
@@ -760,6 +796,75 @@ public class ManagementInterfaceTest {
          } // try catch	
     
     } // testGetMethodGetsOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets parameters of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsAllInstanceConfigurationParameters() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetInstanceConfParams]") + " - GET "
+                + "method gets all instance configuration parameters");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);      
+        
+        try {		
+            managementInterface.handleGetAdminConfigurationInstance(mockGetAllInstanceParameters, 
+                    responseWrapper, false);
+        } catch (Exception x) {		
+            System.out.println("There was some problem when handling the GET request");		
+            throw x;		
+        } // try catch
+        
+        try {		
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetInstanceConfParams]") + " -  "
+                    + "OK  - All instance configuration parameters obtained");		
+        } catch (AssertionError e) {		
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetInstanceConfParams]") + " - "
+                    + "FAIL - There are some problems with your request");		
+            throw e;		
+        } // try catch	
+        
+        folder.delete();
+    
+    } // testGetMethodGetsAllInstanceConfigurationParameters
+    
+    /**
+     * [ManagementInterface] -------- 'GET method gets a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetsOneInstanceConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneInstanceConfParam]") + " - GET "
+                + "method gets one instance configuration parameter");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleGetAdminConfigurationInstance(mockGetOneInstanceParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the GET request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneInstanceConfParam]") + " -  "
+                     + "OK  - Instance configuration parameter obtained");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleGetOneInstanceConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+         
+         folder.delete();
+    
+    } // testGetMethodGetsOneInstanceConfigurationParameter
     
     /**
      * [ManagementInterface] -------- 'POST method posts a single parameter in a given agent configuration file'.
