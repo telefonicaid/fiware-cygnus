@@ -779,7 +779,7 @@ public class ManagementInterface extends AbstractHandler {
             
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\" : {\"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else    
