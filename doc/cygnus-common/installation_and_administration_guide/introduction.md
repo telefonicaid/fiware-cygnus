@@ -10,7 +10,7 @@ cygnus-common provides a set of extensions for Apache Flume, for instance, defin
 ##Intended audience
 This document is mainly addressed to those FIWARE users willing to create historical views about any source of data handled by any of the available Cygnus agents. In that case, you will need this document in order to learn how to install and administrate cygnus-common.
 
-If your aim is to contribute to cygnus-common, please refer to the [User and Programmer Guide](../user_and_programmer_guide/introduction.md).
+If your aim is to contribute to cygnus-common, please refer to the [User and Programmer Guide](https://github.com/telefonicaid/fiware-cygnus/tree/master/doc/cygnus-ngsi/user_and_programmer_guide).
 
 [Top](#top)
 
