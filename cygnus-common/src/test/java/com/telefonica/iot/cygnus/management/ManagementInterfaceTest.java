@@ -133,6 +133,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockGetOneInstanceParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPutOneInstanceParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPostOneInstanceParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockDeleteOneInstanceParameter = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -345,6 +346,11 @@ public class ManagementInterfaceTest {
         when(mockPostOneInstanceParameter.getParameter("param")).thenReturn("POSTED_PARAM");
         when(mockPostOneInstanceParameter.getParameter("value")).thenReturn("posted_value");
         when(mockPostOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance"
+                    + instanceGetAll.getAbsolutePath());
+        
+        when(mockDeleteOneInstanceParameter.getMethod()).thenReturn("DELETE");
+        when(mockDeleteOneInstanceParameter.getParameter("param")).thenReturn("RANDOM_PARAM");
+        when(mockDeleteOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance"
                     + instanceGetAll.getAbsolutePath());
         
     } // setUp
@@ -685,6 +691,41 @@ public class ManagementInterfaceTest {
         } // try catch
         
     } // testDeleteMethodsDeletesASubscriptionV2
+    
+    /**
+     * [ManagementInterface] -------- 'DELETE method deletes a single parameter of a given agent configuration file'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDeleteMethodDeletesOneInstanceConfigurationParameter() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneInstanceConfParam]") + " - DELETE "
+                + "method deletes one instance configuration parameter");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        
+        
+         try {		
+             managementInterface.handleDeleteAdminConfigurationInstance(mockDeleteOneInstanceParameter, 
+                     responseWrapper, false);
+         } catch (Exception x) {		
+             System.out.println("There was some problem when handling the DELETE request");		
+             throw x;		
+         } // try catch
+         
+         try {		
+             assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneInstanceConfParam]") + " -  "
+                     + "OK  - Instance configuration parameter deleted");		
+         } catch (AssertionError e) {		
+             System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteOneInstanceConfParam]") + " - "
+                     + "FAIL - There are some problems with your request");		
+             throw e;		
+         } // try catch	
+         
+         folder.delete();
+    
+    } // testDeleteMethodDeletesOneInstanceConfigurationParameter
     
     /**
      * @throws java.lang.Exception
