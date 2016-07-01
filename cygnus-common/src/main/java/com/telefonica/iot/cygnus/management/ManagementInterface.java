@@ -65,6 +65,14 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 import org.slf4j.MDC;
 /**
  *
@@ -81,11 +89,11 @@ public class ManagementInterface extends AbstractHandler {
     private final int apiPort;
     private final int guiPort;
     private static int numPoints = 0;
-    private static String sourceRows = "";
+    private static final String sourceRows = "";
     private static String channelRows = "";
-    private static String sinkRows = "";
+    private static final String sinkRows = "";
     private OrionBackendImpl orionBackend;
-
+    
     /**
      * Constructor.
      * @param configurationFile
@@ -142,6 +150,14 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminLog(response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleGetSubscriptions(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handleGetAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handleGetAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handleGetAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handleGetAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -151,6 +167,14 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostGroupingRules(request, response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handlePostSubscription(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handlePostAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handlePostAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handlePostAdminConfigurationInstance(request, response, true); 
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -162,6 +186,14 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutGroupingRules(request, response);
                 } else if (uri.equals("/admin/log")) {
                     handlePutAdminLog(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handlePutAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handlePutAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handlePutAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -171,6 +203,14 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteGroupingRules(request, response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleDeleteSubscription(request, response);
+                } else if (uri.startsWith("/admin/configuration/agent")) {
+                    handleDeleteAdminConfigurationAgent(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/agent")) {
+                    handleDeleteAdminConfigurationAgent(request, response, true);
+                } else if (uri.startsWith("/admin/configuration/instance")) {
+                    handleDeleteAdminConfigurationInstance(request, response, false);
+                } else if (uri.startsWith("/v1/admin/configuration/instance")) {
+                    handleDeleteAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -201,14 +241,14 @@ public class ManagementInterface extends AbstractHandler {
     } // handle
 
     private void handleGetVersion(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
                 + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
 
     private void handleGetStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         String jsonStr = "{\"success\":\"true\",\"stats\":{\"sources\":[";
         boolean first = true;
@@ -342,7 +382,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetStats
 
     private void handleGetGroupingRules(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         if (groupingRulesConfFile == null) {
             response.getWriter().println("{\"success\":\"false\","
@@ -366,7 +406,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetGroupingRules
     
     private void handleGetAdminLog(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         try {
             Level level = LogManager.getRootLogger().getLevel();
@@ -406,7 +446,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // flag for use get all or get one subscription
         boolean getAllSubscriptions = false;
@@ -597,9 +637,157 @@ public class ManagementInterface extends AbstractHandler {
         }
         
     } // handleGetSubscriptions
+    
+    protected void handleGetAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        boolean allParameters = false;
+        
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();     
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
+        
+        if (param == null) {
+            allParameters = true;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(29);
+        } else {
+            pathToFile = url.substring(26);
+        } // if else 
+        
+        File file = new File(pathToFile);
+                
+        if (file.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(fileInputStream);
+
+            JSONObject jsonObject = new JSONObject();
+            
+            if (allParameters) {
+                jsonObject.put("agent", properties);
+            } else {
+                String property = properties.getProperty(param);
+                
+                if (property != null) {
+                    jsonObject.put(param, properties.getProperty(param));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
+                    return;
+                } // if else
+                
+            } // if else
+            
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } else {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handleGetAdminParameters
+    
+    protected void handleGetAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        boolean allParameters = false;
+        
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();     
+        String fileName = getFileName(url);
+        
+        if (param == null) {
+            allParameters = true;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if else 
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+        
+        File file = new File(pathToFile);
+                
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(fileInputStream);
+            JSONObject jsonObject = new JSONObject();
+            
+            if (allParameters) {
+                jsonObject.put("instance", properties);
+            } else {
+                String property = properties.getProperty(param);
+                
+                if (property != null) {
+                    jsonObject.put(param, properties.getProperty(param));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : {\"Param '" + param + "' not found in the instance\"}"); 
+                    return;
+                } // if else
+                
+            } // if else
+            
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : {\"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handleGetAdminConfigurationInstance
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -692,7 +880,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePostGroupingRules
 
     protected void handlePostSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         
         // read the new rule wanted to be added
@@ -871,8 +1059,181 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePostSubscription
     
+    protected void handlePostAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(29);
+        } else {
+            pathToFile = url.substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    jsonObject.put("agent", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    return;
+                } // if
+                
+            } // for
+            
+            properties.put(param, newValue);                       
+            jsonObject.put("agent", properties);                        
+            orderedPrinting(properties, file);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePostAdminConfigurationAgent
+    
+    protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+                
+        File file = new File(pathToFile);
+        
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();          
+            Map<String, String> descriptions = readDescriptions(file);
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    jsonObject.put("instance", properties);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    return;
+                } // if
+                
+            } // for
+            
+            properties.put(param, newValue);                       
+            jsonObject.put("instance", properties);                        
+            instancePrinting(properties, file, descriptions);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : {\"File not found in the path received\"}");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePostAdminConfigurationInstance
+    
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
@@ -1010,8 +1371,159 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleDeleteSubscription
     
+    protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(29);
+        } else {
+            pathToFile = url.substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            JSONObject jsonObject = new JSONObject();
+            boolean paramExists = false;
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    paramExists = true;
+                } // if
+                
+            } // for
+            
+            properties.remove(param);                                           
+            jsonObject.put("agent", properties);                  
+            orderedPrinting(properties, file);
+            
+            response.setStatus(HttpServletResponse.SC_OK); 
+            
+            if (paramExists) {
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : " + jsonObject + "}");
+            } // if else
+            
+            LOGGER.debug(jsonObject);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch    
+        
+    } // handleDeleteAdminConfigurationAgent
+    
+    protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+            boolean v1) throws IOException {
+        
+        response.setContentType("application/json; charset=utf-8");
+        String param = request.getParameter("param");
+        String url = request.getRequestURI();
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            Map<String,String> descriptions = readDescriptions(file);
+            JSONObject jsonObject = new JSONObject();
+            boolean paramExists = false;
+            
+            for (Object key: properties.keySet()) {
+                String name = (String) key;
+                
+                if (name.equals(param)) {
+                    paramExists = true;
+                } // if
+                
+            } // for
+            
+            properties.remove(param);                                           
+            jsonObject.put("agent", properties);                  
+            instancePrinting(properties, file, descriptions);  
+            response.setStatus(HttpServletResponse.SC_OK); 
+            
+            if (paramExists) {
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            } else {
+                response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : " + jsonObject + "}");
+            } // if else
+            
+            LOGGER.debug(jsonObject);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch    
+        
+    } // handleDeleteAdminConfigurationAgent
+    
     private void handlePutStats(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         for (String key : sources.keySet()) {
             Source source;
@@ -1092,7 +1604,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutStats
 
     private void handlePutGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // read the new rule wanted to be added
         BufferedReader reader = request.getReader();
@@ -1191,7 +1703,7 @@ public class ManagementInterface extends AbstractHandler {
     } // handlePutGroupingRules
     
     private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
@@ -1234,9 +1746,152 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutAdminLog
     
+    protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+        
+        if (!(fileName.startsWith("agent_"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+            LOGGER.error("Agent file name must start with 'agent_'.");
+            return;
+        } // if
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(29);
+        } else {
+            pathToFile = url.substring(26);
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            properties.put(param, newValue);
+                        
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("agent", properties);
+            
+            orderedPrinting(properties, file);
+                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"File not found in the path received\" }");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // if else    
+        
+    } // handlePutAdminConfigurationAgent
+    
+    protected void handlePutAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
+            boolean v1) throws IOException {
+        response.setContentType("json;charset=utf-8");
+        
+        String param = request.getParameter("param");
+        String newValue = request.getParameter("value");
+        String url = request.getRequestURI();
+        String fileName = getFileName(url);
+                
+        if (param == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
+            return;
+        } else if (param.equals("")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+            LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
+            return;
+        } // if else
+        
+        if (newValue == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+            LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
+            return;
+        } // if else
+                
+        String pathToFile;
+        
+        if (v1) {
+            pathToFile = url.substring(32);
+        } else {
+            pathToFile = url.substring(29);
+        } // if
+        
+        if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+            return;
+        } // if
+                
+        File file = new File(pathToFile);
+                
+        try {
+            Properties properties = new Properties();           
+            properties.load(new FileInputStream(file));
+            Map<String, String> descriptions = readDescriptions(file);
+            properties.put(param, newValue);                                   
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("instance", properties);            
+            instancePrinting(properties, file, descriptions);                               
+            response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\" : " + jsonObject + "}");
+            LOGGER.debug(jsonObject);
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+        } catch (Exception e) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : {\"File not found in the path received\"}");
+            LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } // try catch   
+        
+    } // handlePutAdminConfigurationInstance
+    
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
 
         // get the rule ID to be deleted
         long id = new Long(request.getParameter("id"));
@@ -1305,7 +1960,7 @@ public class ManagementInterface extends AbstractHandler {
     } // getGroupingRulesConfFile
 
     private void handleGetGUI(HttpServletResponse response) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
         String indexJSP = "";
@@ -1335,7 +1990,7 @@ public class ManagementInterface extends AbstractHandler {
             if (channel instanceof CygnusChannel) {
                 CygnusChannel cygnusChannel = (CygnusChannel) channel;
                 point += "," + cygnusChannel.getNumEvents();
-            } // if
+            } // if12
         } // for
 
         point += "]";
@@ -1353,7 +2008,7 @@ public class ManagementInterface extends AbstractHandler {
         numPoints++;
 
         // return the points
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println(
                 "{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":[" + sourceRows + "]},"
@@ -1618,5 +2273,169 @@ public class ManagementInterface extends AbstractHandler {
     protected void setOrionBackend(OrionBackendImpl orionBackend) {
         this.orionBackend = orionBackend;
     } // setOrionBackend
+    
+    /** 
+     * OrderedPrintWriter: Creates a writer with the original order's agent file.
+     * 
+     * @param printWriter
+     * @param properties 
+     */
+    private void orderedPrinting(Properties properties, File file) throws FileNotFoundException {
+                
+        PrintWriter printWriter = new PrintWriter(file);
+        String agentName = "";
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String[] nameParts = name.split("\\.");
+            agentName = nameParts[0];
+            break;
+        } // for
+                
+        ArrayList<String> sourceNames = null;
+        ArrayList<String> channelNames = null;
+        ArrayList<String> sinkNames=  null;
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String value = (String) properties.getProperty(name);
+            
+            if (name.equals(agentName + ".sources")) {
+                sourceNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+            if (name.equals(agentName + ".channels")) {
+                channelNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+            if (name.equals(agentName + ".sinks")) {
+                sinkNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
+                printWriter.println(name + " = " + value);
+            } // if
+            
+        } // for
+        
+        printWriter.println();
+        
+        for (String sourceName : sourceNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".sources." + sourceName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
 
+        } // for
+        
+        for (String channelName : channelNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".channels." + channelName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+
+        } // for
+        
+        for (String sinkName : sinkNames) {
+            
+            for (Object key : properties.keySet()) {
+                String name = (String) key;
+                String value = (String) properties.getProperty(name);
+                
+                if (name.startsWith(agentName + ".sinks." + sinkName)) {
+                    printWriter.println(name + " = " + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+
+        } // for
+        
+        printWriter.close();
+        
+    } // orderedPrinting
+    
+    private void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
+            throws FileNotFoundException {
+                
+        PrintWriter printWriter = new PrintWriter(file);      
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER);
+        printWriter.println();
+        
+        for (Object key : properties.keySet()) {
+            String name = (String) key;
+            String value = (String) properties.getProperty(name);
+            
+            if (descriptions.containsKey(name)) {
+                String description = (String) descriptions.get(name);
+                printWriter.print(description);
+            } // if 
+            
+            printWriter.println(name + "=" + value);
+            printWriter.println();
+        } // for
+        
+        printWriter.close();
+        
+    } // instancePrinting
+    
+    /** 
+    * getFileName: Gets the name of the agent from the given path.
+    * 
+    * @param url 
+    */
+    private String getFileName (String url) {
+        String[] pathElements = url.split("/");
+        return pathElements[pathElements.length - 1];
+    } // getFileName
+    
+    /**
+     * 
+     */
+    private Map<String,String> readDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String header = "";
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
+
+        while ((line = reader.readLine()) != null) {
+            
+            if (line.startsWith("#")) {
+                description += line + "\n";
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                String[] nameValue = line.split("=");
+                String name = nameValue[0];
+                descriptions.put(name, description);
+                description = "";
+            } // if
+            
+        } // while
+        
+        reader.close();
+        return descriptions;
+    }
+    
 } // ManagementInterface

@@ -1,0 +1,14 @@
+{
+   "cartodb_keys": [
+      {
+         "username": "user1",
+         "endpoint": "https://user1.cartodb.com",
+         "key": "1234567890abcdef"
+      },
+      {
+         "username": "user2",
+         "endpoint": "https://user2.cartodb.com",
+         "key": "abcdef1234567890"
+      }
+   ]
+}

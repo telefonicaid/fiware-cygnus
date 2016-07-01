@@ -56,7 +56,7 @@ public class NGSIMongoBaseSinkTest {
      */
     @Test
     public void testConfigureCollectionPrefixIsNotSystem() {
-        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+        System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                 + "-------- Configured 'collection_prefix' cannot be 'system.'");
         String collectionPrefix = "system.";
         String dbPrefix = "sth_";
@@ -66,10 +66,10 @@ public class NGSIMongoBaseSinkTest {
         
         try {
             assertTrue(sink.invalidConfiguration);
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "-  OK  - 'system.' value detected for 'collection_prefix'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "- FAIL - 'system.' value not detected for 'collection_prefix'");
             throw e;
         } // try catch
@@ -80,7 +80,7 @@ public class NGSIMongoBaseSinkTest {
      */
     @Test
     public void testConfigureCollectionPrefixIsEncoded() {
-        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+        System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                 + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
         String dbPrefix = "sth_";
@@ -91,11 +91,11 @@ public class NGSIMongoBaseSinkTest {
         
         try {
             assertTrue(sink.collectionPrefix.equals(encodedCollectionPrefix));
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "-  OK  - 'collection_prefix=" + collectionPrefix
                     + "' correctly encoded as '" + encodedCollectionPrefix + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "- FAIL - 'collection_prefix=" + collectionPrefix
                     + "' wrongly encoded as '" + encodedCollectionPrefix + "'");
             throw e;
@@ -107,7 +107,7 @@ public class NGSIMongoBaseSinkTest {
      */
     @Test
     public void testConfigureDBPrefixIsEncoded() {
-        System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+        System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                 + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
         String collectionPrefix = "sth_";
         String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
@@ -118,10 +118,10 @@ public class NGSIMongoBaseSinkTest {
         
         try {
             assertTrue(sink.dbPrefix.equals(encodedDbPrefix));
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + encodedDbPrefix + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionMongoSink.configure]")
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + encodedDbPrefix + "'");
             throw e;
         } // try catch

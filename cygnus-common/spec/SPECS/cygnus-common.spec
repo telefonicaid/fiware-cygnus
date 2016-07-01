@@ -169,6 +169,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
+- [cygnus-common] [hardening] Add /admin/configuration/agent/path/to/agent.conf route to API (#893)
+- [cygnus-common] [hardening] Add /admin/configuration/instance/path/to/instance.conf route to API (#894)
+
 * Wed Jun 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.1.0
 - [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
 - [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)

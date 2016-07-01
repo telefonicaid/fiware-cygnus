@@ -77,11 +77,21 @@ pages:
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
   - 'cygnus-twitter agent':
-      - 'Quick Start Guide': 'cygnus-twitter/to_be_done.md'
       - 'Installation and Administration Guide':
-          - 'To be done': 'cygnus-twitter/to_be_done.md'
+          - 'Introduction': 'cygnus-twitter/installation_and_administration_guide/introduction.md'
+          - 'Installation via docker': 'cygnus-twitter/installation_and_administration_guide/install_with_docker.md'
+          - 'Installation from sources': 'cygnus-twitter/installation_and_administration_guide/install_from_sources.md'
+          - 'Twitter agent configuration': 'cygnus-twitter/installation_and_administration_guide/configuration.md'
+          - 'Running from cmd': 'cygnus-twitter/installation_and_administration_guide/running.md'
+          - 'Testing': 'cygnus-twitter/installation_and_administration_guide/testing.md'
+          - 'Logs and alarms': 'cygnus-twitter/installation_and_administration_guide/logs_and_alarms.md'
+          - 'Reporting issues and contact information': 'cygnus-twitter/installation_and_administration_guide/issues_and_contact.md'
       - 'User and Programmer Guide':
-          - 'To be done': 'cygnus-twitter/to_be_done.md'
+          - 'Programmer Guide': 'cygnus-twitter/user_and_programmer_guide/programmer_guide.md'
+          - 'Reporting issues and contact information': 'cygnus-twitter/user_and_programmer_guide/issues_and_contact.md'
       - 'Flume extensions catalogue':
-          - 'To be done': 'cygnus-twitter/to_be_done.md'
-
+          - 'Introduction': 'cygnus-twitter/flume_extensions_catalogue/introduction.md'
+          - 'TwitterSource': 'cygnus-twitter/flume_extensions_catalogue/twitter_source.md'
+          - 'TwitterHDFSink': 'cygnus-twitter/flume_extensions_catalogue/twitter_hdfs_sink.md'
+          - 'Reporting issues and contact information': 'cygnus-twitter/flume_extensions_catalogue/issues_and_contact.md'
+      - 'Quick Start Guide': 'cygnus-twitter/quick_start_guide.md'
