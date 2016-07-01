@@ -97,6 +97,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
+- [cygnus-ngsi] [hardening] Do configurable the accepted resolutions in NGSISTHSink (#940)
+- [cygnus-ngsi] [feature] Log time in UTC format (#1071)
+- [cygnus-ngsi] [hardening] Document how the keys configuration file works (#1078)
+
 * Wed Jun 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.1.0
 - [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
 - [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)

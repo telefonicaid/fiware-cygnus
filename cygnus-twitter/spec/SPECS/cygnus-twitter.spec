@@ -97,4 +97,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
+- [cygnus-twitter][feature] Add cygnus-twitter (#1023)
+- [cygnus-twitter] [feature] Log time in UTC format (#1071)
+- [cygnus-twitter] Add documentation about logs and alarms (#1092)
 
