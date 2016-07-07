@@ -242,7 +242,7 @@ Response:
 [Top](#top)
 
 ##<a name="section9"></a>`GET /admin/log`
-If parameterized with `verbose=true` (or directly, the `verbose` parameter is avoided), it simply gets the logging level.
+If parameterized with `verbose=false` (or directly, the `verbose` parameter is avoided), it simply gets the logging level.
 ```
 GET http://<cygnus_host>:<management_port>/admin/log
 ```
