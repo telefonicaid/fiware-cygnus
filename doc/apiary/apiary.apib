@@ -601,6 +601,39 @@ Error list (HTTP response code in parenthesis):
 
 ## Group Admin API
 
+### Gets the log4j logging level [GET /admin/log]
+
++ Parameters
+
+       + ngsi_version: true or false (this case is the same than avoiding the verbose parameter, see next section)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/admin/log?verbose=<verbose_value>
+
++ Response 200 (application/json)
+
+       {
+               "log4j": {
+                       "appenders": [
+                               {
+                                       "layout": "...",
+                                       "name": "..."
+                               }
+                       ],
+                       "level": "..."
+               },
+                       "success": "true"
+       }
+
++ Response 500 (application/json)
+
+       {
+               "error": "..."
+       }
+
+
+
 ### Gets the log4j configuration [GET /admin/log]
 
 + Request
@@ -610,16 +643,7 @@ Error list (HTTP response code in parenthesis):
 + Response 200 (application/json)
 
        {
-           "log4j": {
-           "appenders": [
-               {
-                   "layout": "...",
-                   "name": "..."
-               }
-            ],
-            "level": "..."
-           },
-           "success": "true"
+           "level": "..."
        }
 
 + Response 500 (application/json)

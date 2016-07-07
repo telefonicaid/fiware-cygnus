@@ -147,7 +147,7 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.equals("/v1/groupingrules")) {
                     handleGetGroupingRules(response);
                 } else if (uri.equals("/admin/log")) {
-                    handleGetAdminLog(response);
+                    handleGetAdminLog(request, response);
                 } else if (uri.equals("/v1/subscriptions")) {
                     handleGetSubscriptions(request, response);
                 } else if (uri.startsWith("/admin/configuration/agent")) {
@@ -405,38 +405,48 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
     
-    private void handleGetAdminLog(HttpServletResponse response) throws IOException {
+    private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         try {
             Level level = LogManager.getRootLogger().getLevel();
-            Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-            String appendersJson = "";
+            String verbose = request.getParameter("verbose");
+            
+            if ((verbose == null) || (verbose.equals("false"))) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"level\": \"" + level + "\"}");
+                LOGGER.info("Log level succesfully sent");
+            } else if (verbose.equals("true")) {
+                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                String appendersJson = "";
 
-            while (appenders.hasMoreElements()) {
-                Appender appender = (Appender) appenders.nextElement();
-                String name = appender.getName();
-                PatternLayout layout = (PatternLayout) appender.getLayout();
+                while (appenders.hasMoreElements()) {
+                    Appender appender = (Appender) appenders.nextElement();
+                    String name = appender.getName();
+                    PatternLayout layout = (PatternLayout) appender.getLayout();
+
+                    if (appendersJson.isEmpty()) { 
+                        appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                                + layout.getConversionPattern() + "\"}";
+                    } else {
+                        appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
+                                + layout.getConversionPattern() + "\"}";
+                    } // else
+                    
+                } // while
 
                 if (appendersJson.isEmpty()) {
-                    appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\""
-                            + layout.getConversionPattern() + "\"}";
+                    appendersJson = "[]";
                 } else {
-                    appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                            + layout.getConversionPattern() + "\"}";
+                    appendersJson += "]";
                 } // else
-            } // while
 
-            if (appendersJson.isEmpty()) {
-                appendersJson = "[]";
-            } else {
-                appendersJson += "]";
-            } // else
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
-                    + "\",\"appenders\":" + appendersJson + "}}");
-            LOGGER.info("Log4j configuration successfully sent");
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
+                        + "\",\"appenders\":" + appendersJson + "}}");
+                LOGGER.info("Log4j configuration successfully sent");
+            } // if else if
+            
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().println("{\"success\":\"false\",\"error\":\"" + e.getMessage() + "\"}");

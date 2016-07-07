@@ -227,7 +227,7 @@ Response:
 [Top](#top)
 
 ##<a name="section8"></a>`DELETE /v1/groupingrules`
-Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
+Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter.
 
 ```
 DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
@@ -242,8 +242,7 @@ Response:
 [Top](#top)
 
 ##<a name="section9"></a>`GET /admin/log`
-Gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts).
-
+If parameterized with `verbose=false` (or directly, the `verbose` parameter is avoided), it simply gets the logging level.
 ```
 GET http://<cygnus_host>:<management_port>/admin/log
 ```
@@ -252,18 +251,32 @@ Responses:
 
 ```
 200 OK
+{"level": "...."}
+```
+
+```
+500 Internal Server Error
 {
-    "log4j": {
-        "appenders": [
-            {
-                "layout": "...",
-                "name": "..."
-            }
-        ],
-        "level": "..."
-    },
-    "success": "true"
+    "error": "..."
 }
+```
+
+Instead, if parameterized with `verbose=true` gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts.
+
+```
+GET http://<cygnus_host>:<management_port>/admin/log?verbose=true
+```
+
+Responses:
+
+```
+200 OK
+{"success":"true","....":{"level":".....","appenders":[{"name":"......","layout":"...."}]}}
+```
+
+```
+400 Bad Request
+{"success":"false","Verbose parameter only accepts 'true' as value"}
 ```
 
 ```
