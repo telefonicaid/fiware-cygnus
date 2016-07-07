@@ -242,9 +242,9 @@ Response:
 [Top](#top)
 
 ##<a name="section9"></a>`GET /admin/log`
-Gets the logging level.
+If parameterized with `verbose=true` (or directly, the `verbose` parameter is avoided), it simply gets the logging level.
 ```
-GET http://<cygnus_host>:<management_port>/admin/log4j
+GET http://<cygnus_host>:<management_port>/admin/log
 ```
 
 Responses:
@@ -261,7 +261,7 @@ Responses:
 }
 ```
 
-Gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts) given a parameter `verbose` with a true value. `false` value is invalid.
+Instead, if parameterized with `verbose=true` gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts.
 
 ```
 GET http://<cygnus_host>:<management_port>/admin/log?verbose=true
