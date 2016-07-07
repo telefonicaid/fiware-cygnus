@@ -412,7 +412,7 @@ public class ManagementInterface extends AbstractHandler {
             Level level = LogManager.getRootLogger().getLevel();
             String verbose = request.getParameter("verbose");
             
-            if (verbose == null) {
+            if ((verbose == null) || (verbose.equals("false"))) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().println("{\"level\": \"" + level + "\"}");
                 LOGGER.info("Log level succesfully sent");
@@ -445,11 +445,6 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
                         + "\",\"appenders\":" + appendersJson + "}}");
                 LOGGER.info("Log4j configuration successfully sent");
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"success\":\"false\",\"Verbose parameter only accepts "
-                        + "'true' as value\"}");
-                LOGGER.info("Verbose parameter only accepts 'true' as value");
             } // if else if
             
         } catch (Exception e) {
