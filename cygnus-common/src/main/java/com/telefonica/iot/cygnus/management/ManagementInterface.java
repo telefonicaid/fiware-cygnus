@@ -412,7 +412,6 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("application/json; charset=utf-8");
         
         try {
-            Level level = LogManager.getRootLogger().getLevel();
             String verbose = request.getParameter("verbose");
             String transient_ = request.getParameter("transient");
             String pathToFile = configurationPath + "/log4j.properties";
@@ -420,10 +419,12 @@ public class ManagementInterface extends AbstractHandler {
             String param = "flume.root.logger";
             
             if ((verbose == null) || (verbose.equals("false"))) {
+                
                 if ((transient_ == null) || (transient_.equals("true"))) {
+                    Level level = LogManager.getRootLogger().getLevel();
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"level\": \"" + level + "\"}");
-                    LOGGER.info("Log level succesfully sent");
+                    LOGGER.info("Log level succesfully sent");     
                 } else {
                 
                     if (file.exists()) {
@@ -452,9 +453,11 @@ public class ManagementInterface extends AbstractHandler {
                         LOGGER.debug("File not found in the path received");
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     } // if else
-                }
+                }            
             } else if (verbose.equals("true")) {
+                
                 if ((transient_ == null) || (transient_.equals("true"))) {
+                    Level level = LogManager.getRootLogger().getLevel();
                     Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
                     String appendersJson = "";
 
