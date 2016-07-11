@@ -69,10 +69,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.json.simple.JSONArray;
 import org.slf4j.MDC;
 /**
  *
@@ -93,9 +93,11 @@ public class ManagementInterface extends AbstractHandler {
     private static String channelRows = "";
     private static final String sinkRows = "";
     private OrionBackendImpl orionBackend;
+    private final String configurationPath;
     
     /**
      * Constructor.
+     * @param configurationPath
      * @param configurationFile
      * @param sources
      * @param channels
@@ -103,8 +105,9 @@ public class ManagementInterface extends AbstractHandler {
      * @param apiPort
      * @param guiPort
      */
-    public ManagementInterface(File configurationFile, ImmutableMap<String, SourceRunner> sources, ImmutableMap<String,
-            Channel> channels, ImmutableMap<String, SinkRunner> sinks, int apiPort, int guiPort) {
+    public ManagementInterface(String configurationPath, File configurationFile, ImmutableMap<String, 
+            SourceRunner> sources, ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks, 
+            int apiPort, int guiPort) {
         this.configurationFile = configurationFile;
 
         try {
@@ -120,6 +123,7 @@ public class ManagementInterface extends AbstractHandler {
         this.sinks = sinks;
         this.apiPort = apiPort;
         this.guiPort = guiPort;
+        this.configurationPath = configurationPath;
     } // ManagementInterface
 
     @Override
@@ -411,40 +415,104 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Level level = LogManager.getRootLogger().getLevel();
             String verbose = request.getParameter("verbose");
+            String transient_ = request.getParameter("transient");
+            String pathToFile = configurationPath + "/log4j.properties";
+            File file = new File(pathToFile);
+            String param = "flume.root.logger";
             
             if ((verbose == null) || (verbose.equals("false"))) {
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"level\": \"" + level + "\"}");
-                LOGGER.info("Log level succesfully sent");
-            } else if (verbose.equals("true")) {
-                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-                String appendersJson = "";
-
-                while (appenders.hasMoreElements()) {
-                    Appender appender = (Appender) appenders.nextElement();
-                    String name = appender.getName();
-                    PatternLayout layout = (PatternLayout) appender.getLayout();
-
-                    if (appendersJson.isEmpty()) { 
-                        appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                                + layout.getConversionPattern() + "\"}";
-                    } else {
-                        appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                                + layout.getConversionPattern() + "\"}";
-                    } // else
-                    
-                } // while
-
-                if (appendersJson.isEmpty()) {
-                    appendersJson = "[]";
+                if (transient_.equals("true")) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"level\": \"" + level + "\"}");
+                    LOGGER.info("Log level succesfully sent");
                 } else {
-                    appendersJson += "]";
-                } // else
+                
+                    if (file.exists()) {
+                        FileInputStream fileInputStream = new FileInputStream(file);
+                        Properties properties = new Properties();
+                        properties.load(fileInputStream);
 
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
-                        + "\",\"appenders\":" + appendersJson + "}}");
-                LOGGER.info("Log4j configuration successfully sent");
+                        JSONObject jsonObject = new JSONObject();
+
+                        String property = properties.getProperty(param);
+
+                        if (property != null) {
+                            String[] loggingParams = property.split(",");
+                            response.getWriter().println("{\"level\": \"" + loggingParams[0] + "\"}");
+                            LOGGER.debug(jsonObject);
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().println("{\"success\":\"false\","
+                                    + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
+                        } // if else
+
+                    } else {
+                        response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : { \"File not found in the path received\" }");
+                        LOGGER.debug("File not found in the path received");
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    } // if else
+                }
+            } else if (verbose.equals("true")) {
+                if (transient_.equals("true")) {
+                    Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                    String appendersJson = "";
+
+                    while (appenders.hasMoreElements()) {
+                        Appender appender = (Appender) appenders.nextElement();
+                        String name = appender.getName();
+                        PatternLayout layout = (PatternLayout) appender.getLayout();
+
+                        if (appendersJson.isEmpty()) { 
+                            appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                                    + layout.getConversionPattern() + "\"}";
+                        } else {
+                            appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
+                                    + layout.getConversionPattern() + "\"}";
+                        } // else
+
+                    } // while
+
+                    if (appendersJson.isEmpty()) {
+                        appendersJson = "[]";
+                    } else {
+                        appendersJson += "]";
+                    } // else
+
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
+                            + "\",\"appenders\":" + appendersJson + "}}");
+                    LOGGER.info("Log4j configuration successfully sent");
+                } else {
+                
+                    if (file.exists()) {
+                        FileInputStream fileInputStream = new FileInputStream(file);
+                        Properties properties = new Properties();
+                        properties.load(fileInputStream);
+                        JSONObject jsonObject = new JSONObject();
+                        
+                        String property = properties.getProperty(param);
+                        String[] loggingParams = property.split(",");                    
+
+                        String layoutName = "log4j.appender." + loggingParams[1] + ".layout."
+                                + "ConversionPattern";
+                        String layout = properties.getProperty(layoutName);
+                        String appenderJson = "[{\"name\":\"" + loggingParams[1] + "\",\"layout\":\"" 
+                                + layout + "\"}]";
+
+                        response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + loggingParams[0]
+                            + "\",\"appenders\":" + appenderJson + "}}");
+                        LOGGER.debug(jsonObject);
+                        response.setStatus(HttpServletResponse.SC_OK);
+
+                    } else {
+                        response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\" : { \"File not found in the path received\" }");
+                        LOGGER.debug("File not found in the path received");
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    } // if else
+                }
             } // if else if
             
         } catch (Exception e) {
