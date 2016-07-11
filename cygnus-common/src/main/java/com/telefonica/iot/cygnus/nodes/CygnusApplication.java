@@ -199,7 +199,7 @@ public class CygnusApplication extends Application {
             CommandLineParser parser = new GnuParser();
             CommandLine commandLine = parser.parse(options, args);
 
-                        File configurationFile = new File(commandLine.getOptionValue('f'));
+            File configurationFile = new File(commandLine.getOptionValue('f'));
             String agentName = commandLine.getOptionValue('n');
             boolean reload = !commandLine.hasOption("no-reload-conf");
             

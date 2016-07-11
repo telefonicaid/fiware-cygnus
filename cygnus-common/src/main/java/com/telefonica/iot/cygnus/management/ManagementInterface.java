@@ -72,7 +72,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.json.simple.JSONArray;
 import org.slf4j.MDC;
 /**
  *
