@@ -605,15 +605,17 @@ Error list (HTTP response code in parenthesis):
 
 + Parameters
 
-       + ngsi_version: true or false (this case is the same than avoiding the verbose parameter, see next section)
+       + verbose: true or false (this case is the same than avoiding the verbose parameter, see next section)
+       + transient: true (this case is the same than avoiding the transient parameter, see next section: retrieves information from memory) or false (retrieves information from `log4j.properties` file)
 
 + Request
 
-       GET http://<cygnus_host>:<management_port>/admin/log?verbose=<verbose_value>
+       GET http://<cygnus_host>:<management_port>/admin/log?verbose=<verbose_value>&transient=<transient_value>
 
 + Response 200 (application/json)
 
        {
+               "success": "true",
                "log4j": {
                        "appenders": [
                                {
@@ -622,8 +624,13 @@ Error list (HTTP response code in parenthesis):
                                }
                        ],
                        "level": "..."
-               },
-                       "success": "true"
+               }
+       }
+
++ Response 200 (application/json)
+
+       {
+               "level": "..."
        }
 
 + Response 500 (application/json)
@@ -643,13 +650,13 @@ Error list (HTTP response code in parenthesis):
 + Response 200 (application/json)
 
        {
-           "level": "..."
+               "level": "..."
        }
 
 + Response 500 (application/json)
 
        {
-           "error": "..."
+               "error": "..."
        }
 
 ### Update the logging level of Cygnus [PUT /admin/log]

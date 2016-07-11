@@ -367,7 +367,8 @@ public class ManagementInterfaceTest {
     @Test
     public void testHandle() {
         System.out.println(getTestTraceHead("[ManagementInterface.handle]") + " - Testing ManagementInterface.handle");        
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         
         try {
             managementInterface.handle(null, mockRequest, mockResponse, 1);
@@ -390,7 +391,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
                 + "valid subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
              
         try {
@@ -421,7 +423,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method posts a "
                 + "valid subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);
         
         try {
@@ -453,7 +456,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
                 + "find a subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -484,7 +488,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method doesn't "
                 + "find a subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -515,7 +520,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with empty fields (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -546,7 +552,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with empty fields (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -577,7 +584,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with missing fields (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -608,7 +616,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handlePostSubscription]") + " - POST method post a "
                 + "subscription with missing fields (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -639,7 +648,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
                 + "deletes a subscription (ngsi_version = 1)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -670,7 +680,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handleDeleteSubscription]") + " - DELETE method "
                 + "deletes a subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -702,7 +713,8 @@ public class ManagementInterfaceTest {
                 + "method deletes one instance configuration parameter");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         
         
          try {		
@@ -736,7 +748,8 @@ public class ManagementInterfaceTest {
         System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets a "
                 + "subscription (ngsi_version = 2)");
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         managementInterface.setOrionBackend(orionBackend);        
         
         try {
@@ -767,7 +780,8 @@ public class ManagementInterfaceTest {
          System.out.println(getTestTraceHead("[ManagementInterface.handleGetSubscriptions]") + " - GET method gets "
                  + "all subscriptions (ngsi_version = 2)");	         
          StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);		
-         ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);		
+         ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                 8081, 8082);		
          managementInterface.setOrionBackend(orionBackend);        		
          		
         try {		
@@ -799,7 +813,8 @@ public class ManagementInterfaceTest {
                 + "method gets all agent configuration parameters");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         
         try {		
             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
@@ -830,7 +845,8 @@ public class ManagementInterfaceTest {
                 + "method gets one agent configuration parameter");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);    
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);    
         
         try {		
             managementInterface.handleGetAdminConfigurationAgent(mockGetAllAgentParameters, responseWrapper, false);
@@ -861,7 +877,8 @@ public class ManagementInterfaceTest {
                 + "method gets all instance configuration parameters");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);      
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);      
         
         try {		
             managementInterface.handleGetAdminConfigurationInstance(mockGetAllInstanceParameters, 
@@ -895,7 +912,8 @@ public class ManagementInterfaceTest {
                 + "method gets one instance configuration parameter");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);        
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);        
         
         try {		
             managementInterface.handleGetAdminConfigurationInstance(mockGetOneInstanceParameter, 
@@ -929,7 +947,8 @@ public class ManagementInterfaceTest {
                 + "method post a single parameter in an agent configuration file");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);        
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);        
         
         try {		
             managementInterface.handlePostAdminConfigurationAgent(mockPostOneAgentParameter, responseWrapper, false);
@@ -960,7 +979,8 @@ public class ManagementInterfaceTest {
                 + "method posts one instance configuration parameter");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);        
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);        
         
         try {		
             managementInterface.handlePutAdminConfigurationInstance(mockPutOneInstanceParameter, 
@@ -994,7 +1014,8 @@ public class ManagementInterfaceTest {
                 + "method puts a single parameter in an agent configuration file");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
         
         try {		
             managementInterface.handlePutAdminConfigurationAgent(mockPutOneAgentParameter, responseWrapper, false);
@@ -1025,7 +1046,8 @@ public class ManagementInterfaceTest {
                 + "method puts one instance configuration parameter");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);     
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);     
         
         try {		
             managementInterface.handlePutAdminConfigurationInstance(mockPutOneInstanceParameter, 
@@ -1059,7 +1081,8 @@ public class ManagementInterfaceTest {
                 + "method deletes a single parameter in an agent configuration file");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082);       
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);       
         
         try {		
             managementInterface.handleDeleteAdminConfigurationAgent(mockDeleteOneAgentParameter, 
@@ -1091,7 +1114,8 @@ public class ManagementInterfaceTest {
                   " - Agent configuration doesn't start with 'agent_'");
         
         StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
-        ManagementInterface managementInterface = new ManagementInterface(new File(""), null, null, null, 8081, 8082); 
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082); 
         
         try {		
             managementInterface.handleDeleteAdminConfigurationAgent(mockRequestBadFileName, responseWrapper, false);
