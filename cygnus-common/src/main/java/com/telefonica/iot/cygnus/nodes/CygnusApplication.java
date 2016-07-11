@@ -204,6 +204,7 @@ public class CygnusApplication extends Application {
             boolean reload = !commandLine.hasOption("no-reload-conf");
             
             String configurationPath = configurationFile.getParent();
+            
             if (commandLine.hasOption('h')) {
                 new HelpFormatter().printHelp("cygnus-flume-ng agent", options, true);
                 return;

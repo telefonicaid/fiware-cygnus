@@ -420,7 +420,7 @@ public class ManagementInterface extends AbstractHandler {
             String param = "flume.root.logger";
             
             if ((verbose == null) || (verbose.equals("false"))) {
-                if (transient_.equals("true")) {
+                if ((transient_ == null) || (transient_.equals("true"))) {
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"level\": \"" + level + "\"}");
                     LOGGER.info("Log level succesfully sent");
@@ -454,7 +454,7 @@ public class ManagementInterface extends AbstractHandler {
                     } // if else
                 }
             } else if (verbose.equals("true")) {
-                if (transient_.equals("true")) {
+                if ((transient_ == null) || (transient_.equals("true"))) {
                     Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
                     String appendersJson = "";
 
