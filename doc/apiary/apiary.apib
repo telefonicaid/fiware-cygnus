@@ -606,7 +606,7 @@ Error list (HTTP response code in parenthesis):
 + Parameters
 
        + verbose: true or false (this case is the same than avoiding the verbose parameter, see next section)
-       + transient: true (retrieves information from memory) or false (retrieves information from `log4j.properties` file)
+       + transient: true (this case is the same than avoiding the transient parameter, see next section: retrieves information from memory) or false (retrieves information from `log4j.properties` file)
 
 + Request
 
@@ -643,13 +643,9 @@ Error list (HTTP response code in parenthesis):
 
 ### Gets the log4j configuration [GET /admin/log]
 
-+ Parameters
-
-       + transient: true (retrieves information from memory) or false (retrieves information from `log4j.properties` file)
-
 + Request
 
-       GET http://<cygnus_host>:<management_port>/admin/log&transient=<transient_value>
+       GET http://<cygnus_host>:<management_port>/admin/log
 
 + Response 200 (application/json)
 
