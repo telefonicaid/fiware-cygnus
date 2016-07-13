@@ -25,8 +25,8 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -299,7 +299,7 @@ public class NGSIMySQLSink extends NGSISink {
         } // initialize
         
         private String buildDbName() throws Exception {
-            String name = NGSIUtils.encode(service, false, true);
+            String name = NGSICharsets.encodeMySQL(service);
 
             if (name.length() > CommonConstants.MAX_NAME_LEN) {
                 throw new CygnusBadConfiguration("Building database name '" + name
@@ -314,23 +314,19 @@ public class NGSIMySQLSink extends NGSISink {
 
             switch(dataModel) {
                 case DMBYSERVICEPATH:
-                    if (servicePath.equals("/")) {
-                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
-                                + "dm-by-service-path data model");
-                    } // if
-                    
-                    name = NGSIUtils.encode(servicePath, true, false);
+                    name = NGSICharsets.encodeMySQL(servicePath);
                     break;
                 case DMBYENTITY:
-                    String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true);
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entity);
                     break;
                 case DMBYATTRIBUTE:
-                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true)
-                            + '_' + NGSIUtils.encode(attribute, false, true);
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entity)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(attribute);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
