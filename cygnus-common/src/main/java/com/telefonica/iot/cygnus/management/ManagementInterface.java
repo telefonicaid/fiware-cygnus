@@ -1832,6 +1832,7 @@ public class ManagementInterface extends AbstractHandler {
                 console.setLayout(PATTERN); 
                 
                 try {
+                    
                     if (logLevel == null) {
                         Level level = LogManager.getRootLogger().getLevel();
                         console.setThreshold(level);
@@ -1855,6 +1856,7 @@ public class ManagementInterface extends AbstractHandler {
                         LOGGER.info("log4j appender and logging level updated to " + logLevel.toUpperCase() + "," 
                                 + appender + "'");
                     } // if else 
+                    
                 } catch (Exception e) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"error\":\"Invalid log level\"}");
@@ -2669,7 +2671,6 @@ public class ManagementInterface extends AbstractHandler {
             String name = (String) description;
             String desc = (String) descriptions.get(name);
             printWriter.print(desc);
-            System.out.println("NAME: " + name + " and description: " + desc);
             
             for (Object property: properties.keySet()) {
                 String prop = (String) property;
@@ -2677,7 +2678,6 @@ public class ManagementInterface extends AbstractHandler {
                 
                 if ((prop.startsWith(name)) || (prop.equals(name))) {
                     printWriter.println(prop + "=" + value);
-                    System.out.println("INSERT: " + prop + " : " + value);
                 } // if
                 
             } // for
@@ -2685,18 +2685,9 @@ public class ManagementInterface extends AbstractHandler {
             printWriter.println();
  
         } // for
+        
         printWriter.close();
         
     } // orderedLogPrinting
-    
-    /**
-     * CheckLoggingLevel: Check if a received given is valid.
-     * 
-     * @param: loggingLevel
-     */
-    private boolean checkLoggingLevel (Level level) {
-        
-        return true;
-    } // checkLoggingLevel
     
 } // ManagementInterface
