@@ -65,6 +65,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Layout;
 import org.slf4j.MDC;
 /**
  *
@@ -1787,43 +1790,132 @@ public class ManagementInterface extends AbstractHandler {
         
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
+        String appender = request.getParameter("appender");
+        String transient_ = request.getParameter("transient");
         
-        if (logLevel != null) {
-            if (logLevel.equals("DEBUG")) {
-                LogManager.getRootLogger().setLevel(Level.DEBUG);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("INFO")) {
-                LogManager.getRootLogger().setLevel(Level.INFO);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("WARNING") || logLevel.equals("WARN")) {
-                LogManager.getRootLogger().setLevel(Level.WARN);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("ERROR")) {
-                LogManager.getRootLogger().setLevel(Level.ERROR);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("FATAL")) {
-                LogManager.getRootLogger().setLevel(Level.FATAL);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else {
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            
+            if ((logLevel == null) && (appender == null)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"error\":\"Invalid log level\"}");
-                LOGGER.error("Invalid log level '" + logLevel + "'");
-            } // if else
+                response.getWriter().println("{\"error\":\"'level' or 'appender' parameter required\"}");
+                LOGGER.error("Parameter missing in the request");
+            } else if ((logLevel != null) && (appender == null)) {
+                
+                try {
+                    LoggingLevels.valueOf(logLevel.toUpperCase());
+                    LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"log4j logging level updated to " 
+                            + logLevel.toUpperCase() + "\" }");
+                    LOGGER.info("log4j logging level updated to " + logLevel.toUpperCase());
+                }
+                catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"error\":\"Invalid log level\"}");
+                    LOGGER.error("Invalid log level '" + logLevel + "'");
+                } // try catch
+                
+            } else {
+                
+                // the only solution is to remove the appender and then add the new one
+                // See: http://stackoverflow.com/questions/8965946/configuring-log4j-loggers-programmatically
+                ConsoleAppender console = new ConsoleAppender();
+                String appenderName = "";
+                
+                for (Enumeration appenders = LogManager.getRootLogger().getAllAppenders(); appenders.hasMoreElements(); ) {
+                    Appender app = (Appender) appenders.nextElement();
+                    appenderName = app.getName();
+                } // for
+                
+                Layout PATTERN = LogManager.getRootLogger().getAppender(appenderName).getLayout();
+                console.setName(appender);
+                console.setLayout(PATTERN); 
+                
+                try {
+                    
+                    if (logLevel == null) {
+                        Level level = LogManager.getRootLogger().getLevel();
+                        console.setThreshold(level);
+                    } else {
+                        LoggingLevels.valueOf(logLevel.toUpperCase());
+                        LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));  
+                    } // if else
+                
+                    console.activateOptions();
+                    LogManager.getRootLogger().addAppender(console);
+                    LogManager.getRootLogger().removeAppender(appenderName);
+                
+                    response.setStatus(HttpServletResponse.SC_OK);
+                
+                    if (logLevel == null) {
+                        response.getWriter().println("{\"success\":\"log4j appender updated to " + appender + "\"}");
+                        LOGGER.info("log4j appender updated to " + appender + "'");
+                    } else {
+                        response.getWriter().println("{\"success\":\"log4j appender and logging level updated to " 
+                                + logLevel.toUpperCase()+ "," + appender + "\"}");
+                        LOGGER.info("log4j appender and logging level updated to " + logLevel.toUpperCase() + "," 
+                                + appender + "'");
+                    } // if else 
+                    
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"error\":\"Invalid log level\"}");
+                    LOGGER.error("Invalid log level '" + logLevel + "'");
+                } // try catch
+                    
+            } // if else if
+            
         } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"error\":\"Log level missing\"}");
-            LOGGER.error("Log level missing in the request");
-        } // if else
+            String pathToFile = configurationPath + "/log4j.properties";
+            System.out.println("filePath: " + configurationPath + "/log4j.properties");
+            File file = new File(pathToFile);
+
+            try {
+                Properties properties = new Properties();   
+                properties.load(new FileInputStream(file));
+                Map<String, String> descriptions = readLogDescriptions(file); 
+                
+                String[] flumeLogger = properties.getProperty("flume.root.logger").split(",");
+                
+                try {
+                    
+                    if (logLevel == null) {
+                        logLevel = flumeLogger[0];
+                    } else {
+                        LoggingLevels.valueOf(logLevel.toUpperCase());
+                        LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+                    } // if else
+
+                    if (appender == null) {
+                        appender = flumeLogger[1];
+                    } // if
+
+                    properties.put("flume.root.logger", logLevel.toUpperCase() + "," + appender);
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("log4j", properties);
+
+                    orderedLogPrinting(properties, descriptions, file);
+
+                    response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\" : " + jsonObject + "}");
+                    LOGGER.debug(jsonObject);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                        
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"error\":\"Invalid log level\"}");
+                    LOGGER.error("Invalid log level '" + logLevel + "'");
+                } // try catch
+                
+            } catch (Exception e) {
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            } // try catch 
+        }
+        
+        
     } // handlePutAdminLog
     
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
@@ -2492,7 +2584,6 @@ public class ManagementInterface extends AbstractHandler {
                 
         // read the comments and the properties
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        String header = "";
         String description = "";
         String line;
         Map<String,String> descriptions = new LinkedHashMap<String,String>();
@@ -2508,7 +2599,6 @@ public class ManagementInterface extends AbstractHandler {
             } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
                 String[] nameValue = line.split("=");
                 String name = nameValue[0];
-                descriptions.put(name, description);
                 description = "";
             } // if
             
@@ -2516,6 +2606,88 @@ public class ManagementInterface extends AbstractHandler {
         
         reader.close();
         return descriptions;
-    }
+    } // readDescriptions
+    
+    /** 
+     * readLogDescriptions: Read the descriptions from a log4j file.
+     * 
+     * @param file
+     */
+    private Map<String,String> readLogDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
+        boolean flag = true;
+
+        while ((line = reader.readLine()) != null) {
+                        
+            if (line.startsWith("#")) {
+                description += line + "\n";
+                flag = true;
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+                flag = true;
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                
+                if (flag == true) {
+                    String[] appenderFields = line.split("(\\.)|(=)");
+                    String name = appenderFields[0] + "." + appenderFields[1];
+                
+                    if (appenderFields[1].equals("appender")) {
+                        name += "." + appenderFields[2];
+                    } // if
+                    
+                    descriptions.put(name, description);
+                    description = "";
+                    flag = false;
+                } // if
+
+            } // if else if
+            
+        } // while
+        
+        reader.close();
+        return descriptions;
+    } // readLogDescriptions
+    
+    /** 
+     * OrderedPrintWriter: Creates a writer with the original order's agent file.
+     * 
+     * @param printWriter
+     * @param properties 
+     */
+    private void orderedLogPrinting (Properties properties, Map<String,String> descriptions, File file) 
+            throws FileNotFoundException {
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER + "\n");      
+        printWriter.println("# To be put in APACHE_FLUME_HOME/conf/log4j.properties \n");
+        
+        for (Object description : descriptions.keySet()) {
+            String name = (String) description;
+            String desc = (String) descriptions.get(name);
+            printWriter.print(desc);
+            
+            for (Object property: properties.keySet()) {
+                String prop = (String) property;
+                String value = (String) properties.getProperty(prop);
+                
+                if ((prop.startsWith(name)) || (prop.equals(name))) {
+                    printWriter.println(prop + "=" + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+ 
+        } // for
+        
+        printWriter.close();
+        
+    } // orderedLogPrinting
     
 } // ManagementInterface

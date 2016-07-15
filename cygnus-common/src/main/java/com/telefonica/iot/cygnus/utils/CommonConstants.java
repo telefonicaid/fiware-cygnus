@@ -71,7 +71,7 @@ public final class CommonConstants {
     public static final String INTERNAL_CONCATENATOR = "=";
     public static final String CONCATENATOR = "x0000";
     
-    // Header for API uses
+    // Used by ManagementInterface for API 
     public static final String CYGNUS_IPR_HEADER = "#####\n"  
                                     + "# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U\n" 
                                     + "# \n" 
@@ -94,5 +94,6 @@ public final class CommonConstants {
                                     + "# \n" 
                                     + "# For those usages not covered by the GNU Affero General Public License please "
                                     + "contact with iot_support at tid dot es";
+    public enum LoggingLevels { FATAL, ERROR, WARN, INFO, DEBUG, ALL, NONE, OFF }
     
 } // CommonConstants
