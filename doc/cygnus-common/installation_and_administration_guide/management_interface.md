@@ -285,21 +285,31 @@ Responses:
 [Top](#top)
 
 ##<a name="section10"></a>`PUT /admin/log`
-Updates the logging level of Cygnus, given the logging level as a query parameter.
+Updates the logging level of Cygnus and the name of the appender, given the logging level and the appender name as a query parameters. If parameterized with `transient=true` (or directly, the `transient` parameter is avoided) the information is retrieved from memory. If `transient=false` the information is retrieved from `log4j.properties` file.
 
 Valid logging levels are `DEBUG`, `INFO`, `WARNING` (`WARN` also works), `ERROR` and `FATAL`.
 
 ```
-PUT http://<cygnus_host>:<management_port>/admin/log?level=<log_level>
+PUT http://<cygnus_host>:<management_port>/admin/log
 ```
 
 Responses:
 
 ```
 200 OK
+{"success":"true","result" : { "log4j logging level updated to ...." }
 ```
 
 ```
+200 OK
+{"success":"log4j appender updated to ....."}
+```
+
+```
+200 OK
+{"success":"log4j appender and logging level updated to ..... , ....."}
+```
+
 400 Bad Request
 {"error":"Invalid log level"}
 ```
@@ -307,6 +317,24 @@ Responses:
 ```
 400 Bad Request
 {"error":"}
+```
+
+Instead, if parameterized with `transient=false` puts the information into `log4j.properties` file, not in memory.
+
+```
+PUT http://<cygnus_host>:<management_port>/admin/log?transient=false
+```
+
+Responses:
+
+```
+200 OK
+{"success":"true","result" : {"log4j":{"........."}}}
+```
+
+```
+400 Bad Request
+{"error":""}
 ```
 
 [Top](#top)

@@ -659,28 +659,66 @@ Error list (HTTP response code in parenthesis):
                "error": "..."
        }
 
-### Update the logging level of Cygnus [PUT /admin/log]
+### Update the logging level and/or the appender of Cygnus [PUT /admin/log]
 
 + Parameters
 
-        + loglevel: Must be DEBUG, INFO, WARN, ERROR o FATAL (String) - A valid log level.
+        + level: Must be DEBUG, INFO, WARN, ERROR o FATAL (String) - A valid log level.
+        + appender: A valid appender name.
+        + transient: Must be true (or diretly, the transient parameter is avoided, see next section) or false (PUT in log4j properties file).
 
 + Request
 
-       PUT http://<cygnus_host>:<management_port>/admin/log?level=<log_level>
+       PUT http://<cygnus_host>:<management_port>/admin/log?level=<log_level>&appender=<appender_value>&transient=false
 
 + Response 200 (text/plain)
 
-       OK
-
-+ Response 400 (application/json)
-
        {
-           "error":"Invalid log level"
+               "success":"true","result" : {
+                       "log4j":{
+                               "........."
+                       }
+               }
        }
 
 + Response 400 (application/json)
 
        {
-           "error":""
+           "error":"......"
+       }
+
+### Update the loggin level and/or the appender of Cygnys [PUT /admin/log]
+
++ Request
+
+       PUT http://<cygnus_host>:<management_port>/admin/loggin
+
++ Response 200 (application/json)
+
+       {
+               "success":"log4j logging level updated to ...."
+       }
+
++ Response 200 (application/json)
+
+       {
+               "success":"log4j appender updated to ....."
+       }
+
++ Response 200 (application/json)
+
+       {
+               "success":"log4j appender and logging level updated to ..... , ....."
+       }
+
++ Response 400 (application/json)
+
+       {
+               "error":"Invalid log level"
+       }
+
++ Response 400 (application/json)
+
+       {
+               "error":"......."
        }
