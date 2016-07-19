@@ -42,7 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.Enumeration;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,10 +53,8 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
-import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.apache.log4j.PatternLayout;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mortbay.jetty.HttpConnection;
@@ -65,6 +62,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -412,8 +410,8 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("application/json; charset=utf-8");
         Level level = LogManager.getRootLogger().getLevel();
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("{\"level\":\"" + level + "}");
-        LOGGER.info("Log4j configuration successfully obtained");
+        response.getWriter().println("{\"level\":\"" + level + "\"}");
+        LOGGER.info("Cygnus logging level successfully obtained");
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -1679,42 +1677,19 @@ public class ManagementInterface extends AbstractHandler {
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
         
-        if (logLevel != null) {
-            if (logLevel.equals("DEBUG")) {
-                LogManager.getRootLogger().setLevel(Level.DEBUG);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("INFO")) {
-                LogManager.getRootLogger().setLevel(Level.INFO);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("WARNING") || logLevel.equals("WARN")) {
-                LogManager.getRootLogger().setLevel(Level.WARN);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("ERROR")) {
-                LogManager.getRootLogger().setLevel(Level.ERROR);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("FATAL")) {
-                LogManager.getRootLogger().setLevel(Level.FATAL);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"error\":\"Invalid log level\"}");
-                LOGGER.error("Invalid log level '" + logLevel + "'");
-            } // if else
-        } else {
+        try {
+            LoggingLevels.valueOf(logLevel.toUpperCase());
+            LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"log4j logging level updated to " 
+                    + logLevel.toUpperCase() + "\" }");
+            LOGGER.info("log4j logging level updated to " + logLevel.toUpperCase());
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"error\":\"Log level missing\"}");
-            LOGGER.error("Log level missing in the request");
-        } // if else
+            response.getWriter().println("{\"error\":\"Invalid log level\"}");
+            LOGGER.error("Invalid log level '" + logLevel + "'");
+        } // try catch
+        
     } // handlePutAdminLog
     
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,

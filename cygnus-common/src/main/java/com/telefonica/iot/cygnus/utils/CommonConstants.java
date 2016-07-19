@@ -95,4 +95,7 @@ public final class CommonConstants {
                                     + "# For those usages not covered by the GNU Affero General Public License please "
                                     + "contact with iot_support at tid dot es";
     
+    // Enumeration for ManagementInterface
+    public enum LoggingLevels { FATAL, ERROR, WARN, INFO, DEBUG, ALL, OFF }
+    
 } // CommonConstants
