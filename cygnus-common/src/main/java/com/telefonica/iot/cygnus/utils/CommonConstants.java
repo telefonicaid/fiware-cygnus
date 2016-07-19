@@ -96,6 +96,6 @@ public final class CommonConstants {
                                     + "contact with iot_support at tid dot es";
     
     // Enumeration for ManagementInterface
-    public enum LoggingLevels { FATAL, ERROR, WARN, INFO, DEBUG, ALL, NONE, OFF }
+    public enum LoggingLevels { FATAL, ERROR, WARN, INFO, DEBUG, ALL, OFF }
     
 } // CommonConstants
