@@ -242,7 +242,8 @@ Response:
 [Top](#top)
 
 ##<a name="section9"></a>`GET /admin/log`
-If parameterized with `verbose=false` (or directly, the `verbose` parameter is avoided), it simply gets the logging level using `transient` parameter. If parameterized with `transient=true` (or directly, the `transient` parameter is avoided) the information is retrieved from memory. If `transient=false` the information is retrieved from `log4j.properties` file.
+Gets the logging level of Cygnus.
+
 ```
 GET http://<cygnus_host>:<management_port>/admin/log
 ```
@@ -252,27 +253,6 @@ Responses:
 ```
 200 OK
 {"level": "...."}
-```
-
-```
-500 Internal Server Error
-{
-    "error": "..."
-}
-```
-
-Instead, if parameterized with `verbose=true` gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts).
-Moreover, if parameterized with `transient=false` retrieves the information from `log4j.properties` file, not from memory.
-
-```
-GET http://<cygnus_host>:<management_port>/admin/log?verbose=true&transient=false
-```
-
-Responses:
-
-```
-200 OK
-{"success":"true","....":{"level":".....","appenders":[{"name":"......","layout":"...."}]}}
 ```
 
 ```

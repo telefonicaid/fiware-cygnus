@@ -410,119 +410,10 @@ public class ManagementInterface extends AbstractHandler {
     
     private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
-        
-        try {
-            String verbose = request.getParameter("verbose");
-            String transient_ = request.getParameter("transient");
-            String pathToFile = configurationPath + "/log4j.properties";
-            File file = new File(pathToFile);
-            String param = "flume.root.logger";
-            
-            if ((verbose == null) || (verbose.equals("false"))) {
-                
-                if ((transient_ == null) || (transient_.equals("true"))) {
-                    Level level = LogManager.getRootLogger().getLevel();
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"level\": \"" + level + "\"}");
-                    LOGGER.info("Log level succesfully sent");     
-                } else {
-                
-                    if (file.exists()) {
-                        FileInputStream fileInputStream = new FileInputStream(file);
-                        Properties properties = new Properties();
-                        properties.load(fileInputStream);
-
-                        JSONObject jsonObject = new JSONObject();
-
-                        String property = properties.getProperty(param);
-
-                        if (property != null) {
-                            String[] loggingParams = property.split(",");
-                            response.getWriter().println("{\"level\": \"" + loggingParams[0] + "\"}");
-                            LOGGER.debug(jsonObject);
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        } else {
-                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                            response.getWriter().println("{\"success\":\"false\","
-                                    + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
-                        } // if else
-
-                    } else {
-                        response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : { \"File not found in the path received\" }");
-                        LOGGER.debug("File not found in the path received");
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    } // if else
-                }            
-            } else if (verbose.equals("true")) {
-                
-                if ((transient_ == null) || (transient_.equals("true"))) {
-                    Level level = LogManager.getRootLogger().getLevel();
-                    Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-                    String appendersJson = "";
-
-                    while (appenders.hasMoreElements()) {
-                        Appender appender = (Appender) appenders.nextElement();
-                        String name = appender.getName();
-                        PatternLayout layout = (PatternLayout) appender.getLayout();
-
-                        if (appendersJson.isEmpty()) { 
-                            appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                                    + layout.getConversionPattern() + "\"}";
-                        } else {
-                            appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                                    + layout.getConversionPattern() + "\"}";
-                        } // else
-
-                    } // while
-
-                    if (appendersJson.isEmpty()) {
-                        appendersJson = "[]";
-                    } else {
-                        appendersJson += "]";
-                    } // else
-
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
-                            + "\",\"appenders\":" + appendersJson + "}}");
-                    LOGGER.info("Log4j configuration successfully sent");
-                } else {
-                
-                    if (file.exists()) {
-                        FileInputStream fileInputStream = new FileInputStream(file);
-                        Properties properties = new Properties();
-                        properties.load(fileInputStream);
-                        JSONObject jsonObject = new JSONObject();
-                        
-                        String property = properties.getProperty(param);
-                        String[] loggingParams = property.split(",");                    
-
-                        String layoutName = "log4j.appender." + loggingParams[1] + ".layout."
-                                + "ConversionPattern";
-                        String layout = properties.getProperty(layoutName);
-                        String appenderJson = "[{\"name\":\"" + loggingParams[1] + "\",\"layout\":\"" 
-                                + layout + "\"}]";
-
-                        response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + loggingParams[0]
-                            + "\",\"appenders\":" + appenderJson + "}}");
-                        LOGGER.debug(jsonObject);
-                        response.setStatus(HttpServletResponse.SC_OK);
-
-                    } else {
-                        response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : { \"File not found in the path received\" }");
-                        LOGGER.debug("File not found in the path received");
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    } // if else
-                }
-            } // if else if
-            
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("{\"success\":\"false\",\"error\":\"" + e.getMessage() + "\"}");
-            LOGGER.info(e.getMessage());
-        } // try catch
-        
+        Level level = LogManager.getRootLogger().getLevel();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"level\":\"" + level + "}");
+        LOGGER.info("Log4j configuration successfully obtained");
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -2516,6 +2407,6 @@ public class ManagementInterface extends AbstractHandler {
         
         reader.close();
         return descriptions;
-    }
+    } // readDescriptions
     
 } // ManagementInterface
