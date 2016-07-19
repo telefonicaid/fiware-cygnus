@@ -435,8 +435,6 @@ public class ManagementInterface extends AbstractHandler {
             
             if ((transient_ == null) || (transient_.equals("true"))) {
                 
-                System.out.println("getLevel:" + getLevel +  ", getAppender: " + getAppender + ", levelStr: " 
-                        + levelStr + ", appenderStr: " + appenderStr);
                 if (!getLevel && !getAppender) {
                     Level level = LogManager.getRootLogger().getLevel();
                     Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
@@ -529,6 +527,7 @@ public class ManagementInterface extends AbstractHandler {
                         String layoutName = "log4j.appender." + appenderStr + ".layout."
                             + "ConversionPattern";
                         String layout = properties.getProperty(layoutName);
+                        
                         if (layout != null) {
                             String appenderJson = "{\"name\":\"" + appenderStr + "\",\"layout\":\"" 
                                 + layout + "\"}";
@@ -536,18 +535,19 @@ public class ManagementInterface extends AbstractHandler {
                             response.getWriter().println("{\"success\":\"true\",\"appender\":" + appenderJson + "}}");
                             LOGGER.debug(jsonObject);
                         } else {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                             response.getWriter().println("{\"success\":\"false\","
                                 + "\"result\" : {\"Appender not found\"}}");
                             LOGGER.debug("Invalid appender name");
-                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        }
+                        } // if else
+                        
                     }  // if else if
 
                 } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : { \"File not found in the path received\" }");
                     LOGGER.debug("File not found in the path received");
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 } // if else
                 
             } // if else if
@@ -2597,7 +2597,6 @@ public class ManagementInterface extends AbstractHandler {
                 String appender = splitAppender[2];
                 
                 if (!appendersName.contains(appender)) {
-                    System.out.println("ADDING: " + appender);
                     appendersName.add(appender);
                 } // if
                 
