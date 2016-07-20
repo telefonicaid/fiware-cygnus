@@ -35,6 +35,7 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -64,13 +65,8 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.slf4j.MDC;
 /**
  *
  * @author frb
@@ -468,7 +464,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request));
+                ManagementInterfaceUtils.setCorrelator(request));
                 
         BufferedReader reader = request.getReader();
         String endpointStr = "";
@@ -615,7 +611,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();     
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -690,7 +686,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();     
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (param == null) {
             allParameters = true;
@@ -771,7 +767,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // check the Json syntax of the new rule
         JSONParser jsonParser = new JSONParser();
@@ -885,7 +881,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -1035,7 +1031,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1098,7 +1094,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.put(param, newValue);                       
             jsonObject.put("agent", properties);                        
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1122,7 +1118,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1167,7 +1163,7 @@ public class ManagementInterface extends AbstractHandler {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
             JSONObject jsonObject = new JSONObject();          
-            Map<String, String> descriptions = readDescriptions(file);
+            Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             
             for (Object key: properties.keySet()) {
                 String name = (String) key;
@@ -1185,7 +1181,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.put(param, newValue);                       
             jsonObject.put("instance", properties);                        
-            instancePrinting(properties, file, descriptions);
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1248,7 +1244,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request));
+                ManagementInterfaceUtils.setCorrelator(request));
         
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -1346,7 +1342,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1397,7 +1393,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.remove(param);                                           
             jsonObject.put("agent", properties);                  
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
             
             response.setStatus(HttpServletResponse.SC_OK); 
             
@@ -1454,7 +1450,7 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            Map<String,String> descriptions = readDescriptions(file);
+            Map<String,String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             JSONObject jsonObject = new JSONObject();
             boolean paramExists = false;
             
@@ -1469,7 +1465,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.remove(param);                                           
             jsonObject.put("agent", properties);                  
-            instancePrinting(properties, file, descriptions);  
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);  
             response.setStatus(HttpServletResponse.SC_OK); 
             
             if (paramExists) {
@@ -1588,7 +1584,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // get the rule ID to be updated
         long id = new Long(request.getParameter("id"));
@@ -1699,7 +1695,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1749,7 +1745,7 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("agent", properties);
             
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1772,7 +1768,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1816,11 +1812,11 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            Map<String, String> descriptions = readDescriptions(file);
+            Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             properties.put(param, newValue);                                   
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("instance", properties);            
-            instancePrinting(properties, file, descriptions);                               
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);                               
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
@@ -1844,7 +1840,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-            setCorrelator(request)); 
+            ManagementInterfaceUtils.setCorrelator(request)); 
 
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -2195,22 +2191,6 @@ public class ManagementInterface extends AbstractHandler {
         
     } // manageErrorMsg 
     
-    private String setCorrelator (HttpServletRequest request) {
-        // Get an internal transaction ID.
-        String transId = CommonUtils.generateUniqueId(null, null);
-        
-        // Get also a correlator ID if not sent in the notification. Id correlator ID is not notified
-        // then correlator ID and transaction ID must have the same value.
-        String corrId = CommonUtils.generateUniqueId
-               (request.getHeader(CommonConstants.HEADER_CORRELATOR_ID), transId);
-        
-        // set the given header to the response or create it
-        MDC.put(CommonConstants.LOG4J_CORR, corrId);
-        MDC.put(CommonConstants.LOG4J_TRANS, transId);
-        return corrId;
-    } // setCorrelator
-    
-    
     /**
      * SetOrionBackend: Sets a given orionBackend.
      * 
@@ -2219,169 +2199,5 @@ public class ManagementInterface extends AbstractHandler {
     protected void setOrionBackend(OrionBackendImpl orionBackend) {
         this.orionBackend = orionBackend;
     } // setOrionBackend
-    
-    /** 
-     * OrderedPrintWriter: Creates a writer with the original order's agent file.
-     * 
-     * @param printWriter
-     * @param properties 
-     */
-    private void orderedPrinting(Properties properties, File file) throws FileNotFoundException {
-                
-        PrintWriter printWriter = new PrintWriter(file);
-        String agentName = "";
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String[] nameParts = name.split("\\.");
-            agentName = nameParts[0];
-            break;
-        } // for
-                
-        ArrayList<String> sourceNames = null;
-        ArrayList<String> channelNames = null;
-        ArrayList<String> sinkNames=  null;
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String value = (String) properties.getProperty(name);
-            
-            if (name.equals(agentName + ".sources")) {
-                sourceNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-            if (name.equals(agentName + ".channels")) {
-                channelNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-            if (name.equals(agentName + ".sinks")) {
-                sinkNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-        } // for
-        
-        printWriter.println();
-        
-        for (String sourceName : sourceNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".sources." + sourceName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        for (String channelName : channelNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".channels." + channelName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        for (String sinkName : sinkNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".sinks." + sinkName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        printWriter.close();
-        
-    } // orderedPrinting
-    
-    private void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
-            throws FileNotFoundException {
-                
-        PrintWriter printWriter = new PrintWriter(file);      
-        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER);
-        printWriter.println();
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String value = (String) properties.getProperty(name);
-            
-            if (descriptions.containsKey(name)) {
-                String description = (String) descriptions.get(name);
-                printWriter.print(description);
-            } // if 
-            
-            printWriter.println(name + "=" + value);
-            printWriter.println();
-        } // for
-        
-        printWriter.close();
-        
-    } // instancePrinting
-    
-    /** 
-    * getFileName: Gets the name of the agent from the given path.
-    * 
-    * @param url 
-    */
-    private String getFileName (String url) {
-        String[] pathElements = url.split("/");
-        return pathElements[pathElements.length - 1];
-    } // getFileName
-    
-    /**
-     * 
-     */
-    private Map<String,String> readDescriptions(File file) throws IOException {
-                
-        // read the comments and the properties
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String header = "";
-        String description = "";
-        String line;
-        Map<String,String> descriptions = new LinkedHashMap<String,String>();
-
-        while ((line = reader.readLine()) != null) {
-            
-            if (line.startsWith("#")) {
-                description += line + "\n";
-            } // if
-            
-            if (line.isEmpty()) {
-                description = "";
-            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
-                String[] nameValue = line.split("=");
-                String name = nameValue[0];
-                descriptions.put(name, description);
-                description = "";
-            } // if
-            
-        } // while
-        
-        reader.close();
-        return descriptions;
-    } // readDescriptions
     
 } // ManagementInterface
