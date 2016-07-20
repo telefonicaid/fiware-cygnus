@@ -1,2 +1,3 @@
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
 - [cygnus-common][hardening] Add implementation for /admin/log route (#807)
+- [cygnus-common][hardening] Create ManagementInterfaceUtils.java (#1115)
