@@ -121,7 +121,7 @@ public final class ManagementInterfaceUtils {
             } // for
             
             printWriter.println();
-
+            
         } // for
         
         for (String sinkName : sinkNames) {
@@ -137,13 +137,20 @@ public final class ManagementInterfaceUtils {
             } // for
             
             printWriter.println();
-
+            
         } // for
         
-        printWriter.close();
-        
+        printWriter.close();     
     } // orderedPrinting
     
+    /** 
+     * instancePrinting: Creates a writer with for print an instance.
+     * 
+     * @param properties 
+     * @param file 
+     * @param descriptions 
+     * @throws java.io.FileNotFoundException 
+     */
     public static void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
             throws FileNotFoundException {
                 
@@ -172,7 +179,7 @@ public final class ManagementInterfaceUtils {
     * getFileName: Gets the name of the agent from the given path.
     * 
     * @param url 
-     * @return  
+    * @return  
     */
     public static String getFileName (String url) {
         String[] pathElements = url.split("/");
@@ -180,6 +187,7 @@ public final class ManagementInterfaceUtils {
     } // getFileName
     
     /**
+     * readDescriptions: Read commented lines from a file and store in a LinkedHashMap
      * 
      * @param file
      * @return
