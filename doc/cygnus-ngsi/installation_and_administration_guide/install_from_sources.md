@@ -9,7 +9,7 @@ Content:
 * [Installing dependencies](#section3)
 
 ##<a name="section1"></a>Prerequisites
-[`cygnus-common`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-common/installation_and_administration_guide/install_from_sources.md) must be installed. This includes Maven, `cygnus` user creation, Apache Flume and `cygnus-flume-ng` script installation.
+[`cygnus-common`](../../installation_and_administration_guide/install_from_sources.md) must be installed. This includes Maven, `cygnus` user creation, Apache Flume and `cygnus-flume-ng` script installation.
 
 [Top](#top)
 

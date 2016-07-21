@@ -145,6 +145,6 @@ GET http://<cygnus_host>:<management_port>/v1/groupingrules
 }
 ```
 
-Please, check [this](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-common/installation_and_administration_guide/management_interface.md) link in order to know further details.
+Please, check [this](../installation_and_administration_guide/management_interface.md) link in order to know further details.
 
 [Top](#top)
