@@ -1,1 +1,2 @@
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
+- [cygnus][feature] Standardize logs layout (#1118)
