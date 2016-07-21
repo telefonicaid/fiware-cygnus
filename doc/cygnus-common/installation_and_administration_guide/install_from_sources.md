@@ -29,7 +29,7 @@ Maven is installed by downloading it from [maven.apache.org](http://maven.apache
     $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
     $ tar xzvf apache-maven-3.2.5-bin.tar.gz
     $ mv apache-maven-3.2.5 APACHE_MAVEN_HOME
-    
+
 [Top](#top)
 
 ##<a name="section2"></a>`cygnus` user creation
@@ -38,15 +38,15 @@ It is highly recommended to create a `cygnus` Unix user, under which Cygnus will
 Creating such a user is quite simple. As a sudoer user (root or any other allowed), type the following:
 
     $ (sudo) useradd cygnus
-    
+
 You may add a password or not to the `cygnus` user:
 
     $ (sudo) passwd cygnus
-    
+
 Once created, change to this new fresh user in order to proceed with the rest of the installation:
 
     $ su - cygnus
-    
+
 [Top](#top)
 
 ##<a name="section3"></a>Installing Apache Flume
@@ -76,7 +76,7 @@ Start by cloning the Github repository containing cygnus-common:
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus
     $ git checkout <branch>
-    
+
 `<branch>` should be typically a stable release branch, e.g. `release/0.13.0`, but could also be `master` (synchronized with the latest release) or `develop` (contains the latest not stable changes).
 
 [Top](#top)
@@ -140,7 +140,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 | hive-jdbc | 0.13.0 | `HiveBackendImpl` at runtime |
 | mongodb-driver | 3.0.0 | `MongoBackendImpl` |
 | kafka-clients | 0.8.2.0 | `KafkaBackendImpl` |
-| zkclient | 0.5 | `KafkaBackendImpl` | 
+| zkclient | 0.5 | `KafkaBackendImpl` |
 | kafka_2.11 | 0.8.2.1 | `KafkaBackendImpl` |
 | aws-java-sdk-dynamodb | 1.10.32 | `DynamoDBBackendImpl` |
 
