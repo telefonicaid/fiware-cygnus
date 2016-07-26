@@ -65,6 +65,8 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 /**
@@ -155,6 +157,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleGetAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleGetAdminLogAppenders(request,response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -750,6 +754,63 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handleGetAdminConfigurationInstance
+    
+    private void handleGetAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String transient_ = request.getParameter("transient");
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+        String param = "flume.root.logger";
+        
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+            String appendersJson = ManagementInterfaceUtils.getStringAppenders(appenders);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appendersJson + "}}");
+            LOGGER.debug("Log4j appenders successfully obtained");
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                JSONObject jsonObject = new JSONObject();
+                String property = properties.getProperty(param);
+                String[] loggingParams = property.split(",");
+                
+                String loggingLevel = loggingParams[0];
+                String appenderJson = "[";   
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+
+                for (String name : appenderNames) {
+                    String layoutName = "log4j.appender." + name + ".layout."
+                         + "ConversionPattern";
+                    String layout = properties.getProperty(layoutName);
+                    appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                        + layout + "\"}";
+                    
+                    if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
+                        appenderJson += ", ";
+                    } // if
+                    
+                } // for
+
+                appenderJson += "]";
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + loggingLevel
+                    + "\",\"appenders\":" + appenderJson + "}}");
+                LOGGER.debug("Appender list: " + jsonObject);
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } // if else if
+        
+    } // handleGetAdminLogAppenders
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
