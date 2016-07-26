@@ -808,7 +808,12 @@ public class ManagementInterface extends AbstractHandler {
                 LOGGER.debug("File not found in the path received");
             } // if else
             
-        } // if else if
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
         
     } // handleGetAdminLogAppenders
 
