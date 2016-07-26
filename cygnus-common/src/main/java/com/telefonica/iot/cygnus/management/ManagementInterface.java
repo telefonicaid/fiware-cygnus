@@ -402,7 +402,7 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
     
-    private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         Level level = LogManager.getRootLogger().getLevel();
         response.setStatus(HttpServletResponse.SC_OK);
@@ -1667,7 +1667,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutGroupingRules
     
-    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
@@ -1679,7 +1679,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to " 
                     + logLevel.toUpperCase() + "\" }");
-            LOGGER.info("log4j logging level updated to " + logLevel.toUpperCase());
+            LOGGER.debug("log4j logging level updated to " + logLevel.toUpperCase());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"error\":\"Invalid log level\"}");

@@ -134,6 +134,9 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockPutOneInstanceParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPostOneInstanceParameter = mock(HttpServletRequest.class);
     private final HttpServletRequest mockDeleteOneInstanceParameter = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockGetLoggingLevel = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPutLoggingLevel = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockPutInvalidLoggingLevel = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -352,6 +355,17 @@ public class ManagementInterfaceTest {
         when(mockDeleteOneInstanceParameter.getParameter("param")).thenReturn("RANDOM_PARAM");
         when(mockDeleteOneInstanceParameter.getRequestURI()).thenReturn("/admin/configuration/instance"
                     + instanceGetAll.getAbsolutePath());
+        
+        when(mockGetLoggingLevel.getMethod()).thenReturn("GET");
+        when(mockGetLoggingLevel.getRequestURI()).thenReturn("/admin/log");
+        
+        when(mockPutLoggingLevel.getMethod()).thenReturn("PUT");
+        when(mockPutLoggingLevel.getParameter("level")).thenReturn("INFO");
+        when(mockPutLoggingLevel.getRequestURI()).thenReturn("/admin/log");
+        
+        when(mockPutInvalidLoggingLevel.getMethod()).thenReturn("PUT");
+        when(mockPutInvalidLoggingLevel.getParameter("level")).thenReturn("CUSTOM");
+        when(mockPutInvalidLoggingLevel.getRequestURI()).thenReturn("/admin/log");
         
     } // setUp
     
@@ -938,6 +952,38 @@ public class ManagementInterfaceTest {
     } // testGetMethodGetsOneInstanceConfigurationParameter
     
     /**
+     * [ManagementInterface] -------- 'GET method gets cygnus logging level'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetMethodGetCygnusLoggingLevel() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleGetAdminLog]") + " - GET "
+                + "method gets Cygnus logging level");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);    
+        
+        try {		
+            managementInterface.handleGetAdminLog(mockGetLoggingLevel, responseWrapper);
+        } catch (Exception x) {		
+            System.out.println("There was some problem when handling the GET request");		
+            throw x;		
+        } // try catch
+
+        try {		
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetAdminLog]") + " -  "
+                    + "OK  - Cygnus logging level obtained");		
+        } catch (AssertionError e) {		
+            System.out.println(getTestTraceHead("[ManagementInterface.handleGetAdminLog]") + " - "
+                    + "FAIL - There are some problems with your request");		
+            throw e;		
+        } // try catch	
+    
+    } // testGetMethodGetCygnusLoggingLevel
+    
+    /**
      * [ManagementInterface] -------- 'POST method posts a single parameter in a given agent configuration file'.
      * @throws java.lang.Exception
      */
@@ -1070,6 +1116,70 @@ public class ManagementInterfaceTest {
         folder.delete();
     
     } // testPutMethodPutsOneInstanceConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'PUT method puts a valid Cygnus logging level'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutMethodPutCygnusLoggingLevel() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " - PUT "
+                + "method puts a valid logging level in a running Cygnus");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
+        
+        try {		
+            managementInterface.handlePutAdminLog(mockPutLoggingLevel, responseWrapper);
+        } catch (Exception x) {		
+            System.out.println("There was some problem when handling the PUT request");		
+            throw x;		
+        } // try catch
+
+        try {		
+            assertEquals(HttpServletResponse.SC_OK, responseWrapper.getStatus());		
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " -  "
+                    + "OK  - Cygnus logging level put");		
+        } catch (AssertionError e) {		
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " - "
+                    + "FAIL - There are some problems with your request");		
+            throw e;		
+        } // try catch	
+    
+    } // testPutMethodPutOneAgentConfigurationParameter
+    
+    /**
+     * [ManagementInterface] -------- 'PUT method puts an invalid Cygnus logging level'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutMethodPutInvalidCygnusLoggingLevel() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " - PUT "
+                + "method puts an invalid logging level in a running Cygnus");
+        
+        StatusExposingServletResponse responseWrapper = new StatusExposingServletResponse(response);
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 
+                8081, 8082);
+        
+        try {		
+            managementInterface.handlePutAdminLog(mockPutInvalidLoggingLevel, responseWrapper);
+        } catch (Exception x) {		
+            System.out.println("There was some problem when handling the PUT request");		
+            throw x;		
+        } // try catch
+
+        try {		
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, responseWrapper.getStatus());		
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " -  "
+                    + "OK  - Invalid Cygnus logging level detected");		
+        } catch (AssertionError e) {		
+            System.out.println(getTestTraceHead("[ManagementInterface.handlePutAdminLog]") + " - "
+                    + "FAIL - There are some problems with your request");		
+            throw e;		
+        } // try catch	
+    
+    } // testPutMethodPutOneAgentConfigurationParameter
     
     /**
      * [ManagementInterface] -------- 'DELETE method deletes a single parameter in a given agent configuration file'.
