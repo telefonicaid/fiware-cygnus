@@ -68,6 +68,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -758,48 +760,106 @@ public class ManagementInterface extends AbstractHandler {
         response.setContentType("application/json; charset=utf-8");
         
         String transient_ = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+        
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+        
         String pathToFile = configurationPath + "/log4j.properties";
         File file = new File(pathToFile);
         String param = "flume.root.logger";
         
         if ((transient_ == null) || (transient_.equals("true"))) {
-            Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-            String appendersJson = ManagementInterfaceUtils.getStringAppenders(appenders);
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appendersJson + "}}");
-            LOGGER.debug("Log4j appenders successfully obtained");
+            String appendersJson = "";
+            
+            if (allAppenders) {
+                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                appendersJson = ManagementInterfaceUtils.getStringAppenders(appenders);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appendersJson + "}}");
+                LOGGER.debug("Log4j appenders successfully obtained");
+            } else {
+                
+                try {
+                    Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    String name = app.getName();
+                    PatternLayout layout = (PatternLayout) app.getLayout();
+                    String layoutStr = layout.getConversionPattern();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":\"[{\"name\":\"" + name + 
+                            "\",\"layout\":\"" + layoutStr + "\"}]}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+                
+            } // if else
+            
         } else if (transient_.equals("false")){
             
             if (file.exists()) {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 Properties properties = new Properties();
                 properties.load(fileInputStream);
-                JSONObject jsonObject = new JSONObject();
                 String property = properties.getProperty(param);
                 String[] loggingParams = property.split(",");
                 
                 String loggingLevel = loggingParams[0];
                 String appenderJson = "[";   
                 ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                
+                if (allAppenders) {
 
-                for (String name : appenderNames) {
-                    String layoutName = "log4j.appender." + name + ".layout."
-                         + "ConversionPattern";
-                    String layout = properties.getProperty(layoutName);
-                    appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
-                        + layout + "\"}";
-                    
-                    if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
-                        appenderJson += ", ";
-                    } // if
-                    
-                } // for
+                    for (String name : appenderNames) {                
+                        String layoutName = "log4j.appender." + name + ".layout."
+                            + "ConversionPattern";
+                        String layout = properties.getProperty(layoutName);
+                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                            + layout + "\"}";
+                        
+                        if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
+                            appenderJson += ", ";
+                        } // if
 
-                appenderJson += "]";
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + loggingLevel
-                    + "\",\"appenders\":" + appenderJson + "}}");
-                LOGGER.debug("Appender list: " + jsonObject);
+                    } // for
+
+                    appenderJson += "]";
+                
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
+                    LOGGER.debug("Appender list: " + appenderJson);
+                } else {
+                    boolean appenderFound = false;
+                    
+                    for (String name : appenderNames) { 
+                            
+                        if (name.equals(appenderName)) {
+                            String layoutName = "log4j.appender." + name + ".layout."
+                                + "ConversionPattern";
+                            String layout = properties.getProperty(layoutName);
+                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                                + layout + "\"}";
+                            appenderFound = true;
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appender\":[" + appenderJson + "]}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+                    
+                } // if else
+                
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
