@@ -35,7 +35,6 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

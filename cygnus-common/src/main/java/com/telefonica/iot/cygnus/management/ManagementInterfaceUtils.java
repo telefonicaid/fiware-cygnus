@@ -16,7 +16,7 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.management;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,11 +34,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Appender;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 /**
  *
  * @author pcoello25
  */
-public final class ManagementInterfaceUtils {
+public class ManagementInterfaceUtils {
 
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
