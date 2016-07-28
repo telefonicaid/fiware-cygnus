@@ -26,10 +26,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 /**
  *
@@ -234,5 +237,104 @@ public final class ManagementInterfaceUtils {
         reader.close();
         return descriptions;
     } // readDescriptions
+    
+    /**
+     * getStringAppenders: Returns a string with the list of appenders 
+     * 
+     * @param appenders
+     * @return 
+     */
+    public static String getStringAppenders (Enumeration appenders) {
+        String appendersJson = "";
+
+        while (appenders.hasMoreElements()) {
+            Appender appender = (Appender) appenders.nextElement();
+            String name = appender.getName();
+            PatternLayout layout = (PatternLayout) appender.getLayout();
+
+            if (appendersJson.isEmpty()) { 
+                appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                        + layout.getConversionPattern() + "\"}";
+            } else {
+                appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
+                        + layout.getConversionPattern() + "\"}";
+            } // else
+
+        } // while
+
+        if (appendersJson.isEmpty()) {
+            appendersJson = "[]";
+        } else {
+            appendersJson += "]";
+        } // else
+        
+        return appendersJson;
+    } // getStringAppenders
+    
+    /**
+     * getAppendersFromProperties: Returns an ArrayList with the appenders.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getAppendersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.appender.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = splitAppender[2];
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getAppendersFromProperties
+    
+    /**
+     * getLoggersFromProperties: Returns an ArrayList with the loggers.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getLoggersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.logger.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = "";
+                int length = splitAppender.length;
+                
+                for (int i=2; i < length; i++) {
+                    appender += splitAppender[i];
+                    
+                    if (i < (length-1)) {
+                        appender += ".";
+                    } // if
+                    
+                } // for
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getLoggersFromProperties
    
 } // ManagementInterfaceUtils
