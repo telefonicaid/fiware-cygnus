@@ -35,7 +35,6 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,7 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,8 +64,12 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -208,6 +211,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleDeleteAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleDeleteAdminLogAppenders(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1486,6 +1491,129 @@ public class ManagementInterface extends AbstractHandler {
         } // try catch    
         
     } // handleDeleteAdminConfigurationAgent
+    
+    private void handleDeleteAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        String transient_ = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+
+            if (allAppenders) {
+                LogManager.getRootLogger().removeAllAppenders();
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed succesfully\"}}");
+                LOGGER.debug("Log4j appenders removed succesfully");
+            } else {
+
+                try {
+                    LogManager.getRootLogger().removeAppender(appenderName);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"result\":\"Appender '"+ appenderName 
+                            +"'removed succesfully\"}]}");
+                    LOGGER.debug("Log4j appender removed succesfully");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+
+            } // if else
+
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                boolean hasAppenders = false;
+
+                if (allAppenders) {
+                        
+                    for (String property: properties.stringPropertyNames()) {
+                            
+                        if (property.startsWith("log4j.appender")) {
+                            properties.remove(property);
+                            hasAppenders = true;
+                        } // if
+                                                    
+                    } // for
+
+                    ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                    
+                    if (hasAppenders) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed "
+                                + "succesfully\"}");
+                        LOGGER.debug("Appenders removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } // if else
+                    
+                } else {
+                    boolean appenderFound = false;
+
+                    for (String name : appenderNames) {
+
+                        System.out.println(name + "vs " + appenderName);
+                        if (name.equals(appenderName)) {
+                            String appName = "log4j.appender." + name;
+                            appenderFound = true;
+                            
+                            for (String property: properties.stringPropertyNames()) {
+                            
+                                if (property.startsWith(appName)) {
+                                    properties.remove(property);
+                                } // if
+                            
+                            } // for
+                   
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Appender '" + appenderName 
+                                + "' removed succesfully\"}");
+                        LOGGER.debug("Appender '" + appenderName + "' removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+
+    } // handleDeleteAdminLogAppenders        
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
