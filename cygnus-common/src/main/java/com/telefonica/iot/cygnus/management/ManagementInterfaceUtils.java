@@ -28,13 +28,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.log4j.Appender;
-import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 /**
  *
@@ -366,6 +363,6 @@ public final class ManagementInterfaceUtils {
         printWriter.close();
         
     } // orderedLogPrinting
-
-   
+    
+    
 } // ManagementInterfaceUtils

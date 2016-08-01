@@ -1883,7 +1883,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handleDeleteGroupingRules
     
-        private void handleDeleteAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleDeleteAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
 
         String transient_ = request.getParameter("transient");
