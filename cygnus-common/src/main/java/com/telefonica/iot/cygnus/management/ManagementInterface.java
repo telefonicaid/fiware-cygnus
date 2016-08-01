@@ -35,7 +35,7 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
+import com.telefonica.iot.cygnus.management.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,10 +43,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.apache.flume.Channel;
 import org.apache.flume.Sink;
 import org.apache.flume.SinkProcessor;
@@ -65,8 +65,12 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -208,6 +212,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleDeleteAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handleDeleteAdminLogLoggers(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1876,6 +1882,134 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handleDeleteGroupingRules
+    
+        private void handleDeleteAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        String transient_ = request.getParameter("transient");
+        String loggerName = request.getParameter("name");
+        boolean allLoggers = true;
+
+        if (loggerName != null) {
+            allLoggers = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+
+            if (allLoggers) {
+                
+                while (loggers.hasMoreElements()) {
+                    loggers.nextElement().setLevel(Level.OFF);
+                } // while
+                
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"result\":\"Loggers removed succesfully\"}");
+                LOGGER.debug("Log4j loggers removed succesfully");
+                
+            } else {
+
+                try {
+                    LogManager.getLogger(loggerName).setLevel(Level.OFF);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"result\":\"Logger '"+ loggerName 
+                            +"' removed succesfully\"}");
+                    LOGGER.debug("Log4j logger removed succesfully");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                    LOGGER.debug("Logger name not found");
+                } // try catch
+
+            } // if else
+
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                ArrayList<String> loggerNames = ManagementInterfaceUtils.getLoggersFromProperties(properties);
+                boolean hasAppenders = false;
+
+                if (allLoggers) {
+                        
+                    for (String property: properties.stringPropertyNames()) {
+                            
+                        if (property.startsWith("log4j.logger")) {
+                            properties.remove(property);
+                            hasAppenders = true;
+                        } // if
+                                                    
+                    } // for
+
+                    ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                    
+                    if (hasAppenders) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed "
+                                + "succesfully\"}");
+                        LOGGER.debug("Appenders removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } // if else
+                    
+                } else {
+                    boolean appenderFound = false;
+
+                    for (String name : loggerNames) {
+
+                        if (name.equals(loggerName)) {
+                            String loggName = "log4j.logger." + name;
+                            appenderFound = true;
+                            
+                            for (String property: properties.stringPropertyNames()) {
+                            
+                                if (property.startsWith(loggName)) {
+                                    properties.remove(property);
+                                } // if
+                            
+                            } // for
+                   
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Appender '" + loggerName 
+                                + "' removed succesfully\"}");
+                        LOGGER.debug("Appender '" + loggerName + "' removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+
+    } // handleDeleteAdminLogLoggers
 
     private String getGroupingRulesConfFile() throws IOException {
         if (!configurationFile.exists()) {
