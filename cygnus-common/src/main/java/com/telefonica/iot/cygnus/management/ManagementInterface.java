@@ -35,7 +35,6 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,7 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,8 +64,12 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Appender;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -1830,6 +1833,110 @@ public class ManagementInterface extends AbstractHandler {
         } // try catch   
         
     } // handlePutAdminConfigurationInstance
+    
+    private void handlePutAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String jsonStr = "";
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            jsonStr += line;
+        } // while
+
+        reader.close();
+        JsonObject jsonAppender = new JsonParser().parse(jsonStr).getAsJsonObject(); 
+        JsonObject appender = jsonAppender.get("appender").getAsJsonObject();
+        String name = appender.get("name").getAsString();
+        JsonObject layout = jsonAppender.get("pattern").getAsJsonObject();
+        String pattern = layout.get("ConversionPattern").getAsString();
+        String transient_ = request.getParameter("transient");
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            Enumeration<Appender> currentAppenders = LogManager.getRootLogger().getAllAppenders();
+            boolean appenderFound = false;
+            
+            while (currentAppenders.hasMoreElements()) {
+                Appender currentApp = currentAppenders.nextElement();
+                String appenderName = currentApp.getName();
+                
+                if (appenderName.equals(name)) {
+                    appenderFound = true;
+                } // if
+            } // while
+            
+            PatternLayout patternLayout = new PatternLayout(pattern);
+            
+            if (appenderFound) {
+                Appender appUpdated = LogManager.getRootLogger().getAppender(name);
+                appUpdated.setLayout(patternLayout);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\":{\"Appender '" + name + "' updated succesfully\"}");
+                LOGGER.debug("Appender '" + name + "' updated succesfully");
+            } else {
+                ConsoleAppender newAppender = new ConsoleAppender();
+                newAppender.setName(name);
+                newAppender.setLayout(patternLayout);
+                LogManager.getRootLogger().addAppender(newAppender);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\":{\"Appender '" + name + "' put.\"}}");
+                LOGGER.debug("Appender '" + name + "' put.");
+            } // if else
+
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String class_ = appender.get("class").getAsString();
+                String layoutStr = layout.get("layout").getAsString();
+                Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+
+                String propertyName = "log4j.appender." + name;
+                String propertyLayout = "log4j.appender." + name + ".layout";
+                String propertyPattern = "log4j.appender." + name + ".layout.ConversionPattern";
+                properties.put(propertyName, class_);
+                properties.put(propertyLayout, layoutStr);
+                properties.put(propertyPattern, pattern);
+                String comments;
+                    
+                try {
+                    comments = jsonAppender.get("comments").getAsString();
+                    descriptions.put("log4j.appender." + name , comments);
+                } catch (Exception e) {
+                    comments = "# Values for appender '" + name + "' \n";
+                    descriptions.put("log4j.appender." + name , comments);
+                } // try catch
+
+                ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\","
+                    + "\"result\":{\"Appender '" + name + "' put\"}}");
+                LOGGER.debug("Appender '" + name + "' put.");
+                
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+        
+    } // handlePutAdminLogAppender
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {

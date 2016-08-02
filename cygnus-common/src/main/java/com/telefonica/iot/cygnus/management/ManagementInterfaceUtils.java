@@ -16,8 +16,10 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.management;
 
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,10 +28,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 /**
  *
@@ -234,5 +239,193 @@ public final class ManagementInterfaceUtils {
         reader.close();
         return descriptions;
     } // readDescriptions
+      
+    /**
+     * getStringAppenders: Returns a string with the list of appenders 
+     * 
+     * @param appenders
+     * @return 
+     */
+    public static String getStringAppenders (Enumeration appenders) {
+        String appendersJson = "";
+
+        while (appenders.hasMoreElements()) {
+            Appender appender = (Appender) appenders.nextElement();
+            String name = appender.getName();
+            PatternLayout layout = (PatternLayout) appender.getLayout();
+
+            if (appendersJson.isEmpty()) { 
+                appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                        + layout.getConversionPattern() + "\"}";
+            } else {
+                appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
+                        + layout.getConversionPattern() + "\"}";
+            } // else
+
+        } // while
+
+        if (appendersJson.isEmpty()) {
+            appendersJson = "[]";
+        } else {
+            appendersJson += "]";
+        } // else
+        
+        return appendersJson;
+    } // getStringAppenders
+    
+    /**
+     * getAppendersFromProperties: Returns an ArrayList with the appenders.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getAppendersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.appender.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = splitAppender[2];
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getAppendersFromProperties  
+	
+    /**
+     * getLoggersFromProperties: Returns an ArrayList with the loggers.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getLoggersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.logger.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = "";
+                int length = splitAppender.length;
+                
+                for (int i=2; i < length; i++) {
+                    appender += splitAppender[i];
+                    
+                    if (i < (length-1)) {
+                        appender += ".";
+                    } // if
+                    
+                } // for
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getLoggersFromProperties
+	
+    /** 
+     * readLogDescriptions: Read the descriptions from a log4j file.
+     * 
+     * @param file
+     * @return 
+     * @throws java.io.IOException
+     */
+    public static Map<String,String> readLogDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
+        boolean flag = true;
+
+        while ((line = reader.readLine()) != null) {
+                        
+            if (line.startsWith("#")) {
+                description += line + "\n";
+                flag = true;
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+                flag = true;
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                
+                if (flag == true) {
+                    String[] appenderFields = line.split("(\\.)|(=)");
+                    String name = appenderFields[0] + "." + appenderFields[1];
+                
+                    if (appenderFields[1].equals("appender")) {
+                        name += "." + appenderFields[2];
+                    } // if
+                    
+                    descriptions.put(name, description);
+                    description = "";
+                    flag = false;
+                } // if
+
+            } // if else if
+            
+        } // while
+        
+        reader.close();
+        return descriptions;
+    } // readLogDescriptions
+    
+    /** 
+     * OrderedPrintWriter: Creates a writer with the original order's log4j file.
+     * 
+     * @param properties 
+     * @param descriptions 
+     * @param file 
+     * @throws java.io.FileNotFoundException 
+     */
+    public static void orderedLogPrinting (Properties properties, Map<String,String> descriptions, File file) 
+            throws FileNotFoundException {
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER + "\n");      
+        printWriter.println("# To be put in APACHE_FLUME_HOME/conf/log4j.properties \n");
+        
+        for (Object description : descriptions.keySet()) {
+            String name = (String) description;
+            String desc = (String) descriptions.get(name);
+                    
+            if (!properties.keySet().isEmpty()) {
+                printWriter.print(desc);
+            } // if
+            
+            for (Object property: properties.keySet()) {
+                String prop = (String) property;
+                String value = (String) properties.getProperty(prop);
+                
+                if ((prop.equals(name)) || (prop.startsWith(name))) {
+                    printWriter.println(prop + "=" + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+ 
+        } // for
+        
+        printWriter.close();
+        
+    } // orderedLogPrinting
    
 } // ManagementInterfaceUtils
