@@ -35,7 +35,6 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,7 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +64,8 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 /**
@@ -172,6 +173,8 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handlePostAdminConfigurationInstance(request, response, true); 
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handlePostAdminLogLoggers(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1196,6 +1199,112 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handlePostAdminConfigurationInstance
+    
+    private void handlePostAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String jsonStr = "";
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            jsonStr += line;
+        } // while
+
+        reader.close();
+        JsonObject jsonLogger = new JsonParser().parse(jsonStr).getAsJsonObject(); 
+        JsonObject logger = jsonLogger.get("logger").getAsJsonObject();
+        String name = logger.get("name").getAsString();
+        String level = logger.get("level").getAsString();
+        
+        try {
+            CommonConstants.LoggingLevels.valueOf(level);
+            String transient_ = request.getParameter("transient");
+            String pathToFile = configurationPath + "/log4j.properties";
+            File file = new File(pathToFile);
+
+            if ((transient_ == null) || (transient_.equals("true"))) {
+                Enumeration<Logger> currentLoggers = LogManager.getLoggerRepository().getCurrentLoggers();
+                boolean loggerFound = false;
+
+                while (currentLoggers.hasMoreElements()) {
+                    Logger currentLogger = currentLoggers.nextElement();
+                    String loggerName = currentLogger.getName();
+
+                    if (loggerName.equals(name)) {
+                        loggerFound = true;
+                    } // if
+
+                } // while
+
+                if (loggerFound) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":{\"Logger '" + name + "' already exist\"}}");
+                    LOGGER.debug("Logger '" + name + "' already exist");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\","
+                        + "\"result\":{\"Logger '" + name + "' put\"}}");
+                    LOGGER.debug("Logger '" + name + "' put");
+                } // if else                        
+
+            } else if (transient_.equals("false")) {
+
+                if (file.exists()) {
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    Properties properties = new Properties();
+                    properties.load(fileInputStream);
+                    Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                    ArrayList<String> loggerNames = ManagementInterfaceUtils.getLoggersFromProperties(properties);
+                    boolean loggerFound = false;
+
+                    for (String loggerName: loggerNames) {
+
+                        if (name.equals(loggerName)) {
+                            loggerFound = true;
+                        } // if
+
+                    } // for
+
+                    if (loggerFound) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\":{\"Logger '" + name + "' already exist\"}}");
+                        LOGGER.debug("Logger '" + name + "' already exist");
+                    } else {
+                        String propertyName = "log4j.logger." + name;
+                        properties.put(propertyName, level);
+                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\":{\"Logger '" + name + "' put\"}}");
+                        LOGGER.debug("Logger '" + name + "' put");
+                    } // if else
+
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\" : { \"File not found in the path received\" }");
+                    LOGGER.debug("File not found in the path received");
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                LOGGER.debug("Invalid 'transient' parameter found");
+            } // if else if
+            
+        } catch (Exception e)  {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                + "\"result\":{\"Invalid logging level\"}}");
+            LOGGER.debug("Invalid logging level");
+        } // try catch
+        
+    } // handlePostAdminLogLoggers
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
