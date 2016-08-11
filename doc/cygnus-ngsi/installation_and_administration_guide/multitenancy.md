@@ -31,7 +31,7 @@ The above mentioned solution can only work if the final storage holding the hist
 
 ##<a name="section2"></a>Exceptions
 ###<a name="section2.1"></a>`NGSIDynamoDBSink`
-DynamoDB handles a single database per client, having each client different access credentials. This means a single superuser cannot be configured in charge of writting data on behalf of several tenants. Even in the case a single DynamoDB user space is used for all the tenants and a table is created in a per client basis, it is not a valid a solution since having access to the user space means access to all the tables.
+DynamoDB handles a single database per client, having each client different access credentials. This means a single superuser cannot be configured in charge of writing data on behalf of several tenants. Even in the case a single DynamoDB user space is used for all the tenants and a table is created in a per client basis, it is not a valid a solution since having access to the user space means access to all the tables.
 
 [This](https://github.com/telefonicaid/fiware-cygnus/issues/608) opened issue tries to enclose a valid solution than will be implemented sometime in the future.
 

@@ -227,7 +227,7 @@ Response:
 [Top](#top)
 
 ##<a name="section8"></a>`DELETE /v1/groupingrules`
-Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID a a query parameter.
+Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter.
 
 ```
 DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
@@ -242,7 +242,7 @@ Response:
 [Top](#top)
 
 ##<a name="section9"></a>`GET /admin/log`
-Gets the log4j configuration (relevant parts, as the logging level or the appender names and layouts).
+Gets the logging level of Cygnus.
 
 ```
 GET http://<cygnus_host>:<management_port>/admin/log
@@ -252,18 +252,7 @@ Responses:
 
 ```
 200 OK
-{
-    "log4j": {
-        "appenders": [
-            {
-                "layout": "...",
-                "name": "..."
-            }
-        ],
-        "level": "..."
-    },
-    "success": "true"
-}
+{"level": "...."}
 ```
 
 ```

@@ -2,7 +2,7 @@
 This document details the catalogue of extensions developed for Cygnus on top of [Apache Flume](https://flume.apache.org/).
 
 #Intended audience
-The Flume extensions catalogue is a basic piece of documentation for all those FIWARE users suing Cygnus. It describes the available extra components added to the Flume technology in order to deal with NGSI-like context data in terms of historic building.
+The Flume extensions catalogue is a basic piece of documentation for all those FIWARE users using Cygnus. It describes the available extra components added to the Flume technology in order to deal with NGSI-like context data in terms of historic building.
 
 Software developers may also be interested in this catalogue since it may guide the creation of new components (specially, sinks) for Cygnus/Flume.
 

@@ -44,7 +44,7 @@ ADMIN_PORT=8081
 POLLING_INTERVAL=30
 ```
 
-As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](#section6) section.
+As you can see, this file allows configuring the log file. For a detailed logging configuration, please check the [`log4j.properties`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-common/installation_and_administration_guide/log4j_conf.md) section.
 
 [Top](#top)
 
