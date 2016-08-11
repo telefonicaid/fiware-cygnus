@@ -1516,7 +1516,9 @@ public class ManagementInterface extends AbstractHandler {
             } else {
 
                 try {
-                    LogManager.getRootLogger().removeAppender(appenderName);
+                    // Check if appender already exists
+                    Appender delete = LogManager.getRootLogger().getAppender(appenderName);
+                    LogManager.getRootLogger().removeAppender(delete);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"result\":\"Appender '"+ appenderName 
                             +"'removed succesfully\"}]}");
@@ -1568,7 +1570,6 @@ public class ManagementInterface extends AbstractHandler {
 
                     for (String name : appenderNames) {
 
-                        System.out.println(name + "vs " + appenderName);
                         if (name.equals(appenderName)) {
                             String appName = "log4j.appender." + name;
                             appenderFound = true;
@@ -1609,7 +1610,7 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
 
