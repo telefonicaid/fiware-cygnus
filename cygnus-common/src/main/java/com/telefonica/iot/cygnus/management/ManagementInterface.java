@@ -1898,7 +1898,12 @@ public class ManagementInterface extends AbstractHandler {
                 String class_ = appender.get("class").getAsString();
                 String layoutStr = layout.get("layout").getAsString();
                 Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
-
+                boolean isUpdate = false;
+                
+                if (properties.contains("log4j.appender." + name)) {
+                    isUpdate = true;
+                } // if
+                
                 String propertyName = "log4j.appender." + name;
                 String propertyLayout = "log4j.appender." + name + ".layout";
                 String propertyPattern = "log4j.appender." + name + ".layout.ConversionPattern";
@@ -1917,10 +1922,17 @@ public class ManagementInterface extends AbstractHandler {
 
                 ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
 
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\":{\"Appender '" + name + "' put\"}}");
-                LOGGER.debug("Appender '" + name + "' put.");
+                if (isUpdate) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\","
+                        + "\"result\":{\"Appender '" + name + "' succesfully updated\"}}");
+                    LOGGER.debug("Appender '" + name + "' succesfully updated.");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\","
+                        + "\"result\":{\"Appender '" + name + "' put\"}}");
+                    LOGGER.debug("Appender '" + name + "' put.");
+                } // if else
                 
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1932,7 +1944,7 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
         
