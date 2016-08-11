@@ -1909,21 +1909,27 @@ public class ManagementInterface extends AbstractHandler {
                 
             } else {
 
-                try {
+                ArrayList<Logger> loggerNames = new ArrayList<Logger>();
+
+                while (loggers.hasMoreElements()) {
+                    loggerNames.add(loggers.nextElement());
+                } // while 
+
+                if (loggerNames.contains(LogManager.getLogger(loggerName))) {
                     LogManager.getLogger(loggerName).setLevel(Level.OFF);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"result\":\"Logger '"+ loggerName 
-                            +"' removed succesfully\"}");
+                        +"' removed succesfully\"}");
                     LOGGER.debug("Log4j logger removed succesfully");
-                } catch (Exception e) {
+                } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
                     LOGGER.debug("Logger name not found");
-                } // try catch
-
-            } // if else
-
-        } else if (transient_.equals("false")){
+                } // if else
+                
+            } // if else if
+            
+        } else if (transient_.equals("false")) {
             
             if (file.exists()) {
                 FileInputStream fileInputStream = new FileInputStream(file);
@@ -2002,7 +2008,7 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
 
