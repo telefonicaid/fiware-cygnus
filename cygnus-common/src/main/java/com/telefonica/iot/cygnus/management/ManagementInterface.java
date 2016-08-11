@@ -35,7 +35,6 @@ import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.CygnusSink;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.ManagementInterfaceUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -779,11 +778,19 @@ public class ManagementInterface extends AbstractHandler {
                 
                 while (loggers.hasMoreElements()) {
                     
+                    Logger logger = loggers.nextElement();
+                    String loggName = logger.getName();
+                    Level level = logger.getLevel();
+                    
                     if (!firstTime) {
                         loggersJson += ",";
                     }  // if
                     
-                    loggersJson += "{\"name\":\"" + loggers.nextElement().getName() + "\"}";
+                    if (level != null) {
+                        loggersJson += "{\"name\":\"" + loggName + "\",\"level\":\"" + level.toString() + "\"}";
+                    } else {
+                        loggersJson += "{\"name\":\"" + loggName + "\"}";
+                    }
                     firstTime = false;
                 } // while
                 
@@ -883,11 +890,11 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
         
-    } // handleGetAdminLogAppenders
+    } // handleGetAdminLogLoggers
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
