@@ -1293,7 +1293,7 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                        + "\"result\":{\"Invalid 'transient' parameter found\"}}");
                 LOGGER.debug("Invalid 'transient' parameter found");
             } // if else if
             
