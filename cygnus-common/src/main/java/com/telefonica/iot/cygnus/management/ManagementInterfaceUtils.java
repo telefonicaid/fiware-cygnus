@@ -300,5 +300,132 @@ public class ManagementInterfaceUtils {
         
         return appendersName;
     } // getAppendersFromProperties
+	
+	/**
+     * getLoggersFromProperties: Returns an ArrayList with the loggers.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getLoggersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.logger.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = "";
+                int length = splitAppender.length;
+                
+                for (int i=2; i < length; i++) {
+                    appender += splitAppender[i];
+                    
+                    if (i < (length-1)) {
+                        appender += ".";
+                    } // if
+                    
+                } // for
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getLoggersFromProperties
+	
+    /** 
+     * readLogDescriptions: Read the descriptions from a log4j file.
+     * 
+     * @param file
+     * @return 
+     * @throws java.io.IOException
+     */
+    public static Map<String,String> readLogDescriptions(File file) throws IOException {
+                
+        // read the comments and the properties
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String description = "";
+        String line;
+        Map<String,String> descriptions = new LinkedHashMap<String,String>();
+        boolean flag = true;
+
+        while ((line = reader.readLine()) != null) {
+                        
+            if (line.startsWith("#")) {
+                description += line + "\n";
+                flag = true;
+            } // if
+            
+            if (line.isEmpty()) {
+                description = "";
+                flag = true;
+            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
+                
+                if (flag == true) {
+                    String[] appenderFields = line.split("(\\.)|(=)");
+                    String name = appenderFields[0] + "." + appenderFields[1];
+                
+                    if (appenderFields[1].equals("appender")) {
+                        name += "." + appenderFields[2];
+                    } // if
+                    
+                    descriptions.put(name, description);
+                    description = "";
+                    flag = false;
+                } // if
+
+            } // if else if
+            
+        } // while
+        
+        reader.close();
+        return descriptions;
+    } // readLogDescriptions
+    
+    /** 
+     * OrderedPrintWriter: Creates a writer with the original order's log4j file.
+     * 
+     * @param properties 
+     * @param descriptions 
+     * @param file 
+     * @throws java.io.FileNotFoundException 
+     */
+    public static void orderedLogPrinting (Properties properties, Map<String,String> descriptions, File file) 
+            throws FileNotFoundException {
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER + "\n");      
+        printWriter.println("# To be put in APACHE_FLUME_HOME/conf/log4j.properties \n");
+        
+        for (Object description : descriptions.keySet()) {
+            String name = (String) description;
+            String desc = (String) descriptions.get(name);
+                    
+            if (!properties.keySet().isEmpty()) {
+                printWriter.print(desc);
+            } // if
+            
+            for (Object property: properties.keySet()) {
+                String prop = (String) property;
+                String value = (String) properties.getProperty(prop);
+                
+                if ((prop.equals(name)) || (prop.startsWith(name))) {
+                    printWriter.println(prop + "=" + value);
+                } // if
+                
+            } // for
+            
+            printWriter.println();
+ 
+        } // for
+        
+        printWriter.close();
+        
+    } // orderedLogPrinting
    
 } // ManagementInterfaceUtils

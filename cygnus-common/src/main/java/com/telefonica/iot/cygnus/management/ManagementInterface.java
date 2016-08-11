@@ -775,11 +775,20 @@ public class ManagementInterface extends AbstractHandler {
             String appendersJson = "";
             
             if (allAppenders) {
+                
                 Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
                 appendersJson = ManagementInterfaceUtils.getStringAppenders(appenders);
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appendersJson + "}}");
-                LOGGER.debug("Log4j appenders successfully obtained");
+                
+                if (appendersJson.equals("[]")) { 
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                    LOGGER.debug("No log4j appenders found");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appendersJson + "}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } // if else
+                
             } else {
                 
                 try {
@@ -805,10 +814,7 @@ public class ManagementInterface extends AbstractHandler {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 Properties properties = new Properties();
                 properties.load(fileInputStream);
-                String property = properties.getProperty(param);
-                String[] loggingParams = property.split(",");
                 
-                String loggingLevel = loggingParams[0];
                 String appenderJson = "[";   
                 ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
                 
@@ -829,9 +835,16 @@ public class ManagementInterface extends AbstractHandler {
 
                     appenderJson += "]";
                 
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
-                    LOGGER.debug("Appender list: " + appenderJson);
+                    if (appenderJson.equals("[]")) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } // if else 
+                    
                 } else {
                     boolean appenderFound = false;
                     
@@ -870,7 +883,7 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
         
