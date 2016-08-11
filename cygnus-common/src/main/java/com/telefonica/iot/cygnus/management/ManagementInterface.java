@@ -1875,14 +1875,14 @@ public class ManagementInterface extends AbstractHandler {
                     loggerUpdated.setLevel(Level.toLevel(level));
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\","
-                        + "\"result\":{\"Appender '" + name + "' updated succesfully\"}");
-                    LOGGER.debug("Appender '" + name + "' updated succesfully");
+                        + "\"result\":{\"Logger '" + name + "' updated succesfully\"}");
+                    LOGGER.debug("Logger '" + name + "' updated succesfully");
                 } else {
                     // TO DO: CREATE LOGGER
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\","
-                        + "\"result\":{\"Appender '" + name + "' put\"}}");
-                    LOGGER.debug("Appender '" + name + "' put");
+                        + "\"result\":{\"Logger '" + name + "' put\"}}");
+                    LOGGER.debug("Logger '" + name + "' put");
                 } // if else
 
             } else if (transient_.equals("false")){
@@ -1891,14 +1891,31 @@ public class ManagementInterface extends AbstractHandler {
                     FileInputStream fileInputStream = new FileInputStream(file);
                     Properties properties = new Properties();
                     properties.load(fileInputStream);
+                    boolean loggerFound = false;
+                    String prop = "log4j.logger." + name;
+                    
+                    if (properties.containsKey(prop)) {
+                        System.out.println(properties.containsKey(prop));
+                        loggerFound = true;
+                    } // if
+                    
                     Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
                     String propertyName = "log4j.logger." + name;
                     properties.put(propertyName, level);
                     ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\","
-                        + "\"result\":{\"Logger '" + name + "' put\"}}");
-                    LOGGER.debug("Logger '" + name + "' put.");           
+                    
+                    if (loggerFound) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\":{\"Logger '" + name + "' already exist\"}}");
+                        LOGGER.debug("Logger '" + name + "' already exist");   
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\","
+                            + "\"result\":{\"Logger '" + name + "' put\"}}");
+                        LOGGER.debug("Logger '" + name + "' put.");
+                    } // if else
+                    
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
@@ -1909,7 +1926,7 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                        + "\"result\":{\"Invalid 'transient' parameter found\"}}");
                 LOGGER.debug("Invalid 'transient' parameter found");
             }// if else if
         
