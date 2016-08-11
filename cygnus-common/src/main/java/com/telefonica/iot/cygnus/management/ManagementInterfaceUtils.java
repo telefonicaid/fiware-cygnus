@@ -18,8 +18,6 @@
 
 package com.telefonica.iot.cygnus.management;
 
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,11 +34,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Appender;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 /**
  *
  * @author pcoello25
  */
-public final class ManagementInterfaceUtils {
+public class ManagementInterfaceUtils {
 
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -299,9 +299,9 @@ public final class ManagementInterfaceUtils {
         } // for
         
         return appendersName;
-    } // getAppendersFromProperties  
+    } // getAppendersFromProperties
 	
-    /**
+	/**
      * getLoggersFromProperties: Returns an ArrayList with the loggers.
      * 
      * @param properties

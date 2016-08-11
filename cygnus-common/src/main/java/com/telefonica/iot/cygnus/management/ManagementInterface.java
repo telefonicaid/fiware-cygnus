@@ -1241,8 +1241,8 @@ public class ManagementInterface extends AbstractHandler {
             if (appenderFound) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":{\"Appender '" + name + "' is already defined\"}");
-                LOGGER.debug("Appender '" + name + "' is already defined");
+                    + "\"result\":{\"Appender '" + name + "' already exist\"}");
+                LOGGER.debug("Appender '" + name + "' already exist");
             } else {
                 ConsoleAppender newAppender = new ConsoleAppender();
                 newAppender.setName(name);
@@ -1278,8 +1278,8 @@ public class ManagementInterface extends AbstractHandler {
                 if (appenderFound) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\":{\"Appender '" + name + "' is already defined\"}");
-                    LOGGER.debug("Appender '" + name + "' is already defined");
+                        + "\"result\":{\"Appender '" + name + "' already exist\"}");
+                    LOGGER.debug("Appender '" + name + "' already exist");
                 } else {   
                     String propertyName = "log4j.appender." + name;
                     String propertyLayout = "log4j.appender." + name + ".layout";
@@ -1315,7 +1315,7 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"Invalid 'transient' parameter found\" }");
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
         
