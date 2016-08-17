@@ -2,3 +2,4 @@
 - [cygnus][feature] Standardize logs layout (#1118)
 - [cygnus-common][hardening] Add implementation for /admin/log route (#807)
 - [cygnus-common][hardening] Create ManagementInterfaceUtils class (#1115)
+- [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)
