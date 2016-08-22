@@ -147,9 +147,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Fiware-Service", fiwareService));
-        System.out.println("Adding header: Fiware-Service = " + fiwareService);
         headers.add(new BasicHeader("Fiware-ServicePath", fiwareServicePath));
-        System.out.println("Adding header: Fiware-ServicePath = " + fiwareServicePath);
         
         if (token != null) {
             headers.add(new BasicHeader("X-Auth-token", token));
