@@ -194,6 +194,7 @@ public abstract class HttpBackend {
         if (headers != null) {
             for (Header header : headers) {
                 request.setHeader(header);
+                System.out.println("Setting header: " + header.getName() + " = " + header.getValue());
             } // for
         } // if
 
