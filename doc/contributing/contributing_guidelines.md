@@ -29,7 +29,7 @@ This document is intended to developers aiming at contributing a complete Cygnus
 
 Within this document developers will find detailed guidelines regarding how to contribute to the main Cygnus repository.
 
-Any doubt you may have, please refer to [here](https://github.com/telefonicaid/fiware-cygnus/blob/develop/reporting_issues_and_contact.md).
+Any doubt you may have, please refer to [here](https://github.com/telefonicaid/fiware-cygnus/blob/master/reporting_issues_and_contact.md).
 
 [Top](#top)
 
@@ -41,7 +41,7 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 
 2. It MUST be differentiated between the main repository under the `telefonicaid` namespace ([https://github.com/telefonicaid/fiware-cygnus](https://github.com/telefonicaid/fiware-cygnus)) and any private forked repository (e.g. [https://github.com/frbattid/fiware-cygnus](https://github.com/frbattid/fiware-cygnus)).
 
-3. Cygnus Core Team members are those listed in the [reporting issues and contact information](./reporting_issues_and_contact.md) document.
+3. Cygnus Core Team members are those listed in the [reporting issues and contact information](https://github.com/telefonicaid/fiware-cygnus/blob/master/reporting_issues_and_contact.md) document.
 
 [Top](#top)
 
@@ -286,7 +286,7 @@ log4j is the logging system used by Apache Flume, thus Cygnus agents MUST use lo
 Logs traced by any Cygnus agent MUST contain the following log4 layout:
 
     time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=%X{agent} | msg=%C[%L] : %m%n
-    
+
 Field by field:
 
 * `time`: Date and time the log was generated at.
@@ -321,7 +321,7 @@ In addition, a table MUST be included in charge of defining a set of alarm condi
 * Detection strategy: What has to be found in the logs in order to raise this alarm. It may be a logging level, a log message type, etc.
 * Stop condition: What has to be found in the logs in order to decide the alarm is fixed. It may be a logging level, a log message type, etc.
 * Description: A description of the alarm, why it was raised and including its consequences.
-* Action: 
+* Action:
 
 [Top](#top)
 

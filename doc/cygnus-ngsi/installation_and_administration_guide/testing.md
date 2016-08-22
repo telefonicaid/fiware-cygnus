@@ -10,8 +10,8 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus/cygnus-ngsi
     $ mvn test
-    
-You should get an output similat to the following one:
+
+You should get an output similar to the following one:
 
 ```
 $ mvn test
@@ -20,23 +20,23 @@ $ mvn test
 [INFO] ------------------------------------------------------------------------
 [INFO] Building cygnus-ngsi 0.13.0_SNAPSHOT
 [INFO] ------------------------------------------------------------------------
-[INFO] 
+[INFO]
 [INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ cygnus-ngsi ---
 [debug] execute contextualize
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Copying 2 resources
-[INFO] 
+[INFO]
 [INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ cygnus-ngsi ---
 [INFO] Compiling 12 source files to /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/classes
-[INFO] 
+[INFO]
 [INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ cygnus-ngsi ---
 [debug] execute contextualize
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] skip non existing resourceDirectory /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/src/test/resources
-[INFO] 
+[INFO]
 [INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ cygnus-ngsi ---
 [INFO] Compiling 16 source files to /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/test-classes
-[INFO] 
+[INFO]
 [INFO] --- maven-surefire-plugin:2.10:test (default-test) @ cygnus-ngsi ---
 [INFO] Surefire report directory: /Users/frb/devel/fiware/fiware-cygnus-main/cygnus-ngsi/target/surefire-reports
 
@@ -301,7 +301,7 @@ Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 [Top](#top)
 
 ##<a name="section2"></a>e2e testing
-Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compoung notifications, with or without metadata, even model entities and loops of continuous notifiers.
+Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
 
 For instance, if running the `notification-json-simple.sh`:
 
@@ -317,12 +317,12 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 > Fiware-Service: myservice
 > Fiware-ServicePath: myservicepath
 > Content-Length: 460
-> 
+>
 * upload completely sent off: 460 out of 460 bytes
 < HTTP/1.1 200 OK
 < Transfer-Encoding: chunked
 < Server: Jetty(6.1.26)
-< 
+<
 * Connection #0 to host localhost left intact
 ```
 
