@@ -419,7 +419,7 @@ public class ManagementInterface extends AbstractHandler {
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
         String subscriptionID = request.getParameter("subscription_id");
-        String fiwareService = request.getHeader("Fiware-service");
+        String fiwareService = request.getHeader("Fiware-Service");
         String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if (ngsiVersion == null) {
@@ -862,7 +862,7 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
                 
         String ngsiVersion = request.getParameter("ngsi_version");
-        String fiwareService = request.getHeader("Fiware-service");
+        String fiwareService = request.getHeader("Fiware-Service");
         String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
@@ -1211,7 +1211,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
-        String fiwareService = request.getHeader("Fiware-service");
+        String fiwareService = request.getHeader("Fiware-Service");
         String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {

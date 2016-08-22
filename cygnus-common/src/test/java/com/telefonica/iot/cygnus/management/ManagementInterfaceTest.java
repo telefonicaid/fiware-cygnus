@@ -155,8 +155,8 @@ public class ManagementInterfaceTest {
         String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
-        String service = "fiware_service";
-        String servicePath = "fiware_service_path";
+        String service = "default";
+        String servicePath = "/default";
         
         // Define the readers with the subscriptions 
         BufferedReader readerV1 = new BufferedReader(new StringReader(subscriptionV1));
