@@ -1,1 +1,2 @@
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
+- [cygnus][hardening] Add architecture documentation (#1127)
