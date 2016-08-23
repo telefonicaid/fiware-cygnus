@@ -407,7 +407,7 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
     
-    private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         Level level = LogManager.getRootLogger().getLevel();
         response.setStatus(HttpServletResponse.SC_OK);
@@ -424,6 +424,8 @@ public class ManagementInterface extends AbstractHandler {
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
         String subscriptionID = request.getParameter("subscription_id");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if (ngsiVersion == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -539,7 +541,7 @@ public class ManagementInterface extends AbstractHandler {
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsV2(token, subscriptionID);
+                        getSubscriptionsV2(token, subscriptionID, fiwareService, fiwareServicePath);
                                 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -575,7 +577,7 @@ public class ManagementInterface extends AbstractHandler {
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsByIdV2(token, subscriptionID);
+                        getSubscriptionsByIdV2(token, subscriptionID, fiwareService, fiwareServicePath);
 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -998,6 +1000,8 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
                 
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1075,9 +1079,14 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject orionJson = new JSONObject();
             
             try {
-                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token);
+                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token, fiwareService, fiwareServicePath);
                 status = orionResponse.getStatusCode();
                 orionJson = orionResponse.getJsonObject();
+                
+                if (orionJson.containsKey("orionError")) {
+                    JSONObject error = (JSONObject) orionJson.get("orionError");
+                    status = Integer.parseInt(error.get("code").toString());
+                } // if
                 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
@@ -1142,7 +1151,7 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject orionJson = new JSONObject();
             
             try {
-                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token);   
+                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token, fiwareService, fiwareServicePath);   
                 status = orionResponse.getStatusCode();
                 
                 if (status == 201) {
@@ -1340,6 +1349,8 @@ public class ManagementInterface extends AbstractHandler {
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1439,7 +1450,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (ngsiVersion.equals("1")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV1(subscriptionId, token);
+                    deleteSubscriptionV1(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     JSONObject statusCode = (JSONObject) orionJson.get("statusCode");
@@ -1448,7 +1459,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } else if (ngsiVersion.equals("2")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV2(subscriptionId, token);
+                    deleteSubscriptionV2(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
@@ -1805,7 +1816,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutGroupingRules
     
-    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
@@ -1817,7 +1828,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to " 
                     + logLevel.toUpperCase() + "\" }");
-            LOGGER.info("log4j logging level updated to " + logLevel.toUpperCase());
+            LOGGER.debug("log4j logging level updated to " + logLevel.toUpperCase());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"error\":\"Invalid log level\"}");
