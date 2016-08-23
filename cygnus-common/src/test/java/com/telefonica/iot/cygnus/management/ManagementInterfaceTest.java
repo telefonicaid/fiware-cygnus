@@ -158,6 +158,8 @@ public class ManagementInterfaceTest {
         String subscriptionDelete = "{\"host\":\"orion.lab.fi-ware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String subscriptionGet = "{\"host\":\"orion.lab.fiware.org\", \"port\": \"1026\", \"ssl\": \"false\", \"xauthtoken\": \"QsENv67AJj7blC2qJ0YvfSc5hMWYrs\"}";
         String token = "QsENv67AJj7blC2qJ0YvfSc5hMWYrs";
+        String service = "default";
+        String servicePath = "/default";
         
         // Define the readers with the subscriptions 
         BufferedReader readerV1 = new BufferedReader(new StringReader(subscriptionV1));
@@ -244,8 +246,10 @@ public class ManagementInterfaceTest {
         
         when(response.getWriter()).thenReturn(writer);
         
-        when(orionBackend.deleteSubscriptionV1(subscriptionDelete, token)).thenReturn(responseDeleteV1);
-        when(orionBackend.deleteSubscriptionV2(subscriptionDelete, token)).thenReturn(responseDeleteV2);
+        when(orionBackend.deleteSubscriptionV1(subscriptionDelete, token, service, servicePath)).
+                thenReturn(responseDeleteV1);
+        when(orionBackend.deleteSubscriptionV2(subscriptionDelete, token, service, servicePath)).
+                thenReturn(responseDeleteV2);
         
         File fileGetAll;
         
