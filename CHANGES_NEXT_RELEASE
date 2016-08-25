@@ -1,1 +1,2 @@
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
+- [cygnus-ngsi][feature] General encoding of per-sink forbidden characters (#1107)
