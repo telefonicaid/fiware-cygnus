@@ -33,7 +33,7 @@ public class NGSIKafkaSinkTest {
     private final String service = "service";
     private final String servicePath = "/servicePath";
     private final String servicePathSlash = "/";
-    private final String entity = "entityId_entityType";
+    private final String entity = "entityId=entityType";
     private final String attribute = "attributeName";
     private String expectedTopic;
     
@@ -80,7 +80,7 @@ public class NGSIKafkaSinkTest {
                 + "root service-path is notified/defaulted and data_model=dm-by-service, the Kafka "
                 + "topic name is <service>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
-        sink.configure(createContext("false", "dm-by-service-path"));
+        sink.configure(createContext("false", "dm-by-service"));
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
@@ -104,13 +104,13 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
-                + "the Kafka topic name is <service>_<service-path>");
+                + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "service_servicePath";
+            expectedTopic = "servicexffff/servicePath";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -130,13 +130,13 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByServicePathWithSlashServicePath() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
-                + "the Kafka topic name is <service>");
+                + "the Kafka topic name is the concatenatin of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "service";
+            expectedTopic = "servicexffff/";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -156,13 +156,13 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByEntity() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-entity, the "
-                + "Kafka topic name is <service>_<service-path>_<entityId>_<entityType>");
+                + "Kafka topic name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "service_servicePath_entityId_entityType";
+            expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -182,13 +182,13 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByEntityWithSlashServicePath() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-entity, the Kafka topic "
-                + "name is <service>_<entityId>_<entityType>");
+                + "name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "service_entityId_entityType";
+            expectedTopic = "servicexffff/xffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -208,13 +208,14 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByAttribute() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-attribute, the Kafka "
-                + "topic name is <service>_<service-path>_<entityId>_<entityType>_<attrName>");
+                + "topic name is the concatenation of <service>, <service-path>, <entityId>, <entityType> and "
+                + "<attrName>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "service_servicePath_entityId_entityType_attributeName";
+            expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -233,13 +234,14 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByAttributeWithSlashServicePath() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-attribute, the "
-                + "Kafka topic name is <service>_<entityId>_<entityType>_<attrName>");
+                + "Kafka topic name is the concatenation of <service>, <service-path>, <entityId>, <entityType> and "
+                + "<attrName>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "service_entityId_entityType_attributeName";
+            expectedTopic = "servicexffff/xffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);

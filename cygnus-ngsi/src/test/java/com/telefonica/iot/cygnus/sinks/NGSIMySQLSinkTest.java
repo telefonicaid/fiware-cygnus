@@ -18,310 +18,686 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
-import org.apache.flume.lifecycle.LifecycleState;
-import org.junit.Before;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  *
  * @author frb
  */
-@RunWith(MockitoJUnitRunner.class)
 public class NGSIMySQLSinkTest {
     
-    // mocks
-    @Mock
-    private MySQLBackendImpl mockMySQLBackend;
-    
-    // instance to be tested
-    private NGSIMySQLSink sink;
-    
-    // other inmutable instances
-    private NotifyContextRequest singleNotifyContextRequest;
-    private NotifyContextRequest multipleNotifyContextRequest;
-    
-    // context constants
-    private final String mysqlHost = "localhost";
-    private final String mysqlPort = "3306";
-    private final String mysqlUsername = "user1";
-    private final String mysqlPassword = "pass1234";
-    private final String attrPersistence = "row";
-    private final String enableGrouping = "true";
-    private final String dataModel = "dm-by-entity";
-    
-    // batches constants
-    private final Long recvTimeTs = 123456789L;
-    private final String normalService = "vehicles";
-    private final String abnormalService =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String normalDefaultServicePath = "/4wheels";
-    private final String rootServicePath = "/";
-    private final String abnormalDefaultServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String normalGroupedServicePath = "cars";
-    private final String abnormalGroupedServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String normalDefaultDestination = "car1_car";
-    private final String abnormalDefaultDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    private final String normalGroupedDestination = "my_cars";
-    private final String abnormalGroupedDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    
-    // notification constants
-    private final String singleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
-    private final String multipleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        },\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"115.8\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car2\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
+    /**
+     * Constructor.
+     */
+    public NGSIMySQLSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // NGSIMySQLSinkTest
 
     /**
-     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
-     * classes.
-     *  
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-        // set up the instance of the tested class
-        sink = new NGSIMySQLSink();
-        sink.setPersistenceBackend(mockMySQLBackend);
-        
-        // set up other immutable instances
-        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
-        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
-        
-        // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createDatabase(null);
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).createTable(null, null, null);
-        doNothing().doThrow(new Exception()).when(mockMySQLBackend).insertContextData(null, null, null, null);
-    } // setUp
-    
-    /**
-     * Test of configure method, of class NGSIMySQLSink.
+     * [NGSIMySQLSink.configure] -------- enable_encoding can only be 'true' or 'false'.
      */
     @Test
-    public void testConfigure() {
-        System.out.println("Testing OrionMySQLSink.configure");
-        Context context = createContext();
-        sink.configure(context);
-        assertEquals(mysqlHost, sink.getMySQLHost());
-        assertEquals(mysqlPort, sink.getMySQLPort());
-        assertEquals(mysqlUsername, sink.getMySQLUsername());
-        assertEquals(mysqlPassword, sink.getMySQLPassword());
-        assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
-        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-        assertEquals(DataModel.valueOf(dataModel.replaceAll("-", "").toUpperCase()), sink.getDataModel());
-    } // testConfigure
-
-    /**
-     * Test of start method, of class NGSIMySQLSink.
-     */
-    @Test
-    public void testStart() {
-        System.out.println("Testing OrionMySQLSink.start");
-        Context context = createContext();
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        sink.start();
-        assertTrue(sink.getPersistenceBackend() != null);
-        assertEquals(LifecycleState.START, sink.getLifecycleState());
-    } // testStart
-    
-    /**
-     * Test of persistBatch method, of class NGSIMySQLSink. Null batches are tested.
-     */
-    @Test
-    public void testPersistNullBatches() {
-        System.out.println("Testing OrionHDFSSinkTest.persist (null batches)");
-        Context context = createContext();
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
+    public void testConfigureEnableEncoding() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- enable_encoding can only be 'true' or 'false'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "falso";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
         
         try {
-            sink.persistBatch(null);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistNullBatches
-
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "-  OK  - 'enable_encoding=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "- FAIL - 'enable_encoding=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableEncoding
+    
     /**
-     * Test of persistBath method, of class NGSIMySQLSink. Special resources length are tested.
+     * [NGSIMySQLSink.configure] -------- enable_lowercase can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureEnableLowercase() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- enable_lowercase can only be 'true' or 'false'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = "falso";
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "-  OK  - 'enable_lowercase=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "- FAIL - 'enable_lowercase=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableLowercase
+    
+    /**
+     * [NGSIMySQLSink.configure] -------- enable_grouping can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureEnableGrouping() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- enable_grouping can only be 'true' or 'false'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = "falso";
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "-  OK  - 'enable_grouping=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "- FAIL - 'enable_grouping=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableGrouping
+    
+    /**
+     * [NGSIMySQLSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
+     */
+    // TBD: check for dataModel values in NGSIMySQLSink and uncomment this test.
+    // @Test
+    public void testConfigureDataModel() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service";
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-service' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-service' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureDataModel
+    
+    /**
+     * [NGSIMySQLSink.configure] -------- attr_persistence can only be 'row' or 'column'.
+     */
+    @Test
+    public void testConfigureAttrPersistence() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- attr_persistence can only be 'row' or 'column'");
+        String attrPersistence = "fila";
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "-  OK  - 'attr_persistence=fila' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                    + "- FAIL - 'attr_persistence=fila' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureAttrPersistence
+    
+    /**
+     * [NGSIMySQLSink.buildDBName] -------- When no encoding, the DB name is equals to the encoding of the
+     * notified/defaulted service.
      * @throws java.lang.Exception
      */
     @Test
-    public void testPersistResourceLengths() throws Exception {
-        // common objects
-        Context context = createContext();
-        
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (normal resource lengths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (too long service name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testBuildDBNameNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                + "-------- When no encoding, the DB name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String service = "someService";
         
         try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
+            String builtSchemaName = sink.buildDbName(service);
+            String expectedDBName = "someService";
+        
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
         } // try catch
-        
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (too long servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (too long destination name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-    } // testPersistResourceLengths
+    } // testBuildDBNameNoEncoding
     
     /**
-     * Test of persistBatch method, of class NGSIMySQLSink. Special service and service-path are tested.
+     * [NGSIMySQLSink.buildDBName] -------- When encoding, the DB name is equals to the encoding of the
+     * notified/defaulted service.
      * @throws java.lang.Exception
      */
     @Test
-    public void testPersistServiceServicePath() throws Exception {
-        // common objects
-        Context context = createContext();
-        
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (\"root\" servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testBuildDBNameEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                + "-------- When encoding, the DB name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String service = "someService";
         
         try {
-            sink.persistBatch(groupedBatch);
+            String builtSchemaName = sink.buildDbName(service);
+            String expectedDBName = "someService";
+        
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-
-        System.out.println("Testing OrionMySQLSinkTest.persistBatch (multiple destinations and "
-                + "fiware-servicePaths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
+     * and data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/somePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
         try {
-            sink.persistBatch(groupedBatch);
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "somePath";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistServiceServicePath
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByServicePathNoEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When encoding and when a non root service-path is notified/defaulted and
+     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When encoding and when a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/somePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "x002fsomePath";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByServicePathEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
+     * and data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByEntityNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "somePath_someId_someType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>, <entityId> "
+                        + "and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>, "
+                        + "<entityId> and <entityType>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByEntityNoEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When encoding and when a non root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByEntityEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When encoding and when a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "x002fsomePathxffffsomeIdxffffsomeType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>, <entityId> "
+                        + "and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>, "
+                        + "<entityId> and <entityType>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByEntityEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted and
+     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of \<service-path\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When no encoding and when a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - The table name was built when data_model='dm-by-service-path' and using the root "
+                    + "service path");
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "-  OK  - The table name was not built when data_model='dm-by-service-path' and using the root "
+                    + "service path");
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByServicePathNoEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When encoding and when a root service-path is notified/defaulted and
+     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of \<service-path\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When encoding and when a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "x002f";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByServicePathEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entityId\> and \<entityType\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByEntityNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When no encoding and when a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/";
+        String entity = "someId=someType";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "someId_someType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByEntityNoEncoding
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When encoding and when a root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entityId\> and \<entityType\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByEntityEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When encoding and when a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/";
+        String entity = "someId=someType";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "x002fxffffsomeIdxffffsomeType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByEntityEncoding
     
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
@@ -332,15 +708,22 @@ public class NGSIMySQLSinkTest {
         return batch;
     } // createBatch
     
-    private Context createContext() {
+    private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
+            String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+            String password, String port, String username) {
         Context context = new Context();
-        context.put("mysql_host", mysqlHost);
-        context.put("mysql_port", mysqlPort);
-        context.put("mysql_username", mysqlUsername);
-        context.put("mysql_password", mysqlPassword);
         context.put("attr_persistence", attrPersistence);
+        context.put("batch_size", batchSize);
+        context.put("batch_time", batchTime);
+        context.put("batch_ttl", batchTTL);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", enableGrouping);
-        context.put("table_type", dataModel);
+        context.put("enable_lowercase", enableLowercase);
+        context.put("mysql_host", host);
+        context.put("mysql_password", password);
+        context.put("mysql_port", port);
+        context.put("mysql_username", username);
         return context;
     } // createContext
     

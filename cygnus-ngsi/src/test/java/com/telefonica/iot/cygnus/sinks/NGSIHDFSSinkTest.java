@@ -18,443 +18,740 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
-import static org.junit.Assert.*; // this is required by "fail" like assertions
-import static org.mockito.Mockito.*; // this is required by "when" like functions
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import org.junit.Before;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
-import org.apache.flume.lifecycle.LifecycleState;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  *
  * @author frb
  */
-@RunWith(MockitoJUnitRunner.class)
 public class NGSIHDFSSinkTest {
     
-    // mocks
-    @Mock
-    private HDFSBackendImplREST mockWebHDFSBackend;
-    
-    // instance to be tested
-    private NGSIHDFSSink sink;
-    
-    // other inmutable instances
-    private NotifyContextRequest singleNotifyContextRequest;
-    private NotifyContextRequest multipleNotifyContextRequest;
-    
-    // context constants
-    private final String[] cosmosHost = {"localhost"};
-    private final String cosmosPort = "14000";
-    private final String hdfsUsername = "user1";
-    private final String hdfsPassword = "12345";
-    private final String oauth2Token = "tokenabcdefghijk";
-    private final String serviceAsNamespace = "false";
-    private final String enableHive = "true";
-    private final String hiveServerVersion = "2";
-    private final String hiveHost = "localhost";
-    private final String hivePort = "10000";
-    private final String enableKrb5Auth = "false";
-    private final String enableGrouping = "true";
-    private final String csvSeparator = ",";
-    
-    // batches constants
-    private final Long recvTimeTs = 123456789L;
-    private final String normalService = "vehicles";
-    private final String abnormalService =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "longservname";
-    private final String normalDefaultServicePath = "/4wheels";
-    private final String rootServicePath = "/";
-    private final String abnormalDefaultServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "longservpathname";
-    private final String normalGroupedServicePath = "cars";
-    private final String abnormalGroupedServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "longservpathname";
-    private final String normalDefaultDestination = "car1_car";
-    private final String abnormalDefaultDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "longdestname";
-    private final String normalGroupedDestination = "my_cars";
-    private final String abnormalGroupedDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-            + "longdestname";
-    
-    // notification constants
-    private final String singleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
-    private final String multipleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        },\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"115.8\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car2\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
+    /**
+     * Constructor.
+     */
+    public NGSIHDFSSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // NGSIHDFSSinkTest
 
     /**
-     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
-     * classes.
-     *  
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-        // set up the instance of the tested class
-        sink = new NGSIHDFSSink();
-        sink.setPersistenceBackend(mockWebHDFSBackend);
-        
-        // set up other immutable instances
-        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
-        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
-        
-        // set up the behaviour of the mocked classes
-        when(mockWebHDFSBackend.exists(null)).thenReturn(true);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createDir(null);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).createFile(null, null);
-        doNothing().doThrow(new Exception()).when(mockWebHDFSBackend).append(null, null);
-    } // setUp
-
-    /**
-     * Test of configure method, of class NGSIHDFSSink. Deprecated parameters are used.
+     * [NGSIHDFSSinkTest.configure] -------- enable_encoding can only be 'true' or 'false'.
      */
     @Test
-    public void testConfigureDeprecatedParams() {
-        System.out.println("Testing OrionHDFSSink.configure (deprecated parameters are used)");
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        sink.configure(context);
-        assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
-        assertEquals(cosmosPort, sink.getHDFSPort());
-        assertEquals(hdfsUsername, sink.getHDFSUsername());
-        assertEquals(hdfsPassword, sink.getHDFSPassword());
-        assertEquals(oauth2Token, sink.getOAuth2Token());
-        assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
-        assertEquals(fileFormat, sink.getFileFormat());
-        assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
-        assertEquals(hiveServerVersion, sink.getHiveServerVersion());
-        assertEquals(hiveHost, sink.getHiveHost());
-        assertEquals(hivePort, sink.getHivePort());
-        assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
-        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-    } // testConfigureDeprecatedParams
+    public void testConfigureEnableEncoding() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- enable_encoding can only be 'true' or 'false'");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "falso";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'enable_encoding=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'enable_encoding=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableEncoding
     
     /**
-     * Test of configure method, of class NGSIHDFSSink. No deprecated parameters are used.
+     * [NGSIHDFSSinkTest.configure] -------- enable_lowercase can only be 'true' or 'false'.
      */
     @Test
-    public void testConfigure() {
-        System.out.println("Testing OrionHDFSSinkTest.configure");
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        sink.configure(context);
-        assertEquals(cosmosHost[0], sink.getHDFSHosts()[0]);
-        assertEquals(cosmosPort, sink.getHDFSPort());
-        assertEquals(hdfsUsername, sink.getHDFSUsername());
-        assertEquals(hdfsPassword, sink.getHDFSPassword());
-        assertEquals(oauth2Token, sink.getOAuth2Token());
-        assertEquals(serviceAsNamespace, sink.getServiceAsNamespace());
-        assertEquals(fileFormat, sink.getFileFormat());
-        assertEquals(enableHive, sink.getEnableHive() ? "true" : "false");
-        assertEquals(hiveServerVersion, sink.getHiveServerVersion());
-        assertEquals(hiveHost, sink.getHiveHost());
-        assertEquals(hivePort, sink.getHivePort());
-        assertEquals(enableKrb5Auth, sink.getEnableKrb5Auth());
-        assertEquals(enableGrouping, sink.getEnableGrouping() ? "true" : "false");
-    } // testConfigure
-
-    /**
-     * Test of start method, of class NGSIHDFSSink.
-     */
-    @Test
-    public void testStart() {
-        System.out.println("Testing OrionHDFSSink.start");
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        sink.start();
-        assertTrue(sink.getPersistenceBackend() != null);
-        assertEquals(LifecycleState.START, sink.getLifecycleState());
-    } // testStart
-
-    /**
-     * Test of persistBatch method, of class NGSIHDFSSink. Null batches are tested.
-     */
-    @Test
-    public void testPersistNullBatches() {
-        System.out.println("Testing OrionHDFSSink.persistBatch (null batches)");
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
+    public void testConfigureEnableLowercase() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- enable_lowercase can only be 'true' or 'false'");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = "falso";
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
         
         try {
-            sink.persistBatch(null);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistNullBatches
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'enable_lowercase=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'enable_lowercase=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableLowercase
     
     /**
-     * Test of persistBatch method, of class NGSIHDFSSink. File formats are tested.
+     * [NGSIHDFSSinkTest.configure] -------- enable_grouping can only be 'true' or 'false'.
      */
-    @Test
-    public void testPersistFileFormats() {
-        // common objects
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (json-row file format)");
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (json-column file format)");
-        fileFormat = "json-column";
-        context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (csv-row file format)");
-        fileFormat = "csv-row";
-        context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
+    // TBD: check for enable_grouping values in NGSIHDFSSink and uncomment this test.
+    //@Test
+    public void testConfigureEnableGrouping() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- enable_grouping can only be 'true' or 'false'");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = "falso";
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
         
         try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (csv-column file format)");
-        fileFormat = "csv-column";
-        context = createContext(fileFormat);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistFileFormats
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'enable_grouping=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'enable_grouping=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableGrouping
     
     /**
-     * Test of persistBatch method, of class NGSIHDFSSink. Special resources length is tested.
+     * [NGSIHDFSSinkTest.configure] -------- backend_impl can only be 'rest' or 'binary'.
+     */
+    @Test
+    public void testConfigureBackendImpl() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- enable_grouping can only be 'true' or 'false'");
+        String backendImpl = "api";
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'backend_impl=api' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'backend_impl=api' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureBackendImpl
+    
+    /**
+     * [NGSIHDFSSinkTest.configure] -------- data_model can only be 'dm-by-entity'.
+     */
+    // TBD: check for data_model values in NGSIHDFSSink and uncomment this test.
+    //@Test
+    public void testConfigureDataModel() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- data_model can only be 'dm-by-entity'");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'data_model=dm-by-service-path' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'data_model=dm-by-service-path' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureDataModel
+    
+    /**
+     * [NGSIHDFSSinkTest.configure] -------- file_format can only be 'json-row', 'json-column', 'csv-row' or
+     * 'csv-column'.
+     */
+    @Test
+    public void testConfigureFileFormat() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- file_format can only be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = "fila";
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'file_format=fila' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'file_format=fila' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureFileFormat
+
+    /**
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When no encoding and when a non root service-path is
+     * notified/defaulted the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
      * @throws java.lang.Exception
      */
     @Test
-    public void testPersistResourceLengths() throws Exception {
-        // common objects
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (normal resource lengths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testBuildFolderPathNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
+                + "path is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
         
         try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/someId_someType";
         
-        System.out.println("Testing OrionHDFSSink.persistBatch (too long service name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
         } // try catch
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (too long servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (too long destination name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-    } // testPersistResourceLengths
+    } // testBuildFolderPathNonRootServicePathNoEncoding
     
     /**
-     * Test of persistBatch method, of class NGSIHDFSSink. Special service and service-path are tested.
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When encoding and when a non root service-path is notified/defaulted
+     * the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
      * @throws java.lang.Exception
      */
     @Test
-    public void testPersistServiceServicePath() throws Exception {
-        // common objects
-        String fileFormat = "json-row";
-        Context context = createContext(fileFormat);
-        
-        System.out.println("Testing OrionHDFSSink.persistBatch (\"root\" servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testBuildFolderPathNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When encoding and when a non root service-path is notified/defaulted the HDFS folder path "
+                + "is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
         
         try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/someIdxffffsomeType";
         
-        System.out.println("Testing OrionHDFSSink.persistBatch (multiple destinations and "
-                + "fiware-servicePaths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to the encoding of "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to the encoding of "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathNonRootServicePathEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted
+     * the HDFS folder path is the encoding of \<service\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a root service-path is notified/defaulted the HDFS folder path "
+                + "is the encoding of <service>/<entity>");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
         
         try {
-            sink.persistBatch(groupedBatch);
+            String builtTableName = sink.buildFolderPath(service, servicePath, entity);
+            String expecetedTableName = "someService/someId_someType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of "
+                        + "<service>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of "
+                        + "<service>/<entity>");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistServiceServicePath
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathRootServicePathNoEncoding
+    
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When encoding and when a root service-path is notified/defaulted the
+     * HDFS folder path is the encoding of \<service\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When encoding and when a root service-path is notified/defaulted the HDFS folder path is "
+                + "the encoding of <service>/<entity>");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
+        
+        try {
+            String builtTableName = sink.buildFolderPath(service, servicePath, entity);
+            String expecetedTableName = "someService/someIdxffffsomeType";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of "
+                        + "<service>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of "
+                        + "<service>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathRootServicePathEncoding
+    
+    /**
+     * [NGSIHDFSSinkTest.buildFilePath] -------- When no encoding and when a non root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<service-path\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFilePathNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS file path "
+                + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        
+        try {
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/someId_someType/someId_someType.txt";
+        
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFilePathNonRootServicePathNoEncoding
+    
+    /**
+     * [NGSIHDFSSinkTest.buildFilePath] -------- When encoding and when a non root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<service-path\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFilePathNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When encoding and when a non root service-path is notified/defaulted the HDFS file path "
+                + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        
+        try {
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/someIdxffffsomeType/someIdxffffsomeType.txt";
+        
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to the encoding of "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to the encoding of "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFilePathNonRootServicePathEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFilePathRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When no encoding and when a root service-path is notified/defaulted the HDFS file path is "
+                + "the encoding of <service>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
+        
+        try {
+            String builtTableName = sink.buildFilePath(service, servicePath, entity);
+            String expecetedTableName = "someService/someId_someType/someId_someType.txt";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to "
+                        + "<service>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to "
+                        + "<service>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFilePathRootServicePathNoEncoding
+    
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When encoding and when a root service-path is notified/defaulted the
+     * HDFS file path is the encoding of \<service\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFilePathRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When encoding and when a root service-path is notified/defaulted the HDFS file path is the "
+                + "encoding of <service>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
+        
+        try {
+            String builtTableName = sink.buildFilePath(service, servicePath, entity);
+            String expecetedTableName = "someService/someIdxffffsomeType/someIdxffffsomeType.txt";
+        
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of "
+                        + "<service>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of "
+                        + "<service>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFilePathRootServicePathEncoding
     
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             ContextElement contextElement) {
@@ -465,25 +762,29 @@ public class NGSIHDFSSinkTest {
         return batch;
     } // createBatch
     
-    private Context createContext(String fileFormat) {
+    private Context createContext(String backendImpl, String batchSize, String batchTime, String batchTTL,
+            String csvSeparator, String dataModel, String enableEncoding, String enableGrouping, String enableLowercase,
+            String fileFormat, String host, String password, String port, String username, String hive, String krb5,
+            String token, String serviceAsNamespace) {
         Context context = new Context();
-        context.put("hdfs_password", hdfsPassword);
-
-        context.put("hdfs_host", cosmosHost[0]);
-        context.put("hdfs_port", cosmosPort);
-        context.put("hdfs_username", hdfsUsername);
-        
+        context.put("backend_impl", backendImpl);
+        context.put("batchSize", batchSize);
+        context.put("batchTime", batchTime);
+        context.put("batchTTL", batchTTL);
         context.put("csv_separator", csvSeparator);
-        context.put("oauth2_token", oauth2Token);
-        context.put("service_as_namespace", serviceAsNamespace);
-        context.put("file_format", fileFormat);
-        context.put("hive", enableHive);
-        context.put("hive.server_version", hiveServerVersion);
-        context.put("hive.host", hiveHost);
-        context.put("hive.port", hivePort);
-        
-        context.put("krb5_auth", enableKrb5Auth);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", enableGrouping);
+        context.put("enable_grouping", enableLowercase);
+        context.put("file_format", fileFormat);
+        context.put("hdfs_host", host);
+        context.put("hdfs_password", password);
+        context.put("hdfs_port", port);
+        context.put("hdfs_username", username);
+        context.put("hive", hive);
+        context.put("krb5_auth", krb5);
+        context.put("oauth2_token", token);
+        context.put("service_as_namespace", serviceAsNamespace);
         return context;
     } // createContext
     
