@@ -25,6 +25,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -122,6 +123,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
     @Override
     public void configure(Context context) {
+        // Read NGSISink general configuration
+        super.configure(context);
+        
+        // Impose enable lower case, since PostgreSQL only accepts lower case
+        enableLowercase = true;
+        
         postgresqlHost = context.getString("postgresql_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
         postgresqlPort = context.getString("postgresql_port", "5432");
@@ -153,11 +160,6 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
-
-        super.configure(context);
-        
-        // CKAN requires all the names written in lower case
-        enableLowercase = true;
     } // configure
 
     @Override
@@ -258,56 +260,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             servicePath = cygnusEvent.getServicePath();
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
-            schemaName = buildSchemaName();
-            tableName = buildTableName();
+            schemaName = buildSchemaName(service);
+            tableName = buildTableName(servicePath, entity, attribute);
         } // initialize
-
-        private String buildSchemaName() throws Exception {
-            String name = NGSIUtils.encode(service, false, true);
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building schema name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
-
-            return name;
-        } // buildSchemaName
-
-        private String buildTableName() throws Exception {
-            String name;
-
-            switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    if (servicePath.equals("/")) {
-                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
-                                + "dm-by-service-path data model");
-                    } // if
-                    
-                    name = NGSIUtils.encode(servicePath, true, false);
-                    break;
-                case DMBYENTITY:
-                    String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true);
-                    break;
-                case DMBYATTRIBUTE:
-                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true)
-                            + '_' + NGSIUtils.encode(attribute, false, true);
-                    break;
-                default:
-                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
-            } // switch
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building table name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
-
-            return name;
-        } // buildTableName
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
 
@@ -508,5 +463,95 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
         persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
     } // persistAggregation
+    
+    /**
+     * Creates a PostgreSQL DB name given the FIWARE service.
+     * @param service
+     * @return The PostgreSQL DB name
+     * @throws Exception
+     */
+    public String buildSchemaName(String service) throws Exception {
+        String name;
+        
+        if (enableEncoding) {
+            name = NGSICharsets.encodePostgreSQL(service);
+        } else {
+            name = NGSIUtils.encode(service, false, true);
+        } // if else
+
+        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building schema name '" + name
+                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildSchemaName
+
+    /**
+     * Creates a PostgreSQL table name given the FIWARE service path, the entity and the attribute.
+     * @param servicePath
+     * @param entity
+     * @param attribute
+     * @return The PostgreSQL table name
+     * @throws Exception
+     */
+    public String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+        String name;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    name = NGSICharsets.encodePostgreSQL(servicePath);
+                    break;
+                case DMBYENTITY:
+                    name = NGSICharsets.encodePostgreSQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodePostgreSQL(entity);
+                    break;
+                case DMBYATTRIBUTE:
+                    name = NGSICharsets.encodePostgreSQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodePostgreSQL(entity)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodePostgreSQL(attribute);
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+            } // switch
+        } else {
+            switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    if (servicePath.equals("/")) {
+                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                                + "dm-by-service-path data model");
+                    } // if
+                    
+                    name = NGSIUtils.encode(servicePath, true, false);
+                    break;
+                case DMBYENTITY:
+                    String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entity, false, true);
+                    break;
+                case DMBYATTRIBUTE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entity, false, true)
+                            + '_' + NGSIUtils.encode(attribute, false, true);
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+            } // switch
+        } // if else
+
+        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building table name '" + name
+                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildTableName
 
 } // NGSIPostgreSQLSink

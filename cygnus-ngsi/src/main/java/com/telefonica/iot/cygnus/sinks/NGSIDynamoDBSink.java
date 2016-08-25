@@ -29,8 +29,8 @@ import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import org.apache.flume.Context;
@@ -81,6 +81,12 @@ public class NGSIDynamoDBSink extends NGSISink {
 
     @Override
     public void configure(Context context) {
+        // Read NGSISink general configuration
+        super.configure(context);
+        
+        // Impose enable encoding
+        enableEncoding = true;
+        
         accessKeyId = context.getString("access_key_id");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (access_key_id=" + accessKeyId + ")");
         secretAccessKey = context.getString("secret_access_key");
@@ -111,8 +117,6 @@ public class NGSIDynamoDBSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + attrPersistRowStr + ") -- Must be 'row' or 'column'");
         }  // if else
-
-        super.configure(context);
     } // configure
 
     @Override
@@ -342,19 +346,20 @@ public class NGSIDynamoDBSink extends NGSISink {
 
         switch (dataModel) {
             case DMBYSERVICEPATH:
-                String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                tableName = NGSIUtils.encode(service, false, true)
-                        + (truncatedServicePath.isEmpty() ? "" : "_" + truncatedServicePath);
+                tableName = NGSICharsets.encodeDynamoDB(service)
+                        + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodeDynamoDB(servicePath);
                 break;
             case DMBYENTITY:
-                truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
-                tableName = NGSIUtils.encode(service, false, true)
-                        + (truncatedServicePath.isEmpty() ? "" : "_" + truncatedServicePath)
-                        + "_" + NGSIUtils.encode(destination, false, true);
+                tableName = NGSICharsets.encodeDynamoDB(service)
+                        + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodeDynamoDB(servicePath)
+                        + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodeDynamoDB(destination);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH or DMBYENTITY");
+                            + "'. Please, use dm-by-service-path or dm-by-entity");
         } // switch
 
         if (tableName.length() > CommonConstants.MAX_NAME_LEN) {

@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -432,8 +433,14 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildOrgName(String fiwareService) throws Exception {
-        String orgName = NGSIUtils.encode(fiwareService, false, true);
+    public String buildOrgName(String fiwareService) throws Exception {
+        String orgName;
+        
+        if (enableEncoding) {
+            orgName = NGSICharsets.encodeCKAN(fiwareService);
+        } else {
+            orgName = NGSIUtils.encode(fiwareService, false, true);
+        } // if else
 
         if (orgName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
@@ -451,13 +458,18 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
+    public String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
         String pkgName;
-
-        if (fiwareServicePath.equals("/")) {
-            pkgName = NGSIUtils.encode(fiwareService, false, true);
+        
+        if (enableEncoding) {
+            pkgName = NGSICharsets.encodeCKAN(fiwareService) + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
-            pkgName = NGSIUtils.encode(fiwareService, false, true) + NGSIUtils.encode(fiwareServicePath, false, true);
+            if (fiwareServicePath.equals("/")) {
+                pkgName = NGSIUtils.encode(fiwareService, false, true);
+            } else {
+                pkgName = NGSIUtils.encode(fiwareService, false, true)
+                        + NGSIUtils.encode(fiwareServicePath, false, true);
+            } // if else
         } // if else
 
         if (pkgName.length() > CommonConstants.MAX_NAME_LEN) {
@@ -474,8 +486,14 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildResName(String destination) throws Exception {
-        String resName = NGSIUtils.encode(destination, false, true);
+    public String buildResName(String destination) throws Exception {
+        String resName;
+        
+        if (enableEncoding) {
+            resName = NGSICharsets.encodeCKAN(destination);
+        } else {
+            resName = NGSIUtils.encode(destination, false, true);
+        } // if else
 
         if (resName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "

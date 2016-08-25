@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -294,52 +295,9 @@ public class NGSIMySQLSink extends NGSISink {
             servicePath = cygnusEvent.getServicePath();
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
-            dbName = buildDbName();
-            tableName = buildTableName();
+            dbName = buildDbName(service);
+            tableName = buildTableName(servicePath, entity, attribute);
         } // initialize
-        
-        private String buildDbName() throws Exception {
-            String name = NGSICharsets.encodeMySQL(service);
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building database name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
-
-            return name;
-        } // buildDbName
-        
-        private String buildTableName() throws Exception {
-            String name;
-
-            switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    name = NGSICharsets.encodeMySQL(servicePath);
-                    break;
-                case DMBYENTITY:
-                    name = NGSICharsets.encodeMySQL(servicePath)
-                            + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entity);
-                    break;
-                case DMBYATTRIBUTE:
-                    name = NGSICharsets.encodeMySQL(servicePath)
-                            + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entity)
-                            + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(attribute);
-                    break;
-                default:
-                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
-            } // switch
-
-            if (name.length() > CommonConstants.MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building table name '" + name
-                        + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-            } // if
-
-            return name;
-        } // buildTableName
         
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
         
@@ -507,5 +465,95 @@ public class NGSIMySQLSink extends NGSISink {
         
         persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
     } // persistAggregation
+    
+    /**
+     * Creates a MySQL DB name given the FIWARE service.
+     * @param service
+     * @return The MySQL DB name
+     * @throws Exception
+     */
+    protected String buildDbName(String service) throws Exception {
+        String name;
+        
+        if (enableEncoding) {
+            name = NGSICharsets.encodeMySQL(service);
+        } else {
+            name = NGSIUtils.encode(service, false, true);
+        } // if else
+
+        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building database name '" + name
+                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildDbName
+
+    /**
+     * Creates a MySQL table name given the FIWARE service path, the entity and the attribute.
+     * @param servicePath
+     * @param entity
+     * @param attribute
+     * @return The MySQL table name
+     * @throws Exception
+     */
+    protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+        String name;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    name = NGSICharsets.encodeMySQL(servicePath);
+                    break;
+                case DMBYENTITY:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entity);
+                    break;
+                case DMBYATTRIBUTE:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entity)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(attribute);
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+            } // switch
+        } else {
+            switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    if (servicePath.equals("/")) {
+                        throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
+                                + "dm-by-service-path data model");
+                    } // if
+                    
+                    name = NGSIUtils.encode(servicePath, true, false);
+                    break;
+                case DMBYENTITY:
+                    String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entity, false, true);
+                    break;
+                case DMBYATTRIBUTE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entity, false, true)
+                            + '_' + NGSIUtils.encode(attribute, false, true);
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+            } // switch
+        } // if else
+
+        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building table name '" + name
+                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildTableName
 
 } // NGSIMySQLSink
