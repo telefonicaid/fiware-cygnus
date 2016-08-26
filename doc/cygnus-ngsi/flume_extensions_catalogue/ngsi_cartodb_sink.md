@@ -62,7 +62,7 @@ The name of these tables depends on the configured data model and analysis mode 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
-The above applies both if `enable_raw` or `enable_distance` es set to `true`. In adddition, the distance analysis mode adds the sufix `x0000distance` to the table name.
+The above applies both if `enable_raw` or `enable_distance` es set to `true`. In addition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). Remember certain [encoding](#section2.3.4) is applied.
 
@@ -165,7 +165,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
-    
+
 [Top](#top)
 
 ####<a name="section1.3.2"></a>Table names
@@ -175,7 +175,7 @@ The PostgreSQL table names will be, depending on the configured data model and a
 |---|---|---|
 | `/` | `x002f` | `x002fcar1x0000car[x0000distance]` |
 | `/4wheels` | `x002f4wheels[x0000distance]` | `x002f4wheelsx0000car1x0000car[x0000distance]` |
-    
+
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
@@ -458,7 +458,7 @@ It is mandatory the entities aimed to be handled by this sink have a geolocated 
 [Top](#top)
 
 ####<a name="section2.3.2"></a>Multitenancy support
-Different than other NGSI sinks, where a single authorized user is able to create user sapces and write data on behalf of all the other users (who can only read the data), this sink requires the writting credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
+Different than other NGSI sinks, where a single authorized user is able to create user spaces and write data on behalf of all the other users (who can only read the data), this sink requires the writing credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
 
 [Top](#top)
 
@@ -469,9 +469,9 @@ What is important regarding the batch mechanism is it largely increases the perf
 
 The batching mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `NGSICartoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSICartoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
-Finally, it must be said currenty batching only works with the raw-like storing. Due to the distance-like storing involves data aggregations based on the <i>previous</i> event, the sink currently relies in the PostgreSQL features of querying by the last event for implementing this kind of calculations. Of course, for the sake of performance this is expected to be done <i>inside</i> the sink, by temporarily pointing to the previous event in memory, which will be always faster than accessing the database.
+Finally, it must be said currently batching only works with the raw-like storing. Due to the distance-like storing involves data aggregations based on the <i>previous</i> event, the sink currently relies in the PostgreSQL features of querying by the last event for implementing this kind of calculations. Of course, for the sake of performance this is expected to be done <i>inside</i> the sink, by temporarily pointing to the previous event in memory, which will be always faster than accessing the database.
 
 [Top](#top)
 

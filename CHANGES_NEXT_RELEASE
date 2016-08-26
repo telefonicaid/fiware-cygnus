@@ -1,2 +1,8 @@
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
 - [cygnus-ngsi][feature] General encoding of per-sink forbidden characters (#1107)
+- [cygnus][hardening] Add architecture documentation (#1127)
+- [cygnus][feature] Standardize logs layout (#1118)
+- [cygnus-common][hardening] Add implementation for /admin/log route (#807)
+- [cygnus-common][hardening] Create ManagementInterfaceUtils class (#1115)
+- [cygnus-common][bug] Add fiware-service and fiware-servicePath headers to all API operations (#1124)
+- [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)

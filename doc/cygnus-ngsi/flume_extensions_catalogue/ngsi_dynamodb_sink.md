@@ -39,7 +39,7 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to DynamoDB data structures
-DynamoDB organizes the data in tables of data items. All the tables are locaed within the same *default database*, i.e. the Amazon Web Services user space. Such organization is exploited by `NGSIDynamoDBSink` each time a Flume event is going to be persisted.
+DynamoDB organizes the data in tables of data items. All the tables are located within the same *default database*, i.e. the Amazon Web Services user space. Such organization is exploited by `NGSIDynamoDBSink` each time a Flume event is going to be persisted.
 
 [Top](#top)
 
@@ -132,7 +132,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
-    
+
 [Top](#top)
 
 ####<a name="section1.3.2"></a>Table names
@@ -142,7 +142,7 @@ The DynamoDB table names will be, depending on the configured data model, the fo
 |---|---|---|
 | `/` | `vehicles` | `vehiclesxffffx002fxffffcar1xffffcar` |
 | `/4wheels` | `vehiclesxffffx002f4wheels` | `vehiclesxffffx002f4wheelsxffffcar1xffffcar` |
-    
+
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
@@ -195,7 +195,7 @@ A configuration example could be:
     cygnusagent.sinks.dynamodb-sink.batch_size = 25
     cygnusagent.sinks.dynamodb-sink.batch_timeout = 30
     cygnusagent.sinks.dynamodb-sink.batch_ttl = 10
-    
+
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
@@ -207,25 +207,25 @@ Use `NGSIDynamoDBSink` if you are looking for a cloud-based database with [relat
 ####<a name="section2.3.1"></a>About the table type and its relation with the grouping rules
 The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same DynamoDB table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same DynamoDB table).
 
-The [Grouping feature](./interceptors.md) is another aggregation mechanim, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
+The [Grouping feature](./grouping_interceptor.md) is another aggregation mechanism, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
 
-For instance, if the chosen table type is by destination and the grouping feature is not enabled then two different entities data, `car1` and `car2` both of type `car` will be persisted in two different DynamoDB tables, according to their <i>default</i> destination, i.e. `car1_car` and `car2_car`, respectively. However, if a grouping rule saying "all cars of type `car` will have a modified destination named `cars`" is enabled then both entities data will be persisted in a single table named `cars`. In this example, the direct aggregation is determined by the table type (by destination), but inderectly we have been deciding the aggregation as well through a grouping rule.
+For instance, if the chosen table type is by destination and the grouping feature is not enabled then two different entities data, `car1` and `car2` both of type `car` will be persisted in two different DynamoDB tables, according to their <i>default</i> destination, i.e. `car1_car` and `car2_car`, respectively. However, if a grouping rule saying "all cars of type `car` will have a modified destination named `cars`" is enabled then both entities data will be persisted in a single table named `cars`. In this example, the direct aggregation is determined by the table type (by destination), but indirectly we have been deciding the aggregation as well through a grouping rule.
 
 [Top](#top)
 
 ####<a name="section2.3.2"></a>About the persistence mode
-Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for DynamoDB since this kind of database is designed for holding items of different lenght within the same table. Anyway, it must be taken into account, when designing your applications, the `row` persistence mode will always insert fixed 8-fields data items for each notified attribute. And the `column` mode may be affected by several data items of different lengths (in term of fields), as already explained.
+Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for DynamoDB since this kind of database is designed for holding items of different length within the same table. Anyway, it must be taken into account, when designing your applications, the `row` persistence mode will always insert fixed 8-fields data items for each notified attribute. And the `column` mode may be affected by several data items of different lengths (in term of fields), as already explained.
 
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `NGSIDynamoDBSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIDynamoDBSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same DynamoDB table. If processing the events one by one, we would need 100 inserts into DynamoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination DynamoDB table. In the worst case, the whole 100 entities will be about 100 different entities (100 different DynamoDB tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `NGSIDynamoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIDynamoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
 [Top](#top)
 
@@ -258,15 +258,15 @@ Cygnus applies this specific encoding tailored to DynamoDB data structures:
 As any other NGSI-like sink, `NGSIDynamoDBSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
-    
-A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the DynamoDB table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `DynamoDBBackend` implementation.
-    
+
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the DynamoDB table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `DynamoDBBackend` implementation.
+
     public void start();
 
 An implementation of `DynamoDBBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIDynamoDBSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
-    
+
 A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
@@ -275,4 +275,3 @@ A complete configuration as the described above is read from the given `Context`
 Current implementation of `NGSIDynamoDBSink` relies on the [AWS access keys](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html) mechanism.
 
 [Top](#top)
-

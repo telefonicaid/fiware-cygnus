@@ -32,7 +32,7 @@ Apart from this introduction, this Installation and Administration Guide mainly 
 It is very important to note that, for those topics not covered by this documentation, the related section in cygnus-common applies. Specifically:
 
 * Hardware requirements.
-* Flume environmnet configuration.
+* Flume environment configuration.
 * log4j configuration.
 * Running as a process.
 * Management interface.
