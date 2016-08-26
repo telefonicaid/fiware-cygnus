@@ -205,12 +205,12 @@ public class NGSIGroupingInterceptor implements Interceptor {
             
             if (groupingRulesFileName == null) {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = null) -- Must be configured");
+                LOGGER.debug("[gi] Invalid configuration (grouping_rules_conf_file = null) -- Must be configured");
             } else if (groupingRulesFileName.length() == 0) {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = ) -- Cannot be empty");
+                LOGGER.debug("[gi] Invalid configuration (grouping_rules_conf_file = ) -- Cannot be empty");
             } else {
-                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_conf_file=" + groupingRulesFileName + ")");
             } // if else
 
             String enableEncodingStr = context.getString("enable_encoding", "false");
