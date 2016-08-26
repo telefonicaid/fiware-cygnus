@@ -64,9 +64,12 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
-import org.codehaus.jettison.json.JSONString;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -155,6 +158,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleGetAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleGetAdminLogAppenders(request,response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -752,6 +757,153 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handleGetAdminConfigurationInstance
+    
+    private void handleGetAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String transient_ = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+        
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+        
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+        
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            String appendersJson = "";
+            
+            if (allAppenders) {
+                
+                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
+                
+                if (appendersJson.equals("[]")) { 
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                    LOGGER.debug("No log4j appenders found");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":" + appendersJson + "}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } // if else
+                
+            } else {
+                
+                try {
+                    Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    String name = app.getName();
+                    PatternLayout layout = (PatternLayout) app.getLayout();
+                    String layoutStr = layout.getConversionPattern();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":[{\"name\":\"" + name + 
+                            "\",\"layout\":\"" + layoutStr + "\",\"active\":\"true\"}]}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+                
+            } // if else
+            
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String param = "flume.root.logger";
+                String rootProperty = properties.getProperty(param);
+                String[] rootLogger = rootProperty.split(",");
+                String active = rootLogger[1];
+                
+                String appenderJson = "[";   
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                
+                if (allAppenders) {
+
+                    for (String name : appenderNames) {   
+                        boolean isActive = false;
+                        
+                        if (name.equals(active)) {
+                            isActive = true;
+                        } // if
+                        
+                        String layoutName = "log4j.appender." + name + ".layout."
+                            + "ConversionPattern";
+                        String layout = properties.getProperty(layoutName);
+                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                            + layout + "\",\"active\":\"" + Boolean.toString(isActive) + "\"}";
+                        
+                        if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
+                            appenderJson += ", ";
+                        } // if
+
+                    } // for
+
+                    appenderJson += "]";
+                
+                    if (appenderJson.equals("[]")) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } // if else 
+                    
+                } else {
+                    boolean appenderFound = false;
+                    
+                    for (String name : appenderNames) { 
+                            
+                        if (name.equals(appenderName)) {
+                            String layoutName = "log4j.appender." + name + ".layout."
+                                + "ConversionPattern";
+                            String layout = properties.getProperty(layoutName);
+                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                                + layout + "\",\"active\":\"";
+                            if (name.equals(active)) {
+                                appenderJson += "true\"}";
+                            } else {
+                                appenderJson += "false\"}";
+                            }
+                            appenderFound = true;
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appender\":" + appenderJson + "]}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+                    
+                } // if else
+                
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"File not found in the path received\"}");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":\"Invalid 'transient' parameter found\"}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+        
+    } // handleGetAdminLogAppenders
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
