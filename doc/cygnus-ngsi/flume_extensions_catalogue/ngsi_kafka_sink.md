@@ -48,7 +48,7 @@ A Kafka topic is created (number of partitions 1) if not yet existing depending 
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the topic name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 * Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the topic name. If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
-It must be said there is no known character set accepted and/or forbiden for Kafka. Anyway, certaing [encoding](#section2.3.2) is applied.
+It must be said there is no known character set accepted and/or forbidden for Kafka. Anyway, certaing [encoding](#section2.3.2) is applied.
 
 The following table summarizes the topic name composition:
 

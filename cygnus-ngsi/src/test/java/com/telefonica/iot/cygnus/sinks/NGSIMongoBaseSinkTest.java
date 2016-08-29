@@ -79,13 +79,13 @@ public class NGSIMongoBaseSinkTest {
     } // testConfigureCollectionPrefixIsNotSystem
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbidden characters.
      */
     @Test
     public void testConfigureCollectionPrefixIsEncodedOldEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
-        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
+                + "-------- Configured 'collection_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "this\\is/a$prefix.with-forbidden,chars:-.";
         String dbPrefix = "sth_";
         String dataModel = null; // default
         String enableEncoding = "false";
@@ -108,13 +108,13 @@ public class NGSIMongoBaseSinkTest {
     } // testConfigureCollectionPrefixIsEncodedOldEncoding
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbidden characters.
      */
     @Test
     public void testConfigureCollectionPrefixIsEncodedNewEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
-        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
+                + "-------- Configured 'collection_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "this\\is/a$prefix.with-forbidden,chars:-.";
         String dbPrefix = "sth_";
         String dataModel = null; // default
         String enableEncoding = "true";
@@ -137,14 +137,14 @@ public class NGSIMongoBaseSinkTest {
     } // testConfigureCollectionPrefixIsEncodedNewEncoding
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbidden characters.
      */
     @Test
     public void testConfigureDBPrefixIsEncodedOldEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
+                + "-------- Configured 'db_prefix' is encoded when having forbidden characters");
         String collectionPrefix = "sth_";
-        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
+        String dbPrefix = "this\\is/a$prefix.with forbidden\"chars:-,";
         String dataModel = null; // defaulting
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
@@ -164,14 +164,14 @@ public class NGSIMongoBaseSinkTest {
     } // testConfigureDBPrefixIsEncodedOldEncoding
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbidden characters.
      */
     @Test
     public void testConfigureDBPrefixIsEncodedNewEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
+                + "-------- Configured 'db_prefix' is encoded when having forbidden characters");
         String collectionPrefix = "sth_";
-        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
+        String dbPrefix = "this\\is/a$prefix.with forbidden\"chars:-,";
         String dataModel = null; // defaulting
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
@@ -224,10 +224,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of 'sth_/'");
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of 'sth_/'");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -271,10 +271,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of 'sth_/'");
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of 'sth_/'");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -318,10 +318,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType'");
                 throw e;
             } // try catch
@@ -366,10 +366,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType'");
                 throw e;
             } // try catch
@@ -415,10 +415,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType_someName_someType'");
                 throw e;
             } // try catch
@@ -464,10 +464,10 @@ public class NGSIMongoBaseSinkTest {
             try {
                 assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType_someName_someType'");
                 throw e;
             } // try catch

@@ -30,7 +30,7 @@ public final class NGSICharsets {
     } // NGSICharsets
     
     /**
-     * Encodes a string for PostgreSQL. This includes CartoDB. Only lowercase alphanumercics and _ are allowed.
+     * Encodes a string for PostgreSQL. This includes CartoDB. Only lowercase alphanumerics and _ are allowed.
      * @param in
      * @return The encoded string
      */
@@ -117,7 +117,7 @@ public final class NGSICharsets {
     } // encodeHDFS
     
     /**
-     * Encodes a string for CKAN. Only lowercase alphanumercics, - and _ are allowed.
+     * Encodes a string for CKAN. Only lowercase alphanumerics, - and _ are allowed.
      * @param in
      * @return The encoded string
      */

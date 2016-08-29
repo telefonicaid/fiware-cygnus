@@ -1063,7 +1063,7 @@ public class NGSICharsetsTest {
     @Test
     public void testEncodeMongoDBDatabaseForbiddenCharacters() {
         System.out.println(getTestTraceHead("[NGSICharsets.encodeMongoDBDatabase]")
-                + "-------- Forbidde characters are encoded");
+                + "-------- Forbidden characters are encoded");
         String in = "/\\.\"$";
         String expected = "x002fx005cx002ex0022x0024";
         String out = NGSICharsets.encodeMongoDBDatabase(in);
@@ -1242,7 +1242,7 @@ public class NGSICharsetsTest {
     @Test
     public void testEncodeMongoDBCollectionForbiddenCharacters() {
         System.out.println(getTestTraceHead("[NGSICharsets.encodeMongoDBCollection]")
-                + "-------- Forbidde characters are encoded");
+                + "-------- Forbidden characters are encoded");
         String in = "/$";
         String expected = "x002fx0024";
         String out = NGSICharsets.encodeMongoDBDatabase(in);
@@ -1481,13 +1481,13 @@ public class NGSICharsetsTest {
     } // testEncodeDynamoDBxffff
     
     /**
-     * [NGSICharsets.encodeDynamoDB] -------- Non lower case alphanumerics nor undersocre nor hyphen nor dot are
+     * [NGSICharsets.encodeDynamoDB] -------- Non lower case alphanumerics nor underscore nor hyphen nor dot are
      * encoded.
      */
     @Test
     public void testEncodeDynamoDBRare() {
         System.out.println(getTestTraceHead("[NGSICharsets.encodeDynamoDB]")
-                + "-------- Non lower case alphanumerics and undersocre are encoded");
+                + "-------- Non lower case alphanumerics and underscore are encoded");
         String in = "ÁÉÍÓÚáéíóúÑñÇç";
         String expected = "x00c1x00c9x00cdx00d3x00dax00e1x00e9x00edx00f3x00fax00d1x00f1x00c7x00e7";
         String out = NGSICharsets.encodeMySQL(in);

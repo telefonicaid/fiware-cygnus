@@ -130,7 +130,7 @@ public class NGSIKafkaSinkTest {
     public void testBuildTopicNameDmByServicePathWithSlashServicePath() throws Exception {
         System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
-                + "the Kafka topic name is the concatenatin of <service> and <service-path>");
+                + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
