@@ -561,7 +561,7 @@ Once again, another check are the traces of Cygnus. There we can see how Cygnus 
 
 [Top](#top)
 
-[kafka]: https://github.com/telefonicaid/fiware-cosmos/blob/develop/doc/cygnus-ngsi/integration/img/kafka_zookeeper.png "Architecture for sinfonier"
-[broker]: https://github.com/telefonicaid/fiware-cosmos/blob/develop/doc/cygnus-ngsi/integration/img/broker.png "Broker"
-[cygnus_append]: https://github.com/telefonicaid/fiware-cosmos/blob/develop/doc/cygnus-ngsi/integration/img/cygnus_append.png "APPEND request on Cygnus"
-[cygnus_update]: https://github.com/telefonicaid/fiware-cosmos/blob/develop/doc/cygnus-ngsi/integration/img/cygnus_update.png "UPDATE request on Cygnus"
+[kafka]: https://github.com/telefonicaid/fiware-cosmos/blob/doc/1132_add_integration_examples/doc/cygnus-ngsi/integration/img/kafka_zookeeper.png "Architecture for sinfonier"
+[broker]: https://github.com/pcoello25/fiware-cygnus/blob/doc/1132_add_integration_examples/doc/cygnus-ngsi/integration/img/broker.png "Broker"
+[cygnus_append]: https://github.com/telefonicaid/fiware-cosmos/blob/doc/1132_add_integration_examples/doc/cygnus-ngsi/integration/img/cygnus_append.png "APPEND request on Cygnus"
+[cygnus_update]: https://github.com/telefonicaid/fiware-cosmos/blob/doc/1132_add_integration_examples/doc/cygnus-ngsi/integration/img/cygnus_update.png "UPDATE request on Cygnus"
