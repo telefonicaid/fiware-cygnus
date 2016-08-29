@@ -20,6 +20,7 @@ Content:
     * [Important notes](#section2.3)
         * [About the persistence mode](#section2.3.1)
         * [About batching](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSICKANSink` class](#section3.1)
 * [Annexes](#section4)
@@ -49,21 +50,23 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ####<a name="section1.2.1"></a>Organizations naming conventions
 An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
+Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
 [Top](#top)
 
 ####<a name="section1.2.2"></a>Packages/datasets naming conventions
 A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
 
-Please observe if the notified/defaulted FIWARE service path is the root one, i.e. `/`, then the package/dataset name is equals to the organization name.
-
-The concatenation character is the underscore, `_`.
+Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
 [Top](#top)
 
 ####<a name="section1.2.3"></a>Resources naming conventions
-CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
+
+Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
 [Top](#top)
 
@@ -105,11 +108,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -132,6 +135,17 @@ Assuming the following Flume event is created from a notified NGSI context data 
 [Top](#top)
 
 ####<a section="1.3.2"></a>Organization, dataset and resource names
+Given the above example and using the old encoding, these are the CKAN elements created 
+
+* Orgnaization: `vehicles`.
+* Package: `vehicles_4wheels`.
+* Resource: `car1_car`.
+
+Using the new encdoing:
+
+* Orgnaization: `vehicles`.
+* Package: `vehiclesxffffx002f4wheels`.
+* Resource: `car1xffffcar`.
 
 [Top](#top)
 
@@ -302,6 +316,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. ||
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
 | attr_persistence | no | row | <i>row</i> or <i>column.</i>|
@@ -321,6 +336,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
+    cygnusagent.sinks.ckan-sink.enable_encoding = false
     cygnusagent.sinks.ckan-sink.enable_grouping = false
     cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
     cygnusagent.sinks.ckan-sink.attr_persistence = column
@@ -358,6 +374,29 @@ What is important regarding the batch mechanism is it largely increases the perf
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
 By default, `NGSICKANSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+
+[Top](#top)
+
+####<a name="section2.3.3"></a>About the encoding
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
+
+* All non alphanumeric characters were replaced by underscore, `_`.
+* The underscore was used as concatenator character as well.
+* The slash, `/`, in the FIWARE service paths is ignored.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to CKAN data structures:
+
+* Lowercase alphanumeric characters are not encoded.
+* Upercase alphanumeric characters are encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Hyphen character, `-`, is not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 

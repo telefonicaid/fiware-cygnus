@@ -21,6 +21,7 @@ import com.telefonica.iot.cygnus.backends.mongo.MongoBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.security.MessageDigest;
@@ -103,6 +104,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     
     @Override
     public void configure(Context context) {
+        super.configure(context);
+        
         mongoHosts = context.getString("mongo_hosts", "localhost:27017");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_hosts=" + mongoHosts + ")");
         mongoUsername = context.getString("mongo_username", "");
@@ -110,9 +113,20 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        dbPrefix = NGSIUtils.encodeSTHDB(context.getString("db_prefix", "sth_"));
+        
+        if (enableEncoding) {
+            dbPrefix = NGSICharsets.encodeMongoDBDatabase(context.getString("db_prefix", "sth_"));
+        } else {
+            dbPrefix = NGSIUtils.encodeSTHDB(context.getString("db_prefix", "sth_"));
+        } // if else
+        
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        collectionPrefix = NGSIUtils.encodeSTHCollection(context.getString("collection_prefix", "sth_"));
+        
+        if (enableEncoding) {
+            collectionPrefix = NGSICharsets.encodeMongoDBCollection(context.getString("collection_prefix", "sth_"));
+        } else {
+            collectionPrefix = NGSIUtils.encodeSTHCollection(context.getString("collection_prefix", "sth_"));
+        } // if else
         
         if (collectionPrefix.equals("system.")) {
             invalidConfiguration = true;
@@ -148,8 +162,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
-        
-        super.configure(context);
     } // configure
 
     @Override
@@ -172,7 +184,13 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * @throws Exception
      */
     protected String buildDbName(String fiwareService) throws Exception {
-        String dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
+        String dbName;
+        
+        if (enableEncoding) {
+            dbName = dbPrefix + NGSICharsets.encodeMongoDBDatabase(fiwareService);
+        } else {
+            dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
+        } // if else
 
         if (dbName.length() > CommonConstants.MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
@@ -201,23 +219,46 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         throws Exception {
         String collectionName;
 
-        switch (dataModel) {
-            case DMBYSERVICEPATH:
-                collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath);
-                break;
-            case DMBYENTITY:
-                collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath) + "_"
-                        + NGSIUtils.encodeSTHCollection(entity);
-                break;
-            case DMBYATTRIBUTE:
-                collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath)
-                        + "_" + NGSIUtils.encodeSTHCollection(entity)
-                        + "_" + NGSIUtils.encodeSTHCollection(attribute);
-                break;
-            default:
-                // this should never be reached
-                collectionName = null;
-        } // switch
+        if (enableEncoding) {
+            switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    collectionName = NGSICharsets.encodeMongoDBCollection(fiwareServicePath);
+                    break;
+                case DMBYENTITY:
+                    collectionName = NGSICharsets.encodeMongoDBCollection(fiwareServicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMongoDBCollection(entity);
+                    break;
+                case DMBYATTRIBUTE:
+                    collectionName = NGSICharsets.encodeMongoDBCollection(fiwareServicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMongoDBCollection(entity)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMongoDBCollection(attribute);
+                    break;
+                default:
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
+                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+            } // switch
+        } else {
+            switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath);
+                    break;
+                case DMBYENTITY:
+                    collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath) + "_"
+                            + NGSIUtils.encodeSTHCollection(entity);
+                    break;
+                case DMBYATTRIBUTE:
+                    collectionName = NGSIUtils.encodeSTHCollection(fiwareServicePath)
+                            + "_" + NGSIUtils.encodeSTHCollection(entity)
+                            + "_" + NGSIUtils.encodeSTHCollection(attribute);
+                    break;
+                default:
+                    // this should never be reached
+                    collectionName = null;
+            } // switch
+        } // else
 
         if (shouldHash) {
             int limit = getHashSizeInBytes(dbName);

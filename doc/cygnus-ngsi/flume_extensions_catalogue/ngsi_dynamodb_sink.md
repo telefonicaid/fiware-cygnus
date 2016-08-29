@@ -17,6 +17,7 @@ Content:
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
         * [Throughput in DynamoDB](#section2.3.4)
+        * [About the encoding](#section2.3.5)
 * [Programmers guide](#section3)
     * [`NGSIDynamoDBSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -43,7 +44,7 @@ DynamoDB organizes the data in tables of data items. All the tables are located 
 [Top](#top)
 
 ####<a name="section1.2.1"></a>DynamoDB databases naming conventions
-As said, there is a DynamoDB database per Amazon user. The [name of these users](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html) must be alphanumeric, including the following common characters: `+`, `=`, `,`, `.`, `@`, `_` and `-`.
+As said, there is a DynamoDB database per Amazon user. The [name of these users](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html) must be alphanumeric, including the following common characters: `+`, `=`, `,`, `.`, `@`, `_` and `-`. Remember certain [encoding](#section2.3.5) is applied.
 
 Current version of the sink does not support multitenancy, that means only an Amazon user space (and thus only a database) can be used. Such a user space is specified in the configuration (please, check the [Configuration](#section2.1) section), and therefore it is not necessary an exact match among the Amazon user space name and the FIWARE service path. Nevertheless, it is expected future versions of the sink will implement multitenancy; in that case it will be mandatory both FIWARE service and Amazon user space name match in order to correctly <i>route</i> each service data to the appropriate Amazon user.
 
@@ -52,19 +53,19 @@ Current version of the sink does not support multitenancy, that means only an Am
 ####<a name="section1.2.2"></a>DynamoDB tables naming conventions
 The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and entityType in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
 In both cases, the notified/defaulted FIWARE service is prefixed to the table name.
 
-It must be said DynamoDB [only accepts](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.html) alphanumerics and `_`, `-` and `.`. All the other characters will be escaped to underscore (`_`) when composing the table names.
+It must be said DynamoDB [only accepts](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.html) alphanumerics and `_`, `-` and `.`. Remember certain [encoding](#section2.3.5) is applied.
 
 The following table summarizes the table name composition:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | `<svc>` | `<svc>_<entityId>_<entityType>` |
-| `/<svcPath>` | `<svc>_<svcPath>` | `<svc>_<svcPath>_<entityId>_<entityType>` |
+| `/` | `<svc>x002f` | `<svc>xffffx002fxffff<entityId>xffff<entityType>` |
+| `/<svcPath>` | `<svc>xffffx002f<svcPath>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -108,11 +109,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -139,13 +140,13 @@ The DynamoDB table names will be, depending on the configured data model, the fo
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | `vehicles` | `vehicles_car1_car` |
-| `/4wheels` | `vehicles_4wheels` | `vehicles_4wheels_car1_car` |
+| `/` | `vehicles` | `vehiclesxffffx002fxffffcar1xffffcar` |
+| `/4wheels` | `vehiclesxffffx002f4wheels` | `vehiclesxffffx002f4wheelsxffffcar1xffffcar` |
 
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
-Let's assume a table name `vehicles_4wheels_car1_car` (data model by entity, non-root service path) and `attr_persistence=row` as configuration parameter. The data stored within this table would be:
+Let's assume a table name `x002fvehiclesxffff4wheelsxffffcar1xffffcar` (data model by entity, non-root service path) and `attr_persistence=row` as configuration parameter. The data stored within this table would be:
 
 ![](../images/dynamodb_row_destination.jpg)
 
@@ -234,6 +235,21 @@ Please observe DynamoDB is a cloud-based storage whose throughput may be serious
 Regarding the region, always choose the closest one to the host running Cygnus and `NGSIDynamoDBSink`.
 
 Regarding the amount of information per write, please read carefully [this](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughputIntro.html) piece of documentation about how to fine tune the reserved capacity for write (and read) in AWS DynamoDB. Please observe increasing the write (or read) capabilities increases the cost of the service as well.
+
+[Top](#top)
+
+####<a name="section2.3.5"></a>About the encoding
+Cygnus applies this specific encoding tailored to DynamoDB data structures:
+
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Hyphen character, `-`, is not encoded.
+* Dot character, `.`, is not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
 
 [Top](#top)
 

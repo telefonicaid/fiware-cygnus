@@ -81,6 +81,9 @@ public class NGSICartoDBSink extends NGSISink {
         // Impose enable lower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
         
+        // Impose enable encoding
+        enableEncoding = true;
+        
         // Check the data model is not different than dm-by-service-path or dm-by-entity
         if (dataModel == DataModel.DMBYSERVICE || dataModel == DataModel.DMBYATTRIBUTE) {
             invalidConfiguration = true;
@@ -591,7 +594,7 @@ public class NGSICartoDBSink extends NGSISink {
      * @throws Exception
      */
     protected String buildSchemaName(String service) throws Exception {
-        String name = NGSICharsets.cartoDBEncode(service);
+        String name = NGSICharsets.encodePostgreSQL(service);
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
             throw new CygnusBadConfiguration("Building schema name '" + name
@@ -614,22 +617,22 @@ public class NGSICartoDBSink extends NGSISink {
         
         switch(dataModel) {
             case DMBYSERVICEPATH:
-                name = NGSICharsets.cartoDBEncode(servicePath);
+                name = NGSICharsets.encodePostgreSQL(servicePath);
                 break;
             case DMBYENTITY:
-                String truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
+                String truncatedServicePath = NGSICharsets.encodePostgreSQL(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSICharsets.cartoDBEncode(entity);
+                        + NGSICharsets.encodePostgreSQL(entity);
                 break;
             case DMBYATTRIBUTE:
-                truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
+                truncatedServicePath = NGSICharsets.encodePostgreSQL(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSICharsets.cartoDBEncode(entity) + CommonConstants.CONCATENATOR
-                        + NGSICharsets.cartoDBEncode(attribute);
+                        + NGSICharsets.encodePostgreSQL(entity) + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodePostgreSQL(attribute);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                        + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                        + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
         } // switch
         
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
