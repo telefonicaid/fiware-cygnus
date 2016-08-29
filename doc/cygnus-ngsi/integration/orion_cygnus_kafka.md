@@ -509,7 +509,7 @@ Consumed 1 message
 
 Another check of our success are the log of Cygnus. The traces show us how Cygnus store the information as we can see in the next image:
 
-![APPEND request on Cygnus][cugnus_append]
+![APPEND request on Cygnus][cygnus_append]
 
 [Top](#top)
 
