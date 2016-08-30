@@ -21,6 +21,7 @@ Content:
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
         * [Time zone information](#section2.3.4)
+        * [About the encoding](#section2.3.5)
 * [Programmers guide](#section3)
     * [`NGSIMySQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -49,8 +50,7 @@ MySQL organizes the data in databases that contain tables of data rows. Such org
 ####<a name="section1.2.1"></a>MySQL databases naming conventions
 A database named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
-It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. All the other characters will be replaced with underscore (`_`) when composing the database names.
-
+It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 [Top](#top)
 
 ####<a name="section1.2.2"></a>MySQL tables naming conventions
@@ -59,14 +59,21 @@ The name of these tables depends on the configured data model (see the [Configur
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
-It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. All the other characters will be replaced with underscore (`_`) when composing the table names.
+It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. Remember certain [encoding](#section2.3.5) is applied depending on the `enable_encoding` configuration parameter.
 
-The following table summarizes the table name composition:
+The following table summarizes the table name composition (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
 | `/` | N/A | `<entityId>_<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
+
+The following table summarizes the table name composition (new encoding):
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` |
+| `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -110,11 +117,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
 	     },
         body={
 	        entityId=car1,
@@ -139,12 +146,19 @@ Assuming the following Flume event is created from a notified NGSI context data 
 ####<a name="section1.3.2"></a>Database and table names
 The MySQL database name will always be `vehicles`.
 
-The MySQL table names will be, depending on the configured data model, the following ones:
+The MySQL table names will be, depending on the configured data model, the following ones (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
 | `/` | N/A | `car1_car` |
 | `/4wheels` | `4wheels` | `4wheels_car1_car` |
+
+Using the new encoding:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
+|---|---|---|
+| `/` | `x002f` | `car1xffffcar` |
+| `/wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` |
 
 [Top](#top)
 
@@ -183,6 +197,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIMySQLSink</i> |
 | channel | yes | N/A ||
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
@@ -202,6 +217,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
     cygnusagent.sinks.mysql-sink.channel = mysql-channel
+    cygnusagent.sinks.mysql-sink.enable_encoding = false
     cygnusagent.sinks.mysql-sink.enable_grouping = false
     cygnusagent.sinks.mysql-sink.enable_lowercase = false
     cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
@@ -251,6 +267,28 @@ By default, `NGSIMySQLSink` has a configured batch size and batch accumulation t
 
 ####<a name="section2.3.4"></a>Time zone information
 Time zone information is not added in MySQL timestamps since MySQL stores that information as a environment variable. MySQL timestamps are stored in UTC time.
+
+[Top](#top)
+
+####<a name="section2.3.5"></a>About the encoding
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
+
+* All non alphanumeric characters were replaced by underscore, `_`.
+* The underscore was used as concatenator character as well.
+* The slash, `/`, in the FIWARE service paths is ignored.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to MySQL data structures:
+
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* All the other characters are not encoded.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 

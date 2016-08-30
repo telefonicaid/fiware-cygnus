@@ -77,6 +77,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected int batchTTL;
     protected boolean enableLowercase;
     protected boolean invalidConfiguration;
+    protected boolean enableEncoding;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -145,6 +146,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean getEnableLowerCase() {
         return enableLowercase;
     } // getEnableLowerCase
+    
+    /**
+     * Gets if the encoding is enabled.
+     * @return True is the encoding is enabled, false otherwise.
+     */
+    protected boolean getEnableEncoding() {
+        return enableEncoding;
+    } // getEnableEncoding
     
     /**
      * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
@@ -225,6 +234,18 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_ttl="
                     + batchTTL + ")");
         } // if else
+        
+        String enableEncodingStr = context.getString("enable_encoding", "false");
+        
+        if (enableEncodingStr.equals("true") || enableEncodingStr.equals("false")) {
+            enableEncoding = Boolean.valueOf(enableEncodingStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_encoding="
+                + enableEncodingStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_encoding="
+                + enableEncodingStr + ") -- Must be 'true' or 'false'");
+        }  // if else
     } // configure
 
     @Override

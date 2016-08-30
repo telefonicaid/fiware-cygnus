@@ -149,6 +149,17 @@ public class NGSISinkTest {
                     + "'enable_lowercase' is '" + sink.getEnableLowerCase() + "'");
             throw e;
         } // try catch
+        
+        try {
+            assertEquals(false, sink.getEnableEncoding());
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "-  OK  - The default configuration value for 'enable_encoding' is 'false'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionSink.configure]")
+                    + "- FAIL - The default configuration value for "
+                    + "'enable_encoding' is '" + sink.getEnableEncoding() + "'");
+            throw e;
+        } // try catch
     } // testConfigureNotMandatoryParameters
     
     /**
@@ -228,7 +239,7 @@ public class NGSISinkTest {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[OrionSink.configure]")
                     + "-  OK  - A wrong configuration 'enable_grouping='"
-+ configuredEnableGrouping + "' has been detected");
+                    + configuredEnableGrouping + "' has been detected");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionSink.configure]")
                     + "- FAIL - A wrong configuration 'enable_grouping='"

@@ -25,10 +25,11 @@ import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -480,9 +481,9 @@ public class NGSIHDFSSink extends NGSISink {
         protected String service;
         protected String servicePath;
         protected String destination;
-        protected String firstLevel;
-        protected String secondLevel;
-        protected String thirdLevel;
+        //protected String firstLevel;
+        //protected String secondLevel;
+        //protected String thirdLevel;
         protected String hdfsFolder;
         protected String hdfsFile;
         protected String hiveFields;
@@ -528,11 +529,13 @@ public class NGSIHDFSSink extends NGSISink {
             service = cygnusEvent.getService();
             servicePath = cygnusEvent.getServicePath();
             destination = cygnusEvent.getEntity();
-            firstLevel = buildFirstLevel(service);
-            secondLevel = buildSecondLevel(servicePath);
-            thirdLevel = buildThirdLevel(destination);
-            hdfsFolder = firstLevel + (servicePath.equals("/") ? "" : secondLevel) + "/" + thirdLevel;
-            hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
+            //firstLevel = buildFirstLevel(service);
+            //secondLevel = buildSecondLevel(servicePath);
+            //thirdLevel = buildThirdLevel(destination);
+            hdfsFolder = buildFolderPath(service, servicePath, destination);
+            hdfsFile = buildFilePath(service, servicePath, destination);
+            //hdfsFolder = firstLevel + (servicePath.equals("/") ? "" : secondLevel) + "/" + thirdLevel;
+            //hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -547,15 +550,16 @@ public class NGSIHDFSSink extends NGSISink {
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            hiveFields = NGSIUtils.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
-                    + NGSIUtils.encodeHive(NGSIConstants.RECV_TIME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_TYPE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_NAME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_TYPE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_VALUE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_MD) + " array<struct<name:string,type:string,value:string>>";
+            hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
+                    + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_TYPE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_NAME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_TYPE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_VALUE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_MD)
+                    + " array<struct<name:string,type:string,value:string>>";
         } // initialize
 
         @Override
@@ -621,10 +625,10 @@ public class NGSIHDFSSink extends NGSISink {
             super.initialize(cygnusEvent);
 
             // particular initialization
-            hiveFields = NGSIUtils.encodeHive(NGSIConstants.RECV_TIME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_TYPE) + " string";
+            hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_TYPE) + " string";
 
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -635,7 +639,7 @@ public class NGSIHDFSSink extends NGSISink {
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                hiveFields += "," + NGSIUtils.encodeHive(attrName) + " string," + NGSIUtils.encodeHive(attrName)
+                hiveFields += "," + NGSICharsets.encodeHive(attrName) + " string," + NGSICharsets.encodeHive(attrName)
                         + "_md array<struct<name:string,type:string,value:string>>";
             } // for
         } // initialize
@@ -697,15 +701,15 @@ public class NGSIHDFSSink extends NGSISink {
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws Exception {
             super.initialize(cygnusEvent);
-            hiveFields = NGSIUtils.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
-                    + NGSIUtils.encodeHive(NGSIConstants.RECV_TIME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_TYPE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_NAME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_TYPE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_VALUE) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ATTR_MD_FILE) + " string";
+            hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
+                    + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_TYPE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_NAME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_TYPE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_VALUE) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ATTR_MD_FILE) + " string";
         } // initialize
 
         @Override
@@ -739,9 +743,7 @@ public class NGSIHDFSSink extends NGSISink {
                         + attrType + ")");
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
-                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
-                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
-                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
 
@@ -815,10 +817,10 @@ public class NGSIHDFSSink extends NGSISink {
             super.initialize(cygnusEvent);
 
             // particular initialization
-            hiveFields = NGSIUtils.encodeHive(NGSIConstants.RECV_TIME) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
-                    + NGSIUtils.encodeHive(NGSIConstants.ENTITY_TYPE) + " string";
+            hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.FIWARE_SERVICE_PATH) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_ID) + " string,"
+                    + NGSICharsets.encodeHive(NGSIConstants.ENTITY_TYPE) + " string";
 
             // iterate on all this context element attributes; it is supposed all the entity's attributes are notified
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -830,12 +832,10 @@ public class NGSIHDFSSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
-                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
-                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
                 mdAggregations.put(attrMdFileName, new String());
-                hiveFields += ",`" + NGSIUtils.encodeHive(attrName) + "` string,"
-                        + "`" + NGSIUtils.encodeHive(attrName) + "_md_file` string";
+                hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
+                        + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
             } // for
         } // initialize
 
@@ -873,9 +873,7 @@ public class NGSIHDFSSink extends NGSISink {
 
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
-                String thirdLevelMd = buildThirdLevelMd(destination, attrName, attrType);
-                String attrMdFolder = firstLevel + "/" + secondLevel + "/" + thirdLevelMd;
-                String attrMdFileName = attrMdFolder + "/" + thirdLevelMd + ".txt";
+                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
 
@@ -1003,7 +1001,7 @@ public class NGSIHDFSSink extends NGSISink {
 
         // get the table name to be created
         // the replacement is necessary because Hive, due it is similar to MySQL, does not accept '-' in the table names
-        String tableName = NGSIUtils.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
+        String tableName = NGSICharsets.encodeHive((serviceAsNamespace ? "" : username + "_") + dirPath) + tag;
         LOGGER.info("Creating Hive external table '" + tableName + "' in database '"  + dbName + "'");
 
         // get a Hive client
@@ -1040,76 +1038,78 @@ public class NGSIHDFSSink extends NGSISink {
     } // provisionHive
 
     /**
-     * Builds the first level of a HDFS path given a fiwareService. It throws an exception if the naming conventions are
-     * violated.
-     * @param fiwareService
-     * @return
-     * @throws Exception
-     */
-    private String buildFirstLevel(String fiwareService) throws Exception {
-        String firstLevel = NGSIUtils.encode(fiwareService, false, true);
-
-        if (firstLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building firstLevel=fiwareService (fiwareService=" + fiwareService + ") "
-                    + "and its length is greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return firstLevel;
-    } // buildFirstLevel
-
-    /**
-     * Builds the second level of a HDFS path given given a fiwareService and a destination. It throws an exception if
-     * the naming conventions are violated.
-     * @param fiwareService
+     * Builds a HDFS folder path.
+     * @param service
+     * @param servicePath
      * @param destination
-     * @return
-     * @throws Exception
+     * @return The HDFS folder path
      */
-    private String buildSecondLevel(String fiwareServicePath) throws Exception {
-        String secondLevel = NGSIUtils.encode(fiwareServicePath, false, false);
-
-        if (secondLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building secondLevel=fiwareServicePath (" + fiwareServicePath + ") and "
-                    + "its length is greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return secondLevel;
-    } // buildSecondLevel
-
+    protected String buildFolderPath(String service, String servicePath, String destination) {
+        if (enableEncoding) {
+            return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+                    + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false);
+        } else {
+            return NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
+                    + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true);
+        } // if else
+    } // buildFolderPath
+    
     /**
-     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
-     * violated.
+     * Builds a HDFS file path.
+     * @param service
+     * @param servicePath
      * @param destination
-     * @return
-     * @throws Exception
+     * @return The file path
      */
-    private String buildThirdLevel(String destination) throws Exception {
-        String thirdLevel = NGSIUtils.encode(destination, false, true);
-
-        if (thirdLevel.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building thirdLevel=destination (" + destination + ") and its length is "
-                    + "greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return thirdLevel;
-    } // buildThirdLevel
-
+    protected String buildFilePath(String service, String servicePath, String destination) {
+        if (enableEncoding) {
+            return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+                    + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false)
+                    + "/" + NGSICharsets.encodeHDFS(destination, false) + ".txt";
+        } else {
+            return NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
+                    + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true)
+                    + "/" + NGSIUtils.encode(destination, false, true) + ".txt";
+        } // if else
+    } // buildFilePath
+    
     /**
-     * Builds the third level of a HDFS path given a destination. It throws an exception if the naming conventions are
-     * violated.
+     * Builds an attribute metadata HDFS folder path.
+     * @param service
+     * @param servicePath
      * @param destination
-     * @return
-     * @throws Exception
+     * @param attrName
+     * @param attrType
+     * @return The attribute metadata HDFS folder path
      */
-    private String buildThirdLevelMd(String destination, String attrName, String attrType) throws Exception {
-        String thirdLevelMd = destination + "_" + attrName + "_" + attrType;
-
-        if (thirdLevelMd.length() > NGSIConstants.MAX_NAME_LEN_HDFS) {
-            throw new CygnusBadConfiguration("Building thirdLevelMd=" + thirdLevelMd + " and its length is "
-                    + "greater than " + NGSIConstants.MAX_NAME_LEN_HDFS);
-        } // if
-
-        return thirdLevelMd;
-    } // buildThirdLevelMd
+    protected String buildAttrMdFolderPath(String service, String servicePath, String destination, String attrName,
+            String attrType) {
+        return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+                + (servicePath.equals("/") ? "" : "/")
+                + NGSICharsets.encodeHDFS(destination, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrName, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrType, false);
+    } // buildAttrMdFolderPath
+    
+    /**
+     * Builds an attribute metadata HDFS file path.
+     * @param service
+     * @param servicePath
+     * @param destination
+     * @param attrName
+     * @param attrType
+     * @return The attribute metadata HDFS file path
+     */
+    protected String buildAttrMdFilePath(String service, String servicePath, String destination, String attrName,
+            String attrType) {
+        return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+                + (servicePath.equals("/") ? "" : "/")
+                + NGSICharsets.encodeHDFS(destination, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrName, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrType, false) + "/"
+                + NGSICharsets.encodeHDFS(destination, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrName, false) + CommonConstants.CONCATENATOR
+                + NGSICharsets.encodeHDFS(attrType, false) + ".txt";
+    } // buildAttrMdFolderPath
 
 } // NGSIHDFSSink
