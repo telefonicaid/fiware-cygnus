@@ -6,3 +6,4 @@
 - [cygnus-common][hardening] Create ManagementInterfaceUtils class (#1115)
 - [cygnus-common][bug] Add fiware-service and fiware-servicePath headers to all API operations (#1124)
 - [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)
+- [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
