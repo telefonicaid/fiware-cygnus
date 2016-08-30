@@ -760,7 +760,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleGetAdminConfigurationInstance
     
-        private void handleGetAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleGetAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
 
         String transient_ = request.getParameter("transient");
@@ -921,7 +921,6 @@ public class ManagementInterface extends AbstractHandler {
             String appendersJson = "";
 
             if (allAppenders) {
-
                 Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
                 appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
 
@@ -964,7 +963,6 @@ public class ManagementInterface extends AbstractHandler {
                 String rootProperty = properties.getProperty(param);
                 String[] rootLogger = rootProperty.split(",");
                 String active = rootLogger[1];
-
                 String appenderJson = "[";
                 ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
 
