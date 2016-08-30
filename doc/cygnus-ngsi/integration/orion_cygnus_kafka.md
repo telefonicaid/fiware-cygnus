@@ -696,7 +696,7 @@ Consumed 2 messages
 ```
 
 Once again, another check are the traces of Cygnus. There we can see how Cygnus receive the notification and store the information in Kafka:
-
+```
 time=2016-08-30T08:15:20.113CEST | lvl=DEBUG | corr=4b1be263-2502-4ca6-91fc-e43e8e642904 | trans=4b1be263-2502-4ca6-91fc-e43e8e642904 | srv=library | subsrv=/catalog | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[192] : Header host received with value localhost:5050
 time=2016-08-30T08:15:20.114CEST | lvl=DEBUG | corr=4b1be263-2502-4ca6-91fc-e43e8e642904 | trans=4b1be263-2502-4ca6-91fc-e43e8e642904 | srv=library | subsrv=/catalog | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[192] : Header user-agent received with value orion/0.28.0-next libcurl/7.47.0
 time=2016-08-30T08:15:20.114CEST | lvl=DEBUG | corr=4b1be263-2502-4ca6-91fc-e43e8e642904 | trans=4b1be263-2502-4ca6-91fc-e43e8e642904 | srv=library | subsrv=/catalog | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[192] : Header fiware-service received with value Library
@@ -749,6 +749,7 @@ time=2016-08-30T08:15:20.225CEST | lvl=DEBUG | corr=79e5aee5-dd0e-4aeb-90d7-532a
 time=2016-08-30T08:15:20.233CEST | lvl=INFO | corr=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | trans=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | srv=library | subsrv=/catalog | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSIKafkaSink[305] : [kafka-sink] Persisting data at OrionKafkaSink. Topic (library_catalog_book1_book), Data ({"headers":[{"fiware-service":"library"},{"fiware-servicePath":"/catalog"},{"timestamp":1472537720119}],"body":{"attributes":[{"name":"title","type":"text","value":"Seat Panda"},{"name":"price","type":"float","value":"145.50"},{"name":"pages","type":"integer","value":"5"}],"type":"Book","isPattern":"false","id":"Book1"}})
 time=2016-08-30T08:15:20.233CEST | lvl=DEBUG | corr=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | trans=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | srv=library | subsrv=/catalog | function=send | comp=Cygnus | msg=com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl[74] : Record: 'ProducerRecord(topic=library_catalog_book1_book, partition=null, key=null, value={"headers":[{"fiware-service":"library"},{"fiware-servicePath":"/catalog"},{"timestamp":1472537720119}],"body":{"attributes":[{"name":"title","type":"text","value":"Seat Panda"},{"name":"price","type":"float","value":"145.50"},{"name":"pages","type":"integer","value":"5"}],"type":"Book","isPattern":"false","id":"Book1"}}' sent to Kafka.
 time=2016-08-30T08:15:20.234CEST | lvl=INFO | corr=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | trans=79e5aee5-dd0e-4aeb-90d7-532ae0df95b4 | srv=library | subsrv=/catalog | function=processNewBatches | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSISink[400] : Finishing internal transaction (79e5aee5-dd0e-4aeb-90d7-532ae0df95b4)
+```
 
 [Top](#top)
 
