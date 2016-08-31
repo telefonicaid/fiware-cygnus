@@ -42,7 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.Enumeration;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,10 +53,8 @@ import org.apache.flume.SinkRunner;
 import org.apache.flume.Source;
 import org.apache.flume.SourceRunner;
 import org.apache.flume.source.http.HTTPSourceHandler;
-import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.apache.log4j.PatternLayout;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mortbay.jetty.HttpConnection;
@@ -65,14 +62,14 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
-import org.slf4j.MDC;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 /**
  *
  * @author frb
@@ -161,6 +158,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleGetAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleGetAdminLogAppenders(request,response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -408,121 +407,12 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
     
-    private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
-        
-        try {
-            String verbose = request.getParameter("verbose");
-            String transient_ = request.getParameter("transient");
-            String pathToFile = configurationPath + "/log4j.properties";
-            File file = new File(pathToFile);
-            String param = "flume.root.logger";
-            
-            if ((verbose == null) || (verbose.equals("false"))) {
-                
-                if ((transient_ == null) || (transient_.equals("true"))) {
-                    Level level = LogManager.getRootLogger().getLevel();
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"level\": \"" + level + "\"}");
-                    LOGGER.info("Log level succesfully sent");     
-                } else {
-                
-                    if (file.exists()) {
-                        FileInputStream fileInputStream = new FileInputStream(file);
-                        Properties properties = new Properties();
-                        properties.load(fileInputStream);
-
-                        JSONObject jsonObject = new JSONObject();
-
-                        String property = properties.getProperty(param);
-
-                        if (property != null) {
-                            String[] loggingParams = property.split(",");
-                            response.getWriter().println("{\"level\": \"" + loggingParams[0] + "\"}");
-                            LOGGER.debug(jsonObject);
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        } else {
-                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                            response.getWriter().println("{\"success\":\"false\","
-                                    + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
-                        } // if else
-
-                    } else {
-                        response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : { \"File not found in the path received\" }");
-                        LOGGER.debug("File not found in the path received");
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    } // if else
-                }            
-            } else if (verbose.equals("true")) {
-                
-                if ((transient_ == null) || (transient_.equals("true"))) {
-                    Level level = LogManager.getRootLogger().getLevel();
-                    Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-                    String appendersJson = "";
-
-                    while (appenders.hasMoreElements()) {
-                        Appender appender = (Appender) appenders.nextElement();
-                        String name = appender.getName();
-                        PatternLayout layout = (PatternLayout) appender.getLayout();
-
-                        if (appendersJson.isEmpty()) { 
-                            appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                                    + layout.getConversionPattern() + "\"}";
-                        } else {
-                            appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                                    + layout.getConversionPattern() + "\"}";
-                        } // else
-
-                    } // while
-
-                    if (appendersJson.isEmpty()) {
-                        appendersJson = "[]";
-                    } else {
-                        appendersJson += "]";
-                    } // else
-
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + level
-                            + "\",\"appenders\":" + appendersJson + "}}");
-                    LOGGER.info("Log4j configuration successfully sent");
-                } else {
-                
-                    if (file.exists()) {
-                        FileInputStream fileInputStream = new FileInputStream(file);
-                        Properties properties = new Properties();
-                        properties.load(fileInputStream);
-                        JSONObject jsonObject = new JSONObject();
-                        
-                        String property = properties.getProperty(param);
-                        String[] loggingParams = property.split(",");                    
-
-                        String layoutName = "log4j.appender." + loggingParams[1] + ".layout."
-                                + "ConversionPattern";
-                        String layout = properties.getProperty(layoutName);
-                        String appenderJson = "[{\"name\":\"" + loggingParams[1] + "\",\"layout\":\"" 
-                                + layout + "\"}]";
-
-                        response.getWriter().println("{\"success\":\"true\",\"log4j\":{\"level\":\"" + loggingParams[0]
-                            + "\",\"appenders\":" + appenderJson + "}}");
-                        LOGGER.debug(jsonObject);
-                        response.setStatus(HttpServletResponse.SC_OK);
-
-                    } else {
-                        response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : { \"File not found in the path received\" }");
-                        LOGGER.debug("File not found in the path received");
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    } // if else
-                }
-            } // if else if
-            
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("{\"success\":\"false\",\"error\":\"" + e.getMessage() + "\"}");
-            LOGGER.info(e.getMessage());
-        } // try catch
-        
+        Level level = LogManager.getRootLogger().getLevel();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"level\":\"" + level + "\"}");
+        LOGGER.info("Cygnus logging level successfully obtained");
     } // handleGetAdminLog
     
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -534,6 +424,8 @@ public class ManagementInterface extends AbstractHandler {
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
         String subscriptionID = request.getParameter("subscription_id");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if (ngsiVersion == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -579,7 +471,7 @@ public class ManagementInterface extends AbstractHandler {
 
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request));
+                ManagementInterfaceUtils.setCorrelator(request));
                 
         BufferedReader reader = request.getReader();
         String endpointStr = "";
@@ -649,7 +541,7 @@ public class ManagementInterface extends AbstractHandler {
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsV2(token, subscriptionID);
+                        getSubscriptionsV2(token, subscriptionID, fiwareService, fiwareServicePath);
                                 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -685,7 +577,7 @@ public class ManagementInterface extends AbstractHandler {
                 JSONObject orionJson = new JSONObject();
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsByIdV2(token, subscriptionID);
+                        getSubscriptionsByIdV2(token, subscriptionID, fiwareService, fiwareServicePath);
 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -726,7 +618,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();     
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -801,7 +693,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();     
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (param == null) {
             allParameters = true;
@@ -865,6 +757,153 @@ public class ManagementInterface extends AbstractHandler {
         } // if else    
         
     } // handleGetAdminConfigurationInstance
+    
+    private void handleGetAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        String transient_ = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+        
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+        
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+        
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            String appendersJson = "";
+            
+            if (allAppenders) {
+                
+                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
+                
+                if (appendersJson.equals("[]")) { 
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                    LOGGER.debug("No log4j appenders found");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":" + appendersJson + "}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } // if else
+                
+            } else {
+                
+                try {
+                    Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    String name = app.getName();
+                    PatternLayout layout = (PatternLayout) app.getLayout();
+                    String layoutStr = layout.getConversionPattern();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":[{\"name\":\"" + name + 
+                            "\",\"layout\":\"" + layoutStr + "\",\"active\":\"true\"}]}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+                
+            } // if else
+            
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String param = "flume.root.logger";
+                String rootProperty = properties.getProperty(param);
+                String[] rootLogger = rootProperty.split(",");
+                String active = rootLogger[1];
+                
+                String appenderJson = "[";   
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                
+                if (allAppenders) {
+
+                    for (String name : appenderNames) {   
+                        boolean isActive = false;
+                        
+                        if (name.equals(active)) {
+                            isActive = true;
+                        } // if
+                        
+                        String layoutName = "log4j.appender." + name + ".layout."
+                            + "ConversionPattern";
+                        String layout = properties.getProperty(layoutName);
+                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                            + layout + "\",\"active\":\"" + Boolean.toString(isActive) + "\"}";
+                        
+                        if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
+                            appenderJson += ", ";
+                        } // if
+
+                    } // for
+
+                    appenderJson += "]";
+                
+                    if (appenderJson.equals("[]")) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } // if else 
+                    
+                } else {
+                    boolean appenderFound = false;
+                    
+                    for (String name : appenderNames) { 
+                            
+                        if (name.equals(appenderName)) {
+                            String layoutName = "log4j.appender." + name + ".layout."
+                                + "ConversionPattern";
+                            String layout = properties.getProperty(layoutName);
+                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                                + layout + "\",\"active\":\"";
+                            if (name.equals(active)) {
+                                appenderJson += "true\"}";
+                            } else {
+                                appenderJson += "false\"}";
+                            }
+                            appenderFound = true;
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appender\":" + appenderJson + "]}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+                    
+                } // if else
+                
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"File not found in the path received\"}");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":\"Invalid 'transient' parameter found\"}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+        
+    } // handleGetAdminLogAppenders
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
@@ -882,7 +921,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // check the Json syntax of the new rule
         JSONParser jsonParser = new JSONParser();
@@ -975,6 +1014,8 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
                 
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -996,7 +1037,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -1052,9 +1093,14 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject orionJson = new JSONObject();
             
             try {
-                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token);
+                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token, fiwareService, fiwareServicePath);
                 status = orionResponse.getStatusCode();
                 orionJson = orionResponse.getJsonObject();
+                
+                if (orionJson.containsKey("orionError")) {
+                    JSONObject error = (JSONObject) orionJson.get("orionError");
+                    status = Integer.parseInt(error.get("code").toString());
+                } // if
                 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
@@ -1119,7 +1165,7 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject orionJson = new JSONObject();
             
             try {
-                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token);   
+                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token, fiwareService, fiwareServicePath);   
                 status = orionResponse.getStatusCode();
                 
                 if (status == 201) {
@@ -1146,7 +1192,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1209,7 +1255,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.put(param, newValue);                       
             jsonObject.put("agent", properties);                        
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1233,7 +1279,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1278,7 +1324,7 @@ public class ManagementInterface extends AbstractHandler {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
             JSONObject jsonObject = new JSONObject();          
-            Map<String, String> descriptions = readDescriptions(file);
+            Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             
             for (Object key: properties.keySet()) {
                 String name = (String) key;
@@ -1296,7 +1342,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.put(param, newValue);                       
             jsonObject.put("instance", properties);                        
-            instancePrinting(properties, file, descriptions);
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1317,6 +1363,8 @@ public class ManagementInterface extends AbstractHandler {
         
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1359,7 +1407,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request));
+                ManagementInterfaceUtils.setCorrelator(request));
         
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -1416,7 +1464,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (ngsiVersion.equals("1")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV1(subscriptionId, token);
+                    deleteSubscriptionV1(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     JSONObject statusCode = (JSONObject) orionJson.get("statusCode");
@@ -1425,7 +1473,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } else if (ngsiVersion.equals("2")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV2(subscriptionId, token);
+                    deleteSubscriptionV2(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
@@ -1457,7 +1505,7 @@ public class ManagementInterface extends AbstractHandler {
         
         String param = request.getParameter("param");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1508,7 +1556,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.remove(param);                                           
             jsonObject.put("agent", properties);                  
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
             
             response.setStatus(HttpServletResponse.SC_OK); 
             
@@ -1565,7 +1613,7 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            Map<String,String> descriptions = readDescriptions(file);
+            Map<String,String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             JSONObject jsonObject = new JSONObject();
             boolean paramExists = false;
             
@@ -1580,7 +1628,7 @@ public class ManagementInterface extends AbstractHandler {
             
             properties.remove(param);                                           
             jsonObject.put("agent", properties);                  
-            instancePrinting(properties, file, descriptions);  
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);  
             response.setStatus(HttpServletResponse.SC_OK); 
             
             if (paramExists) {
@@ -1699,7 +1747,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                setCorrelator(request)); 
+                ManagementInterfaceUtils.setCorrelator(request)); 
 
         // get the rule ID to be updated
         long id = new Long(request.getParameter("id"));
@@ -1782,48 +1830,25 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutGroupingRules
     
-    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
         String logLevel = request.getParameter("level");
         
-        if (logLevel != null) {
-            if (logLevel.equals("DEBUG")) {
-                LogManager.getRootLogger().setLevel(Level.DEBUG);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("INFO")) {
-                LogManager.getRootLogger().setLevel(Level.INFO);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("WARNING") || logLevel.equals("WARN")) {
-                LogManager.getRootLogger().setLevel(Level.WARN);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("ERROR")) {
-                LogManager.getRootLogger().setLevel(Level.ERROR);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else if (logLevel.equals("FATAL")) {
-                LogManager.getRootLogger().setLevel(Level.FATAL);
-                response.setStatus(HttpServletResponse.SC_OK);
-                //response.getWriter().println("{\"success\":\"true\"}");
-                LOGGER.info("log4j logging level updated to " + logLevel);
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"error\":\"Invalid log level\"}");
-                LOGGER.error("Invalid log level '" + logLevel + "'");
-            } // if else
-        } else {
+        try {
+            LoggingLevels.valueOf(logLevel.toUpperCase());
+            LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{\"success\":\"log4j logging level updated to " 
+                    + logLevel.toUpperCase() + "\" }");
+            LOGGER.debug("log4j logging level updated to " + logLevel.toUpperCase());
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"error\":\"Log level missing\"}");
-            LOGGER.error("Log level missing in the request");
-        } // if else
+            response.getWriter().println("{\"error\":\"Invalid log level\"}");
+            LOGGER.error("Invalid log level '" + logLevel + "'");
+        } // try catch
+        
     } // handlePutAdminLog
     
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
@@ -1833,7 +1858,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1883,7 +1908,7 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("agent", properties);
             
-            orderedPrinting(properties, file);
+            ManagementInterfaceUtils.orderedPrinting(properties, file);
                                
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
@@ -1906,7 +1931,7 @@ public class ManagementInterface extends AbstractHandler {
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
-        String fileName = getFileName(url);
+        String fileName = ManagementInterfaceUtils.getFileName(url);
                 
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1950,11 +1975,11 @@ public class ManagementInterface extends AbstractHandler {
         try {
             Properties properties = new Properties();           
             properties.load(new FileInputStream(file));
-            Map<String, String> descriptions = readDescriptions(file);
+            Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             properties.put(param, newValue);                                   
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("instance", properties);            
-            instancePrinting(properties, file, descriptions);                               
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);                               
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
@@ -1978,7 +2003,7 @@ public class ManagementInterface extends AbstractHandler {
         
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-            setCorrelator(request)); 
+            ManagementInterfaceUtils.setCorrelator(request)); 
 
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -2329,22 +2354,6 @@ public class ManagementInterface extends AbstractHandler {
         
     } // manageErrorMsg 
     
-    private String setCorrelator (HttpServletRequest request) {
-        // Get an internal transaction ID.
-        String transId = CommonUtils.generateUniqueId(null, null);
-        
-        // Get also a correlator ID if not sent in the notification. Id correlator ID is not notified
-        // then correlator ID and transaction ID must have the same value.
-        String corrId = CommonUtils.generateUniqueId
-               (request.getHeader(CommonConstants.HEADER_CORRELATOR_ID), transId);
-        
-        // set the given header to the response or create it
-        MDC.put(CommonConstants.LOG4J_CORR, corrId);
-        MDC.put(CommonConstants.LOG4J_TRANS, transId);
-        return corrId;
-    } // setCorrelator
-    
-    
     /**
      * SetOrionBackend: Sets a given orionBackend.
      * 
@@ -2353,169 +2362,5 @@ public class ManagementInterface extends AbstractHandler {
     protected void setOrionBackend(OrionBackendImpl orionBackend) {
         this.orionBackend = orionBackend;
     } // setOrionBackend
-    
-    /** 
-     * OrderedPrintWriter: Creates a writer with the original order's agent file.
-     * 
-     * @param printWriter
-     * @param properties 
-     */
-    private void orderedPrinting(Properties properties, File file) throws FileNotFoundException {
-                
-        PrintWriter printWriter = new PrintWriter(file);
-        String agentName = "";
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String[] nameParts = name.split("\\.");
-            agentName = nameParts[0];
-            break;
-        } // for
-                
-        ArrayList<String> sourceNames = null;
-        ArrayList<String> channelNames = null;
-        ArrayList<String> sinkNames=  null;
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String value = (String) properties.getProperty(name);
-            
-            if (name.equals(agentName + ".sources")) {
-                sourceNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-            if (name.equals(agentName + ".channels")) {
-                channelNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-            if (name.equals(agentName + ".sinks")) {
-                sinkNames = new ArrayList<String>(Arrays.asList(value.split("\\s+")));
-                printWriter.println(name + " = " + value);
-            } // if
-            
-        } // for
-        
-        printWriter.println();
-        
-        for (String sourceName : sourceNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".sources." + sourceName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        for (String channelName : channelNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".channels." + channelName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        for (String sinkName : sinkNames) {
-            
-            for (Object key : properties.keySet()) {
-                String name = (String) key;
-                String value = (String) properties.getProperty(name);
-                
-                if (name.startsWith(agentName + ".sinks." + sinkName)) {
-                    printWriter.println(name + " = " + value);
-                } // if
-                
-            } // for
-            
-            printWriter.println();
-
-        } // for
-        
-        printWriter.close();
-        
-    } // orderedPrinting
-    
-    private void instancePrinting (Properties properties, File file, Map<String,String> descriptions) 
-            throws FileNotFoundException {
-                
-        PrintWriter printWriter = new PrintWriter(file);      
-        printWriter.println(CommonConstants.CYGNUS_IPR_HEADER);
-        printWriter.println();
-        
-        for (Object key : properties.keySet()) {
-            String name = (String) key;
-            String value = (String) properties.getProperty(name);
-            
-            if (descriptions.containsKey(name)) {
-                String description = (String) descriptions.get(name);
-                printWriter.print(description);
-            } // if 
-            
-            printWriter.println(name + "=" + value);
-            printWriter.println();
-        } // for
-        
-        printWriter.close();
-        
-    } // instancePrinting
-    
-    /** 
-    * getFileName: Gets the name of the agent from the given path.
-    * 
-    * @param url 
-    */
-    private String getFileName (String url) {
-        String[] pathElements = url.split("/");
-        return pathElements[pathElements.length - 1];
-    } // getFileName
-    
-    /**
-     * 
-     */
-    private Map<String,String> readDescriptions(File file) throws IOException {
-                
-        // read the comments and the properties
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String header = "";
-        String description = "";
-        String line;
-        Map<String,String> descriptions = new LinkedHashMap<String,String>();
-
-        while ((line = reader.readLine()) != null) {
-            
-            if (line.startsWith("#")) {
-                description += line + "\n";
-            } // if
-            
-            if (line.isEmpty()) {
-                description = "";
-            } else if ((!(line.startsWith("#")) && (!(line.isEmpty())))) {
-                String[] nameValue = line.split("=");
-                String name = nameValue[0];
-                descriptions.put(name, description);
-                description = "";
-            } // if
-            
-        } // while
-        
-        reader.close();
-        return descriptions;
-    }
     
 } // ManagementInterface

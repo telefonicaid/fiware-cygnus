@@ -1,5 +1,5 @@
 #Cygnus Quick Start Guide
-This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](i./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
+This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
 
 ##Installing Cygnus
 Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
@@ -104,9 +104,9 @@ curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: a
 EOF
 ```
 
-This script will emulate the sending of an Orion notification to the URL endpoint passed as argument. The above notification is about and entity named `Room1` of type `Room` belonging to the FIWARE service `qsg` and the FIWARE service path `testsink`; it has a single attribute named `temperature` of type `float`. 
+This script will emulate the sending of an Orion notification to the URL endpoint passed as argument. The above notification is about and entity named `Room1` of type `Room` belonging to the FIWARE service `qsg` and the FIWARE service path `testsink`; it has a single attribute named `temperature` of type `float`.
 
-(4) Give execution permissions to `notification.sh` and run it, pasing as argument the URL of the listening `HTTPSource`:
+(4) Give execution permissions to `notification.sh` and run it, passing as argument the URL of the listening `HTTPSource`:
 
 ```
 $ chmod a+x notification.sh
@@ -136,4 +136,4 @@ There are several channels suited for reporting issues and asking for doubts in 
     * [german.torodelvalle@telefonica.com](german.torodelvalle@telefonica.com) **[Contributor]**
     * [ivan.ariasleon@telefonica.com](mailto:ivan.ariasleon@telefonica.com) **[Quality Assurance]**
 
-**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.
+**NOTE**: Please try to avoid personaly emailing the contributors unless they ask for it. In fact, if you send a private email you will probably receive an automatic response enforcing you to use [stackoverflow.com](http://stackoverflow.com) or [ask.fiware.org](https://ask.fiware.org/questions/). This is because using the mentioned methods will create a public database of knowledge that can be useful for future users; private email is just private and cannot be shared.

@@ -112,7 +112,7 @@ A configuration example could be:
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
-Use this sink in order to test if a Cygnus deployment is properly receiveing notifications from an Orion Context Broker premise.
+Use this sink in order to test if a Cygnus deployment is properly receiving notifications from an Orion Context Broker premise.
 
 [Top](#top)
 

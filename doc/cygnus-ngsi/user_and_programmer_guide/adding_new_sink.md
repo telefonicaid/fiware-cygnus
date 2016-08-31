@@ -27,16 +27,16 @@ This document tries to guide you on the development of such alternative sinks, b
 `NGSISink` provides most of the logic required by any NGSI-like sink:
 
 * Configuration of parameters common to all the sinks.
-* Starting and stoping the sink.
+* Starting and stopping the sink.
 * Flume events consumption in a batch-like approach, including opening, committing and closing of Flume transactions.
 * Counters for statistics (in fact, this feature is given by `CygnusSink`).
 
 You find this class at the following path:
 
     fiware-cygnus/cygnus-ngsi/src/main/java/com/telefonica/iot/cygnus/sinks/NGSISink.java
-    
+
 [Top](#top)
-    
+
 ###<a name="section2.1"></a>Inherited configuration
 All the sinks extending `NGSISink` inherit the following configuration parameters:
 
@@ -69,7 +69,7 @@ Please notice that the `process()` method handles all the possible errors that m
 
 Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/grouped destination (`notified-destinations` and `grouped-destinations` headers in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_grouping` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
 
-Specific persistence logic is implemented by overwritting the only abstract method within `NGSISink`, i.e. `persistBatch(NGSIBatch)`:
+Specific persistence logic is implemented by overwriting the only abstract method within `NGSISink`, i.e. `persistBatch(NGSIBatch)`:
 
     abstract void persistBatch(NGSIBatch) throws Exception;
 
@@ -102,21 +102,21 @@ It is worth to briefly comment how the specific data structures should be create
 Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a grouping rule is used to overwrite this default behavior).
 
 [Top](#top)
- 
+
 ##<a name="section4"></a>Backend convenience classes
 Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. Nevertheless, these classes should not be located at `cygnus-ngsi` but at `cygnus-common`.
-    
+
 [Top](#top)
-    
+
 ##<a name="section5"></a>Naming and placing the new classes
 New sink classes must be called `NGSI<technology>Sink`, being <i>technology</i> the name of the persistence backend. Examples are the already existent sinks `NGSIHDFSSink`, `NGSICKANSink` or `NGSIMySQLSink`.
 
 Regarding the new sink class location, it must be:
 
     fiware-cygnus/cygnus-ngsi/src/main/java/com/telefonica/iot/cygnus/sinks/
-    
+
 As already explained, backends must be located at:
 
     fiware-cygnus/cygnus-common/src/main/java/com/telefonica/iot/cygnus/backends/<technology>/
-    
+
 [Top](#top)
