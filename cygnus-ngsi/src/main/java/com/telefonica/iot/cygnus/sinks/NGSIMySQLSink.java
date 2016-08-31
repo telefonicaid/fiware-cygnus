@@ -481,9 +481,9 @@ public class NGSIMySQLSink extends NGSISink {
             name = NGSIUtils.encode(service, false, true);
         } // if else
 
-        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building database name '" + name
-                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
         } // if
 
         return name;
@@ -548,9 +548,9 @@ public class NGSIMySQLSink extends NGSISink {
             } // switch
         } // if else
 
-        if (name.length() > CommonConstants.MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
         } // if
 
         return name;
