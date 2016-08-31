@@ -25,6 +25,7 @@ import com.telefonica.iot.cygnus.backends.hive.HiveBackend;
 import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -1044,14 +1045,23 @@ public class NGSIHDFSSink extends NGSISink {
      * @param destination
      * @return The HDFS folder path
      */
-    protected String buildFolderPath(String service, String servicePath, String destination) {
+    protected String buildFolderPath(String service, String servicePath, String destination) throws CygnusBadConfiguration {
+        String folderPath;
+        
         if (enableEncoding) {
-            return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+            folderPath = NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
                     + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false);
         } else {
-            return NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
+            folderPath = NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
                     + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true);
         } // if else
+        
+        if (folderPath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building folder path name '" + folderPath + "' and its length is "
+                    + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
+        } // if
+        
+        return folderPath;
     } // buildFolderPath
     
     /**
@@ -1061,16 +1071,25 @@ public class NGSIHDFSSink extends NGSISink {
      * @param destination
      * @return The file path
      */
-    protected String buildFilePath(String service, String servicePath, String destination) {
+    protected String buildFilePath(String service, String servicePath, String destination) throws CygnusBadConfiguration {
+        String filePath;
+        
         if (enableEncoding) {
-            return NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
+            filePath = NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
                     + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false)
                     + "/" + NGSICharsets.encodeHDFS(destination, false) + ".txt";
         } else {
-            return NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
+            filePath = NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
                     + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true)
                     + "/" + NGSIUtils.encode(destination, false, true) + ".txt";
         } // if else
+        
+        if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building file path name '" + filePath + "' and its length is "
+                    + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
+        } // if
+        
+        return filePath;
     } // buildFilePath
     
     /**

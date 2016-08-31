@@ -442,11 +442,14 @@ public class NGSICKANSink extends NGSISink {
             orgName = NGSIUtils.encode(fiwareService, false, true);
         } // if else
 
-        if (orgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
-                    + "greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
+        if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
+            
         return orgName;
     } // buildOrgName
 
@@ -472,10 +475,13 @@ public class NGSICKANSink extends NGSISink {
             } // if else
         } // if else
 
-        if (pkgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
-                    + ") and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
+        if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
 
         return pkgName;
     } // buildPkgName
@@ -495,10 +501,13 @@ public class NGSICKANSink extends NGSISink {
             resName = NGSIUtils.encode(destination, false, true);
         } // if else
 
-        if (resName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
-                    + "than " + CommonConstants.MAX_NAME_LEN);
-        } // if
+        if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
 
         return resName;
     } // buildResName

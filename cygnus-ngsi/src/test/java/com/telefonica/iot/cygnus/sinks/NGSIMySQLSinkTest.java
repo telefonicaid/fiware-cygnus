@@ -699,6 +699,165 @@ public class NGSIMySQLSinkTest {
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByEntityEncoding
     
+    /**
+     * [NGSIMySQLSink.buildDbName] -------- A database name length greater than 64 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDbNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDbName]")
+                + "-------- A database name length greater than 64 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
+        
+        try {
+            sink.buildDbName(service);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDbName]")
+                    + "- FAIL - A database name length greater than 64 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDbName]")
+                    + "-  OK  - A database name length greater than 64 characters has been detected");
+        } // try catch
+    } // testBuildDbNameLength
+    
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When data model is by service path, a table name length greater than 64
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When data model is by service path, a table name length greater than 64 characters is "
+                + "detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 64 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 64 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByServicePath
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 64
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When data model is by entity, a table name length greater than 64 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity";
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/tooLooooooooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooooooooooongEntity";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 64 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 64 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByEntity
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When data model is by atribute, a table name length greater than 64 characters is "
+                + "detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-attribute";
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String servicePath = "/tooLooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooongEntity";
+        String attribute = "tooLooooooooooooongAttribute";
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 64 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 64 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByAttribute
+    
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
         NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,

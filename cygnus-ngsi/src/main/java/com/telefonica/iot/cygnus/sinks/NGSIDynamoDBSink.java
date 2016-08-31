@@ -362,9 +362,12 @@ public class NGSIDynamoDBSink extends NGSISink {
                             + "'. Please, use dm-by-service-path or dm-by-entity");
         } // switch
 
-        if (tableName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building tableName '" + tableName
-                    + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
+        if (tableName.length() > NGSIConstants.DYNAMO_DB_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building table name '" + tableName
+                    + "' and its length is greater than " + NGSIConstants.DYNAMO_DB_MAX_NAME_LEN);
+        } else if (tableName.length() < NGSIConstants.DYNAMO_DB_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building table name '" + tableName
+                    + "' and its length is lower than " + NGSIConstants.DYNAMO_DB_MIN_NAME_LEN);
         } // if
 
         return tableName;

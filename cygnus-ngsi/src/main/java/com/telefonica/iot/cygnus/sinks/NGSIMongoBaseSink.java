@@ -192,9 +192,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             dbName = dbPrefix + NGSIUtils.encodeSTHDB(fiwareService);
         } // if else
 
-        if (dbName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building dbName=fiwareService (" + dbName + ") and its length is greater "
-                    + "than " + CommonConstants.MAX_NAME_LEN);
+        if (dbName.length() > NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES) {
+            throw new CygnusBadConfiguration("Building database name '" + dbName + "' and its length is greater "
+                    + "than " + NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES);
         } // if
 
         return dbName;
@@ -263,11 +263,11 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         if (shouldHash) {
             int limit = getHashSizeInBytes(dbName);
 
-            if (limit < NGSIConstants.STH_MIN_HASH_SIZE_IN_BYTES) {
+            if (limit < NGSIConstants.MONGO_DB_MIN_HASH_SIZE_IN_BYTES) {
                 LOGGER.error("The available bytes for the hashes to be used as part of the collection names is not "
-                        + "big enough (at least " + NGSIConstants.STH_MIN_HASH_SIZE_IN_BYTES + " bytes are needed), "
-                        + "please reduce the size of the database prefix, the fiware-service and/or the collection "
-                        + "prefix");
+                        + "big enough (at least " + NGSIConstants.MONGO_DB_MIN_HASH_SIZE_IN_BYTES + " bytes are "
+                        + "needed), please reduce the size of the database prefix, the fiware-service and/or the "
+                        + "collection prefix");
                 return null;
             } // if
 
@@ -278,9 +278,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         } else {
             collectionName = collectionPrefix + collectionName;
 
-            if (collectionName.getBytes().length > NGSIConstants.STH_MAX_NAMESPACE_SIZE_IN_BYTES) {
-                LOGGER.error("");
-                return null;
+            if (collectionName.getBytes().length > NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES) {
+                throw new CygnusBadConfiguration("Building collection name '" + collectionName + "' and its length is "
+                        + "greater than " + NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES);
             } // if
         } // if else
 
@@ -288,7 +288,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     } // buildCollectionName
 
     private int getHashSizeInBytes(String dbName) {
-        return NGSIConstants.STH_MAX_NAMESPACE_SIZE_IN_BYTES - dbName.getBytes().length
+        return NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES - dbName.getBytes().length
                 - collectionPrefix.getBytes().length - ".aggr".getBytes().length - 1;
     } // getHashSizeInBytes
 

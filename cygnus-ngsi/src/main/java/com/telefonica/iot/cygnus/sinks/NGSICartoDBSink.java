@@ -376,7 +376,7 @@ public class NGSICartoDBSink extends NGSISink {
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.THE_GEOM, new ArrayList<String>());
+            aggregation.put(NGSIConstants.CARTO_DB_THE_GEOM, new ArrayList<String>());
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
@@ -440,7 +440,7 @@ public class NGSICartoDBSink extends NGSISink {
                 String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
                 
                 if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
-                    aggregation.get(NGSIConstants.THE_GEOM).add(location);
+                    aggregation.get(NGSIConstants.CARTO_DB_THE_GEOM).add(location);
                 } else {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
@@ -596,9 +596,9 @@ public class NGSICartoDBSink extends NGSISink {
     protected String buildSchemaName(String service) throws Exception {
         String name = NGSICharsets.encodePostgreSQL(service);
 
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;
@@ -635,9 +635,9 @@ public class NGSICartoDBSink extends NGSISink {
                         + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
         } // switch
         
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;

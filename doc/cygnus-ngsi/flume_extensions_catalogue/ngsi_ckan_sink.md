@@ -50,14 +50,18 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ####<a name="section1.2.1"></a>Organizations naming conventions
 An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
-Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
+Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.organization_create) may be up to 100 characters (minimum, 2 characters).
 
 [Top](#top)
 
 ####<a name="section1.2.2"></a>Packages/datasets naming conventions
 A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
 
-Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
+Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.package_create) may be up to 100 characters (minimum, 2 characters).
 
 [Top](#top)
 
@@ -66,7 +70,9 @@ CKAN resources follow a single data model (see the [Configuration](#section2.1) 
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
 
-Remember certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
+Nevertheless, different than PostgreSQL, resource lengths may be up to 100 characters (minimum, 2 characters).
 
 [Top](#top)
 

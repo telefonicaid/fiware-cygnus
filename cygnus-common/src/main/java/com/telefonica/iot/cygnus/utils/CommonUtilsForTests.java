@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
  */
 public final class CommonUtilsForTests {
     
-    private static final int MAX_LEN_TEST_TRACE_HEAD = 55;
+    private static final int MAX_LEN_TEST_TRACE_HEAD = 60;
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.

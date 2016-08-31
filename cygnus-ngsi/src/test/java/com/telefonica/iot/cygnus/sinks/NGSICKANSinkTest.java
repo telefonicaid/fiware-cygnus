@@ -609,6 +609,122 @@ public class NGSICKANSinkTest {
             throw e;
         } // try catch
     } // testBuildResourceNameEncoding
+    
+    /**
+     * [NGSICKANSink.buildOrgName] -------- An organization name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrganizationNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- An organization name length greater than 100 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // defalt
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogService";
+        
+        try {
+            sink.buildOrgName(service);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - An organization name length greater than 100 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "-  OK  - An organization name length greater than 100 characters has been detected");
+        } // try catch
+    } // testBuildOrganizationNameLength
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- A package name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPackageNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- A resource name length greater than 100 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // defalt
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogService";
+        String servicePath = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooooooogServicePath";
+        
+        try {
+            sink.buildPkgName(service, servicePath);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - A package name length greater than 100 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "-  OK  - A package name length greater than 100 characters has been detected");
+        } // try catch
+    } // testBuildPackageNameLength
+    
+    /**
+     * [NGSICKANSink.buildResName] -------- A resource name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                + "-------- A resource name length greater than 100 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // defalt
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+        String entity = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogEntity";
+        
+        try {
+            sink.buildResName(entity);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - A resource name length greater than 100 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "-  OK  - A resource name length greater than 100 characters has been detected");
+        } // try catch
+    } // testBuildResourceNameLength
 
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
