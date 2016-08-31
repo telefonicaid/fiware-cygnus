@@ -291,7 +291,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         // try persisting the rollbacked accumulation
         try {
             persistBatch(rollbackedAccumulation.getBatch());
-            LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+            
+            if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
+                LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
+            } // if
+            
             rollbackedAccumulations.remove(0);
             numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
             return Status.READY;
@@ -311,8 +315,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                             + "batch TTL=" + rollbackedAccumulation.ttl);
                 } else {
                     rollbackedAccumulations.remove(0);
-                    LOGGER.info("TTL exhausted, finishing internal transaction ("
-                            + rollbackedAccumulation.getAccTransactionIds() + ")");
+                    
+                    if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
+                        LOGGER.info("TTL exhausted, finishing internal transaction ("
+                                + rollbackedAccumulation.getAccTransactionIds() + ")");
+                    } // if
                 } // if else
                 
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
@@ -360,7 +367,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         for (currentIndex = accumulator.getAccIndex(); currentIndex < batchSize; currentIndex++) {
             // check if the batch accumulation timeout has been reached
             if ((new Date().getTime() - accumulator.getAccStartDate()) > (batchTimeout * 1000)) {
-                LOGGER.info("Batch accumulation time reached, the batch will be processed as it is");
+                LOGGER.debug("Batch accumulation time reached, the batch will be processed as it is");
                 break;
             } // if
 
@@ -414,11 +421,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         try {
             if (accumulator.getAccIndex() != 0) {
-                LOGGER.info("Batch completed, persisting it");
+                LOGGER.debug("Batch completed, persisting it");
                 persistBatch(accumulator.getBatch());
             } // if
 
-            LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
+            if (!accumulator.getAccTransactionIds().isEmpty()) {
+                LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
+            } // if
+            
             numPersistedEvents += accumulator.getBatch().getNumEvents();
             accumulator.initialize(new Date().getTime());
             txn.commit();
@@ -441,8 +451,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
                             + "batch TTL=" + accumulator.ttl);
                 } else {
-                    LOGGER.info("TTL exhausted, finishing internal transaction ("
-                            + accumulator.getAccTransactionIds() + ")");
+                    if (!accumulator.getAccTransactionIds().isEmpty()) {
+                        LOGGER.info("TTL exhausted, finishing internal transaction ("
+                                + accumulator.getAccTransactionIds() + ")");
+                    } // if
                 } // if else
                 
                 accumulator.initialize(new Date().getTime());
