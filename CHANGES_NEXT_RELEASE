@@ -10,3 +10,4 @@
 - [cygnus-ngsi][feature] Do per-sink active checkings of element name sizes (#407)
 - [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
 - [cygnus-ngsi][hardening] Decrease to DEBUG the logging level of batching related traces (#1126)
+- [cygnus-common][bug] Release connection upon persistence error (#1139)
