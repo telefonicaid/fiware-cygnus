@@ -51,12 +51,13 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 
-# Add Cyugnus user
-RUN adduser ${CYGNUS_USER}
+COPY . ${CYGNUS_HOME}/
 
 # Install
-RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
-    yum clean all && \
+RUN \
+    # Add Cygnus user
+    adduser ${CYGNUS_USER} && \
+    yum -y install nc java-1.6.0-openjdk-devel git && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
     tar xzvf ${MVN_TGZ} && \
     mv apache-maven-${MVN_VER} ${MVN_HOME} && \
@@ -68,10 +69,6 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
-    # Make a shallow clone to help reduce final image size
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
-    cd ${CYGNUS_HOME} && \
-    git checkout ${GIT_REV_CYGNUS} && \
     # Build and install cygnus-common
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean compile exec:exec assembly:single && \
@@ -88,27 +85,33 @@ RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
     # Create Cygnus log folder
-    mkdir /var/log/cygnus && \
+    mkdir -p /var/log/cygnus && \
     # Cleanup to thin the final image
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn clean && \
-    rm -rf /root/.m2 && \
-    bash -c 'find /usr/share/locale -maxdepth 1 -mindepth 1 -type d | grep -v -e "en_US" | xargs rm -rfv' && \
+    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    yum erase -y git java-1.6.0-openjdk-devel && unset JAVA_HOME && \
+    rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && yum -y erase libss && \
+    yum clean all && rpm -vv --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
+    find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
-    mv -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    build-locale-archive && \
-    rm -f /opt/${MVN_TGZ} && \
-    rm -f /opt/${FLUME_TGZ}
+    /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
+    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && \
+    # Reduce two big jar files...
+    pack200 ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
+    pack200 ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
+    rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
+    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar
 
 # Copy some files needed for starting cygnus-ngsi
-COPY cygnus-entrypoint.sh /
-COPY agent.conf ${FLUME_HOME}/conf/
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh /
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
-EXPOSE ${CYGNUS_SERVICE_PORT}
-EXPOSE ${CYGNUS_API_PORT}
+EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
+
