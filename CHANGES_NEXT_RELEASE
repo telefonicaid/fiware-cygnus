@@ -8,3 +8,4 @@
 - [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)
 - [cygnus-ngsi][feature] Do per-sink active checkings of element name sizes (#407)
 - [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
+- [cygnus-ngsi][hardening] Decrease to DEBUG the logging level of batching related traces (#1126)
