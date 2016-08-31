@@ -42,7 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Appender;
 import org.apache.log4j.PatternLayout;
 /**
@@ -158,6 +158,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleGetAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handleGetAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleGetAdminLogAppenders(request,response);
                 } else {
@@ -758,29 +760,171 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleGetAdminConfigurationInstance
     
+    private void handleGetAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        String transient_ = request.getParameter("transient");
+        String loggerName = request.getParameter("name");
+        boolean allLoggers = true;
+
+        if (loggerName != null) {
+            allLoggers = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+        String param = "flume.root.logger";
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            String loggersJson = "[";
+            boolean firstTime = true;
+            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+
+            if (allLoggers) {
+
+                while (loggers.hasMoreElements()) {
+
+                    Logger logger = loggers.nextElement();
+                    String loggName = logger.getName();
+                    Level level = logger.getLevel();
+
+                    if (!firstTime) {
+                        loggersJson += ",";
+                    }  // if
+
+                    if (level != null) {
+                        loggersJson += "{\"name\":\"" + loggName + "\",\"level\":\"" + level.toString() + "\"}";
+                    } else {
+                        loggersJson += "{\"name\":\"" + loggName + "\"}";
+                    }
+                    firstTime = false;
+                } // while
+
+                loggersJson += "]";
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"loggers\":" + loggersJson + "}");
+                LOGGER.debug("Log4j loggers successfully obtained");
+            } else {
+                boolean loggerFound = false;
+
+                while (loggers.hasMoreElements()) {
+
+                    Logger log = loggers.nextElement();
+                    if (log.getName().equals(loggerName)) {
+                        loggersJson += "{\"name\":\"" + log.getName() + "\"}";
+                        loggerFound = true;
+                    } // if
+
+                } // while
+
+                loggersJson += "]";
+
+                if (loggerFound) {
+                    LogManager.getLoggerRepository().getLogger(loggerName);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
+                    LOGGER.debug("Log4j logger successfully obtained");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"logger name not found\"}");
+                    LOGGER.debug("Logger name not found");
+                } // try catch
+
+            } // if else
+
+        } else if (transient_.equals("false")){
+
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String loggersJson = "[";
+                ArrayList<String> loggerNames = ManagementInterfaceUtils.getLoggersFromProperties(properties);
+
+                if (allLoggers) {
+
+                    for (String name : loggerNames) {
+                        String propertyName = "log4j.logger." + name;
+                        String level = properties.getProperty(propertyName);
+                        loggersJson += "{\"name\":\"" + name + "\",\"level\":\""
+                            + level + "\"}";
+
+                        if (!(loggerNames.get(loggerNames.size()-1).equals(name))) {
+                            loggersJson += ",";
+                        } // if
+
+                    } // for
+
+                    loggersJson += "]";
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"loggers\":" + loggersJson + "}");
+                    LOGGER.debug("Logger list: " + loggersJson);
+                } else {
+                    boolean loggerFound = false;
+
+                    for (String name : loggerNames) {
+
+                        if (name.equals(loggerName)) {
+                            String propertyName = "log4j.logger." + name;
+                            String level = properties.getProperty(propertyName);
+                            loggersJson += "{\"name\":\"" + loggerName + "\",\"level\":\""
+                                + level + "\"}]";
+                            loggerFound = true;
+                        } // if
+
+                    } // for
+
+                    if (loggerFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
+                        LOGGER.debug("Logger list: " + loggersJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                        LOGGER.debug("Logger name not found");
+                    } // if else
+
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+
+    } // handleGetAdminLogLoggers
+        
+        
     private void handleGetAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
-        
+
         String transient_ = request.getParameter("transient");
         String appenderName = request.getParameter("name");
         boolean allAppenders = true;
-        
+
         if (appenderName != null) {
             allAppenders = false;
         } // if
-        
+
         String pathToFile = configurationPath + "/log4j.properties";
         File file = new File(pathToFile);
-        
+
         if ((transient_ == null) || (transient_.equals("true"))) {
             String appendersJson = "";
-            
+
             if (allAppenders) {
-                
                 Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
                 appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
-                
-                if (appendersJson.equals("[]")) { 
+
+                if (appendersJson.equals("[]")) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
                     LOGGER.debug("No log4j appenders found");
@@ -789,16 +933,16 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"true\",\"appender\":" + appendersJson + "}");
                     LOGGER.debug("Log4j appenders successfully obtained");
                 } // if else
-                
+
             } else {
-                
+
                 try {
                     Appender app = LogManager.getRootLogger().getAppender(appenderName);
                     String name = app.getName();
                     PatternLayout layout = (PatternLayout) app.getLayout();
                     String layoutStr = layout.getConversionPattern();
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\",\"appender\":[{\"name\":\"" + name + 
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":[{\"name\":\"" + name +
                             "\",\"layout\":\"" + layoutStr + "\",\"active\":\"true\"}]}");
                     LOGGER.debug("Log4j appenders successfully obtained");
                 } catch (Exception e) {
@@ -806,11 +950,11 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
                     LOGGER.debug("Appender name not found");
                 } // try catch
-                
+
             } // if else
-            
+
         } else if (transient_.equals("false")){
-            
+
             if (file.exists()) {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 Properties properties = new Properties();
@@ -819,25 +963,24 @@ public class ManagementInterface extends AbstractHandler {
                 String rootProperty = properties.getProperty(param);
                 String[] rootLogger = rootProperty.split(",");
                 String active = rootLogger[1];
-                
-                String appenderJson = "[";   
+                String appenderJson = "[";
                 ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
-                
+
                 if (allAppenders) {
 
-                    for (String name : appenderNames) {   
+                    for (String name : appenderNames) {
                         boolean isActive = false;
-                        
+
                         if (name.equals(active)) {
                             isActive = true;
                         } // if
-                        
+
                         String layoutName = "log4j.appender." + name + ".layout."
                             + "ConversionPattern";
                         String layout = properties.getProperty(layoutName);
-                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\""
                             + layout + "\",\"active\":\"" + Boolean.toString(isActive) + "\"}";
-                        
+
                         if (!(appenderNames.get(appenderNames.size()-1).equals(name))) {
                             appenderJson += ", ";
                         } // if
@@ -845,7 +988,7 @@ public class ManagementInterface extends AbstractHandler {
                     } // for
 
                     appenderJson += "]";
-                
+
                     if (appenderJson.equals("[]")) {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
@@ -854,18 +997,18 @@ public class ManagementInterface extends AbstractHandler {
                         response.setStatus(HttpServletResponse.SC_OK);
                         response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
                         LOGGER.debug("Appender list: " + appenderJson);
-                    } // if else 
-                    
+                    } // if else
+
                 } else {
                     boolean appenderFound = false;
-                    
-                    for (String name : appenderNames) { 
-                            
+
+                    for (String name : appenderNames) {
+
                         if (name.equals(appenderName)) {
                             String layoutName = "log4j.appender." + name + ".layout."
                                 + "ConversionPattern";
                             String layout = properties.getProperty(layoutName);
-                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\"" 
+                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\""
                                 + layout + "\",\"active\":\"";
                             if (name.equals(active)) {
                                 appenderJson += "true\"}";
@@ -886,24 +1029,26 @@ public class ManagementInterface extends AbstractHandler {
                         response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
                         LOGGER.debug("Appender name not found");
                     } // if else
-                    
+
                 } // if else
-                
+
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"result\":\"File not found in the path received\"}");
                 LOGGER.debug("File not found in the path received");
             } // if else
-            
+
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\":\"Invalid 'transient' parameter found\"}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
-        
+
     } // handleGetAdminLogAppenders
+
+
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
