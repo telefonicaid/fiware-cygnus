@@ -64,7 +64,7 @@ The name of these tables depends on the configured data model and analysis mode 
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In addition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
-Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted.. This leads to certain [encoding](#section2.3.4) is applied.
+Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. This leads to certain [encoding](#section2.3.4) is applied.
 
 PostgreSQL [tables name length](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) is limited to 64 characters.
 
