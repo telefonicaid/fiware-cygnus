@@ -50,7 +50,9 @@ MongoDB organizes the data in databases that contain collections of Json documen
 ####<a name="section1.2.1"></a>MongoDB databases naming conventions
 A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. Remember certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
 
 [Top](#top)
 
@@ -61,7 +63,9 @@ The name of these collections depends on the configured data model and analysis 
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name.
 * Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated. The configured prefix is prepended to the collection name.
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`. Remember certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
 
 The following table summarizes the table name composition (assuming default `sth_` prefix, old encoding):
 

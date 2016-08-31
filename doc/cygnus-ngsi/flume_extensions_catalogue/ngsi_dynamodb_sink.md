@@ -44,7 +44,9 @@ DynamoDB organizes the data in tables of data items. All the tables are located 
 [Top](#top)
 
 ####<a name="section1.2.1"></a>DynamoDB databases naming conventions
-As said, there is a DynamoDB database per Amazon user. The [name of these users](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html) must be alphanumeric, including the following common characters: `+`, `=`, `,`, `.`, `@`, `_` and `-`. Remember certain [encoding](#section2.3.5) is applied.
+As said, there is a DynamoDB database per Amazon user. The [name of these users](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html) must be alphanumeric, including the following common characters: `+`, `=`, `,`, `.`, `@`, `_` and `-`. This leads to certain [encoding](#section2.3.5) is applied.
+
+DynamoDB [databases name length](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-naming-rules) may be up to 255 characters (minimum, 3 characters).
 
 Current version of the sink does not support multitenancy, that means only an Amazon user space (and thus only a database) can be used. Such a user space is specified in the configuration (please, check the [Configuration](#section2.1) section), and therefore it is not necessary an exact match among the Amazon user space name and the FIWARE service path. Nevertheless, it is expected future versions of the sink will implement multitenancy; in that case it will be mandatory both FIWARE service and Amazon user space name match in order to correctly <i>route</i> each service data to the appropriate Amazon user.
 
@@ -58,7 +60,9 @@ The name of these tables depends on the configured data model (see the [Configur
 
 In both cases, the notified/defaulted FIWARE service is prefixed to the table name.
 
-It must be said DynamoDB [only accepts](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.html) alphanumerics and `_`, `-` and `.`. Remember certain [encoding](#section2.3.5) is applied.
+It must be said DynamoDB [only accepts](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.html) alphanumerics and `_`, `-` and `.`. This leads to certain [encoding](#section2.3.5) is applied.
+
+DynamoDB [tables name length](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-naming-rules) may be up to 255 characters (minimum, 3 characters).
 
 The following table summarizes the table name composition:
 
