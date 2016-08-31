@@ -753,6 +753,98 @@ public class NGSIHDFSSinkTest {
         } // try catch
     } // testBuildFilePathRootServicePathEncoding
     
+    /**
+     * [NGSIHDFSSink.buildFolderPath] -------- A folder path length greater than 255 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFolderPath]")
+                + "-------- A folder path length greater than 255 characters is detected");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = null; // default value
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
+        
+        try {
+            sink.buildFolderPath(service, servicePath, destination);
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFolderPath]")
+                    + "- FAIL - A folder path length greater than 255 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFolderPath]")
+                    + "-  OK  - A folder path length greater than 255 characters has been detected");
+        } // try catch
+    } // testBuildFolderPathLength
+    
+    /**
+     * [NGSIHDFSSink.buildFolderPath] -------- A folder path length greater than 255 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFilePathLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFilePath]")
+                + "-------- A file path length greater than 255 characters is detected");
+        String backendImpl = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = null; // default value
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
+                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
+                token, serviceAsNamespace));
+        String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
+        
+        try {
+            sink.buildFilePath(service, servicePath, destination);
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFilePath]")
+                    + "- FAIL - A file path length greater than 255 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFilePath]")
+                    + "-  OK  - A file path length greater than 255 characters has been detected");
+        } // try catch
+    } // testBuildFilePathLength
+    
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             ContextElement contextElement) {
         NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,

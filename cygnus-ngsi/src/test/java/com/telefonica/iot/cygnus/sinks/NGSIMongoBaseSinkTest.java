@@ -478,4 +478,152 @@ public class NGSIMongoBaseSinkTest {
         } // catch
     } // testBuildCollectionNameDMByEntityRootServicePathNewEncoding
     
+    /**
+     * [NGSIMongoBaseSink.buildDbName] -------- A database name length greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDbNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                + "-------- A database name length greater than 113 characters is detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "oooooooooooooooooooongService";
+        
+        try {
+            sink.buildDbName(service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                    + "- FAIL - A database name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                    + "-  OK  - A database name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildDbNameLength
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by service path, a collection name length
+     * greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by service path, a collection name length greater than 113 characters "
+                + "is detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "oooooooooooooooooooooooooooongServicePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByServicePath
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by entity, a collection name length greater
+     * than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by entity, a collection name length greater than 113 characters is "
+                + "detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-entity";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongEntity";
+        String attribute = null; // irrelevant for this test
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByEntity
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by attribute, a collection name length
+     * greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by atribute, a collection name length greater than 113 characters is "
+                + "detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-attribute";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLoooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLoooooooooooooooooooooooooooooooooooooooooongEntity";
+        String attribute = "tooLoooooooooooooooooooooooooooooooooooooooongAttribute";
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByAttribute
+    
 } // NGSIMongoBaseSinkTest

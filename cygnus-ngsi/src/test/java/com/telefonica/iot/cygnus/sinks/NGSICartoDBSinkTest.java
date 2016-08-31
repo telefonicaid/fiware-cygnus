@@ -972,12 +972,12 @@ public class NGSICartoDBSinkTest {
             } // try catch
             
             try {
-                assertTrue(fields.contains(NGSIConstants.THE_GEOM));
+                assertTrue(fields.contains(NGSIConstants.CARTO_DB_THE_GEOM));
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "-  OK  - '" + NGSIConstants.THE_GEOM + "' is in the fields '" + fields + "'");
+                        + "-  OK  - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is in the fields '" + fields + "'");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "- FAIL - '" + NGSIConstants.THE_GEOM + "' is not in the fields '" + fields + "'");
+                        + "- FAIL - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is not in the fields '" + fields + "'");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -1272,6 +1272,119 @@ public class NGSICartoDBSinkTest {
             throw e;
         } // try catch
     } // testAggregateCoordinatesAreFlipped
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by service path, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by service path, a table name length greater than 63 characters is "
+                + "detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-service-path";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByServicePath
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by entity, a table name length greater than 63 characters is detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-entity";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLoooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLoooooooooooooooooooooooooooongEntity";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByEntity
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by atribute, a table name length greater than 63 characters is "
+                + "detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-attribute";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooongEntity";
+        String attribute = "tooLooooooooooooongAttribute";
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByAttribute
     
     private Context createContext(String endpoint, String apiKey, String dataModel, String enableLowercase,
             String flipCoordinates, String enableRaw, String enableDistance, String keysConfFile) {

@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
-import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.io.BufferedReader;
@@ -43,6 +42,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 /**
  *
@@ -89,7 +89,7 @@ public class NGSIRestHandlerTest {
     
     /**
      * [NGSIRestHandler.configure] -------- When not configured, the default values are used for non mandatory
- parameters.
+     * parameters.
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
@@ -251,10 +251,10 @@ public class NGSIRestHandlerTest {
                     + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-service' header value is "
-                    + " less or equal than '" + CommonConstants.SERVICE_HEADER_MAX_LEN + "'");
+                    + " less or equal than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
             System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-servicePath' header value "
-                    + "is less or equal than '" + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+                    + "is less or equal than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
@@ -265,11 +265,11 @@ public class NGSIRestHandlerTest {
             } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-service' header value "
-                        + "is greater than '" + CommonConstants.SERVICE_HEADER_MAX_LEN + "'");
+                        + "is greater than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
             } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
                 System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-servicePath' header "
-                        + "value is greater than '" + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+                        + "value is greater than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
             } // if else
             
             assertTrue(false);
@@ -493,7 +493,7 @@ public class NGSIRestHandlerTest {
                     + "- FAIL - The notified transaction ID '" + notifiedCorrId + "' has not not reused, '"
                     + generatedCorrId + "' has been generated instead");
             throw e;
-        } // try catch // try catch
+        } // try catch
     } // testGenerateUniqueIdCorrIdReused
     
     /**
@@ -544,6 +544,97 @@ public class NGSIRestHandlerTest {
             throw e;
         } // try catch
     } // testGenerateUniqueIdSameCorrAndTransIds
+    
+    /**
+     * [NGSIRestHandler.wrongServiceHeader] -------- A content-type different than 'application/json; charset=utf-8' is
+ detected.
+     */
+    @Test
+    public void testWrongContentType() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+                + "-------- A content-type different than 'application/json; charset=utf-8' is detected");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String wrongContentType = "application/json";
+        
+        try {
+            assertTrue(handler.wrongContentType(wrongContentType));
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+                    + "-  OK  - A wrong content-type '" + wrongContentType + "' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+                    + "- FAIL - A wrong content-type '" + wrongContentType + "' has not been detected");
+            throw e;
+        } // try catch
+    } // testWrongContentType
+    
+    /**
+     * [NGSIRestHandler.wrongServiceHeaderLength] -------- A FIWARE service header whose length is greater than 50
+     * characters is detected.
+     */
+    @Test
+    public void testWrongServiceHeaderLength() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+                + "-------- A FIWARE service header whose length is greater than 50 characters is detected");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String wrongServiceHeader = "thisIsAFiwareServiceHeaderWhoseLengthIsGreaterThanTheAccepted50CharactersLimit";
+        
+        try {
+            assertTrue(handler.wrongServiceHeaderLength(wrongServiceHeader));
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+                    + "-  OK  - A wrong FIWARE service header '" + wrongServiceHeader + "' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+                    + "- FAIL - A wrong FIWARE service header '" + wrongServiceHeader + "' has not been detected");
+            throw e;
+        } // try catch
+    } // testWrongServiceHeaderLength
+    
+    /**
+     * [NGSIRestHandler.wrongServicePathHeaderLength] -------- A FIWARE service path header whose length is greater than
+     * 50 characters is detected.
+     */
+    @Test
+    public void testWrongServicePathHeaderLength() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+                + "-------- A FIWARE service path header whose length is greater than 50 characters is detected");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String wrongServicePathHeader = "thisIsAFiwareServicePathHeaderWhoseLengthIsGreaterThanTheAccepted50"
+                + "CharactersLimit";
+        
+        try {
+            assertTrue(handler.wrongServicePathHeaderLength(wrongServicePathHeader));
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+                    + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+                    + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
+                    + "detected");
+            throw e;
+        } // try catch
+    } // testWrongServicePathHeaderLength
+    
+    /**
+     * [NGSIRestHandler.wrongServicePathHeaderInitialCharacter] -------- A FIWARE service path header not starting by
+     * slash is detected.
+     */
+    @Test
+    public void testWrongServicePathHeaderInitialCharacter() {
+        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+                + "-------- A FIWARE service path header not starting by slash is detected");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        String wrongServicePathHeader = "servicePath";
+        
+        try {
+            assertTrue(handler.wrongServicePathHeaderInitialCharacter(wrongServicePathHeader));
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+                    + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+                    + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
+                    + "detected");
+            throw e;
+        } // try catch
+    } // testWrongServicePathHeaderInitialCharacter
     
     private Context createContext(String notificationTarget, String defaultService, String defaultServicePath) {
         Context context = new Context();
