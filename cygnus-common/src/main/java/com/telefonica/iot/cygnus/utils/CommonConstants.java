@@ -33,7 +33,7 @@ public final class CommonConstants {
     // Http header names
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
     
-    // Http headers propably used by Flume events as well
+    // Http headers probably used by Flume events as well... TBD: should not be here!!
     public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
     public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
@@ -51,11 +51,8 @@ public final class CommonConstants {
     public static final String ATTR_MD_FILE        = "attrMdFile";
 
     // Maximum values
-    public static final int MAX_CONNS                   = 500;
-    public static final int MAX_CONNS_PER_ROUTE         = 100;
-    public static final int MAX_NAME_LEN                = 64;
-    public static final int SERVICE_HEADER_MAX_LEN      = 50;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
+    public static final int MAX_CONNS           = 500;
+    public static final int MAX_CONNS_PER_ROUTE = 100;
     
     // Others
     public static final String EMPTY_MD = "[]";
