@@ -97,6 +97,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+
+* Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
+- [cygnus][hardening] Add architecture documentation (#1127)
+- [cygnus-ngsi][bug] Insert NULL in CKAN columns when an empty attribute value ("", null, {} or []) or empty attribute metadata (null or []) is notified (#1144)
+
 * Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
 - [cygnus-ngsi] [hardening] Do configurable the accepted resolutions in NGSISTHSink (#940)
 - [cygnus-ngsi] [feature] Log time in UTC format (#1071)

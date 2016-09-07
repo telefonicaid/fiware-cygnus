@@ -1,3 +1,0 @@
-- [cygnus-common][bug] Release connection upon persistence error (#1139)
-- [cygnus][hardening] Add architecture documentation (#1127)
-- [cygnus-common][bug] Insert NULL in CKAN columns when an empty attribute value ("", null, {} or []) or empty attribute metadata (null or []) is notified (#1144)

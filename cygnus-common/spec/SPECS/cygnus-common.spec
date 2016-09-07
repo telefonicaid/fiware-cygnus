@@ -169,6 +169,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
+- [cygnus-common][bug] Release connection upon persistence error (#1139)
+- [cygnus][hardening] Add architecture documentation (#1127)
+
 * Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
 - [cygnus-common] [hardening] Add /admin/configuration/agent/path/to/agent.conf route to API (#893)
 - [cygnus-common] [hardening] Add /admin/configuration/instance/path/to/instance.conf route to API (#894)
