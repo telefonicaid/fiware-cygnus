@@ -10,6 +10,7 @@ theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
 pages:
   - Home: index.md
+  - 'Architecture': architecture.md
   - 'cygnus-common library':
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
