@@ -317,16 +317,10 @@ public class NGSICKANSink extends NGSISink {
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\","
                     + "\"" + NGSIConstants.ATTR_NAME + "\": \"" + attrName + "\","
-                    + "\"" + NGSIConstants.ATTR_TYPE + "\": \"" + attrType + "\","
-                    + "\"" + NGSIConstants.ATTR_VALUE + "\": " + attrValue;
-
-                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
-                    record += ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata + "}";
-                } else {
-                    record += "}";
-                } // if else
+                    + "\"" + NGSIConstants.ATTR_TYPE + "\": \"" + attrType + "\""
+                    + (isSpecialValue(attrValue) ? "" : ",\"" + NGSIConstants.ATTR_VALUE + "\": " + attrValue)
+                    + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata)
+                    + "}";
 
                 if (records.isEmpty()) {
                     records += record;
@@ -384,13 +378,8 @@ public class NGSICKANSink extends NGSISink {
                         + attrType + ")");
 
                 // create part of the column with the current attribute (a.k.a. a column)
-                record += ",\"" + attrName + "\": " + attrValue;
-
-                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
-                    record += ",\"" + attrName + "_md\": " + attrMetadata;
-                } // if
+                record += (isSpecialValue(attrValue) ? "" : ",\"" + attrName + "\": " + attrValue)
+                        + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + attrName + "_md\": " + attrMetadata);
             } // for
 
             // now, aggregate the column
@@ -511,5 +500,13 @@ public class NGSICKANSink extends NGSISink {
 
         return resName;
     } // buildResName
+    
+    private boolean isSpecialValue(String value) {
+        return value == null || value.equals(("\"\"")) || value.equals("{}") || value.equals("[]");
+    } // isSpecialValue
+    
+    private boolean isSpecialMetadata(String value) {
+        return value == null || value.equals("[]");
+    } // isSpecialMetadata
 
 } // NGSICKANSink
