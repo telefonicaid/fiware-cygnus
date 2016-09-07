@@ -11,3 +11,4 @@
 - [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
 - [cygnus-ngsi][hardening] Decrease to DEBUG the logging level of batching related traces (#1126)
 - [cygnus-common][bug] Release connection upon persistence error (#1139)
+- [cygnus-common][bug] Insert NULL in CKAN columns when an empty ("", null, {} or []) attribute value is notified (#1144)
