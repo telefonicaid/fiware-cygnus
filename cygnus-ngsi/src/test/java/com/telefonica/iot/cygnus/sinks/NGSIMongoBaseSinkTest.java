@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -60,9 +61,11 @@ public class NGSIMongoBaseSinkTest {
                 + "-------- Configured 'collection_prefix' cannot be 'system.'");
         String collectionPrefix = "system.";
         String dbPrefix = "sth_";
-        String dataModel = null; // defaulting
+        String dataModel = null; // default
+        String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -76,76 +79,139 @@ public class NGSIMongoBaseSinkTest {
     } // testConfigureCollectionPrefixIsNotSystem
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbidden characters.
      */
     @Test
-    public void testConfigureCollectionPrefixIsEncoded() {
+    public void testConfigureCollectionPrefixIsEncodedOldEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'collection_prefix' is encoded when having forbiden characters");
-        String collectionPrefix = "this\\is/a$prefix.with-forbiden,chars:-.";
+                + "-------- Configured 'collection_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "this\\is/a$prefix.with-forbidden,chars:-.";
         String dbPrefix = "sth_";
-        String dataModel = null; // defaulting
+        String dataModel = null; // default
+        String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
-        String encodedCollectionPrefix = NGSIUtils.encodeSTHCollection(collectionPrefix);
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String expectedCollectionPrefix = NGSIUtils.encodeSTHCollection(collectionPrefix);
         
         try {
-            assertTrue(sink.collectionPrefix.equals(encodedCollectionPrefix));
+            assertEquals(expectedCollectionPrefix, sink.collectionPrefix);
             System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "-  OK  - 'collection_prefix=" + collectionPrefix
-                    + "' correctly encoded as '" + encodedCollectionPrefix + "'");
+                    + "' correctly encoded as '" + expectedCollectionPrefix + "'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
                     + "- FAIL - 'collection_prefix=" + collectionPrefix
-                    + "' wrongly encoded as '" + encodedCollectionPrefix + "'");
+                    + "' wrongly encoded as '" + expectedCollectionPrefix + "'");
             throw e;
-        } // try catch
-    } // testConfigureCollectionPrefixIsEncoded
+        } // try catch // try catch
+    } // testConfigureCollectionPrefixIsEncodedOldEncoding
     
     /**
-     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbiden characters.
+     * [NGSIMongoSink.configure] -------- Configured 'collection_prefix' is encoded when having forbidden characters.
      */
     @Test
-    public void testConfigureDBPrefixIsEncoded() {
+    public void testConfigureCollectionPrefixIsEncodedNewEncoding() {
         System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                + "-------- Configured 'db_prefix' is encoded when having forbiden characters");
-        String collectionPrefix = "sth_";
-        String dbPrefix = "this\\is/a$prefix.with forbiden\"chars:-,";
-        String dataModel = null; // defaulting
+                + "-------- Configured 'collection_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "this\\is/a$prefix.with-forbidden,chars:-.";
+        String dbPrefix = "sth_";
+        String dataModel = null; // default
+        String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
-        String encodedDbPrefix = NGSIUtils.encodeSTHDB(dbPrefix);
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String expectedCollectionPrefix = NGSICharsets.encodeMongoDBCollection(collectionPrefix);
         
         try {
-            assertTrue(sink.dbPrefix.equals(encodedDbPrefix));
+            assertEquals(expectedCollectionPrefix, sink.collectionPrefix);
             System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                    + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + encodedDbPrefix + "'");
+                    + "-  OK  - 'collection_prefix=" + collectionPrefix
+                    + "' correctly encoded as '" + expectedCollectionPrefix + "'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
-                    + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + encodedDbPrefix + "'");
+                    + "- FAIL - 'collection_prefix=" + collectionPrefix
+                    + "' wrongly encoded as '" + expectedCollectionPrefix + "'");
             throw e;
-        } // try catch
-    } // testConfigureDBPrefixIsEncoded
+        } // try catch // try catch
+    } // testConfigureCollectionPrefixIsEncodedNewEncoding
+    
+    /**
+     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbidden characters.
+     */
+    @Test
+    public void testConfigureDBPrefixIsEncodedOldEncoding() {
+        System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                + "-------- Configured 'db_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "this\\is/a$prefix.with forbidden\"chars:-,";
+        String dataModel = null; // defaulting
+        String enableEncoding = "false";
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String expectedDbPrefix = NGSIUtils.encodeSTHDB(dbPrefix);
+        
+        try {
+            assertEquals(expectedDbPrefix, sink.dbPrefix);
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                    + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + expectedDbPrefix + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                    + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + expectedDbPrefix + "'");
+            throw e;
+        } // try catch // try catch
+    } // testConfigureDBPrefixIsEncodedOldEncoding
+    
+    /**
+     * [NGSIMongoSink.configure] -------- Configured 'db_prefix' is encoded when having forbidden characters.
+     */
+    @Test
+    public void testConfigureDBPrefixIsEncodedNewEncoding() {
+        System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                + "-------- Configured 'db_prefix' is encoded when having forbidden characters");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "this\\is/a$prefix.with forbidden\"chars:-,";
+        String dataModel = null; // defaulting
+        String enableEncoding = "true";
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String expectedDbPrefix = NGSICharsets.encodeMongoDBDatabase(dbPrefix);
+        
+        try {
+            assertEquals(expectedDbPrefix, sink.dbPrefix);
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                    + "-  OK  - 'db_prefix=" + dbPrefix + "' correctly encoded as '" + expectedDbPrefix + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[OrionMongoBaseSink.configure]")
+                    + "- FAIL - 'db_prefix=" + dbPrefix + "' wrongly encoded as '" + expectedDbPrefix + "'");
+            throw e;
+        } // try catch // try catch
+    } // testConfigureDBPrefixIsEncodedNewEncoding
     
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
-     * data_model=dm-by-service-path, the MongoDB collection name is <prefix>/.
+     * data_model=dm-by-service-path, the MongoDB collection name is the concatenation of \<prefix\> and
+     * \<service-path\>.
      */
     @Test
-    public void testBuildCollectionNameDMByServicePathRootServicePath() {
+    public void testBuildCollectionNameDMByServicePathRootServicePathOldEncoding() {
         System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
                 + "-------- When / service-path is notified/defaulted and data_model=dm-by-service-path, "
-                + "the MongoDB collection name is <prefix>/");
+                + "the MongoDB collection name is the concatenation of <prefix> and <service-path>");
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
         String dataModel = "dm-by-service-path";
+        String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
         String fiwareServicePath = "/";
-        String entity = "someId_someType";
-        String attribute = "someName_someType";
+        String entity = "someId=someType";
+        String attribute = "someName";
         boolean isAggregated = false;
         String entityId = "someId";
         String entityType = "someType";
@@ -153,14 +219,15 @@ public class NGSIMongoBaseSinkTest {
         try {
             String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
                     isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_/";
             
             try {
-                assertEquals("sth_/", collectionName);
+                assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of 'sth_/'");
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of 'sth_/'");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -168,27 +235,30 @@ public class NGSIMongoBaseSinkTest {
                         + "- FAIL - There was some problem when building the collection name");
             assertTrue(false);
         } // catch
-    } // testBuildCollectionNameDMByServicePathRootServicePath
+    } // testBuildCollectionNameDMByServicePathRootServicePathOldEncoding
     
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
-     * data_model=dm-by-entity, the MongoDB collections name is <prefix>/_<entityId>_<entityType>.
+     * data_model=dm-by-service-path, the MongoDB collection name is the concatenation of \<prefix\> and
+     * \<service-path\>.
      */
     @Test
-    public void testBuildCollectionNameDMByEntityRootServicePath() {
+    public void testBuildCollectionNameDMByServicePathRootServicePathNewEncoding() {
         System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the MongoDB"
-                + "collections name is <prefix>/_<entityId>_<entityType>");
+                + "-------- When / service-path is notified/defaulted and data_model=dm-by-service-path, "
+                + "the MongoDB collection name is the concatenation of <prefix> and <service-path>");
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
-        String dataModel = "dm-by-entity";
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
         String fiwareServicePath = "/";
-        String entity = "someId_someType";
-        String attribute = "someName_someType";
+        String entity = "someId=someType";
+        String attribute = "someName";
         boolean isAggregated = false;
         String entityId = "someId";
         String entityType = "someType";
@@ -196,14 +266,62 @@ public class NGSIMongoBaseSinkTest {
         try {
             String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
                     isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_x002f";
             
             try {
-                assertEquals("sth_/_someId_someType", collectionName);
+                assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of 'sth_/'");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - There was some problem when building the collection name");
+            assertTrue(false);
+        } // catch
+    } // testBuildCollectionNameDMByServicePathRootServicePathNewEncoding
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
+     * data_model=dm-by-entity, the MongoDB collections name is the concatenation of the \<prefix\>, \<service-path\>,
+     * \<entityId\> and \<entityType\>.
+     */
+    @Test
+    public void testBuildCollectionNameDMByEntityRootServicePathOldEncoding() {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the MongoDB"
+                + "collections name is the concatenation of the <prefix>, <service-path>, <entityId> and <entityType>");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "false";
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = "sth_default";
+        String fiwareService = "default";
+        String fiwareServicePath = "/";
+        String entity = "someId=someType";
+        String attribute = "someName";
+        boolean isAggregated = false;
+        String entityId = "someId";
+        String entityType = "someType";
+        
+        try {
+            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
+                    isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_/_someId_someType";
+            
+            try {
+                assertEquals(expectedCollectionName, collectionName);
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType'");
                 throw e;
             } // try catch
@@ -212,28 +330,30 @@ public class NGSIMongoBaseSinkTest {
                         + "- FAIL - There was some problem when building the collection name");
             assertTrue(false);
         } // catch
-    } // testBuildCollectionNameDMByEntityRootServicePath
+    } // testBuildCollectionNameDMByEntityRootServicePathOldEncoding
     
     /**
      * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
-     * data_model=dm-by-attribute, the MongoDB collections name is
-     * <prefix>/_<entityId>_<entityType>_<attrName>_<attrType>.
+     * data_model=dm-by-entity, the MongoDB collections name is the concatenation of the \<prefix\>, \<service-path\>,
+     * \<entityId\> and \<entityType\>.
      */
     @Test
-    public void testBuildCollectionNameDMByAttributeRootServicePath() {
+    public void testBuildCollectionNameDMByEntityRootServicePathNewEncoding() {
         System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                + "-------- When / service-path is notified/defaulted and data_model=dm-by-attribute, the "
-                + "MongoDB collections name is <prefix>/_<entityId>_<entityType>_<attrName>_<attrType>");
+                + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the MongoDB"
+                + "collections name is the concatenation of the <prefix>, <service-path>, <entityId> and <entityType>");
         String collectionPrefix = "sth_";
         String dbPrefix = "sth_";
-        String dataModel = "dm-by-attribute";
+        String dataModel = "dm-by-entity";
+        String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel));
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
         String fiwareServicePath = "/";
-        String entity = "someId_someType";
-        String attribute = "someName_someType";
+        String entity = "someId=someType";
+        String attribute = "someName";
         boolean isAggregated = false;
         String entityId = "someId";
         String entityType = "someType";
@@ -241,14 +361,64 @@ public class NGSIMongoBaseSinkTest {
         try {
             String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
                     isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_x002fxffffsomeIdxffffsomeType";
             
             try {
-                assertEquals("sth_/_someId_someType_someName_someType", collectionName);
+                assertEquals(expectedCollectionName, collectionName);
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "-  OK  - '" + collectionName + "' was crated as collection name");
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
-                        + "- FAIL - '" + collectionName + "' was crated as collection name instead of "
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
+                        + "'sth_/_someId_someType'");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - There was some problem when building the collection name");
+            assertTrue(false);
+        } // catch
+    } // testBuildCollectionNameDMByEntityRootServicePathNewEncoding
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
+     * data_model=dm-by-attribute, the MongoDB collections name is the concatenation of \<prefix\>, \<service-path\>,
+     * \<entityId\>, \<entityType\> and \<attrName\>.
+     */
+    @Test
+    public void testBuildCollectionNameDMByAttributeRootServicePathOldEncoding() {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When / service-path is notified/defaulted and data_model=dm-by-attribute, the "
+                + "MongoDB collections name is the concatenation of <prefix>, <service-path>, <entityId>, <entityType> "
+                + "and <attrName>");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-attribute";
+        String enableEncoding = "false";
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = "sth_default";
+        String fiwareService = "default";
+        String fiwareServicePath = "/";
+        String entity = "someId=someType";
+        String attribute = "someName";
+        boolean isAggregated = false;
+        String entityId = "someId";
+        String entityType = "someType";
+        
+        try {
+            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
+                    isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_/_someId_someType_someName";
+            
+            try {
+                assertEquals(expectedCollectionName, collectionName);
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
                         + "'sth_/_someId_someType_someName_someType'");
                 throw e;
             } // try catch
@@ -257,6 +427,203 @@ public class NGSIMongoBaseSinkTest {
                         + "- FAIL - There was some problem when building the collection name");
             assertTrue(false);
         } // catch
-    } // testBuildCollectionNameDMByEntityRootServicePath
+    } // testBuildCollectionNameDMByEntityRootServicePathOldEncoding
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When / service-path is notified/defaulted and
+     * data_model=dm-by-attribute, the MongoDB collections name is the concatenation of \<prefix\>, \<service-path\>,
+     * \<entityId\>, \<entityType\> and \<attrName\>.
+     */
+    @Test
+    public void testBuildCollectionNameDMByAttributeRootServicePathNewEncoding() {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When / service-path is notified/defaulted and data_model=dm-by-attribute, the "
+                + "MongoDB collections name is the concatenation of <prefix>, <service-path>, <entityId>, <entityType> "
+                + "and <attrName>");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-attribute";
+        String enableEncoding = "true";
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = "sth_default";
+        String fiwareService = "default";
+        String fiwareServicePath = "/";
+        String entity = "someId=someType";
+        String attribute = "someName";
+        boolean isAggregated = false;
+        String entityId = "someId";
+        String entityType = "someType";
+        
+        try {
+            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
+                    isAggregated, entityId, entityType, fiwareService);
+            String expectedCollectionName = "sth_x002fxffffsomeIdxffffsomeTypexffffsomeName";
+            
+            try {
+                assertEquals(expectedCollectionName, collectionName);
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "-  OK  - '" + collectionName + "' was created as collection name");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - '" + collectionName + "' was created as collection name instead of "
+                        + "'sth_/_someId_someType_someName_someType'");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                        + "- FAIL - There was some problem when building the collection name");
+            assertTrue(false);
+        } // catch
+    } // testBuildCollectionNameDMByEntityRootServicePathNewEncoding
+    
+    /**
+     * [NGSIMongoBaseSink.buildDbName] -------- A database name length greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDbNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                + "-------- A database name length greater than 113 characters is detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "oooooooooooooooooooongService";
+        
+        try {
+            sink.buildDbName(service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                    + "- FAIL - A database name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildDbName]")
+                    + "-  OK  - A database name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildDbNameLength
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by service path, a collection name length
+     * greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by service path, a collection name length greater than 113 characters "
+                + "is detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-service-path";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "oooooooooooooooooooooooooooongServicePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByServicePath
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by entity, a collection name length greater
+     * than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by entity, a collection name length greater than 113 characters is "
+                + "detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-entity";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongEntity";
+        String attribute = null; // irrelevant for this test
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByEntity
+    
+    /**
+     * [NGSIMongoBaseSink.buildCollectionName] -------- When data model is by attribute, a collection name length
+     * greater than 113 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildCollectionNameLengthDataModelByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                + "-------- When data model is by atribute, a collection name length greater than 113 characters is "
+                + "detected");
+        String collectionPrefix = "sth_";
+        String dbPrefix = "sth_";
+        String dataModel = "dm-by-attribute";
+        String enableEncoding = null; // default
+        NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
+        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding));
+        String dbName = null; // irrelevant for this test
+        String servicePath = "/tooLoooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLoooooooooooooooooooooooooooooooooooooooooongEntity";
+        String attribute = "tooLoooooooooooooooooooooooooooooooooooooooongAttribute";
+        boolean isAggregated = false; // irrelevant for this test
+        String entityId = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
+        String service = null; // irrelevant for this test
+        
+        try {
+            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
+                    service);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "- FAIL - A collection name length greater than 113 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
+                    + "-  OK  - A collection name length greater than 113 characters has been detected");
+        } // try catch
+    } // testBuildCollectionNameLengthDataModelByAttribute
     
 } // NGSIMongoBaseSinkTest

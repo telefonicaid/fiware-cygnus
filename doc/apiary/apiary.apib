@@ -610,22 +610,13 @@ Error list (HTTP response code in parenthesis):
 + Response 200 (application/json)
 
        {
-           "log4j": {
-           "appenders": [
-               {
-                   "layout": "...",
-                   "name": "..."
-               }
-            ],
-            "level": "..."
-           },
-           "success": "true"
+               "level": "..."
        }
 
 + Response 500 (application/json)
 
        {
-           "error": "..."
+               "error": "..."
        }
 
 ### Update the logging level of Cygnus [PUT /admin/log]

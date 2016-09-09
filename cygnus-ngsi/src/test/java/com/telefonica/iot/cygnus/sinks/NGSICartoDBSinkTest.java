@@ -393,7 +393,7 @@ public class NGSICartoDBSinkTest {
     } // testConfigureDataModelOK
     
     /**
-     * [NGSICartoDBSink.start] -------- When started, a CartoDB backend is created.
+     * [NGSICartoDBSink.start] -------- Endpoint field must appear within an entry in the keys file.
      */
     @Test
     public void testStartEndpointNotNullKeysFile() {
@@ -629,13 +629,14 @@ public class NGSICartoDBSinkTest {
     } // testStartKeyNotEmptyKeysFile
     
     /**
-     * [NGSICartoDBSink.buildSchemaName] -------- The schema name is equals to the notified/defaulted service.
+     * [NGSICartoDBSink.buildSchemaName] -------- The schema name is equals to the encoding of the notified/defaulted
+     * service.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildSchemaName() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
-                + "-------- The schema name is equals to the notified/defaulted service");
+                + "-------- The schema name is equals to the encoding of the notified/defaulted service");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = null; // default one
@@ -651,14 +652,15 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtSchemaName = sink.buildSchemaName(service);
+            String expectedSchemaName = "somex0053ervice";
         
             try {
-                assertEquals("someservice", builtSchemaName);
+                assertEquals(expectedSchemaName, builtSchemaName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
-                        + "-  OK  - '" + builtSchemaName + "' is equals to the lower case of <service>");
+                        + "-  OK  - '" + builtSchemaName + "' is equals to the encoding of <service>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
-                        + "- FAIL - '" + builtSchemaName + "' is not equals to the lower case of <service>");
+                        + "- FAIL - '" + builtSchemaName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -670,14 +672,14 @@ public class NGSICartoDBSinkTest {
 
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the CartoDB table name is the lower case of x002f<service-path>.
+     * data_model is 'dm-by-service-path' the CartoDB table name is the encoding of <service-path>.
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameNonRootServicePathDataModelByServicePath() throws Exception {
+    public void testBuildTableNameNonRootServicePathDataModelByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the CartoDB table name is the lower case of of x002f<service-path>");
+                + "'dm-by-service-path' the CartoDB table name is the encoding of <service-path>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-service-path";
@@ -695,14 +697,15 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expecetedTableName = "x002fsomex0050ath";
         
             try {
-                assertEquals("x002fsomepath", builtTableName);
+                assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of x002f<service-path>");
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of x002f<service-path>");
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -710,19 +713,19 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - There was some problem when building the table name");
             throw e;
         } // try catch
-    } // testBuildDBNameNonRootServicePathDataModelByServicePath
+    } // testBuildTableNameNonRootServicePathDataModelByServicePath
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a non root service-path is notified/defaulted
      * and data_model is 'dm-by-entity' the CartoDB table name is the lower case of
-     * x002f\<service-path\>x0000\<entity_id\>x0000\<entity_type\>.
+     * x002f\<service-path\>xffff\<entity_id\>xffff\<entity_type\>.
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameNonRootServicePathDataModelByEntity() throws Exception {
+    public void testBuildTableNameNonRootServicePathDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is 'dm-by-entity' "
-                + "the CartoDB table name is the lower case of x002f<servicePath>x0000<entityId>x0000<entityType>");
+                + "the CartoDB table name is the lower case of x002f<servicePath>xffff<entityId>xffff<entityType>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-entity";
@@ -742,14 +745,14 @@ public class NGSICartoDBSinkTest {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("x002fsomepathx0000someidx0000sometype", builtTableName);
+                assertEquals("x002fsomex0050athxffffsomex0049dxffffsomex0054ype", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "x002f<servicePath>x0000<entityId>x0000<entityType>");
+                        + "x002f<servicePath>xffff<entityId>xffff<entityType>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "x002f<servicePath>x0000<entityId>x0000<entityType>");
+                        + "x002f<servicePath>xffff<entityId>xffff<entityType>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -757,7 +760,7 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - There was some problem when building the table name");
             throw e;
         } // try catch
-    } // testBuildDBNameNonRootServicePathDataModelByEntity
+    } // testBuildTableNameNonRootServicePathDataModelByEntity
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted and
@@ -765,7 +768,7 @@ public class NGSICartoDBSinkTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameRootServicePathDataModelByServicePath() throws Exception {
+    public void testBuildTableNameRootServicePathDataModelByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
                 + "'dm-by-service-path' the CartoDB table name is x002f");
@@ -801,19 +804,20 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - There was some problem when building the table name");
             throw e;
         } // try catch
-    } // testBuildDBNameRootServicePathDataModelByServicePath
+    } // testBuildTableNameRootServicePathDataModelByServicePath
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When a root service-path is notified/defaulted
-     * and data_model is 'dm-by-entity' the CartoDB table name is the lower case of
-     * x002f\<service-path\>_\<entity_id\>_\<entity_type\>.
+     * and data_model is 'dm-by-entity' the CartoDB table name is the encoding of the concatenation of
+     * \<service-path\>, \<entity_id\> and \<entity_type\>.
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameRootServicePathDataModelByEntity() throws Exception {
+    public void testBuildTableNameRootServicePathDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                 + "-------- When a non service-path is notified/defaulted and data_model is 'dm-by-entity' "
-                + "the CartoDB table name is the lower case of x002fx0000<entityId>x0000<entityType>");
+                + "the CartoDB table name is the encoding of the concatenation of <service-path>, <entityId> and"
+                + "<entityType>");
         String endpoint = "https://localhost";
         String apiKey = "1234567890abcdef";
         String dataModel = "dm-by-entity";
@@ -831,16 +835,17 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String expectedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
         
             try {
-                assertEquals("x002fx0000someidx0000sometype", builtTableName);
+                assertEquals(expectedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
-                        + "x002fx0000<entityId>x0000<entityType>");
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of the concatenation of "
+                        + "<service-path>, <entityId> and <entityType>");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the lower case of "
-                        + "x002fx0000<entityId>x0000<entityType>");
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of the concatenation of "
+                        + "<service-path>, <entityId> and <entityType>");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -848,7 +853,7 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - There was some problem when building the table name");
             throw e;
         } // try catch
-    } // testBuildDBNameRootServicePathDataModelByEntity
+    } // testBuildTableNameRootServicePathDataModelByEntity
 
     /**
      * [CartoDBAggregator.initialize] -------- When initializing through an initial geolocated event, a table
@@ -967,12 +972,12 @@ public class NGSICartoDBSinkTest {
             } // try catch
             
             try {
-                assertTrue(fields.contains(NGSIConstants.THE_GEOM));
+                assertTrue(fields.contains(NGSIConstants.CARTO_DB_THE_GEOM));
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "-  OK  - '" + NGSIConstants.THE_GEOM + "' is in the fields '" + fields + "'");
+                        + "-  OK  - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is in the fields '" + fields + "'");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "- FAIL - '" + NGSIConstants.THE_GEOM + "' is not in the fields '" + fields + "'");
+                        + "- FAIL - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is not in the fields '" + fields + "'");
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -1267,6 +1272,119 @@ public class NGSICartoDBSinkTest {
             throw e;
         } // try catch
     } // testAggregateCoordinatesAreFlipped
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by service path, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByServicePath() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by service path, a table name length greater than 63 characters is "
+                + "detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-service-path";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
+        String entity = null; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByServicePath
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by entity, a table name length greater than 63 characters is detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-entity";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLoooooooooooooooooooooooooooongServicePath";
+        String entity = "tooLoooooooooooooooooooooooooooongEntity";
+        String attribute = null; // irrelevant for this test
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByEntity
+    
+    /**
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByAttribute() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                + "-------- When data model is by atribute, a table name length greater than 63 characters is "
+                + "detected");
+        // Create a NGSICartoDBSink
+        String endpoint = "https://localhost";
+        String apiKey = "1234567890abcdef";
+        String dataModel = "dm-by-attribute";
+        String enableLowercase = null; // default
+        String flipCoordinates = null; // default
+        String enableRaw = null; // default one
+        String enableDistance = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(endpoint, apiKey, dataModel, enableLowercase, flipCoordinates, enableRaw,
+                enableDistance, keysConfFile));
+        String servicePath = "/tooLooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooongEntity";
+        String attribute = "tooLooooooooooooongAttribute";
+        
+        try {
+            sink.buildTableName(servicePath, entity, attribute);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByAttribute
     
     private Context createContext(String endpoint, String apiKey, String dataModel, String enableLowercase,
             String flipCoordinates, String enableRaw, String enableDistance, String keysConfFile) {

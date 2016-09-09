@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
  */
 public final class CommonUtilsForTests {
     
-    private static final int MAX_LEN_TEST_TRACE_HEAD = 55;
+    private static final int MAX_LEN_TEST_TRACE_HEAD = 60;
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -100,9 +100,12 @@ public final class CommonUtilsForTests {
      * Creates a Flume context for Mongo/STH sinks.
      * @param collectionPrefix
      * @param dbPrefix
+     * @param dataModel
+     * @param enableEncoding
      * @return A Flume context for Mongo/STH sinks.
      */
-    public static Context createContextForMongoSTH(String collectionPrefix, String dbPrefix, String dataModel) {
+    public static Context createContextForMongoSTH(String collectionPrefix, String dbPrefix, String dataModel,
+            String enableEncoding) {
         Context context = new Context();
         context.put("attr_persistence", "row");
         context.put("batch_size", "100");
@@ -113,6 +116,7 @@ public final class CommonUtilsForTests {
         context.put("data_expiration", "0");
         context.put("data_model", dataModel);
         context.put("db_prefix", dbPrefix);
+        context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", "false");
         context.put("enable_lowercase", "false");
         context.put("max_documents", "0");

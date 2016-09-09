@@ -25,6 +25,7 @@ Content:
         * [About the persistence mode](#section2.3.1)
         * [About the binary backend](#section2.3.2)
         * [About batching](#section2.3.3)
+        * [About the encoding](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIHDFSSink` class](#section3.1)
     * [OAuth2 authentication](#section3.2)
@@ -47,7 +48,7 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 [Top](#top)
 
 ###<a name="section1.2"></a>Mapping Flume events to HDFS data structures
-[HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `NGSIHDFSSink` each time a Flume event is going to be persisted.
+[HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containing big data files. Such organization is exploited by `NGSIHDFSSink` each time a Flume event is going to be persisted.
 
 [Top](#top)
 
@@ -55,12 +56,12 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 Since the unique data model accepted for `NGSIHDFSSink` is per entity (see the [Configuration](#section2.1) section for more details), a HDFS folder:
 
     /user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>
-    
+
 is created (if not existing yet) for each notified entity, where `<hdfs_username>` is a configuration parameter about a HDFS superuser, `<fiware-service>` and `<fiware-servicePath>` are notified as Http headers (or defaulted in NGSIRestHandler), and `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
 Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set. Any forbidden character will be replaced with underscore `_`.
+Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set and path max length (255 characters). This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
 [Top](#top)
 
@@ -102,7 +103,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 * `attrName`: Notified attribute name.
 * `attrType`: Notified attribute type.
 * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 this can be a JSON object or JSON array.
-* `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field sepator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
+* `attrMd`: In this case, the field does not contain the real metadata, but the name of the HDFS file storing such metadata. The reason to do this is the metadata may be an array of any length; each element within the array will be persisted as a single line in the metadata file containing the metadata's name, type and value, all of them separated by the ',' field separator. There will be a metadata file per each attribute under `/user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>_<attrName>_<attrType>/<destination>_<attrName>_<attrType>.txt`
 
 [Top](#top)
 
@@ -119,7 +120,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 [Top](#top)
 
 ####<a name="section1.2.6"></a>Hive
-A special feature regarding HDFS persisted data is the posssibility to exploit it through Hive, a SQL-like querying system. `NGSIHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
+A special feature regarding HDFS persisted data is the possibility to exploit it through Hive, a SQL-like querying system. `NGSIHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
 
 The fields regarding each data row match the fields of the JSON documents/CSV records appended to the HDFS files. In the case of JSON, they are deserialized by using a [JSON serde](https://github.com/rcongiu/Hive-JSON-Serde). In the case of CSV they are deserialized by the delimiter fields specified in the table creation.
 
@@ -136,11 +137,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -163,10 +164,14 @@ Assuming the following Flume event is created from a notified NGSI context data 
 [Top](#top)
 
 ####<a name="section1.3.2"></a>Path names
-Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file:
+Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file (old encoding):
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
     
+Using the new encoding:
+
+    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1xffffcar/car1xffffcar.txt
+
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Json row-like storing
@@ -181,7 +186,7 @@ A pair of Json documents are appended to the above file, one per attribute:
 
 ####<a name="section1.3.4"></a>Json column-like storing
 A single Json document is appended to the above file, containing all the attributes:
- 
+
 ```
 {"recvTime":"2015-04-20T12:13:22.41.124Z","fiwareServicePath":"4wheels","entityId":"car1","entityType":"car","speed":"112.9","speed_md":[],"oil_level":"74.6","oil_level_md":[]}
 ```
@@ -264,6 +269,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
 | channel | yes | N/A ||
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
@@ -298,6 +304,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+    cygnusagent.sinks.hdfs-sink.enable_encoding = false
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
     cygnusagent.sinks.hdfs-sink.enable_lowercase = false
     cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
@@ -338,9 +345,9 @@ Please observe not always the same number of attributes is notified; this depend
 ####<a name="section2.3.2"></a>About the binary backend
 Current implementation of the HDFS binary backend does not support any authentication mechanism.
 
-A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currenty supported by the remote RPC server the binary backend accesses.
+A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currently supported by the remote RPC server the binary backend accesses.
 
-Valid authentication mechanims are Kerberos and Hadoop Delegation Token, nevertheless none has been used and the backend simply requires a username (the one configured in `hdfs_username`) in order the `cygnus` user (the one running Cygnus) impersonates it.
+Valid authentication mechanism are Kerberos and Hadoop Delegation Token, nevertheless none has been used and the backend simply requires a username (the one configured in `hdfs_username`) in order the `cygnus` user (the one running Cygnus) impersonates it.
 
 Thus, it is not recommended to use this backend in multi-user environment, or at least not without accepting the risk any user may impersonate any other one by simply specifying his/her username.
 
@@ -349,13 +356,34 @@ There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111
 [Top](#top)
 
 ####<a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `NGSIHDFSSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIHDFSSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `NGSIHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSIHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+
+[Top](#top)
+
+####<a name="section2.3.4"></a>About the encoding
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
+
+* All non alphanumeric characters were replaced by underscore, `_`.
+* The underscore was used as concatenator character as well.
+* The slash, `/`, in the FIWARE service paths is ignored.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to HDFS data structures:
+
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
+* Slash character, `/`, is encoded as `x002f`.
+* All the other characters are not encoded.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 
@@ -365,7 +393,7 @@ As any other NGSI-like sink, `NGSIHDFSSink` extends the base `NGSISink`. The met
 
     void persistBatch(Batch batch) throws Exception;
 
-A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the HDFS file where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `HDFSBackend` implementation (binary or rest).
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the HDFS file where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `HDFSBackend` implementation (binary or rest).
 
     public void start();
 
@@ -443,7 +471,7 @@ Contains the following line, which must not be changed (thus, the distributed fi
 
 ####`conf/krb5.conf`
 
-This file can be built from the distributed `conf/krb5.conf.template`. Edit it appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your netowork administrator in order to know them).
+This file can be built from the distributed `conf/krb5.conf.template`. Edit it appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your network administrator in order to know them).
 
     [libdefaults]
      default_realm = EXAMPLE.COM

@@ -202,7 +202,9 @@ public class CygnusApplication extends Application {
             File configurationFile = new File(commandLine.getOptionValue('f'));
             String agentName = commandLine.getOptionValue('n');
             boolean reload = !commandLine.hasOption("no-reload-conf");
-
+            
+            String configurationPath = configurationFile.getParent();
+            
             if (commandLine.hasOption('h')) {
                 new HelpFormatter().printHelp("cygnus-flume-ng agent", options, true);
                 return;
@@ -284,8 +286,8 @@ public class CygnusApplication extends Application {
             
             // start the Management Interface, passing references to Flume components
             LOGGER.info("Starting a Jetty server listening on port " + apiPort + " (Management Interface)");
-            mgmtIfServer = new JettyServer(apiPort, guiPort, new ManagementInterface(configurationFile,
-                    sourcesRef, channelsRef, sinksRef, apiPort, guiPort));
+            mgmtIfServer = new JettyServer(apiPort, guiPort, new ManagementInterface(configurationPath,
+                    configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort));
             mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)

@@ -49,8 +49,8 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- Not mandatory parameters get the default value on configure()");
         NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
         String groupingRulesConfFile = "/grouping_rules.conf";
-        String enableNewEncoding = null; // default value
-        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        String enableEncoding = null; // default value
+        Context context = createBuilderContext(enableEncoding, groupingRulesConfFile);
         builder.configure(context);
         
         try {
@@ -73,8 +73,8 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- When configured, enable_new_encoding must be 'true' or 'false'");
         NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
         String groupingRulesConfFile = "/grouping_rules.conf";
-        String enableNewEncoding = "falso"; // wrong value
-        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        String enableEncoding = "falso"; // wrong value
+        Context context = createBuilderContext(enableEncoding, groupingRulesConfFile);
         builder.configure(context);
         
         try {
@@ -97,8 +97,8 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- Configured 'grouping_rules_conf_file' cannot be empty");
         NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
         String groupingRulesConfFile = ""; // wrong value
-        String enableNewEncoding = null; // default value
-        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        String enableEncoding = null; // default value
+        Context context = createBuilderContext(enableEncoding, groupingRulesConfFile);
         builder.configure(context);
         
         try {
@@ -121,8 +121,8 @@ public class NGSIGroupingInterceptorTest {
                 + "-------- Configured 'grouping_rules_conf_file' cannot be null");
         NGSIGroupingInterceptor.Builder builder = new NGSIGroupingInterceptor.Builder();
         String groupingRulesConfFile = null; // wrong value
-        String enableNewEncoding = null; // default value
-        Context context = createBuilderContext(enableNewEncoding, groupingRulesConfFile);
+        String enableEncoding = null; // default value
+        Context context = createBuilderContext(enableEncoding, groupingRulesConfFile);
         builder.configure(context);
         
         try {
@@ -223,9 +223,9 @@ public class NGSIGroupingInterceptorTest {
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
     
-    private Context createBuilderContext(String enableNewEncoding, String groupingRulesConfFile) {
+    private Context createBuilderContext(String enableEncoding, String groupingRulesConfFile) {
         Context context = new Context();
-        context.put("enable_new_encoding", enableNewEncoding);
+        context.put("enable_encoding", enableEncoding);
         context.put("grouping_rules_conf_file", groupingRulesConfFile);
         return context;
     } // createBuilderContext
