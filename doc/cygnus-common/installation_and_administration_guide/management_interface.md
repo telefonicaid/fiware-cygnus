@@ -926,6 +926,12 @@ Deletes a subscription made to Orion given its ID and the NGSI version. The Json
 
 ```
 DELETE "http://<cygnus_host>:<management_port>/v1/subscriptions?subscription_id=<subscriptionId>&ngsi_version=<ngsiVersion>"
+{
+   "host":"orion.lab.fiware.org",
+   "port":"1026",
+   "ssl":"<ssl_value>",
+   "xauthtoken":"<your_auth_token>"
+}
 ```
 
 Responses:

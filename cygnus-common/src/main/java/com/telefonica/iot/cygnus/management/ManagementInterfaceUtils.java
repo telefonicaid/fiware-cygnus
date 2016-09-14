@@ -18,6 +18,8 @@
 
 package com.telefonica.iot.cygnus.management;
 
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,10 +28,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.log4j.Appender;
+import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -37,7 +42,7 @@ import com.telefonica.iot.cygnus.utils.CommonConstants;
  *
  * @author pcoello25
  */
-public final class ManagementInterfaceUtils {
+public class ManagementInterfaceUtils {
 
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -238,6 +243,23 @@ public final class ManagementInterfaceUtils {
     } // readDescriptions
     
     /**
+     * getStringAppenders: Returns a string with the list of appenders 
+     * 
+     * @param appenders
+     * @return 
+     */
+    public static String getStringAppender (Enumeration appenders) {
+
+        Appender appender = (Appender) appenders.nextElement();
+        String name = appender.getName();
+        PatternLayout layout = (PatternLayout) appender.getLayout();
+        String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";
+        
+        return appendersJson;
+    } // getStringAppenders
+    
+    /**
      * getAppendersFromProperties: Returns an ArrayList with the appenders.
      * 
      * @param properties
@@ -264,7 +286,45 @@ public final class ManagementInterfaceUtils {
         
         return appendersName;
     } // getAppendersFromProperties
-    
+	
+	/**
+     * getLoggersFromProperties: Returns an ArrayList with the loggers.
+     * 
+     * @param properties
+     * @return 
+     *
+     */
+    public static ArrayList<String> getLoggersFromProperties (Properties properties) {
+        ArrayList<String> appendersName = new ArrayList<String>();
+        
+        for (Object property: properties.keySet()) {
+            String name = (String) property;
+            
+            if (name.startsWith("log4j.logger.")) {
+                String[] splitAppender = name.split("\\.");
+                String appender = "";
+                int length = splitAppender.length;
+                
+                for (int i=2; i < length; i++) {
+                    appender += splitAppender[i];
+                    
+                    if (i < (length-1)) {
+                        appender += ".";
+                    } // if
+                    
+                } // for
+                
+                if (!appendersName.contains(appender)) {
+                    appendersName.add(appender);
+                } // if
+                
+            } // if
+            
+        } // for
+        
+        return appendersName;
+    } // getLoggersFromProperties
+	
     /** 
      * readLogDescriptions: Read the descriptions from a log4j file.
      * 
@@ -340,7 +400,7 @@ public final class ManagementInterfaceUtils {
                 String prop = (String) property;
                 String value = (String) properties.getProperty(prop);
                 
-                if ((prop.startsWith(name)) || (prop.equals(name))) {
+                if ((prop.equals(name)) || (prop.startsWith(name))) {
                     printWriter.println(prop + "=" + value);
                 } // if
                 

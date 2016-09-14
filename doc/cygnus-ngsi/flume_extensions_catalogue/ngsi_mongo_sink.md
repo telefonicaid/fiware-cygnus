@@ -20,7 +20,7 @@ Content:
         * [Hashing based collections](#section2.3.1)
         * [About batching](#section2.3.2)
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-        * [Databases and collections encoding details](#section2.3.4)
+        * [About the encoding](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
     * [`NGSIMongoBackend` class](#section3.2)
@@ -47,28 +47,39 @@ MongoDB organizes the data in databases that contain collections of Json documen
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>MongoDB databases and collections naming conventions
+####<a name="section1.2.1"></a>MongoDB databases naming conventions
 A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the collection names, so they will be replaced by underscore, `_`.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
 
 [Top](#top)
 
 ####<a name="section1.2.2"></a>MongoDB collections naming conventions
 The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name.
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated. The configured prefix is prepended to the collection name.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated. The configured prefix is prepended to the collection name.
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
-The following table summarizes the table name composition (assuming default `sth_` prefix):
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
+
+The following table summarizes the table name composition (assuming default `sth_` prefix, old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|
 | `/` | `sth_/` | `sth_/<entityId>_<entityType>` | `sth_/<entityId>_<entityType>_<attrName>` |
 | `/<svcPath>` | `sth_/<svcPath>` | `sth_/<svcPath>_<entityId>_<entityType>` | `sth_/<svcPath>_<entityId>_<entityType>_<attrName>` |
+
+Using the new encoding:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_x002f` | `sth_x002fxffff<entityId>xffff<entityType>` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>` |
+| `/<svcPath>` | `sth_x002f<svcPath>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -158,12 +169,19 @@ Assuming the following Flume event is created from a notified NGSI context data 
 ####<a name="section1.3.2"></a>Database and collection names
 A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
 
-Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones:
+Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|
 | `/` | `sth_/` | `sth_/car1_car` | `sth_/car1_car_speed`<br>`sth_/car1_car_oil_level` |
 | `/4wheels` | `sth_/4wheels` | `sth_/4wheels_car1_car` | `sth_/4wheels_car1_car_speed`<br>`sth_/4wheels_car1_car_oil_level` |
+
+Using the new encoding:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_x002f` | `sth_x002fxffffcar1xffffcar` | `sth_x002fxffffcar1xffffcarxffffspeed`<br>`sth_x002fxffffcar1xffffcarxffffoil_level` |
+| `/4wheels` | `sth_x002f4wheels` | `sth_x002f4wheelsxffffcar1xffffcar` | `sth_x002f4wheelsxffffcar1xfffcarxffffspeed`<br>`sth_x002f4wheelsxffffcar1xffffcarxffffoil_level` |
 
 [Top](#top)
 
@@ -276,6 +294,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSIMongoSink |
 | channel | yes | N/A |
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
@@ -303,6 +322,7 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.channel = mongo-channel
     cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
     cygnusagent.sinks.mongo-sink.attr_persistence = column
+    cygnusagent.sinks.mongo-sink.enable_encoding = false
     cygnusagent.sinks.mongo-sink.enable_grouping = false
     cygnusagent.sinks.mongo-sink.enable_lowercase = false
     cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
@@ -351,11 +371,22 @@ By default, `NGSIMongoSink` stores the notification reception timestamp. Neverth
 
 [Top](#top)
 
-###<a name="section2.3.4"></a>Databases and collections encoding details
+###<a name="section2.3.4"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
 * Collections names will have the characters `$` encoded as `_`.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to MongoDB data structures:
+
+* Equals character, `=`, is encoded as `xffff`.
+* All the forbidden characters are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 
