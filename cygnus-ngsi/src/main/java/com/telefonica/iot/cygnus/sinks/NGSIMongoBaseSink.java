@@ -190,19 +190,13 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     /**
      * Builds a collection name given a fiwareServicePath and a destination. It throws an exception if the naming
      * conventions are violated.
-     * @param dbName
      * @param fiwareServicePath
      * @param entity
      * @param attribute
-     * @param isAggregated
-     * @param entityId
-     * @param entityType
-     * @param fiwareService
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String dbName, String fiwareServicePath, String entity, String attribute,
-            boolean isAggregated, String entityId, String entityType, String fiwareService)
+    protected String buildCollectionName(String fiwareServicePath, String entity, String attribute)
         throws Exception {
         String collectionName;
 

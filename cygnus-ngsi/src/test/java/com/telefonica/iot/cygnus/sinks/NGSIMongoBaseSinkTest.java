@@ -207,18 +207,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_/";
             
             try {
@@ -254,18 +248,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_x002f";
             
             try {
@@ -301,18 +289,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_/_someId_someType";
             
             try {
@@ -349,18 +331,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_x002fxffffsomeIdxffffsomeType";
             
             try {
@@ -398,18 +374,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_/_someId_someType_someName";
             
             try {
@@ -447,18 +417,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = "sth_default";
-        String fiwareService = "default";
         String fiwareServicePath = "/";
         String entity = "someId=someType";
         String attribute = "someName";
-        boolean isAggregated = false;
-        String entityId = "someId";
-        String entityType = "someType";
         
         try {
-            String collectionName = sink.buildCollectionName(dbName, fiwareServicePath, entity, attribute,
-                    isAggregated, entityId, entityType, fiwareService);
+            String collectionName = sink.buildCollectionName(fiwareServicePath, entity, attribute);
             String expectedCollectionName = "sth_x002fxffffsomeIdxffffsomeTypexffffsomeName";
             
             try {
@@ -525,19 +489,13 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = null; // irrelevant for this test
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
                 + "oooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        boolean isAggregated = false; // irrelevant for this test
-        String entityId = null; // irrelevant for this test
-        String entityType = null; // irrelevant for this test
-        String service = null; // irrelevant for this test
         
         try {
-            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
-                    service);
+            sink.buildCollectionName(servicePath, entity, attribute);
             System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
                     + "- FAIL - A collection name length greater than 113 characters has not been detected");
             assertTrue(false);
@@ -565,18 +523,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = null; // irrelevant for this test
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongEntity";
         String attribute = null; // irrelevant for this test
-        boolean isAggregated = false; // irrelevant for this test
-        String entityId = null; // irrelevant for this test
-        String entityType = null; // irrelevant for this test
-        String service = null; // irrelevant for this test
         
         try {
-            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
-                    service);
+            sink.buildCollectionName(servicePath, entity, attribute);
             System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
                     + "- FAIL - A collection name length greater than 113 characters has not been detected");
             assertTrue(false);
@@ -604,18 +556,12 @@ public class NGSIMongoBaseSinkTest {
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
         sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
-        String dbName = null; // irrelevant for this test
         String servicePath = "/tooLoooooooooooooooooooooooooooooooooooongServicePath";
         String entity = "tooLoooooooooooooooooooooooooooooooooooooooooongEntity";
         String attribute = "tooLoooooooooooooooooooooooooooooooooooooooongAttribute";
-        boolean isAggregated = false; // irrelevant for this test
-        String entityId = null; // irrelevant for this test
-        String entityType = null; // irrelevant for this test
-        String service = null; // irrelevant for this test
         
         try {
-            sink.buildCollectionName(dbName, servicePath, entity, attribute, isAggregated, entityId, entityType,
-                    service);
+            sink.buildCollectionName(servicePath, entity, attribute);
             System.out.println(getTestTraceHead("[NGSIMongoBaseSink.buildCollectionName]")
                     + "- FAIL - A collection name length greater than 113 characters has not been detected");
             assertTrue(false);
