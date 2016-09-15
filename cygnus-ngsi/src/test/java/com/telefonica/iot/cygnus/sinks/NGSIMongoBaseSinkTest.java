@@ -17,10 +17,10 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -64,7 +64,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // default
         String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         
         try {
@@ -90,7 +90,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // default
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String expectedCollectionPrefix = NGSIUtils.encodeSTHCollection(collectionPrefix);
         
@@ -119,7 +119,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // default
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String expectedCollectionPrefix = NGSICharsets.encodeMongoDBCollection(collectionPrefix);
         
@@ -148,7 +148,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // defaulting
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String expectedDbPrefix = NGSIUtils.encodeSTHDB(dbPrefix);
         
@@ -175,7 +175,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // defaulting
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String expectedDbPrefix = NGSICharsets.encodeMongoDBDatabase(dbPrefix);
         
@@ -205,7 +205,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-service-path";
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -252,7 +252,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -299,7 +299,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-entity";
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -347,7 +347,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-entity";
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -396,7 +396,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-attribute";
         String enableEncoding = "false";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -445,7 +445,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-attribute";
         String enableEncoding = "true";
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = "sth_default";
         String fiwareService = "default";
@@ -491,7 +491,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = null; // default
         String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
                 + "oooooooooooooooooooongService";
@@ -523,7 +523,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-service-path";
         String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = null; // irrelevant for this test
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
@@ -563,7 +563,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-entity";
         String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = null; // irrelevant for this test
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
@@ -602,7 +602,7 @@ public class NGSIMongoBaseSinkTest {
         String dataModel = "dm-by-attribute";
         String enableEncoding = null; // default
         NGSIMongoBaseSinkImpl sink = new NGSIMongoBaseSinkImpl();
-        sink.configure(CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        sink.configure(NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding));
         String dbName = null; // irrelevant for this test
         String servicePath = "/tooLoooooooooooooooooooooooooooooooooooongServicePath";
