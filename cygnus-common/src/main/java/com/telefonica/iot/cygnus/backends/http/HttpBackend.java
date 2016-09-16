@@ -202,6 +202,7 @@ public abstract class HttpBackend {
         try {
             httpRes = httpClient.execute(request);
         } catch (IOException e) {
+            request.releaseConnection();
             throw new CygnusPersistenceError(e.getMessage());
         } // try catch
 

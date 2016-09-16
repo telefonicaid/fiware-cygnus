@@ -25,6 +25,7 @@ Content:
         * [About the persistence mode](#section2.3.1)
         * [About the binary backend](#section2.3.2)
         * [About batching](#section2.3.3)
+        * [About the encoding](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIHDFSSink` class](#section3.1)
     * [OAuth2 authentication](#section3.2)
@@ -60,7 +61,7 @@ is created (if not existing yet) for each notified entity, where `<hdfs_username
 
 Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
-Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set. Any forbidden character will be replaced with underscore `_`.
+Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set and path max length (255 characters). This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
 [Top](#top)
 
@@ -136,11 +137,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -163,9 +164,13 @@ Assuming the following Flume event is created from a notified NGSI context data 
 [Top](#top)
 
 ####<a name="section1.3.2"></a>Path names
-Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file:
+Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file (old encoding):
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
+    
+Using the new encoding:
+
+    $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1xffffcar/car1xffffcar.txt
 
 [Top](#top)
 
@@ -264,6 +269,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
 | channel | yes | N/A ||
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
@@ -298,6 +304,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+    cygnusagent.sinks.hdfs-sink.enable_encoding = false
     cygnusagent.sinks.hdfs-sink.enable_grouping = false
     cygnusagent.sinks.hdfs-sink.enable_lowercase = false
     cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
@@ -356,6 +363,27 @@ What is important regarding the batch mechanism is it largely increases the perf
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
 By default, `NGSIHDFSSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+
+[Top](#top)
+
+####<a name="section2.3.4"></a>About the encoding
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
+
+* All non alphanumeric characters were replaced by underscore, `_`.
+* The underscore was used as concatenator character as well.
+* The slash, `/`, in the FIWARE service paths is ignored.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to HDFS data structures:
+
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
+* Slash character, `/`, is encoded as `x002f`.
+* All the other characters are not encoded.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 

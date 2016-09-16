@@ -227,8 +227,6 @@ cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix pro the MongoDB collections
 # cygnusagent.sinks.mongo-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-# cygnusagent.sinks.mongo-sink.should_hash = false
 # Must be dm-by-service-path or dm-by-entity
 # cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
 # how the attributes are stored, either per row either per column (row, column)
@@ -270,8 +268,6 @@ cygnusagent.sinks.sth-sink.channel = sth-channel
 # cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 # cygnusagent.sinks.sth-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-# cygnusagent.sinks.sth-sink.should_hash = false
 # number of notifications to be included within a processing batch
 # cygnusagent.sinks.sth-sink.batch_size = 1
 # timeout for batch accumulation

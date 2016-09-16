@@ -39,61 +39,79 @@ public interface OrionBackend {
     /**
      * Subscribe to Orion with a given port, host and string with subscription information (v1).
      * 
-     * @param cygnusSubscription
+     * @param subscription
      * @param token
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV1(String cygnusSubscription, String token) throws Exception;
+    JsonResponse subscribeContextV1(String subscription, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
     /**
      * Subscribe to Orion with a given port, host and string with subscription information (v2).
      * 
-     * @param cygnusSubscription
+     * @param subscription
      * @param token
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV2(String cygnusSubscription, String token) throws Exception;
+    JsonResponse subscribeContextV2(String subscription, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
     /**
      * Unsubscribe from Orion with a given subscription id (v1).
      * 
      * @param subscriptionId
      * @param token
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse deleteSubscriptionV1(String subscriptionId, String token) throws Exception;
+    JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
     /**
      * Unsubscribe from Orion with a given subscription id (v2).
      * 
      * @param subscriptionId
      * @param token
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception;
+    JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
     /**
      * Gets a current subscription with a given subscription id (v2).
      * 
      * @param token
      * @param subscriptionId
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId) throws Exception;
+    JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
     /**
      * Gets all current subscriptions in the system (v2).
      * 
      * @param token
      * @param subscriptionId
+     * @param fiwareService
+     * @param fiwareServicePath
      * @throws Exception
      * @return response
      */
-    JsonResponse getSubscriptionsV2(String token, String subscriptionId) throws Exception;
+    JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService, 
+            String fiwareServicePath) throws Exception;
     
 } // StatsBackend

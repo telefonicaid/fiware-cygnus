@@ -246,29 +246,13 @@ public class ManagementInterfaceUtils {
      * @param appenders
      * @return 
      */
-    public static String getStringAppenders (Enumeration appenders) {
-        String appendersJson = "";
+    public static String getStringAppender (Enumeration appenders) {
 
-        while (appenders.hasMoreElements()) {
-            Appender appender = (Appender) appenders.nextElement();
-            String name = appender.getName();
-            PatternLayout layout = (PatternLayout) appender.getLayout();
-
-            if (appendersJson.isEmpty()) { 
-                appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                        + layout.getConversionPattern() + "\"}";
-            } else {
-                appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                        + layout.getConversionPattern() + "\"}";
-            } // else
-
-        } // while
-
-        if (appendersJson.isEmpty()) {
-            appendersJson = "[]";
-        } else {
-            appendersJson += "]";
-        } // else
+        Appender appender = (Appender) appenders.nextElement();
+        String name = appender.getName();
+        PatternLayout layout = (PatternLayout) appender.getLayout();
+        String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";
         
         return appendersJson;
     } // getStringAppenders

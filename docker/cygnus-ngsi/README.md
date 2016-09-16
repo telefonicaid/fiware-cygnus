@@ -25,19 +25,19 @@ Start by cloning the `fiware-cygnus` repository:
 
 Change directory:
 
-    $ cd fiware-cygnus/docker/cygnus-ngsi
+    $ cd fiware-cygnus
 
 And run the following command:
 
-    $ docker build -t cygnus-ngsi .
+    $ sudo docker build -f docker/cygnus-ngsi/Dockerfile -t cygnus-ngsi .
 
 Once finished (it may take a while), you can check the available images at your docker by typing:
 
 ```
 $ docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
-cygnus-ngsi         latest              df556c817163        About a minute ago   1.132 GB
-centos              6                   61bf77ab8841        4 weeks ago          228.9 MB
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+cygnus-ngsi         latest              6a9e16550c82        10 seconds ago      462.1 MB
+centos              6                   273a1eca2d3a        2 weeks ago         194.6 MB
 ```
 
 [Top](#top)
@@ -51,9 +51,9 @@ It can be listed the same way than above:
 
 ```
 $ docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
-cygnus-ngsi         latest              df556c817163        About a minute ago   1.132 GB
-centos              6                   61bf77ab8841        4 weeks ago          228.9 MB
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+cygnus-ngsi         latest              6a9e16550c82        10 seconds ago      462.1 MB
+centos              6                   273a1eca2d3a        2 weeks ago         194.6 MB
 ```
 
 [Top](#top)
