@@ -2261,23 +2261,23 @@ public class ManagementInterface extends AbstractHandler {
                     
                     if (hasAppenders) {
                         response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed "
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Loggers removed "
                                 + "succesfully\"}");
-                        LOGGER.debug("Appenders removed succesfully");
+                        LOGGER.debug("Loggers removed succesfully");
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
-                        LOGGER.debug("No log4j appenders found");
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j loggers found\"}");
+                        LOGGER.debug("No log4j loggers found");
                     } // if else
                     
                 } else {
-                    boolean appenderFound = false;
+                    boolean loggerFound = false;
 
                     for (String name : loggerNames) {
 
                         if (name.equals(loggerName)) {
                             String loggName = "log4j.logger." + name;
-                            appenderFound = true;
+                            loggerFound = true;
                             
                             for (String property: properties.stringPropertyNames()) {
                             
@@ -2291,16 +2291,16 @@ public class ManagementInterface extends AbstractHandler {
 
                     } // for
 
-                    if (appenderFound) {
+                    if (loggerFound) {
                         ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
                         response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Appender '" + loggerName 
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Logger '" + loggerName 
                                 + "' removed succesfully\"}");
-                        LOGGER.debug("Appender '" + loggerName + "' removed succesfully");
+                        LOGGER.debug("Logger '" + loggerName + "' removed succesfully");
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
-                        LOGGER.debug("Appender name not found");
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                        LOGGER.debug("Logger name not found");
                     } // if else
 
                 } // if else
