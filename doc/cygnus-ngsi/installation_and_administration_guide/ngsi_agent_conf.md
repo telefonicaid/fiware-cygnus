@@ -211,8 +211,6 @@ cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.mongo-sink.should_hash = false
 # specify if the sink will use a single collection for each service path, for each entity or for each attribute
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
 # how the attributes are stored, either per row either per column (row, column)
@@ -246,8 +244,6 @@ cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
 cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.sth-sink.should_hash = false
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.sth-sink.batch_size = 100
 # timeout for batch accumulation
