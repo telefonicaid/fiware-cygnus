@@ -15,10 +15,9 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [Hashing based collections](#section2.3.1)
-        * [About batching](#section2.3.2)
-        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-        * [About the encoding](#section2.3.4)
+        * [About batching](#section2.3.1)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Implementation details](#section3)
     * [`NGSISTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
@@ -305,7 +304,6 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
-| should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
 | collection_prefix | no | sth_ | `system.` is not accepted. |
 | resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
@@ -331,7 +329,6 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.mongo_password = mypassword
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.sth-sink.should_hash = false
     cygnusagent.sinks.sth-sink.resolutions = month,day
     cygnusagent.sinks.sth-sink.batch_size = 100
     cygnusagent.sinks.sth-sink.batch_timeout = 30
@@ -347,14 +344,7 @@ Use `NGSISTHSink` if you are looking for a Json-based document storage about agg
 [Top](#top)
 
 ###<a name="section2.3"></a>Important notes
-###<a name="section2.3.1"></a>Hashing based collections
-In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
-
-In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
-
-[Top](#top)
-
-###<a name="section2.3.2"></a>About batching
+####<a name="section2.3.1"></a>About batching
 Despite `NGSISTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
 
 Nevertheless, FIWARE Comet storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of FIWARE Comet (sum, sum2, max and min).
@@ -365,12 +355,12 @@ Thus, `NGSISTHSink` does not implement a real batching mechanism as usual. Pleas
 
 [Top](#top)
 
-###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSISTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-###<a name="section2.3.4"></a>About the encoding
+####<a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:

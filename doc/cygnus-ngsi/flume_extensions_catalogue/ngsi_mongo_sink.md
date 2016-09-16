@@ -17,10 +17,9 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [Hashing based collections](#section2.3.1)
-        * [About batching](#section2.3.2)
-        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-        * [About the encoding](#section2.3.4)
+        * [About batching](#section2.3.1)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
     * [`NGSIMongoBackend` class](#section3.2)
@@ -302,7 +301,6 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
-| should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
 | collection_prefix | no | sth_ | `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
@@ -330,7 +328,6 @@ A configuration example could be:
     cygnusagent.sinks.mongo-sink.mongo_password = mypassword
     cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
     cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.should_hash = false
     cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
     cygnusagent.sinks.mongo-sink.batch_size = 100
     cygnusagent.sinks.mongo-sink.batch_timeout = 30
@@ -348,14 +345,7 @@ Use `NGSIMongoSink` if you are looking for a Json-based document storage not gro
 [Top](#top)
 
 ###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>Hashing based collections
-In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
-
-In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
-
-[Top](#top)
-
-####<a name="section2.3.2"></a>About batching
+####<a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIMongoSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -366,12 +356,12 @@ By default, `NGSIMongoSink` has a configured batch size and batch accumulation t
 
 [Top](#top)
 
-###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSIMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-###<a name="section2.3.4"></a>About the encoding
+####<a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
