@@ -19,10 +19,12 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.sinks.NGSIHDFSSink.BackendImpl;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -41,6 +43,210 @@ public class NGSIHDFSSinkTest {
     } // NGSIHDFSSinkTest
 
     /**
+     * [NGSIHDFSSink.configure] -------- When not configured, not mandatory parameters get default values.
+     */
+    @Test
+    public void testConfigureDefaults() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                + "-------- When not configured, not mandatory parameters get default values");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = null; // default value
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = null; // default value
+        String krb5 = null; // default value
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
+        
+        try {
+            assertEquals(BackendImpl.REST, sink.getBackendImpl());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'backend.impl=rest' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'backend.impl=rest' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(500, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'backend.max_conns=500' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'backend.max_conns=500' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(100, sink.getBackendMaxConnsPerRoute());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'backend.max_conns_per_route=100' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'backend.max_conns_per_route=100' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(1, sink.getBatchSize());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'batch_size=1' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'batch_size=1' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(30, sink.getBatchTimeout());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'batch_timeout=30' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'batch_timeout=30' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(10, sink.getBatchTTL());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'batch_ttl=30' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'batch_ttl=30' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(",", sink.getCSVSeparator());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'csv_separator=,' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'csv_separator=,' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(Enums.DataModel.DMBYENTITY, sink.getDataModel());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-entity' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-entity' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableEncoding());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'enable_encoding=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'enable_encoding=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableGrouping());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'enable_grouping=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'enable_grouping=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableLowerCase());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'enable_lowercase=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'enable_owercase=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("json-row", sink.getFileFormat());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'file_format=json-row' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'file_format=json-row' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            String[] expectedHost = {"localhost"};
+            Assert.assertArrayEquals(expectedHost, sink.getHDFSHosts());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'hdfs_host=localhost' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'hdfs_host=localhost' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("14000", sink.getHDFSPort());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'hdfs_port=14000' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'hdfs_port=14000' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableHive());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'enable_hive=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'enable_hive=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableKrb5Auth());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'enable_krb5=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'enable_krb5=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getServiceAsNamespace());
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "-  OK  - 'service_as_namespace=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
+                    + "- FAIL - 'service_as_namespace=false' not configured by default");
+            throw e;
+        } // try catch
+    } // testConfigureDefaults
+    
+    /**
      * [NGSIHDFSSinkTest.configure] -------- enable_encoding can only be 'true' or 'false'.
      */
     @Test
@@ -48,6 +254,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
                 + "-------- enable_encoding can only be 'true' or 'false'");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -66,9 +274,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -89,6 +297,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
                 + "-------- enable_lowercase can only be 'true' or 'false'");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -107,9 +317,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -131,6 +341,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
                 + "-------- enable_grouping can only be 'true' or 'false'");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -149,9 +361,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -165,13 +377,15 @@ public class NGSIHDFSSinkTest {
     } // testConfigureEnableGrouping
     
     /**
-     * [NGSIHDFSSinkTest.configure] -------- backend_impl can only be 'rest' or 'binary'.
+     * [NGSIHDFSSinkTest.configure] -------- backend.impl can only be 'rest' or 'binary'.
      */
     @Test
     public void testConfigureBackendImpl() {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
-                + "-------- enable_grouping can only be 'true' or 'false'");
+                + "-------- backend.impl can only be 'rest' or 'binary'");
         String backendImpl = "api";
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -190,9 +404,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -214,6 +428,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
                 + "-------- data_model can only be 'dm-by-entity'");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -232,9 +448,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -256,6 +472,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
                 + "-------- file_format can only be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -274,9 +492,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -300,6 +518,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
                 + "path is the encoding of <service>/<service-path>/<entity>");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -318,9 +538,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -358,6 +578,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When encoding and when a non root service-path is notified/defaulted the HDFS folder path "
                 + "is the encoding of <service>/<service-path>/<entity>");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -376,9 +598,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -416,6 +638,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When no encoding and when a root service-path is notified/defaulted the HDFS folder path "
                 + "is the encoding of <service>/<entity>");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -434,9 +658,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -474,6 +698,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When encoding and when a root service-path is notified/defaulted the HDFS folder path is "
                 + "the encoding of <service>/<entity>");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -492,9 +718,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -532,6 +758,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS file path "
                 + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -550,9 +778,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -590,6 +818,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When encoding and when a non root service-path is notified/defaulted the HDFS file path "
                 + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -608,9 +838,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -648,6 +878,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When no encoding and when a root service-path is notified/defaulted the HDFS file path is "
                 + "the encoding of <service>/<entity>/<entity>.txt");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -666,9 +898,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -706,6 +938,8 @@ public class NGSIHDFSSinkTest {
                 + "-------- When encoding and when a root service-path is notified/defaulted the HDFS file path is the "
                 + "encoding of <service>/<entity>/<entity>.txt");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -724,9 +958,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -762,6 +996,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFolderPath]")
                 + "-------- A folder path length greater than 255 characters is detected");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -780,9 +1016,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
@@ -808,6 +1044,8 @@ public class NGSIHDFSSinkTest {
         System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFilePath]")
                 + "-------- A file path length greater than 255 characters is detected");
         String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
         String batchSize = null; // default value
         String batchTime = null; // default value
         String batchTTL = null; // default value
@@ -826,9 +1064,9 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, batchSize, batchTime, batchTTL, csvSeparator, dataModel,
-                enableEncoding, enableGrouping, enableLowercase, fileFormat, host, password, port, username, hive, krb5,
-                token, serviceAsNamespace));
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
@@ -854,12 +1092,15 @@ public class NGSIHDFSSinkTest {
         return batch;
     } // createBatch
     
-    private Context createContext(String backendImpl, String batchSize, String batchTime, String batchTTL,
-            String csvSeparator, String dataModel, String enableEncoding, String enableGrouping, String enableLowercase,
-            String fileFormat, String host, String password, String port, String username, String hive, String krb5,
-            String token, String serviceAsNamespace) {
+    private Context createContext(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
+            String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+            String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+            String password, String port, String username, String hive, String krb5, String token,
+            String serviceAsNamespace) {
         Context context = new Context();
-        context.put("backend_impl", backendImpl);
+        context.put("backend.impl", backendImpl);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
         context.put("batchSize", batchSize);
         context.put("batchTime", batchTime);
         context.put("batchTTL", batchTTL);
