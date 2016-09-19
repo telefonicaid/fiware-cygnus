@@ -57,7 +57,11 @@ cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnusagent.sinks.hdfs-sink.backend_impl = rest
+cygnusagent.sinks.hdfs-sink.backend.impl = rest
+# maximum number of Http connections to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+# maximum number of Http connections per route to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -130,6 +134,10 @@ cygnusagent.sinks.ckan-sink.batch_size = 100
 cygnusagent.sinks.ckan-sink.batch_timeout = 30
 # number of retries upon persistence error
 cygnusagent.sinks.ckan-sink.batch_ttl = 10
+# maximum number of Http connections to CKAN backend
+cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+# maximum number of Http connections per route to CKAN backend
+cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 # ============================================
 # NGSIPostgreSQLSink configuration
