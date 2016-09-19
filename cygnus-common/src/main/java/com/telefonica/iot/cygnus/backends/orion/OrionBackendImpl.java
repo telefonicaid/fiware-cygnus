@@ -39,9 +39,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
      * @param orionHost
      * @param orionPort
      * @param ssl
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public OrionBackendImpl(String orionHost, String orionPort, boolean ssl) {
-        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null);
+    public OrionBackendImpl(String orionHost, String orionPort, boolean ssl, int maxConns, int maxConnsPerRoute) {
+        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
     } // StatsBackendImpl
 
     @Override
