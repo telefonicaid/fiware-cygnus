@@ -63,6 +63,8 @@ public class HDFSBackendImplRESTTest {
     private final String hivePort = "10000";
     private final String dirPath = "path/to/my/data";
     private final String data = "this is a lot of data";
+    private final int maxConns = 50;
+    private final int maxConnsPerRoute = 10;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -74,7 +76,7 @@ public class HDFSBackendImplRESTTest {
     public void setUp() throws Exception {
         // set up the instance of the tested class
         backend = new HDFSBackendImplREST(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
-                hivePort, false, null, null, null, null, false);
+                hivePort, false, null, null, null, null, false, maxConns, maxConnsPerRoute);
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
