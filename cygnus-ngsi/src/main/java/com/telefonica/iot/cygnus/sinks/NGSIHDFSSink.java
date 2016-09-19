@@ -88,6 +88,8 @@ public class NGSIHDFSSink extends NGSISink {
     private HDFSBackend persistenceBackend;
     private HiveBackend hiveBackend;
     private String csvSeparator;
+    private int maxConns;
+    private int maxConnsPerRoute;
 
     /**
      * Constructor.
@@ -141,10 +143,10 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Returns if the service is used as HDFS namespace. It is protected due to it is only required for testing
      * purposes.
-     * @return "true" if the service is used as HDFS namespace, "false" otherwise.
+     * @return True if the service is used as HDFS namespace, False otherwise.
      */
-    protected String getServiceAsNamespace() {
-        return (serviceAsNamespace ? "true" : "false");
+    protected boolean getServiceAsNamespace() {
+        return serviceAsNamespace;
     } // getServiceAsNamespace
 
     /**
@@ -197,10 +199,10 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Returns if Kerberos is being used for authenticacion. It is protected due to it is only required for testing
      * purposes.
-     * @return "true" if Kerberos is being used for authentication, otherwise "false"
+     * @return True if Kerberos is being used for authentication, otherwise False
      */
-    protected String getEnableKrb5Auth() {
-        return (enableKrb5 ? "true" : "false");
+    protected boolean getEnableKrb5Auth() {
+        return enableKrb5;
     } // getEnableKrb5Auth
 
     /**
@@ -218,6 +220,22 @@ public class NGSIHDFSSink extends NGSISink {
     protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
+    
+    protected String getCSVSeparator() {
+        return csvSeparator;
+    } // getCSVSeparator
+    
+    protected BackendImpl getBackendImpl() {
+        return backendImpl;
+    } // getBackendImpl
+    
+    protected int getBackendMaxConns() {
+        return maxConns;
+    } // getBackendMaxConns
+    
+    protected int getBackendMaxConnsPerRoute() {
+        return maxConnsPerRoute;
+    } // getBackendMaxConnsPerRoute
 
     @Override
     public void configure(Context context) {
@@ -281,7 +299,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // catch
 
         // Hive configuration
-        String enableHiveStr = context.getString("hive", "true");
+        String enableHiveStr = context.getString("hive", "false");
         
         if (enableHiveStr.equals("true") || enableHiveStr.equals("false")) {
             enableHive = Boolean.valueOf(enableHiveStr);
@@ -373,17 +391,23 @@ public class NGSIHDFSSink extends NGSISink {
                 + serviceAsNamespaceStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
-        String backendImplStr = context.getString("backend_impl", "rest");
+        String backendImplStr = context.getString("backend.impl", "rest");
 
         try {
             backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl="
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.impl="
                         + backendImplStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend_impl="
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.impl="
                 + backendImplStr + ") -- Must be 'rest' or 'binary'");
         }  // try catch
+        
+        maxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + maxConns + ")");
+        maxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route=" + maxConnsPerRoute
+                + ")");
         
         super.configure(context);
         // Techdebt: allow this sink to work with all the data models
@@ -405,7 +429,7 @@ public class NGSIHDFSSink extends NGSISink {
             } else if (backendImpl == BackendImpl.REST) {
                 persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
                         hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, serviceAsNamespace);
+                        krb5ConfFile, serviceAsNamespace, maxConns, maxConnsPerRoute);
             } else {
                 LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
                         + backendImpl.toString());
