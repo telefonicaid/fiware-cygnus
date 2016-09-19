@@ -274,7 +274,9 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
-| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
@@ -309,7 +311,9 @@ A configuration example could be:
     cygnusagent.sinks.hdfs-sink.enable_lowercase = false
     cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
     cygnusagent.sinks.hdfs-sink.file_format = json-column
-    cygnusagent.sinks.hdfs-sink.backend_impl = rest
+    cygnusagent.sinks.hdfs-sink.backend.impl = rest
+    cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+    cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
     cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
     cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
     cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
