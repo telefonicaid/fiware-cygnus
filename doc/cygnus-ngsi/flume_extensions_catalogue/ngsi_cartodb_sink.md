@@ -20,6 +20,7 @@ Content:
         * [`NGSICartoDBSink` and non-geolocated entities](#section2.3.1)
         * [Multitenancy support](#section2.3.1)
         * [Batching](#section2.3.3)
+        * [About the encoding](#senction2.3.4)
 * [Programmers guide](#section3)
     * [`NGSICartoDBSSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -58,19 +59,21 @@ Here it is assumed the notified/default FIWARE service maps the PostgreSQL schem
 ####<a name="section1.2.2"></a>PostgreSQL tables naming conventions
 The name of these tables depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In addition, the distance analysis mode adds the sufix `x0000distance` to the table name.
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). All the other characters will be encoded as `xXXXX` when composing the table names, where `XXXX` is the [unicode](https://en.wikipedia.org/wiki/List_of_Unicode_characters) of the character. For instance, the initial slash (`/`) of the FIWARE service path is encoded as `x002f`.
+Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. This leads to certain [encoding](#section2.3.4) is applied.
+
+PostgreSQL [tables name length](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) is limited to 64 characters.
 
 The following table summarizes the table name composition:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | `x002f` | `x002f<entityId>x0000<entityType>[x0000distance]` |
-| `/<svcPath>` | `x002f<svcPath>[x0000distance]` | `x002f<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
+| `/` | `x002f` | `x002fxffff<entityId>x0000<entityType>[x0000distance]` |
+| `/<svcPath>` | `x002fxffff<svcPath>[x0000distance]` | `x002fxffff<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -136,11 +139,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -394,6 +397,8 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx000
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
@@ -413,6 +418,8 @@ cygnus-ngsi.sinks.raw-sink.data_model = dm-by-entity
 cygnus-ngsi.sinks.raw-sink.batch_size = 10
 cygnus-ngsi.sinks.raw-sink.batch_timeout = 5
 cygnus-ngsi.sinks.raw-sink.batch_ttl = 0
+cygnus-ngsi.sinks.raw-sink.backend.max_conns = 500
+cygnus-ngsi.sinks.raw-sink.backend.max_conns_per_route = 100
 ```
 
 An example of CartoDB keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):
@@ -471,6 +478,20 @@ The batching mechanism adds an accumulation timeout to prevent the sink stays in
 By default, `NGSICartoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
 Finally, it must be said currently batching only works with the raw-like storing. Due to the distance-like storing involves data aggregations based on the <i>previous</i> event, the sink currently relies in the PostgreSQL features of querying by the last event for implementing this kind of calculations. Of course, for the sake of performance this is expected to be done <i>inside</i> the sink, by temporarily pointing to the previous event in memory, which will be always faster than accessing the database.
+
+[Top](#top)
+
+####<a name="section2.3.4"></a>About the encoding
+Cygnus applies this specific encoding tailored to CartoDB data structures:
+
+* Lowercase alphanumeric characters are not encoded.
+* Upercase alphanumeric characters are encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
 
 [Top](#top)
 

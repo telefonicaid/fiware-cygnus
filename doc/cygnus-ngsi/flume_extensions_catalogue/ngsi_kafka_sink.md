@@ -15,6 +15,7 @@ Content:
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
         * [About batching](#section2.3.1)
+        * [About the encoding](#section2.3.2)
 * [Programmers guide](#section3)
     * [`NGSIKafkaSink` class](#section3.1)
 
@@ -42,19 +43,19 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ####<a name="section1.2.1"></a>Topics naming conventions
 A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured data model:
 
-* Data model by service (`data_model=dm-by-service`). As the data model name denotes, the notified FIWARE service (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service is stored in this unique topic.
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique topic. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the topic name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
+* Data model by service (`data_model=dm-by-service`). As the data model name denotes, the notified FIWARE service (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service is stored in this unique topic.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique topic. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the topic name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the topic name. If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.
 
-It must be said there is no known character set accepted and/or forbidden for Kafka.
+It must be said there is no known character set accepted and/or forbidden for Kafka. Anyway, certaing [encoding](#section2.3.2) is applied.
 
 The following table summarizes the topic name composition:
 
 | FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|---|
-| `/` | `<svc>` | N/A | `<entityId>_<entityType>` | `<entityId>_<entityType>_<attrName>` |
-| `/<svcPath>` | `<svc>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityId>_<entityType>_<attrName>` |
+| `/` | `<svc>` | `<svc>xffffx002f` | `<svc>xffffx002fxffff<entityId>xffff<entityType>` | `<svc>xffffx002fxffff<entityId>xffff<entityType>xffff<attrName>` |
+| `/<svcPath>` | `<svc>` | `<svc>xffffx002f<svcPath>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -107,15 +108,15 @@ The topic names will be, depending on the configured data model, the following o
 
 | FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|---|
-| `/` | `vehicles` | N/A | `car1_car` | `car1_car_speed`<br>`car1_car_oil_level` |
-| `/4wheels` | `vehicles` | `4wheels` | `4wheels_car1_car` | `4wheels_car1_car_speed`<br>`4wheels_car1_car_oil_level` |
+| `/` | `vehicles` | `vehiclesxffffx002f` | `vehiclesxffffx002fxffffcar1_car` | `vehiclesxffffx002fxffffcar1xffffcarxffffspeed`<br>`vehiclesxffffx002fxffffcar1xffffcarxffffoil_level` |
+| `/4wheels` | `vehicles` | `vehiclesxffffx002f4wheels` | `vehiclesxffffx002f4wheelsxffffcar1xffffcar` | `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`<br>`vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffoil_level` |
 
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Storing
-Let's assume a topic name `vehicles_4wheels_car1_car_speed` (data model by attribute, non-root service path). The data stored within this topic would be:
+Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed` (data model by attribute, non-root service path). The data stored within this topic would be:
 
-    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_speed --from-beginning
+    $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"/4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"speed","type":"float","value":"112.9"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehicles_4wheels_car1_car_oil_level --from-beginning
     {"headers":[{"fiware-service":"vehicles"},{"fiware-servicePath":"4wheels"},{"timestamp":1429535775}],"body":{"contextElement":{"attributes":[{"name":"oil_level","type":"float","value":"74.6"}],"type":"car","isPattern":"false","id":"car1"},"statusCode":{"code":"200","reasonPhrase":"OK"}}}
@@ -175,6 +176,16 @@ What is important regarding the batch mechanism is it largely increases the perf
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
 By default, `NGSIKafkaSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+
+[Top](#top)
+
+####<a name="section2.3.2"></a>About the encoding
+Cygnus applies this specific encoding tailored to Kafka data structures:
+
+* Equals character, `=`, is encoded as `xffff`.
+* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
+* All the other characters are not encoded.
+* `xffff` is used as concatenator character.
 
 [Top](#top)
 

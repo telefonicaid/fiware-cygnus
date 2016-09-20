@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.utils;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.event.EventBuilder;
 import org.json.simple.JSONArray;
@@ -32,7 +31,7 @@ import org.json.simple.JSONObject;
  */
 public final class CommonUtilsForTests {
     
-    private static final int MAX_LEN_TEST_TRACE_HEAD = 55;
+    private static final int MAX_LEN_TEST_TRACE_HEAD = 60;
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -95,32 +94,5 @@ public final class CommonUtilsForTests {
         notification.put("contextResponses", contextResponses);
         return notification;
     } // createNotification
-    
-    /**
-     * Creates a Flume context for Mongo/STH sinks.
-     * @param collectionPrefix
-     * @param dbPrefix
-     * @return A Flume context for Mongo/STH sinks.
-     */
-    public static Context createContextForMongoSTH(String collectionPrefix, String dbPrefix, String dataModel) {
-        Context context = new Context();
-        context.put("attr_persistence", "row");
-        context.put("batch_size", "100");
-        context.put("batch_timeout", "30");
-        context.put("batch_ttl", "10");
-        context.put("collection_prefix", collectionPrefix);
-        context.put("collection_size", "0");
-        context.put("data_expiration", "0");
-        context.put("data_model", dataModel);
-        context.put("db_prefix", dbPrefix);
-        context.put("enable_grouping", "false");
-        context.put("enable_lowercase", "false");
-        context.put("max_documents", "0");
-        context.put("mongo_hosts", "localhost:27017");
-        context.put("mongo_password", "");
-        context.put("mongo_username", "");
-        context.put("should_hash", "false");
-        return context;
-    } // createContextForMongoSTH
     
 } // CommonUtilsForTests

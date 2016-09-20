@@ -51,17 +51,19 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param ckanPort
      * @param orionUrl
      * @param ssl
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
     public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String orionUrl,
-            boolean ssl) {
-        super(new String[]{ckanHost}, ckanPort, ssl, false, null, null, null, null);
+            boolean ssl, int maxConns, int maxConnsPerRoute) {
+        super(new String[]{ckanHost}, ckanPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         
         // this class attributes
         this.apiKey = apiKey;
         this.orionUrl = orionUrl;
         
         // create the cache
-        cache = new CKANCache(new String[]{ckanHost}, ckanPort, ssl, apiKey);
+        cache = new CKANCache(new String[]{ckanHost}, ckanPort, ssl, apiKey, maxConns, maxConnsPerRoute);
     } // CKANBackendImpl
 
     @Override

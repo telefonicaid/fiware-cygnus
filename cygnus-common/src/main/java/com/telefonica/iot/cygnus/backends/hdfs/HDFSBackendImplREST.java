@@ -62,12 +62,15 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
      * @param krb5LoginConfFile
      * @param krb5ConfFile
      * @param serviceAsNamespace
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
     public HDFSBackendImplREST(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
             String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
             String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
-            boolean serviceAsNamespace) {
-        super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+            boolean serviceAsNamespace, int maxConns, int maxConnsPerRoute) {
+        super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, maxConns,
+                maxConnsPerRoute);
         this.hdfsUser = hdfsUser;
         this.hdfsPassword = hdfsPassword;
         this.hiveServerVersion = hiveServerVersion;
