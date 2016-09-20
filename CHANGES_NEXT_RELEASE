@@ -1,2 +1,3 @@
 - [cygnus][bug] Fix documentation about DELETE subscriptions (#1147)
 - [cygnus-ngsi][hardening] Remove unused hashing feature in NGSIMongoSink and NGSISTHSink (#1113)
+- [cygnus-ngsi][hardening] Configurable Http parameters at backend (#1152)
