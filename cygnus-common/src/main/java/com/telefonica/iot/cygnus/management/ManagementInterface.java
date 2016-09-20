@@ -1505,7 +1505,7 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         JsonObject jsonAppender = new JsonParser().parse(jsonStr).getAsJsonObject();
         
-        if (jsonAppender.isJsonNull()) {
+        if (!jsonAppender.isJsonNull()) {
             JsonObject appender = jsonAppender.get("appender").getAsJsonObject();
             String name = appender.get("name").getAsString();
             JsonObject layout = jsonAppender.get("pattern").getAsJsonObject();
@@ -1537,10 +1537,20 @@ public class ManagementInterface extends AbstractHandler {
                     newAppender.setName(name);
                     PatternLayout patternLayout = new PatternLayout(pattern);
                     newAppender.setLayout(patternLayout);
+                    Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                    for (Enumeration listApps = appenders; listApps.hasMoreElements(); )  {
+                        Appender app = (Appender) listApps.nextElement();
+                        System.out.println("appender: " + app);
+                    } // for
                     LogManager.getRootLogger().addAppender(newAppender);
+                    appenders = LogManager.getRootLogger().getAllAppenders();
+                    for (Enumeration listApps = appenders; listApps.hasMoreElements(); )  {
+                        Appender app = (Appender) listApps.nextElement();
+                        System.out.println("appender: " + app);
+                    } // for
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\","
-                        + "\"result\":{\"Appender '" + name + "' posted.\"}}");
+                        + "\"result\":{\"Appender '" + name + "' posted\"}}");
                     LOGGER.debug("Appender '" + name + "' posted.");
                 } // if else
 
