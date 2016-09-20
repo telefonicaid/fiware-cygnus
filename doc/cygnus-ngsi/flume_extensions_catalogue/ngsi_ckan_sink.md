@@ -334,6 +334,8 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
@@ -354,6 +356,8 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.batch_size = 100
     cygnusagent.sinks.ckan-sink.batch_timeout = 30
     cygnusagent.sinks.ckan-sink.batch_ttl = 10
+    cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+    cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 [Top](#top)
 
