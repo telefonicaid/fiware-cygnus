@@ -169,6 +169,24 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Sep 09 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.3.0
+- [cygnus][hardening] Add architecture documentation (#1127)
+- [cygnus][feature] Standardize logs layout (#1118)
+- [cygnus-common][hardening] Add implementation for /admin/log route (#807)
+- [cygnus-common][hardening] Create ManagementInterfaceUtils class (#1115)
+- [cygnus-common][bug] Add fiware-service and fiware-servicePath headers to all API operations (#1124)
+- [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
+- [cygnus-common][bug] Release connection upon persistence error (#1139)
+- [cygnus-common][bug] Insert NULL in CKAN columns when an empty attribute value ("", null, {} or []) or empty attribute metadata (null or []) is notified (#1144)
+
+* Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
+- [cygnus-common][bug] Release connection upon persistence error (#1139)
+- [cygnus][hardening] Add architecture documentation (#1127)
+
+* Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
+- [cygnus-common] [hardening] Add /admin/configuration/agent/path/to/agent.conf route to API (#893)
+- [cygnus-common] [hardening] Add /admin/configuration/instance/path/to/instance.conf route to API (#894)
+
 * Wed Jun 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.1.0
 - [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
 - [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)

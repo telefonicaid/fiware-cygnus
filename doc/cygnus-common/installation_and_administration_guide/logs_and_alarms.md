@@ -6,7 +6,7 @@ Content:
 * [Alarm conditions](#seciton3)
 
 ##<a name="section1"></a>Introduction
-This document describes the alarms a platform integrating Cygnus should raise when an incident happens. Thus, it is addressed to professional operators and such platform adminitrators.
+This document describes the alarms a platform integrating Cygnus should raise when an incident happens. Thus, it is addressed to professional operators and such platform administrators.
 
 Cygnus messages are explained before the alarm conditions deriving from those messages are described.
 
@@ -14,20 +14,20 @@ For each alarm, the following information is given:
 
 * <b>Alarm identifier</b>. A unique numerical identifier starting by 1.
 * <b>Severity</b>. CRITICAL or WARNING.
-* <b>Detection strategy</b>. An example log trace which identifies related alarm. 
-* <b>Stop condition</b>. An example log trace which means that related problem is no longer active. 
-* <b>Description</b>. A detailed explanation of the situation which triggers the alarm. 
+* <b>Detection strategy</b>. An example log trace which identifies related alarm.
+* <b>Stop condition</b>. An example log trace which means that related problem is no longer active.
+* <b>Description</b>. A detailed explanation of the situation which triggers the alarm.
 * <b>Action</b>. A detailed plan to cope with this situation (e.g. reboots, checks connectivities, etc).
 
-[Top](#top) 
+[Top](#top)
 
 ##<a name="section2"></a>Log message types
 Cygnus logs are categorized under seven message types, each one identified by a tag in the custom message part of the trace. These are the tags:
 
-* <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](stillackoverflow.com) (please, tag it with <i>fiware</i>).
+* <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](http://stackoverflow.com/search?q=fiware) (please, tag it with <i>fiware</i>).
 
     Example: `Fatal error (SSL cannot be used, no such algorithm. Details=...)`
-* <i>Runtime error</i> (`ERROR` level). These kind of errors may cause Cygnus to fail, and thus must be repported to the development team through [stackoverflow.com](stackoverflow.com) (please, tag it with <i>fiware</i>).
+* <i>Runtime error</i> (`ERROR` level). These kind of errors may cause Cygnus to fail, and thus must be repported to the development team through [stackoverflow.com](http://stackoverflow.com/search?q=fiware) (please, tag it with <i>fiware</i>).
 
     Example: `Runtime error (The Hive table cannot be created. Hive query=.... Details="...)`
 * <i>Bad configuration</i> (`ERROR` level). These kind of errors regard to a bad configuration parameter, and eventually may lead to a Cygnus fail.

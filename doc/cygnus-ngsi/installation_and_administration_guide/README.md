@@ -8,7 +8,7 @@
 * Configuration:
     * [NGSI agent configuration](./ngsi_agent_conf.md)
     * [Grouping Rules configuration](./grouping_rules_conf.md)
-    * [log4j configuration](./log4j_conf.md)
+    * [log4j configuration](../../installation_and_administration_guide/log4j_conf.md)
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a service](./running_as_service.md)

@@ -15,10 +15,9 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [Hashing based collections](#section2.3.1)
-        * [About batching](#section2.3.2)
-        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-        * [Databases and collections encoding details](#section2.3.4)
+        * [About batching](#section2.3.1)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Implementation details](#section3)
     * [`NGSISTHSink` class](#section3.1)
     * [`MongoBackend` class](#section3.2)
@@ -59,7 +58,9 @@ MongoDB organizes the data in databases that contain collections of Json documen
 ####<a name="section1.2.1"></a>MongoDB databases and collections naming conventions
 A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the collection names, so they will be replaced by underscore, `_`.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
 
 [Top](#top)
 
@@ -67,17 +68,26 @@ It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/refere
 The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. The concatenation string is `0x0000`, closely related to the encoding of not allowed characters (see below). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
-* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.  The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
+* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the collections name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
+* Data model by attribute (`data_model=dm-by-attribute`). For each entity's attribute, the notified/default FIWARE service path is concatenated to the notified entity ID and type and to the notified attribute name in order to compose the collection name. If the FIWARE service path is the root one (`/`) then only the entity ID and type and the attribute name and type are concatenated.  The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
 
-It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names, so it will be replaced by underscore, `_`.
+It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `$` in the collection names. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
-The following table summarizes the table name composition (assuming default `sth_` prefix):
+MongoDB [namespaces (database + collection) name length](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) is limited to 113 bytes.
+
+The following table summarizes the table name composition (assuming default `sth_` prefix, old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|
 | `/` | `sth_/.aggr` | `sth_/<entityId>_<entityType>.aggr` | `sth_/<entityId>_<entityType>_<attrName>.aggr` |
-| `/<svcPath>.aggr` | `sth_/<svcPath>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>_<attrName>.aggr` |
+| `/<svcPath>` | `sth_/<svcPath>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>.aggr` | `sth_/<svcPath>_<entityId>_<entityType>_<attrName>.aggr` |
+
+Using the new encoding:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_x002f.aggr` | `sth_x002fxffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
+| `/<svcPath>` | `sth_x002fxffff<svcPath>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
@@ -95,7 +105,7 @@ As said, `NGSISTHSink` has been designed for pre-aggregating certain statistics 
 
 This is done by changing the <i>usual</i> behaviour of a NGSI-like sink: instead of appending more and more information elements, a set of information elements (in this case, Json documents within the collections) are created once, and updated many.
 
-There will be at least (see below about the <i>origin</i>) a Json document for each <i>resolution</i> handled by `NGSISTHSink`: month, day, hour, minute and second. For each one of these documents, there will be as many <i>offset</i> fields as the resolution denotes, e.g. for a resolution of "day" ther will be 24 offsets, for a resolution of "second" there will be 60 offsets. Initially, these offsets will be setup to 0 (for numeric aggregations), or `{}` for string aggregations, and as long notifications arrive, these values will be updated depending on the resolution and the offset within that resolution the notification was receieved.
+There will be at least (see below about the <i>origin</i>) a Json document for each <i>resolution</i> handled by `NGSISTHSink`: month, day, hour, minute and second. For each one of these documents, there will be as many <i>offset</i> fields as the resolution denotes, e.g. for a resolution of "day" ther will be 24 offsets, for a resolution of "second" there will be 60 offsets. Initially, these offsets will be setup to 0 (for numeric aggregations), or `{}` for string aggregations, and as long notifications arrive, these values will be updated depending on the resolution and the offset within that resolution the notification was received.
 
 Each one of the Json documents (each one for each resolution) will also have an <i>origin</i>, the time for which the aggregated information applies. For instance, for a resolution of "minute" a valid origin could be `2015-03-01T13:00:00.000Z`, meaning the 13th hour of March, the 3rd, 2015. There may be another Json document having a different origin for the same resolution, e.g. `2015-03-01T14:00:00.000Z`, meaning the 14th hour of March, the 3rd, 2015. The origin is stored using UTC time to avoid locale issues.
 
@@ -114,11 +124,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -143,12 +153,19 @@ Assuming the following Flume event is created from a notified NGSI context data 
 ####<a name="section1.3.2"></a>Database and collection names
 A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
 
-Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones:
+Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
 |---|---|---|---|
 | `/` | `sth_/.aggr` | `sth_/car1_car.aggr` | `sth_/car1_car_speed.aggr`<br>`sth_/car1_car_oil_level.aggr` |
 | `/4wheels` | `sth_/4wheels.aggr` | `sth_/4wheels_car1_car.aggr` | `sth_/4wheels_car1_car_speed.aggr`<br>`sth_/4wheels_car1_car_oil_level.aggr` |
+
+Using the new encoding:
+
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
+|---|---|---|---|
+| `/` | `sth_x002f.aggr` | `sth_x002fxffffcar1xffffcar.aggr` | `sth_x002fxffffcar1xffffcarxffffspeed.aggr`<br>`sth_x002fxffffcar1xffffcarxffffoil_level.aggr` |
+| `/4wheels` | `sth_x002f4wheels.aggr` | `sth_x002f4wheelsxffffcar1xffffcar.aggr` | `sth_x002f4wheelsxffffcar1xffffcarxffffspeed.aggr`<br>`sth_x002f4wheelsxffffcar1xffffcarxffffoil_level.aggr` |
 
 [Top](#top)
 
@@ -280,13 +297,13 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
-| should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
 | collection_prefix | no | sth_ | `system.` is not accepted. |
 | resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
@@ -303,6 +320,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
     cygnusagent.sinks.sth-sink.channel = sth-channel
+    cygnusagent.sinks.sth-sink.enable_encoding = false
     cygnusagent.sinks.sth-sink.enable_grouping = false
     cygnusagent.sinks.sth-sink.enable_lowercase = false
     cygnusagent.sinks.sth-sink.data_model = dm-by-entity
@@ -311,7 +329,6 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.mongo_password = mypassword
     cygnusagent.sinks.sth-sink.db_prefix = cygnus_
     cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.sth-sink.should_hash = false
     cygnusagent.sinks.sth-sink.resolutions = month,day
     cygnusagent.sinks.sth-sink.batch_size = 100
     cygnusagent.sinks.sth-sink.batch_timeout = 30
@@ -327,14 +344,7 @@ Use `NGSISTHSink` if you are looking for a Json-based document storage about agg
 [Top](#top)
 
 ###<a name="section2.3"></a>Important notes
-###<a name="section2.3.1"></a>Hashing based collections
-In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
-
-In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
-
-[Top](#top)
-
-###<a name="section2.3.2"></a>About batching
+####<a name="section2.3.1"></a>About batching
 Despite `NGSISTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
 
 Nevertheless, FIWARE Comet storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of FIWARE Comet (sum, sum2, max and min).
@@ -345,16 +355,27 @@ Thus, `NGSISTHSink` does not implement a real batching mechanism as usual. Pleas
 
 [Top](#top)
 
-###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSISTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-###<a name="section2.3.4"></a>Databases and collections encoding details
+####<a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
+
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * Database names will have the characters `\`, `/`, `.`, `$`, `"` and ` ` encoded as `_`.
 * Collections names will have the characters `$` encoded as `_`.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to MongoDB data structures:
+
+* Equals character, `=`, is encoded as `xffff`.
+* All the forbidden characters are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 

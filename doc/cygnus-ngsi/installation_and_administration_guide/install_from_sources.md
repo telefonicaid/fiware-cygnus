@@ -20,7 +20,7 @@ Start by cloning the Github repository:
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
     $ cd fiware-cygnus
     $ git checkout <branch>
-    
+
 `<branch>` should be typically a stable release branch, e.g. `release/0.13.0`, but could also be `master` (synchronized with the latest release) or `develop` (contains the latest not stable changes).
 
 [Top](#top)
@@ -31,7 +31,7 @@ Start by cloning the Github repository:
     $ cd cygnus-ngsi
     $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-ngsi-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
-    
+
 Or as a thin Java jar file:
 
     $ cd cygnus-ngsi

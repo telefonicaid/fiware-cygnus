@@ -39,20 +39,22 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
      * @param orionHost
      * @param orionPort
      * @param ssl
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public OrionBackendImpl(String orionHost, String orionPort, boolean ssl) {
-        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null);
+    public OrionBackendImpl(String orionHost, String orionPort, boolean ssl, int maxConns, int maxConnsPerRoute) {
+        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
     } // StatsBackendImpl
 
     @Override
-    public JsonResponse subscribeContextV1(String subscription, String token) 
-            throws Exception {
+    public JsonResponse subscribeContextV1(String subscription, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception {
         
         // create the relative URL
         String relativeURL = "/v1/subscribeContext";
         
         // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
         
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);
@@ -65,14 +67,14 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // subscribeContext
     
     @Override
-    public JsonResponse subscribeContextV2(String subscription, String token) 
-            throws Exception {
+    public JsonResponse subscribeContextV2(String subscription, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception {
         
         // create the relative URL
         String relativeURL = "/v2/subscriptions";
         
         // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
         
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);
@@ -85,11 +87,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // subscribeContext
     
     @Override
-    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token) 
-            throws Exception {
+    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception { 
         
         // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
                 
         String relativeURL = "/v1/unsubscribeContext";
         String subscriptionStr = "{\n" 
@@ -104,11 +106,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // deleteSubscriptionV1
     
     @Override
-    public JsonResponse getSubscriptionsByIdV2(String token, 
-            String subscriptionId) throws Exception {
+    public JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService, 
+            String fiwareServicePath) throws Exception {
         
         // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
         
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
@@ -117,10 +119,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // getSubscriptionsV2byId
     
     @Override
-    public JsonResponse getSubscriptionsV2(String token, String subscriptionId) throws Exception {
+    public JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService, 
+            String fiwareServicePath) throws Exception {
         
     // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
         
         String relativeURL = "/v2/subscriptions";
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
@@ -129,10 +132,10 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
     } // getSubscriptionsV2
     
     @Override
-    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token) throws Exception {
-        
+    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService, 
+            String fiwareServicePath) throws Exception {
         // create the http header
-        ArrayList<Header> headers = getHeaders(token);
+        ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
         
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
@@ -141,10 +144,12 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         
     } // deleteSubscriptionV2
     
-    private ArrayList<Header> getHeaders (String token) {
+    private ArrayList<Header> getHeaders (String token, String fiwareService, String fiwareServicePath) {
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
+        headers.add(new BasicHeader("Fiware-Service", fiwareService));
+        headers.add(new BasicHeader("Fiware-ServicePath", fiwareServicePath));
         
         if (token != null) {
             headers.add(new BasicHeader("X-Auth-token", token));

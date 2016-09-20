@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -19,7 +19,6 @@
 package com.telefonica.iot.cygnus.backends.http;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -59,8 +58,11 @@ public class HttpClientFactory {
      * @param ssl True if SSL connections are desired. False otherwise.
      * @param loginConfFile
      * @param krb5ConfFile
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile) {
+    public HttpClientFactory(boolean ssl, String loginConfFile, String krb5ConfFile, int maxConns,
+            int maxConnsPerRoute) {
         // set the Kerberos parameters
         this.loginConfFile = loginConfFile;
         this.krb5ConfFile = krb5ConfFile;
@@ -68,16 +70,16 @@ public class HttpClientFactory {
         // create the appropriate connections manager
         if (ssl) {
             sslConnectionsManager = new PoolingClientConnectionManager(getSSLSchemeRegistry());
-            sslConnectionsManager.setMaxTotal(CommonConstants.MAX_CONNS);
-            sslConnectionsManager.setDefaultMaxPerRoute(CommonConstants.MAX_CONNS_PER_ROUTE);
+            sslConnectionsManager.setMaxTotal(maxConns);
+            sslConnectionsManager.setDefaultMaxPerRoute(maxConnsPerRoute);
         } else {
             connectionsManager = new PoolingClientConnectionManager();
-            connectionsManager.setMaxTotal(CommonConstants.MAX_CONNS);
-            connectionsManager.setDefaultMaxPerRoute(CommonConstants.MAX_CONNS_PER_ROUTE);
+            connectionsManager.setMaxTotal(maxConns);
+            connectionsManager.setDefaultMaxPerRoute(maxConnsPerRoute);
         } // if else
         
-        LOGGER.info("Setting max total connections (" + CommonConstants.MAX_CONNS + ")");
-        LOGGER.info("Setting default max connections per route (" + CommonConstants.MAX_CONNS_PER_ROUTE + ")");
+        LOGGER.info("Setting max total connections (" + maxConns + ")");
+        LOGGER.info("Setting default max connections per route (" + maxConnsPerRoute + ")");
     } // HttpClientFactory
     
     /**

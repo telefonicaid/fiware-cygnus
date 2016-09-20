@@ -97,6 +97,26 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Sep 09 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.3.0
+- [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
+- [cygnus-ngsi][feature] General encoding of per-sink forbidden characters (#1107)
+- [cygnus][hardening] Add architecture documentation (#1127)
+- [cygnus][feature] Standardize logs layout (#1118)
+- [cygnus-ngsi][hardening] Reduce the size of the Docker image (#1117)
+- [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)
+- [cygnus-ngsi][feature] Do per-sink active checkings of element name sizes (#407)
+- [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
+- [cygnus-ngsi][hardening] Decrease to DEBUG the logging level of batching related traces (#1126)
+
+* Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
+- [cygnus][hardening] Add architecture documentation (#1127)
+- [cygnus-ngsi][bug] Insert NULL in CKAN columns when an empty attribute value ("", null, {} or []) or empty attribute metadata (null or []) is notified (#1144)
+
+* Fri Jul 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.0
+- [cygnus-ngsi] [hardening] Do configurable the accepted resolutions in NGSISTHSink (#940)
+- [cygnus-ngsi] [feature] Log time in UTC format (#1071)
+- [cygnus-ngsi] [hardening] Document how the keys configuration file works (#1078)
+
 * Wed Jun 01 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.1.0
 - [cygnus-ngsi] [hardening] Force UTF-8 charset both at NGSIRestHandler and the sinks (#975)
 - [cygnus-common] [hardening] Added a fiware-correlator header to messages of API responses (#932)

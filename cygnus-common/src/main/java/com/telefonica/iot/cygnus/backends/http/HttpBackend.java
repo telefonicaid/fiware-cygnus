@@ -74,9 +74,11 @@ public abstract class HttpBackend {
      * @param krb5Password
      * @param krb5LoginConfFile
      * @param krb5ConfFile
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
     public HttpBackend(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password,
-            String krb5LoginConfFile, String krb5ConfFile) {
+            String krb5LoginConfFile, String krb5ConfFile, int maxConns, int maxConnsPerRoute) {
         this.hosts = new LinkedList(Arrays.asList(hosts));
         this.port = port;
         this.ssl = ssl;
@@ -85,7 +87,7 @@ public abstract class HttpBackend {
         this.krb5Password = krb5Password;
         
         // create a Http clients factory and an initial connection
-        httpClientFactory = new HttpClientFactory(ssl, krb5LoginConfFile, krb5ConfFile);
+        httpClientFactory = new HttpClientFactory(ssl, krb5LoginConfFile, krb5ConfFile, maxConns, maxConnsPerRoute);
         httpClient = httpClientFactory.getHttpClient(ssl, krb5);
     } // HttpBackend
     
@@ -202,6 +204,7 @@ public abstract class HttpBackend {
         try {
             httpRes = httpClient.execute(request);
         } catch (IOException e) {
+            request.releaseConnection();
             throw new CygnusPersistenceError(e.getMessage());
         } // try catch
 

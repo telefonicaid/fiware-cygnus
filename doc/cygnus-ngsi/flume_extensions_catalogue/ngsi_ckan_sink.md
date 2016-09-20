@@ -20,6 +20,7 @@ Content:
     * [Important notes](#section2.3)
         * [About the persistence mode](#section2.3.1)
         * [About batching](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSICKANSink` class](#section3.1)
 * [Annexes](#section4)
@@ -49,21 +50,29 @@ This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [
 ####<a name="section1.2.1"></a>Organizations naming conventions
 An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
+Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
+Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.organization_create) may be up to 100 characters (minimum, 2 characters).
+
 [Top](#top)
 
 ####<a name="section1.2.2"></a>Packages/datasets naming conventions
 A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
 
-Please observe if the notified/defaulted FIWARE service path is the root one, i.e. `/`, then the package/dataset name is equals to the organization name.
+Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
-The concatenation character is the underscore, `_`.
+Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.package_create) may be up to 100 characters (minimum, 2 characters).
 
 [Top](#top)
 
 ####<a name="section1.2.3"></a>Resources naming conventions
-CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the entity ID and type, concatenated by the underscore character, `_`. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
+
+Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+
+Nevertheless, different than PostgreSQL, resource lengths may be up to 100 characters (minimum, 2 characters).
 
 [Top](#top)
 
@@ -105,11 +114,11 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	         transactionId=1429535775-308-0000000000,
 	         ttl=10,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
+	         fiware-servicepath=/4wheels,
 	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
+	         notified-servicepaths=/4wheels
 	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         grouped-servicepath=/4wheels
         },
         body={
 	        entityId=car1,
@@ -128,10 +137,21 @@ Assuming the following Flume event is created from a notified NGSI context data 
 	        ]
 	    }
     }
-    
+
 [Top](#top)
 
 ####<a section="1.3.2"></a>Organization, dataset and resource names
+Given the above example and using the old encoding, these are the CKAN elements created 
+
+* Orgnaization: `vehicles`.
+* Package: `vehicles_4wheels`.
+* Resource: `car1_car`.
+
+Using the new encdoing:
+
+* Orgnaization: `vehicles`.
+* Package: `vehiclesxffffx002f4wheels`.
+* Resource: `car1xffffcar`.
 
 [Top](#top)
 
@@ -302,6 +322,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable_grouping | no | false | <i>true</i> or <i>false</i>. ||
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
 | attr_persistence | no | row | <i>row</i> or <i>column.</i>|
@@ -313,6 +334,8 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
@@ -321,6 +344,7 @@ A configuration example could be:
     ...
     cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
+    cygnusagent.sinks.ckan-sink.enable_encoding = false
     cygnusagent.sinks.ckan-sink.enable_grouping = false
     cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
     cygnusagent.sinks.ckan-sink.attr_persistence = column
@@ -332,6 +356,8 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.batch_size = 100
     cygnusagent.sinks.ckan-sink.batch_timeout = 30
     cygnusagent.sinks.ckan-sink.batch_ttl = 10
+    cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+    cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 [Top](#top)
 
@@ -351,13 +377,36 @@ Please check the [Annexes](#section4) in order to know how to provision a resour
 [Top](#top)
 
 ####<a name="section2.3.2"></a>About batching
-As explained in the [programmers guide](#section3), `NGSICKANSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSICKANSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same CKAN resource. If processing the events one by one, we would need 100 inserts into CKAN; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination CKAN resource. In the worst case, the whole 100 entities will be about 100 different entities (100 different CKAN resources), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
-By default, `NGSICKANSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](../operation/performance_tuning_tips.md).
+By default, `NGSICKANSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+
+[Top](#top)
+
+####<a name="section2.3.3"></a>About the encoding
+Until version 1.2.0 (included), Cygnus applied a very simple encoding:
+
+* All non alphanumeric characters were replaced by underscore, `_`.
+* The underscore was used as concatenator character as well.
+* The slash, `/`, in the FIWARE service paths is ignored.
+
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to CKAN data structures:
+
+* Lowercase alphanumeric characters are not encoded.
+* Upercase alphanumeric characters are encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Hyphen character, `-`, is not encoded.
+* Equals character, `=`, is encoded as `xffff`.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
+* `xffff` is used as concatenator character.
+    
+Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
 
@@ -367,7 +416,7 @@ As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The met
 
     void persistBatch(Batch batch) throws Exception;
 
-A `Batch` contanins a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
+A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
 
     public void start();
 
@@ -404,7 +453,7 @@ Creating a resource within the above package/dataset (the package ID is given in
 $ curl -X POST "http://demo.ckan.org/api/3/action/resource_create" -d '{"name":"room1_room","url":"none","format":"","package_id":"d35fca28-732f-4096-8376-944563f175ba"}' -H "Authorization: xxxxxxxx"
 ```
 
-Finally, creating a datastore associated to the above resource and suitable for receiving Cgynus data in column mode (the resource ID is given in the response to the above resource creation request):
+Finally, creating a datastore associated to the above resource and suitable for receiving Cygnus data in column mode (the resource ID is given in the response to the above resource creation request):
 
 ```
 $ curl -X POST "http://demo.ckan.org/api/3/action/datastore_create" -d '{"fields":[{"id":"recvTime","type":"text"}, {"id":"fiwareServicePath","type":"text"}, {"id":"entityId","type":"text"}, {"id":"entityType","type":"text"}, {"id":"temperature","type":"float"}, {"id":"temperature_md","type":"json"}],"resource_id":"48c120df-5bcd-48c7-81fa-8ecf4e4ef9d7","force":"true"}' -H "Authorization: xxxxxxxx"
