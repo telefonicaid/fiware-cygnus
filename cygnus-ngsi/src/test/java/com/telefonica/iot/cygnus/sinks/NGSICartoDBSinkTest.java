@@ -182,6 +182,78 @@ public class NGSICartoDBSinkTest {
     } // testConfigureDefaults
     
     /**
+     * [NGSICartoDBSink.configure] -------- backend.max_conns gets the configured value.
+     */
+    @Test
+    public void testConfigureMaxConns() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- backend.max_conns gets the configured value");
+        String apiKey = "1234567890abcdef";
+        String backendMaxConns = "25";
+        String backendMaxConnsPerRoute = null;
+        String batchSize = null;
+        String batchTimeout = null;
+        String batchTTL = null;
+        String dataModel = null; // default one
+        String enableDistance = null; // default one
+        String enableGrouping = null;
+        String enableLowercase = null;
+        String enableRaw = null; // default one
+        String flipCoordinates = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
+                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, flipCoordinates,
+                keysConfFile));
+        
+        try {
+            assertEquals(25, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'backend.max_conns=25' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'backend.max_conns=25' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConns
+    
+    /**
+     * [NGSICartoDBSink.configure] -------- backend.max_conns_per_route gets the configured value.
+     */
+    @Test
+    public void testConfigureMaxConnsPerRoute() {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- backend.max_conns_per_route gets the configured value");
+        String apiKey = "1234567890abcdef";
+        String backendMaxConns = null;
+        String backendMaxConnsPerRoute = "3";
+        String batchSize = null;
+        String batchTimeout = null;
+        String batchTTL = null;
+        String dataModel = null; // default one
+        String enableDistance = null; // default one
+        String enableGrouping = null;
+        String enableLowercase = null;
+        String enableRaw = null; // default one
+        String flipCoordinates = null; // default one
+        String keysConfFile = "/keys.conf";
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
+                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, flipCoordinates,
+                keysConfFile));
+        
+        try {
+            assertEquals(3, sink.getBackendMaxConnsPerRoute());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'backend.max_conns_per_route=3' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'backend.max_conns_per_route=3' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConnsPerRoute
+    
+    /**
      * [NGSICartoDBSink.configure] -------- Independently of the configured value, enable_lowercase is always 'true'
      * by default.
      */
@@ -1687,8 +1759,8 @@ public class NGSICartoDBSinkTest {
             String keysConfFile) {
         Context context = new Context();
         context.put("api_key", apiKey);
-        context.put("backend_max_conns", backendMaxConns);
-        context.put("backend_max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
         context.put("batch_size", batchSize);
         context.put("batch_timeout", batchTimeout);
         context.put("batch_ttl", batchTTL);

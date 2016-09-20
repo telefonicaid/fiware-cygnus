@@ -247,6 +247,92 @@ public class NGSIHDFSSinkTest {
     } // testConfigureDefaults
     
     /**
+     * [NGSIHDFSSinkTest.configure] -------- backend.max_conns gets the configured value.
+     */
+    @Test
+    public void testConfigureMaxConns() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- backend.max_conns gets the configured value");
+        String backendImpl = null; // default value
+        String backendMaxConns = "25";
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = null;
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = null;
+        String krb5 = null;
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
+        
+        try {
+            assertEquals(25, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'backend.max_conns=25' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'backend.max_conns=25' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConns
+    
+    /**
+     * [NGSIHDFSSinkTest.configure] -------- backend.max_conns_per_route gets the configured value.
+     */
+    @Test
+    public void testConfigureMaxConnsPerRoute() {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                + "-------- backend.max_conns_per_route gets the configured value");
+        String backendImpl = null; // default value
+        String backendMaxConns = null;
+        String backendMaxConnsPerRoute = "3";
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = null;
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = null;
+        String krb5 = null;
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace));
+        
+        try {
+            assertEquals(3, sink.getBackendMaxConnsPerRoute());
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "-  OK  - 'backend.max_conns_per_route=3' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
+                    + "- FAIL - 'backend.max_conns_per_route=3' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConnsPerRoute
+    
+    /**
      * [NGSIHDFSSinkTest.configure] -------- enable_encoding can only be 'true' or 'false'.
      */
     @Test
