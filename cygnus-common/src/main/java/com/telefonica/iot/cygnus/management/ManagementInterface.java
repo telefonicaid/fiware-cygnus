@@ -808,7 +808,7 @@ public class ManagementInterface extends AbstractHandler {
                     if (level != null) {
                         loggersJson += "{\"name\":\"" + loggName + "\",\"level\":\"" + level.toString() + "\"}";
                     } else {
-                        loggersJson += "{\"name\":\"" + loggName + "\"}";
+                        loggersJson += "{\"name\":\"" + loggName + "\",\"level\":null}";
                     }
                     firstTime = false;
                 } // while
