@@ -397,6 +397,8 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx000
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
@@ -416,6 +418,8 @@ cygnus-ngsi.sinks.raw-sink.data_model = dm-by-entity
 cygnus-ngsi.sinks.raw-sink.batch_size = 10
 cygnus-ngsi.sinks.raw-sink.batch_timeout = 5
 cygnus-ngsi.sinks.raw-sink.batch_ttl = 0
+cygnus-ngsi.sinks.raw-sink.backend.max_conns = 500
+cygnus-ngsi.sinks.raw-sink.backend.max_conns_per_route = 100
 ```
 
 An example of CartoDB keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):

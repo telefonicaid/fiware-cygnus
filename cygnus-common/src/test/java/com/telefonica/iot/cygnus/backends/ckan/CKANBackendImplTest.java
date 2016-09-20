@@ -65,6 +65,8 @@ public class CKANBackendImplTest {
     private final String data = "this is a lot of data";
     private final HashMap<String, String> attrList = new HashMap<String, String>();
     private final HashMap<String, String> attrMdList = new HashMap<String, String>();
+    private final int maxConns = 50;
+    private final int maxConnsPerRoute = 10;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -75,7 +77,7 @@ public class CKANBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new CKANBackendImpl(apiKey, host, port, orionURL, ssl);
+        backend = new CKANBackendImpl(apiKey, host, port, orionURL, ssl, maxConns, maxConnsPerRoute);
 
         // set up the behaviour of the mocked classes
         when(mockCache.isCachedOrg(orgName)).thenReturn(true);

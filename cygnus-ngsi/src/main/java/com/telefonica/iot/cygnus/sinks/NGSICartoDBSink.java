@@ -46,8 +46,10 @@ public class NGSICartoDBSink extends NGSISink {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSICartoDBSink.class);
     private String keysConfFile;
     private boolean flipCoordinates;
-    protected boolean enableRaw;
-    protected boolean enableDistance;
+    private boolean enableRaw;
+    private boolean enableDistance;
+    private int backendMaxConns;
+    private int backendMaxConnsPerRoute;
     private HashMap<String, CartoDBBackendImpl> backends;
     
     /**
@@ -72,6 +74,38 @@ public class NGSICartoDBSink extends NGSISink {
     protected void setBackends(HashMap<String, CartoDBBackendImpl> backends) {
         this.backends = backends;
     } // setBackends
+    
+    /**
+     * Gets the maximum number of connections in the backend.
+     * @return The maximum number of connections in the backend
+     */
+    protected int getBackendMaxConns() {
+        return backendMaxConns;
+    } // getBackendMaxConns
+    
+    /**
+     * Gets the maximum number of connections per route in the backend.
+     * @return The maximum number of connections per route in the backend
+     */
+    protected int getBackendMaxConnsPerRoute() {
+        return backendMaxConnsPerRoute;
+    } // getBackendMaxConnsPerRoute
+    
+    /**
+     * Gets if the distance-based analysis is enabled.
+     * @return True if the distance-based analysis is enabled, false otherwise
+     */
+    protected boolean getEnableDistance() {
+        return enableDistance;
+    } // getEnableDistance
+    
+    /**
+     * Gets if the raw-based analysis is enabled.
+     * @return True if the raw-based analysis is enabled, false otherwise
+     */
+    protected boolean getEnableRaw() {
+        return enableRaw;
+    } // getEnableRaw
     
     @Override
     public void configure(Context context) {
@@ -142,6 +176,12 @@ public class NGSICartoDBSink extends NGSISink {
             LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
                     + enableDistanceStr + ") -- Must be 'true' or 'false'");
         } // if else
+        
+        backendMaxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
+        backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route=" + backendMaxConnsPerRoute
+                + ")");
     } // configure
     
     @Override
@@ -225,7 +265,7 @@ public class NGSICartoDBSink extends NGSISink {
                 continue;
             } // if
 
-            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key));
+            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns, backendMaxConnsPerRoute));
         } // for
         
         if (backends.isEmpty()) {
