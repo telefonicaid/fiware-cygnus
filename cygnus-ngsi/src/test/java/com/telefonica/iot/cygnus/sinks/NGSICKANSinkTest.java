@@ -71,10 +71,10 @@ public class NGSICKANSinkTest {
         try {
             assertTrue(sink.getRowAttrPersistence());
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "-  OK  - 'attr_persisnce=row' configured by default");
+                    + "-  OK  - 'attr_persistence=row' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "- FAIL - 'attr_persisnce=row' not configured by default");
+                    + "- FAIL - 'attr_persistence=row' not configured by default");
             throw e;
         } // try catch
         
@@ -101,10 +101,10 @@ public class NGSICKANSinkTest {
         try {
             assertEquals(100, sink.getBackendMaxConnsPerRoute());
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "-  OK  - 'backend.max_conns_per_rpute=100' configured by default");
+                    + "-  OK  - 'backend.max_conns_per_route=100' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "- FAIL - 'backend.max_conns_per_rpute=100' not configured by default");
+                    + "- FAIL - 'backend.max_conns_per_route=100' not configured by default");
             throw e;
         } // try catch
         
@@ -174,7 +174,7 @@ public class NGSICKANSinkTest {
                     + "-  OK  - 'enable_lowercase=true' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "- FAIL - 'enable_owercase=true' not configured by default");
+                    + "- FAIL - 'enable_lowercase=true' not configured by default");
             throw e;
         } // try catch
         

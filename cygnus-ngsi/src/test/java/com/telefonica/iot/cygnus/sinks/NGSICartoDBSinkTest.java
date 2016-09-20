@@ -146,7 +146,7 @@ public class NGSICartoDBSinkTest {
                     + "-  OK  - 'enable_distance=false' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - 'enable_encoding=false' not configured by default");
+                    + "- FAIL - 'enable_distance=false' not configured by default");
             throw e;
         } // try catch
         

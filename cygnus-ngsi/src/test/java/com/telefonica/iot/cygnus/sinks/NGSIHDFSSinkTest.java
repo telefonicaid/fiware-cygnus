@@ -180,7 +180,7 @@ public class NGSIHDFSSinkTest {
                     + "-  OK  - 'enable_lowercase=false' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
-                    + "- FAIL - 'enable_owercase=false' not configured by default");
+                    + "- FAIL - 'enable_lowercase=false' not configured by default");
             throw e;
         } // try catch
         

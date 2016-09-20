@@ -53,10 +53,10 @@ public class NGSIDynamoDBSinkTest {
         try {
             assertTrue(sink.getRowAttrPersistence());
             System.out.println(getTestTraceHead("[NGSIDynamoDBSink.configure]")
-                    + "-  OK  - 'attr_persisnce=row' configured by default");
+                    + "-  OK  - 'attr_persistence=row' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIDynamoDBSink.configure]")
-                    + "- FAIL - 'attr_persisnce=row' not configured by default");
+                    + "- FAIL - 'attr_persistence=row' not configured by default");
             throw e;
         } // try catch
         
