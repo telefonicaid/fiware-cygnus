@@ -243,47 +243,19 @@ public class ManagementInterfaceUtils {
     } // readDescriptions
     
     /**
-     * getStringAppenders: Returns a string with the list of appenders 
+     * getStringAppender: Returns the active appender 
      * 
      * @param appenders
      * @return 
      */
-<<<<<<< HEAD
-    public static String getStringAppenders (Enumeration appenders) {
-        String appendersJson = "";
-
-        while (appenders.hasMoreElements()) {
-            Appender appender = (Appender) appenders.nextElement();
-            String name = appender.getName();
-            PatternLayout layout = (PatternLayout) appender.getLayout();
-
-            if (appendersJson.isEmpty()) { 
-                appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                        + layout.getConversionPattern() + "\"}";
-            } else {
-                appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                        + layout.getConversionPattern() + "\"}";
-            } // else
-
-        } // while
-
-        if (appendersJson.isEmpty()) {
-            appendersJson = "[]";
-        } else {
-            appendersJson += "]";
-        } // else
-=======
     public static String getStringAppender (Enumeration appenders) {
-
         Appender appender = (Appender) appenders.nextElement();
         String name = appender.getName();
         PatternLayout layout = (PatternLayout) appender.getLayout();
         String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";
->>>>>>> develop
-        
+                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";   
         return appendersJson;
-    } // getStringAppenders
+    } // getStringAppender
     
     /**
      * getAppendersFromProperties: Returns an ArrayList with the appenders.
