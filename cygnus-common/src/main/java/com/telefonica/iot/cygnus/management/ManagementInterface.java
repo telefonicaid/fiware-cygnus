@@ -217,8 +217,13 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleDeleteAdminConfigurationInstance(request, response, true);
+<<<<<<< HEAD
                 } else if (uri.startsWith("/v1/admin/log/loggers")) {
                     handleDeleteAdminLogLoggers(request, response);
+=======
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleDeleteAdminLogAppenders(request, response);
+>>>>>>> develop
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -1771,6 +1776,130 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // try catch
     } // handleDeleteAdminConfigurationAgent
+    
+    private void handleDeleteAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        String transient_ = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+
+            if (allAppenders) {
+                LogManager.getRootLogger().removeAllAppenders();
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed succesfully\"}}");
+                LOGGER.debug("Log4j appenders removed succesfully");
+            } else {
+
+                try {
+                    // Check if appender already exists
+                    Appender delete = LogManager.getRootLogger().getAppender(appenderName);
+                    LogManager.getRootLogger().removeAppender(delete);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"result\":\"Appender '"+ appenderName 
+                            +"'removed succesfully\"}]}");
+                    LOGGER.debug("Log4j appender removed succesfully");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+
+            } // if else
+
+        } else if (transient_.equals("false")){
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                boolean hasAppenders = false;
+
+                if (allAppenders) {
+                        
+                    for (String property: properties.stringPropertyNames()) {
+                            
+                        if (property.startsWith("log4j.appender")) {
+                            properties.remove(property);
+                            hasAppenders = true;
+                        } // if
+                                                    
+                    } // for
+
+                    ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                    
+                    if (hasAppenders) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed "
+                                + "succesfully\"}");
+                        LOGGER.debug("Appenders removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } // if else
+                    
+                } else {
+                    boolean appenderFound = false;
+
+                    for (String name : appenderNames) {
+
+                        if (name.equals(appenderName)) {
+                            String appName = "log4j.appender." + name;
+                            appenderFound = true;
+                            
+                            for (String property: properties.stringPropertyNames()) {
+                            
+                                if (property.startsWith(appName)) {
+                                    properties.remove(property);
+                                } // if
+                            
+                            } // for
+                   
+                        } // if
+
+                    } // for
+
+                    if (appenderFound) {
+                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Appender '" + appenderName 
+                                + "' removed succesfully\"}");
+                        LOGGER.debug("Appender '" + appenderName + "' removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+
+    } // handleDeleteAdminLogAppenders        
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
