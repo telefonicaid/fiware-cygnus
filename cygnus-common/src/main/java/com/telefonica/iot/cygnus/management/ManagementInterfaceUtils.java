@@ -242,7 +242,7 @@ public class ManagementInterfaceUtils {
     } // readDescriptions
     
     /**
-     * getStringAppenders: Returns a string with the list of appenders 
+     * getStringAppender: Returns the active appender 
      * 
      * @param appenders
      * @return 
@@ -252,9 +252,9 @@ public class ManagementInterfaceUtils {
         String name = appender.getName();
         PatternLayout layout = (PatternLayout) appender.getLayout();
         String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";
+                + layout.getConversionPattern() + "\",\"active\":\"true\"}]";   
         return appendersJson;
-    } // getStringAppenders
+    } // getStringAppender
     
     /**
      * getAppendersFromProperties: Returns an ArrayList with the appenders.

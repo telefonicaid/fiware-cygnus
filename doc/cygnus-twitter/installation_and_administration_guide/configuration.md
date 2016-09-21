@@ -20,10 +20,10 @@ The keyworks (hashtags) that are used in the twitter query to filter tweets with
 The coordinates to specify the spatial area where the source will collect geo-located tweets. The coordinates will be used in the twitter query:
 
 ```
-cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
-cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
-cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
-cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
+cygnus-twitter.sources.twitter-source.south_west_latitude = 39.4247692
+cygnus-twitter.sources.twitter-source.south_west_longitude = -0.4315448
+cygnus-twitter.sources.twitter-source.north_east_latitude = 39.5038788
+cygnus-twitter.sources.twitter-source.north_east_longitude = -0.3124204
 ```
 
 These coordinates are used to define a rectangle filter where tweets have been geo-located. Only tweets inside this rectangle are stored.
@@ -79,10 +79,10 @@ cygnus-twitter.sources.http-source.type = org.telefonica.iot.cygnus.sources.Twit
 # keywords
 # cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3
 # Coordinates for filter query
-cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
-cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
-cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
-cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
+cygnus-twitter.sources.twitter-source.south_west_latitude = 39.4247692
+cygnus-twitter.sources.twitter-source.south_west_longitude = -0.4315448
+cygnus-twitter.sources.twitter-source.north_east_latitude = 39.5038788
+cygnus-twitter.sources.twitter-source.north_east_longitude = -0.3124204
 cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxxx
 cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessToken = xxxxxxxx
@@ -99,7 +99,11 @@ cygnus-twitter.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnus-twitter.sinks.hdfs-sink.backend_impl = rest
+cygnus-twitter.sinks.hdfs-sink.backend.impl = rest
+# maximum number of Http connections to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+# maximum number of Http connections per route to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnus-twitter.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2

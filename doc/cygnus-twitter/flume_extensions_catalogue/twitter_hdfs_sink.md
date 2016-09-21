@@ -56,7 +56,9 @@ Hive is currently not supported in this version of the `TwitterHDFSSink`.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.TwitterHDFSSink</i> |
 | channel | yes | N/A ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
 | hdfs_username | yes | N/A | An already existent user in HDFS. |
@@ -84,7 +86,11 @@ A configuration example could be:
     # true if lower case is wanted to forced in all the element names, false otherwise
     # cygnusagent.sinks.hdfs-sink.enable_lowercase = false
     # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-    # cygnusagent.sinks.hdfs-sink.backend_impl = rest
+    # cygnusagent.sinks.hdfs-sink.backend.impl = rest
+    # maximum number of Http connections to HDFS backend
+    # cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+    # maximum number of Http connections per route to HDFS backend
+    # cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
     # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
     # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
     # cygnusagent.sinks.hdfs-sink.hdfs_host = localhost
