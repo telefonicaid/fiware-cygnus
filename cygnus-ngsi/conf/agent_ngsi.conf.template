@@ -69,7 +69,11 @@ cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 # default data model, must be dm-by-entity
 # cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-# cygnusagent.sinks.hdfs-sink.backend_impl = rest
+# cygnusagent.sinks.hdfs-sink.backend.impl = rest
+# maximum number of Http connections to HDFS backend
+# cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+# maximum number of Http connections per route to HDFS backend
+# cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 # cygnusagent.sinks.hdfs-sink.hdfs_host = localhost
@@ -144,6 +148,10 @@ cygnusagent.sinks.ckan-sink.api_key = ckanapikey
 # cygnusagent.sinks.ckan-sink.batch_timeout = 30
 # number of retries upon persistence error
 # cygnusagent.sinks.ckan-sink.batch_ttl = 10
+# maximum number of Http connections to CKAN backend
+# cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+# maximum number of Http connections per route to CKAN backend
+# cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 # ============================================
 # NGSIMySQLSink configuration
@@ -227,8 +235,6 @@ cygnusagent.sinks.mongo-sink.channel = mongo-channel
 # cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix pro the MongoDB collections
 # cygnusagent.sinks.mongo-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-# cygnusagent.sinks.mongo-sink.should_hash = false
 # Must be dm-by-service-path or dm-by-entity
 # cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
 # how the attributes are stored, either per row either per column (row, column)
@@ -270,8 +276,6 @@ cygnusagent.sinks.sth-sink.channel = sth-channel
 # cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 # cygnusagent.sinks.sth-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-# cygnusagent.sinks.sth-sink.should_hash = false
 # number of notifications to be included within a processing batch
 # cygnusagent.sinks.sth-sink.batch_size = 1
 # timeout for batch accumulation

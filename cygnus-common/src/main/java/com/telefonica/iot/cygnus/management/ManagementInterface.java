@@ -42,7 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import org.apache.log4j.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,9 +63,11 @@ import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -85,11 +86,13 @@ public class ManagementInterface extends AbstractHandler {
     private final int apiPort;
     private final int guiPort;
     private static int numPoints = 0;
-    private static final String sourceRows = "";
+    private static final String SOURCE_ROWS = "";
     private static String channelRows = "";
-    private static final String sinkRows = "";
+    private static final String SINK_ROWS = "";
     private OrionBackendImpl orionBackend;
     private final String configurationPath;
+    private static final int MAX_CONNS = 50;
+    private static final int MAX_CONNS_PER_ROUTE = 10;
     
     /**
      * Constructor.
@@ -101,8 +104,8 @@ public class ManagementInterface extends AbstractHandler {
      * @param apiPort
      * @param guiPort
      */
-    public ManagementInterface(String configurationPath, File configurationFile, ImmutableMap<String, 
-            SourceRunner> sources, ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks, 
+    public ManagementInterface(String configurationPath, File configurationFile, ImmutableMap<String,
+            SourceRunner> sources, ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks,
             int apiPort, int guiPort) {
         this.configurationFile = configurationFile;
 
@@ -158,6 +161,10 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleGetAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handleGetAdminLogLoggers(request, response);
+                } else if (uri.startsWith("/v1/admin/log/appenders")) {
+                    handleGetAdminLogAppenders(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -174,7 +181,7 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.startsWith("/admin/configuration/instance")) {
                     handlePostAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
-                    handlePostAdminConfigurationInstance(request, response, true); 
+                    handlePostAdminConfigurationInstance(request, response, true);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -407,7 +414,13 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
     
-    private void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /**
+     * Handles GET /admin/log.
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    protected void handleGetAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         Level level = LogManager.getRootLogger().getLevel();
         response.setStatus(HttpServletResponse.SC_OK);
@@ -415,6 +428,12 @@ public class ManagementInterface extends AbstractHandler {
         LOGGER.info("Cygnus logging level successfully obtained");
     } // handleGetAdminLog
     
+    /**
+     * Handles GET /subscriptions.
+     * @param request
+     * @param response
+     * @throws IOException
+     */
     protected void handleGetSubscriptions(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
@@ -424,6 +443,8 @@ public class ManagementInterface extends AbstractHandler {
         // get the parameters to be updated
         String ngsiVersion = request.getParameter("ngsi_version");
         String subscriptionID = request.getParameter("subscription_id");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if (ngsiVersion == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -468,8 +489,7 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
 
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                ManagementInterfaceUtils.setCorrelator(request));
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
                 
         BufferedReader reader = request.getReader();
         String endpointStr = "";
@@ -521,7 +541,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.debug("Valid Endpoint. Creating request to Orion (GET all subscriptions).");
         } else {
             LOGGER.debug("Valid Endpoint. Creating request to Orion (GET subsription by id).");
-        }
+        } // if else
         
         // get host, port and ssl for request
         String host = endpoint.getHost();
@@ -530,16 +550,15 @@ public class ManagementInterface extends AbstractHandler {
         String token = endpoint.getAuthToken();
 
         // Create a orionBackend for request
-        orionBackend = new OrionBackendImpl(host, port, ssl);
+        orionBackend = new OrionBackendImpl(host, port, ssl, MAX_CONNS, MAX_CONNS_PER_ROUTE);
         
-        if (getAllSubscriptions)  {
-            
-            try { 
+        if (getAllSubscriptions) {
+            try {
                 int status;
-                JSONObject orionJson = new JSONObject();
+                JSONObject orionJson;
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsV2(token, subscriptionID);
+                        getSubscriptionsV2(token, subscriptionID, fiwareService, fiwareServicePath);
                                 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -561,21 +580,18 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                                 + "\"result\" : {" + orionJson.toJSONString() + "}");
                 } // if else
-            
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
                 response.getWriter().println("{\"success\":\"false\","
                                 + "\"result\" : {" + e.getMessage() + "}");
             } // try catch
-            
         } else {
-            
-            try { 
-                int status = -1;
-                JSONObject orionJson = new JSONObject();
+            try {
+                int status;
+                JSONObject orionJson;
 
                 JsonResponse orionResponse = orionBackend.
-                        getSubscriptionsByIdV2(token, subscriptionID);
+                        getSubscriptionsByIdV2(token, subscriptionID, fiwareService, fiwareServicePath);
 
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
@@ -603,19 +619,23 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                                 + "\"result\" : {" + e.getMessage() + "}");
             } // try catch
-            
-        }
-        
+        } // if else
     } // handleGetSubscriptions
     
-    protected void handleGetAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response, 
+    /**
+     * Handles GET /admin/configuration/agent.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
+    protected void handleGetAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        
         response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
-        String url = request.getRequestURI();     
+        String url = request.getRequestURI();
         String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (!(fileName.startsWith("agent_"))) {
@@ -642,7 +662,7 @@ public class ManagementInterface extends AbstractHandler {
             pathToFile = url.substring(29);
         } else {
             pathToFile = url.substring(26);
-        } // if else 
+        } // if else
         
         File file = new File(pathToFile);
                 
@@ -663,7 +683,7 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : {\"Param '" + param + "' not found in the agent\"}"); 
+                            + "\"result\" : {\"Param '" + param + "' not found in the agent\"}");
                     return;
                 } // if else
                 
@@ -679,18 +699,23 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"result\" : { \"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
-        
+        } // if else
     } // handleGetAdminParameters
-    
-    protected void handleGetAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+
+    /**
+     * Handles GET /admin/configuration/instance.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
+    protected void handleGetAdminConfigurationInstance(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        
         response.setContentType("application/json; charset=utf-8");
         boolean allParameters = false;
         
         String param = request.getParameter("param");
-        String url = request.getRequestURI();     
+        String url = request.getRequestURI();
         String fileName = ManagementInterfaceUtils.getFileName(url);
         
         if (param == null) {
@@ -709,12 +734,12 @@ public class ManagementInterface extends AbstractHandler {
             pathToFile = url.substring(32);
         } else {
             pathToFile = url.substring(29);
-        } // if else 
+        } // if else
         
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+                    + "\"result\" : {\"Invalid path for a instance configuration file\"}");
             return;
         } // if
         
@@ -736,25 +761,285 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : {\"Param '" + param + "' not found in the instance\"}"); 
+                            + "\"result\" : {\"Param '" + param + "' not found in the instance\"}");
                     return;
                 } // if else
-                
             } // if else
             
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
-            
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\" : {\"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
-        
+        } // if else
     } // handleGetAdminConfigurationInstance
+    
+    private void handleGetAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        String transientVar = request.getParameter("transient");
+        String loggerName = request.getParameter("name");
+        boolean allLoggers = true;
+
+        if (loggerName != null) {
+            allLoggers = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+        String param = "flume.root.logger";
+
+        if ((transientVar == null) || (transientVar.equals("true"))) {
+            String loggersJson = "[";
+            boolean firstTime = true;
+            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+
+            if (allLoggers) {
+                while (loggers.hasMoreElements()) {
+
+                    Logger logger = loggers.nextElement();
+                    String loggName = logger.getName();
+                    Level level = logger.getLevel();
+
+                    if (!firstTime) {
+                        loggersJson += ",";
+                    }  // if
+
+                    if (level != null) {
+                        loggersJson += "{\"name\":\"" + loggName + "\",\"level\":\"" + level.toString() + "\"}";
+                    } else {
+                        loggersJson += "{\"name\":\"" + loggName + "\",\"level\":null}";
+                    }
+                    firstTime = false;
+                } // while
+
+                loggersJson += "]";
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"loggers\":" + loggersJson + "}");
+                LOGGER.debug("Log4j loggers successfully obtained");
+            } else {
+                boolean loggerFound = false;
+
+                while (loggers.hasMoreElements()) {
+
+                    Logger log = loggers.nextElement();
+                    if (log.getName().equals(loggerName)) {
+                        loggersJson += "{\"name\":\"" + log.getName() + "\"}";
+                        loggerFound = true;
+                    } // if
+
+                } // while
+
+                loggersJson += "]";
+
+                if (loggerFound) {
+                    LogManager.getLoggerRepository().getLogger(loggerName);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
+                    LOGGER.debug("Log4j logger successfully obtained");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"logger name not found\"}");
+                    LOGGER.debug("Logger name not found");
+                } // try catch
+            } // if else
+        } else if (transientVar.equals("false")) {
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String loggersJson = "[";
+                ArrayList<String> loggerNames = ManagementInterfaceUtils.getLoggersFromProperties(properties);
+
+                if (allLoggers) {
+
+                    for (String name : loggerNames) {
+                        String propertyName = "log4j.logger." + name;
+                        String level = properties.getProperty(propertyName);
+                        loggersJson += "{\"name\":\"" + name + "\",\"level\":\""
+                            + level + "\"}";
+
+                        if (!(loggerNames.get(loggerNames.size() - 1).equals(name))) {
+                            loggersJson += ",";
+                        } // if
+                    } // for
+
+                    loggersJson += "]";
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"loggers\":" + loggersJson + "}");
+                    LOGGER.debug("Logger list: " + loggersJson);
+                } else {
+                    boolean loggerFound = false;
+
+                    for (String name : loggerNames) {
+                        if (name.equals(loggerName)) {
+                            String propertyName = "log4j.logger." + name;
+                            String level = properties.getProperty(propertyName);
+                            loggersJson += "{\"name\":\"" + loggerName + "\",\"level\":\""
+                                + level + "\"}]";
+                            loggerFound = true;
+                        } // if
+                    } // for
+
+                    if (loggerFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
+                        LOGGER.debug("Logger list: " + loggersJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                        LOGGER.debug("Logger name not found");
+                    } // if else
+                } // if else
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        } // if else if
+    } // handleGetAdminLogLoggers
+
+    private void handleGetAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        String transientVar = request.getParameter("transient");
+        String appenderName = request.getParameter("name");
+        boolean allAppenders = true;
+
+        if (appenderName != null) {
+            allAppenders = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transientVar == null) || (transientVar.equals("true"))) {
+            String appendersJson = "";
+
+            if (allAppenders) {
+                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
+
+                if (appendersJson.equals("[]")) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                    LOGGER.debug("No log4j appenders found");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":" + appendersJson + "}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } // if else
+
+            } else {
+
+                try {
+                    Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    String name = app.getName();
+                    PatternLayout layout = (PatternLayout) app.getLayout();
+                    String layoutStr = layout.getConversionPattern();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"appender\":[{\"name\":\"" + name
+                            + "\",\"layout\":\"" + layoutStr + "\",\"active\":\"true\"}]}");
+                    LOGGER.debug("Log4j appenders successfully obtained");
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                    LOGGER.debug("Appender name not found");
+                } // try catch
+            } // if else
+        } else if (transientVar.equals("false")) {
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                String param = "flume.root.logger";
+                String rootProperty = properties.getProperty(param);
+                String[] rootLogger = rootProperty.split(",");
+                String active = rootLogger[1];
+                String appenderJson = "[";
+                ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+
+                if (allAppenders) {
+
+                    for (String name : appenderNames) {
+                        boolean isActive = false;
+
+                        if (name.equals(active)) {
+                            isActive = true;
+                        } // if
+
+                        String layoutName = "log4j.appender." + name + ".layout."
+                            + "ConversionPattern";
+                        String layout = properties.getProperty(layoutName);
+                        appenderJson += "{\"name\":\"" + name + "\",\"layout\":\""
+                            + layout + "\",\"active\":\"" + Boolean.toString(isActive) + "\"}";
+
+                        if (!(appenderNames.get(appenderNames.size() - 1).equals(name))) {
+                            appenderJson += ", ";
+                        } // if
+                    } // for
+
+                    appenderJson += "]";
+
+                    if (appenderJson.equals("[]")) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j appenders found\"}");
+                        LOGGER.debug("No log4j appenders found");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appenders\":" + appenderJson + "}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } // if else
+                } else {
+                    boolean appenderFound = false;
+
+                    for (String name : appenderNames) {
+                        if (name.equals(appenderName)) {
+                            String layoutName = "log4j.appender." + name + ".layout."
+                                + "ConversionPattern";
+                            String layout = properties.getProperty(layoutName);
+                            appenderJson += "{\"name\":\"" + name + "\",\"layout\":\""
+                                + layout + "\",\"active\":\"";
+                            if (name.equals(active)) {
+                                appenderJson += "true\"}";
+                            } else {
+                                appenderJson += "false\"}";
+                            }
+                            appenderFound = true;
+                        } // if
+                    } // for
+
+                    if (appenderFound) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"appender\":" + appenderJson + "]}");
+                        LOGGER.debug("Appender list: " + appenderJson);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Appender name not found\"}");
+                        LOGGER.debug("Appender name not found");
+                    } // if else
+                } // if else
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"File not found in the path received\"}");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":\"Invalid 'transient' parameter found\"}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        } // if else if
+    } // handleGetAdminLogAppenders
 
     private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
@@ -771,8 +1056,7 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                ManagementInterfaceUtils.setCorrelator(request)); 
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
 
         // check the Json syntax of the new rule
         JSONParser jsonParser = new JSONParser();
@@ -865,6 +1149,8 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
                 
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -872,7 +1158,7 @@ public class ManagementInterface extends AbstractHandler {
                 + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
             LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
             return;
-        } 
+        } // if
         
         if (!((ngsiVersion.equals("1")) || (ngsiVersion.equals("2")))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -882,11 +1168,10 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                     + "Must be 1 or 2. Check it for errors.");
             return;
-        }
+        } // if
         
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                ManagementInterfaceUtils.setCorrelator(request)); 
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
 
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -908,17 +1193,15 @@ public class ManagementInterface extends AbstractHandler {
             // check if the subscription and endpoint are valid
             int err = cygnusSubscriptionv1.isValid();
 
-             if (err > 0) {
+            if (err > 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             
                 try {
                     manageErrorMsg(err, response);
                     return;
-                } // if
-                 catch (Exception e) {
+                } catch (Exception e) {
                     Logger.getLogger(e.getMessage());
-                 } // try catch
-            
+                } // try catch
             } // if
              
             LOGGER.debug("Valid CygnusSubscription. Creating request to Orion.");
@@ -931,20 +1214,26 @@ public class ManagementInterface extends AbstractHandler {
             String token = cygnusSubscriptionv1.getOrionEndpoint().getAuthToken();
             
             // Create a orionBackend for request
-            orionBackend = new OrionBackendImpl(host, port, ssl);
+            orionBackend = new OrionBackendImpl(host, port, ssl, MAX_CONNS, MAX_CONNS_PER_ROUTE);
         
             // Get /subscription JSON from entire one
             JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
             String subscriptionStr = inputJson.get("subscription").toString();
         
-            JsonResponse orionResponse = null;
-            int status = -1;
-            JSONObject orionJson = new JSONObject();
+            JsonResponse orionResponse;
+            int status;
+            JSONObject orionJson;
             
             try {
-                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token);
+                orionResponse = orionBackend.subscribeContextV1(subscriptionStr, token, fiwareService,
+                        fiwareServicePath);
                 status = orionResponse.getStatusCode();
                 orionJson = orionResponse.getJsonObject();
+                
+                if (orionJson.containsKey("orionError")) {
+                    JSONObject error = (JSONObject) orionJson.get("orionError");
+                    status = Integer.parseInt(error.get("code").toString());
+                } // if
                 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
@@ -954,13 +1243,10 @@ public class ManagementInterface extends AbstractHandler {
                     response.getWriter().println("{\"success\":\"false\","
                             + "\"result\" : {" + orionJson.toJSONString() + "}");
                 } // if else
-                
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
             } // try catch
-            
         } else if (ngsiVersion.equals("2")) {
-            
             try {
                 cygnusSubscriptionv2 = gson.fromJson(jsonStr, CygnusSubscriptionV2.class);
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -981,11 +1267,9 @@ public class ManagementInterface extends AbstractHandler {
                 try {
                     manageErrorMsg(err, response);
                     return;
-                } // if
-                 catch (Exception e) {
+                } catch (Exception e) {
                     Logger.getLogger(e.getMessage());
                 } // try catch
-            
             } // if
              
             LOGGER.debug("Valid CygnusSubscriptionV2. Creating request to Orion.");
@@ -998,18 +1282,19 @@ public class ManagementInterface extends AbstractHandler {
             String token = cygnusSubscriptionv2.getOrionEndpoint().getAuthToken();
             
             // Create a orionBackend for request
-            orionBackend = new OrionBackendImpl(host, port, ssl);
+            orionBackend = new OrionBackendImpl(host, port, ssl, MAX_CONNS, MAX_CONNS_PER_ROUTE);
         
             // Get /subscription JSON from entire one
             JsonObject inputJson = new JsonParser().parse(jsonStr).getAsJsonObject();
             String subscriptionStr = inputJson.get("subscription").toString();
         
-            JsonResponse orionResponse = null;
-            int status = -1;
-            JSONObject orionJson = new JSONObject();
+            JsonResponse orionResponse;
+            int status;
+            JSONObject orionJson;
             
             try {
-                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token);   
+                orionResponse = orionBackend.subscribeContextV2(subscriptionStr, token, fiwareService,
+                        fiwareServicePath);
                 status = orionResponse.getStatusCode();
                 
                 if (status == 201) {
@@ -1020,15 +1305,21 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     orionJson = orionResponse.getJsonObject();
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toString()+ "}");
+                            + "\"result\" : {" + orionJson.toString() + "}");
                 } // if else
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
             } // try catch
         } // if else if
-        
     } // handlePostSubscription
     
+    /**
+     * Handles POST /admin/configuration/agent.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
     protected void handlePostAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
         response.setContentType("application/json; charset=utf-8");
@@ -1079,7 +1370,7 @@ public class ManagementInterface extends AbstractHandler {
         File file = new File(pathToFile);
                 
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
             JSONObject jsonObject = new JSONObject();
             
@@ -1094,32 +1385,33 @@ public class ManagementInterface extends AbstractHandler {
                     LOGGER.debug(jsonObject);
                     return;
                 } // if
-                
             } // for
             
-            properties.put(param, newValue);                       
-            jsonObject.put("agent", properties);                        
+            properties.put(param, newValue);
+            jsonObject.put("agent", properties);
             ManagementInterfaceUtils.orderedPrinting(properties, file);
-                               
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
-            
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\" : { \"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
-        
+        } // if else
     } // handlePostAdminConfigurationAgent
     
+    /**
+     * Handles POST /admin/configuration/instance.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
     protected void handlePostAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
-        
         response.setContentType("application/json; charset=utf-8");
-        
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");
         String url = request.getRequestURI();
@@ -1158,16 +1450,16 @@ public class ManagementInterface extends AbstractHandler {
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+                    + "\"result\" : {\"Invalid path for a instance configuration file\"}");
             return;
         } // if
                 
         File file = new File(pathToFile);
         
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
-            JSONObject jsonObject = new JSONObject();          
+            JSONObject jsonObject = new JSONObject();
             Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             
             for (Object key: properties.keySet()) {
@@ -1181,32 +1473,29 @@ public class ManagementInterface extends AbstractHandler {
                     LOGGER.debug(jsonObject);
                     return;
                 } // if
-                
             } // for
             
-            properties.put(param, newValue);                       
-            jsonObject.put("instance", properties);                        
+            properties.put(param, newValue);
+            jsonObject.put("instance", properties);
             ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
-                               
             response.getWriter().println("{\"success\":\"true\","
                     + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
-            
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\" : {\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
-        
+        } // if else
     } // handlePostAdminConfigurationInstance
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
-        
         String subscriptionId = request.getParameter("subscription_id");
         String ngsiVersion = request.getParameter("ngsi_version");
+        String fiwareService = request.getHeader("Fiware-Service");
+        String fiwareServicePath = request.getHeader("Fiware-ServicePath");
         
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1219,7 +1508,7 @@ public class ManagementInterface extends AbstractHandler {
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
+                    + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
             LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
             return;
         } // if
@@ -1248,8 +1537,7 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                ManagementInterfaceUtils.setCorrelator(request));
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
         
         // Create a Gson object parsing the Json string
         Gson gson = new Gson();
@@ -1296,7 +1584,7 @@ public class ManagementInterface extends AbstractHandler {
         String token = endpoint.getAuthToken();
 
         // Create a orionBackend for request
-        orionBackend = new OrionBackendImpl(host, port, ssl);
+        orionBackend = new OrionBackendImpl(host, port, ssl, MAX_CONNS, MAX_CONNS_PER_ROUTE);
         
         try {
             
@@ -1306,7 +1594,7 @@ public class ManagementInterface extends AbstractHandler {
             
             if (ngsiVersion.equals("1")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV1(subscriptionId, token);
+                    deleteSubscriptionV1(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     JSONObject statusCode = (JSONObject) orionJson.get("statusCode");
@@ -1315,7 +1603,7 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
             } else if (ngsiVersion.equals("2")) {
                 orionResponse = orionBackend.
-                    deleteSubscriptionV2(subscriptionId, token);
+                    deleteSubscriptionV2(subscriptionId, token, fiwareService, fiwareServicePath);
                 if (orionResponse != null) {
                     orionJson = orionResponse.getJsonObject();
                     status = orionResponse.getStatusCode();
@@ -1341,7 +1629,7 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handleDeleteSubscription
     
-    protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response, 
+    protected void handleDeleteAdminConfigurationAgent (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
@@ -1382,7 +1670,7 @@ public class ManagementInterface extends AbstractHandler {
         File file = new File(pathToFile);
                 
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
             JSONObject jsonObject = new JSONObject();
             boolean paramExists = false;
@@ -1396,18 +1684,15 @@ public class ManagementInterface extends AbstractHandler {
                 
             } // for
             
-            properties.remove(param);                                           
-            jsonObject.put("agent", properties);                  
+            properties.remove(param);
+            jsonObject.put("agent", properties);
             ManagementInterfaceUtils.orderedPrinting(properties, file);
-            
-            response.setStatus(HttpServletResponse.SC_OK); 
+            response.setStatus(HttpServletResponse.SC_OK);
             
             if (paramExists) {
-                response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+                response.getWriter().println("{\"success\":\"true\"," + "\"result\" : " + jsonObject + "}");
             } else {
-                response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : " + jsonObject + "}");
+                response.getWriter().println("{\"success\":\"false\"," + "\"result\" : " + jsonObject + "}");
             } // if else
             
             LOGGER.debug(jsonObject);
@@ -1417,11 +1702,10 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"result\" : { \"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // try catch    
-        
+        } // try catch
     } // handleDeleteAdminConfigurationAgent
     
-    protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response, 
+    protected void handleDeleteAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
         
         response.setContentType("application/json; charset=utf-8");
@@ -1453,9 +1737,9 @@ public class ManagementInterface extends AbstractHandler {
         File file = new File(pathToFile);
                 
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
-            Map<String,String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
+            Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
             JSONObject jsonObject = new JSONObject();
             boolean paramExists = false;
             
@@ -1465,31 +1749,28 @@ public class ManagementInterface extends AbstractHandler {
                 if (name.equals(param)) {
                     paramExists = true;
                 } // if
-                
             } // for
             
-            properties.remove(param);                                           
-            jsonObject.put("agent", properties);                  
-            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);  
-            response.setStatus(HttpServletResponse.SC_OK); 
+            properties.remove(param);
+            jsonObject.put("agent", properties);
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
+            response.setStatus(HttpServletResponse.SC_OK);
             
             if (paramExists) {
                 response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+                        + "\"result\" : " + jsonObject + "}");
             } else {
                 response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : " + jsonObject + "}");
+                        + "\"result\" : " + jsonObject + "}");
             } // if else
             
             LOGGER.debug(jsonObject);
-            
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\" : { \"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // try catch    
-        
+        } // try catch
     } // handleDeleteAdminConfigurationAgent
     
     private void handlePutStats(HttpServletResponse response) throws IOException {
@@ -1588,8 +1869,7 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-                ManagementInterfaceUtils.setCorrelator(request)); 
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
 
         // get the rule ID to be updated
         long id = new Long(request.getParameter("id"));
@@ -1672,7 +1952,13 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePutGroupingRules
     
-    private void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /**
+     * Handles PUT /admin/log.
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    protected void handlePutAdminLog(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         // get the parameters to be updated
@@ -1682,9 +1968,9 @@ public class ManagementInterface extends AbstractHandler {
             LoggingLevels.valueOf(logLevel.toUpperCase());
             LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("{\"success\":\"log4j logging level updated to " 
+            response.getWriter().println("{\"success\":\"log4j logging level updated to "
                     + logLevel.toUpperCase() + "\" }");
-            LOGGER.info("log4j logging level updated to " + logLevel.toUpperCase());
+            LOGGER.debug("log4j logging level updated to " + logLevel.toUpperCase());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"error\":\"Invalid log level\"}");
@@ -1693,6 +1979,13 @@ public class ManagementInterface extends AbstractHandler {
         
     } // handlePutAdminLog
     
+    /**
+     * Handles PUT /admin/configuration/agent.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
     protected void handlePutAdminConfigurationAgent(HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
         response.setContentType("application/json; charset=utf-8");
@@ -1743,7 +2036,7 @@ public class ManagementInterface extends AbstractHandler {
         File file = new File(pathToFile);
                 
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
             properties.put(param, newValue);
                         
@@ -1762,10 +2055,17 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"result\" : { \"File not found in the path received\" }");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // if else    
+        } // if else
         
     } // handlePutAdminConfigurationAgent
     
+    /**
+     * Handles PUT /admin/configuration/instance.
+     * @param request
+     * @param response
+     * @param v1
+     * @throws IOException
+     */
     protected void handlePutAdminConfigurationInstance (HttpServletRequest request, HttpServletResponse response,
             boolean v1) throws IOException {
         response.setContentType("json;charset=utf-8");
@@ -1808,32 +2108,29 @@ public class ManagementInterface extends AbstractHandler {
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : {\"Invalid path for a instance configuration file\"}"); 
+                + "\"result\" : {\"Invalid path for a instance configuration file\"}");
             return;
         } // if
                 
         File file = new File(pathToFile);
                 
         try {
-            Properties properties = new Properties();           
+            Properties properties = new Properties();
             properties.load(new FileInputStream(file));
             Map<String, String> descriptions = ManagementInterfaceUtils.readDescriptions(file);
-            properties.put(param, newValue);                                   
+            properties.put(param, newValue);
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("instance", properties);            
-            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);                               
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+            jsonObject.put("instance", properties);
+            ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
+            response.getWriter().println("{\"success\":\"true\"," + "\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
-            
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
                     + "\"result\" : {\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } // try catch   
-        
+        } // try catch
     } // handlePutAdminConfigurationInstance
     
     private void handlePutAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -1881,14 +2178,10 @@ public class ManagementInterface extends AbstractHandler {
                     + "\"result\":{\"Appender '" + name + "' updated succesfully\"}");
                 LOGGER.debug("Appender '" + name + "' updated succesfully");
             } else {
-                ConsoleAppender newAppender = new ConsoleAppender();
-                newAppender.setName(name);
-                newAppender.setLayout(patternLayout);
-                LogManager.getRootLogger().addAppender(newAppender);
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\":{\"Appender '" + name + "' put.\"}}");
-                LOGGER.debug("Appender '" + name + "' put.");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":{\"Appender '" + name + "' couldn't be added. It can only be updated.\"}}");
+                LOGGER.debug("Appender '" + name + "' couldn't be added. It can only be updated.");
             } // if else
 
         } else if (transient_.equals("false")){
@@ -1960,8 +2253,7 @@ public class ManagementInterface extends AbstractHandler {
         long id = new Long(request.getParameter("id"));
         
         // set the given header to the response or create it
-        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, 
-            ManagementInterfaceUtils.setCorrelator(request)); 
+        response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
 
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -2073,15 +2365,14 @@ public class ManagementInterface extends AbstractHandler {
         // return the points
         response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println(
-                "{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":[" + sourceRows + "]},"
-                + "\"channel_points\":{\"columns\":[" + channelColumns + "],\"rows\":[" + channelRows + "]},"
-                + "\"sink_points\":{\"columns\":[" + sinkColumns + "],\"rows\":[" + sinkRows + "]}}");
+        response.getWriter().println("{\"source_points\":{\"columns\":[" + sourceColumns + "],\"rows\":["
+                + SOURCE_ROWS + "]}," + "\"channel_points\":{\"columns\":[" + channelColumns + "],\"rows\":["
+                + channelRows + "]}," + "\"sink_points\":{\"columns\":[" + sinkColumns + "],\"rows\":["
+                + SINK_ROWS + "]}}");
     } // handleGetPoints
     
-    private void manageErrorMsg(int err, HttpServletResponse response) throws Exception{
-                
-        switch (err) {            
+    private void manageErrorMsg(int err, HttpServletResponse response) throws Exception {
+        switch (err) {
             // cases of missing endpoint or subscription
             case 11:
                 response.getWriter().println("{\"success\":\"false\","
@@ -2189,12 +2480,11 @@ public class ManagementInterface extends AbstractHandler {
                         + "\"error\":\"Invalid subscription, field 'throttling' is empty\"}");
                 LOGGER.error("Invalid subscription, field 'throttling' is empty");
                 return;
-                
             case 141:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'description' is missing\"}");
                 LOGGER.error("Invalid subscription, field 'description' is missing");
-                return;               
+                return;
             case 142:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'description' is empty\"}");
@@ -2205,44 +2495,43 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'subject' is missing\"}");
                 LOGGER.error("Invalid subscription, field 'subject' is missing");
-                return;                 
+                return;
             case 15112:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'subject' is empty\"}");
                 LOGGER.error("Invalid subscription, field 'subject' is empty");
-                return;           
+                return;
             case 1512:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'subject' has missing fields\"}");
                 LOGGER.error("Invalid subscription, field 'subject' has missing fields");
-                return;           
+                return;
             case 1513:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'subject' has empty fields\"}");
                 LOGGER.error("Invalid subscription, field 'subject' has empty fields");
-                return; 
+                return;
              
             case 1611:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'notification' is missing\"}");
                 LOGGER.error("Invalid subscription, field 'notification' is missing");
-                return; 
+                return;
             case 1612:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'notification' has missing fields\"}");
                 LOGGER.error("Invalid subscription, field 'notification' has missing fields");
-                return;    
+                return;
             case 1613:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'notification' has empty fields\"}");
                 LOGGER.error("Invalid subscription, field 'notification' has empty fields");
                 return;
-                
             case 171:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'expires' is missing\"}");
                 LOGGER.error("Invalid subscription, field 'expires' is missing");
-                return;               
+                return;
             case 172:
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription, field 'expires' is empty\"}");
@@ -2308,9 +2597,8 @@ public class ManagementInterface extends AbstractHandler {
                 response.getWriter().println("{\"success\":\"false\","
                         + "\"error\":\"Invalid subscription\"}");
                 LOGGER.error("Invalid subscription");
-            } // switch
-        
-    } // manageErrorMsg 
+        } // switch
+    } // manageErrorMsg
     
     /**
      * SetOrionBackend: Sets a given orionBackend.

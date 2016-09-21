@@ -17,8 +17,8 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Arrays;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
@@ -49,9 +49,10 @@ public class NGSISTHSinkTest {
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
         String dataModel = null; // default value
+        String enableEncoding = null; // default value
         String resolutions = null; // default value
         NGSISTHSink sink = new NGSISTHSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, resolutions));
+        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, enableEncoding, resolutions));
         
         try {
             boolean[] expected = {true, true, true, true, true};
@@ -75,9 +76,10 @@ public class NGSISTHSinkTest {
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
         String dataModel = null; // default value
+        String enableEncoding = null; // default value
         String resolutions = "month,week,second";
         NGSISTHSink sink = new NGSISTHSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, resolutions));
+        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, enableEncoding, resolutions));
         
         try {
             boolean[] expected = {true, false, false, false, true};
@@ -101,9 +103,10 @@ public class NGSISTHSinkTest {
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
         String dataModel = null; // default value
+        String enableEncoding = null; // default value
         String resolutions = "";
         NGSISTHSink sink = new NGSISTHSink();
-        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, resolutions));
+        sink.configure(createContext(collectionPrefix, dbPrefix, dataModel, enableEncoding, resolutions));
         
         try {
             boolean[] expected = {false, false, false, false, false};
@@ -117,8 +120,10 @@ public class NGSISTHSinkTest {
         } // try catch
     } // testConfigureEmptyResolutions
     
-    private Context createContext(String collectionPrefix, String dbPrefix, String dataModel, String resolutions) {
-        Context context = CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel);
+    private Context createContext(String collectionPrefix, String dbPrefix, String dataModel, String enableEncoding,
+            String resolutions) {
+        Context context = NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+                enableEncoding);
         context.put("resolutions", resolutions);
         return context;
     } // createContext

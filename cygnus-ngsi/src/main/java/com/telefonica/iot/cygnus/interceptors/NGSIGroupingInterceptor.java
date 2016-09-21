@@ -43,20 +43,20 @@ public class NGSIGroupingInterceptor implements Interceptor {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGroupingInterceptor.class);
     private final String groupingRulesFileName;
     private CygnusGroupingRules groupingRules;
-    private final boolean enableNewEncoding;
+    private final boolean enableEncoding;
     private ConfigurationReader configurationReader;
     private boolean invalidConfiguration = false;
     
     /**
      * Constructor.
      * @param groupingRulesFileName
-     * @param enableNewEncoding
+     * @param enableEncoding
      * @param invalidConfiguration
      */
-    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean enableNewEncoding,
+    public NGSIGroupingInterceptor(String groupingRulesFileName, boolean enableEncoding,
             boolean invalidConfiguration) {
         this.groupingRulesFileName = groupingRulesFileName;
-        this.enableNewEncoding = enableNewEncoding;
+        this.enableEncoding = enableEncoding;
         this.invalidConfiguration = invalidConfiguration;
     } // NGSIGroupingInterceptor
     
@@ -128,7 +128,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
 
                 if (matchingRule == null) {
                     groupedDestinations.add(contextElement.getId()
-                            + (enableNewEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                            + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
                             + contextElement.getType());
                     groupedServicePaths.add(splitedNotifiedServicePaths[i]);
                 } else {
@@ -137,7 +137,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
                 } // if else
 
                 defaultDestinations.add(contextElement.getId()
-                        + (enableNewEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
                         + contextElement.getType());
             } // for
 
@@ -196,7 +196,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
      */
     public static class Builder implements Interceptor.Builder {
         private String groupingRulesFileName;
-        private boolean enableNewEncoding;
+        private boolean enableEncoding;
         private boolean invalidConfiguration;
  
         @Override
@@ -205,34 +205,34 @@ public class NGSIGroupingInterceptor implements Interceptor {
             
             if (groupingRulesFileName == null) {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = null) -- Must be configured");
+                LOGGER.debug("[gi] Invalid configuration (grouping_rules_conf_file = null) -- Must be configured");
             } else if (groupingRulesFileName.length() == 0) {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding = ) -- Cannot be empty");
+                LOGGER.debug("[gi] Invalid configuration (grouping_rules_conf_file = ) -- Cannot be empty");
             } else {
-                LOGGER.debug("[gi] Reading configuration (grouping_rules_file=" + groupingRulesFileName + ")");
+                LOGGER.debug("[gi] Reading configuration (grouping_rules_conf_file=" + groupingRulesFileName + ")");
             } // if else
 
-            String enableNewEncodingStr = context.getString("enable_new_encoding", "false");
+            String enableEncodingStr = context.getString("enable_encoding", "false");
 
-            if (enableNewEncodingStr.equals("true") || enableNewEncodingStr.equals("false")) {
-                enableNewEncoding = Boolean.valueOf(enableNewEncodingStr);
-                LOGGER.debug("[gi] Reading configuration (enable_new_encoding="
-                        + enableNewEncodingStr + ")");
+            if (enableEncodingStr.equals("true") || enableEncodingStr.equals("false")) {
+                enableEncoding = Boolean.valueOf(enableEncodingStr);
+                LOGGER.debug("[gi] Reading configuration (enable_encoding="
+                        + enableEncodingStr + ")");
             }  else {
                 invalidConfiguration = true;
-                LOGGER.debug("[gi] Invalid configuration (enable_new_encoding="
-                        + enableNewEncodingStr + ") -- Must be 'true' or 'false'");
+                LOGGER.debug("[gi] Invalid configuration (enable_encoding="
+                        + enableEncodingStr + ") -- Must be 'true' or 'false'");
             }  // if else
         } // configure
  
         @Override
         public Interceptor build() {
-            return new NGSIGroupingInterceptor(groupingRulesFileName, enableNewEncoding, invalidConfiguration);
+            return new NGSIGroupingInterceptor(groupingRulesFileName, enableEncoding, invalidConfiguration);
         } // build
         
         protected boolean getEnableNewEncoding() {
-            return enableNewEncoding;
+            return enableEncoding;
         } // getEnableNewEncoding
         
         protected boolean getInvalidConfiguration() {

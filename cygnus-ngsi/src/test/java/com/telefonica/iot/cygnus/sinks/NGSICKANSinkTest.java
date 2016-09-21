@@ -18,18 +18,15 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
-import static org.mockito.Mockito.*; // this is required by "when" like functions
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import org.junit.Before;
+import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
-import org.apache.flume.channel.MemoryChannel;
-import org.apache.flume.lifecycle.LifecycleState;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.junit.Test;
 
 /**
@@ -39,365 +36,967 @@ import org.junit.Test;
 @RunWith(MockitoJUnitRunner.class)
 public class NGSICKANSinkTest {
     
-    // mocks
-    @Mock
-    private CKANBackend mockCKANBackend;
-    
-    // instance to be tested
-    private NGSICKANSink sink;
-    
-    // other inmutable instances
-    private NotifyContextRequest singleNotifyContextRequest;
-    private NotifyContextRequest multipleNotifyContextRequest;
-    
-    // context constants
-    private final String ckanHost = "localhost";
-    private final String ckanPort = "3306";
-    private final String apiKey = "xyzwxyzwxyzw";
-    private final String orionURL = "http://localhost:1026";
-    private final String ssl = "true";
-    private String enableGrouping = "true";
-    private String attrPersistence = "row";
-    
-    // batches constants
-    private final Long recvTimeTs = 123456789L;
-    private final String normalService = "vehicles";
-    private final String abnormalService =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservname";
-    private final String normalDefaultServicePath = "/4wheels";
-    private final String rootServicePath = "/";
-    private final String abnormalDefaultServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String normalGroupedServicePath = "cars";
-    private final String abnormalGroupedServicePath =
-            "/tooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongservpathname";
-    private final String normalDefaultDestination = "car1_car";
-    private final String abnormalDefaultDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    private final String normalGroupedDestination = "my_cars";
-    private final String abnormalGroupedDestination =
-            "tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolongdestname";
-    
-    // notification constants
-    private final String singleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
-    private final String multipleContextElementNotification = ""
-            + "{\n"
-            + "    \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n"
-            + "    \"originator\" : \"localhost\",\n"
-            + "    \"contextResponses\" : [\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"112.9\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car1\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        },\n"
-            + "        {\n"
-            + "            \"contextElement\" : {\n"
-            + "                \"attributes\" : [\n"
-            + "                    {\n"
-            + "                        \"name\" : \"speed\",\n"
-            + "                        \"type\" : \"float\",\n"
-            + "                        \"value\" : \"115.8\"\n"
-            + "                    }\n"
-            + "                ],\n"
-            + "                \"type\" : \"car\",\n"
-            + "                \"isPattern\" : \"false\",\n"
-            + "                \"id\" : \"car2\"\n"
-            + "            },\n"
-            + "            \"statusCode\" : {\n"
-            + "                \"code\" : \"200\",\n"
-            + "                \"reasonPhrase\" : \"OK\"\n"
-            + "            }\n"
-            + "        }\n"
-            + "    ]\n"
-            + "}";
+    /**
+     * Constructor.
+     */
+    public NGSICKANSinkTest() {
+        LogManager.getRootLogger().setLevel(Level.FATAL);
+    } // NGSICKANSinkTest
 
     /**
-     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
-     * classes.
-     *  
-     * @throws Exception
+     * [NGSICKANSink.configure] -------- When not configured, not mandatory parameters get default values.
      */
-    @Before
-    public void setUp() throws Exception {
-        // set up the instance of the tested class
-        sink = new NGSICKANSink();
-        sink.setPersistenceBackend(mockCKANBackend);
+    @Test
+    public void testConfigureDefaults() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- When not configured, not mandatory parameters get default values");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
         
-        // set up other immutable instances
-        singleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(singleContextElementNotification);
-        multipleNotifyContextRequest = TestUtils.createJsonNotifyContextRequest(multipleContextElementNotification);
-
-        // set up the behaviour of the mocked classes
-        doNothing().doThrow(new Exception()).when(mockCKANBackend).persist(null, null, null, null, true);
-    } // setUp
-
-    /**
-     * Test of configure method, of class NGSICKANSink.
-     */
-    @Test
-    public void testConfigure() {
-        System.out.println("Testing OrionCKANSink.configure");
-        attrPersistence = "row";
-        Context context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        assertEquals(ckanHost, sink.getCKANHost());
-        assertEquals(ckanPort, sink.getCKANPort());
-        assertEquals(apiKey, sink.getAPIKey());
-        assertEquals(apiKey, sink.getAPIKey());
-        assertEquals(attrPersistence, sink.getRowAttrPersistence() ? "row" : "column");
-        assertEquals(ssl, sink.getSSL() ? "true" : "false");
-    } // testConfigure
-
-    /**
-     * Test of start method, of class NGSICKANSink.
-     */
-    @Test
-    public void testStart() {
-        System.out.println("Testing OrionCKANSink.start");
-        attrPersistence = "row";
-        enableGrouping = "true";
-        Context context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        sink.start();
-        assertTrue(sink.getPersistenceBackend() != null);
-        assertEquals(LifecycleState.START, sink.getLifecycleState());
-    } // testStart
+        try {
+            assertTrue(sink.getRowAttrPersistence());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'attr_persistence=row' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'attr_persistence=row' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("nokey", sink.getAPIKey());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'api_key=nokey' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'api_key=nokey' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(500, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'backend.max_conns=500' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'backend.max_conns=500' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(100, sink.getBackendMaxConnsPerRoute());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'backend.max_conns_per_route=100' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'backend.max_conns_per_route=100' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(1, sink.getBatchSize());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'batch_size=1' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'batch_size=1' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(30, sink.getBatchTimeout());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'batch_timeout=30' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'batch_timeout=30' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(10, sink.getBatchTTL());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'batch_ttl=30' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'batch_ttl=30' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(DataModel.DMBYENTITY, sink.getDataModel());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-entity' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-entity' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableEncoding());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_encoding=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_encoding=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableGrouping());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_grouping=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_grouping=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(sink.getEnableLowerCase());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_lowercase=true' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_lowercase=true' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("localhost", sink.getCKANHost());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ckan_host=localhost' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ckan_host=localhost' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals("80", sink.getCKANPort());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ckan_port=80' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ckan_port=80' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getSSL());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ssl=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ssl=false' not configured by default");
+            throw e;
+        } // try catch
+    } // testConfigureDefaults
     
     /**
-     * Test of persistBatch method, of class NGSICKANSink. Null batches are tested.
+     * [NGSICKANSink.configure] -------- backend.max_conns gets the configured value.
      */
     @Test
-    public void testPersistNullBatches() {
-        System.out.println("Testing OrionCKANSinkTest.persistBatch (null batches)");
-        attrPersistence = "row";
-        enableGrouping = "true";
-        Context context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
+    public void testConfigureMaxConns() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- backend.max_conns gets the configured value");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = "25";
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "falso";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
         
         try {
-            sink.persistBatch(null);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistNullBatches
-
-    /**
-     * Test of persistBatch method, of class NGSICKANSink. Attribute persistence modes are tested.
-     */
-    @Test
-    public void testPersistAttrPersistence() {
-        // common objects
-        NGSIBatch defaultBatch = createBatch(recvTimeTs, normalService, normalDefaultServicePath, normalDefaultDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        System.out.println("Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)");
-        attrPersistence = "row";
-        enableGrouping = "true";
-        Context context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSinkTest.persistBatch (row persistence, disable grouping)");
-        attrPersistence = "row";
-        enableGrouping = "false";
-        context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSinkTest.persistBatch (column attr persistence, enable grouping)");
-        attrPersistence = "column";
-        enableGrouping = "true";
-        context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSinkTest.persistBatch (column attr persistence, disable grouping)");
-        attrPersistence = "column";
-        enableGrouping = "false";
-        context = createContext(attrPersistence, enableGrouping);
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-    } // testPersistAttrPersistence
+            assertEquals(25, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'backend.max_conns=25' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'backend.max_conns=25' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConns
     
     /**
-     * Test of persistBatch method, of class NGSICKANSink. Attribute persistence modes are tested.
+     * [NGSICKANSink.configure] -------- backend.max_conns_per_route gets the configured value.
      */
     @Test
-    public void testPersistResourceLengths() {
-        // common objects
-        attrPersistence = "row";
-        enableGrouping = "true";
-        Context context = createContext(attrPersistence, enableGrouping);
-        
-        System.out.println("Testing OrionCKANSink.persisBatch (normal resource lengths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testConfigureMaxConnsPerRoute() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- backend.max_conns_per_route gets the configured value");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = "3";
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "falso";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
         
         try {
-            sink.persistBatch(groupedBatch);
+            assertEquals(3, sink.getBackendMaxConnsPerRoute());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'backend.max_conns_per_route=3' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'backend.max_conns_per_route=3' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureMaxConnsPerRoute
+    
+    /**
+     * [NGSICKANSink.configure] -------- enable_encoding can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureEnableEncoding() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- enable_encoding can only be 'true' or 'false'");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "falso";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_encoding=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_encoding=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableEncoding
+    
+    /**
+     * [NGSICKANSink.configure] -------- enable_lowercase can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureEnableLowercase() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- enable_lowercase can only be 'true' or 'false'");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = "falso";
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_lowercase=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_lowercase=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableLowercase
+    
+    /**
+     * [NGSICKANSink.configure] -------- enable_grouping can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureEnableGrouping() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- enable_grouping can only be 'true' or 'false'");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = "falso";
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'enable_grouping=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'enable_grouping=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableGrouping
+    
+    /**
+     * [NGSICKANSink.configure] -------- data_model can only be 'dm-by-entity'.
+     */
+    // TBD: check for dataModel values in NGSIMySQLSink and uncomment this test.
+    // @Test
+    public void testConfigureDataModel() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- data_model can only be 'dm-by-entity'");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'data_model=dm-by-service' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'data_model=dm-by-service' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureDataModel
+    
+    /**
+     * [NGSICKANSink.configure] -------- attr_persistence can only be 'row' or 'column'.
+     */
+    @Test
+    public void testConfigureAttrPersistence() {
+        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                + "-------- attr_persistence can only be 'row' or 'column'");
+        String apiKey = null; // default
+        String attrPersistence = "fila";
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'attr_persistence=fila' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'attr_persistence=fila' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureAttrPersistence
+    
+    /**
+     * [NGSICKANSink.buildOrgName] -------- When no encoding, the org name is equals to the encoding of the
+     * notified/defaulted service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrgNameNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- When no encoding, the org name is equals to the encoding of the notified/defaulted "
+                + "service");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
+        
+        try {
+            String builtOrgName = sink.buildOrgName(service);
+            String expectedOrgName = "someService";
+        
+            try {
+                assertEquals(expectedOrgName, builtOrgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "-  OK  - '" + expectedOrgName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "- FAIL - '" + expectedOrgName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch // try catch
         } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSink.persistBatch (too long service name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, abnormalService, normalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildOrgNameNoEncoding
+    
+    /**
+     * [NGSICKANSink.buildOrgName] -------- When encoding, the org name is equals to the encoding of the
+     * notified/defaulted service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrgNameEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- When encoding, the org name is equals to the encoding of the notified/defaulted service");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
         
         try {
-            sink.persistBatch(groupedBatch);
+            String builtOrgName = sink.buildOrgName(service);
+            String expectedOrgName = "somex0053ervice";
+        
+            try {
+                assertEquals(expectedOrgName, builtOrgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "-  OK  - '" + expectedOrgName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "- FAIL - '" + expectedOrgName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildOrgNameEncoding
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When no encoding and when using a notified/defaulted non root service path,
+     * the pkg name is equals to the encoding of the concatenation of the notified/defaulted service and the
+     * notified/defaulted service path.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNameNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When no encoding and when using a notified/defaulted non root service path, the pkg name "
+                + "is equals to the encoding of the concatenation of the notified/defaulted service and the "
+                + "notified/defaulted service path");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "someService_someServicePath";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNameNonRootServicePathNoEncoding
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When encoding and when using a notified/defaulted non root service path,
+     * the pkg name is equals to the encoding of the concatenation of the notified/defaulted service and the
+     * notified/defaulted service path.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNameNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When encoding and when using a notified/defaulted non root service path, the pkg name is "
+                + "equals to the encoding of the concatenation of the notified/defaulted service and the "
+                + "notified/defaulted service path");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "somex0053ervicex002fsomex0053ervicex0050ath";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNameNonRootServicePathEncoding
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When no encoding and when using a notified/defaulted root service path, the
+     * pkg name is equals to the encoding of the concatenation of the notified/defaulted service and the
+     * notified/defaulted service path.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNameRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When no encoding and when using a notified/defaulted root service path, the pkg name is "
+                + "equals to the encoding of the concatenation of the notified/defaulted service and the "
+                + "notified/defaulted service path");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
+        String servicePath = "/";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "someService";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNameRootServicePathNoEncoding
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When encoding and when using a notified/defaulted root service path, the
+     * pkg name is equals to the encoding of the concatenation of the notified/defaulted service and the
+     * notified/defaulted service path.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNameRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When encoding and when using a notified/defaulted root service path, the pkg name is "
+                + "equals to the encoding of the concatenation of the notified/defaulted service and the "
+                + "notified/defaulted service path");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "someService";
+        String servicePath = "/";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "somex0053ervicex002f";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the encoding of "
+                        + "<service>xffff<servicePath>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNameRootServicePathEncoding
+    
+    /**
+     * [NGSICKANSink.buildResName] -------- When no encoding, the CKAN resource name is the encoding of the
+     * concatenation of the notified \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNameNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                + "-------- When no encoding, the CKAN resource name is the encoding of the concatenation of the "
+                + "notified <entityId> and <entityType>");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String entity = "someId=someType";
+        
+        try {
+            String builtResName = sink.buildResName(entity);
+            String expecetedResName = "someId_someType";
+        
+            try {
+                assertEquals(expecetedResName, builtResName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "-  OK  - '" + builtResName + "' is equals to the encoding of <entityId> and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "- FAIL - '" + builtResName + "' is not equals to the encoding of <entityId> and "
+                        + "<entityType>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildResourceNameNoEncoding
+    
+    /**
+     * [NGSICKANSink.buildResName] -------- When encoding, the CKAN resource name is the encoding of the concatenation
+     * of the notified \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNameEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                + "-------- When encoding, the CKAN resource name is the encoding of the concatenation of the "
+                + "notified <entityId> and <entityType>");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String entity = "someId=someType";
+        
+        try {
+            String builtResName = sink.buildResName(entity);
+            String expecetedResName = "somex0049dxffffsomex0054ype";
+        
+            try {
+                assertEquals(expecetedResName, builtResName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "-  OK  - '" + builtResName + "' is equals to the encoding of <entityId> and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "- FAIL - '" + builtResName + "' is not equals to the encoding of <entityId> and "
+                        + "<entityType>");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildResourceNameEncoding
+    
+    /**
+     * [NGSICKANSink.buildOrgName] -------- An organization name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrganizationNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- An organization name length greater than 100 characters is detected");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogService";
+        
+        try {
+            sink.buildOrgName(service);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - An organization name length greater than 100 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "-  OK  - An organization name length greater than 100 characters has been detected");
         } // try catch
-        
-        System.out.println("Testing OrionCKANSink.persistBatch (too long servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, abnormalGroupedServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-        
-        System.out.println("Testing OrionCKANSink.persistBatch (too long destination name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, abnormalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertTrue(true);
-        } // try catch
-    } // testPersistResourceLengths
+    } // testBuildOrganizationNameLength
     
     /**
-     * Test of persistBatch method, of class NGSICKANSink. Special service and service-path are tested.
+     * [NGSICKANSink.buildPkgName] -------- A package name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
      */
     @Test
-    public void testPersistServiceServicePath() {
-        // common objects
-        attrPersistence = "row";
-        enableGrouping = "true";
-        Context context = createContext(attrPersistence, enableGrouping);
-        
-        System.out.println("Testing OrionCKANSink.persistBatch (\"root\" servicePath name)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        NGSIBatch groupedBatch = createBatch(recvTimeTs, normalService, rootServicePath, normalGroupedDestination,
-                singleNotifyContextRequest.getContextResponses().get(0).getContextElement());
-        
-        try {
-            sink.persistBatch(groupedBatch);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(true);
-        } // try catch finally
-        
-        System.out.println("Testing OrionCKANSink.persistBatch (multiple destinations and "
-                + "fiware-servicePaths)");
-        sink.configure(context);
-        sink.setChannel(new MemoryChannel());
-        groupedBatch = createBatch(recvTimeTs, normalService, normalGroupedServicePath, normalGroupedDestination,
-                multipleNotifyContextRequest.getContextResponses().get(0).getContextElement());
+    public void testBuildPackageNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- A resource name length greater than 100 characters is detected");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogService";
+        String servicePath = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooooooogServicePath";
         
         try {
-            sink.persistBatch(groupedBatch);
+            sink.buildPkgName(service, servicePath);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - A package name length greater than 100 characters has not been detected");
+            assertTrue(false);
         } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
             assertTrue(true);
-        } // try catch finally
-    } // testPersistServiceServicePath
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "-  OK  - A package name length greater than 100 characters has been detected");
+        } // try catch
+    } // testBuildPackageNameLength
     
+    /**
+     * [NGSICKANSink.buildResName] -------- A resource name length greater than 100 characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNameLength() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                + "-------- A resource name length greater than 100 characters is detected");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+        String entity = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+                + "ooooogEntity";
+        
+        try {
+            sink.buildResName(entity);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - A resource name length greater than 100 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "-  OK  - A resource name length greater than 100 characters has been detected");
+        } // try catch
+    } // testBuildResourceNameLength
+
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
         NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
@@ -407,14 +1006,24 @@ public class NGSICKANSinkTest {
         return batch;
     } // createBatch
     
-    private Context createContext(String attrPersistence, String enableGrouping) {
+    private Context createContext(String apiKey, String attrPersistence, String backendMaxConns,
+            String backendMaxConnsPerRoute, String batchSize, String batchTime, String batchTTL, String dataModel,
+            String enableEncoding, String enableGrouping, String enableLowercase, String host, String port,
+            String ssl) {
         Context context = new Context();
-        context.put("ckan_host", ckanHost);
-        context.put("ckan_port", ckanPort);
         context.put("api_key", apiKey);
-        context.put("enable_grouping", enableGrouping);
-        context.put("orion_url", orionURL);
         context.put("attr_persistence", attrPersistence);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("batch_size", batchSize);
+        context.put("batch_time", batchTime);
+        context.put("batch_ttl", batchTTL);
+        context.put("ckan_host", host);
+        context.put("ckan_port", port);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_lowercase", enableLowercase);
         context.put("ssl", ssl);
         return context;
     } // createContext

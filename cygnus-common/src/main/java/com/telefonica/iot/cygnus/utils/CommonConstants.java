@@ -33,7 +33,7 @@ public final class CommonConstants {
     // Http header names
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
     
-    // Http headers propably used by Flume events as well
+    // Http headers probably used by Flume events as well... TBD: should not be here!!
     public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
     public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
@@ -49,13 +49,6 @@ public final class CommonConstants {
     public static final String ATTR_VALUE          = "attrValue";
     public static final String ATTR_MD             = "attrMd";
     public static final String ATTR_MD_FILE        = "attrMdFile";
-
-    // Maximum values
-    public static final int MAX_CONNS                   = 500;
-    public static final int MAX_CONNS_PER_ROUTE         = 100;
-    public static final int MAX_NAME_LEN                = 64;
-    public static final int SERVICE_HEADER_MAX_LEN      = 50;
-    public static final int SERVICE_PATH_HEADER_MAX_LEN = 50;
     
     // Others
     public static final String EMPTY_MD = "[]";
@@ -69,31 +62,31 @@ public final class CommonConstants {
     
     // encoding
     public static final String INTERNAL_CONCATENATOR = "=";
-    public static final String CONCATENATOR = "x0000";
+    public static final String CONCATENATOR = "xffff";
     
     // Header for API uses
-    public static final String CYGNUS_IPR_HEADER = "#####\n"  
-                                    + "# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U\n" 
-                                    + "# \n" 
-                                    + "# This file is part of fiware-cygnus (FI-WARE project).\n" 
-                                    + "# \n" 
-                                    + "# fiware-cygnus is free software: you can redistribute it and/or modify it under "
-                                    + "the terms of the GNU Affero General\n" 
-                                    + "# Public License as published by the Free Software Foundation, either version 3 "
-                                    + "of the License, or (at your option) any\n" 
-                                    + "# later version.\n" 
-                                    + "# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT "
-                                    + "ANY WARRANTY; without even the implied\n" 
-                                    + "# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
-                                    + "Affero General Public License for more\n" 
-                                    + "# details.\n" 
-                                    + "# \n" 
-                                    + "# You should have received a copy of the GNU Affero General Public License "
-                                    + "along with fiware-cygnus. If not, see\n" 
-                                    + "# http://www.gnu.org/licenses/.\n" 
-                                    + "# \n" 
-                                    + "# For those usages not covered by the GNU Affero General Public License please "
-                                    + "contact with iot_support at tid dot es";
+    public static final String CYGNUS_IPR_HEADER = "#####\n"
+            + "# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U\n"
+            + "# \n"
+            + "# This file is part of fiware-cygnus (FI-WARE project).\n"
+            + "# \n"
+            + "# fiware-cygnus is free software: you can redistribute it and/or modify it under "
+            + "the terms of the GNU Affero General\n"
+            + "# Public License as published by the Free Software Foundation, either version 3 "
+            + "of the License, or (at your option) any\n"
+            + "# later version.\n"
+            + "# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT "
+            + "ANY WARRANTY; without even the implied\n"
+            + "# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
+            + "Affero General Public License for more\n"
+            + "# details.\n"
+            + "# \n"
+            + "# You should have received a copy of the GNU Affero General Public License "
+            + "along with fiware-cygnus. If not, see\n"
+            + "# http://www.gnu.org/licenses/.\n"
+            + "# \n"
+            + "# For those usages not covered by the GNU Affero General Public License please "
+            + "contact with iot_support at tid dot es";
     
     // Enumeration for ManagementInterface
     public enum LoggingLevels { FATAL, ERROR, WARN, INFO, DEBUG, ALL, OFF }
