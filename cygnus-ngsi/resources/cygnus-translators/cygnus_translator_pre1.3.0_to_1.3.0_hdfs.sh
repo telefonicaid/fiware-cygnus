@@ -98,8 +98,8 @@ function get_encoding {
 				res="null"
 			fi
 		elif [ "$type_" == "entity_dir" ] || [ "$type_" == "entity_file" ]; then
-			if [ $numUnderscores -le 1 ]; then
-                                res=$(echo "$path" | sed -r 's/[_]+/xffff/g')
+			if [ $numUnderscores -eq 1 ]; then
+                                res=$path
                         elif [ "$force" == "true" ]; then
 				res=$(echo "$path" | sed -r 's/[_]+/xffff/g')
 			else
@@ -216,15 +216,7 @@ function iterate {
 
 	# Analyze the current path
 	if [ "$type_" != "basepath" ]; then
-		if [ "$function" == "analyze" ]; then
-			process "analyze" $path $type_
-		elif [ "$function" == "encode" ]; then
-			process "encode" $path $type_
-		elif [ "$function" == "force" ]; then
-			process "force" $path $type_
-		else
-			echo "Unknown function '$function', use 'analyze', 'encode' or 'force'"
-		fi
+		process $function $path $type_
 	fi
 }
 
