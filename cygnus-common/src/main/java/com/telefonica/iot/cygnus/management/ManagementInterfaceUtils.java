@@ -36,7 +36,7 @@ import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import static org.mortbay.jetty.HttpMethods.HEAD;
+
 /**
  *
  * @author pcoello25
