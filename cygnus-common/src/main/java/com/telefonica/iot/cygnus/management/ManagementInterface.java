@@ -221,13 +221,10 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleDeleteAdminConfigurationInstance(request, response, true);
-<<<<<<< HEAD
                 } else if (uri.startsWith("/v1/admin/log/loggers")) {
                     handleDeleteAdminLogLoggers(request, response);
-=======
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleDeleteAdminLogAppenders(request, response);
->>>>>>> develop
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
