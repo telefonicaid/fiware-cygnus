@@ -217,8 +217,13 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handleDeleteAdminConfigurationInstance(request, response, true);
+<<<<<<< HEAD
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handleDeleteAdminLogLoggers(request, response);
+=======
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleDeleteAdminLogAppenders(request, response);
+>>>>>>> develop
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -2300,6 +2305,140 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("The specified rule ID does not exist. Details: id=" + id);
         } // if else
     } // handleDeleteGroupingRules
+    
+    private void handleDeleteAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        String transient_ = request.getParameter("transient");
+        String loggerName = request.getParameter("name");
+        boolean allLoggers = true;
+
+        if (loggerName != null) {
+            allLoggers = false;
+        } // if
+
+        String pathToFile = configurationPath + "/log4j.properties";
+        File file = new File(pathToFile);
+
+        if ((transient_ == null) || (transient_.equals("true"))) {
+            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+
+            if (allLoggers) {
+                
+                while (loggers.hasMoreElements()) {
+                    loggers.nextElement().setLevel(Level.OFF);
+                } // while
+                
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{\"success\":\"true\",\"result\":\"Loggers removed succesfully\"}");
+                LOGGER.debug("Log4j loggers removed succesfully");
+                
+            } else {
+
+                ArrayList<Logger> loggerNames = new ArrayList<Logger>();
+
+                while (loggers.hasMoreElements()) {
+                    loggerNames.add(loggers.nextElement());
+                } // while 
+
+                if (loggerNames.contains(LogManager.getLogger(loggerName))) {
+                    LogManager.getLogger(loggerName).setLevel(Level.OFF);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().println("{\"success\":\"true\",\"result\":\"Logger '"+ loggerName 
+                        +"' removed succesfully\"}");
+                    LOGGER.debug("Log4j logger removed succesfully");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                    LOGGER.debug("Logger name not found");
+                } // if else
+                
+            } // if else if
+            
+        } else if (transient_.equals("false")) {
+            
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(fileInputStream);
+                Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                ArrayList<String> loggerNames = ManagementInterfaceUtils.getLoggersFromProperties(properties);
+                boolean hasAppenders = false;
+
+                if (allLoggers) {
+                        
+                    for (String property: properties.stringPropertyNames()) {
+                            
+                        if (property.startsWith("log4j.logger")) {
+                            properties.remove(property);
+                            hasAppenders = true;
+                        } // if
+                                                    
+                    } // for
+
+                    ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                    
+                    if (hasAppenders) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\"Loggers removed "
+                                + "succesfully\"}");
+                        LOGGER.debug("Loggers removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"No log4j loggers found\"}");
+                        LOGGER.debug("No log4j loggers found");
+                    } // if else
+                    
+                } else {
+                    boolean loggerFound = false;
+
+                    for (String name : loggerNames) {
+
+                        if (name.equals(loggerName)) {
+                            String loggName = "log4j.logger." + name;
+                            loggerFound = true;
+                            
+                            for (String property: properties.stringPropertyNames()) {
+                            
+                                if (property.startsWith(loggName)) {
+                                    properties.remove(property);
+                                } // if
+                            
+                            } // for
+                   
+                        } // if
+
+                    } // for
+
+                    if (loggerFound) {
+                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().println("{\"success\":\"true\",\"result\":\" Logger '" + loggerName 
+                                + "' removed succesfully\"}");
+                        LOGGER.debug("Logger '" + loggerName + "' removed succesfully");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
+                        LOGGER.debug("Logger name not found");
+                    } // if else
+
+                } // if else
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\" : { \"File not found in the path received\" }");
+                LOGGER.debug("File not found in the path received");
+            } // if else
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+            LOGGER.debug("Invalid 'transient' parameter found");
+        }// if else if
+
+    } // handleDeleteAdminLogLoggers
 
     private String getGroupingRulesConfFile() throws IOException {
         if (!configurationFile.exists()) {
