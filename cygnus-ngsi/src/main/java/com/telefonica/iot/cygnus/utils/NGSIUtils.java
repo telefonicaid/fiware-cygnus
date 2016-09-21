@@ -35,8 +35,8 @@ public final class NGSIUtils {
     private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
     private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
-    private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[\\/\\\\.\\$\" ]");
-    private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("\\$");
+    private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[=\\/\\\\.\\$\" ]");
+    private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("[=\\$]");
     
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
@@ -62,17 +62,7 @@ public final class NGSIUtils {
             return ENCODEPATTERNSLASH.matcher(in).replaceAll("_");
         } // if else
     } // encode
-    
-    /**
-     * Encodes a string replacing all the non alphanumeric characters by '_'.
-     * 
-     * @param in
-     * @return The encoded version of the input string.
-     */
-    public static String encodeHive(String in) {
-        return ENCODEHIVEPATTERN.matcher(in).replaceAll("_").toLowerCase();
-    } // encodeHive
-    
+
     /**
      * Encodes a string replacing all '/', '\', '.', ' ', '"' and '$' by '_'.
      * @param in

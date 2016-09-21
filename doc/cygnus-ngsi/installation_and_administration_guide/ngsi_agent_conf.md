@@ -57,7 +57,11 @@ cygnusagent.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 cygnusagent.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnusagent.sinks.hdfs-sink.backend_impl = rest
+cygnusagent.sinks.hdfs-sink.backend.impl = rest
+# maximum number of Http connections to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+# maximum number of Http connections per route to HDFS backend
+cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
 cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
@@ -130,6 +134,10 @@ cygnusagent.sinks.ckan-sink.batch_size = 100
 cygnusagent.sinks.ckan-sink.batch_timeout = 30
 # number of retries upon persistence error
 cygnusagent.sinks.ckan-sink.batch_ttl = 10
+# maximum number of Http connections to CKAN backend
+cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+# maximum number of Http connections per route to CKAN backend
+cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 # ============================================
 # NGSIPostgreSQLSink configuration
@@ -211,8 +219,6 @@ cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
 cygnusagent.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.mongo-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.mongo-sink.should_hash = false
 # specify if the sink will use a single collection for each service path, for each entity or for each attribute
 cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
 # how the attributes are stored, either per row either per column (row, column)
@@ -246,8 +252,6 @@ cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
 cygnusagent.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
 cygnusagent.sinks.sth-sink.collection_prefix = sth_
-# true is collection names are based on a hash, false for human redable collections
-cygnusagent.sinks.sth-sink.should_hash = false
 # number of notifications to be included within a processing batch
 cygnusagent.sinks.sth-sink.batch_size = 100
 # timeout for batch accumulation

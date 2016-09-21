@@ -36,6 +36,7 @@ import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import static org.mortbay.jetty.HttpMethods.HEAD;
 /**
  *
  * @author pcoello25
@@ -246,30 +247,12 @@ public class ManagementInterfaceUtils {
      * @param appenders
      * @return 
      */
-    public static String getStringAppenders (Enumeration appenders) {
-        String appendersJson = "";
-
-        while (appenders.hasMoreElements()) {
-            Appender appender = (Appender) appenders.nextElement();
-            String name = appender.getName();
-            PatternLayout layout = (PatternLayout) appender.getLayout();
-
-            if (appendersJson.isEmpty()) { 
-                appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                        + layout.getConversionPattern() + "\"}";
-            } else {
-                appendersJson += ",{\"name\":\"" + name + "\",\"layout\":\""
-                        + layout.getConversionPattern() + "\"}";
-            } // else
-
-        } // while
-
-        if (appendersJson.isEmpty()) {
-            appendersJson = "[]";
-        } else {
-            appendersJson += "]";
-        } // else
-        
+    public static String getStringAppender (Enumeration appenders) {
+        Appender appender = (Appender) appenders.nextElement();
+        String name = appender.getName();
+        PatternLayout layout = (PatternLayout) appender.getLayout();
+        String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
+                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]";
         return appendersJson;
     } // getStringAppenders
     
