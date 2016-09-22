@@ -38,6 +38,8 @@ The per agent **Quick Start Guide** provides a good documentation summary.
 
 Nevertheless, both the **Installation and Administration Guide** and the **User and Programmer Guide** shown within this documentation for each agent cover more advanced topics.
 
+Of special interest are the per-agent integration examples under `doc/<agent>/integration`.
+
 The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
 
 Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.

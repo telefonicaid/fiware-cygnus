@@ -54,6 +54,8 @@ public class TwitterHDFSSink extends TwitterSink {
     private String krb5ConfFile;
     private BackendImpl backendImpl;
     private HDFSBackend persistenceBackend;
+    private int maxConns;
+    private int maxConnsPerRoute;
 
     /**
      * Constructor.
@@ -224,13 +226,19 @@ public class TwitterHDFSSink extends TwitterSink {
 
         try {
             backendImpl = BackendImpl.valueOf(backendImplStr.toUpperCase());
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend_impl="
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.impl="
                         + backendImplStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend_impl="
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.impl="
                 + backendImplStr + ") -- Must be 'rest' or 'binary'");
         }  // try catch
+        
+        maxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + maxConns + ")");
+        maxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route=" + maxConnsPerRoute
+                + ")");
         
         super.configure(context);
 
@@ -247,7 +255,7 @@ public class TwitterHDFSSink extends TwitterSink {
             } else if (backendImpl == BackendImpl.REST) {
                 persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
                         "", "", "", enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, false);
+                        krb5ConfFile, false, maxConns, maxConnsPerRoute);
             } else {
                 LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
                         + backendImpl.toString());

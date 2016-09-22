@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -46,14 +46,17 @@ public class HttpBackendTest {
      */
     private class HttpBackendImpl extends HttpBackend {
 
-        public HttpBackendImpl(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
-            super(hosts, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        public HttpBackendImpl(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User,
+                String krb5Password, String krb5LoginConfFile, String krb5ConfFile, int maxConns,
+                int maxConnsPerRoute) {
+            super(hosts, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, maxConns,
+                    maxConnsPerRoute);
         } // HttpBackendImpl
    
     } // HttpBackendImpl
     
     @Mock
-    HttpClient httpclient; 
+    private HttpClient httpclient;
     
     // instance to be tested
     private HttpBackend httpBackend;
@@ -67,7 +70,9 @@ public class HttpBackendTest {
     private StringEntity arrayEntity;
     private String normalURL;
     private String arrayURL;
-    private String[] host;    
+    private String[] host;
+    private final int maxConns = 50;
+    private final int maxConnsPerRoute = 10;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -77,24 +82,21 @@ public class HttpBackendTest {
      */
     @Before
     public void setUp() throws Exception {
-        
-        String normalResponse = "{\"somefield\":\"somevalue\",\"somefield2\":\"somevalue2\",\"somefield2\":\"somevalue2\"}";
-        String arrayResponse = "[{\"somefield\":{\"somesubfield1\":\"somevalue1\",\"sumesuffield1\":\"somevalue2\",\"http\":{\"field1\":\"value1\"},}},{\"somefield\":{\"somesubfield1\":\"somevalue1\",\"sumesuffield1\":\"somevalue2\",\"http\":{\"field1\":\"value1\"},}}]";
-        
+        String normalResponse =
+                "{\"somefield\":\"somevalue\",\"somefield2\":\"somevalue2\",\"somefield2\":\"somevalue2\"}";
+        String arrayResponse =
+                "[{\"somefield\":{\"somesubfield1\":\"somevalue1\",\"sumesuffield1\":\"somevalue2\","
+                + "\"http\":{\"field1\":\"value1\"},}},{\"somefield\":{\"somesubfield1\":\"somevalue1\","
+                + "\"sumesuffield1\":\"somevalue2\",\"http\":{\"field1\":\"value1\"},}}]";
         normalURL = "http://someurl:1234";
         arrayURL = "http://someurl:1234";
-        
         normalEntity = new StringEntity(normalResponse);
         arrayEntity = new StringEntity(arrayResponse);
-        
         host = new String[] {"someurl.org"};
-        
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("X-Auth-token", "12345"));
-        
         when(mockResponse.getEntity()).thenReturn(normalEntity);
-        
         when(mockArrayResponse.getEntity()).thenReturn(arrayEntity);
         when(httpclient.execute(mockRequest)).thenReturn(mockResponse);
         when(httpclient.execute(mockArrayRequest)).thenReturn(mockArrayResponse);
@@ -102,34 +104,38 @@ public class HttpBackendTest {
     
     @Test
     public void testDoRequestWithNormalResponse() throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - Gets a valid Json object based JSONResponse");
-        httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null);
+        System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
+                + " - Gets a valid Json object based JSONResponse");
+        httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
         httpBackend.setHttpClient(httpclient);
         
         try {
             httpBackend.doRequest("GET", normalURL, headers, normalEntity);
             System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " -  OK  - Succesfully got");
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - FAIL - There was some problem when handling the request.");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
+                    + " - FAIL - There was some problem when handling the request.");
             throw e;
         } // try catch
-        
     } // testDoRequestWithNormalResponse
     
     @Test
-    public void testDoRequestWithArrayResponse () throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - Gets a valid Json array based JSONResponse");
-        httpBackend = new HttpBackendImpl(host, arrayURL, false, false, null, null, null, null);
+    public void testDoRequestWithArrayResponse() throws Exception {
+        System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
+                + " - Gets a valid Json array based JSONResponse");
+        httpBackend = new HttpBackendImpl(host, arrayURL, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
         httpBackend.setHttpClient(httpclient);
         
         try {
             httpBackend.doRequest("GET", arrayURL, headers, arrayEntity);
             System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " -  OK  - Succesfully got");
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " - FAIL - There was some problem when handling the request.");
+            System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
+                    + " - FAIL - There was some problem when handling the request.");
             throw e;
         } // try catch
-        
     } // testDoRequestWithArrayResponse
 
 } // HttpBackendTest

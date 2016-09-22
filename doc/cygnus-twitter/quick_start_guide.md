@@ -48,10 +48,10 @@ cygnus-twitter.sources.http-source.type = org.telefonica.iot.cygnus.sources.Twit
 # keywords
 # cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3
 # Coordinates for filter query
-cygnus-twitter.sources.twitter-source.south-west_latitude = 39.4247692
-cygnus-twitter.sources.twitter-source.south-west_longitude = -0.4315448
-cygnus-twitter.sources.twitter-source.north-east_latitude = 39.5038788
-cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
+cygnus-twitter.sources.twitter-source.south_west_latitude = 39.4247692
+cygnus-twitter.sources.twitter-source.south_west_longitude = -0.4315448
+cygnus-twitter.sources.twitter-source.north_east_latitude = 39.5038788
+cygnus-twitter.sources.twitter-source.north_east_longitude = -0.3124204
 cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxxx
 cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessToken = xxxxxxxx

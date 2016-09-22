@@ -61,6 +61,8 @@ public class CKANCacheTest {
     private final String orgId = "org_id";
     private final String pkgId = "pkg_id";
     private final String resId = "res_id";
+    private final int maxConns = 50;
+    private final int maxConnsPerRoute = 10;
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -71,7 +73,7 @@ public class CKANCacheTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        cache = new CKANCache(hosts, port, ssl, apiKey);
+        cache = new CKANCache(hosts, port, ssl, apiKey, maxConns, maxConnsPerRoute);
 
         // set up the behaviour of the mocked classes
         when(orgMap.get(orgName)).thenReturn(orgId);

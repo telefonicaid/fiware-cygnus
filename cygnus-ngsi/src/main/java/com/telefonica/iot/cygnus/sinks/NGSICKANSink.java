@@ -24,8 +24,8 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
@@ -47,6 +47,8 @@ public class NGSICKANSink extends NGSISink {
     private String orionUrl;
     private boolean rowAttrPersistence;
     private boolean ssl;
+    private int backendMaxConns;
+    private int backendMaxConnsPerRoute;
     private CKANBackend persistenceBackend;
 
     /**
@@ -113,6 +115,24 @@ public class NGSICKANSink extends NGSISink {
     protected boolean getSSL() {
         return this.ssl;
     } // getSSL
+    
+    /**
+     * Gets the maximum number of Http connections allowed in the backend. It is protected due to it is only required
+     * for testing purposes.
+     * @return The maximum number of Http connections allowed in the backend
+     */
+    protected int getBackendMaxConns() {
+        return backendMaxConns;
+    } // getBackendMaxConns
+    
+    /**
+     * Gets the maximum number of Http connections per route allowed in the backend. It is protected due to it is only
+     * required for testing purposes.
+     * @return The maximum number of Http connections per route allowed in the backend
+     */
+    protected int getBackendMaxConnsPerRoute() {
+        return backendMaxConnsPerRoute;
+    } // getBackendMaxConnsPerRoute
 
     @Override
     public void configure(Context context) {
@@ -157,6 +177,12 @@ public class NGSICKANSink extends NGSISink {
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
+        backendMaxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
+        backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route="
+                + backendMaxConnsPerRoute + ")");
+        
         super.configure(context);
         
         // Techdebt: allow this sink to work with all the data models
@@ -169,7 +195,8 @@ public class NGSICKANSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl);
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl, backendMaxConns,
+                    backendMaxConnsPerRoute);
             LOGGER.debug("[" + this.getName() + "] CKAN persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the CKAN persistence backend. Details="
@@ -316,16 +343,10 @@ public class NGSICKANSink extends NGSISink {
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\","
                     + "\"" + NGSIConstants.ATTR_NAME + "\": \"" + attrName + "\","
-                    + "\"" + NGSIConstants.ATTR_TYPE + "\": \"" + attrType + "\","
-                    + "\"" + NGSIConstants.ATTR_VALUE + "\": " + attrValue;
-
-                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
-                    record += ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata + "}";
-                } else {
-                    record += "}";
-                } // if else
+                    + "\"" + NGSIConstants.ATTR_TYPE + "\": \"" + attrType + "\""
+                    + (isSpecialValue(attrValue) ? "" : ",\"" + NGSIConstants.ATTR_VALUE + "\": " + attrValue)
+                    + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata)
+                    + "}";
 
                 if (records.isEmpty()) {
                     records += record;
@@ -383,13 +404,8 @@ public class NGSICKANSink extends NGSISink {
                         + attrType + ")");
 
                 // create part of the column with the current attribute (a.k.a. a column)
-                record += ",\"" + attrName + "\": " + attrValue;
-
-                // metadata is an special case, because CKAN doesn't support empty array, e.g. "[ ]"
-                // (http://stackoverflow.com/questions/24207065/inserting-empty-arrays-in-json-type-fields-in-datastore)
-                if (!attrMetadata.equals(CommonConstants.EMPTY_MD)) {
-                    record += ",\"" + attrName + "_md\": " + attrMetadata;
-                } // if
+                record += (isSpecialValue(attrValue) ? "" : ",\"" + attrName + "\": " + attrValue)
+                        + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + attrName + "_md\": " + attrMetadata);
             } // for
 
             // now, aggregate the column
@@ -432,14 +448,23 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildOrgName(String fiwareService) throws Exception {
-        String orgName = NGSIUtils.encode(fiwareService, false, true);
+    public String buildOrgName(String fiwareService) throws Exception {
+        String orgName;
+        
+        if (enableEncoding) {
+            orgName = NGSICharsets.encodeCKAN(fiwareService);
+        } else {
+            orgName = NGSIUtils.encode(fiwareService, false, true);
+        } // if else
 
-        if (orgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building orgName=fiwareService (" + orgName + ") and its length is "
-                    + "greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
-
+        if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
+            
         return orgName;
     } // buildOrgName
 
@@ -451,19 +476,27 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
+    public String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
         String pkgName;
-
-        if (fiwareServicePath.equals("/")) {
-            pkgName = NGSIUtils.encode(fiwareService, false, true);
+        
+        if (enableEncoding) {
+            pkgName = NGSICharsets.encodeCKAN(fiwareService) + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
-            pkgName = NGSIUtils.encode(fiwareService, false, true) + NGSIUtils.encode(fiwareServicePath, false, true);
+            if (fiwareServicePath.equals("/")) {
+                pkgName = NGSIUtils.encode(fiwareService, false, true);
+            } else {
+                pkgName = NGSIUtils.encode(fiwareService, false, true)
+                        + NGSIUtils.encode(fiwareServicePath, false, true);
+            } // if else
         } // if else
 
-        if (pkgName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building pkgName=fiwareService + '_' + fiwareServicePath (" + pkgName
-                    + ") and its length is greater than " + CommonConstants.MAX_NAME_LEN);
-        } // if
+        if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
 
         return pkgName;
     } // buildPkgName
@@ -474,15 +507,32 @@ public class NGSICKANSink extends NGSISink {
      * @return
      * @throws Exception
      */
-    private String buildResName(String destination) throws Exception {
-        String resName = NGSIUtils.encode(destination, false, true);
+    public String buildResName(String destination) throws Exception {
+        String resName;
+        
+        if (enableEncoding) {
+            resName = NGSICharsets.encodeCKAN(destination);
+        } else {
+            resName = NGSIUtils.encode(destination, false, true);
+        } // if else
 
-        if (resName.length() > CommonConstants.MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resName=destination (" + resName + ") and its length is greater "
-                    + "than " + CommonConstants.MAX_NAME_LEN);
-        } // if
+        if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        } // if else if
 
         return resName;
     } // buildResName
+    
+    private boolean isSpecialValue(String value) {
+        return value == null || value.equals(("\"\"")) || value.equals("{}") || value.equals("[]");
+    } // isSpecialValue
+    
+    private boolean isSpecialMetadata(String value) {
+        return value == null || value.equals("[]");
+    } // isSpecialMetadata
 
 } // NGSICKANSink
