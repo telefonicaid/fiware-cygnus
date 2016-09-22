@@ -2,3 +2,4 @@
 - [cygnus-ngsi][hardening] Remove unused hashing feature in NGSIMongoSink and NGSISTHSink (#1113)
 - [cygnus-ngsi][hardening] Configurable Http parameters at backend (#1152)
 - [cygnus-twitter][bug] Fixed misspelled underscores in doc examples (#1161)
+- [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
