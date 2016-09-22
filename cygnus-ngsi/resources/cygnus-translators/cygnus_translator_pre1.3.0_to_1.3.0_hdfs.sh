@@ -114,13 +114,11 @@ function get_encoding {
 }
 
 # Function to process a path
-# $1 --> function to be done (input)
-# $2 --> path to be processed (input)
-# $3 --> type of path (input)
+# $1 --> path to be processed (input)
+# $2 --> type of path (input)
 function process {
-	local func=$1
-        local path=$2
-        local type_=$3
+        local path=$1
+        local type_=$2
 
 	# Get the encoding of the given path
 	dir="$(dirname $path)"
@@ -134,7 +132,10 @@ function process {
 		elif [ "$encoding" == "$name" ]; then
 			echo -e " |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
 		else
-			hadoop fs -mv $path $dir/$encoding
+			if [ "$function" == "encode" ]; then
+				hadoop fs -mv $path $dir/$encoding
+			fi
+
 			echo -e " |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
                 fi
         elif [ "$type_" == "subservice" ]; then
@@ -143,7 +144,10 @@ function process {
                 elif [ "$encoding" == "$name" ]; then
                         echo -e " |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
 		else
-			hadoop fs -mv $path $dir/$encoding
+			if [ "$function" == "encode" ]; then
+				hadoop fs -mv $path $dir/$encoding
+			fi
+
                         echo -e " |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
                 fi
         elif [ "$type_" == "entity_dir" ]; then
@@ -152,7 +156,10 @@ function process {
 		elif [ "$encoding" == "$name" ]; then
                         echo -e " |    |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
                 else
-			hadoop fs -mv $path $dir/$encoding
+			if [ "$function" == "encode" ]; then
+				hadoop fs -mv $path $dir/$encoding
+			fi
+
                         echo -e " |    |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
                 fi
         elif [ "$type_" == "entity_file" ]; then
@@ -161,7 +168,10 @@ function process {
 		elif [ "$encoding" == "$name" ]; then
                         echo -e " |    |    |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
                 else
-			hadoop fs -mv $path $dir/$encoding
+			if [ "$function" == "encode" ]; then
+				hadoop fs -mv $path $dir/$encoding
+			fi
+
                         echo -e " |    |    |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
                 fi
         else
@@ -216,7 +226,7 @@ function iterate {
 
 	# Analyze the current path
 	if [ "$type_" != "basepath" ]; then
-		process $function $path $type_
+		process $path $type_
 	fi
 }
 
