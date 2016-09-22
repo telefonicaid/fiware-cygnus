@@ -18,8 +18,6 @@
 
 package com.telefonica.iot.cygnus.management;
 
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +36,7 @@ import org.apache.log4j.PatternLayout;
 import org.slf4j.MDC;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+
 /**
  *
  * @author pcoello25
@@ -243,7 +242,7 @@ public class ManagementInterfaceUtils {
     } // readDescriptions
     
     /**
-     * getStringAppenders: Returns a string with the list of appenders 
+     * getStringAppender: Returns the active appender 
      * 
      * @param appenders
      * @return 
@@ -253,9 +252,9 @@ public class ManagementInterfaceUtils {
         String name = appender.getName();
         PatternLayout layout = (PatternLayout) appender.getLayout();
         String appendersJson = "[{\"name\":\"" + name + "\",\"layout\":\"" 
-                    + layout.getConversionPattern() + "\",\"active\":\"true\"}]"; 
+                + layout.getConversionPattern() + "\",\"active\":\"true\"}]";   
         return appendersJson;
-    } // getStringAppenders
+    } // getStringAppender
     
     /**
      * getAppendersFromProperties: Returns an ArrayList with the appenders.
