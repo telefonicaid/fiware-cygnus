@@ -46,8 +46,10 @@ public class NGSICartoDBSink extends NGSISink {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSICartoDBSink.class);
     private String keysConfFile;
     private boolean flipCoordinates;
-    protected boolean enableRaw;
-    protected boolean enableDistance;
+    private boolean enableRaw;
+    private boolean enableDistance;
+    private int backendMaxConns;
+    private int backendMaxConnsPerRoute;
     private HashMap<String, CartoDBBackendImpl> backends;
     
     /**
@@ -73,6 +75,38 @@ public class NGSICartoDBSink extends NGSISink {
         this.backends = backends;
     } // setBackends
     
+    /**
+     * Gets the maximum number of connections in the backend.
+     * @return The maximum number of connections in the backend
+     */
+    protected int getBackendMaxConns() {
+        return backendMaxConns;
+    } // getBackendMaxConns
+    
+    /**
+     * Gets the maximum number of connections per route in the backend.
+     * @return The maximum number of connections per route in the backend
+     */
+    protected int getBackendMaxConnsPerRoute() {
+        return backendMaxConnsPerRoute;
+    } // getBackendMaxConnsPerRoute
+    
+    /**
+     * Gets if the distance-based analysis is enabled.
+     * @return True if the distance-based analysis is enabled, false otherwise
+     */
+    protected boolean getEnableDistance() {
+        return enableDistance;
+    } // getEnableDistance
+    
+    /**
+     * Gets if the raw-based analysis is enabled.
+     * @return True if the raw-based analysis is enabled, false otherwise
+     */
+    protected boolean getEnableRaw() {
+        return enableRaw;
+    } // getEnableRaw
+    
     @Override
     public void configure(Context context) {
         // Read NGSISink general configuration
@@ -80,6 +114,9 @@ public class NGSICartoDBSink extends NGSISink {
         
         // Impose enable lower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
+        
+        // Impose enable encoding
+        enableEncoding = true;
         
         // Check the data model is not different than dm-by-service-path or dm-by-entity
         if (dataModel == DataModel.DMBYSERVICE || dataModel == DataModel.DMBYATTRIBUTE) {
@@ -139,6 +176,12 @@ public class NGSICartoDBSink extends NGSISink {
             LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
                     + enableDistanceStr + ") -- Must be 'true' or 'false'");
         } // if else
+        
+        backendMaxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
+        backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route=" + backendMaxConnsPerRoute
+                + ")");
     } // configure
     
     @Override
@@ -222,7 +265,7 @@ public class NGSICartoDBSink extends NGSISink {
                 continue;
             } // if
 
-            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key));
+            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns, backendMaxConnsPerRoute));
         } // for
         
         if (backends.isEmpty()) {
@@ -373,7 +416,7 @@ public class NGSICartoDBSink extends NGSISink {
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.THE_GEOM, new ArrayList<String>());
+            aggregation.put(NGSIConstants.CARTO_DB_THE_GEOM, new ArrayList<String>());
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
@@ -437,7 +480,7 @@ public class NGSICartoDBSink extends NGSISink {
                 String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
                 
                 if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
-                    aggregation.get(NGSIConstants.THE_GEOM).add(location);
+                    aggregation.get(NGSIConstants.CARTO_DB_THE_GEOM).add(location);
                 } else {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
@@ -591,11 +634,11 @@ public class NGSICartoDBSink extends NGSISink {
      * @throws Exception
      */
     protected String buildSchemaName(String service) throws Exception {
-        String name = NGSICharsets.cartoDBEncode(service);
+        String name = NGSICharsets.encodePostgreSQL(service);
 
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;
@@ -614,27 +657,27 @@ public class NGSICartoDBSink extends NGSISink {
         
         switch(dataModel) {
             case DMBYSERVICEPATH:
-                name = NGSICharsets.cartoDBEncode(servicePath);
+                name = NGSICharsets.encodePostgreSQL(servicePath);
                 break;
             case DMBYENTITY:
-                String truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
+                String truncatedServicePath = NGSICharsets.encodePostgreSQL(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSICharsets.cartoDBEncode(entity);
+                        + NGSICharsets.encodePostgreSQL(entity);
                 break;
             case DMBYATTRIBUTE:
-                truncatedServicePath = NGSICharsets.cartoDBEncode(servicePath);
+                truncatedServicePath = NGSICharsets.encodePostgreSQL(servicePath);
                 name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + CommonConstants.CONCATENATOR)
-                        + NGSICharsets.cartoDBEncode(entity) + CommonConstants.CONCATENATOR
-                        + NGSICharsets.cartoDBEncode(attribute);
+                        + NGSICharsets.encodePostgreSQL(entity) + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodePostgreSQL(attribute);
                 break;
             default:
                 throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                        + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                        + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
         } // switch
         
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_ID_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_ID_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;

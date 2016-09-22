@@ -39,9 +39,12 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
      * @param port
      * @param ssl
      * @param apiKey
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey) {
-        super(new String[]{host}, port, ssl, false, null, null, null, null);
+    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey, int maxConns,
+            int maxConnsPerRoute) {
+        super(new String[]{host}, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
     } // CartoDBBackendImpl
     

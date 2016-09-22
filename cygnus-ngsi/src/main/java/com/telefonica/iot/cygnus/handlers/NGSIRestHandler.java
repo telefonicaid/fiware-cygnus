@@ -118,10 +118,10 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         defaultService = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE, "default");
         
-        if (defaultService.length() > CommonConstants.SERVICE_HEADER_MAX_LEN) {
+        if (defaultService.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
-                    + "' parameter length greater than " + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
+                    + "' parameter length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
         } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultService)) {
             LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
                     + defaultService + ")");
@@ -133,10 +133,10 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         defaultServicePath = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE_PATH, "/");
         
-        if (defaultServicePath.length() > CommonConstants.SERVICE_PATH_HEADER_MAX_LEN) {
+        if (defaultServicePath.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
-                    + "' parameter length greater " + "than " + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                    + "' parameter length greater " + "than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
         } else if (!defaultServicePath.startsWith("/")) {
             invalidConfiguration = true;
             LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
@@ -194,33 +194,40 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
                 corrId = headerValue;
             } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
-                if (!headerValue.contains("application/json; charset=utf-8")) {
+                if (wrongContentType(headerValue)) {
                     LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
                 } // if else
             } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE)) {
-                if (headerValue.length() > CommonConstants.SERVICE_HEADER_MAX_LEN) {
-                    LOGGER.warn("Bad HTTP notification ('fiware-service' header length greater than "
-                            + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
-                    throw new HTTPBadRequestException("'fiware-service' header length greater than "
-                            + CommonConstants.SERVICE_HEADER_MAX_LEN + ")");
+                if (wrongServiceHeaderLength(headerValue)) {
+                    LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE
+                            + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                    throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE
+                            + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
                 } else {
                     service = headerValue;
                 } // if else
             } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE_PATH)) {
-                if (headerValue.length() > CommonConstants.SERVICE_PATH_HEADER_MAX_LEN) {
-                    LOGGER.warn("Bad HTTP notification ('fiware-servicePath' header length greater than "
-                            + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-                    throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
-                            + CommonConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-                } else if (!headerValue.startsWith("/")) {
-                    LOGGER.warn("Bad HTTP notification ('fiware-servicePath' heacder value must start with '/'");
-                    throw new HTTPBadRequestException("'fiware-servicePath' header value must start with '/'");
-                } else {
-                    servicePath = headerValue;
-                } // if else
+                String[] splitValues = headerValue.split(",");
+                
+                for (String splitValue : splitValues) {
+                    if (wrongServicePathHeaderLength(splitValue)) {
+                        LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                + "' header value length greater than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN
+                                + ")");
+                        throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
+                                + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                    } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
+                        LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                + "' header value must start with '/'");
+                        throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                + "' header value must start with '/'");
+                    } // if else
+                } // for
+                
+                servicePath = headerValue;
             } // if else if
         } // while
         
@@ -287,5 +294,44 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         numProcessedEvents++;
         return eventList;
     } // getEvents
- 
+    
+    /**
+     * Checks is the give Content-Type header value is wrong or not. It is protected since it is used by the tests.
+     * @param headerValue
+     * @return True is the header value length is wrong, otherwise false
+     */
+    protected boolean wrongContentType(String headerValue) {
+        return !headerValue.contains("application/json; charset=utf-8");
+    } // wrongContentType
+    
+    /**
+     * Checks if the given FIWARE service header value length is wrong or not. It is protected since it is used by the
+     * tests.
+     * @param headerValue
+     * @return True is the header value length is wrong, otherwise false
+     */
+    protected boolean wrongServiceHeaderLength(String headerValue) {
+        return headerValue.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN;
+    } // wrongServiceHeaderLength
+    
+    /**
+     * Checks if the given FIWARE service path header value length is wrong or not. It is protected since it is used by
+     * the tests.
+     * @param headerValue
+     * @return True is the header value length is wrong, otherwise false
+     */
+    protected boolean wrongServicePathHeaderLength(String headerValue) {
+        return headerValue.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN;
+    } // wrongServicePathHeaderLength
+
+    /**
+     * Checks if the given FIWARE service path header initial value is wrong or not. It is protected since it is used by
+     * the tests.
+     * @param headerValue
+     * @return True is the header value length is wrong, otherwise false
+     */
+    protected boolean wrongServicePathHeaderInitialCharacter(String headerValue) {
+        return !headerValue.startsWith("/");
+    } // wrongServicePathHeaderInitialCharacter
+    
 } // NGSIRestHandler

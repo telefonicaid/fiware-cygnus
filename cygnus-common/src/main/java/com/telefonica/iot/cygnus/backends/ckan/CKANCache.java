@@ -50,9 +50,11 @@ public class CKANCache extends HttpBackend {
      * @param port
      * @param ssl
      * @param apiKey
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public CKANCache(String[] hosts, String port, boolean ssl, String apiKey) {
-        super(hosts, port, ssl, false, null, null, null, null);
+    public CKANCache(String[] hosts, String port, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
+        super(hosts, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
         tree = new HashMap<String, HashMap<String, ArrayList<String>>>();
         orgMap = new HashMap<String, String>();
