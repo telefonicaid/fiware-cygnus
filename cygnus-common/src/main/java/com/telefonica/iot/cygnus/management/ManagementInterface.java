@@ -202,6 +202,8 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handlePutAdminConfigurationInstance(request, response, true);
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handlePutAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handlePutAdminLogAppenders(request, response);
                 } else {
@@ -2389,6 +2391,127 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
         
     } // handlePutAdminLogAppender
+    
+        private void handlePutAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String jsonStr = "";
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            jsonStr += line;
+        } // while
+
+        reader.close();
+        
+        if (!jsonStr.isEmpty()) {
+            JsonObject jsonLogger = new JsonParser().parse(jsonStr).getAsJsonObject(); 
+            try {
+                JsonObject logger = jsonLogger.get("logger").getAsJsonObject();
+                String name = logger.get("name").getAsString();
+                String level = logger.get("level").getAsString();
+
+                try {
+                    CommonConstants.LoggingLevels.valueOf(level);
+                    String transient_ = request.getParameter("transient");
+                    String pathToFile = configurationPath + "/log4j.properties";
+                    File file = new File(pathToFile);
+
+                    if ((transient_ == null) || (transient_.equals("true"))) {
+                        Enumeration<Logger> currentLoggers = LogManager.getLoggerRepository().getCurrentLoggers();
+                        boolean loggerFound = false;
+
+                        while (currentLoggers.hasMoreElements()) {
+                            Logger currentLogger = currentLoggers.nextElement();
+                            String loggerName = currentLogger.getName();
+
+                            if (loggerName.equals(name)) {
+                                loggerFound = true;
+                            } // if
+                        } // while
+
+                        if (loggerFound) {
+                            Logger loggerUpdated = LogManager.getLoggerRepository().getLogger(name);
+                            loggerUpdated.setLevel(Level.toLevel(level));
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\":\"Logger '" + name + "' updated succesfully\"}");
+                            LOGGER.debug("Logger '" + name + "' updated succesfully");
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\":\"Loggers addition is not implemented\"}");
+                            LOGGER.debug("Loggers addition is not implemented");
+                        } // if else
+
+                    } else if (transient_.equals("false")){
+
+                        if (file.exists()) {
+                            FileInputStream fileInputStream = new FileInputStream(file);
+                            Properties properties = new Properties();
+                            properties.load(fileInputStream);
+                            boolean loggerFound = false;
+                            String prop = "log4j.logger." + name;
+
+                            if (properties.containsKey(prop)) {
+                                System.out.println(properties.containsKey(prop));
+                                loggerFound = true;
+                            } // if
+
+                            Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                            String propertyName = "log4j.logger." + name;
+                            properties.put(propertyName, level);
+                            ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+
+                            if (loggerFound) {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                response.getWriter().println("{\"success\":\"true\","
+                                    + "\"result\":\"Logger '" + name + "' updated succesfully\"}");
+                                LOGGER.debug("Logger '" + name + "' updated succesfully");   
+                            } else {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                response.getWriter().println("{\"success\":\"true\","
+                                    + "\"result\":\"Logger '" + name + "' put\"}");
+                                LOGGER.debug("Logger '" + name + "' put.");
+                            } // if else
+
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().println("{\"success\":\"false\","
+                                    + "\"result\":\"File not found in the path received\"}");
+                            LOGGER.debug("File not found in the path received");
+                        } // if else
+
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\":\"Invalid 'transient' parameter found\"}");
+                        LOGGER.debug("Invalid 'transient' parameter found");
+                    }// if else if
+
+                } catch (Exception e)  {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"Invalid logging level\"}");
+                    LOGGER.debug("Invalid logging level");
+                } // try catch
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"Invalid input JSON\"}");
+                LOGGER.debug("Invalid input JSON");
+            }
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":\"Missing input JSON\"}");
+            LOGGER.debug("Missing input JSON");
+        }
+        
+    } // handlePutAdminLogLoggers
     
     private void handleDeleteGroupingRules(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
