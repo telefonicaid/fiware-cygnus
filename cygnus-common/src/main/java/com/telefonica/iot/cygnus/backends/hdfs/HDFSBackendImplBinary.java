@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -18,10 +18,8 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
-import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -50,7 +48,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     
     /**
      * 
-     * @param hdfsHosts
+     * @param hdfsHost
      * @param hdfsPort
      * @param hdfsUser
      * @param hdfsPassword
@@ -65,7 +63,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImplBinary(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+    public HDFSBackendImplBinary(String hdfsHost, String hdfsPort, String hdfsUser, String hdfsPassword,
             String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
             String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
             boolean serviceAsNamespace) {
@@ -76,7 +74,7 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         this.hiveHost = hiveHost;
         this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
-        this.fsGetter = new FSGetter(hdfsHosts, hdfsPort);
+        this.fsGetter = new FSGetter(hdfsHost, hdfsPort);
     } // HDFSBackendImplBinary
     
     protected void setFSGetter(FSGetter fsGetter) {
@@ -244,16 +242,16 @@ public class HDFSBackendImplBinary implements HDFSBackend {
      */
     protected class FSGetter {
         
-        private final String[] hdfsHosts;
+        private final String hdfsHost;
         private final String hdfsPort;
         
         /**
          * Constructor.
-         * @param hdfsHosts
+         * @param hdfsHost
          * @param hdfsPort
          */
-        public FSGetter(String[] hdfsHosts, String hdfsPort) {
-            this.hdfsHosts = hdfsHosts;
+        public FSGetter(String hdfsHost, String hdfsPort) {
+            this.hdfsHost = hdfsHost;
             this.hdfsPort = hdfsPort;
         } // FSGetter
         
@@ -263,16 +261,11 @@ public class HDFSBackendImplBinary implements HDFSBackend {
          * @throws java.io.IOException
          */
         public FileSystem get() throws IOException {
-            for (String hdfsHost: hdfsHosts) {
-                Configuration conf = new Configuration();
-                //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/core-site.xml"));
-                //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/hdfs-site.xml"));
-                conf.set("fs.default.name", "hdfs://" + hdfsHost + ":" + hdfsPort);
-                return FileSystem.get(conf);
-            } // for
-            
-            LOGGER.error("No HDFS file system could be got, the sink will not work!");
-            return null;
+            Configuration conf = new Configuration();
+            //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/core-site.xml"));
+            //conf.addResource(new Path("/Users/frb/devel/fiware/fiware-cygnus/conf/hdfs-site.xml"));
+            conf.set("fs.default.name", "hdfs://" + hdfsHost + ":" + hdfsPort);
+            return FileSystem.get(conf);
         } // get
         
     } // FSGetter
