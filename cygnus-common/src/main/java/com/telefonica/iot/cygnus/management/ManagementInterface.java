@@ -1513,8 +1513,8 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         if (!jsonStr.isEmpty()) {
             JsonObject jsonAppender = new JsonParser().parse(jsonStr).getAsJsonObject();
-            JsonObject appender = jsonAppender.get("appender").getAsJsonObject();
             try {
+                JsonObject appender = jsonAppender.get("appender").getAsJsonObject();
                 String name = appender.get("name").getAsString();
                 JsonObject layout = jsonAppender.get("pattern").getAsJsonObject();
                 String pattern = layout.get("ConversionPattern").getAsString();
@@ -1601,8 +1601,8 @@ public class ManagementInterface extends AbstractHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\":\"Input JSON is empty\"}");
-            LOGGER.debug("Input JSON is empty.");
+                + "\"result\":\"Missing input JSON\"}");
+            LOGGER.debug("Missing input JSON.");
         } // if else
         
     } // handlePostAdminLogAppender
