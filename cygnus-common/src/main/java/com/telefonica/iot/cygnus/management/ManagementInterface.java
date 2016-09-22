@@ -182,6 +182,8 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostAdminConfigurationInstance(request, response, false);
                 } else if (uri.startsWith("/v1/admin/configuration/instance")) {
                     handlePostAdminConfigurationInstance(request, response, true); 
+                } else if (uri.startsWith("/v1/admin/log/loggers")) {
+                    handlePostAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handlePostAdminLogAppenders(request, response); 
                 } else {
@@ -1498,6 +1500,110 @@ public class ManagementInterface extends AbstractHandler {
         } // if else
     } // handlePostAdminConfigurationInstance
     
+    private void handlePostAdminLogLoggers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+        
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String jsonStr = "";
+        String line;
+        
+        while ((line = reader.readLine()) != null) {
+            jsonStr += line;
+        } // while
+
+        reader.close();
+        
+        if (!jsonStr.isEmpty()) {
+            JsonObject jsonLogger = new JsonParser().parse(jsonStr).getAsJsonObject(); 
+            
+            try {
+                JsonObject logger = jsonLogger.get("logger").getAsJsonObject();
+                String name = logger.get("name").getAsString();
+                String level = logger.get("level").getAsString();
+
+                try {
+                    CommonConstants.LoggingLevels.valueOf(level);
+                    String transient_ = request.getParameter("transient");
+                    String pathToFile = configurationPath + "/log4j.properties";
+                    File file = new File(pathToFile);
+
+                    if ((transient_ == null) || (transient_.equals("true"))) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\","
+                            + "\"result\":\"POST appenders in transient mode is not implemented\"}");
+                        LOGGER.debug("POST appenders in transient mode is not implemented");                       
+
+                    } else if (transient_.equals("false")) {
+
+                        if (file.exists()) {
+                            FileInputStream fileInputStream = new FileInputStream(file);
+                            Properties properties = new Properties();
+                            properties.load(fileInputStream);
+                            Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                            ArrayList<String> loggerNames = 
+                                    ManagementInterfaceUtils.getLoggersFromProperties(properties);
+                            boolean loggerFound = false;
+
+                            for (String loggerName: loggerNames) {
+
+                                if (name.equals(loggerName)) {
+                                    loggerFound = true;
+                                } // if
+
+                            } // for
+
+                            if (loggerFound) {
+                                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                                response.getWriter().println("{\"success\":\"false\","
+                                    + "\"result\":{\"Logger '" + name + "' already exist\"}}");
+                                LOGGER.debug("Logger '" + name + "' already exist");
+                            } else {
+                                String propertyName = "log4j.logger." + name;
+                                properties.put(propertyName, level);
+                                ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                response.getWriter().println("{\"success\":\"true\","
+                                    + "\"result\":{\"Logger '" + name + "' put\"}}");
+                                LOGGER.debug("Logger '" + name + "' put");
+                            } // if else
+
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().println("{\"success\":\"false\","
+                                    + "\"result\" : { \"File not found in the path received\" }");
+                            LOGGER.debug("File not found in the path received");
+                        } // if else
+
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+                        LOGGER.debug("Invalid 'transient' parameter found");
+                    } // if else if
+
+                } catch (Exception e)  {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":{\"Invalid logging level\"}}");
+                    LOGGER.debug("Invalid logging level");
+                } // try catch
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"Invalid input JSON\"}");
+                LOGGER.debug("Invalid input JSON");
+            } // try catch
+            
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"result\":\"Missing input JSON\"}");
+            LOGGER.debug("Missing input JSON");
+        } // if else
+       
+    } // handlePostAdminLogLoggers
+    
     private void handlePostAdminLogAppenders(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
@@ -1575,7 +1681,7 @@ public class ManagementInterface extends AbstractHandler {
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.getWriter().println("{\"success\":\"true\","
                                 + "\"result\":\"Appender '" + name + "' posted.\"}");
-                            LOGGER.debug("Appender '" + name + "' posted.");
+                            LOGGER.debug("Appender '" + name + "' posted.");                        
                         } // if else
 
                     } else {
@@ -1605,7 +1711,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.debug("Missing input JSON.");
         } // if else
         
-    } // handlePostAdminLogAppender
+    } // handlePostAdminLogAppender  
     
     protected void handleDeleteSubscription(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
