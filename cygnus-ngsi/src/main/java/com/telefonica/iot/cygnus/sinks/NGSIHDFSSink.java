@@ -36,6 +36,7 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.apache.flume.Context;
@@ -67,7 +68,7 @@ public class NGSIHDFSSink extends NGSISink {
     public enum HiveDBType { DEFAULTDB, NAMESPACEDB }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIHDFSSink.class);
-    private String[] host;
+    private String[] hosts;
     private String port;
     private String username;
     private String password;
@@ -85,7 +86,7 @@ public class NGSIHDFSSink extends NGSISink {
     private boolean serviceAsNamespace;
     private BackendImpl backendImpl;
     private HiveDBType hiveDBType;
-    private HDFSBackend persistenceBackend;
+    private LinkedList<HDFSBackend> persistenceBackends;
     private HiveBackend hiveBackend;
     private String csvSeparator;
     private int maxConns;
@@ -103,7 +104,7 @@ public class NGSIHDFSSink extends NGSISink {
      * @return The Cosmos host
      */
     protected String[] getHDFSHosts() {
-        return host;
+        return hosts;
     } // getHDFSHosts
 
     /**
@@ -206,19 +207,19 @@ public class NGSIHDFSSink extends NGSISink {
     } // getEnableKrb5Auth
 
     /**
-     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
-     * @return The persistence backend
+     * Returns the persistence backends. It is protected due to it is only required for testing purposes.
+     * @return The persistence backends
      */
-    protected HDFSBackend getPersistenceBackend() {
-        return persistenceBackend;
+    protected LinkedList<HDFSBackend> getPersistenceBackends() {
+        return persistenceBackends;
     } // getPersistenceBackend
 
     /**
-     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * Sets the persistence backends. It is protected due to it is only required for testing purposes.
+     * @param persistenceBackends
      */
-    protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(LinkedList<HDFSBackend> persistenceBackends) {
+        this.persistenceBackends = persistenceBackends;
     } // setPersistenceBackend
     
     protected String getCSVSeparator() {
@@ -240,8 +241,8 @@ public class NGSIHDFSSink extends NGSISink {
     @Override
     public void configure(Context context) {
         String hdfsHost = context.getString("hdfs_host", "localhost");
-        host = hdfsHost.split(",");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
+        hosts = hdfsHost.split(",");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(hosts) + ")");
         
         port = context.getString("hdfs_port", "14000");
         
@@ -420,21 +421,27 @@ public class NGSIHDFSSink extends NGSISink {
             // create Hive backend
             hiveBackend = new HiveBackendImpl(hiveServerVersion, hiveHost, hivePort, username, password);
             LOGGER.debug("[" + this.getName() + "] Hive persistence backend created");
-
-            // create the persistence backend
-            if (backendImpl == BackendImpl.BINARY) {
-                persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
-                        hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, serviceAsNamespace);
-            } else if (backendImpl == BackendImpl.REST) {
-                persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
-                        hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, serviceAsNamespace, maxConns, maxConnsPerRoute);
-            } else {
-                LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
-                        + backendImpl.toString());
-                System.exit(-1);
-            } // if else
+            
+            // create the persistence backends
+            persistenceBackends = new LinkedList<HDFSBackend>();
+            
+            for (String host : hosts) {
+                if (backendImpl == BackendImpl.BINARY) {
+                    HDFSBackendImplBinary persistenceBackend = new HDFSBackendImplBinary(host, port, username, password,
+                            oauth2Token, hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password,
+                            krb5LoginConfFile, krb5ConfFile, serviceAsNamespace);
+                    persistenceBackends.add(persistenceBackend);
+                } else if (backendImpl == BackendImpl.REST) {
+                    HDFSBackendImplREST persistenceBackend = new HDFSBackendImplREST(host, port, username, password,
+                            oauth2Token, hiveServerVersion, hiveHost, hivePort, enableKrb5, krb5User, krb5Password,
+                            krb5LoginConfFile, krb5ConfFile, serviceAsNamespace, maxConns, maxConnsPerRoute);
+                    persistenceBackends.add(persistenceBackend);
+                } else {
+                    LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
+                            + backendImpl.toString());
+                    System.exit(-1);
+                } // if else
+            } // for
 
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
@@ -979,12 +986,28 @@ public class NGSIHDFSSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
 
-        if (persistenceBackend.exists(hdfsFile)) {
-            persistenceBackend.append(hdfsFile, aggregation);
-        } else {
-            persistenceBackend.createDir(hdfsFolder);
-            persistenceBackend.createFile(hdfsFile, aggregation);
-        } // if else
+        for (HDFSBackend persistenceBackend: persistenceBackends) {
+            try {
+                if (persistenceBackend.exists(hdfsFile)) {
+                    persistenceBackend.append(hdfsFile, aggregation);
+                } else {
+                    persistenceBackend.createDir(hdfsFolder);
+                    persistenceBackend.createFile(hdfsFile, aggregation);
+                } // if else
+
+                if (!persistenceBackends.getFirst().equals(persistenceBackend)) {
+                    persistenceBackends.remove(persistenceBackend);
+                    persistenceBackends.add(0, persistenceBackend);
+                    LOGGER.debug("Placing the persistence backend (" + persistenceBackend.toString()
+                            + ") in the first place of the list");
+                } // if
+
+                break;
+            } catch (Exception e) {
+                LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
+                        + "trying other one. Details: " + e.getMessage());
+            } // try catch
+        } // for
     } // persistAggregation
 
     private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {
@@ -997,12 +1020,28 @@ public class NGSIHDFSSink extends NGSISink {
             LOGGER.info("[" + this.getName() + "] Persisting metadata at OrionHDFSSink. HDFS file ("
                     + hdfsMDFile + "), Data (" + mdAggregation + ")");
 
-            if (persistenceBackend.exists(hdfsMDFile)) {
-                persistenceBackend.append(hdfsMDFile, mdAggregation);
-            } else {
-                persistenceBackend.createDir(hdfsMdFolder);
-                persistenceBackend.createFile(hdfsMDFile, mdAggregation);
-            } // if else
+            for (HDFSBackend persistenceBackend: persistenceBackends) {
+                try {
+                    if (persistenceBackend.exists(hdfsMDFile)) {
+                        persistenceBackend.append(hdfsMDFile, mdAggregation);
+                    } else {
+                        persistenceBackend.createDir(hdfsMdFolder);
+                        persistenceBackend.createFile(hdfsMDFile, mdAggregation);
+                    } // if else
+                    
+                    if (!persistenceBackends.getFirst().equals(persistenceBackend)) {
+                        persistenceBackends.remove(persistenceBackend);
+                        persistenceBackends.add(0, persistenceBackend);
+                        LOGGER.debug("Placing the persistence backend (" + persistenceBackend.toString()
+                                + ") in the first place of the list");
+                    } // if
+                    
+                    break;
+                } catch (Exception e) {
+                    LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
+                            + "trying other one. Details: " + e.getMessage());
+                } // try catch
+            } // for
         } // for
     } // persistMDAggregations
 
