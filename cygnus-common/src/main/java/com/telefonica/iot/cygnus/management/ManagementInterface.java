@@ -1511,90 +1511,97 @@ public class ManagementInterface extends AbstractHandler {
         } // while
 
         reader.close();
-        JsonObject jsonAppender = new JsonParser().parse(jsonStr).getAsJsonObject();
-        
-        if (!jsonAppender.isJsonNull()) {
+        if (!jsonStr.isEmpty()) {
+            JsonObject jsonAppender = new JsonParser().parse(jsonStr).getAsJsonObject();
             JsonObject appender = jsonAppender.get("appender").getAsJsonObject();
-            String name = appender.get("name").getAsString();
-            JsonObject layout = jsonAppender.get("pattern").getAsJsonObject();
-            String pattern = layout.get("ConversionPattern").getAsString();
-            String transient_ = request.getParameter("transient");
-            String pathToFile = configurationPath + "/log4j.properties";
-            File file = new File(pathToFile);
+            try {
+                String name = appender.get("name").getAsString();
+                JsonObject layout = jsonAppender.get("pattern").getAsJsonObject();
+                String pattern = layout.get("ConversionPattern").getAsString();
+                String transient_ = request.getParameter("transient");
+                String pathToFile = configurationPath + "/log4j.properties";
+                File file = new File(pathToFile);
 
-            if ((transient_ == null) || (transient_.equals("true"))) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":\"POST appenders in transient mode is not implemented\"}");
-                LOGGER.debug("POST appenders in transient mode is not implemented");
+                if ((transient_ == null) || (transient_.equals("true"))) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("{\"success\":\"false\","
+                        + "\"result\":\"POST appenders in transient mode is not implemented\"}");
+                    LOGGER.debug("POST appenders in transient mode is not implemented");
 
-            } else if (transient_.equals("false")){
+                } else if (transient_.equals("false")) {
 
-                if (file.exists()) {
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    Properties properties = new Properties();
-                    properties.load(fileInputStream);
-                    String class_ = appender.get("class").getAsString();
-                    String layoutStr = layout.get("layout").getAsString();
-                    Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
-                    boolean appenderFound = false;
-                    ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
+                    if (file.exists()) {
+                        FileInputStream fileInputStream = new FileInputStream(file);
+                        Properties properties = new Properties();
+                        properties.load(fileInputStream);
+                        String class_ = appender.get("class").getAsString();
+                        String layoutStr = layout.get("layout").getAsString();
+                        Map<String, String> descriptions = ManagementInterfaceUtils.readLogDescriptions(file);
+                        boolean appenderFound = false;
+                        ArrayList<String> appenderNames = ManagementInterfaceUtils.getAppendersFromProperties(properties);
 
-                    for (String app : appenderNames) {        
+                        for (String app : appenderNames) {        
 
-                        if (app.equals(name)) {
-                            appenderFound = true;
-                        } // if 
+                            if (app.equals(name)) {
+                                appenderFound = true;
+                            } // if 
 
-                    } // for
+                        } // for
 
-                    if (appenderFound) {
+                        if (appenderFound) {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().println("{\"success\":\"false\","
+                                + "\"result\":\"Appender '" + name + "' already exist\"}");
+                            LOGGER.debug("Appender '" + name + "' already exist");
+                        } else {   
+                            String propertyName = "log4j.appender." + name;
+                            String propertyLayout = "log4j.appender." + name + ".layout";
+                            String propertyPattern = "log4j.appender." + name + ".layout.ConversionPattern";
+                            properties.put(propertyName, class_);
+                            properties.put(propertyLayout, layoutStr);
+                            properties.put(propertyPattern, pattern);
+                            String comments;
+
+                            try {
+                                comments = jsonAppender.get("comments").getAsString();
+                                descriptions.put("log4j.appender." + name , comments);
+                            } catch (Exception e) {
+                                comments = "# Values for appender '" + name + "' \n";
+                                descriptions.put("log4j.appender." + name , comments);
+                            } // try catch
+
+                            ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
+
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.getWriter().println("{\"success\":\"true\","
+                                + "\"result\":\"Appender '" + name + "' posted.\"}");
+                            LOGGER.debug("Appender '" + name + "' posted.");
+                        } // if else
+
+                    } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\":{\"Appender '" + name + "' already exist\"}");
-                        LOGGER.debug("Appender '" + name + "' already exist");
-                    } else {   
-                        String propertyName = "log4j.appender." + name;
-                        String propertyLayout = "log4j.appender." + name + ".layout";
-                        String propertyPattern = "log4j.appender." + name + ".layout.ConversionPattern";
-                        properties.put(propertyName, class_);
-                        properties.put(propertyLayout, layoutStr);
-                        properties.put(propertyPattern, pattern);
-                        String comments;
-
-                        try {
-                            comments = jsonAppender.get("comments").getAsString();
-                            descriptions.put("log4j.appender." + name , comments);
-                        } catch (Exception e) {
-                            comments = "# Values for appender '" + name + "' \n";
-                            descriptions.put("log4j.appender." + name , comments);
-                        } // try catch
-
-                        ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
-
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\":{\"Appender '" + name + "' posted.\"}}");
-                        LOGGER.debug("Appender '" + name + "' posted.");
+                                + "\"result\":\"File not found in the path received\"}");
+                        LOGGER.debug("File not found in the path received");
                     } // if else
 
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : { \"File not found in the path received\" }");
-                    LOGGER.debug("File not found in the path received");
-                } // if else
-
-            } else {
+                            + "\"result\":\"Invalid 'transient' parameter found\"}");
+                    LOGGER.debug("Invalid 'transient' parameter found");
+                }// if else if
+            } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\":{\"Invalid 'transient' parameter found\"}}");
-                LOGGER.debug("Invalid 'transient' parameter found");
-            }// if else if
+                        + "\"result\":\"Invalid input JSON\"}");
+                LOGGER.debug("Invalid input JSON");
+            }
+            
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\":{\"Input JSON is empty\"}}");
+                + "\"result\":\"Input JSON is empty\"}");
             LOGGER.debug("Input JSON is empty.");
         } // if else
         
