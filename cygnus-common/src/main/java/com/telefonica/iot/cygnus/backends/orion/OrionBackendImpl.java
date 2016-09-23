@@ -41,13 +41,11 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
      * @param ssl
      */
     public OrionBackendImpl(String orionHost, String orionPort, boolean ssl) {
-        super(new String[]{orionHost}, orionPort, ssl, false, null, null, null, null);
+        super(orionHost, orionPort, ssl, false, null, null, null, null);
     } // StatsBackendImpl
 
     @Override
-    public JsonResponse subscribeContextV1(String subscription, String token) 
-            throws Exception {
-        
+    public JsonResponse subscribeContextV1(String subscription, String token) throws Exception {
         // create the relative URL
         String relativeURL = "/v1/subscribeContext";
         
