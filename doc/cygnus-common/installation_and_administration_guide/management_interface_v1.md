@@ -22,16 +22,17 @@ Content:
 * [GET `/v1/admin/log/loggers`](#section13)
   * [GET logger by name](#section13.1)
   * [GET all loggers](#section13.2)
-* [PUT `/v1/admin/log/appenders`](#section14)
-* [POST `/v1/admin/log/appenders`](#section15)
-* [PUT `/v1/admin/log/loggers`](#section16)
-* [POST `/v1/admin/log/loggers`](#section17)
-* [DELETE `/v1/admin/log/appenders`](#section18)
-  * [DELETE appender by name](#section18.1)
-  * [DELETE all appenders](#section18.2)
-* [DELETE `/v1/admin/log/loggers`](#section19)
-  * [DELETE logger by name](#section19.1)
-  * [DELETE all loggers](#section19.2)
+* [PUT and POST methods for loggers and appenders](#section14)
+  * [PUT `/v1/admin/log/appenders`](#section14.1)
+  * [POST `/v1/admin/log/appenders`](#section14.2)
+  * [PUT `/v1/admin/log/loggers`](#section14.3)
+  * [POST `/v1/admin/log/loggers`](#section14.4)
+* [DELETE `/v1/admin/log/appenders`](#section15)
+  * [DELETE appender by name](#section15.1)
+  * [DELETE all appenders](#section15.2)
+* [DELETE `/v1/admin/log/loggers`](#section16)
+  * [DELETE logger by name](#section16.1)
+  * [DELETE all loggers](#section16.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
@@ -284,13 +285,13 @@ Responses:
 Valid subscription:
 
 ```
-{"success":"true","result" : {{"subscribeResponse":{"duration":"P1M","throttling":"PT5S","subscriptionId":"56f9081c3c6fb7e9d2a912a0"}}}}
+{"success":"true","result":{"subscribeResponse":{"duration":"P1M","throttling":"PT5S","subscriptionId":"56f9081c3c6fb7e9d2a912a0"}}}
 ```
 
 Invalid subscription (Unknown fields in this case):
 
 ```
-{"success":"true","result" :{"subscribeError":{"errorCode":{"code":"400","reasonPhrase":"Bad Request","details":"JSON Parse Error: unknown field: \/extraField"}}}
+{"success":"true","result":{"subscribeError":{"errorCode":{"code":"400","reasonPhrase":"Bad Request","details":"JSON Parse Error: unknown field: \/extraField"}}}}
 ```
 
 Invalid JSON (Empty field and missing field):
@@ -298,7 +299,7 @@ Invalid JSON (Empty field and missing field):
 ```
 {"success":"false","error":"Invalid subscription, field 'duration' is empty"}
 
-{"success":"false","error":"Invalid subscription, field 'notifyConditions' is missing"
+{"success":"false","error":"Invalid subscription, field 'notifyConditions' is missing"}
 ```
 
 Please observe Cygnus checks if the Json passed in the payload is valid (syntactically and semantically).
@@ -356,13 +357,13 @@ Responses:
 Valid subscription:
 
 ```
-{"success":"true","result" : {"SubscriptionID" : "572ae23d20e1387832ed98d0"}}
+{"success":"true","result":{"SubscriptionID" : "572ae23d20e1387832ed98d0"}}
 ```
 
 Invalid subscription (Unknown fields in this case):
 
 ```
-{"success":"false","error":"Parse error, malformed Json. Check it for errors."}
+{"success":"false","error":"Parse error, malformed Json. Check it for errors"}
 ```
 
 Invalid JSON (e.g. Missing fields or invalid endpoint):
@@ -390,16 +391,16 @@ Responses:
 Subscriptions deleted in v1 and v2:
 
 ```
-{"success":"true","result" : {" Subscription deleted "}
+{"success":"true","result":"Subscription deleted"}
 
 ```
 
 Wrong parameter:
 
 ```
-{"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors."}
+{"success":"false","error":"Parse error, wrong parameter (subscription_id). Check it for errors"}
 
-{"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors."}
+{"success":"false","error":"Parse error, wrong parameter (ngsi_version). Check it for errors"}
 ```
 
 Wrong subscription ID:
@@ -407,11 +408,11 @@ Wrong subscription ID:
 ```
 [NGSI v1]
 
-{"success":"false","result" : {{"subscriptionId":"571872a9c0585c7451571be4","statusCode":{"code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"}}}
+{"success":"false","result":{{"subscriptionId":"571872a9c0585c7451571be4","statusCode":{"code":"404","reasonPhrase":"No context element found","details":"subscriptionId: \/571872a9c0585c7451571be4\/"}}}}
 
 [NGSI v2]
 
-{"success":"false","result" : {{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
+{"success":"false","result":{"description":"The requested subscription has not been found. Check id","error":"NotFound"}}
 ```
 
 Empty or missing authentication token:
@@ -448,32 +449,32 @@ Responses:
 Valid and current subscription id with the correct NGSI version:
 
 ```
-{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/192.168.64.111\/ngsi23\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}
+{"success":"true","result" : {{"notification":{"lastNotification":"2015-07-28T22:24:33.00Z","timesSent":8122767998226748692,"callback":"http:\/\/192.168.64.111\/ngsi23\/notifyContext","attributes":[]},"expires":"2016-09-25T08:17:47.00Z","subject":{"condition":{"expression":{"q":"","geometry":"","coords":"","georel":""},"attributes":["TimeInstant"]},"entities":[{"id":"","type":"sevilla:fountain","idPattern":"patternId"}]},"id":"54325022q460a3873d30oe95","status":"active"}}}
 ```
 
 Valid but inexistent subscription id with the correct NGSI version:
 
 ```
-{"success":"false","result" : {{"description":"","error":"subscriptionId does not correspond to an active subscription"}}
+{"success":"false","result":{"description":"","error":"subscriptionId does not correspond to an active subscription"}}
 ```
 
 Invalid NGSI version:
 
 ```
-{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
+{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors"}
 ```
 
 Valid but not implemented NGSI version (sending `ngsi_version=1`):
 
 ```
-{"success":"false","error":"GET /v1/subscriptions not implemented."}
+{"success":"false","error":"GET /v1/subscriptions not implemented"}
 ```
 
 Missing or empty parameters:
 
 ```
-{"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors."}
-{"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors."}
+{"success":"false","error":"Parse error, missing parameter (subscription_id). Check it for errors"}
+{"success":"false","error":"Parse error, empty parameter (ngsi_version). Check it for errors"}
 ```
 
 [Top](#top)
@@ -497,19 +498,19 @@ When a valid subscription ID and an accepted NGSI version is used:
 
 ```
 
-When an invalid NGSI version is used:
+Invalid NGSI version is used:
 
 ```
-{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors."}
+{"success":"false","error":"Parse error, invalid parameter (ngsi_version): Must be 1 or 2. Check it for errors"}
 ```
 
-When a valid but not implemented NGSI version (sending `ngsi_version=1`):
+Valid but not implemented NGSI version (sending `ngsi_version=1`):
 
 ```
-{"success":"false","error":"GET /v1/subscriptions not implemented for NGSI version 1."}
+{"success":"false","error":"GET /v1/subscriptions not implemented for NGSI version 1"}
 ```
 
-When there are missing or empty parameters:
+Missing or empty parameters:
 
 ```
 {"success":"false","error":"Invalid endpoint, field 'ssl' is missing"}
@@ -529,19 +530,19 @@ GET "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?name=<appende
 
 Responses:
 
-When an appender is found given its name:
+Appender is found given its name:
 ```
 {"success":"true","appender":"[{"name":".....","layout":"......"}]}
 ```
 
-When there aren't an appender with a given name:
+There aren't an appender with a given name:
 ```
 {"success":"false","result":"Appender name not found"}
 ```
 
-When an invalid `transient` parameter is given:
+Invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
@@ -557,19 +558,19 @@ GET "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<tr
 
 Responses:
 
-When all appenders are found:
+All appenders are found:
 ```
 {"success":"true","appenders":[{"name":".....","layout":"......"},{"name":".....","layout":"....."}]}
 ```
 
-When there aren't appenders to be shown:
+There aren't appenders to be shown:
 ```
 {"success":"false","result":"No log4j appenders found"}
 ```
 
-When an invalid `transient` parameter is given:
+Invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
@@ -586,19 +587,19 @@ GET "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?name=<logger_na
 
 Responses:
 
-When a logger is found given its name:
+Logger is found given its name:
 ```
 {"success":"true","logger":[{"name":"....."}]}
 ```
 
-When there aren't an logger with a given name:
+There aren't an logger with a given name:
 ```
 {"success":"false","result":"logger name not found"}
 ```
 
-When an invalid `transient` parameter is given:
+Invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
@@ -614,26 +615,40 @@ GET "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<tran
 
 Responses:
 
-When all loggers are found:
+All loggers are found:
 ```
-{"success":"true","loggers":[{"name":".......","level":"...."},{"name":"....."},{"name":".....","level":"....."}]}
+{"success":"true","loggers":[{"name":".......","level":"...."}]}
 ```
 
-When there aren't appenders to be shown:
+There aren't appenders to be shown:
 ```
 {"success":"false","result":"No log4j loggers found"}
 ```
 
 When an invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
 
-##<a name="section14"></a> PUT `/v1/admin/log/appenders`
+##<a name="section14"></a> PUT and POST methods for loggers and appenders
 
-Puts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=true` (or omitting this parameter) the appender is put on Cygnus, if `transient=false` is put on the file.
+Following table resume the behaviour of PUT and POST method for every mode (`transient=true` or `transient=false`) and every method:
+
+|                     | APPENDER    |              | LOGGER      |              |
+|---------------------|------------ |--------------|------------ |--------------|
+|                     | Transient   | No transient | Transient   | No transient |
+|---------------------|------------ |--------------|------------ |--------------|
+| GET                 |    YES      |     YES      |    YES      |     YES      |
+| PUT                 | ONLY UPDATE |     YES      | ONLY UPDATE |     YES      |
+| POST                |    NO       |     YES      |    NO       |     YES      |
+| DELETE              |    YES      |     YES      |    YES      |     YES      |
+
+
+###<a name="section14.1"></a> PUT `/v1/admin/log/appenders`
+
+Puts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=true` (or omitting this parameter) the appender is updated if the name is equals with the current active appender; if `transient=false` the appender is added or updated in the file.
 
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>" -d
@@ -651,26 +666,38 @@ PUT "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<tr
 
 Responses:
 
-When a new appender is put:
+A new appender is put in transient mode and name is not equal with the current appender:
 ```
-{"success":"true","result":{"Appender '....' put."}}
-```
-
-When the appender exist and is updated:
-```
-{"success":"true","result":{"Appender '....' updated succesfully"}
+{"success":"false","result":"Appenders addition is not implemented"}
 ```
 
-When an invalid `transient` parameter is given:
+A new appender is put in no transient mode:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"true","result":"Appender '....' put."}
+```
+
+Appender exist and is updated:
+```
+{"success":"true","result":"Appender '....' updated succesfully"}
+```
+
+Invalid `transient` parameter is given:
+```
+{"success":"false","result":"Invalid 'transient' parameter"}
+```
+
+Sending only a request without JSON or sending a invalid one:
+```
+{"success":"false","result":"Missing input JSON"}
+
+{"success":"false","result":"Invalid input JSON"}
 ```
 
 [Top](#top)
 
-##<a name="section15"></a> POST `/v1/admin/log/appenders`
+###<a name="section14.2"></a> POST `/v1/admin/log/appenders`
 
-Posts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=true` (or omitting this parameter) the appender is posted on Cygnus, if `transient=false` is posted on the file.
+Posts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=false` is posted on the file. POST method is not implemented with `transient=true`.
 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>" -d
@@ -688,26 +715,38 @@ POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<tra
 
 Responses:
 
-When a new appender is put:
+New appender with `transient=true`:
 ```
-{"success":"true","result":{"Appender '.....' posted."}}
-```
-
-When the appender exist and is updated:
-```
-{"success":"false","result":{"Appender '.....' already exist"}
+{"success":"false","result":"POST appenders in transient mode is not implemented"}
 ```
 
-When an invalid `transient` parameter is given:
+New appender with `transient=false`:
+```
+{"success":"true","result":"Appender '........' posted."}
+```
+
+Appender already exists:
+```
+{"success":"false","result":{"Appender '........' already exist"}}
+```
+
+Invalid `transient` parameter is given:
 ```
 {"success":"false","result":{"Invalid 'transient' parameter"}}
 ```
 
+Sending a request without JSON or an invalid one:
+```
+{"success":"false","result":"Missing input JSON"}
+
+{"success":"false","result":"Invalid input JSON"}
+```
+
 [Top](#top)
 
-##<a name="section16"></a> PUT `/v1/admin/log/loggers`
+###<a name="section14.3"></a> PUT `/v1/admin/log/loggers`
 
-Puts a logger in a running Cygnus given a JSON with the information about the name and level of the logger. This method only accepts the parameter `transient=false` due to logger creation limitations in the code. Therefore, the loggers are put on the `log4j.properties` file.
+Puts an logger in a running Cygnus given a JSON with the information about the name and level of the logger. If parameterised with `transient=true` (or omitting this parameter) the logger is updated if the name is equals with a current logger. PUT method only update in transient mode due to logger creation limitations in the code. If `transient=false` the appender is added or updated in the file.
 
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
@@ -721,26 +760,39 @@ PUT "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false
 
 Responses:
 
-When a new appender is put:
+New appender with `transient=true`:
 ```
-{"success":"true","result":{"Appender '....' put."}}
-```
-
-When the appender exist and is updated:
-```
-{"success":"true","result":{"Appender '....' updated succesfully"}
+{"success":"false","result":"Loggers addition is  not implemented"}
 ```
 
-When an invalid `transient` parameter is given:
+Appender exist and is updated:
+```
+{"success":"true","result":"Appender '.......' updated successfully"}
+```
+
+New appender with `transient=false`:
+```
+{"success":"true","result":"Logger '......' put"}
+```
+
+Invalid `transient` parameter is given:
 ```
 {"success":"false","result":{"Invalid 'transient' parameter"}}
 ```
 
+Sending a request without JSON or an invalid one:
+```
+{"success":"false","result":"Missing input JSON"}
+
+{"success":"false","result":"Invalid input JSON"}
+```
+
 [Top](#top)
 
-##<a name="section17"></a> POST `/v1/admin/log/loggers`
+###<a name="section14.4"></a> POST `/v1/admin/log/loggers`
 
 Posts an logger on a running Cygnus. This method only accepts the parameter `transient=false` due to logger creation limitations in the code. Therefore, the loggers are posted on the `log4j.properties` file.
+Posts an logger in a running Cygnus given a JSON with the information about the name and level of the logger. If parameterised with `transient=false` is posted on the file. POST method is not implemented with `transient=true`.
 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
@@ -754,14 +806,19 @@ POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=fals
 
 Responses:
 
-When a new logger is put:
+New logger with `transient=true`:
 ```
-{"success":"true","result":{"Logger '.....' posted."}}
+{"success":"false","result":"POST appenders in transient mode is not implemented"}
 ```
 
-When the logger exist and is updated:
+New logger with `transient=false`:
 ```
-{"success":"false","result":{"Logger '.....' already exist"}
+{"success":"true","result":"Logger '.......' posted"}
+
+```
+Logger exist and is updated:
+```
+{"success":"false","result":"Logger '.......' already exist"}
 ```
 
 When an invalid `transient` parameter is given:
@@ -769,11 +826,18 @@ When an invalid `transient` parameter is given:
 {"success":"false","result":{"Invalid 'transient' parameter"}}
 ```
 
+Sending a request without JSON or an invalid one:
+```
+{"success":"false","result":"Missing input JSON"}
+
+{"success":"false","result":"Invalid input JSON"}
+```
+
 [Top](#top)
 
 
-##<a name="section18"></a> DELETE `/v1/admin/log/appenders`
-###<a name="section18.1"></a> DELETE appender by name
+##<a name="section15"></a> DELETE `/v1/admin/log/appenders`
+###<a name="section15.1"></a> DELETE appender by name
 
 Deletes an existent appender from a running logger given its name. It can be deleted on the running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appender is deleted on Cygnus, if `transient=false` is deleted in the file.
@@ -786,7 +850,7 @@ Responses:
 
 When an appender is found and deleted given its name:
 ```
-{"success":"true","result":"Appender '.....' removed succesfully"}
+{"success":"true","result":"Appender '.....' removed successfully"}
 ```
 
 When there aren't an appender with a given name:
@@ -796,12 +860,12 @@ When there aren't an appender with a given name:
 
 When an invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
 
-###<a name="section18.2"></a> DELETE all appenders
+###<a name="section15.2"></a> DELETE all appenders
 
 Deletes all existent appenders from a running logger. They can be deleted on the running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appenders are deleted on Cygnus, if `transient=false` are deleted in the file.
@@ -814,18 +878,18 @@ Responses:
 
 When all appenders are deleted:
 ```
-{"success":"true","result":"Appenders removed succesfully"}}
+{"success":"true","result":"Appenders removed successfully"}
 ```
 
 When an invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
 
-##<a name="section19"></a> DELETE `/v1/admin/log/loggers`
-###<a name="section19.1"></a> DELETE logger by name
+##<a name="section16"></a> DELETE `/v1/admin/log/loggers`
+###<a name="section16.1"></a> DELETE logger by name
 
 Deletes an existent logger from a running Cygnus given its name. It can be deleted on a running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the logger is deleted on Cygnus, if `transient=false` is deleted in the file.
@@ -838,7 +902,7 @@ Responses:
 
 When a logger is found and deleted given its name:
 ```
-{"success":"true","result":"Logger '.....' removed succesfully"}
+{"success":"true","result":"Logger '.....' removed successfully"}
 ```
 
 When there aren't an logger with a given name:
@@ -848,12 +912,12 @@ When there aren't an logger with a given name:
 
 When an invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)
 
-###<a name="section19.2"></a> DELETE all loggers
+###<a name="section16.2"></a> DELETE all loggers
 
 Deletes all existent loggers from a running Cygnus. They can be deleted on a running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the loggers are deleted on Cygnus, if `transient=false` are deleted in the file.
@@ -866,12 +930,12 @@ Responses:
 
 When all loggers are deleted:
 ```
-{"success":"true","result":"Loggers removed succesfully"}
+{"success":"true","result":"Loggers removed successfully"}
 ```
 
 When an invalid `transient` parameter is given:
 ```
-{"success":"false","result":{"Invalid 'transient' parameter"}}
+{"success":"false","result":"Invalid 'transient' parameter"}
 ```
 
 [Top](#top)

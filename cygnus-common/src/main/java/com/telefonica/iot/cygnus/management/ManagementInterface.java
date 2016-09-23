@@ -459,13 +459,13 @@ public class ManagementInterface extends AbstractHandler {
         if (ngsiVersion == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (ngsi_version). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (ngsi_version). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (ngsi_version). Check it for errors.");
             return;
         } else if (ngsiVersion.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (ngsi_version). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (ngsi_version). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (ngsi_version). Check it for errors.");
             return;
         } // if else
@@ -474,7 +474,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
                 + "\"error\":\"Parse error, invalid parameter (ngsi_version): "
-                + "Must be 1 or 2. Check it for errors.\"}");
+                + "Must be 1 or 2. Check it for errors\"}");
             LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                 + "Must be 1 or 2. Check it for errors.");
             return;
@@ -483,7 +483,7 @@ public class ManagementInterface extends AbstractHandler {
         if (ngsiVersion.equals("1")) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"GET /v1/subscriptions not implemented for NGSI version 1.\"}");
+                + "\"error\":\"GET /v1/subscriptions not implemented for NGSI version 1\"}");
             LOGGER.error("GET /v1/subscriptions not implemented.");
             return;
         } // if
@@ -493,7 +493,7 @@ public class ManagementInterface extends AbstractHandler {
         } else if (subscriptionID.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (subscription_id). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (subscription_id). Check it for errors.");
             return;
         } // if else
@@ -521,7 +521,7 @@ public class ManagementInterface extends AbstractHandler {
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"}");
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors\"}");
             LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
             return;
         } // try catch
@@ -575,7 +575,7 @@ public class ManagementInterface extends AbstractHandler {
                     status = orionResponse.getStatusCode();
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                        + "\"result\":\"There was some problem when handling the response\"}");
                     LOGGER.debug("There was some problem when handling the response");
                     return;
                 } // if else
@@ -584,16 +584,15 @@ public class ManagementInterface extends AbstractHandler {
 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
-                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                                + "\"result\":\"" + orionJson.toJSONString() + "\"}");
                     LOGGER.debug("Subscription received: " + orionJson.toJSONString());
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                                + "\"result\":\"" + orionJson.toJSONString() + "\"}");
                 } // if else
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
-                response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : {" + e.getMessage() + "}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":\"" + e.getMessage() + "\"}");
             } // try catch
         } else {
             try {
@@ -608,7 +607,7 @@ public class ManagementInterface extends AbstractHandler {
                     status = orionResponse.getStatusCode();
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"There was some problem when handling the response\" }");
+                        + "\"result\":\"There was some problem when handling the response\"}");
                     LOGGER.debug("There was some problem when handling the response");
                     return;
                 } // if else
@@ -617,17 +616,16 @@ public class ManagementInterface extends AbstractHandler {
 
                 if (status == 200) {
                     response.getWriter().println("{\"success\":\"true\","
-                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                                + "\"result\":\"" + orionJson.toJSONString() + "\"}");
                     LOGGER.debug("Subscription received: " + orionJson.toJSONString());
                 } else {
                     response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : {" + orionJson.toJSONString() + "}");
+                                + "\"result\":\"" + orionJson.toJSONString() + "\"}");
                 } // if else
             
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
-                response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" : {" + e.getMessage() + "}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":\"" + e.getMessage() + "\"}");
             } // try catch
         } // if else
     } // handleGetSubscriptions
@@ -651,7 +649,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+                + "\"error\":\"Agent file name must start with 'agent_'\"}");
             LOGGER.error("Agent file name must start with 'agent_'.");
             return;
         } // if
@@ -661,7 +659,7 @@ public class ManagementInterface extends AbstractHandler {
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param_name). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param_name). Check it for errors.");
             return;
         } // if else
@@ -693,20 +691,18 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {\"Param '" + param + "' not found in the agent\"}");
+                            + "\"result\":\"Param '" + param + "' not found in the agent\"}");
                     return;
                 } // if else
                 
             } // if else
             
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "");
+            response.getWriter().println("{\"success\":\"true\",\"result\":" + jsonObject + "");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
         } else {
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else
@@ -749,7 +745,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"Invalid path for a instance configuration file\"}");
+                    + "\"result\":\"Invalid path for a instance configuration file\"}");
             return;
         } // if
         
@@ -771,18 +767,16 @@ public class ManagementInterface extends AbstractHandler {
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {\"Param '" + param + "' not found in the instance\"}");
+                            + "\"result\":\"Param '" + param + "' not found in the instance\"}");
                     return;
                 } // if else
             } // if else
             
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+            response.getWriter().println("{\"success\":\"true\",\"result\":\"" + jsonObject + "\"}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"File not found in the path received\" }");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else
@@ -852,7 +846,7 @@ public class ManagementInterface extends AbstractHandler {
                     LOGGER.debug("Log4j logger successfully obtained");
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().println("{\"success\":\"false\",\"result\":\"logger name not found\"}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":\"Logger name not found\"}");
                     LOGGER.debug("Logger name not found");
                 } // try catch
             } // if else
@@ -879,7 +873,7 @@ public class ManagementInterface extends AbstractHandler {
 
                     loggersJson += "]";
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"true\",\"loggers\":" + loggersJson + "}");
+                    response.getWriter().println("{\"success\":\"true\",\"loggers\":\"" + loggersJson + "\"}");
                     LOGGER.debug("Logger list: " + loggersJson);
                 } else {
                     boolean loggerFound = false;
@@ -896,7 +890,7 @@ public class ManagementInterface extends AbstractHandler {
 
                     if (loggerFound) {
                         response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
+                        response.getWriter().println("{\"success\":\"true\",\"logger\":\"" + loggersJson + "\"}");
                         LOGGER.debug("Logger list: " + loggersJson);
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -907,13 +901,12 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"File not found in the path received\" }");
+                        + "\"result\":\"File not found in the path received\"}");
                 LOGGER.debug("File not found in the path received");
             } // if else
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"Invalid 'transient' parameter found\"}");
             LOGGER.debug("Invalid 'transient' parameter found");
         } // if else if
     } // handleGetAdminLogLoggers
@@ -1029,7 +1022,7 @@ public class ManagementInterface extends AbstractHandler {
 
                     if (appenderFound) {
                         response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().println("{\"success\":\"true\",\"appender\":" + appenderJson + "]}");
+                        response.getWriter().println("{\"success\":\"true\",\"appender\":\"" + appenderJson + "\"}");
                         LOGGER.debug("Appender list: " + appenderJson);
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -1107,8 +1100,7 @@ public class ManagementInterface extends AbstractHandler {
                     LOGGER.warn("Invalid grouping rule, some field is not allowed");
                     return;
                 default:
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"error\":\"Invalid grouping rule\"}");
+                    response.getWriter().println("{\"success\":\"false\",\"error\":\"Invalid grouping rule\"}");
                     LOGGER.warn("Invalid grouping rule");
                     return;
             } // swtich
@@ -1165,7 +1157,7 @@ public class ManagementInterface extends AbstractHandler {
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
+                + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors\"}");
             LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
             return;
         } // if
@@ -1174,7 +1166,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Parse error, invalid parameter (ngsi_version): "
-                    + "Must be 1 or 2. Check it for errors.\"}");
+                    + "Must be 1 or 2. Check it for errors\"}");
             LOGGER.error("Parse error, invalid parameter (ngsi_version): "
                     + "Must be 1 or 2. Check it for errors.");
             return;
@@ -1195,7 +1187,7 @@ public class ManagementInterface extends AbstractHandler {
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors\"");
                 LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
                 return;
             } // try catch
@@ -1246,12 +1238,10 @@ public class ManagementInterface extends AbstractHandler {
                 } // if
                 
                 if (status == 200) {
-                    response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    response.getWriter().println("{\"success\":\"true\",\"result\":{" + orionJson.toJSONString() + "}");
                     LOGGER.debug("Subscribed.");
                 } else {
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":{" + orionJson.toJSONString() + "}");
                 } // if else
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
@@ -1263,7 +1253,7 @@ public class ManagementInterface extends AbstractHandler {
             } catch (JsonSyntaxException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors\"");
                 LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
                 return;
             } // try catch
@@ -1310,12 +1300,11 @@ public class ManagementInterface extends AbstractHandler {
                 if (status == 201) {
                     String location = orionResponse.getLocationHeader().getValue();
                     response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : { SubscriptionID = " + location.substring(18) + "}");
+                            + "\"result\":{\"SubscriptionID\":\"" + location.substring(18) + "\"}");
                     LOGGER.debug("Subscribed.");
                 } else {
                     orionJson = orionResponse.getJsonObject();
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toString() + "}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":{" + orionJson.toString() + "}");
                 } // if else
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
@@ -1342,7 +1331,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+                + "\"error\":\"Agent file name must start with 'agent_'\"}");
             LOGGER.error("Agent file name must start with 'agent_'.");
             return;
         } // if
@@ -1350,13 +1339,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -1364,7 +1353,7 @@ public class ManagementInterface extends AbstractHandler {
         if (newValue == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
             return;
         } // if else
@@ -1390,8 +1379,7 @@ public class ManagementInterface extends AbstractHandler {
                 if (name.equals(param)) {
                     jsonObject.put("agent", properties);
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : " + jsonObject + "}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":" + jsonObject + "}");
                     LOGGER.debug(jsonObject);
                     return;
                 } // if
@@ -1400,13 +1388,11 @@ public class ManagementInterface extends AbstractHandler {
             properties.put(param, newValue);
             jsonObject.put("agent", properties);
             ManagementInterfaceUtils.orderedPrinting(properties, file);
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+            response.getWriter().println("{\"success\":\"true\",\"result\":" + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else
@@ -1430,13 +1416,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -1444,7 +1430,7 @@ public class ManagementInterface extends AbstractHandler {
         if (newValue == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
             return;
         } // if else
@@ -1460,7 +1446,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"Invalid path for a instance configuration file\"}");
+                    + "\"result\":\"Invalid path for a instance configuration file\"}");
             return;
         } // if
                 
@@ -1478,8 +1464,7 @@ public class ManagementInterface extends AbstractHandler {
                 if (name.equals(param)) {
                     jsonObject.put("instance", properties);
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : " + jsonObject + "}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":" + jsonObject + "}");
                     LOGGER.debug(jsonObject);
                     return;
                 } // if
@@ -1488,13 +1473,11 @@ public class ManagementInterface extends AbstractHandler {
             properties.put(param, newValue);
             jsonObject.put("instance", properties);
             ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+            response.getWriter().println("{\"success\":\"true\",\"result\":" + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"File not found in the path received\"}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else
@@ -1556,7 +1539,7 @@ public class ManagementInterface extends AbstractHandler {
                             if (loggerFound) {
                                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                                 response.getWriter().println("{\"success\":\"false\","
-                                    + "\"result\":{\"Logger '" + name + "' already exist\"}}");
+                                    + "\"result\":\"Logger '" + name + "' already exist\"}");
                                 LOGGER.debug("Logger '" + name + "' already exist");
                             } else {
                                 String propertyName = "log4j.logger." + name;
@@ -1564,14 +1547,14 @@ public class ManagementInterface extends AbstractHandler {
                                 ManagementInterfaceUtils.orderedLogPrinting(properties, descriptions, file);
                                 response.setStatus(HttpServletResponse.SC_OK);
                                 response.getWriter().println("{\"success\":\"true\","
-                                    + "\"result\":{\"Logger '" + name + "' put\"}}");
+                                    + "\"result\":\"Logger '" + name + "' put\"}");
                                 LOGGER.debug("Logger '" + name + "' put");
                             } // if else
 
                         } else {
                             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                             response.getWriter().println("{\"success\":\"false\","
-                                    + "\"result\" : { \"File not found in the path received\" }");
+                                    + "\"result\":\"File not found in the path received\"}");
                             LOGGER.debug("File not found in the path received");
                         } // if else
 
@@ -1584,21 +1567,18 @@ public class ManagementInterface extends AbstractHandler {
 
                 } catch (Exception e)  {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\":{\"Invalid logging level\"}}");
+                    response.getWriter().println("{\"success\":\"false\",\"result\":{\"Invalid logging level\"}}");
                     LOGGER.debug("Invalid logging level");
                 } // try catch
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\":\"Invalid input JSON\"}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":\"Invalid input JSON\"}");
                 LOGGER.debug("Invalid input JSON");
             } // try catch
             
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":\"Missing input JSON\"}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"Missing input JSON\"}");
             LOGGER.debug("Missing input JSON");
         } // if else
        
@@ -1680,7 +1660,7 @@ public class ManagementInterface extends AbstractHandler {
 
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.getWriter().println("{\"success\":\"true\","
-                                + "\"result\":\"Appender '" + name + "' posted.\"}");
+                                + "\"result\":\"Appender '" + name + "' posted\"}");
                             LOGGER.debug("Appender '" + name + "' posted.");                        
                         } // if else
 
@@ -1699,15 +1679,13 @@ public class ManagementInterface extends AbstractHandler {
                 }// if else if
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\":\"Invalid input JSON\"}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":\"Invalid input JSON\"}");
                 LOGGER.debug("Invalid input JSON");
             }
             
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                + "\"result\":\"Missing input JSON\"}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"Missing input JSON\"}");
             LOGGER.debug("Missing input JSON.");
         } // if else
         
@@ -1723,7 +1701,7 @@ public class ManagementInterface extends AbstractHandler {
         if ((subscriptionId == null) || (subscriptionId.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, wrong parameter (subscription_id). Check it for errors.\"}");
+                    + "\"error\":\"Parse error, wrong parameter (subscription_id). Check it for errors\"}");
             LOGGER.error("Parse error, wrong parameter (subscription_id). Check it for errors.");
             return;
         } // if
@@ -1731,7 +1709,7 @@ public class ManagementInterface extends AbstractHandler {
         if ((ngsiVersion == null) || (ngsiVersion.equals(""))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors.\"}");
+                    + "\"error\":\"Parse error, wrong parameter (ngsi_version). Check it for errors\"}");
             LOGGER.error("Parse error, wrong parameter (ngsi_version). Check it for errors.");
             return;
         } // if
@@ -1772,7 +1750,7 @@ public class ManagementInterface extends AbstractHandler {
         } catch (JsonSyntaxException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Parse error, malformed Json. Check it for errors.\"");
+                    + "\"error\":\"Parse error, malformed Json. Check it for errors\"");
             LOGGER.error("Parse error, malformed Json. Check it for errors.\"");
             return;
         } // try catch
@@ -1836,18 +1814,15 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.debug("Status code obtained: " + status);
             
             if ((status == 204) || (status == 200)) {
-                response.getWriter().println("{\"success\":\"true\","
-                            + "\"result\" : {\" Subscription deleted \"}");
+                response.getWriter().println("{\"success\":\"true\",\"result\":\" Subscription deleted\"}");
                 LOGGER.debug("Subscription deleted succesfully.");
             } else {
-                response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + orionJson.toJSONString() + "}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":" + orionJson.toJSONString() + "}");
             } // if else
             
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            response.getWriter().println("{\"success\":\"false\","
-                            + "\"result\" : {" + e.getMessage() + "}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":" + e.getMessage() + "}");
         } // try catch
         
     } // handleDeleteSubscription
@@ -1863,7 +1838,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+                + "\"error\":\"Agent file name must start with 'agent_'\"}");
             LOGGER.error("Agent file name must start with 'agent_'.");
             return;
         } // if
@@ -1871,13 +1846,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -1913,16 +1888,16 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             
             if (paramExists) {
-                response.getWriter().println("{\"success\":\"true\"," + "\"result\" : " + jsonObject + "}");
+                response.getWriter().println("{\"success\":\"true\",\"result\":" + jsonObject + "}");
             } else {
-                response.getWriter().println("{\"success\":\"false\"," + "\"result\" : " + jsonObject + "}");
+                response.getWriter().println("{\"success\":\"false\",\"result\":" + jsonObject + "}");
             } // if else
             
             LOGGER.debug(jsonObject);
             
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // try catch
@@ -1938,13 +1913,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -1990,7 +1965,7 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.debug(jsonObject);
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // try catch
@@ -2025,7 +2000,7 @@ public class ManagementInterface extends AbstractHandler {
                     LogManager.getRootLogger().removeAppender(delete);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"result\":\"Appender '"+ appenderName 
-                            +"'removed succesfully\"}]}");
+                            +"'removed succesfully\"}");
                     LOGGER.debug("Log4j appender removed succesfully");
                 } catch (Exception e) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -2107,7 +2082,7 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"File not found in the path received\" }");
+                        + "\"result\":\"File not found in the path received\"}");
                 LOGGER.debug("File not found in the path received");
             } // if else
             
@@ -2345,7 +2320,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(fileName.startsWith("agent_"))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Agent file name must start with 'agent_'.\"}");
+                + "\"error\":\"Agent file name must start with 'agent_'\"}");
             LOGGER.error("Agent file name must start with 'agent_'.");
             return;
         } // if
@@ -2353,13 +2328,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -2367,7 +2342,7 @@ public class ManagementInterface extends AbstractHandler {
         if (newValue == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
             return;
         } // if else
@@ -2392,14 +2367,13 @@ public class ManagementInterface extends AbstractHandler {
             
             ManagementInterfaceUtils.orderedPrinting(properties, file);
                                
-            response.getWriter().println("{\"success\":\"true\","
-                    + "\"result\" : " + jsonObject + "}");
+            response.getWriter().println("{\"success\":\"true\",\"result\" : " + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
             
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : { \"File not found in the path received\" }");
+                    + "\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // if else
@@ -2425,13 +2399,13 @@ public class ManagementInterface extends AbstractHandler {
         if (param == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (param). Check it for errors.");
             return;
         } else if (param.equals("")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, empty parameter (param). Check it for errors.\"}");
+                + "\"error\":\"Parse error, empty parameter (param). Check it for errors\"}");
             LOGGER.error("Parse error, empty parameter (param). Check it for errors.");
             return;
         } // if else
@@ -2439,7 +2413,7 @@ public class ManagementInterface extends AbstractHandler {
         if (newValue == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"error\":\"Parse error, missing parameter (value). Check it for errors.\"}");
+                + "\"error\":\"Parse error, missing parameter (value). Check it for errors\"}");
             LOGGER.error("Parse error, missing parameter (value). Check it for errors.");
             return;
         } // if else
@@ -2455,7 +2429,7 @@ public class ManagementInterface extends AbstractHandler {
         if (!(pathToFile.endsWith("/usr/cygnus/conf/" + fileName))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                + "\"result\" : {\"Invalid path for a instance configuration file\"}");
+                + "\"result\":{\"Invalid path for a instance configuration file\"}");
             return;
         } // if
                 
@@ -2469,12 +2443,12 @@ public class ManagementInterface extends AbstractHandler {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("instance", properties);
             ManagementInterfaceUtils.instancePrinting(properties, file, descriptions);
-            response.getWriter().println("{\"success\":\"true\"," + "\"result\" : " + jsonObject + "}");
+            response.getWriter().println("{\"success\":\"true\",\"result\":" + jsonObject + "}");
             LOGGER.debug(jsonObject);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\" : {\"File not found in the path received\"}");
+                    + "\"result\":\"File not found in the path received\"}");
             LOGGER.debug("File not found in the path received. Details: " +  e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } // try catch
@@ -2581,7 +2555,7 @@ public class ManagementInterface extends AbstractHandler {
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         response.getWriter().println("{\"success\":\"false\","
-                                + "\"result\" :  \"File not found in the path received\" }");
+                                + "\"result\":\"File not found in the path received\"}");
                         LOGGER.debug("File not found in the path received");
                     } // if else
 
@@ -2601,8 +2575,7 @@ public class ManagementInterface extends AbstractHandler {
             
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":\"Missing input JSON\"}");
+            response.getWriter().println("{\"success\":\"false\",\"result\":\"Missing input JSON\"}");
             LOGGER.debug("Missing input JSON");
         } // if else
         
@@ -2742,7 +2715,7 @@ public class ManagementInterface extends AbstractHandler {
         if (groupingRulesConfFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"error\":\"Missing configuration file for Grouping Rules\"");
+                    + "\"error\":\"Missing configuration file for Grouping Rules\"}");
             LOGGER.error("Missing configuration file for Grouping Rules");
             return;
         } // if
@@ -2751,7 +2724,7 @@ public class ManagementInterface extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("{\"success\":\"false\","
                     + "\"error\":\"Configuration file for Grouing Rules not found. Details: "
-                    + groupingRulesConfFile + "\"");
+                    + groupingRulesConfFile + "\"}");
             LOGGER.error("Configuration file for Grouing Rules not found. Details: " + groupingRulesConfFile);
             return;
         } // if
@@ -2895,14 +2868,14 @@ public class ManagementInterface extends AbstractHandler {
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().println("{\"success\":\"false\","
-                        + "\"result\" : { \"File not found in the path received\" }");
+                        + "\"result\":\"File not found in the path received\"}");
                 LOGGER.debug("File not found in the path received");
             } // if else
             
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("{\"success\":\"false\","
-                    + "\"result\":{\"Invalid 'transient' parameter found\"}}");
+                    + "\"result\":\"Invalid 'transient' parameter found\"}");
             LOGGER.debug("Invalid 'transient' parameter found");
         }// if else if
 
