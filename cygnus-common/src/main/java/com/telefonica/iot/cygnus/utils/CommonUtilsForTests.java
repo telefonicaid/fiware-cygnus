@@ -100,6 +100,7 @@ public final class CommonUtilsForTests {
      * Creates a Flume context for Mongo/STH sinks.
      * @param collectionPrefix
      * @param dbPrefix
+     * @param dataModel
      * @return A Flume context for Mongo/STH sinks.
      */
     public static Context createContextForMongoSTH(String collectionPrefix, String dbPrefix, String dataModel) {
