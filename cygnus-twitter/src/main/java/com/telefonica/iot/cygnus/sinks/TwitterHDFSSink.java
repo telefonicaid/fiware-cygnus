@@ -40,7 +40,7 @@ public class TwitterHDFSSink extends TwitterSink {
     public enum BackendImpl { BINARY, REST }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(TwitterHDFSSink.class);
-    private String[] host;
+    private String[] hosts;
     private String port;
     private String username;
     private String password;
@@ -53,7 +53,7 @@ public class TwitterHDFSSink extends TwitterSink {
     private String krb5LoginConfFile;
     private String krb5ConfFile;
     private BackendImpl backendImpl;
-    private HDFSBackend persistenceBackend;
+    private LinkedList<HDFSBackend> persistenceBackends;
 
     /**
      * Constructor.
@@ -67,7 +67,7 @@ public class TwitterHDFSSink extends TwitterSink {
      * @return The Cosmos host
      */
     protected String[] getHDFSHosts() {
-        return host;
+        return hosts;
     } // getHDFSHosts
 
     /**
@@ -121,23 +121,23 @@ public class TwitterHDFSSink extends TwitterSink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected HDFSBackend getPersistenceBackend() {
-        return persistenceBackend;
+    protected LinkedList<HDFSBackend> getPersistenceBackend() {
+        return persistenceBackends;
     } // getPersistenceBackend
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param persistenceBackends
      */
-    protected void setPersistenceBackend(HDFSBackendImplREST persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(LinkedList<HDFSBackend> persistenceBackends) {
+        this.persistenceBackends = persistenceBackends;
     } // setPersistenceBackend
 
     @Override
     public void configure(Context context) {
         String hdfsHost = context.getString("hdfs_host", "localhost");
-        host = hdfsHost.split(",");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(host) + ")");
+        hosts = hdfsHost.split(",");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_host=" + Arrays.toString(hosts) + ")");
         
         port = context.getString("hdfs_port", "14000");
         
@@ -239,20 +239,26 @@ public class TwitterHDFSSink extends TwitterSink {
     @Override
     public void start() {
         try {
-            // create the persistence backend
-            if (backendImpl == BackendImpl.BINARY) {
-                persistenceBackend = new HDFSBackendImplBinary(host, port, username, password, oauth2Token,
-                        "", "", "", enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, false);
-            } else if (backendImpl == BackendImpl.REST) {
-                persistenceBackend = new HDFSBackendImplREST(host, port, username, password, oauth2Token,
-                        "", "", "", enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
-                        krb5ConfFile, false);
-            } else {
-                LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
-                        + backendImpl.toString());
-                System.exit(-1);
-            } // if else
+            // create the persistence backends
+            persistenceBackends = new LinkedList<HDFSBackend>();
+            
+            for (String host : hosts) {
+                if (backendImpl == BackendImpl.BINARY) {
+                    HDFSBackendImplBinary persistenceBackend = new HDFSBackendImplBinary(host, port, username, password,
+                            oauth2Token, "", "", "", enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
+                            krb5ConfFile, false);
+                    persistenceBackends.add(persistenceBackend);
+                } else if (backendImpl == BackendImpl.REST) {
+                    HDFSBackendImplREST persistenceBackend = new HDFSBackendImplREST(host, port, username, password,
+                            oauth2Token, "", "", "", enableKrb5, krb5User, krb5Password, krb5LoginConfFile,
+                            krb5ConfFile, false);
+                    persistenceBackends.add(persistenceBackend);
+                } else {
+                    LOGGER.fatal("The configured backend implementation does not exist, Cygnus will exit. Details="
+                            + backendImpl.toString());
+                    System.exit(-1);
+                } // if else
+            } // for
 
             LOGGER.debug("[" + this.getName() + "] HDFS persistence backend created");
         } catch (Exception e) {
@@ -349,13 +355,30 @@ public class TwitterHDFSSink extends TwitterSink {
 
         LOGGER.info("[" + this.getName() + "] Persisting data at TwitterHDFSSink. HDFS file ("
                 + hdfsFile + ")");
+        
+        for (HDFSBackend persistenceBackend: persistenceBackends) {
+            try {
+                if (persistenceBackend.exists(hdfsFile)) {
+                    persistenceBackend.append(hdfsFile, aggregation);
+                } else {
+                    persistenceBackend.createDir(hdfsFolder);
+                    persistenceBackend.createFile(hdfsFile, aggregation);
+                } // if else
+                
+                if (!persistenceBackends.getFirst().equals(persistenceBackend)) {
+                    persistenceBackends.remove(persistenceBackend);
+                    persistenceBackends.add(0, persistenceBackend);
 
-        if (persistenceBackend.exists(hdfsFile)) {
-            persistenceBackend.append(hdfsFile, aggregation);
-        } else {
-            persistenceBackend.createDir(hdfsFolder);
-            persistenceBackend.createFile(hdfsFile, aggregation);
-        } // if else
+                    LOGGER.debug("Placing the persistence backend (" + persistenceBackend.toString()
+                            + ") in the first place of the list");
+                } // if
+
+                break;
+            } catch (Exception e) {
+                LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
+                        + "trying other one. Details: " + e.getMessage());
+            } // try catch
+        } // for
     } // persistAggregation
 
 } // TwitterHDFSSink
