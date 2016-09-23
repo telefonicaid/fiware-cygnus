@@ -67,4 +67,11 @@ public interface HDFSBackend {
      */
     boolean exists(String filePath) throws Exception;
     
+    /**
+     * Serializes the backend for pretty printing.
+     * @return The backend serialized for pretty printing.
+     */
+    @Override
+    String toString();
+    
 } // HDFSBackend
