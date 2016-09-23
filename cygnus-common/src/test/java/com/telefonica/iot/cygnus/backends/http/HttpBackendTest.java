@@ -46,8 +46,8 @@ public class HttpBackendTest {
      */
     private class HttpBackendImpl extends HttpBackend {
 
-        public HttpBackendImpl(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
-            super(hosts, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        public HttpBackendImpl(String host, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile) {
+            super(host, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
         } // HttpBackendImpl
    
     } // HttpBackendImpl
@@ -67,7 +67,7 @@ public class HttpBackendTest {
     private StringEntity arrayEntity;
     private String normalURL;
     private String arrayURL;
-    private String[] host;    
+    private String host;    
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -87,7 +87,7 @@ public class HttpBackendTest {
         normalEntity = new StringEntity(normalResponse);
         arrayEntity = new StringEntity(arrayResponse);
         
-        host = new String[] {"someurl.org"};
+        host = "someurl.org";
         
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));

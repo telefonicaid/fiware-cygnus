@@ -53,7 +53,7 @@ public class HDFSBackendImplRESTTest {
     private HttpClient mockHttpClientExistsCreateDir;
     
     // constants
-    private final String[] hdfsHosts = {"1.2.3.4", "5.6.7.8."};
+    private final String hdfsHost = "1.2.3.4";
     private final String hdfsPort = "50070";
     private final String user = "hdfs-user";
     private final String password = "12345abcde";
@@ -73,7 +73,7 @@ public class HDFSBackendImplRESTTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImplREST(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
+        backend = new HDFSBackendImplREST(hdfsHost, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
                 hivePort, false, null, null, null, null, false);
         
         // set up other instances
