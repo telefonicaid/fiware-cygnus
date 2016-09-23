@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -36,11 +36,9 @@ import org.apache.http.message.BasicHeader;
  */
 public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
+    private final String hdfsHost;
+    private final String hdfsPort;
     private final String hdfsUser;
-    private final String hdfsPassword;
-    private final String hiveServerVersion;
-    private final String hiveHost;
-    private final String hivePort;
     private final boolean serviceAsNamespace;
     private static final CygnusLogger LOGGER = new CygnusLogger(HDFSBackendImplREST.class);
     private static final String BASE_URL = "/webhdfs/v1/user/";
@@ -48,7 +46,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
     /**
      * 
-     * @param hdfsHosts
+     * @param hdfsHost
      * @param hdfsPort
      * @param hdfsUser
      * @param hdfsPassword
@@ -63,16 +61,14 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
      * @param krb5ConfFile
      * @param serviceAsNamespace
      */
-    public HDFSBackendImplREST(String[] hdfsHosts, String hdfsPort, String hdfsUser, String hdfsPassword,
+    public HDFSBackendImplREST(String hdfsHost, String hdfsPort, String hdfsUser, String hdfsPassword,
             String oauth2Token, String hiveServerVersion, String hiveHost, String hivePort, boolean krb5,
             String krb5User, String krb5Password, String krb5LoginConfFile, String krb5ConfFile,
             boolean serviceAsNamespace) {
-        super(hdfsHosts, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        super(hdfsHost, hdfsPort, false, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile);
+        this.hdfsHost = hdfsHost;
+        this.hdfsPort = hdfsPort;
         this.hdfsUser = hdfsUser;
-        this.hdfsPassword = hdfsPassword;
-        this.hiveServerVersion = hiveServerVersion;
-        this.hiveHost = hiveHost;
-        this.hivePort = hivePort;
         this.serviceAsNamespace = serviceAsNamespace;
         
         // add the OAuth2 token as a the unique header that will be sent
@@ -175,5 +171,10 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         // check the status
         return (response.getStatusCode() == 200);
     } // exists
+    
+    @Override
+    public String toString() {
+        return this.hdfsHost + ":" + this.hdfsPort;
+    } // toString
 
 } // HDFSBackendImplREST
