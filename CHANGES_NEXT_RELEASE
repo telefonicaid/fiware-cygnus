@@ -3,3 +3,4 @@
 - [cygnus-ngsi][hardening] Configurable Http parameters at backend (#1152)
 - [cygnus-twitter][bug] Fixed misspelled underscores in doc examples (#1161)
 - [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
+- [cygnus-ngis][hardening] Add a cache for already created elements in PostgreSQLSink (#1171)
