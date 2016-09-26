@@ -23,7 +23,7 @@ MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.2.1"
+ENV CYGNUS_VERSION "1.2.2"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"
@@ -31,7 +31,7 @@ ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "release/1.2.1"
+ENV GIT_REV_CYGNUS "release/1.2.2"
 
 ENV MVN_VER "3.2.5"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
