@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.containers.NameMapper;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
@@ -39,6 +40,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -78,6 +80,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean enableLowercase;
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
+    protected NameMapper nameMapper;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -246,6 +249,19 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_encoding="
                 + enableEncodingStr + ") -- Must be 'true' or 'false'");
         }  // if else
+        
+        String nameMappingsConfFile = context.getString("name_mappings_conf_file");
+        
+        if (nameMappingsConfFile == null || nameMappingsConfFile.isEmpty()) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (name_mappings_conf_file) "
+                    + "-- Must be configured with a non empty value");
+        } else {
+            nameMapper = new NameMapper(this.getName(), nameMappingsConfFile);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (name_mappings_conf_file="
+                    + nameMappingsConfFile + ")");
+        } // if else
+        
     } // configure
 
     @Override
@@ -403,12 +419,16 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch
 
-            // parse the event and accumulate it
+            // parse the event, do the mappings (if any) and accumulate it
             try {
                 LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
                         + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
                 NotifyContextRequest notification = parseEventBody(event);
-                accumulator.accumulate(event.getHeaders(), notification);
+                ImmutableTriple<String, String, NotifyContextRequest> map = nameMapper.map(
+                        event.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE),
+                        event.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH),
+                        notification);
+                accumulator.accumulate(event.getHeaders(), map.getRight());
                 numProcessedEvents++;
             } catch (Exception e) {
                 LOGGER.debug("There was some problem when parsing the notifed context element. Details="
@@ -727,7 +747,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // clone
 
     } // Accumulator
-
+    
     /**
      * This is the method the classes extending this class must implement when dealing with a batch of events to be
      * persisted.
