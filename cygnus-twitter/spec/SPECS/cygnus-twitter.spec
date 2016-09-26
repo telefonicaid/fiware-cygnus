@@ -97,6 +97,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon Sep 26 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.2
+
 * Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
 - [cygnus][hardening] Add architecture documentation (#1127)
 
