@@ -50,7 +50,7 @@ public class HDFSBackendImplBinaryTest {
     private FSDataOutputStream fsDataOutputStreamMock;
     
     // constants
-    private final String[] hdfsHosts = {"1.2.3.4", "5.6.7.8."};
+    private final String hdfsHost = "1.2.3.4";
     private final String hdfsPort = "50070";
     private final String user = "hdfs-user";
     private final String password = "12345abcde";
@@ -70,7 +70,7 @@ public class HDFSBackendImplBinaryTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new HDFSBackendImplBinary(hdfsHosts, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
+        backend = new HDFSBackendImplBinary(hdfsHost, hdfsPort, user, password, token, hiveServerVersion, hiveHost,
                 hivePort, false, null, null, null, null, false);
         
         // set up the behaviour of the mocked classes

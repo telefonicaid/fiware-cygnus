@@ -3,3 +3,4 @@
 - [cygnus-ngsi][hardening] Configurable Http parameters at backend (#1152)
 - [cygnus-twitter][bug] Fixed misspelled underscores in doc examples (#1161)
 - [cygnus-ngsi] [feature] Add implementation for /admin/log route (807) - continue - (#807)
+- [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)

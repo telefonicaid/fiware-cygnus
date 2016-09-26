@@ -46,10 +46,10 @@ public class HttpBackendTest {
      */
     private class HttpBackendImpl extends HttpBackend {
 
-        public HttpBackendImpl(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User,
+        public HttpBackendImpl(String host, String port, boolean ssl, boolean krb5, String krb5User,
                 String krb5Password, String krb5LoginConfFile, String krb5ConfFile, int maxConns,
                 int maxConnsPerRoute) {
-            super(hosts, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, maxConns,
+            super(host, port, ssl, krb5, krb5User, krb5Password, krb5LoginConfFile, krb5ConfFile, maxConns,
                     maxConnsPerRoute);
         } // HttpBackendImpl
    
@@ -70,7 +70,7 @@ public class HttpBackendTest {
     private StringEntity arrayEntity;
     private String normalURL;
     private String arrayURL;
-    private String[] host;
+    private String host;
     private final int maxConns = 50;
     private final int maxConnsPerRoute = 10;
     
@@ -92,7 +92,7 @@ public class HttpBackendTest {
         arrayURL = "http://someurl:1234";
         normalEntity = new StringEntity(normalResponse);
         arrayEntity = new StringEntity(arrayResponse);
-        host = new String[] {"someurl.org"};
+        host = "someurl.org";
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("X-Auth-token", "12345"));
