@@ -103,9 +103,9 @@ public class NameMappings {
      */
     public class EntityMapping {
         
-        private String originalEntityName;
+        private String originalEntityId;
         private String originalEntityType;
-        private String newEntityName;
+        private String newEntityId;
         private String newEntityType;
         private final ArrayList<AttributeMapping> attributeMappings;
         
@@ -120,17 +120,17 @@ public class NameMappings {
             return attributeMappings;
         } // getAttributeMappings
         
-        public String getOriginalEntityName() {
-            return originalEntityName;
-        } // getOriginalEntityName
+        public String getOriginalEntityId() {
+            return originalEntityId;
+        } // getOriginalEntityId
         
         public String getOriginalEntityType() {
             return originalEntityType;
         } // getOriginalEntityType
         
-        public String getNewEntityName() {
-            return newEntityName;
-        } // getNewEntityName
+        public String getNewEntityId() {
+            return newEntityId;
+        } // getNewEntityId
         
         public String getNewEntityType() {
             return newEntityType;
