@@ -281,4 +281,3 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // createConnection
     } // PostgreSQLDriver
 } // PostgreSQLBackendImpl
-

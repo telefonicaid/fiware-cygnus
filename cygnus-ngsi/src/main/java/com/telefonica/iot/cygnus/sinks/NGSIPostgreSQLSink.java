@@ -30,6 +30,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
+import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLCache;
 
 /**
  *
@@ -48,6 +49,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
+    // Parameter 'cache' and cache <schema,[table,table,table..]>
+    private boolean cache;
+    private PostgreSQLCache postgreCache;
 
     /**
      * Constructor.
@@ -62,6 +66,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
      */
     protected String getPostgreSQLHost() {
         return postgresqlHost;
+    } // getPostgreSQLHost
+    
+    /**
+     * Gets the PostgreSQL cache. It is protected due to it is only required for testing purposes.
+     * @return The PostgreSQL cache state
+     */
+    protected boolean getCache() {
+        return cache;
     } // getPostgreSQLHost
 
     /**
@@ -160,11 +172,28 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
+                
+        String cacheStr = context.getString("cache", "false");
+        
+        if (cacheStr.equals("true") || cacheStr.equals("false")) {
+            cache = Boolean.valueOf(cacheStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cache=" + cacheStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cache="
+                + cacheStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
     } // configure
 
     @Override
     public void start() {
         try {
+            if (cache) {
+                postgreCache = new PostgreSQLCache();
+                LOGGER.debug("[" + this.getName() + "] PostgreSQL cache created");
+            } // if
+            
             LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
             persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
                     postgresqlUsername, postgresqlPassword);
@@ -453,13 +482,32 @@ public class NGSIPostgreSQLSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Persisting data at OrionPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
-
+        
+        if (cache) {
+            LOGGER.info("Checking if the schema (" + schemaName + ") and the table (" + tableName + ") are in cache.");
+            int cacheCode = PostgreSQLCache.isSchemaTableInCache(schemaName, tableName);
+            
+            if (cacheCode > 0) {
+                PostgreSQLCache.persistInCache(schemaName, tableName, cacheCode);
+                
+                if (aggregator instanceof RowAggregator) {
+                    if (cacheCode == 2) {
+                        persistenceBackend.createSchema(schemaName); 
+                    } // if
+                    persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                } // if
+                
+            } // if else
+        } else {
+            
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.createSchema(schemaName);
+                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+            } // if
+        }
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createSchema(schemaName);
-            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-        } // if
+        
 
         persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
     } // persistAggregation
