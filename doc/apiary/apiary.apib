@@ -51,14 +51,13 @@ Error list (HTTP response code in parenthesis):
             }
        ]
 
-# Group Statistics API
-Allowed operations with API statistics.
+# Group Statistics API.
 
 ## Methods [/Statistics API]
-Information can be retrieved by GET statistics method, which you can retrieve all the information of the flume component.
+Allowed operations with API statistics:
 
-### "GET /v1/stats": Get statistics [GET]
-Statistics can be reset by a PUT request.
+### "GET /v1/stats" [GET /v1/stats]
+Information can be retrieved by GET statistics method, which you can retrieve all the information of the flume component.
 
 + Request
 
@@ -104,7 +103,8 @@ Statistics can be reset by a PUT request.
           }
         ]
 
-### "PUT /v1/stats": Reset statistics [PUT]
+### "PUT /v1/stats" [PUT /v1/stats]
+Statistics can be reset by a PUT request.
 
 + Request
 
@@ -120,10 +120,9 @@ Statistics can be reset by a PUT request.
 API operations used to manage the grouping rules of Cygnus.
 
 ## Methods [/Grouping Rules API]
-Grouping rules can be retrieved by GET methods.
 
-### "GET /v1/groupingrules": Get current grouping rules [GET]
-A grouping rule can be updated by PUT method.
+### "GET /v1/groupingrules" [GET /v1/groupingrules]
+Grouping rules can be retrieved by GET methods.
 
 + Request
 
@@ -157,8 +156,8 @@ A grouping rule can be updated by PUT method.
             }
         ]
 
-### "PUT /v1/groupingrules": Update an already existent grouping rules [PUT]
-A grouping rule can be added by POST method.
+### "PUT /v1/groupingrules" [PUT /v1/groupingrules]
+A grouping rule can be updated by PUT method.
 
 + Parameters
 
@@ -180,8 +179,8 @@ A grouping rule can be added by POST method.
             {"success":"true"}
         ]
 
-### "POST /v1/groupingrules": Adds a new rule [POST]
-A grouping rule can be deleted by DELETE method.
+### "POST /v1/groupingrules" [POST /v1/groupingrules]
+A grouping rule can be added by POST method.
 
 + Parameters
 
@@ -203,7 +202,8 @@ A grouping rule can be deleted by DELETE method.
            "success":"true"
        }
 
-### "DELETE /v1/groupingrules": Delete a grouping rules [DELETE]
+### "DELETE /v1/groupingrules" [DELETE /v1/groupingrules]
+A grouping rule can be deleted by DELETE method.
 
 + Parameters
 
@@ -221,12 +221,11 @@ A grouping rule can be deleted by DELETE method.
 
 
 # Group Subscriptions API
-API operations used to manage subscriptions without interact with Orion. There are some allowed operations like POST new subscriptions (ngsi_version 1 and 2), GET current subscriptions (by ID or delete all) or DELETE by ID.
 
 ## Methods [/Subscriptions API]
-Subscription can be retrieved by GET methods, retrieving all the subscriptions or retrieving one by its subscription ID.
+API operations used to manage subscriptions without interact with Orion. There are some allowed operations like POST new subscriptions (ngsi_version 1 and 2), GET current subscriptions (by ID or delete all) or DELETE by ID.
 
-### "GET /v1/subscriptions": Gets a current subscription [GET]
+### "GET /v1/subscriptions?ngsi_version=2&subscription_id=<subscriptionId>" [GET /v1/subscriptions?ngsi_version=2&subscription_id=<subscriptionId>]
 
 + Parameters
 
@@ -309,8 +308,8 @@ Subscription can be retrieved by GET methods, retrieving all the subscriptions o
                "error":"GET /v1/subscriptions not implemented."
        }
 
-### "GET /v1/subscriptions": Gets all current subscriptions [GET]
-Subscription can be created by POST methods, in `ngsi_version=1` and `ngsi_version=2`.
+### "GET /v1/subscriptions?ngsi_version=2" [GET /v1/subscriptions?ngsi_version=2]
+Subscription can be retrieved by GET methods, retrieving all the subscriptions or retrieving one by its subscription ID.
 
 + Parameters
 
@@ -389,7 +388,7 @@ Subscription can be created by POST methods, in `ngsi_version=1` and `ngsi_versi
             "error":"Invalid endpoint, field 'ssl' is missing"
        }
 
-### "POST /v1/subscriptions": Creates a new subscription to Orion v1 [POST]
+### "POST /v1/subscriptions?ngsi_version=1" [POST /v1/subscriptions?ngsi_version=1]
 
 + Parameters
 
@@ -470,8 +469,8 @@ Subscription can be created by POST methods, in `ngsi_version=1` and `ngsi_versi
             "error":"Invalid subscription, field 'notifyConditions' is missing"
         }
 
-### "POST /v1/subscriptions": Creates a new subscription to Orion v2 [POST]
-Subscriptions can be deleted by DELETE methods, deleting a subscription by its ID.
+### "POST /v1/subscriptions?ngsi_version=2" [POST /v1/subscriptions?ngsi_version=2]
+Subscription can be created by POST methods, in `ngsi_version=1` and `ngsi_version=2`.
 
 + Parameters
 
@@ -479,7 +478,7 @@ Subscriptions can be deleted by DELETE methods, deleting a subscription by its I
 
 + Request
 
-       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsi_version>"
+       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=2"
        {
                "subscription":{
                        "description": "One subscription to rule them all",
@@ -548,7 +547,8 @@ Subscriptions can be deleted by DELETE methods, deleting a subscription by its I
                "error":"Missing endpoint"
        }
 
-### "DELETE /v1/subscriptions": Deletes a current subscription to Orion [DELETE]
+### "DELETE /v1/subscriptions" [DELETE /v1/subscriptions]
+Subscriptions can be deleted by DELETE methods, deleting a subscription by its ID.
 
 + Parameters
 
@@ -624,13 +624,12 @@ Subscriptions can be deleted by DELETE methods, deleting a subscription by its I
 
 
 # Group Admin API
-API operations used to get and update the logging level of Cygnus.
 
 ## Methods [/Group Admin API]
-Logging level can be retrieved by GET method.
+API operations used to get and update the logging level of Cygnus.
 
-### "GET /admin/log": Gets the log4j configuration [GET]
-Logging level can be updated by PUT method.
+### "GET /admin/log" [GET /admin/log]
+Logging level can be retrieved by GET method.
 
 + Request
 
@@ -648,7 +647,8 @@ Logging level can be updated by PUT method.
                "error": "..."
        }
 
-### "PUT /admin/log": Update the logging level of Cygnus [PUT]
+### "PUT /admin/log" [PUT /admin/log]
+Logging level can be updated by PUT method.
 
 + Parameters
 
@@ -675,12 +675,11 @@ Logging level can be updated by PUT method.
        }
 
 # Group Admin Loggers API
-Group of API methods related with log4j loggers.
 
 ## Methods [/Admin Loggers API]
-Loggers can be retrieved with GET methods, getting all loggers or getting one by its name.
+Group of API methods related with log4j loggers.
 
-### "GET /v1/admin/log/loggers": Retrieve all Loggers [GET]
+### "GET /v1/admin/log/loggers" [GET /v1/admin/log/loggers]
 
 + Parameters
 
@@ -711,8 +710,8 @@ Loggers can be retrieved with GET methods, getting all loggers or getting one by
        }
 
 
-### "GET /v1/admin/log/loggers?name=<name>": Retrieve the Logger with name <name> [GET]
-Loggers can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
+### "GET /v1/admin/log/loggers?name=<name>" [GET /v1/admin/log/loggers?name=<name>]
+Loggers can be retrieved with GET methods, getting all loggers or getting one by its name.
 
 + Parameters
 
@@ -746,8 +745,8 @@ Loggers can be put with PUT methods. There are some special situations here: In 
            "result":"Invalid 'transient' parameter found"
        }
 
-### "PUT /v1/admin/log/loggers": Add or update an existent Logger [PUT]
-Loggers can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Loggers in memory.
+### "PUT /v1/admin/log/loggers" [PUT /v1/admin/log/loggers]
+Loggers can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
 
 + Parameters
 
@@ -806,8 +805,8 @@ Loggers can be posted with POST methods. This situation only works in no `transi
            "result":"Invalid input JSON"
        }
 
-### "POST /v1/admin/log/loggers": Add an inexistent Logger [POST]
-Loggers can be deleted with DELETE methods, deleting all Loggers or getting one by its name.
+### "POST /v1/admin/log/loggers" [POST /v1/admin/log/loggers]
+Loggers can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Loggers in memory.
 
 + Parameters
 
@@ -872,7 +871,7 @@ Loggers can be deleted with DELETE methods, deleting all Loggers or getting one 
            "result":"Invalid input JSON"
        }
 
-### "DELETE /v1/admin/log/loggers": Delete all Loggers [DELETE]
+### "DELETE /v1/admin/log/loggers" [DELETE /v1/admin/log/loggers]
 
 + Parameters
 
@@ -896,7 +895,8 @@ Loggers can be deleted with DELETE methods, deleting all Loggers or getting one 
            "result":"Invalid 'transient' parameter found"
        }
 
-### "DELETE /v1/admin/log/loggers?name=<name>": Delete an existent Logger [DELETE]
+### "DELETE /v1/admin/log/loggers?name=<name>" [DELETE /v1/admin/log/loggers?name=<name>]
+Loggers can be deleted with DELETE methods, deleting all Loggers or getting one by its name.
 
 + Parameters
 
@@ -922,12 +922,11 @@ Loggers can be deleted with DELETE methods, deleting all Loggers or getting one 
        }
 
 # Group Admin Appenders API
-Group of API methods related with log4j appenders.
 
 ## Methods [/Admin Appenders API]
-Appenders can be retrieved with GET methods, getting all appenders or getting one by its name.
+Group of API methods related with log4j appenders.
 
-### "GET /v1/admin/log/appenders": Retrieve all Appenders [GET]
+### "GET /v1/admin/log/appenders" [GET /v1/admin/log/appenders]
 
 + Parameters
 
@@ -956,8 +955,8 @@ Appenders can be retrieved with GET methods, getting all appenders or getting on
            "result":"Invalid 'transient' parameter found"
        }
 
-### "GET /v1/admin/log/appenders?name=<name>": Retrieve the Appender with name <name> [GET]
-Appenders can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
+### "GET /v1/admin/log/appenders?name=<name>" [GET /v1/admin/log/appenders?name=<name>]
+Appenders can be retrieved with GET methods, getting all appenders or getting one by its name.
 
 + Parameters
 
@@ -994,8 +993,8 @@ Appenders can be put with PUT methods. There are some special situations here: I
            "result":"Invalid 'transient' parameter found"
        }
 
-### "PUT /v1/admin/log/appenders": Add or update an existent Appender [PUT]
-Appenders can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Appenders in memory.
+### "PUT /v1/admin/log/appenders" [PUT /v1/admin/log/appenders]
+Appenders can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
 
 + Parameters
 
@@ -1065,8 +1064,8 @@ Appenders can be posted with POST methods. This situation only works in no `tran
            "result":"Invalid input JSON"
        }
 
-### "POST /v1/admin/log/appenders": Add an inexistent Appender [POST]
-Appenders can be deleted with DELETE methods, deleting all appenders or getting one by its name.
+### "POST /v1/admin/log/appenders" [POST /v1/admin/log/appenders]
+Appenders can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Appenders in memory.
 
 + Parameters
 
@@ -1135,7 +1134,7 @@ Appenders can be deleted with DELETE methods, deleting all appenders or getting 
            "result":"Invalid input JSON"
        }
 
-### "DELETE /v1/admin/log/appenders": Delete all Appenders [DELETE]
+### "DELETE /v1/admin/log/appenders" [DELETE /v1/admin/log/appenders]
 
 + Parameters
 
@@ -1159,7 +1158,8 @@ Appenders can be deleted with DELETE methods, deleting all appenders or getting 
            "result":"Invalid 'transient' parameter found"
        }
 
-### "DELETE /v1/admin/log/appenders?name=<name>": Delete an existent Appender [DELETE]
+### "DELETE /v1/admin/log/appenders?name=<name>" [DELETE /v1/admin/log/appenders?name=<name>]
+Appenders can be deleted with DELETE methods, deleting all appenders or getting one by its name.
 
 + Parameters
 
