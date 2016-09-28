@@ -61,9 +61,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -95,9 +96,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -129,9 +131,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -164,9 +167,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -198,9 +202,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -234,9 +239,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "someService";
         
         try {
@@ -280,9 +286,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "someService";
         
         try {
@@ -327,9 +334,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -376,9 +384,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -427,9 +436,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -480,9 +490,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -531,9 +542,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -570,9 +582,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -621,9 +634,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -672,9 +686,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -719,9 +734,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
         
         try {
@@ -758,9 +774,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -798,9 +815,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooongEntity";
         String attribute = null; // irrelevant for this test
@@ -839,9 +857,10 @@ public class NGSIPostgreSQLSinkTest {
         String password = null; // default
         String port = null; // default
         String username = null; // default
+        String cache = null; // default
         NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooongEntity";
         String attribute = "tooLooooooooooooongAttribute";
@@ -858,6 +877,41 @@ public class NGSIPostgreSQLSinkTest {
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
     
+        /**
+     * [NGSIPostgreSQLSink.configure] -------- cache can only be 'true' or 'false'.
+     */
+    @Test
+    public void testConfigureCache() {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.configure]")
+                + "-------- cache can only be 'true' or 'false'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null;
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = "falso";
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.configure]")
+                    + "-  OK  - 'cache=falso' was detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.configure]")
+                    + "- FAIL - 'cache=falso' was not detected");
+            throw e;
+        } // try catch
+    } // testConfigureEnableEncoding
+    
     private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
             NotifyContextRequest.ContextElement contextElement) {
         NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
@@ -869,7 +923,7 @@ public class NGSIPostgreSQLSinkTest {
     
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
-            String password, String port, String username) {
+            String password, String port, String username, String cache) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
         context.put("batch_size", batchSize);
@@ -883,6 +937,7 @@ public class NGSIPostgreSQLSinkTest {
         context.put("mysql_password", password);
         context.put("mysql_port", port);
         context.put("mysql_username", username);
+        context.put("cache", cache);
         return context;
     } // createContext
 
