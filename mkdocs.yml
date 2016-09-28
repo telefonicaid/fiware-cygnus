@@ -8,6 +8,7 @@ markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+google_analytics: ['UA-84866051-1', 'fiware-cygnus.readthedocs.io']
 pages:
   - Home: index.md
   - 'Architecture': architecture.md
