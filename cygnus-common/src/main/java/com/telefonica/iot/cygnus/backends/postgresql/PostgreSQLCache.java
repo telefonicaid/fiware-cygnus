@@ -28,10 +28,18 @@ import java.util.HashMap;
  */
 public class PostgreSQLCache {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(PostgreSQLCache.class);
-    private static final HashMap<String, ArrayList<String>> cache = new HashMap<String, ArrayList<String>>();
+    private final CygnusLogger LOGGER = new CygnusLogger(PostgreSQLCache.class);
+    private HashMap<String, ArrayList<String>> cache = new HashMap<String, ArrayList<String>>();
     
-    public static int isSchemaTableInCache(String schemaName, String tableName) {
+    public HashMap<String, ArrayList<String>> getCache() {
+        return cache;
+    } // getCache
+    
+    public void setCache(HashMap<String, ArrayList<String>> PSQLcache) {
+        this.cache = PSQLcache;
+    } // setCache
+    
+    public int isSchemaTableInCache(String schemaName, String tableName) {
         boolean isSchemaInCache = false;
         boolean isTableInSchema = false;
         
@@ -72,7 +80,7 @@ public class PostgreSQLCache {
         
     } // isSchemaTableInCache
     
-    public static void persistInCache(String schemaName, String tableName, int code) {    
+    public void persistInCache(String schemaName, String tableName, int code) {    
         ArrayList<String> tableNames;
         if (code == 1) {
             tableNames = cache.get(schemaName);

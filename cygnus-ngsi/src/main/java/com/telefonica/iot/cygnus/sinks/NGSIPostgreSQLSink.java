@@ -485,10 +485,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
         
         if (cache) {
             LOGGER.info("Checking if the schema (" + schemaName + ") and the table (" + tableName + ") are in cache.");
-            int cacheCode = PostgreSQLCache.isSchemaTableInCache(schemaName, tableName);
+            int cacheCode = postgreCache.isSchemaTableInCache(schemaName, tableName);
             
             if (cacheCode > 0) {
-                PostgreSQLCache.persistInCache(schemaName, tableName, cacheCode);
+                postgreCache.persistInCache(schemaName, tableName, cacheCode);
                 
                 if (aggregator instanceof RowAggregator) {
                     if (cacheCode == 2) {
