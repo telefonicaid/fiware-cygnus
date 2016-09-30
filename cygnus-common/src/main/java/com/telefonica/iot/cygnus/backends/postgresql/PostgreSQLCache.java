@@ -90,17 +90,22 @@ public class PostgreSQLCache {
     
     public void persistSchemaInCache(String schemaName) {
         cache.put(schemaName, new ArrayList<String>());
+        LOGGER.debug("Schema (" + schemaName + ") added to cache");
     } // persistSchemaInCache
     
     public void persistTableInCache(String schemaName, String tableName) {
         
-        if (isSchemaInCache(schemaName)) {
-            ArrayList<String> tableNames = cache.get(schemaName);
-            tableNames.add(tableName);
-            cache.put(schemaName, tableNames);
-        } else {
-            LOGGER.debug("Schema doesn't exist. Table couldn't be created");
-        } // if else
+        for (HashMap.Entry<String,ArrayList<String>> entry : cache.entrySet()) {
+                String schema = entry.getKey();
+                
+                if (schema.equals(schemaName)) {
+                    ArrayList<String> tableNames = cache.get(schemaName);
+                    tableNames.add(tableName);
+                    cache.put(schemaName, tableNames);
+                    LOGGER.debug("Table (" + tableName + ") added to schema (" + schemaName + ") in cache");
+                } // if 
+                
+            } // for
         
     } // persistTableInCache
     
