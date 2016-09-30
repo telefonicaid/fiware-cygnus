@@ -65,20 +65,24 @@ public class PostgreSQLCache {
     public boolean isTableInCachedSchema (String schemaName, String tableName) {
         if (!cache.isEmpty()) {
             
-            if (isSchemaInCache(schemaName)) {
-                ArrayList<String> tables = cache.get(schemaName);
+            for (HashMap.Entry<String,ArrayList<String>> entry : cache.entrySet()) {
+                String schema = entry.getKey();
                 
-                LOGGER.info("Checking if the table (" + tableName + ") belongs to (" + schemaName + ")");
+                if (schema.equals(schemaName)) {
+                    ArrayList<String> tables = cache.get(schemaName);
+
+                    LOGGER.info("Checking if the table (" + tableName + ") belongs to (" + schemaName + ")");
+
+                    if (tables.contains(tableName)) {
+                        LOGGER.debug("Table (" + tableName + ") was found in the specified schema (" + schemaName + ")");
+                        return true;
+                    } else {
+                        LOGGER.debug("Table (" + tableName + ") wasn't found in the specified schema (" + schemaName + ")");
+                        return false;
+                    } // if else
                 
-                if (tables.contains(tableName)) {
-                    LOGGER.debug("Table (" + tableName + ") was found in the specified schema (" + schemaName + ")");
-                    return true;
-                } else {
-                    LOGGER.debug("Table (" + tableName + ") wasn't found in the specified schema (" + schemaName + ")");
-                    return false;
-                } // if else
-                
-            } // if             
+                } // if     
+            } // for
             
             LOGGER.debug("Schema (" + schemaName + ") wasn't found in Cache");
             return false;            
