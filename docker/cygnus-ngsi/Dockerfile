@@ -51,8 +51,6 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 
-# COPY . ${CYGNUS_HOME}/
-
 # Install
 RUN \
     # Add Cygnus user
