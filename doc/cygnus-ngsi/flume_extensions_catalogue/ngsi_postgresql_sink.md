@@ -239,7 +239,7 @@ Coming soon.
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-
+| backend.enable_cache | yes | N/A | <i>true</i> or <i>false</i>, <i>true</i> enable the creation of a Cache, <i>false</i> disable the creation of a Cache |
 A configuration example could be:
 
     cygnusagent.sinks = postgresql-sink
@@ -260,6 +260,7 @@ A configuration example could be:
     cygnusagent.sinks.postgresql-sink.batch_size = 100
     cygnusagent.sinks.postgresql-sink.batch_timeout = 30
     cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+    cygnusagent.sinks.postgresql.backend.enable_cache = true
 
 [Top](#top)
 
@@ -318,7 +319,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
