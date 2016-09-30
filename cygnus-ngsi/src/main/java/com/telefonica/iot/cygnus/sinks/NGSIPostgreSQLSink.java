@@ -50,7 +50,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
     // Parameter 'cache' and cache <schema,[table,table,table..]>
-    private boolean cache;
+    private boolean enableCache;
     private PostgreSQLCache postgreCache;
 
     /**
@@ -73,7 +73,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * @return The PostgreSQL cache state
      */
     protected boolean getCache() {
-        return cache;
+        return enableCache;
     } // getPostgreSQLHost
 
     /**
@@ -173,30 +173,24 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
                 
-        String cacheStr = context.getString("cache", "false");
+        String enableCacheStr = context.getString("backend.enable_cache", "false");
         
-        if (cacheStr.equals("true") || cacheStr.equals("false")) {
-            cache = Boolean.valueOf(cacheStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (cache=" + cacheStr + ")");
+        if (enableCacheStr.equals("true") || enableCacheStr.equals("false")) {
+            enableCache = Boolean.valueOf(enableCacheStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.enable_cache=" + enableCache + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cache="
-                + cacheStr + ") -- Must be 'true' or 'false'");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
+                + enableCache + ") -- Must be 'true' or 'false'");
         }  // if else
         
     } // configure
 
     @Override
     public void start() {
-        try {
-            if (cache) {
-                postgreCache = new PostgreSQLCache();
-                LOGGER.debug("[" + this.getName() + "] PostgreSQL cache created");
-            } // if
-            
-            LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
+        try {            
             persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
-                    postgresqlUsername, postgresqlPassword);
+                    postgresqlUsername, postgresqlPassword, enableCache);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -483,28 +477,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
         
-        if (cache) {
-            LOGGER.info("Checking if the schema (" + schemaName + ") and the table (" + tableName + ") are in cache.");
-            int cacheCode = postgreCache.isSchemaTableInCache(schemaName, tableName);
-            
-            if (cacheCode > 0) {
-                postgreCache.persistInCache(schemaName, tableName, cacheCode);
-                
-                if (aggregator instanceof RowAggregator) {
-                    if (cacheCode == 2) {
-                        persistenceBackend.createSchema(schemaName); 
-                    } // if
-                    persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-                } // if
-                
-            } // if else
-        } else {
-            
-            if (aggregator instanceof RowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-            } // if
-        }
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createSchema(schemaName);
+            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+        } // if
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         

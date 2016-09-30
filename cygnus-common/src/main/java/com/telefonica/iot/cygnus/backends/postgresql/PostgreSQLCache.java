@@ -39,57 +39,63 @@ public class PostgreSQLCache {
         this.cache = PSQLcache;
     } // setCache
     
-    public int isSchemaTableInCache(String schemaName, String tableName) {
-        boolean isSchemaInCache = false;
-        boolean isTableInSchema = false;
-        
+    public boolean isSchemaInCache (String schemaName) {    
+        LOGGER.debug("Checking if the schema (" + schemaName + ") exists");
         if (!cache.isEmpty()) {
             
             for (HashMap.Entry<String,ArrayList<String>> entry : cache.entrySet()) {
-                
                 String schema = entry.getKey();
-                ArrayList<String> tables = entry.getValue();
                 
-                LOGGER.info("Checking if the schema (" + schemaName + ") is equals to (" + schema + ")");
                 if (schema.equals(schemaName)) {
-                    isSchemaInCache = true;
-                } // if
-                
-                LOGGER.info("Checking if the table (" + tables + ") contains (" + tableName + ")");
-                if (tables.contains(tableName)) {
-                    isTableInSchema = true;
+                    LOGGER.debug("Schema (" + schemaName + ") exists in Cache");
+                    return true;
                 } // if
                 
             } // for
             
+            LOGGER.debug("Schema (" + schemaName + ") doesnt' exist in Cache");
+            return false;
         } else {
-            LOGGER.info("Empty Cache. Returning 2");
-            return 2;
+            LOGGER.debug("Cache is empty");
+            return false;
         } // if else
-        
-        if (isSchemaInCache && isTableInSchema) {
-            LOGGER.info("Schema & table in Cache: Returning 0");
-            return 0;
-        } else if (isSchemaInCache && !isTableInSchema) {
-            LOGGER.info("Schema in Cache but not the tableName: Returning 1");
-            return 1;
-        } else {
-            LOGGER.info("Schema & table not in Cache: Returning 2");
-            return 2;
-        } // if else if
-        
-    } // isSchemaTableInCache
+
+    } // isSchemaInCache
     
-    public void persistInCache(String schemaName, String tableName, int code) {    
-        ArrayList<String> tableNames;
-        if (code == 1) {
-            tableNames = cache.get(schemaName);
+    public boolean isTableInCachedSchema (String schemaName, String tableName) {
+        if (!cache.isEmpty()) {
+            
+            if (isSchemaInCache(schemaName)) {
+                ArrayList<String> tables = cache.get(schemaName);
+                
+                LOGGER.info("Checking if the table (" + tableName + ") belongs to (" + schemaName + ")");
+                
+                if (tables.contains(tableName)) {
+                    LOGGER.debug("Table (" + tableName + ") was found in the specified schema (" + schemaName + ")");
+                    return true;
+                } else {
+                    LOGGER.debug("Table (" + tableName + ") wasn't found in the specified schema (" + schemaName + ")");
+                    return false;
+                } // if else
+                
+            } // if             
+            
+            LOGGER.debug("Schema (" + schemaName + ") wasn't found in Cache");
+            return false;            
         } else {
-            tableNames = new ArrayList<String>();
-        } // if else
-        
+            LOGGER.debug("Cache is empty");
+            return false;
+        }
+    } // isTableInCachedSchema
+    
+    public void persistSchemaInCache(String schemaName) {
+        cache.put(schemaName, new ArrayList<String>());
+    } // persistSchemaInCache
+    
+    public void persistTableInCache(String schemaName, String tableName) {
+        ArrayList<String> tableNames = cache.get(schemaName);
         tableNames.add(tableName);
         cache.put(schemaName, tableNames);
-    } // persistInCache
+    } // persistTableInCache
     
 } // PostgreSQLCache

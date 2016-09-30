@@ -73,7 +73,7 @@ public class PostgreSQLBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new PostgreSQLBackendImpl(host, port, database, user, password);
+        backend = new PostgreSQLBackendImpl(host, port, database, user, password, true);
 
         // set up the behaviour of the mocked classes
         when(mockDriverSchemaCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);

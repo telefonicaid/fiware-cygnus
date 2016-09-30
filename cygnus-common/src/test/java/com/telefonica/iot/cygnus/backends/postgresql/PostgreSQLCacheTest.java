@@ -44,8 +44,7 @@ public class PostgreSQLCacheTest {
     private final HashMap<String, ArrayList<String>> emptyCache = new HashMap<String, ArrayList<String>>();
     private final HashMap<String, ArrayList<String>> cacheWithSchemaAndTableName = 
             new HashMap<String, ArrayList<String>>();
-    private final HashMap<String, ArrayList<String>> cacheOnlyWithSchema = new HashMap<String, ArrayList<String>>();
-    
+    private final HashMap<String, ArrayList<String>> cacheOnlyWithSchema = new HashMap<String, ArrayList<String>>(); 
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -67,15 +66,16 @@ public class PostgreSQLCacheTest {
     @Test
     public void testSchemaAndTableInEmptyCache() {
         PSQLcache.setCache(emptyCache);
-        System.out.println(getTestTraceHead("[PostgreSQLCache.isSchemaTableInCache]")
-                + "-------- Adding a new tableName and new schemaName in an empty cache");
+        System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableInEmptyCache]")
+                + "-------- Testing if a new tableName and new schemaName are in an empty cache");
         
         try {
-            assertEquals(2, PSQLcache.isSchemaTableInCache(schemaName, tableName));
-            System.out.println(getTestTraceHead("[PostgreSQLCache.isSchemaTableInCache]")
+            assertEquals(true, ((!PSQLcache.isSchemaInCache(schemaName)) 
+                    && (!PSQLcache.isTableInCachedSchema(schemaName, tableName))));
+            System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableInEmptyCache]")
                     + "-  OK  - TableName and SchemaName weren't found in the empty Cache.");
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[PostgreSQLCache.isSchemaTableInCache]")
+            System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableInEmptyCache]")
                     + "- FAIL - TableName and SchemaName were found in the empty Cache.");
         } // try catch
         
@@ -85,10 +85,11 @@ public class PostgreSQLCacheTest {
     public void testSchemaAndTableWithBothValuesCached() {
         PSQLcache.setCache(cacheWithSchemaAndTableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithBothValuesCached]")
-                + "-------- Adding a new tableName and new schemaName in a cache with both values cached");
+                + "-------- Testing if a tableName and a schemaName are in a cache with both values cached");
         
         try {
-            assertEquals(0, PSQLcache.isSchemaTableInCache(schemaName, tableName));
+            assertEquals(true, ((PSQLcache.isSchemaInCache(schemaName)) 
+                    && (PSQLcache.isTableInCachedSchema(schemaName, tableName))));
             System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithBothValuesCached]")
                     + "-  OK  - TableName and SchemaName were found in the Cache.");
         } catch (Exception e) {
@@ -102,10 +103,11 @@ public class PostgreSQLCacheTest {
     public void testSchemaAndTableWithSchemaCached() {
         PSQLcache.setCache(cacheOnlyWithSchema);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithSchemaCached]")
-                + "-------- Adding a new tableName and new schemaName in a cache with the schemaName");
+                + "-------- Testing if a new tableName and a schemaName are in a cache with cached schemaName");
         
         try {
-            assertEquals(1, PSQLcache.isSchemaTableInCache(schemaName, tableName));
+            assertEquals(true, ((PSQLcache.isSchemaInCache(schemaName)) 
+                    && (!PSQLcache.isTableInCachedSchema(schemaName, tableName))));
             System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithSchemaCached]")
                     + "-  OK  - SchemaName was found in the cache but not TableName.");
         } catch (Exception e) {
@@ -118,9 +120,10 @@ public class PostgreSQLCacheTest {
     @Test
     public void testPersistSchemaAndTableInCache() {
         PSQLcache.setCache(emptyCache);
-        PSQLcache.persistInCache(schemaName, tableName, 2);
+        PSQLcache.persistSchemaInCache(schemaName);
+        PSQLcache.persistTableInCache(schemaName, tableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testPersistSchemaAndTableInCache]")
-                + "-------- Adding a new tableName and new schemaName in a cache with the schemaName");
+                + "-------- Persisting a new tableName and new schemaName into an empty cache");
         
         try {
             assertEquals(cacheWithSchemaAndTableName, PSQLcache.getCache());
@@ -136,9 +139,9 @@ public class PostgreSQLCacheTest {
     @Test
     public void testPersistOnlyTableInCache() {
         PSQLcache.setCache(cacheOnlyWithSchema);
-        PSQLcache.persistInCache(schemaName, tableName, 1);
+        PSQLcache.persistTableInCache(schemaName, tableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testPersistOnlyTableInCache]")
-                + "-------- Adding a new tableName to a schema already created in cache");
+                + "-------- Persisting a new tableName into a schema already created in cache");
         
         try {
             assertEquals(cacheWithSchemaAndTableName, PSQLcache.getCache());
@@ -154,9 +157,10 @@ public class PostgreSQLCacheTest {
     @Test
     public void testIfPersistDuplicateTableNames() {
         PSQLcache.setCache(cacheWithSchemaAndTableName);
-        PSQLcache.persistInCache(schemaName, tableName, 2);
+        PSQLcache.persistSchemaInCache(schemaName);
+        PSQLcache.persistTableInCache(schemaName, tableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testIfPersistDuplicateTableNames]")
-                + "-------- Adding a tableName and schema to a cache with both values already cached.");
+                + "-------- Persisting a tableName and schema into a cache with both values already cached.");
         
         try {
             assertEquals(cacheWithSchemaAndTableName, PSQLcache.getCache());
