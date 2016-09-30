@@ -93,9 +93,15 @@ public class PostgreSQLCache {
     } // persistSchemaInCache
     
     public void persistTableInCache(String schemaName, String tableName) {
-        ArrayList<String> tableNames = cache.get(schemaName);
-        tableNames.add(tableName);
-        cache.put(schemaName, tableNames);
+        
+        if (isSchemaInCache(schemaName)) {
+            ArrayList<String> tableNames = cache.get(schemaName);
+            tableNames.add(tableName);
+            cache.put(schemaName, tableNames);
+        } else {
+            LOGGER.debug("Schema doesn't exist. Table couldn't be created");
+        } // if else
+        
     } // persistTableInCache
     
 } // PostgreSQLCache

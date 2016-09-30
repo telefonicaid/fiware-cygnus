@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -22,7 +22,6 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import java.util.ArrayList;
 import java.util.HashMap;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -45,23 +44,7 @@ public class PostgreSQLCacheTest {
     private final HashMap<String, ArrayList<String>> cacheWithSchemaAndTableName = 
             new HashMap<String, ArrayList<String>>();
     private final HashMap<String, ArrayList<String>> cacheOnlyWithSchema = new HashMap<String, ArrayList<String>>(); 
-    
-    /**
-     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
-     * classes.
-     *  
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-                
-        // Used in test 'testSchemaAndTableInEmptyCache'
-        cacheOnlyWithSchema.put(schemaName, emptyList);
-        
-        // Used in test 'testSchemaAndTableInEmptyCache'
-        tableList.add(tableName);
-        cacheWithSchemaAndTableName.put(schemaName, tableList);
-    }
+
     
     @Test
     public void testSchemaAndTableInEmptyCache() {
@@ -83,6 +66,8 @@ public class PostgreSQLCacheTest {
     
     @Test
     public void testSchemaAndTableWithBothValuesCached() {
+        tableList.add(tableName);
+        cacheWithSchemaAndTableName.put(schemaName, tableList);
         PSQLcache.setCache(cacheWithSchemaAndTableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithBothValuesCached]")
                 + "-------- Testing if a tableName and a schemaName are in a cache with both values cached");
@@ -101,6 +86,7 @@ public class PostgreSQLCacheTest {
     
     @Test
     public void testSchemaAndTableWithSchemaCached() {
+        cacheOnlyWithSchema.put(schemaName, emptyList);
         PSQLcache.setCache(cacheOnlyWithSchema);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testSchemaAndTableWithSchemaCached]")
                 + "-------- Testing if a new tableName and a schemaName are in a cache with cached schemaName");
@@ -138,6 +124,7 @@ public class PostgreSQLCacheTest {
     
     @Test
     public void testPersistOnlyTableInCache() {
+        cacheOnlyWithSchema.put(schemaName, emptyList);
         PSQLcache.setCache(cacheOnlyWithSchema);
         PSQLcache.persistTableInCache(schemaName, tableName);
         System.out.println(getTestTraceHead("[PostgreSQLCache.testPersistOnlyTableInCache]")
@@ -156,6 +143,8 @@ public class PostgreSQLCacheTest {
     
     @Test
     public void testIfPersistDuplicateTableNames() {
+        tableList.add(tableName);
+        cacheWithSchemaAndTableName.put(schemaName, tableList);
         PSQLcache.setCache(cacheWithSchemaAndTableName);
         PSQLcache.persistSchemaInCache(schemaName);
         PSQLcache.persistTableInCache(schemaName, tableName);

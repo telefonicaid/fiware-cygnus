@@ -30,7 +30,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLCache;
 
 /**
  *
@@ -51,7 +50,6 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private PostgreSQLBackendImpl persistenceBackend;
     // Parameter 'cache' and cache <schema,[table,table,table..]>
     private boolean enableCache;
-    private PostgreSQLCache postgreCache;
 
     /**
      * Constructor.
@@ -72,7 +70,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * Gets the PostgreSQL cache. It is protected due to it is only required for testing purposes.
      * @return The PostgreSQL cache state
      */
-    protected boolean getCache() {
+    protected boolean getEnableCache() {
         return enableCache;
     } // getPostgreSQLHost
 

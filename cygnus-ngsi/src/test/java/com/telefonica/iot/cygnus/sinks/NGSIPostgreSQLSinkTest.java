@@ -877,7 +877,7 @@ public class NGSIPostgreSQLSinkTest {
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
     
-        /**
+    /**
      * [NGSIPostgreSQLSink.configure] -------- cache can only be 'true' or 'false'.
      */
     @Test
