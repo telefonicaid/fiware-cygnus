@@ -51,7 +51,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
 
-COPY . ${CYGNUS_HOME}/
+# COPY . ${CYGNUS_HOME}/
 
 # Install
 RUN \
@@ -69,6 +69,10 @@ RUN \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
+    # Make a shallow clone to help reduce final image size
+    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    cd ${CYGNUS_HOME} && \
+    git checkout ${GIT_REV_CYGNUS} && \
     # Build and install cygnus-common
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn clean compile exec:exec assembly:single && \
@@ -103,11 +107,10 @@ RUN \
     pack200 ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     pack200 ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar
-
-# Copy some files needed for starting cygnus-ngsi
-COPY docker/cygnus-ngsi/cygnus-entrypoint.sh /
-COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
+    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
+    # Copy some files needed for starting cygnus-ngsi
+    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
+    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
