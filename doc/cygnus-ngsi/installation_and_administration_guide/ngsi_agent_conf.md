@@ -10,9 +10,9 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL, PostgreSQL, Mongo, FIWARE Comet, Kafka, DynamoDB, CartoDB).
 
 #=============================================
-# the next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
+# The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
 # ones suggested below, but in that case make sure you keep coherence in properties names along the configuration file.
-# regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
+# Regarding sinks, you can use multiple types at the same time; the only requirement is to provide a channel for each
 # one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
@@ -88,7 +88,7 @@ cygnus-ngsi.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # number of retries upon persistence error
 # cygnus-ngsi.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
-# cygnus-ngsi.sinks.hdfs-sink.cygnus-ngsi
+# cygnus-ngsi.sinks.hdfs-sink.hive = false
 # Hive server version, 1 or 2 (ignored if hive is false)
 # cygnus-ngsi.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
@@ -299,7 +299,7 @@ cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
 # cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
 # cygnus-ngsi.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
-# zookeeper endpoint needed to create Kafka topics, in the form of host:port
+# Zookeeper endpoint needed to create Kafka topics, in the form of host:port
 # cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 # number of notifications to be included within a processing batch
 # cygnus-ngsi.sinks.kafka-sink.batch_size = 100
