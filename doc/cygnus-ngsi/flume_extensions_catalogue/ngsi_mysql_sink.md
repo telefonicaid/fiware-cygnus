@@ -217,23 +217,23 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 
 A configuration example could be:
 
-    cygnusagent.sinks = mysql-sink
-    cygnusagent.channels = mysql-channel
+    cygnus-ngsi.sinks = mysql-sink
+    cygnus-ngsi.channels = mysql-channel
     ...
-    cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
-    cygnusagent.sinks.mysql-sink.channel = mysql-channel
-    cygnusagent.sinks.mysql-sink.enable_encoding = false
-    cygnusagent.sinks.mysql-sink.enable_grouping = false
-    cygnusagent.sinks.mysql-sink.enable_lowercase = false
-    cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
-    cygnusagent.sinks.mysql-sink.mysql_port = 3306
-    cygnusagent.sinks.mysql-sink.mysql_username = myuser
-    cygnusagent.sinks.mysql-sink.mysql_password = mypassword
-    cygnusagent.sinks.mysql-sink.attr_persistence = row
-    cygnusagent.sinks.mysql-sink.batch_size = 100
-    cygnusagent.sinks.mysql-sink.batch_timeout = 30
-    cygnusagent.sinks.mysql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
+    cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
+    cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
+    cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
+    cygnus-ngsi.sinks.mysql-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mysql-sink.mysql_host = 192.168.80.34
+    cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
+    cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
+    cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
+    cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.mysql-sink.batch_size = 100
+    cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
 
 [Top](#top)
 

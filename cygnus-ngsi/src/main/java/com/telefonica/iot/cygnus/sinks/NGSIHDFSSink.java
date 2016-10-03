@@ -983,7 +983,7 @@ public class NGSIHDFSSink extends NGSISink {
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionHDFSSink. HDFS file ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
 
         for (HDFSBackend persistenceBackend: persistenceBackends) {
@@ -1017,7 +1017,7 @@ public class NGSIHDFSSink extends NGSISink {
             String hdfsMdFolder = hdfsMDFile.substring(0, hdfsMDFile.lastIndexOf("/"));
             String mdAggregation = aggregator.getMDAggregation(hdfsMDFile);
 
-            LOGGER.info("[" + this.getName() + "] Persisting metadata at OrionHDFSSink. HDFS file ("
+            LOGGER.info("[" + this.getName() + "] Persisting metadata at NGSIHDFSSink. HDFS file ("
                     + hdfsMDFile + "), Data (" + mdAggregation + ")");
 
             for (HDFSBackend persistenceBackend: persistenceBackends) {

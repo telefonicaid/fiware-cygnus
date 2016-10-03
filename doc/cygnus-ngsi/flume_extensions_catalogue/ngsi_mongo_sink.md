@@ -313,29 +313,29 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 
 A configuration example could be:
 
-    cygnusagent.sinks = mongo-sink
-    cygnusagent.channels = mongo-channel
+    cygnus-ngsi.sinks = mongo-sink
+    cygnus-ngsi.channels = mongo-channel
     ...
-    cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
-    cygnusagent.sinks.mongo-sink.channel = mongo-channel
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.attr_persistence = column
-    cygnusagent.sinks.mongo-sink.enable_encoding = false
-    cygnusagent.sinks.mongo-sink.enable_grouping = false
-    cygnusagent.sinks.mongo-sink.enable_lowercase = false
-    cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
-    cygnusagent.sinks.mongo-sink.mongo_username = myuser
-    cygnusagent.sinks.mongo-sink.mongo_password = mypassword
-    cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.batch_size = 100
-    cygnusagent.sinks.mongo-sink.batch_timeout = 30
-    cygnusagent.sinks.mongo-sink.batch_ttl = 10
-    cygnusagent.sinks.mongo-sink.data_expiration = 0
-    cygnusagent.sinks.mongo-sink.collections_size = 0
-    cygnusagent.sinks.mongo-sink.max_documents = 0
-    cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
+    cygnus-ngsi.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
+    cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
+    cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
+    cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
+    cygnus-ngsi.sinks.mongo-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
+    cygnus-ngsi.sinks.mongo-sink.mongo_username = myuser
+    cygnus-ngsi.sinks.mongo-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.mongo-sink.db_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.collection_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.batch_size = 100
+    cygnus-ngsi.sinks.mongo-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.mongo-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.mongo-sink.data_expiration = 0
+    cygnus-ngsi.sinks.mongo-sink.collections_size = 0
+    cygnus-ngsi.sinks.mongo-sink.max_documents = 0
+    cygnus-ngsi.sinks.mongo-sink.ignore_white_spaces = true
 
 [Top](#top)
 

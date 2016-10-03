@@ -242,24 +242,24 @@ Coming soon.
 
 A configuration example could be:
 
-    cygnusagent.sinks = postgresql-sink
-    cygnusagent.channels = postgresql-channel
+    cygnus-ngsi.sinks = postgresql-sink
+    cygnus-ngsi.channels = postgresql-channel
     ...
-    cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
-    cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
-    cygnusagent.sinks.postgresql-sink.enable_encoding = false
-    cygnusagent.sinks.postgresql-sink.enable_grouping = false
-    cygnusagent.sinks.postgresql-sink.enable_lowercase = false
-    cygnusagent.sinks.postgresql-sink.data_model = dm-by-entity
-    cygnusagent.sinks.postgresql-sink.postgresql_host = 192.168.80.34
-    cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
-    cygnusagent.sinks.postgresql-sink.postgresql_database = mydatabase
-    cygnusagent.sinks.postgresql-sink.postgresql_username = myuser
-    cygnusagent.sinks.postgresql-sink.postgresql_password = mypassword
-    cygnusagent.sinks.postgresql-sink.attr_persistence = row
-    cygnusagent.sinks.postgresql-sink.batch_size = 100
-    cygnusagent.sinks.postgresql-sink.batch_timeout = 30
-    cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+    cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
+    cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_host = 192.168.80.34
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_port = 5432
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
+    cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
 
 [Top](#top)
 

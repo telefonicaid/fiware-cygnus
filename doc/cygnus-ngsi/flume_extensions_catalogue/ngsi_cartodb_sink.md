@@ -406,20 +406,20 @@ A configuration example could be:
 cygnus-ngsi.sinks = cartodb-sink
 cygnus-ngsi.channels = cartodb-channel
 ...
-cygnus-ngsi.sinks.raw-sink.channel = cartodb-channel
-cygnus-ngsi.sinks.raw-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
-cygnus-ngsi.sinks.raw-sink.enable_grouping = false
-cygnus-ngsi.sinks.raw-sink.enable_lowercase = false
-cygnus-ngsi.sinks.raw-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
-cygnus-ngsi.sinks.raw-sink.flip_coordinates = true
-cygnus-ngsi.sinks.raw-sink.enable_raw = true
-cygnus-ngsi.sinks.raw-sink.enable_distance = false
-cygnus-ngsi.sinks.raw-sink.data_model = dm-by-entity
-cygnus-ngsi.sinks.raw-sink.batch_size = 10
-cygnus-ngsi.sinks.raw-sink.batch_timeout = 5
-cygnus-ngsi.sinks.raw-sink.batch_ttl = 0
-cygnus-ngsi.sinks.raw-sink.backend.max_conns = 500
-cygnus-ngsi.sinks.raw-sink.backend.max_conns_per_route = 100
+cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
+cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
+cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
+cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
+cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
+cygnus-ngsi.sinks.cartodb-sink.flip_coordinates = true
+cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
+cygnus-ngsi.sinks.cartodb-sink.enable_distance = false
+cygnus-ngsi.sinks.cartodb-sink.data_model = dm-by-entity
+cygnus-ngsi.sinks.cartodb-sink.batch_size = 10
+cygnus-ngsi.sinks.cartodb-sink.batch_timeout = 5
+cygnus-ngsi.sinks.cartodb-sink.batch_ttl = 0
+cygnus-ngsi.sinks.cartodb-sink.backend.max_conns = 500
+cygnus-ngsi.sinks.cartodb-sink.backend.max_conns_per_route = 100
 ```
 
 An example of CartoDB keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):

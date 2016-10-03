@@ -64,7 +64,7 @@ cygnus-twitter.sources.twitter-source.north-east_longitude = -0.3124204
                     |                  |
                     |                  |
                south-west ------------   
-        
+
     ```
 
  * The credentials used to connect with Twitter API:
@@ -78,7 +78,7 @@ cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxx
 * Parameters associated to the sinks. Currently, for the `cygnus-twitter` agent, the only sink defined is the `HDFS sink`. The `HDFS sink` parameters that appear in the configuration file and are directly related to `twitter-agent` are:
     * `hdfs_folder`: to declare the folder where the tweets file will be created.
     * `hdfs_file`: to declare the file where tweets will be stored inside the `hdfs_folder`
-    
+
 ```
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
@@ -113,11 +113,11 @@ cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessToken = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxxx
 # ============================================
-# OrionHDFSSink configuration
+# NGSIHDFSSink configuration
 # channel name from where to read notification events
 cygnus-twitter.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.OrionHDFSSink
+cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 # true if the grouping feature is enabled for this sink, false otherwise
 cygnus-twitter.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise

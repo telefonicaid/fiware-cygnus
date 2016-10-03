@@ -80,55 +80,55 @@ A configuration example could be:
     # ============================================
     # TwitterHDFSSink configuration
     # channel name from where to read notification events
-    cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+    cygnus-twitter.sinks.hdfs-sink.channel = hdfs-channel
     # sink class, must not be changed
-    cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.TwitterHDFSSink
+    cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.TwitterHDFSSink
     # true if lower case is wanted to forced in all the element names, false otherwise
-    # cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+    # cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
     # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-    # cygnusagent.sinks.hdfs-sink.backend.impl = rest
+    # cygnus-twitter.sinks.hdfs-sink.backend.impl = rest
     # maximum number of Http connections to HDFS backend
-    # cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+    # cygnus-twitter.sinks.hdfs-sink.backend.max_conns = 500
     # maximum number of Http connections per route to HDFS backend
-    # cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
+    # cygnus-twitter.sinks.hdfs-sink.backend.max_conns_per_route = 100
     # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
     # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-    # cygnusagent.sinks.hdfs-sink.hdfs_host = localhost
+    # cygnus-twitter.sinks.hdfs-sink.hdfs_host = localhost
     # port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
-    # cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+    # cygnus-twitter.sinks.hdfs-sink.hdfs_port = 14000
     # username allowed to write in HDFS
-    cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
+    cygnus-twitter.sinks.hdfs-sink.hdfs_username = hdfs_username
     # password for the above username; this is only required for Hive authentication
-    cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
+    cygnus-twitter.sinks.hdfs-sink.hdfs_password = xxxxxxxx
     # OAuth2 token for HDFS authentication
-    cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+    cygnus-twitter.sinks.hdfs-sink.oauth2_token = xxxxxxxx
     # timeout for batch accumulation
-    # cygnusagent.sinks.hdfs-sink.batch_timeout = 30
+    # cygnus-twitter.sinks.hdfs-sink.batch_timeout = 30
     # number of retries upon persistence error
-    # cygnusagent.sinks.hdfs-sink.batch_ttl = 10
+    # cygnus-twitter.sinks.hdfs-sink.batch_ttl = 10
     # Hive enabling
-    # cygnusagent.sinks.hdfs-sink.hive = false
+    # cygnus-twitter.sinks.hdfs-sink.hive = false
     # Hive server version, 1 or 2 (ignored if hive is false)
-    # cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+    # cygnus-twitter.sinks.hdfs-sink.hive.server_version = 2
     # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-    # cygnusagent.sinks.hdfs-sink.hive.host = localhost
+    # cygnus-twitter.sinks.hdfs-sink.hive.host = localhost
     # Hive port for Hive external table provisioning (ignored if hive is false)
-    # cygnusagent.sinks.hdfs-sink.hive.port = 10000
+    # cygnus-twitter.sinks.hdfs-sink.hive.port = 10000
     # Hive database type, available types are default-db and namespace-db
-    # cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
+    # cygnus-twitter.sinks.hdfs-sink.hive.db_type = default-db
     # Kerberos-based authentication enabling
-    # cygnusagent.sinks.hdfs-sink.krb5_auth = false
+    # cygnus-twitter.sinks.hdfs-sink.krb5_auth = false
     # Kerberos username (ignored if krb5_auth is false)
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
     # Kerberos password (ignored if krb5_auth is false)
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
     # Kerberos login file (ignored if krb5_auth is false)
-    # cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+    # cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
     # Kerberos configuration file (ignored if krb5_auth is false)
-    # cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+    # cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
     # Set folder and file to store tweets
-    cygnusagent.sinks.hdfs-sink.hdfs_folder = olympic_games_2016
-    cygnusagent.sinks.hdfs-sink.hdfs_file = tweets.txt
+    cygnus-twitter.sinks.hdfs-sink.hdfs_folder = olympic_games_2016
+    cygnus-twitter.sinks.hdfs-sink.hdfs_file = tweets.txt
 
 [Top](#top)
 
@@ -209,7 +209,7 @@ A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/pl
 * Access tokens are requested to the Identity Manager, which is asked by the final service for authentication purposes once the tokens are received. Please observe by asking this the service not only discover who is the real FIWARE user behind the request, but the service has full certainty the user is who he/she says to be.
 * At the same time, the Identity Manager relies on the Access Control for authorization purposes. The access token gives, in addition to the real identity of the user, his/her roles according to the requested resource. The Access Control owns a list of policies regarding who is allowed to access all the resources based on the user roles.
 
-This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnusagent.sinks.hdfs-sink.oauth2_token` parameter.
+This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnus-twitter.sinks.hdfs-sink.oauth2_token` parameter.
 
 In order to get an access token, do the following request to your OAuth2 tokens provider; in FIWARE Lab this is `cosmos.lab.fi-ware.org:13000`:
 
@@ -238,18 +238,18 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 [Top](#top)
 
 ####`conf/cygnus.conf`
-This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `OrionHDFSSink` configuration:
+This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
-    cygnusagent.sinks.hdfs-sink.krb5_auth = true
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth = true
     # Kerberos username
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
     # Kerberos password
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
     # Kerberos login file
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
     # Kerberos configuration file
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+    cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 I.e. start enabling (or not) the Kerberos authentication. Then, configure a user with an already registered Kerberos principal, and its password. Finally, specify the location of two special Kerberos files.
 

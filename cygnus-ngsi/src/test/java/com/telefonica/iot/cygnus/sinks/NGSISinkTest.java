@@ -37,14 +37,14 @@ public class NGSISinkTest {
     /**
      * This class is used to test once and only once the common functionality shared by all the real extending sinks.
      */
-    private class OrionSinkImpl extends NGSISink {
+    private class NGSISinkImpl extends NGSISink {
 
         @Override
         void persistBatch(NGSIBatch batch) throws Exception {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
         
-    } // OrionSinkImpl
+    } // NGSISinkImpl
     
     /**
      * Constructor.
@@ -58,8 +58,8 @@ public class NGSISinkTest {
      */
     @Test
     public void testStart() {
-        System.out.println(getTestTraceHead("[OrionSink.start]") + "-------- The sink starts properly");
-        OrionSinkImpl sink = new OrionSinkImpl();
+        System.out.println(getTestTraceHead("[NGSISink.start]") + "-------- The sink starts properly");
+        NGSISinkImpl sink = new NGSISinkImpl();
         sink.configure(createContext(null, null, null, null, null, null)); // default configuration
         sink.setChannel(new MemoryChannel());
         sink.start();
@@ -67,10 +67,10 @@ public class NGSISinkTest {
         
         try {
             assertEquals(LifecycleState.START, state);
-            System.out.println(getTestTraceHead("[OrionSink.start]")
+            System.out.println(getTestTraceHead("[NGSISink.start]")
                     + "-  OK  - The sink started properly, the lifecycle state is '" + state.toString() + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.start]")
+            System.out.println(getTestTraceHead("[NGSISink.start]")
                     + "- FAIL - The sink did not start properly, the lifecycle state is '" + state.toString() + "'");
         } // try catch
     } // testStart
@@ -81,27 +81,27 @@ public class NGSISinkTest {
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
-        System.out.println(getTestTraceHead("[OrionSink.configure]")
+        System.out.println(getTestTraceHead("[NGSISink.configure]")
                 + "-------- When not configured, the default values are used for non mandatory parameters");
-        OrionSinkImpl sink = new OrionSinkImpl();
+        NGSISinkImpl sink = new NGSISinkImpl();
         sink.configure(createContext(null, null, null, null, null, null)); // default configuration
         
         try {
             assertEquals(1, sink.getBatchSize());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'batch_size' is '1'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for 'batch_size' is '" + sink.getBatchSize() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(30, sink.getBatchTimeout());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'batch_timeout' is '30'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for 'batch_timeout' is '"
                     + sink.getBatchTimeout() + "'");
             throw e;
@@ -109,20 +109,20 @@ public class NGSISinkTest {
         
         try {
             assertEquals(10, sink.getBatchTTL());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'batch_ttl' is '10'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for 'batch_ttl' is '" + sink.getBatchTTL() + "'");
             throw e;
         } // try catch
         
         try {
             assertEquals(DataModel.DMBYENTITY, sink.getDataModel());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'data_model' is 'dm-by-entity'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
                     + "'data_model' is '" + sink.getDataModel() + "'");
             throw e;
@@ -130,10 +130,10 @@ public class NGSISinkTest {
         
         try {
             assertEquals(false, sink.getEnableGrouping());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'enable_grouping' is 'false'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
                     + "'enable_grouping' is '" + sink.getEnableGrouping() + "'");
             throw e;
@@ -141,10 +141,10 @@ public class NGSISinkTest {
         
         try {
             assertEquals(false, sink.getEnableLowerCase());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'enable_lowercase' is 'false'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
                     + "'enable_lowercase' is '" + sink.getEnableLowerCase() + "'");
             throw e;
@@ -152,10 +152,10 @@ public class NGSISinkTest {
         
         try {
             assertEquals(false, sink.getEnableEncoding());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The default configuration value for 'enable_encoding' is 'false'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
                     + "'enable_encoding' is '" + sink.getEnableEncoding() + "'");
             throw e;
@@ -168,96 +168,96 @@ public class NGSISinkTest {
      */
     @Test
     public void testConfigureInvalidConfiguration() {
-        System.out.println(getTestTraceHead("[OrionSink.configure]")
+        System.out.println(getTestTraceHead("[NGSISink.configure]")
                 + "-------- The configuration becomes invalid upon out-of-the-limits configured values for parameters "
                 + "having a discrete set of accepted values, or numerical values having upper or lower limits");
-        OrionSinkImpl sink = new OrionSinkImpl();
+        NGSISinkImpl sink = new NGSISinkImpl();
         String configuredBatchSize = "0";
         sink.configure(createContext(configuredBatchSize, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'batch_size='"
                     + configuredBatchSize + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'batch_size='"
                     + configuredBatchSize + "' has not been detected");
             throw e;
         } // try catch
         
-        sink = new OrionSinkImpl();
+        sink = new NGSISinkImpl();
         String configuredBatchTimeout = "0";
         sink.configure(createContext(null, configuredBatchTimeout, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'batch_timeout='"
                     + configuredBatchTimeout + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'batch_timeout='"
                     + configuredBatchTimeout + "' has not been detected");
             throw e;
         } // try catch
         
-        sink = new OrionSinkImpl();
+        sink = new NGSISinkImpl();
         String configuredBatchTTL = "-2";
         sink.configure(createContext(null, null, configuredBatchTTL, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'batch_ttl='" + configuredBatchTTL + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'batch_ttl='" + configuredBatchTTL + "' has not been detected");
             throw e;
         } // try catch
         
-        sink = new OrionSinkImpl();
+        sink = new NGSISinkImpl();
         String dataModel = "dm-by-other";
         sink.configure(createContext(null, null, null, dataModel, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'data_model='" + dataModel + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'data_model='" + dataModel + "' has not been detected");
             throw e;
         } // try catch
         
-        sink = new OrionSinkImpl();
+        sink = new NGSISinkImpl();
         String configuredEnableGrouping = "falso";
         sink.configure(createContext(null, null, null, null, configuredEnableGrouping, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'enable_grouping='"
                     + configuredEnableGrouping + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'enable_grouping='"
                     + configuredEnableGrouping + "' has not been detected");
             throw e;
         } // try catch
         
-        sink = new OrionSinkImpl();
+        sink = new NGSISinkImpl();
         String configuredEnableLowercase = "verdadero";
         sink.configure(createContext(null, null, null, null, null, configuredEnableLowercase));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - A wrong configuration 'enable_lowercase='"
                     + configuredEnableLowercase + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - A wrong configuration 'enable_lowercase='"
                     + configuredEnableLowercase + "' has not been detected");
             throw e;

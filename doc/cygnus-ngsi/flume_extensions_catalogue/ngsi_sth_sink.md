@@ -315,26 +315,26 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 
 A configuration example could be:
 
-    cygnusagent.sinks = sth-sink
-    cygnusagent.channels = sth-channel
+    cygnus-ngsi.sinks = sth-sink
+    cygnus-ngsi.channels = sth-channel
     ...
-    cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
-    cygnusagent.sinks.sth-sink.channel = sth-channel
-    cygnusagent.sinks.sth-sink.enable_encoding = false
-    cygnusagent.sinks.sth-sink.enable_grouping = false
-    cygnusagent.sinks.sth-sink.enable_lowercase = false
-    cygnusagent.sinks.sth-sink.data_model = dm-by-entity
-    cygnusagent.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
-    cygnusagent.sinks.sth-sink.mongo_username = myuser
-    cygnusagent.sinks.sth-sink.mongo_password = mypassword
-    cygnusagent.sinks.sth-sink.db_prefix = cygnus_
-    cygnusagent.sinks.sth-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.sth-sink.resolutions = month,day
-    cygnusagent.sinks.sth-sink.batch_size = 100
-    cygnusagent.sinks.sth-sink.batch_timeout = 30
-    cygnusagent.sinks.sth-sink.batch_ttl = 10
-    cygnusagent.sinks.sth-sink.data_expiration = 0
-    cygnusagent.sinks.sth-sink.ignore_white_spaces = true
+    cygnus-ngsi.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
+    cygnus-ngsi.sinks.sth-sink.channel = sth-channel
+    cygnus-ngsi.sinks.sth-sink.enable_encoding = false
+    cygnus-ngsi.sinks.sth-sink.enable_grouping = false
+    cygnus-ngsi.sinks.sth-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.sth-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
+    cygnus-ngsi.sinks.sth-sink.mongo_username = myuser
+    cygnus-ngsi.sinks.sth-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.sth-sink.db_prefix = cygnus_
+    cygnus-ngsi.sinks.sth-sink.collection_prefix = cygnus_
+    cygnus-ngsi.sinks.sth-sink.resolutions = month,day
+    cygnus-ngsi.sinks.sth-sink.batch_size = 100
+    cygnus-ngsi.sinks.sth-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.sth-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.sth-sink.data_expiration = 0
+    cygnus-ngsi.sinks.sth-sink.ignore_white_spaces = true
 
 [Top](#top)
 

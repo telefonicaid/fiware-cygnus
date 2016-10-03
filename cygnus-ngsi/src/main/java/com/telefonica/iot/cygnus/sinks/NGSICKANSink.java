@@ -432,7 +432,7 @@ public class NGSICKANSink extends NGSISink {
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
 
         if (aggregator instanceof RowAggregator) {

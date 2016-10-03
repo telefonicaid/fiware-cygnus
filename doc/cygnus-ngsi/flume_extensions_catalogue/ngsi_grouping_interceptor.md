@@ -191,9 +191,9 @@ As can be seen, two entities (`Room1` and `Room2`) of the same type (`Room`) wit
 
 A configuration example could be:
 
-    cygnusagent.sources.http-source.interceptors = gi <other-interceptors>
-    cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-    cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = [FLUME_HOME_DIR]/conf/grouping_rules.conf
+    cygnus-ngsi.sources.http-source.interceptors = gi <other-interceptors>
+    cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
+    cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = [FLUME_HOME_DIR]/conf/grouping_rules.conf
 
 [Top](#top)
 

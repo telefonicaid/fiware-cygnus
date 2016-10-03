@@ -38,37 +38,37 @@ This kind of agent is the simplest one you can configure with Cygnus. It is base
 (1) Create and edit a `/usr/cygnus/conf/agent_test.conf` file (as a sudoer):
 
 ```
-cygnusagent.sources = http-source
-cygnusagent.sinks = test-sink
-cygnusagent.channels = test-channel
+cygnus-ngsi.sources = http-source
+cygnus-ngsi.sinks = test-sink
+cygnus-ngsi.channels = test-channel
 
-cygnusagent.sources.http-source.channels = test-channel
-cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
-cygnusagent.sources.http-source.port = 5050
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
-cygnusagent.sources.http-source.handler.notification_target = /notify
-cygnusagent.sources.http-source.handler.default_service = def_serv
-cygnusagent.sources.http-source.handler.default_service_path = def_servpath
-cygnusagent.sources.http-source.handler.events_ttl = 2
-cygnusagent.sources.http-source.interceptors = ts gi
-cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
+cygnus-ngsi.sources.http-source.channels = test-channel
+cygnus-ngsi.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+cygnus-ngsi.sources.http-source.port = 5050
+cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+cygnus-ngsi.sources.http-source.handler.notification_target = /notify
+cygnus-ngsi.sources.http-source.handler.default_service = def_serv
+cygnus-ngsi.sources.http-source.handler.default_service_path = def_servpath
+cygnus-ngsi.sources.http-source.handler.events_ttl = 2
+cygnus-ngsi.sources.http-source.interceptors = ts gi
+cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
+cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
 
-cygnusagent.channels.test-channel.type = memory
-cygnusagent.channels.test-channel.capacity = 1000
-cygnusagent.channels.test-channel.transactionCapacity = 100
+cygnus-ngsi.channels.test-channel.type = memory
+cygnus-ngsi.channels.test-channel.capacity = 1000
+cygnus-ngsi.channels.test-channel.transactionCapacity = 100
 
-cygnusagent.sinks.test-sink.channel = test-channel
-cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
-cygnusagent.sinks.test-sink.batch_size = 1
-cygnusagent.sinks.test_sink.batch_timeout = 10
+cygnus-ngsi.sinks.test-sink.channel = test-channel
+cygnus-ngsi.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
+cygnus-ngsi.sinks.test-sink.batch_size = 1
+cygnus-ngsi.sinks.test_sink.batch_timeout = 10
 ```
 
 (2) Start Cygnus from the command line; Cygnus will be printing logs on the standard output (i.e. your screen):
 
 ```
-$ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/conf/agent_test.conf -n cygnusagent -Dflume.root.logger=INFO,console
+$ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/conf/agent_test.conf -n cygnus-ngsi -Dflume.root.logger=INFO,console
 ```
 
 (3) Open a new terminal (since Cygnus should be printing logs on the standard output of the first one) and create and edit somewhere a `notification.sh` file:
@@ -76,7 +76,7 @@ $ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/
 ```
 URL=$1
 
-curl $URL -v -s -S --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: testsink" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: testsink" -d @- <<EOF
 {
 	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
 	"originator" : "localhost",
