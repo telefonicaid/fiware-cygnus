@@ -48,7 +48,6 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
-    // Parameter 'cache' and cache <schema,[table,table,table..]>
     private boolean enableCache;
 
     /**

@@ -59,6 +59,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             cache = new PostgreSQLCache();
             LOGGER.info("PostgreSQL cache created succesfully");
         } // if
+        
         driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername,
                 postgresqlPassword);
     } // PostgreSQLBackendImpl
@@ -218,7 +219,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * @param postgresqlUsername
          * @param postgresqlPassword
          */
-        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort,String postgresqlDatabase, 
+        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, 
                 String postgresqlUsername, String postgresqlPassword) {
             connections = new HashMap<String, Connection>();
             this.postgresqlHost = postgresqlHost;

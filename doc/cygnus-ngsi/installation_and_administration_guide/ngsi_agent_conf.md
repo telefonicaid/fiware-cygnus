@@ -170,7 +170,7 @@ cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
 cygnusagent.sinks.postgresql-sink.batch_ttl = 10
 # true enables cache, false disables cache
-cygnusagent.sinks.postgresql-sink.backend.enable_cache = false
+#cygnusagent.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
 # NGSIMySQLSink configuration

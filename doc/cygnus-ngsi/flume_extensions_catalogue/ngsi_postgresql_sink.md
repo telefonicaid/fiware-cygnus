@@ -239,7 +239,7 @@ Coming soon.
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-| backend.enable_cache | yes | N/A | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
+| backend.enable_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
 A configuration example could be:
 
     cygnusagent.sinks = postgresql-sink
@@ -260,7 +260,7 @@ A configuration example could be:
     cygnusagent.sinks.postgresql-sink.batch_size = 100
     cygnusagent.sinks.postgresql-sink.batch_timeout = 30
     cygnusagent.sinks.postgresql-sink.batch_ttl = 10
-    cygnusagent.sinks.postgresql.backend.enable_cache = true
+    cygnusagent.sinks.postgresql.backend.enable_cache = false
 
 [Top](#top)
 
