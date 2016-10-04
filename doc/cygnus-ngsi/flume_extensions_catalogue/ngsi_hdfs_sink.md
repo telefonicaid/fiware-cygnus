@@ -334,7 +334,7 @@ A configuration example could be:
 ###<a name="section2.2"></a>Use cases
 Use `NGSIHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
 
-For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, FIWARE Comet or MySQL (Cygnus provides sinks for them, as well).
+For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, STH Comet or MySQL (Cygnus provides sinks for them, as well).
 
 [Top](#top)
 

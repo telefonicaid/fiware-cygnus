@@ -5,4 +5,3 @@
 - [cygnus-ngsi] [feature] Add implementation for /admin/log route (807) - continue - (#807)
 - [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
 - [cygnus][doc] Update mkdocs.yml with the google analytics ID (#1183)
-- [cygnus][hardening] Continuous update (#997)
