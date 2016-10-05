@@ -6,3 +6,4 @@
 - [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
 - [cygnus-ngis][hardening] Add a cache for already created elements in PostgreSQLSink (#1171)
 - [cygnus][doc] Update mkdocs.yml with the google analytics ID (#1183)
+- [cygnus][hardening] Update default agent.conf file with latests paremeters (#1194)
