@@ -9,7 +9,7 @@ Content:
     * [Running](#section2.4)
     * [Unit testing](#section2.5)
     * [Management API overview](#section2.6)
-* [Advanced topics and further reading](#section3)
+* [Further reading](#section3)
 * [Features summary](#section4)
 * [Reporting issues and contact information](#section5)
 
@@ -84,7 +84,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section3"></a>Advanced topics and further reading
+##<a name="section3"></a>Further reading
 
 Further information can be found in the documentation at [fiware-cygnus.readthedocs.io](https://fiware-cygnus.readthedocs.io)
 
