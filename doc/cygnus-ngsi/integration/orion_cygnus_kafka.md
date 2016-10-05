@@ -427,46 +427,46 @@ At this moment we have a local Orion ContextBroker running on port 1026, a local
 
 Cygnus is the connector in charge of persisting Orion context data in Kafka, creating a historical view of such data. Cygnus runs once we have configured the file `agent.conf`, that contains all the values necessary. We are going to use the agent below:
 ```
-cygnusagent.sources = http-source
-cygnusagent.sinks = kafka-sink
-cygnusagent.channels = kafka-channel
+cygnus-ngsi.sources = http-source
+cygnus-ngsi.sinks = kafka-sink
+cygnus-ngsi.channels = kafka-channel
 
-cygnusagent.sources.http-source.channels = kafka-channel
-cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
-cygnusagent.sources.http-source.port = 5050
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
-cygnusagent.sources.http-source.handler.notification_target = /notify
-cygnusagent.sources.http-source.handler.default_service = def_serv
-cygnusagent.sources.http-source.handler.default_service_path = /def_servpath
-cygnusagent.sources.http-source.handler.events_ttl = 2
-cygnusagent.sources.http-source.interceptors = ts gi
-cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /path/to/your/grouping_rules/conf/grouping_rules.conf
+cygnus-ngsi.sources.http-source.channels = kafka-channel
+cygnus-ngsi.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+cygnus-ngsi.sources.http-source.port = 5050
+cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+cygnus-ngsi.sources.http-source.handler.notification_target = /notify
+cygnus-ngsi.sources.http-source.handler.default_service = def_serv
+cygnus-ngsi.sources.http-source.handler.default_service_path = /def_servpath
+cygnus-ngsi.sources.http-source.handler.events_ttl = 2
+cygnus-ngsi.sources.http-source.interceptors = ts gi
+cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
+cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /path/to/your/grouping_rules/conf/grouping_rules.conf
 
-cygnusagent.channels.kafka-channel.type = memory
-cygnusagent.channels.kafka-channel.capacity = 1000
-cygnusagent.channels.kafka-channel.trasactionCapacity = 100
+cygnus-ngsi.channels.kafka-channel.type = memory
+cygnus-ngsi.channels.kafka-channel.capacity = 1000
+cygnus-ngsi.channels.kafka-channel.trasactionCapacity = 100
 
-cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
-cygnusagent.sinks.kafka-sink.channel = kafka-channel
-cygnusagent.sinks.kafka-sink.enable_grouping = false
-cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
-cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
-cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
-cygnusagent.sinks.kafka-sink.batch_size = 1
-cygnusagent.sinks.kafka-sink.batch_timeout = 10
+cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
+cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
+cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
+cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
+cygnus-ngsi.sinks.kafka-sink.broker_list = localhost:9092
+cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
+cygnus-ngsi.sinks.kafka-sink.batch_size = 1
+cygnus-ngsi.sinks.kafka-sink.batch_timeout = 10
 ```
 
 Important agent values:
-* cygnusagent.sources.http-source.port: Must be 5050. It's important to set this value for the subscription.
-* cygnusagent.sources.http-source.handler.notification_target: We are going to use `/notify`, and it's important too for the subscription.
-* cygnusagent.sinks.kafka-sink.broker_list: As we have configure only 1 broker must be the local direction of it (localhost:9092)
-* cygnusagent.sinks.kafka-sink.zookeeper_endpoint: The same as the previous files (localhost:2181)
+* cygnus-ngsi.sources.http-source.port: Must be 5050. It's important to set this value for the subscription.
+* cygnus-ngsi.sources.http-source.handler.notification_target: We are going to use `/notify`, and it's important too for the subscription.
+* cygnus-ngsi.sinks.kafka-sink.broker_list: As we have configure only 1 broker must be the local direction of it (localhost:9092)
+* cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint: The same as the previous files (localhost:2181)
 
 'agent.conf' file must be in the folder `conf`, ubicated in the root folder of `cygnus/apache-flume-1.4.0/` and must be executed like this:
 ```
-$ bin/cygnus-flume-ng agent --conf conf -f conf/agent.conf -n cygnusagent -Dflume.root.logger=DEBUG,console
+$ bin/cygnus-flume-ng agent --conf conf -f conf/agent.conf -n cygnus-ngsi -Dflume.root.logger=DEBUG,console
 ```
 
 At this moment we have a local Orion ContextBroker running on por 1026, a local Zookeeper running on port 2181, a local Broker running on port 9092 and a local Cygnus running on port 5050.
@@ -515,7 +515,7 @@ EOF
 Subscription to Orion have some JSON fields with different purposes:
 * Field "entities": Describe the entity and its type.
 * Field "attributes": Defines the attributes that will be notified when receives an update.
-* Field "reference": Endpoint where Orion will send the notifications. Previous values from Cygnus `cygnusagent.sources.http-source.port` and `cygnusagent.sources.http-source.handler.notification_target` define that, for that reason our agent must be configured with `5050/notify`.
+* Field "reference": Endpoint where Orion will send the notifications. Previous values from Cygnus `cygnus-ngsi.sources.http-source.port` and `cygnus-ngsi.sources.http-source.handler.notification_target` define that, for that reason our agent must be configured with `5050/notify`.
 * Field "notifyConditions":
   * Field "condValues": Orion will send updates when any of these attributes change.
 

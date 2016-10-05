@@ -8,8 +8,7 @@ FIWARE-CYGNUS API (v1).
 This is a cookbook with commands that show how to use FIWARE cygnus API.
 It's a work in progress and is changing on a daily basis.
 
-Please check the following [FIWARE Open Specification Legal Notice (implicit patents license)]
-(http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_(implicit_patents_license))
+Please check the following [FIWARE Open Specification Legal Notice: implicit patents license](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28implicit_patents_license%29)
 to understand the rights to use this document.
 
 
@@ -23,7 +22,7 @@ This resource allows you to obtain a list of subresources published by the API:
   * current grouping rules configured
   * add, update or delete current grouping rules
 
-## Error responses
+# Error responses
 
 Error list (HTTP response code in parenthesis):
 
@@ -33,9 +32,11 @@ Error list (HTTP response code in parenthesis):
 * BadRequest            (`400`). The request is invalid.
 * InternalServerError   (`500`). Internal error in the server.
 
-## Group Version API
+# Group Version API
 
-## Gets the version of the running Cygnus [GET /v1/version]
+## Getting the version of Cygnus [/Version API]
+
+### "GET /v1/version" [GET]
 
 + Request
 
@@ -50,9 +51,13 @@ Error list (HTTP response code in parenthesis):
             }
        ]
 
-## Group Statistics API
+# Group Statistics API.
 
-## Get stats of Flume components [GET /v1/stats]
+## Methods [/Statistics API]
+Allowed operations with API statistics:
+
+### "GET /v1/stats" [GET /v1/stats]
+Information can be retrieved by GET statistics method, which you can retrieve all the information of the flume component.
 
 + Request
 
@@ -98,7 +103,8 @@ Error list (HTTP response code in parenthesis):
           }
         ]
 
-## Resets the statistics about the configured Flume components [PUT /v1/stats]
+### "PUT /v1/stats" [PUT /v1/stats]
+Statistics can be reset by a PUT request.
 
 + Request
 
@@ -110,9 +116,13 @@ Error list (HTTP response code in parenthesis):
             "success":"true"
         }
 
-## Group Grouping Rules API
+# Group Grouping Rules API
+API operations used to manage the grouping rules of Cygnus.
 
-### Get current grouping rules [GET /v1/groupingrules]
+## Methods [/Grouping Rules API]
+
+### "GET /v1/groupingrules" [GET /v1/groupingrules]
+Grouping rules can be retrieved by GET methods.
 
 + Request
 
@@ -146,29 +156,8 @@ Error list (HTTP response code in parenthesis):
             }
         ]
 
-### Adds a new rule [POST /v1/groupingrules]
-
-+ Parameters
-
-       + id: 1 (number) - An unique identifier of the message.
-
-+ Request
-
-       POST http://<cygnus_host>:<management_port>/v1/groupingrules
-       {
-           "regex": "Room",
-           "destination": "allrooms",
-           "fiware_service_path": "rooms",
-           "fields": ["entityType"]
-       }
-
-+ Response 200 (application/json)
-
-       {
-           "success":"true"
-       }
-
-### Update an already existent grouping rules [PUT /v1/groupingrules]
+### "PUT /v1/groupingrules" [PUT /v1/groupingrules]
+A grouping rule can be updated by PUT method.
 
 + Parameters
 
@@ -190,8 +179,31 @@ Error list (HTTP response code in parenthesis):
             {"success":"true"}
         ]
 
+### "POST /v1/groupingrules" [POST /v1/groupingrules]
+A grouping rule can be added by POST method.
 
-### Delete a grouping rules [DELETE /v1/groupingrules]
++ Parameters
+
+       + id: 1 (number) - An unique identifier of the message.
+
++ Request
+
+       POST http://<cygnus_host>:<management_port>/v1/groupingrules
+       {
+           "regex": "Room",
+           "destination": "allrooms",
+           "fiware_service_path": "rooms",
+           "fields": ["entityType"]
+       }
+
++ Response 200 (application/json)
+
+       {
+           "success":"true"
+       }
+
+### "DELETE /v1/groupingrules" [DELETE /v1/groupingrules]
+A grouping rule can be deleted by DELETE method.
 
 + Parameters
 
@@ -208,167 +220,12 @@ Error list (HTTP response code in parenthesis):
        ]
 
 
-## Group Subscriptions API
+# Group Subscriptions API
 
-### Creates a new subscription to Orion v1 [POST /v1/subscriptions]
+## Methods [/Subscriptions API]
+API operations used to manage subscriptions without interact with Orion. There are some allowed operations like POST new subscriptions (ngsi_version 1 and 2), GET current subscriptions (by ID or delete all) or DELETE by ID.
 
-+ Parameters
-
-       + ngsi_version: 1 (Defines the Orion API's version)
-
-+ Request
-
-       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=1"
-       {
-           "subscription":{
-           "entities": [
-                   {
-                       "type": "Room",
-                       "isPattern": "false",
-                       "id": "Room1"
-                   }
-               ],
-           "attributes": [],
-           "reference": "http://<reference_host>:<reference_port>",
-           "duration": "P1M",
-           "notifyConditions": [
-                   {
-                       "type": "ONCHANGE",
-                      "condValues": []
-                   }
-               ],
-           "throttling": "PT5S"
-           },
-           "endpoint":{
-                   "host":"<endpoint_host>",
-                   "port":"<endpoint_port>",
-                   "ssl":"false",
-                   "xauthtoken":"234123123123123"
-           }
-       }
-
-+ Response 200 (application/json)
-
-        {
-            "success":"true",
-            "result" : {
-                    {
-                      "subscribeResponse":{
-                                  "duration":"P1M",
-                                  "throttling":"PT5S",
-                                  "subscriptionId":"56f9081c3c6fb7e9d2a912a0"
-                        }
-                    }
-              }
-        }
-
-+ Response 400 (application/json)
-
-        {
-            "success":"true",
-            "result" : {
-                    "subscribeError": {
-                                "errorCode": {
-                                        "code":"400",
-                                        "reasonPhrase":"Bad Request",
-                                        "details":"JSON Parse Error: unknown field: \/extraField"
-                                }
-                    }
-            }
-        }
-
-+ Response 400 (application/json)
-
-        {
-            "success":"false",
-            "error":"Invalid subscription, field 'duration' is empty"
-        }
-
-+ Response 400 (application/json)
-
-        {
-            "success":"false",
-            "error":"Invalid subscription, field 'notifyConditions' is missing"
-        }
-
-### Creates a new subscription to Orion v2 [POST /v1/subscriptions]
-
-+ Parameters
-
-       + ngsi_version: 2 (Defines the Orion API's version)
-
-+ Request
-
-       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=<ngsi_version>"
-       {
-               "subscription":{
-                       "description": "One subscription to rule them all",
-                       "subject": {
-                               "entities": [
-                                       {
-                                               "idPattern": ".*",
-                                               "type": "Room"
-                                       }
-                               ],
-                               "condition": {
-                                       "attrs": [
-                                              "temperature"
-                                       ],
-                                       "expression": {
-                                               "q": "temperature>40"
-                                       }
-                               }
-                       },
-                       "notification": {
-                              "http": {
-                                      "url": "http://localhost:1234"
-                               },
-                               "attrs": [
-                                       "temperature",
-                                       "humidity"
-                               ]
-                       },
-                       "expires": "2016-05-05T14:00:00.00Z","throttling": 5
-               },
-               "endpoint":{
-                       "host":"orion.lab.fiware.org",
-                       "port":"1026",
-                       "ssl":"false",
-                       "xauthtoken":"QsENv67AJj7blC2qJ0YvfSc5hMWYrs"
-               }
-       }
-
-+ Response 201 (application/json)
-
-       {
-               "success":"true",
-               "result" : {
-                       "SubscriptionID" : "572ae23d20e1387832ed98d0"
-               }
-       }
-
-+ Response 400 (application/json)
-
-       {
-               "success":"false",
-               "error":"Invalid subscription, field 'xxxxxx' is missing"
-       }
-
-+ Response 400 (application/json)
-
-       {
-               "success":"false",
-               "error":"Invalid subscription, field 'xxxxxx' has missing fields"
-       }
-
-+ Response 400 (application/json)
-
-       {
-               "success":"false",
-               "error":"Missing endpoint"
-       }
-
-### Gets a current subscription [GET /v1/subscriptions]
+### "GET /v1/subscriptions?ngsi_version=2&subscription_id=<subscriptionId>" [GET /v1/subscriptions?ngsi_version=2&subscription_id=<subscriptionId>]
 
 + Parameters
 
@@ -451,7 +308,8 @@ Error list (HTTP response code in parenthesis):
                "error":"GET /v1/subscriptions not implemented."
        }
 
-### Gets all current subscriptions [GET /v1/subscriptions]
+### "GET /v1/subscriptions?ngsi_version=2" [GET /v1/subscriptions?ngsi_version=2]
+Subscription can be retrieved by GET methods, retrieving all the subscriptions or retrieving one by its subscription ID.
 
 + Parameters
 
@@ -530,7 +388,167 @@ Error list (HTTP response code in parenthesis):
             "error":"Invalid endpoint, field 'ssl' is missing"
        }
 
-### Deletes a current subscription to Orion [DELETE /v1/subscriptions]
+### "POST /v1/subscriptions?ngsi_version=1" [POST /v1/subscriptions?ngsi_version=1]
+
++ Parameters
+
+       + ngsi_version: 1 (Defines the Orion API's version)
+
++ Request
+
+       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=1"
+       {
+           "subscription":{
+           "entities": [
+                   {
+                       "type": "Room",
+                       "isPattern": "false",
+                       "id": "Room1"
+                   }
+               ],
+           "attributes": [],
+           "reference": "http://<reference_host>:<reference_port>",
+           "duration": "P1M",
+           "notifyConditions": [
+                   {
+                       "type": "ONCHANGE",
+                      "condValues": []
+                   }
+               ],
+           "throttling": "PT5S"
+           },
+           "endpoint":{
+                   "host":"<endpoint_host>",
+                   "port":"<endpoint_port>",
+                   "ssl":"false",
+                   "xauthtoken":"234123123123123"
+           }
+       }
+
++ Response 200 (application/json)
+
+        {
+            "success":"true",
+            "result" : {
+                    {
+                      "subscribeResponse":{
+                                  "duration":"P1M",
+                                  "throttling":"PT5S",
+                                  "subscriptionId":"56f9081c3c6fb7e9d2a912a0"
+                        }
+                    }
+              }
+        }
+
++ Response 400 (application/json)
+
+        {
+            "success":"true",
+            "result" : {
+                    "subscribeError": {
+                                "errorCode": {
+                                        "code":"400",
+                                        "reasonPhrase":"Bad Request",
+                                        "details":"JSON Parse Error: unknown field: \/extraField"
+                                }
+                    }
+            }
+        }
+
++ Response 400 (application/json)
+
+        {
+            "success":"false",
+            "error":"Invalid subscription, field 'duration' is empty"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "success":"false",
+            "error":"Invalid subscription, field 'notifyConditions' is missing"
+        }
+
+### "POST /v1/subscriptions?ngsi_version=2" [POST /v1/subscriptions?ngsi_version=2]
+Subscription can be created by POST methods, in `ngsi_version=1` and `ngsi_version=2`.
+
++ Parameters
+
+       + ngsi_version: 2 (Defines the Orion API's version)
+
++ Request
+
+       POST "http://<cygnus_host>:<management_port>/v1/subscriptions?ngsi_version=2"
+       {
+               "subscription":{
+                       "description": "One subscription to rule them all",
+                       "subject": {
+                               "entities": [
+                                       {
+                                               "idPattern": ".*",
+                                               "type": "Room"
+                                       }
+                               ],
+                               "condition": {
+                                       "attrs": [
+                                              "temperature"
+                                       ],
+                                       "expression": {
+                                               "q": "temperature>40"
+                                       }
+                               }
+                       },
+                       "notification": {
+                              "http": {
+                                      "url": "http://localhost:1234"
+                               },
+                               "attrs": [
+                                       "temperature",
+                                       "humidity"
+                               ]
+                       },
+                       "expires": "2016-05-05T14:00:00.00Z","throttling": 5
+               },
+               "endpoint":{
+                       "host":"orion.lab.fiware.org",
+                       "port":"1026",
+                       "ssl":"false",
+                       "xauthtoken":"QsENv67AJj7blC2qJ0YvfSc5hMWYrs"
+               }
+       }
+
++ Response 201 (application/json)
+
+       {
+               "success":"true",
+               "result" : {
+                       "SubscriptionID" : "572ae23d20e1387832ed98d0"
+               }
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Invalid subscription, field 'xxxxxx' is missing"
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Invalid subscription, field 'xxxxxx' has missing fields"
+       }
+
++ Response 400 (application/json)
+
+       {
+               "success":"false",
+               "error":"Missing endpoint"
+       }
+
+### "DELETE /v1/subscriptions" [DELETE /v1/subscriptions]
+Subscriptions can be deleted by DELETE methods, deleting a subscription by its ID.
 
 + Parameters
 
@@ -605,9 +623,13 @@ Error list (HTTP response code in parenthesis):
        }
 
 
-## Group Admin API
+# Group Admin API
 
-### Gets the log4j configuration [GET /admin/log]
+## Methods [/Group Admin API]
+API operations used to get and update the logging level of Cygnus.
+
+### "GET /admin/log" [GET /admin/log]
+Logging level can be retrieved by GET method.
 
 + Request
 
@@ -625,11 +647,12 @@ Error list (HTTP response code in parenthesis):
                "error": "..."
        }
 
-### Update the logging level of Cygnus [PUT /admin/log]
+### "PUT /admin/log" [PUT /admin/log]
+Logging level can be updated by PUT method.
 
 + Parameters
 
-        + loglevel: Must be DEBUG, INFO, WARN, ERROR o FATAL (String) - A valid log level.
+       + loglevel: Must be DEBUG, INFO, WARN, ERROR o FATAL (Defines the valid logging levels)
 
 + Request
 
@@ -649,4 +672,514 @@ Error list (HTTP response code in parenthesis):
 
        {
            "error":""
+       }
+
+# Group Admin Loggers API
+
+## Methods [/Admin Loggers API]
+Group of API methods related with log4j loggers.
+
+### "GET /v1/admin/log/loggers" [GET /v1/admin/log/loggers]
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "loggers":[
+               {"name":"org.apache.hadoop","level":"WARN"},
+               {"name":"org.apache.flume.node.AbstractConfigurationProvider"},
+               {"name":"org.apache.kafka","level":"WARN"},
+               ........
+               {"name":"org.apache.hive","level":"INFO"}
+           ]
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+
+### "GET /v1/admin/log/loggers?name=<name>" [GET /v1/admin/log/loggers?name=<name>]
+Loggers can be retrieved with GET methods, getting all loggers or getting one by its name.
+
++ Parameters
+
+       + transient: true (retrieves from memory) or false (retrieves from file).
+       + name: "logger_name" (Defines the name of the appender)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>&name=<logger_name>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "loggers":[
+               {"name":<logger_name>,"level":<logger_level>},
+           ]
+       }
+
++ Response 400 (application/json)
+
+      {
+          "success":"false",
+          "result":"logger name not found"
+      }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+### "PUT /v1/admin/log/loggers" [PUT /v1/admin/log/loggers]
+Loggers can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       PUT http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>
+       {
+          "logger": {
+               "name":<logger_name>,
+               "level":<logger_level>
+          }
+       }
+
++ Response 200 (text/plain)
+
+       {
+          "success":"true",
+          "result":"Logger <logger_name> updated succesfully"
+       }
+
++ Response 200 (application/json)
+
+       {
+           "success":"true",
+           "result":"Logger <logger_name> put"
+       }
+
++ Response 400 (application/json)
+
+      {
+          "success":"false",
+          "result":"Loggers addition is  not implemented"
+      }
+
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Missing input JSON"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid input JSON"
+       }
+
+### "POST /v1/admin/log/loggers" [POST /v1/admin/log/loggers]
+Loggers can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Loggers in memory.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       POST http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>
+       {
+          "logger": {
+               "name":<logger_name>,
+               "level":<logger_level>
+          }
+       }
+
++ Response 200 (text/plain)
+
+       {
+          "success":"true",
+          "result":"Logger <logger_name> updated succesfully"
+       }
+
++ Response 200 (application/json)
+
+       {
+           "success":"true",
+           "result":"Logger <logger_name> posted"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"POST appenders in transient mode is not implemented"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Logger <logger_name> already exist"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Missing input JSON"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid input JSON"
+       }
+
+### "DELETE /v1/admin/log/loggers" [DELETE /v1/admin/log/loggers]
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       DELETE http://<cygnus_host>:<management_port>/v1/admin/log/loggers?name=<logger_name>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "result":"Loggers removed succesfully"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+### "DELETE /v1/admin/log/loggers?name=<name>" [DELETE /v1/admin/log/loggers?name=<name>]
+Loggers can be deleted with DELETE methods, deleting all Loggers or getting one by its name.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+       + name: "logger_name" (Defines the name of the appender)
+
++ Request
+
+       DELETE http://<cygnus_host>:<management_port>/v1/admin/log/loggers?name=<logger_name>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "result":"Logger <logger_name> removed succesfully"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+# Group Admin Appenders API
+
+## Methods [/Admin Appenders API]
+Group of API methods related with log4j appenders.
+
+### "GET /v1/admin/log/appenders" [GET /v1/admin/log/appenders]
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "appenders":[
+               {
+                   "name":"console",
+                   "layout":"time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n"
+               }
+           ]
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+### "GET /v1/admin/log/appenders?name=<name>" [GET /v1/admin/log/appenders?name=<name>]
+Appenders can be retrieved with GET methods, getting all appenders or getting one by its name.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+       + name: "appender_name" (Defines the name of the appender)
+
++ Request
+
+       GET http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>&name=<appender_name>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "appender":[
+               {
+                   "name":<appender_name>,
+                   "layout":"time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n"
+               }
+           ]
+       }
+
++ Response 400 (application/json)
+
+      {
+          "success":"false",
+          "result":"Appender name not found"
+      }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+### "PUT /v1/admin/log/appenders" [PUT /v1/admin/log/appenders]
+Appenders can be put with PUT methods. There are some special situations here: In `transient` mode only update is allowed. However, in no `transient` mode the put option is available, in addition to upgrading.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       PUT http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>
+       {
+           "appender": {
+               "name":<appender_name>,
+               "class":<appender_class>
+           },
+           "pattern": {
+               "layout":<appender_layout>,
+               "ConversionPattern":"<appender_conversion_pattern>
+           }
+       }
+
++ Response 200 (text/plain)
+
+       {
+          "success":"true",
+          "result":"Appender <appender_name> updated succesfully"
+       }
+
++ Response 200 (application/json)
+
+       {
+           "success":"true",
+           "result":"Appender <appender_name> put"
+       }
+
++ Response 400 (application/json)
+
+      {
+          "success":"false",
+          "result":"Appenders addition is  not implemented"
+      }
+
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Appenders addition is not implemented"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Missing input JSON"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid input JSON"
+       }
+
+### "POST /v1/admin/log/appenders" [POST /v1/admin/log/appenders]
+Appenders can be posted with POST methods. This situation only works in no `transient` mode, disabling the creation of new Appenders in memory.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       POST http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>
+       {
+           "appender": {
+               "name":<appender_name>,
+               "class":<appender_class>
+           },
+           "pattern": {
+               "layout":<appender_layout>,
+               "ConversionPattern":"<appender_conversion_pattern>
+           }
+       }
+
++ Response 200 (text/plain)
+
+       {
+          "success":"true",
+          "result":"Appender <appender_name> updated succesfully"
+       }
+
++ Response 200 (application/json)
+
+       {
+           "success":"true",
+           "result":"Appender <appender_name> posted"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"POST appenders in transient mode is not implemented"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Appender <appender_name> already exist"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Missing input JSON"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid input JSON"
+       }
+
+### "DELETE /v1/admin/log/appenders" [DELETE /v1/admin/log/appenders]
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+
++ Request
+
+       DELETE http://<cygnus_host>:<management_port>/v1/admin/log/appenders
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "result":"Appenders removed succesfully"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
+       }
+
+### "DELETE /v1/admin/log/appenders?name=<name>" [DELETE /v1/admin/log/appenders?name=<name>]
+Appenders can be deleted with DELETE methods, deleting all appenders or getting one by its name.
+
++ Parameters
+
+       + transient: true, retrieving from memory, or false, retrieving from file (Defines the transient mode)
+       + name: "appender_name" (Defines the name of the appender)
+
++ Request
+
+       DELETE http://<cygnus_host>:<management_port>/v1/admin/log/appenders?name=<appender_name>
+
++ Response 200 (text/plain)
+
+       {
+           "success":"true",
+           "result":"Appender <appender_name> removed succesfully"
+       }
+
++ Response 400 (application/json)
+
+       {
+           "success":"false",
+           "result":"Invalid 'transient' parameter found"
        }

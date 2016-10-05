@@ -185,22 +185,22 @@ If `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within
 
 A configuration example could be:
 
-    cygnusagent.sinks = dynamodb-sink
-    cygnusagent.channels = dynamodb-channel
+    cygnus-ngsi.sinks = dynamodb-sink
+    cygnus-ngsi.channels = dynamodb-channel
     ...
-    cygnusagent.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
-    cygnusagent.sinks.dynamodb-sink.channel = dynamodb-channel
-    cygnusagent.sinks.dynamodb-sink.enable_grouping = false
-    cygnusagent.sinks.dynamodb-sink.enable_name_mappings = false
-    cygnusagent.sinks.dynamodb-sink.enable_lowercase = false
-    cygnusagent.sinks.dynamodb-sink.data_model = dm-by-entity
-    cygnusagent.sinks.dynamodb-sink.attr_persistence = column
-    cygnusagent.sinks.dynamodb-sink.access_key_id = xxxxxxxx
-    cygnusagent.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
-    cygnusagent.sinks.dynamodb-sink.region = eu-central-1
-    cygnusagent.sinks.dynamodb-sink.batch_size = 25
-    cygnusagent.sinks.dynamodb-sink.batch_timeout = 30
-    cygnusagent.sinks.dynamodb-sink.batch_ttl = 10
+    cygnus-ngsi.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
+    cygnus-ngsi.sinks.dynamodb-sink.channel = dynamodb-channel
+    cygnus-ngsi.sinks.dynamodb-sink.enable_grouping = false
+    cygnus-ngsi.sinks.dynamodb-sink.enable_lowercase = false
+    ygnus-ngsi.sinks.dynamodb-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.dynamodb-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.dynamodb-sink.attr_persistence = column
+    cygnus-ngsi.sinks.dynamodb-sink.access_key_id = xxxxxxxx
+    cygnus-ngsi.sinks.dynamodb-sink.secret_access_key = xxxxxxxxx
+    cygnus-ngsi.sinks.dynamodb-sink.region = eu-central-1
+    cygnus-ngsi.sinks.dynamodb-sink.batch_size = 25
+    cygnus-ngsi.sinks.dynamodb-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.dynamodb-sink.batch_ttl = 10
 
 [Top](#top)
 

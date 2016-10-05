@@ -173,7 +173,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             } // if
 
             // insert the data
-            LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
+            LOGGER.info("[" + this.getName() + "] Persisting data at NGSISTHSink. Database: " + dbName
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
                     + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);

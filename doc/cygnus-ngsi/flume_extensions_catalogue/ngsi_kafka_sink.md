@@ -145,22 +145,22 @@ Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`
 
 A configuration example could be:
 
-    cygnusagent.sinks = kafka-sink
-    cygnusagent.channels = kafka-channel
+    cygnus-ngsi.sinks = kafka-sink
+    cygnus-ngsi.channels = kafka-channel
     ...
-    cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
-    cygnusagent.sinks.kafka-sink.channel = kafka-channel
-    cygnusagent.sinks.kafka-sink.enable_grouping = false
-    cygnusagent.sinks.kafka-sink.enable_name_mappings = false
-    cygnusagent.sinks.kafka-sink.enable_lowercase = false
-    cygnusagent.sinks.kafka-sink.data_model = dm-by-entity
-    cygnusagent.sinks.kafka-sink.broker_list = localhost:9092
-    cygnusagent.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
-    cygnusagent.sinks.kafka-sink.partitions = 5
-    cygnusagent.sinks.kafka-sink.replication_factor = 1
-    cygnusagent.sinks.kafka-sink.batch_size = 100
-    cygnusagent.sinks.kafka-sink.batch_timeout = 30
-    cygnusagent.sinks.kafka-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
+    cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
+    cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
+    cygnus-ngsi.sinks.kafka-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.kafka-sink.broker_list = localhost:9092
+    cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
+    cygnus-ngsi.sinks.kafka-sink.partitions = 5
+    cygnus-ngsi.sinks.kafka-sink.replication_factor = 1
+    cygnus-ngsi.sinks.kafka-sink.batch_size = 100
+    cygnus-ngsi.sinks.kafka-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.kafka-sink.batch_ttl = 10
 
 [Top](#top)
 

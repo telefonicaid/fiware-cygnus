@@ -1,7 +1,7 @@
 # CKAN management scripts
 
 ## `ckan_datastore_cleaner.sh`
-This script aims to delete old entries within CKAN datastores, interacting directly with the underlyting Postgresql database that CKAN uses internally. Note that CKAN is considered a short-term historic storage, and thus cannot contain all the context information forever.
+This script aims to delete old entries within CKAN datastores, interacting directly with the underlying Postgresql database that CKAN uses internally. Note that CKAN is considered a short-term historic storage, and thus cannot contain all the context information forever.
 
 The way the data is deleted is by comparing the current date with the stored `recvTime` in each row. If such difference is greater than a specified number of days, the row is deleted.
 
@@ -15,7 +15,7 @@ The script has 1 parameter:
 Use this command to manually run the script:
     $ ./ckan-datastore-cleaner.sh <data_lifetime_days>
 
-The script assumes that it runs in the same machine than the Postgresql server by an user with sudo privilegies.
+The script assumes that it runs in the same machine than the Postgresql server by an user with sudo privileges.
 
 ### Cron scheduling
 More interesting than running the script by hand is to schedule regular executions. This is achieved by using Cron.
@@ -23,7 +23,7 @@ More interesting than running the script by hand is to schedule regular executio
 First of all, install (simply copy) the `ckan-datastore-cleaner.sh` script somewhere only a privileged user has access, e.g. `/usr/share/cygnus/` (must be created if not yet existing). Do not forget to give the privileged user execution permissions:
 
     $ sudo mkdir /usr/share/cygnus/
-    $ sudo cp ckan-datastore-cleaner.sh /usr/share/cygnus 
+    $ sudo cp ckan-datastore-cleaner.sh /usr/share/cygnus
     $ sudo chmod u+x /usr/share/cygnus/ckan-datastore-cleaner.sh
 
 In order to program the scheduling, create a `cygnus_crontab.txt` file. Put the following line within that file, if wanting to execute the script every hour with an expiration interval of 1 day:
@@ -82,4 +82,3 @@ The script has three parameters:
 
 # Contact
 Fermin Galan Marquez (fermin dot galanmarquez at telefonica dot com)
->>>>>>> develop

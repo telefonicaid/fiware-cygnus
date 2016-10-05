@@ -8,6 +8,7 @@ markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+google_analytics: ['UA-84866051-2', 'fiware-cygnus.readthedocs.io']
 pages:
   - Home: index.md
   - 'Architecture': architecture.md
@@ -16,6 +17,7 @@ pages:
           - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
           - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
           - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
+          - 'Installation via docker': 'cygnus-common/installation_and_administration_guide/install_with_docker.md'
           - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
           - 'Flume environment configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
           - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'

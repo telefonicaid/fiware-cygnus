@@ -9,8 +9,9 @@ Content:
     * [Running](#section2.4)
     * [Unit testing](#section2.5)
     * [Management API overview](#section2.6)
-* [Features summary](#section3)
-* [Reporting issues and contact information](#section4)
+* [Further reading](#section3)
+* [Features summary](#section4)
+* [Reporting issues and contact information](#section5)
 
 #<a name="section1"></a>Welcome to cygnus-common
 cygnus-common is the base for any Cygnus agent (e.g. cygnus-ngsi). Cygnus agents are based on [Apache Flume](http://flume.apache.org/) agents, which are basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
@@ -83,7 +84,13 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section3"></a>Features summary
+##<a name="section3"></a>Further reading
+
+Further information can be found in the documentation at [fiware-cygnus.readthedocs.io](https://fiware-cygnus.readthedocs.io)
+
+[Top](#top)
+
+##<a name="section4"></a>Features summary
 <table>
   <tr><td rowspan="6">Management Interface</td><td>GET /version</td><td>0.5.0</td></tr>
   <tr><td>GET /stats</td><td>0.13.0</td></tr>
@@ -105,7 +112,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section4"></a>Reporting issues and contact information
+##<a name="section5"></a>Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
 
 [Top](#top)

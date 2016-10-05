@@ -16,9 +16,9 @@
 # under the License.
 
 
-# The configuration file needs to define the sources, 
+# The configuration file needs to define the sources,
 # the channels and the sinks.
-# Sources, channels and sinks are defined per agent, 
+# Sources, channels and sinks are defined per agent,
 # in this case called 'agent'
 
 agent.sources = seqGenSrc
@@ -34,7 +34,7 @@ agent.sources.seqGenSrc.channels = memoryChannel
 # Each sink's type must be defined
 agent.sinks.loggerSink.type = logger
 
-#Specify the channel the sink should use
+# Specify the channel the sink should use
 agent.sinks.loggerSink.channel = memoryChannel
 
 # Each channel's type is defined.

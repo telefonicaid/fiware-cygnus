@@ -7,7 +7,7 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
-# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL, PostgreSQL, Mongo, FIWARE Comet, Kafka, DynamoDB).
+# General configuration template explaining how to setup a sink of each of the available types (HDFS, CKAN, MySQL, PostgreSQL, Mongo, STH Comet, Kafka, DynamoDB, CartoDB).
 
 #=============================================
 # The next tree fields set the sources, sinks and channels used by Cygnus. You could use different names than the
@@ -16,372 +16,442 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
-cygnusagent.sources = http-source
-cygnusagent.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink postgresql-sink
-cygnusagent.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
+cygnus-ngsi.sources = http-source
+cygnus-ngsi.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink postgresql-sink cartodb-sink
+cygnus-ngsi.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel cartodb-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
+cygnus-ngsi.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
 # source class, must not be changed
-cygnusagent.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+cygnus-ngsi.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
-cygnusagent.sources.http-source.port = 5050
+cygnus-ngsi.sources.http-source.port = 5050
 # Flume handler that will parse the notifications, must not be changed
-cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
 # URL target
-cygnusagent.sources.http-source.handler.notification_target = /notify
-# Default service (service semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service = default
-# Default service path (service path semantic depends on the persistence sink)
-cygnusagent.sources.http-source.handler.default_service_path = /
-# Source interceptors, do not change
-cygnusagent.sources.http-source.interceptors = ts gi
+cygnus-ngsi.sources.http-source.handler.notification_target = /notify
+# default service (service semantic depends on the persistence sink)
+cygnus-ngsi.sources.http-source.handler.default_service = default
+# default service path (service path semantic depends on the persistence sink)
+cygnus-ngsi.sources.http-source.handler.default_service_path = /
+# source interceptors, do not change
+cygnus-ngsi.sources.http-source.interceptors = ts gi
 # TimestampInterceptor, do not change
-cygnusagent.sources.http-source.interceptors.ts.type = timestamp
+cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
 # GroupingInterceptor, do not change
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
 # Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
-# See the doc/design/interceptors document for more details
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
+# see the doc/design/interceptors document for more details
+cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # NGSIHDFSSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
+cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
+# true or false, true applies the new encoding, false applies the old encoding.
+#cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_grouping = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnusagent.sinks.hdfs-sink.backend.impl = rest
+#cygnus-ngsi.sinks.hdfs-sink.backend.impl = rest
 # maximum number of Http connections to HDFS backend
-cygnusagent.sinks.hdfs-sink.backend.max_conns = 500
+#cygnus-ngsi.sinks.hdfs-sink.backend.max_conns = 500
 # maximum number of Http connections per route to HDFS backend
-cygnusagent.sinks.hdfs-sink.backend.max_conns_per_route = 100
+#cygnus-ngsi.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-cygnusagent.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
+#cygnus-ngsi.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
-cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+#cygnus-ngsi.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
+cygnus-ngsi.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the above username; this is only required for Hive authentication
-cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
+cygnus-ngsi.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
-cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+cygnus-ngsi.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
-cygnusagent.sinks.hdfs-sink.service_as_namespace = false
+#cygnus-ngsi.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
-cygnusagent.sinks.hdfs-sink.file_format = json-column
+#cygnus-ngsi.sinks.hdfs-sink.file_format = json-column
 # character used for separating the values when using CSV file formats
-cygnusagent.sinks.hdfs-sink.csv_separator = ,
+#cygnus-ngsi.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.hdfs-sink.batch_size = 100
+#cygnus-ngsi.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.hdfs-sink.batch_timeout = 30
+# cygunsagent.sinks.hdfs-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.hdfs-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
-cygnusagent.sinks.hdfs-sink.hive = true
+#cygnus-ngsi.sinks.hdfs-sink.hive = false
 # Hive server version, 1 or 2 (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+#cygnus-ngsi.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.host = x.y.z.w
+#cygnus-ngsi.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
-cygnusagent.sinks.hdfs-sink.hive.port = 10000
+#cygnus-ngsi.sinks.hdfs-sink.hive.port = 10000
 # Hive database type, available types are default-db and namespace-db
-cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
+#cygnus-ngsi.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
-cygnusagent.sinks.hdfs-sink.krb5_auth = false
+#cygnus-ngsi.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
 # Kerberos password (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 # Kerberos login file (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+#cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+#cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 # ============================================
 # NGSICKANSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.ckan-sink.channel = ckan-channel
+cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
-cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
+cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.ckan-sink.enable_grouping = false
-# true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
+# true applies the new encoding, false applies the old encoding.
+#cygnus-ngsi.sinks.ckan-sink.enable_encoding = false
 # the CKAN API key to use
-cygnusagent.sinks.ckan-sink.api_key = ckanapikey
+cygnus-ngsi.sinks.ckan-sink.api_key = ckanapikey
 # the FQDN/IP address for the CKAN API endpoint
-cygnusagent.sinks.ckan-sink.ckan_host = x.y.z.w
+#cygnus-ngsi.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
-cygnusagent.sinks.ckan-sink.ckan_port = 80
+#cygnus-ngsi.sinks.ckan-sink.ckan_port = 80
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
-cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
+#cygnus-ngsi.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.ckan-sink.attr_persistence = row
+#cygnus-ngsi.sinks.ckan-sink.attr_persistence = row
 # enable SSL for secure Http transportation; 'true' or 'false'
-cygnusagent.sinks.ckan-sink.ssl = false
+#cygnus-ngsi.sinks.ckan-sink.ssl = false
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.ckan-sink.batch_size = 100
+#cygnus-ngsi.sinks.ckan-sink.batch_size = 100
 # timeout for batch accumulation
-cygnusagent.sinks.ckan-sink.batch_timeout = 30
+#cygnus-ngsi.sinks.ckan-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.ckan-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.ckan-sink.batch_ttl = 10
 # maximum number of Http connections to CKAN backend
-cygnusagent.sinks.ckan-sink.backend.max_conns = 500
+#cygnus-ngsi.sinks.ckan-sink.backend.max_conns = 500
 # maximum number of Http connections per route to CKAN backend
-cygnusagent.sinks.ckan-sink.backend.max_conns_per_route = 100
+#cygnus-ngsi.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 # ============================================
 # NGSIPostgreSQLSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
+cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
 # sink class, must not be changed
-cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+# true applies the new encoding, false applies the old encoding.
+#cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.postgresql-sink.enable_grouping = false
+#cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # the FQDN/IP address where the PostgreSQL server runs
-cygnusagent.sinks.postgresql-sink.postgresql_host = x.y.z.w
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_host = x.y.z.w
 # the port where the PostgreSQL server listens for incomming connections
-cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_port = 5432
 # the name of the postgresql database
-cygnusagent.sinks.postgresql-sink.postgresql_database = postgres
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_database = postgres
 # a valid user in the PostgreSQL server
-cygnusagent.sinks.postgresql-sink.postgresql_username = root
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_username = root
 # password for the user above
-cygnusagent.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.postgresql-sink.attr_persistence = column
-# select the table type
-cygnusagent.sinks.postgresql-sink.data_model = by-service-path
+#cygnus-ngsi.sinks.postgresql-sink.attr_persistence = column
+# select the data_model: dm-by-service-path or dm-by-entity
+#cygnus-ngsi.sinks.postgresql-sink.data_model = by-service-path
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.postgresql-sink.batch_size = 100
+#cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
-cygnusagent.sinks.postgresql-sink.batch_timeout = 30
+#cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+# true enables cache, false disables cache
+#cygnus-ngsi.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
 # NGSIMySQLSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.mysql-sink.channel = mysql-channel
+cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
 # sink class, must not be changed
-cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
+cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
+# true applies the new encoding, false applies the old encoding
+#cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.mysql-sink.enable_grouping = false
+#cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # the FQDN/IP address where the MySQL server runs
-cygnusagent.sinks.mysql-sink.mysql_host = x.y.z.w
+#cygnus-ngsi.sinks.mysql-sink.mysql_host = x.y.z.w
 # the port where the MySQL server listens for incomming connections
-cygnusagent.sinks.mysql-sink.mysql_port = 3306
+#cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
 # a valid user in the MySQL server
-cygnusagent.sinks.mysql-sink.mysql_username = root
+#cygnus-ngsi.sinks.mysql-sink.mysql_username = root
 # password for the user above
-cygnusagent.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
+#cygnus-ngsi.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.mysql-sink.attr_persistence = column
-# select the table type from table-by-destination and table-by-service-path
-cygnusagent.sinks.mysql-sink.table_type = table-by-destination
+#cygnus-ngsi.sinks.mysql-sink.attr_persistence = column
+# select the data_model: dm-by-service-path or dm-by-entity
+#cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.mysql-sink.batch_size = 100
+#cygnus-ngsi.sinks.mysql-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.mysql-sink.batch_timeout = 30
+# cygunsagent.sinks.mysql-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.mysql-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
 
 # ============================================
 # NGSIMongoSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
+cygnus-ngsi.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
 # channel name from where to read notification events
-cygnusagent.sinks.mongo-sink.channel = mongo-channel
+cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
+# true applies the new encoding, false applies the old encoding
+#cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.mongo-sink.enable_grouping = false
+#cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-cygnusagent.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+#cygnus-ngsi.sinks.mongo-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.mongo-sink.mongo_username = mongo_username
+#cygnus-ngsi.sinks.mongo-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.mongo-sink.mongo_password = xxxxxxxx
+#cygnus-ngsi.sinks.mongo-sink.mongo_password = xxxxxxxx
 # prefix for the MongoDB databases
-cygnusagent.sinks.mongo-sink.db_prefix = sth_
+#cygnus-ngsi.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
-cygnusagent.sinks.mongo-sink.collection_prefix = sth_
-# specify if the sink will use a single collection for each service path, for each entity or for each attribute
-cygnusagent.sinks.mongo-sink.data_model = collection-per-entity  
+#cygnus-ngsi.sinks.mongo-sink.collection_prefix = sth_
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-attribute
+#cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity  
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.mongo-sink.attr_persistence = column
+#cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.mongo-sink.batch_size = 100
+#cygnus-ngsi.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.mongo-sink.batch_timeout = 30
+# cygunsagent.sinks.mongo-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.mongo-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.mongo-sink.batch_ttl = 10
 # true if white space-based attribute values must be ignored
-cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
+#cygnus-ngsi.sinks.mongo-sink.ignore_white_spaces = true
+# value specified in seconds. Set to 0 if not wanting this policy
+#cygnus-ngsi.sinks.mongo-sink.data_expiration = 0
+# value specified in bytes. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes
+#cygnus-ngsi.sinks.mongo-sink.collections_size = 0
+# value specifies the number of documents. Set to 0 if not wanting this policy
+#cygnus-ngsi.sinks.mongo-sink.max_documents = 0
+# true if exclusively white space-based attribute values must be ignored, false otherwise
+#cygnus-ngsi.sinks.mongo-sink.ignore_white_spaces = true
 
 # ============================================
 # NGSISTHSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
+cygnus-ngsi.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
 # channel name from where to read notification events
-cygnusagent.sinks.sth-sink.channel = sth-channel
+cygnus-ngsi.sinks.sth-sink.channel = sth-channel
+# true applies the new encoding, false applies the old encoding
+#cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.sth-sink.enable_grouping = false
+#cygnus-ngsi.sinks.sth-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
-cygnusagent.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+#cygnus-ngsi.sinks.sth-sink.mongo_hosts = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # a valid user in the MongoDB server (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.sth-sink.mongo_username = mongo_username
+#cygnus-ngsi.sinks.sth-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
-cygnusagent.sinks.sth-sink.mongo_password = xxxxxxxx
+#cygnus-ngsi.sinks.sth-sink.mongo_password = xxxxxxxx
 # prefix for the MongoDB databases
-cygnusagent.sinks.sth-sink.db_prefix = sth_
+#cygnus-ngsi.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
-cygnusagent.sinks.sth-sink.collection_prefix = sth_
+#cygnus-ngsi.sinks.sth-sink.collection_prefix = sth_
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.sth-sink.batch_size = 100
+#cygnus-ngsi.sinks.sth-sink.batch_size = 100
 # timeout for batch accumulation
-cygnusagent.sinks.sth-sink.batch_timeout = 30
+#cygnus-ngsi.sinks.sth-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.sth-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.sth-sink.batch_ttl = 10
 # true if white space-based attribute values must be ignored
-cygnusagent.sinks.sth-sink.ignore_white_spaces = true
+#cygnus-ngsi.sinks.sth-sink.ignore_white_spaces = true
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-attribute
+#cygnus-ngsi.sinks.sth-sink.data_model = dm-by-entity
+# accepted values are month, day, hour, minute and second separated by comma
+#cygnus-ngsi.sinks.sth-sink.resolutions = month,day
+# value specified in seconds. Set to 0 if not wanting this policy
+#cygnus-ngsi.sinks.sth-sink.data_expiration = 0
 
 #=============================================
 # NGSIKafkaSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
+cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
 # channel name from where to read notification events
-cygnusagent.sinks.kafka-sink.channel = kafka-channel
+cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.sth-sink.enable_grouping = false
+#cygnus-ngsi.sinks.sth-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
-# select the Kafka topic type between topic-by-service, topic-by-service-path and topic-by-destination
-cygnusagent.sinks.kafka-sink.topic_type = topic-by-destination
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+# select the data_model: dm-by-service, dm-by-service-path, dm-by-entity or dm-by-attribute
+#cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
-cygnusagent.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
+#cygnus-ngsi.sinks.kafka-sink.broker_list = x1.y1.z1.w1:port1,x2.y2.z2.w2:port2,...
 # Zookeeper endpoint needed to create Kafka topics, in the form of host:port
-cygnusagent.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
+#cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = x.y.z.w:port
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.kafka-sink.batch_size = 100
+#cygnus-ngsi.sinks.kafka-sink.batch_size = 100
 # timeout for batch accumulation
-cygnusagent.sinks.kafka-sink.batch_timeout = 30
+#cygnus-ngsi.sinks.kafka-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.kafka-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.kafka-sink.batch_ttl = 10
+# rumber of partitions for a topic
+#cygnus-ngsi.sinks.kafka-sink.partitions = 5
+# replication factor must be less than or equal to the number of brokers created
+#cygnus-ngsi.sinks.kafka-sink.replication_factor = 1
 
 # ============================================
 # NGSIDynamoDBSink configuration
 # sink class, must not be changed
-cygnusagent.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
+cygnus-ngsi.sinks.dynamo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
 # channel name from where to read notification events
-cygnusagent.sinks.dynamo-sink.channel = dynamo-channel
+cygnus-ngsi.sinks.dynamo-sink.channel = dynamo-channel
 # AWS Access Key Id
-cygnusagent.sinks.dynamo-sink.access_key_id = xxxxxxxx
+cygnus-ngsi.sinks.dynamo-sink.access_key_id = xxxxxxxx
 # AWS Secret Access Key
-cygnusagent.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
+cygnus-ngsi.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 # AWS region where the tables will be created (link)
-cygnusagent.sinks.dynamo-sink.region = eu-central-1
+#cygnus-ngsi.sinks.dynamo-sink.region = eu-central-1
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnusagent.sinks.dynamo-sink.enable_grouping = false
+#cygnus-ngsi.sinks.dynamo-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # how the attributes are stored, either per row either per column (row, column)
-cygnusagent.sinks.dynamo-sink.attr_persistence = column
-# select the table type from table-by-destination and table-by-service-path
-cygnusagent.sinks.dynamo-sink.table_type = table-by-destination
+#cygnus-ngsi.sinks.dynamo-sink.attr_persistence = column
+# select the data_model: dm-by-entity 	dm-by-entity or dm-by-service-path
+#cygnus-ngsi.sinks.dynamo-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
-cygnusagent.sinks.dynamo-sink.batch_size = 100
+#cygnus-ngsi.sinks.dynamo-sink.batch_size = 100
 # timeout for batch accumulation
-cygnusagent.sinks.dynamo-sink.batch_timeout = 30
+#cygnus-ngsi.sinks.dynamo-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnusagent.sinks.dynamo-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.dynamo-sink.batch_ttl = 10
 
-#=============================================
+# ============================================
+# NGSICartoDBSink configuration
+# sink class, must not be changed
+cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
+# channel name from where to read notification events
+cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
+# true if the grouping feature is enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
+# select the data_model: dm-by-service-path or dm-by-entity
+#cygnus-ngsi.sinks.cartodb-sink.data_model = dm-by-entity
+# absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys
+cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
+# if true the latitude and longitude values are exchanged, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.flip_coordinates = true
+# if true, a raw based storage is done, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
+# if true, a distance based storage is done, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.enable_distance = false
+# number of notifications to be included within a processing batch
+#cygnus-ngsi.sinks.cartodb-sink.batch_size = 100
+# timeout for batch accumulation
+#cygnus-ngsi.sinks.cartodb-sink.batch_timeout = 30
+# number of retries upon persistence error
+#cygnus-ngsi.sinks.cartodb-sink.batch_ttl = 10
+# maximum number of connections allowed for a Http-based HDFS backend
+#cygnus-ngsi.sinks.cartodb-sink.backend.max_conns = 500
+# maximum number of connections per route allowed for a Http-based HDFS backend
+#cygnus-ngsi.sinks.cartodb-sink.backend.max_conns_per_route = 100
+
+# =============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.hdfs-channel.type = memory
+cygnus-ngsi.channels.hdfs-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.hdfs-channel.capacity = 1000
+cygnus-ngsi.channels.hdfs-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.hdfs-channel.transactionCapacity = 100
+cygnus-ngsi.channels.hdfs-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # ckan-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.ckan-channel.type = memory
+cygnus-ngsi.channels.ckan-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.ckan-channel.capacity = 1000
+cygnus-ngsi.channels.ckan-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.ckan-channel.transactionCapacity = 100
+cygnus-ngsi.channels.ckan-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # mysql-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.mysql-channel.type = memory
+cygnus-ngsi.channels.mysql-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.mysql-channel.capacity = 1000
+cygnus-ngsi.channels.mysql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.mysql-channel.transactionCapacity = 100
+cygnus-ngsi.channels.mysql-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # postgresql-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.postgresql-channel.type = memory
+cygnus-ngsi.channels.postgresql-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.postgresql-channel.capacity = 1000
+cygnus-ngsi.channels.postgresql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.postgresql-channel.transactionCapacity = 100
+cygnus-ngsi.channels.postgresql-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # mongo-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.mongo-channel.type = memory
+cygnus-ngsi.channels.mongo-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.mongo-channel.capacity = 1000
+cygnus-ngsi.channels.mongo-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.mongo-channel.transactionCapacity = 100
+cygnus-ngsi.channels.mongo-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # sth-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.sth-channel.type = memory
+cygnus-ngsi.channels.sth-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.sth-channel.capacity = 1000
+cygnus-ngsi.channels.sth-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.sth-channel.transactionCapacity = 100
+cygnus-ngsi.channels.sth-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # kafka-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.kafka-channel.type = memory
+cygnus-ngsi.channels.kafka-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.kafka-channel.capacity = 1000
+cygnus-ngsi.channels.kafka-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.mkafka-channel.transactionCapacity = 100
+cygnus-ngsi.channels.mkafka-channel.transactionCapacity = 100
 
-#=============================================
+# =============================================
 # dynamo-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.dynamo-channel.type = memory
+cygnus-ngsi.channels.dynamo-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.dynamo-channel.capacity = 1000
+cygnus-ngsi.channels.dynamo-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.dynamo-channel.transactionCapacity = 100
+cygnus-ngsi.channels.dynamo-channel.transactionCapacity = 100
+
+# ============================================
+# cartodb-channel configuration
+# channel type (must not be changed)
+cygnus-ngsi.channels.cartodb-channel.type = memory
+# capacity of the channel
+cygnus-ngsi.channels.cartodb-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnus-ngsi.channels.cartodb-channel.transactionCapacity = 100
 ```
 
 [Top](#top)

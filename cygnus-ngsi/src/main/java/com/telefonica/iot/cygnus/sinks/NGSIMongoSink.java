@@ -340,7 +340,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         
         String dbName = aggregator.getDbName(enableLowercase);
         String collectionName = aggregator.getCollectionName(enableLowercase);
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
         backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);

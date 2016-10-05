@@ -50,7 +50,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testbuildTopicNameDmByService() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-service, the Kafka topic "
                 + "name is <service>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -60,10 +60,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equal to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -76,7 +76,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByServiceWithSlashServicePath() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-service, the Kafka "
                 + "topic name is <service>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -86,10 +86,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "service";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -102,7 +102,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByServicePath() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
                 + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -112,10 +112,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/servicePath";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -128,7 +128,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByServicePathWithSlashServicePath() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-service-path, "
                 + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -138,10 +138,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -154,7 +154,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByEntity() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-entity, the "
                 + "Kafka topic name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -164,10 +164,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]")  + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]")  + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -180,7 +180,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByEntityWithSlashServicePath() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-entity, the Kafka topic "
                 + "name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
@@ -190,10 +190,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/xffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic
                     + "' was created instead.");
             throw e;
@@ -206,7 +206,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByAttribute() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When a non "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When a non "
                 + "root service-path is notified/defaulted and data_model=dm-by-attribute, the Kafka "
                 + "topic name is the concatenation of <service>, <service-path>, <entityId>, <entityType> and "
                 + "<attrName>");
@@ -217,10 +217,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch
@@ -232,7 +232,7 @@ public class NGSIKafkaSinkTest {
      */
     @Test
     public void testBuildTopicNameDmByAttributeWithSlashServicePath() throws Exception {
-        System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-------- When the "
+        System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-------- When the "
                 + "root service-path is notified/defaulted and data_model=dm-by-attribute, the "
                 + "Kafka topic name is the concatenation of <service>, <service-path>, <entityId>, <entityType> and "
                 + "<attrName>");
@@ -243,10 +243,10 @@ public class NGSIKafkaSinkTest {
         try {
             expectedTopic = "servicexffff/xffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "-  OK  - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionKafkaSink.buildTopicName]") + "- FAIL - "
+            System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "- FAIL - "
                     + "Wrong topic built, expected: '" + expectedTopic + "' but '" + topic + "' was created instead.");
             throw e;
         } // try catch

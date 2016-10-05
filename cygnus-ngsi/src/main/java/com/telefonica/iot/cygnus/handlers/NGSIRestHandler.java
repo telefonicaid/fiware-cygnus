@@ -108,11 +108,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         notificationTarget = context.getString(NGSIConstants.PARAM_NOTIFICATION_TARGET, "/notify");
         
         if (notificationTarget.startsWith("/")) {
-            LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
+            LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
                     + notificationTarget + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
+            LOGGER.error("[NGSIRestHandler] Bad configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
                     + notificationTarget + ") -- Must start with '/'");
         } // if else
         
@@ -120,14 +120,14 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         if (defaultService.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN) {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
+            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
                     + "' parameter length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
         } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultService)) {
-            LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
+            LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE + "="
                     + defaultService + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
+            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
                     + "' parameter can only contain alphanumerics or underscores)");
         } // if else
         
@@ -135,29 +135,29 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         if (defaultServicePath.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN) {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
+            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
                     + "' parameter length greater " + "than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
         } else if (!defaultServicePath.startsWith("/")) {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
+            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
                     + "' must start with '/')");
         } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultServicePath.substring(1))) {
-            LOGGER.debug("Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH + "="
+            LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH + "="
                     + defaultServicePath + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.error("Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
+            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
                     + "' parameter can only contain alphanumerics or underscores");
         } // else
         
-        LOGGER.info("Startup completed");
+        LOGGER.info("[NGSIRestHandler] Startup completed");
     } // configure
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // if the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
-            LOGGER.debug("Invalid configuration, thus returning an empty list of Flume events");
+            LOGGER.debug("[NGSIRestHandler] Invalid configuration, thus returning an empty list of Flume events");
             return new ArrayList<Event>();
         } // if
         
@@ -167,7 +167,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
         if (!method.equals("POST")) {
-            LOGGER.warn("Bad HTTP notification (" + method + " method not supported)");
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + method + " method not supported)");
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
 
@@ -175,7 +175,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String target = request.getRequestURI();
         
         if (!target.equals(notificationTarget)) {
-            LOGGER.warn("Bad HTTP notification (" + target + " target not supported)");
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported)");
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
@@ -189,20 +189,20 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
             String headerValue = request.getHeader(headerName);
-            LOGGER.debug("Header " + headerName + " received with value " + headerValue);
+            LOGGER.debug("[NGSIRestHandler] Header " + headerName + " received with value " + headerValue);
             
             if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
                 corrId = headerValue;
             } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
                 if (wrongContentType(headerValue)) {
-                    LOGGER.warn("Bad HTTP notification (" + headerValue + " content type not supported)");
+                    LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + headerValue + " content type not supported)");
                     throw new HTTPBadRequestException(headerValue + " content type not supported");
                 } else {
                     contentType = headerValue;
                 } // if else
             } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE)) {
                 if (wrongServiceHeaderLength(headerValue)) {
-                    LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE
+                    LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE
                             + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
                     throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE
                             + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
@@ -214,13 +214,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                 
                 for (String splitValue : splitValues) {
                     if (wrongServicePathHeaderLength(splitValue)) {
-                        LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                                 + "' header value length greater than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN
                                 + ")");
                         throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
                                 + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
                     } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
-                        LOGGER.warn("Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                                 + "' header value must start with '/'");
                         throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                                 + "' header value must start with '/'");
@@ -233,7 +233,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // check if received content type is null
         if (contentType == null) {
-            LOGGER.warn("Missing content type. Required 'application/json; charset=utf-8'");
+            LOGGER.warn("[NGSIRestHandler] Missing content type. Required 'application/json; charset=utf-8'");
             throw new HTTPBadRequestException("Missing content type. Required 'application/json; charset=utf-8'");
         } // if
         
@@ -252,7 +252,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // by the whole source code.
         MDC.put(CommonConstants.LOG4J_CORR, corrId);
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
-        LOGGER.info("Starting internal transaction (" + transId + ")");
+        LOGGER.info("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
         
         // get the data content
         String data = "";
@@ -264,33 +264,33 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         } // while
                 
         if (data.length() == 0) {
-            LOGGER.warn("Bad HTTP notification (No content in the request)");
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
         } // if
 
-        LOGGER.info("Received data (" + data + ")");
+        LOGGER.info("[NGSIRestHandler] Received data (" + data + ")");
         
         // create the appropiate headers
         Map<String, String> eventHeaders = new HashMap<String, String>();
         eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE
+        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE
                 + ", value=" + (service == null ? defaultService : service) + ")");
         eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
                 ? defaultServicePath : servicePath);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                 + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
         eventHeaders.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
-        LOGGER.debug("Adding flume event header (name=" + CommonConstants.HEADER_CORRELATOR_ID
+        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_CORRELATOR_ID
                 + ", value=" + corrId + ")");
         eventHeaders.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
+        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
                 + ", value=" + transId + ")");
         
         // create the event list containing only one event
         ArrayList<Event> eventList = new ArrayList<Event>();
         Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
         eventList.add(event);
-        LOGGER.debug("Event put in the channel, id=" + event.hashCode());
+        LOGGER.debug("[NGSIRestHandler] Event put in the channel, id=" + event.hashCode());
         numProcessedEvents++;
         return eventList;
     } // getEvents

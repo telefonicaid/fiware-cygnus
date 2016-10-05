@@ -160,7 +160,7 @@ public class NGSITestSink extends NGSISink {
     private void persistAggregation(TestAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionTestSink. Data (" + aggregation + ")");
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSITestSink. Data (" + aggregation + ")");
     } // persistAggregation
 
 } // NGSITestSink

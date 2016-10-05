@@ -314,30 +314,30 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 
 A configuration example could be:
 
-    cygnusagent.sinks = mongo-sink
-    cygnusagent.channels = mongo-channel
+    cygnus-ngsi.sinks = mongo-sink
+    cygnus-ngsi.channels = mongo-channel
     ...
-    cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
-    cygnusagent.sinks.mongo-sink.channel = mongo-channel
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.attr_persistence = column
-    cygnusagent.sinks.mongo-sink.enable_encoding = false
-    cygnusagent.sinks.mongo-sink.enable_grouping = false
-    cygnusagent.sinks.mongo-sink.enable_name_mappings = false
-    cygnusagent.sinks.mongo-sink.enable_lowercase = false
-    cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
-    cygnusagent.sinks.mongo-sink.mongo_username = myuser
-    cygnusagent.sinks.mongo-sink.mongo_password = mypassword
-    cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.batch_size = 100
-    cygnusagent.sinks.mongo-sink.batch_timeout = 30
-    cygnusagent.sinks.mongo-sink.batch_ttl = 10
-    cygnusagent.sinks.mongo-sink.data_expiration = 0
-    cygnusagent.sinks.mongo-sink.collections_size = 0
-    cygnusagent.sinks.mongo-sink.max_documents = 0
-    cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
+    cygnus-ngsi.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
+    cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
+    cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
+    cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
+    cygnus-ngsi.sinks.mongo-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
+    cygnus-ngsi.sinks.mongo-sink.mongo_username = myuser
+    cygnus-ngsi.sinks.mongo-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.mongo-sink.db_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.collection_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.batch_size = 100
+    cygnus-ngsi.sinks.mongo-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.mongo-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.mongo-sink.data_expiration = 0
+    cygnus-ngsi.sinks.mongo-sink.collections_size = 0
+    cygnus-ngsi.sinks.mongo-sink.max_documents = 0
+    cygnus-ngsi.sinks.mongo-sink.ignore_white_spaces = true
 
 [Top](#top)
 
@@ -377,7 +377,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * All the forbidden characters are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
@@ -413,7 +413,7 @@ Creates a collection, given its name, if not exists in the given database.
 
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
-Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See STH Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.
 

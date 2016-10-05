@@ -35,7 +35,7 @@ CONFIG_FOLDER=/usr/cygnus/conf
 # Which is the config file
 CONFIG_FILE=/usr/cygnus/conf/agent_<id>.conf
 # Name of the agent. The name of the agent is not trivial, since it is the base for the Flume parameters naming conventions, e.g. it appears in <AGENT_NAME>.sources.http-source.channels=...
-AGENT_NAME=cygnusagent
+AGENT_NAME=cygnus-common
 # Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
 LOGFILE_NAME=cygnus.log
 # Administration port. Must be unique per instance
