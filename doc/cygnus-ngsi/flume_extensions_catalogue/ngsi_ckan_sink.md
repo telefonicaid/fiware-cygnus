@@ -322,20 +322,21 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
-| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. ||
-| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
-| attr_persistence | no | row | <i>row</i> or <i>column.</i>|
-| ckan_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
-| ckan_port | no | 80 ||
+| enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
+| data\_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
+| attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
+| ckan\_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
+| ckan\_port | no | 80 ||
 | ssl | no | false ||
-| api_key | yes | N/A ||
-| orion_url | no | http://localhost:1026 | To be put as the filestore URL. |
-| batch_size | no | 1 | Number of events accumulated before persistence. |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
-| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
+| api\_key | yes | N/A ||
+| orion\_url | no | http://localhost:1026 | To be put as the filestore URL. |
+| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
@@ -346,6 +347,7 @@ A configuration example could be:
     cygnusagent.sinks.ckan-sink.channel = ckan-channel
     cygnusagent.sinks.ckan-sink.enable_encoding = false
     cygnusagent.sinks.ckan-sink.enable_grouping = false
+    cygnusagent.sinks.ckan-sink.enable_name_mappings = false
     cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
     cygnusagent.sinks.ckan-sink.attr_persistence = column
     cygnusagent.sinks.ckan-sink.ckan_host = 192.168.80.34

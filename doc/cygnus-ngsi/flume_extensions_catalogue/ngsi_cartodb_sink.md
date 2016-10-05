@@ -387,7 +387,8 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx000
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICartoDBSink</i> |
 | channel | yes | N/A ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
 | keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys. |
@@ -409,6 +410,7 @@ cygnus-ngsi.channels = cartodb-channel
 cygnus-ngsi.sinks.raw-sink.channel = cartodb-channel
 cygnus-ngsi.sinks.raw-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
 cygnus-ngsi.sinks.raw-sink.enable_grouping = false
+cygnus-ngsi.sinks.raw-sink.enable_name_mappings = false
 cygnus-ngsi.sinks.raw-sink.enable_lowercase = false
 cygnus-ngsi.sinks.raw-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
 cygnus-ngsi.sinks.raw-sink.flip_coordinates = true

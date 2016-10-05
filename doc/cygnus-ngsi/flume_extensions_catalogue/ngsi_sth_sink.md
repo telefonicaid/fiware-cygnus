@@ -298,7 +298,8 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | Always <i>false</i>. ||
+| enable_name_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
@@ -322,6 +323,7 @@ A configuration example could be:
     cygnusagent.sinks.sth-sink.channel = sth-channel
     cygnusagent.sinks.sth-sink.enable_encoding = false
     cygnusagent.sinks.sth-sink.enable_grouping = false
+    cysnusagent.sinks.sth-sink.enable_name_mappings = false
     cygnusagent.sinks.sth-sink.enable_lowercase = false
     cygnusagent.sinks.sth-sink.data_model = dm-by-entity
     cygnusagent.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
