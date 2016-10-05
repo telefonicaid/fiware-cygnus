@@ -470,7 +470,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionPostgreSQLSink. Schema ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
         

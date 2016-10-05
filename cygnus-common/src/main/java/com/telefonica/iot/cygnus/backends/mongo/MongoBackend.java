@@ -36,7 +36,7 @@ public interface MongoBackend {
     void createDatabase(String dbName) throws Exception;
 
     /**
-     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
+     * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
      * @param dbName
      * @param collectionName

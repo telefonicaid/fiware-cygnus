@@ -18,7 +18,7 @@ Mocks are simulated requests that mimic the behavior of real requests in control
  *  Comments:                                                                                              *
  *         Default Dataset is prefixed by organization name to ensure uniqueness ant it.                   *
  *            Must be purely lowercase alphanumeric (ascii) characters,                                    *
- *            plus "-" and "_" acording to CKAN limitations.                                               *
+ *            plus "-" and "_" according to CKAN limitations.                                               *
  *         HTTP protocol: the certificate file is not necessary.                                           *
  *         HTTPS protocol: the certificate file is  necessary.                                             *
  *            how to create certificate file:                                                              *
@@ -30,7 +30,7 @@ Mocks are simulated requests that mimic the behavior of real requests in control
 
 #### Paths mocked:
 
-``` 
+```
      1 - GET  - 200 -- /api/util/status
      2 - GET  - 200 -- /api/3/action/organization_show?id=row_default_1
      3 - POST - 200 -- /api/3/action/organization_create

@@ -27,13 +27,13 @@ Current stable release is able to persist Orion context data in:
 * [MySQL](https://www.mysql.com/), the well-know relational database manager.
 * [CKAN](http://ckan.org/), an Open Data platform.
 * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [FIWARE Comet (STH)](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+* [STH Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
 * [CartoDB](https://cartodb.com/), the database specialized in geolocated data.
 
-You may consider to visit [cygnus-ngsi Quick Start Guide](doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
+You may consider to visit [cygnus-ngsi Quick Start Guide](../../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
 [Top](#top)
 
@@ -66,7 +66,7 @@ Please observe, as part of the installation process, cygnus-common is installed 
 [Top](#top)
 
 ###<a name="section2.3"></a>Configuration
-cygnus-ngsi is a tool with a high degree of configuration required for properly running it. The reason is the configuration describes the Flume-based agent choosen to be run.
+cygnus-ngsi is a tool with a high degree of configuration required for properly running it. The reason is the configuration describes the Flume-based agent chosen to be run.
 
 So, the starting point is choosing the internal architecture of the cygnus-ngsi agent. Let's assume the simplest one:
 
@@ -105,7 +105,7 @@ cygnusagent.channels.test-channel.capacity = 1000
 cygnusagent.channels.test-channel.transactionCapacity = 100
 ```
 
-Check the [Installation and Administraion Guide](./doc/installation_and_administration_guide/introduction.md) for configurations involving real data storages such as HDFS, MySQL, etc.
+Check the [Installation and Administration Guide](../../doc/installation_and_administration_guide/introduction.md) for configurations involving real data storages such as HDFS, MySQL, etc.
 
 In addition, a `/usr/cygnus/conf/cygnus_instance_1.conf` file must be created if we want to run cygnus-ngsi as a service (see next section):
 
@@ -163,7 +163,7 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 * Connection #0 to host localhost left intact
 ```
 
-Or you can connect a real NGSI source such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Please, check the [User and Programmer Guide](./doc/user_and_programmer_guide/connecting_orion.md) for further details.
+Or you can connect a real NGSI source such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Please, check the [User and Programmer Guide](../../doc/cygnus-ngsi/user_and_programmer_guide/connecting_orion.md) for further details.
 
 [Top](#top)
 
@@ -222,21 +222,21 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](./doc/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 
 ##<a name="section3"></a>Advanced topics and further reading
-Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](./doc/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](./doc/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](./doc/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
+Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](../../doc/cygnus-ngsi/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](../../doc/cygnus-ngsi/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](../../doc/cygnus-ngsi/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
-* [Installation with docker](doc/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
-* [Installation from sources](doc/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified, e.g. the `hadoop-core` libraries.
-* [Running as a process](doc/installation_and_administration_guide/running_as_process.md). Running cygus-ngsi as a process is very useful for testing and debugging purposes.
-* [Management Interface](doc/installation_and_administration_guide/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
+* [Installation with docker](../../doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
+* [Installation from sources](../../doc/cygnus-ngsi/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified, e.g. the `hadoop-core` libraries.
+* [Running as a process](../../doc/cygnus-ngsi/installation_and_administration_guide/running_as_process.md). Running cygus-ngsi as a process is very useful for testing and debugging purposes.
+* [Management Interface](../../doc/cygnus-ngsi/installation_and_administration_guide/management_interface.md). From Cygnus 0.5 there is a REST-based management interface for administration purposes.
 * [Pattern-based grouping](doc/). Designed as a Flume interceptor, this feature <i>overwrites</i> the default behaviour when building the `destination` header within the Flume events. It creates specific `fiware-servicePath` per notified context element as well.
-* [Multi-instance](doc/installation_and_administration_guide/configuration.md). Several instances of cygus-ngsi can be run as a service.
-* [Performance tips](doc/installation_and_administration_guide/performance_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtain the best from cygus-ngsi.
-* [New sink development](doc/user_and_programmer_guide/adding_new_sink.md). Addressed to those developers aiming to contribute to cygus-ngsi with new sinks.
+* [Multi-instance](../../doc/cygnus-ngsi/installation_and_administration_guide/configuration_examples.md). Several instances of cygus-ngsi can be run as a service.
+* [Performance tips](../../doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtain the best from cygus-ngsi.
+* [New sink development](../../doc/cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md). Addressed to those developers aiming to contribute to cygus-ngsi with new sinks.
 
 [Top](#top)
 
@@ -289,6 +289,6 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 [Top](#top)
 
 ##<a name="section5"></a>Reporting issues and contact information
-Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
+Any doubt you may have, please refer to the [Cygnus Core Team](../../doc/cygnus-ngsi/user_and_programmer_guide/reporting_issues_and_contact.md).
 
 [Top](#top)

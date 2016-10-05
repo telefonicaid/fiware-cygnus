@@ -91,7 +91,7 @@ public class MongoBackendImpl implements MongoBackend {
     } // createDatabase
 
     /**
-     * Creates a collection for FIWARE Comet, given its name, if not exists in the given database. Time-based limits are set,
+     * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
      * @param dbName
      * @param collectionName
@@ -218,22 +218,22 @@ public class MongoBackendImpl implements MongoBackend {
             insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                     attrName, attrType, attrValue, Resolution.SECOND);
         } // if
-        
+
         if (resolutions[1]) {
             insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                     attrName, attrType, attrValue, Resolution.MINUTE);
         } // if
-        
+
         if (resolutions[2]) {
             insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                     attrName, attrType, attrValue, Resolution.HOUR);
         } // if
-        
+
         if (resolutions[3]) {
             insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                     attrName, attrType, attrValue, Resolution.DAY);
         } // if
-        
+
         if (resolutions[4]) {
             insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
                     attrName, attrType, attrValue, Resolution.MONTH);

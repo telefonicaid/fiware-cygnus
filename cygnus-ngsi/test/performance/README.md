@@ -10,7 +10,7 @@ This is the repository for scripts, used for Performance tests.
 * "nginx" app exists in Balancer VM (only in cluster case)
 * Verify nginx configuration for each scenario (only in cluster case)
 * Verify that the mock exists and it is installed correctly
-	
+
 #### Pre-steps:
 
 * Launch "ServerAgent" in Balancer and each Cygnus Node VMs
@@ -29,7 +29,7 @@ nohup sh startAgent.sh --udp-port 0 --tcp-port 4444 &
 ```
   >**Steps**:
 ```
- start the mock in especific port
+ start the mock in specific port
 - cygnus configuration (sink, mock host, mock port, etc)
 - restart cygnus service
 - launch jmeter script
