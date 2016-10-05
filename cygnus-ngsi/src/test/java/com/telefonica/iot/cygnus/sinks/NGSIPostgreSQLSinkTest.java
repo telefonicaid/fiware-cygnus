@@ -904,10 +904,10 @@ public class NGSIPostgreSQLSinkTest {
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.configure]")
-                    + "-  OK  - 'cache=falso' was detected");
+                    + "-  OK  - 'enable_cache=falso' was detected");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.configure]")
-                    + "- FAIL - 'cache=falso' was not detected");
+                    + "- FAIL - 'enable_cache=falso' was not detected");
             throw e;
         } // try catch
     } // testConfigureEnableEncoding
@@ -937,7 +937,7 @@ public class NGSIPostgreSQLSinkTest {
         context.put("mysql_password", password);
         context.put("mysql_port", port);
         context.put("mysql_username", username);
-        context.put("cache", cache);
+        context.put("backend.enable_cache", cache);
         return context;
     } // createContext
 
