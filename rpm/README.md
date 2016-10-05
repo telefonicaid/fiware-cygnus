@@ -1,6 +1,6 @@
 In order to build the RPM packages, follow the following steps:
 
-* Build the Cygnus .jars both _common_ and _ngsi_ with `mvn clean compile exec:exec assembly:single` (see [Cygnus-common README](../cygnus-common/README.md) 
+* Build the Cygnus .jars both _common_ and _ngsi_ with `mvn clean compile exec:exec assembly:single` (see [Cygnus-common README](../cygnus-common/README.md)
   and [Cygnus-NGSI README](../cygnus-ngsi/README.md) for additional detail).
 * Run the `package.sh` script (inside the `rpm` directory) which, upon finalization, will generate the `.rpm`'s
   files in the `cygnus-common/spec/RPMS/x86_64` and `cygnus-ngsi/spec/RPMS/x86_64` directories. You must specify the version number (matching with the one in the pom.xml
@@ -18,9 +18,9 @@ In order to build the RPM packages, follow the following steps:
 When a package is built it introduces three features in Cygnus SW:
 
 * Daily log rotation: use logrotate tool to perform this operation. View
-  [logrotate config file](rpm/SOURCES/logrotate.d/logrotate-cygnus-daily) for more info
+  [logrotate config file](../../cygnus-common/spec/SOURCES/logrotate.d/logrotate-cygnus-daily) for more info
 * Automatic deletion of files older than 30 days programmed in cron:
-  [cron file](rpm/SOURCES/cron.d/cleanup_old_cygnus_logfiles)
+  [cron file](../../cygnus-common/spec/SOURCES/cron.d/cleanup_old_cygnus_logfiles)
 * init.d service script: which is a common service script (named as `cygnus`) with the usual operations
   `start`, `stop`, `restart` and `status`. It is invoked as other service script: `service cygnus start`
   and this actilon starts **all** instances configured for Cygnus but service script has a special

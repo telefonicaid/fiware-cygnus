@@ -118,17 +118,19 @@ cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxxx
 cygnus-twitter.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
 cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
+# true applies the new encoding, false applies the old encoding
+#cygnus-twitter.sinks.hdfs-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
-cygnus-twitter.sinks.hdfs-sink.enable_grouping = false
+#cygnus-twitter.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-cygnus-twitter.sinks.hdfs-sink.backend_impl = rest
+#cygnus-twitter.sinks.hdfs-sink.backend_impl = rest
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-cygnus-twitter.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
+#cygnus-twitter.sinks.hdfs-sink.hdfs_host = x1.y1.z1.w1,x2.y2.z2.w2
 # port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
-cygnus-twitter.sinks.hdfs-sink.hdfs_port = 14000
+#cygnus-twitter.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
 cygnus-twitter.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the above username; this is only required for Hive authentication
@@ -136,37 +138,37 @@ cygnus-twitter.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
 cygnus-twitter.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwise
-cygnus-twitter.sinks.hdfs-sink.service_as_namespace = false
+#cygnus-twitter.sinks.hdfs-sink.service_as_namespace = false
 # how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
-cygnus-twitter.sinks.hdfs-sink.file_format = json-column
+#cygnus-twitter.sinks.hdfs-sink.file_format = json-column
 # character used for separating the values when using CSV file formats
-cygnus-twitter.sinks.hdfs-sink.csv_separator = ,
+#cygnus-twitter.sinks.hdfs-sink.csv_separator = ,
 # number of notifications to be included within a processing batch
-cygnus-twitter.sinks.hdfs-sink.batch_size = 100
+#cygnus-twitter.sinks.hdfs-sink.batch_size = 100
 # timeout for batch accumulation
-cygunsagent.sinks.hdfs-sink.batch_timeout = 30
+#cygunsagent.sinks.hdfs-sink.batch_timeout = 30
 # number of retries upon persistence error
-cygnus-twitter.sinks.hdfs-sink.batch_ttl = 10
+#cygnus-twitter.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
-cygnus-twitter.sinks.hdfs-sink.hive = true
+#cygnus-twitter.sinks.hdfs-sink.hive = false
 # Hive server version, 1 or 2 (ignored if hive is false)
-cygnus-twitter.sinks.hdfs-sink.hive.server_version = 2
+#cygnus-twitter.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-cygnus-twitter.sinks.hdfs-sink.hive.host = x.y.z.w
+#cygnus-twitter.sinks.hdfs-sink.hive.host = x.y.z.w
 # Hive port for Hive external table provisioning (ignored if hive is false)
-cygnus-twitter.sinks.hdfs-sink.hive.port = 10000
+#cygnus-twitter.sinks.hdfs-sink.hive.port = 10000
 # Hive database type, available types are default-db and namespace-db
-cygnus-twitter.sinks.hdfs-sink.hive.db_type = default-db
+#cygnus-twitter.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
-cygnus-twitter.sinks.hdfs-sink.krb5_auth = false
+#cygnus-twitter.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
 cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
 # Kerberos password (ignored if krb5_auth is false)
 cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 # Kerberos login file (ignored if krb5_auth is false)
-cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+3cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file (ignored if krb5_auth is false)
-cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+#cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 #=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
@@ -177,7 +179,7 @@ cygnus-twitter.channels.hdfs-channel.capacity = 1000
 cygnus-twitter.channels.hdfs-channel.transactionCapacity = 100
 ```
 
-Check the [User and Programmer Guide](./doc/user_and_programmer_guide/introduction.md) for configurations involving real data storages such as HDFS.
+Check the [User and Programmer Guide](../../doc/cygnus-twitter/user_and_programmer_guide/introduction.md) for configurations involving real data storages such as HDFS.
 
 [Top](#top)
 
@@ -245,7 +247,7 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](./doc/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 
@@ -266,7 +268,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 [Top](#top)
 
 ##<a name="section6"></a>Licensing
-Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](./LICENSE).
+Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](../../LICENSE).
 
 [Top](#top)
 
@@ -274,6 +276,6 @@ Cygnus is licensed under Affero General Public License (GPL) version 3. You can 
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
-* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelarator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
+* Use [ask.fiware.org](https://ask.fiware.org/questions/) for general questions about FIWARE, e.g. how many cities are using FIWARE, how can I join the accelerator program, etc. Even for general questions about this software, for instance, use cases or architectures you want to discuss.
 
 [Top](#top)

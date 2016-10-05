@@ -43,7 +43,7 @@ centos              6                   61bf77ab8841        6 weeks ago         
 [Top](#top)
 
 ###<a name="section2.2"></a>Using docker hub image
-Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus-common):
+Instead of building an image from the scratch, you may download it from [hub.docker.com](https://hub.docker.com/r/fiware/cygnus-common/):
 
     $ docker pull fiware/cygnus-common
 

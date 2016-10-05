@@ -43,7 +43,7 @@ centos              6                   273a1eca2d3a        2 weeks ago         
 [Top](#top)
 
 ###<a name="section2.2"></a>Using docker hub image
-Instead of building an image from the scratch, you may download it from [hub.docker.com](docker pull fiware/cygnus-ngsi):
+Instead of building an image from the scratch, you may download it from [hub.docker.com](https://hub.docker.com/r/fiware/cygnus-ngsi/):
 
     $ docker pull fiware/cygnus-ngsi
 
