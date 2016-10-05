@@ -214,6 +214,8 @@ cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 # cygnusagent.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
 # cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+# true enables cache, false disables cache
+#cygnusagent.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
 # NGSIMongoSink configuration
