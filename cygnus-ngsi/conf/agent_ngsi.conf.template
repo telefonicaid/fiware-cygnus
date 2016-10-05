@@ -213,7 +213,9 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 # timeout for batch accumulation
 #cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
 # number of retries upon persistence error
-#cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+# true enables cache, false disables cache
+#cygnus-ngsi.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
 # NGSIMongoSink configuration

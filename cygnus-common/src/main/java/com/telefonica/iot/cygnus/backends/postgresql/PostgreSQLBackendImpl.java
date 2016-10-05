@@ -42,6 +42,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
     private static final String DRIVER_NAME = "org.postgresql.Driver";
     private PostgreSQLDriver driver;
     private static final CygnusLogger LOGGER = new CygnusLogger(PostgreSQLBackendImpl.class);
+    private PostgreSQLCache cache = null;
 
     /**
      * Constructor.
@@ -50,9 +51,15 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param postgresqlDatabase
      * @param postgresqlUsername
      * @param postgresqlPassword
+     * @param enableCache
      */
     public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase,
-            String postgresqlUsername, String postgresqlPassword) {
+            String postgresqlUsername, String postgresqlPassword, boolean enableCache) {
+        if (enableCache) {
+            cache = new PostgreSQLCache();
+            LOGGER.info("PostgreSQL cache created succesfully");
+        } // if
+        
         driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername,
                 postgresqlPassword);
     } // PostgreSQLBackendImpl
@@ -76,26 +83,32 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      */
     @Override
     public void createSchema(String schemaName) throws Exception {
-        Statement stmt = null;
+        boolean schemaCached = cache.isSchemaInCache(schemaName);     
+        
+        if (!schemaCached) {
+            Statement stmt = null;
 
-        // get a connection to an empty database
-        Connection con = driver.getConnection("");
+            // get a connection to an empty database
+            Connection con = driver.getConnection("");
 
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            try {
+                stmt = con.createStatement();
+            } catch (Exception e) {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // try catch
 
-        try {
-            String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
-            LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            try {
+                String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
+                LOGGER.debug("Executing SQL query '" + query + "'");
+                stmt.executeUpdate(query);
+            } catch (Exception e) {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // try catch
 
-        closePostgreSQLObjects(con, stmt);
+            closePostgreSQLObjects(con, stmt);
+            cache.persistSchemaInCache(schemaName);
+        } // if
+        
     } // createSchema
 
     /**
@@ -107,26 +120,32 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      */
     @Override
     public void createTable(String schemaName, String tableName, String typedFieldNames) throws Exception {
-        Statement stmt = null;
+        boolean tableInSchema = cache.isTableInCachedSchema(schemaName, tableName);
+        
+        if (!tableInSchema) {
+            Statement stmt = null;
 
-        // get a connection to the given schema
-        Connection con = driver.getConnection(schemaName);
+            // get a connection to the given schema
+            Connection con = driver.getConnection(schemaName);
 
-        try {
-            stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            try {
+                stmt = con.createStatement();
+            } catch (Exception e) {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // try catch
 
-        try {
-            String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
-            LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            try {
+                String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
+                LOGGER.debug("Executing SQL query '" + query + "'");
+                stmt.executeUpdate(query);
+            } catch (Exception e) {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // try catch
 
-        closePostgreSQLObjects(con, stmt);
+            closePostgreSQLObjects(con, stmt);
+            cache.persistTableInCache(schemaName, tableName);
+        } // if
+        
     } // createTable
 
     @Override
@@ -200,8 +219,8 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * @param postgresqlUsername
          * @param postgresqlPassword
          */
-        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort,
-                String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword) {
+        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, 
+                String postgresqlUsername, String postgresqlPassword) {
             connections = new HashMap<String, Connection>();
             this.postgresqlHost = postgresqlHost;
             this.postgresqlPort = postgresqlPort;
@@ -281,4 +300,3 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // createConnection
     } // PostgreSQLDriver
 } // PostgreSQLBackendImpl
-

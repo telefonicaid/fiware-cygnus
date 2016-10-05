@@ -172,7 +172,9 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 # timeout for batch accumulation
 # cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
-# cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+# true enables cache, false disables cache
+# cygnus-ngsi.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
 # NGSIMySQLSink configuration
