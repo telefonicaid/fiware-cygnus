@@ -51,6 +51,7 @@ pages:
           - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
           - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
           - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
+          - 'Name mappings': 'cygnus-ngsi/installation_and_administration_guide/name_mappings.md'
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
           - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
           - 'Sanity checks': 'cygnus-ngsi/installation_and_administration_guide/sanity_checks.md'
