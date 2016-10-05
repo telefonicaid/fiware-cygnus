@@ -103,7 +103,7 @@ public class PostgreSQLCacheTest {
         
     } // testSchemaAndTableWithSchemaCached
     
-    @Test
+    //@Test
     public void testPersistSchemaAndTableInCache() {
         PSQLcache.setCache(emptyCache);
         PSQLcache.persistSchemaInCache(schemaName);
@@ -122,7 +122,7 @@ public class PostgreSQLCacheTest {
         
     } // testPersistSchemaAndTableInCache
     
-    @Test
+    //@Test
     public void testPersistOnlyTableInCache() {
         cacheOnlyWithSchema.put(schemaName, emptyList);
         PSQLcache.setCache(cacheOnlyWithSchema);
