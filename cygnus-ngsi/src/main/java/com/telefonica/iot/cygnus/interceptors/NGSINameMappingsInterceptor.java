@@ -307,6 +307,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             serviceMapping = sm;
             
             if (!serviceMapping.getOriginalService().equals(originalService)) {
+                serviceMapping = null;
                 continue;
             } // if
             
@@ -331,6 +332,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             servicePathMapping = spm;
             
             if (!servicePathMapping.getOriginalServicePath().equals(originalServicePath)) {
+                servicePathMapping = null;
                 continue;
             } // if
             
@@ -361,6 +363,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
                 if (!entityMapping.getOriginalEntityId().equals(originalEntityId)
                         || !entityMapping.getOriginalEntityType().equals(originalEntityType)) {
+                    entityMapping = null;
                     continue;
                 } // if
 
@@ -397,6 +400,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
                     if (!attributeMapping.getOriginalAttributeName().equals(originalAttributeName)
                             || !attributeMapping.getOriginalAttributeType().equals(originalAttributeType)) {
+                        attributeMapping = null;
                         continue;
                     } // if
 
