@@ -553,7 +553,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     /**
      * Utility class for batch-like event accumulation purposes.
      */
-    private class Accumulator implements Cloneable {
+    protected class Accumulator implements Cloneable {
 
         // accumulated events
         private NGSIBatch batch;
@@ -597,6 +597,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
          * Accumulates an event given its headers and context data.
          * @param headers
          * @param originalNCR
+         * @param mappedNCR
          */
         public void accumulate(Map<String, String> headers, NotifyContextRequest originalNCR,
                 NotifyContextRequest mappedNCR) {
