@@ -70,3 +70,6 @@ As seen, the name mappings feature is quite similar to the already existent grou
 Most probably, the grouping rules feature is deprecated in future versions of Cygnus.
 
 [Top](#top)
+
+##Further reading
+Please, check the [specific documentation](../flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) for this custom interceptor in the Flume extensions catalogue for cygnus-ngsi agent.
