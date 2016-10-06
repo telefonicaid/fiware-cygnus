@@ -33,7 +33,7 @@ import org.junit.Test;
  *
  * @author frb
  */
-public class NGSINameMappingInterceptorTest {
+public class NGSINameMappingsInterceptorTest {
     
     private final String originalNCRStr = ""
             + "{"
@@ -90,18 +90,18 @@ public class NGSINameMappingInterceptorTest {
     /**
      * Constructor.
      */
-    public NGSINameMappingInterceptorTest() {
+    public NGSINameMappingsInterceptorTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
-    } // NGSINameMappingInterceptorTest
+    } // NGSINameMappingsInterceptorTest
     
     /**
-     * [NGSINameMappingInterceptor.Builder.configure] -------- Configured 'name_mappings_conf_file' cannot be empty.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured 'name_mappings_conf_file' cannot be empty.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotEmpty() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
                 + "-------- Configured 'name_mappings_conf_file' cannot be empty");
-        NGSINameMappingInterceptor.Builder builder = new NGSINameMappingInterceptor.Builder();
+        NGSINameMappingsInterceptor.Builder builder = new NGSINameMappingsInterceptor.Builder();
         String nameMappingsConfFile = ""; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
         builder.configure(context);
@@ -118,13 +118,13 @@ public class NGSINameMappingInterceptorTest {
     } // testBuilderConfigureNameMappingsConfFileNotEmpty
     
     /**
-     * [NGSINameMappingInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be null.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be null.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotNull() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
                 + "-------- Configured 'name_mappings_conf_file' cannot be null");
-        NGSINameMappingInterceptor.Builder builder = new NGSINameMappingInterceptor.Builder();
+        NGSINameMappingsInterceptor.Builder builder = new NGSINameMappingsInterceptor.Builder();
         String nameMappingsConfFile = null; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
         builder.configure(context);
@@ -150,7 +150,7 @@ public class NGSINameMappingInterceptorTest {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                 + "-------- When a NGSI event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, mapped-fiware-service and mapped-fiware-servicepath headers");
-        NGSINameMappingInterceptor nameMappingInterceptor = new NGSINameMappingInterceptor("", false);
+        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor("", false);
         nameMappingInterceptor.initialize();
         Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = nameMappingInterceptor.intercept(originalEvent).getHeaders();
@@ -237,7 +237,7 @@ public class NGSINameMappingInterceptorTest {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                 + "-------- When a Flume event is put in the channel, it contains the original NotifyContextRequest "
                 + "and the mapped one");
-        NGSINameMappingInterceptor nameMappingInterceptor = new NGSINameMappingInterceptor("", false);
+        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor("", false);
         nameMappingInterceptor.initialize();
         Event originalEvent = createEvent();
         NGSIEvent ngsiEvent = (NGSIEvent) nameMappingInterceptor.intercept(originalEvent);
@@ -269,4 +269,4 @@ public class NGSINameMappingInterceptorTest {
         return context;
     } // createBuilderContext
 
-} // NGSINameMappingInterceptorTest
+} // NGSINameMappingsInterceptorTest

@@ -46,9 +46,9 @@ import org.apache.flume.interceptor.Interceptor;
  *
  * @author frb
  */
-public class NGSINameMappingInterceptor implements Interceptor {
+public class NGSINameMappingsInterceptor implements Interceptor {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSINameMappingInterceptor.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSINameMappingsInterceptor.class);
     private final String nameMappingsConfFile;
     private final boolean invalidConfiguration;
     private NameMappings nameMappings;
@@ -59,10 +59,10 @@ public class NGSINameMappingInterceptor implements Interceptor {
      * @param nameMappingsConfFile
      * @param invalidConfiguration
      */
-    public NGSINameMappingInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
+    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
         this.nameMappingsConfFile = nameMappingsConfFile;
         this.invalidConfiguration = invalidConfiguration;
-    } // NGSINameMappingInterceptor
+    } // NGSINameMappingsInterceptor
 
     @Override
     public void initialize() {
@@ -184,7 +184,7 @@ public class NGSINameMappingInterceptor implements Interceptor {
  
         @Override
         public Interceptor build() {
-            return new NGSINameMappingInterceptor(nameMappingsConfFile, invalidConfiguration);
+            return new NGSINameMappingsInterceptor(nameMappingsConfFile, invalidConfiguration);
         } // build
         
         protected boolean getInvalidConfiguration() {
@@ -194,7 +194,7 @@ public class NGSINameMappingInterceptor implements Interceptor {
     } // Builder
     
     /**
-     * Class in charge or periodically reading the NGSINameMappingInterceptor configuration file.
+     * Class in charge or periodically reading the NGSINameMappingsInterceptor configuration file.
      */
     private class PeriodicalNameMappingsReader extends Thread {
         
@@ -426,4 +426,4 @@ public class NGSINameMappingInterceptor implements Interceptor {
         return new ImmutableTriple(newService, newServicePath, newNCR);
     } // map
     
-} // NGSINameMappingInterceptor
+} // NGSINameMappingsInterceptor
