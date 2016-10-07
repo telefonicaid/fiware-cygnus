@@ -97,6 +97,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Oct 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.4.0
+- [cygnus][bug] Fix documentation about DELETE subscriptions (#1147)
+- [cygnus-ngsi][hardening] Remove unused hashing feature in NGSIMongoSink and NGSISTHSink (#1113)
+- [cygnus-ngsi][hardening] Configurable Http parameters at backend (#1152)
+- [cygnus-twitter][bug] Fixed misspelled underscores in doc examples (#1161)
+- [cygnus-ngsi] [feature] Add implementation for /admin/log route (807) - continue - (#807)
+- [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
+- [cygnus-ngsi][feature] Name mappings (#1076)
+- [cygnus-ngis][hardening] Add a cache for already created elements in PostgreSQLSink (#1171)
+- [cygnus][doc] Update mkdocs.yml with the google analytics ID (#1183)
+- [cygnus][hardening] Update default agent.conf file with latests paremeters (#1194)
+
 * Fri Sep 09 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.3.0
 - [cygnus-ngsi][bug] Change mysql and mongo hosts to "iot-mysql" and "iot-mongo" (#1105)
 - [cygnus-ngsi][feature] General encoding of per-sink forbidden characters (#1107)
