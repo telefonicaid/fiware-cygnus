@@ -19,8 +19,8 @@
 package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.Gson;
+import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -39,18 +39,14 @@ public final class TestUtils {
      * @param jsonStr
      * @return The Json-based notificationContextRequest
      */
-    public static NotifyContextRequest createJsonNotifyContextRequest(String jsonStr) {
-        Logger logger = Logger.getLogger(NGSIUtils.class);
-        NotifyContextRequest notification = null;
+    public static NotifyContextRequest createJsonNotifyContextRequest(String jsonStr) throws Exception {
         Gson gson = new Gson();
-
-        try {
-            notification = gson.fromJson(jsonStr, NotifyContextRequest.class);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        } // try catch
-        
-        return notification;
+        return gson.fromJson(jsonStr, NotifyContextRequest.class);
     } // createJsonNotifyContextRequest
+    
+    public static NameMappings createJsonNameMappings(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NameMappings.class);
+    } // createJsonNameMappings
     
 } // TestUtils

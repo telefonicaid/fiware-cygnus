@@ -227,7 +227,8 @@ Coming soon.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
@@ -250,6 +251,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
     cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
     cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.postgresql-sink.postgresql_host = 192.168.80.34
     cygnus-ngsi.sinks.postgresql-sink.postgresql_port = 5432

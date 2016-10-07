@@ -270,7 +270,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
@@ -308,6 +309,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
     cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
     cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.hdfs-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.hdfs-sink.file_format = json-column
     cygnus-ngsi.sinks.hdfs-sink.backend.impl = rest
@@ -323,11 +325,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.batch_timeout = 30
     cygnus-ngsi.sinks.hdfs-sink.batch_ttl = 10
     cygnus-ngsi.sinks.hdfs-sink.cygnus-ngsi
-    cygnus-ngsi.sinks.hdfs-sink.hive.server_version = 2
-    cygnus-ngsi.sinks.hdfs-sink.hive.host = 192.168.80.35
-    cygnus-ngsi.sinks.hdfs-sink.hive.port = 10000
-    cygnus-ngsi.sinks.hdfs-sink.hive.db_type = default-db
+    cygnus-ngsi.sinks.hdfs-sink.hive = false
     cygnus-ngsi.sinks.hdfs-sink.krb5_auth = false
+>>>>>>> develop
 
 [Top](#top)
 

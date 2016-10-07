@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.containers;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -26,7 +25,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementR
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.StatusCode;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 /**
@@ -35,7 +33,6 @@ import org.junit.Test;
  */
 public class NotifyContextRequestTest {
 
-    private Logger logger;
     private final String notifyJsonSimple = ""
             + "{"
             +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
@@ -199,9 +196,10 @@ public class NotifyContextRequestTest {
 
     /**
      * Test of getSubscriptionId method, of class NotifyContextRequest.
+     * @throws java.lang.Exception
      */
     @Test
-    public void testGetSubscriptionId() {
+    public void testGetSubscriptionId() throws Exception {
         String expResult = "51c0ac9ed714fb3b37d7d5a8";
         // test case for nofity-json-simple
         System.out.println("getSubscriptionId (notify-json-simple)");
@@ -224,9 +222,10 @@ public class NotifyContextRequestTest {
 
     /**
      * Test of getOriginator method, of class NotifyContextRequest.
+     * @throws java.lang.Exception
      */
     @Test
-    public void testGetOriginator() {
+    public void testGetOriginator() throws Exception {
         String expResult = "localhost";
         // test case for nofity-json-simple
         System.out.println("getOriginator (notify-json-simple)");
@@ -249,9 +248,10 @@ public class NotifyContextRequestTest {
 
     /**
      * Test of getContextResponses method, of class NotifyContextRequest.
+     * @throws java.lang.Exception
      */
     @Test
-    public void testGetContextResponses() {
+    public void testGetContextResponses() throws Exception {
         testGetCxtResJsonSimple();
         testGetCxtResJsonCompound();
         testGetCxtResJsonCompoundNested();
@@ -263,7 +263,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-simple.
      */
-    private void testGetCxtResJsonSimple() {
+    private void testGetCxtResJsonSimple() throws Exception {
         System.out.println("getOriginator (notify-json-simple)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -291,7 +291,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-compound.
      */
-    private void testGetCxtResJsonCompound() {
+    private void testGetCxtResJsonCompound() throws Exception {
         System.out.println("getOriginator (notify-json-compound)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -323,7 +323,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-compound.
      */
-    private void testGetCxtResJsonCompoundNested() {
+    private void testGetCxtResJsonCompoundNested() throws Exception {
         System.out.println("getOriginator (notify-json-compound-nested)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompoundNested);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -355,7 +355,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-metadata.
      */
-    private void testGetCxtResJsonMd() {
+    private void testGetCxtResJsonMd() throws Exception {
         System.out.println("getOriginator (notify-json-metadata)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -383,7 +383,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-simple-unordered.
      */
-    private void testGetCxtResJsonSimpleUnordered() {
+    private void testGetCxtResJsonSimpleUnordered() throws Exception {
         System.out.println("getOriginator (notify-json-simple-unordered)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleUnordered);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
@@ -411,7 +411,7 @@ public class NotifyContextRequestTest {
     /**
      * Sub-test case for nofity-json-simple-unordered.
      */
-    private void testGetCxtResJsonSimpleNullAttrs() {
+    private void testGetCxtResJsonSimpleNullAttrs() throws Exception {
         System.out.println("getOriginator (notify-json-simple-null-attrs)");
         NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleNullAttrs);
         ArrayList<ContextElementResponse> cerList = instance.getContextResponses();

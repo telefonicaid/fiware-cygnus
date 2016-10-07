@@ -56,6 +56,8 @@ cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 #cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
@@ -116,6 +118,8 @@ cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
 cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.ckan-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding.
 #cygnus-ngsi.sinks.ckan-sink.enable_encoding = false
 # the CKAN API key to use
@@ -151,8 +155,10 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 #cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
 # the FQDN/IP address where the PostgreSQL server runs
 #cygnus-ngsi.sinks.postgresql-sink.postgresql_host = x.y.z.w
 # the port where the PostgreSQL server listens for incomming connections
@@ -186,6 +192,8 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 #cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.mysql-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # the FQDN/IP address where the MySQL server runs
@@ -213,8 +221,10 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 cygnus-ngsi.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
 # channel name from where to read notification events
 cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding
-#cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
+#cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -256,8 +266,10 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 cygnus-ngsi.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
 # channel name from where to read notification events
 cygnus-ngsi.sinks.sth-sink.channel = sth-channel
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding
-#cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
+#cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.sth-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -294,9 +306,11 @@ cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSin
 # channel name from where to read notification events
 cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
 # true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.sth-sink.enable_grouping = false
+#cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.kafka-sink.enable_lowercase = false
 # select the data_model: dm-by-service, dm-by-service-path, dm-by-entity or dm-by-attribute
 #cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
 # comma-separated list of Kafka brokers (a broker is defined as host:port)
@@ -328,8 +342,10 @@ cygnus-ngsi.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 #cygnus-ngsi.sinks.dynamo-sink.region = eu-central-1
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.dynamo-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.dynamo-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
-#cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-ngsi.sinks.dynamo-sink.enable_lowercase = false
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.dynamo-sink.attr_persistence = column
 # select the data_model: dm-by-entity 	dm-by-entity or dm-by-service-path
@@ -349,6 +365,8 @@ cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoD
 cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
 # true if the grouping feature is enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
 # select the data_model: dm-by-service-path or dm-by-entity

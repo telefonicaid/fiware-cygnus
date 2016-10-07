@@ -46,6 +46,12 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.21</version>
         </dependency>
+        <!-- Required by NameMapper -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
         <!-- Required by any agent -->
         <dependency>
             <groupId>com.telefonica.iot</groupId>

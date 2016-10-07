@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.containers;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 
 /**
@@ -68,6 +67,49 @@ public class NotifyContextRequest {
     } // setContextResponses
     
     /**
+     * Gets a deep copy of this object.
+     * @return A deep copy of this object
+     */
+    public NotifyContextRequest deepCopy() {
+        NotifyContextRequest copy = new NotifyContextRequest();
+        copy.subscriptionId = this.subscriptionId;
+        copy.originator = this.originator;
+        
+        if (this.contextResponses != null) {
+            copy.contextResponses = new ArrayList<ContextElementResponse>();
+
+            for (ContextElementResponse cer : this.contextResponses) {
+                copy.contextResponses.add(cer.deepCopy());
+            } // for
+        } else {
+            copy.contextResponses = null;
+        } // if else
+        
+        return copy;
+    } // deepCopy
+    
+    @Override
+    public String toString() {
+        String s = "{\"subscriptionId\":\"" + subscriptionId + "\",\"originator\":\"" + originator
+                + "\",\"contextResponses\":[";
+        
+        if (contextResponses != null) {
+            boolean first = true;
+
+            for (ContextElementResponse cer : contextResponses) {
+                if (first) {
+                    s += cer.toString();
+                    first = false;
+                } else {
+                    s += "," + cer.toString();
+                } // if else
+            } // for
+        } // if
+        
+        return s + "]}";
+    } // toString
+    
+    /**
      * Class for storing contextElementResponse information from a notifyContextRequest.
      */
     public class ContextElementResponse {
@@ -98,6 +140,23 @@ public class NotifyContextRequest {
         public void setStatusCode(StatusCode statusCode) {
             this.statusCode = statusCode;
         } // setStatusCode
+        
+        /**
+         * Gets a deep copy of this object.
+         * @return A deep copy of this object
+         */
+        public ContextElementResponse deepCopy() {
+            ContextElementResponse cer = new ContextElementResponse();
+            cer.contextElement = this.contextElement.deepCopy();
+            cer.statusCode = this.statusCode.deepCopy();
+            return cer;
+        } // deepCopy
+        
+        @Override
+        public String toString() {
+            return "{\"contextElement\":" + contextElement.toString()
+                    + ",\"statusCode\":" + statusCode.toString() + "}";
+        } // toString
         
     } // ContextElementResponse
     
@@ -186,49 +245,52 @@ public class NotifyContextRequest {
             return contextElement;
         } // filter
         
-    } // ContextElement
-    
-    /**
-     * Class for storing entityId information from a contextElement.
-     */
-    public class EntityId {
-        
-        private String type;
-        private String isPattern;
-        private String id;
-        
         /**
-         * Constructor for Gson, a Json parser.
+         * Gets a deep copy of this object.
+         * @return A deep copy of this object
          */
-        public EntityId() {
-        } // EntityId
+        public ContextElement deepCopy() {
+            ContextElement ce = new ContextElement();
+            ce.id = this.id;
+            ce.type = this.type;
+            ce.isPattern = this.isPattern;
+            
+            if (this.attributes != null) {
+                ce.attributes = new ArrayList<ContextAttribute>();
+
+                for (ContextAttribute ca : this.attributes) {
+                    ce.attributes.add(ca.deepCopy());
+                } // for
+            } else {
+                ce.attributes = null;
+            } // if else
+            
+            return ce;
+        } // deepCopy
         
-        public String getType() {
-            return type;
-        } // getType
+        @Override
+        public String toString() {
+            String s = "{\"id\":\"" + id + "\",\"type\":\"" + type + "\",\"isPattern\":\"" + isPattern
+                    + "\",\"attributes\":[";
+            
+            if (attributes != null) {
+                boolean first = true;
+
+                for (ContextAttribute ca : attributes) {
+                    if (first) {
+                        s += ca.toString();
+                        first = false;
+                    } else {
+                        s += "," + ca.toString();
+                    } // if else
+                } // for
+            } // if
         
-        public String getIsPattern() {
-            return isPattern;
-        } // getIsPattern
+            return s + "]}";
+        } // toString
         
-        public String getId() {
-            return id;
-        } // getId
-        
-        public void setType(String type) {
-            this.type = type;
-        } // setType
-        
-        public void setIsPattern(String isPattern) {
-            this.isPattern = isPattern;
-        } // setIsPattern
-        
-        public void setId(String id) {
-            this.id = id;
-        } // setId
-        
-    } // EntityId
-    
+    } // ContextElement
+
     /**
      * Class for storing contextAttribute information from a notifyContextRequest.
      */
@@ -317,6 +379,50 @@ public class NotifyContextRequest {
             this.metadatas = metadatas;
         } // setContextMetadata
         
+        /**
+         * Gets a deep copy of this object.
+         * @return A deep copy of this object
+         */
+        public ContextAttribute deepCopy() {
+            ContextAttribute ca = new ContextAttribute();
+            ca.name = this.name;
+            ca.type = this.type;
+            ca.value = this.value;
+            
+            if (this.metadatas != null) {
+                ca.metadatas = new ArrayList<ContextMetadata>();
+                
+                for (ContextMetadata cm : this.metadatas) {
+                    ca.metadatas.add(cm.deepCopy());
+                } // for
+            } else {
+                ca.metadatas = null;
+            } // if else
+            
+            return ca;
+        } // deepCopy
+        
+        @Override
+        public String toString() {
+            String s = "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value
+                    + "\",\"metadatas\":[";
+            
+            if (metadatas != null) {
+                boolean first = true;
+
+                for (ContextMetadata cm : metadatas) {
+                    if (first) {
+                        s += cm.toString();
+                        first = false;
+                    } else {
+                        s += "," + cm.toString();
+                    } // if else
+                } // for
+            } // if
+            
+            return s + "]}";
+        } // toString
+        
     } // ContextAttribute
     
     /**
@@ -341,7 +447,7 @@ public class NotifyContextRequest {
         public String getType() {
             return type;
         } // getType
-        
+
         /**
          * Gets metadata value.
          * @return The metadata value for this metadata attribute in String format.
@@ -367,6 +473,23 @@ public class NotifyContextRequest {
         public void setContextMetadata(JsonElement value) {
             this.value = value;
         } // setContextMetadata
+        
+        /**
+         * Gets a deep copy of this object.
+         * @return A deep copy of this object
+         */
+        public ContextMetadata deepCopy() {
+            ContextMetadata cm = new ContextMetadata();
+            cm.name = this.name;
+            cm.type = this.type;
+            cm.value = this.value;
+            return cm;
+        } // deepCopy
+        
+        @Override
+        public String toString() {
+            return "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value + "\"}";
+        } // toStrng
         
     } // ContextMetadata
     
@@ -399,6 +522,22 @@ public class NotifyContextRequest {
         public void setReasonPhrase(String reasonPhrase) {
             this.reasonPhrase = reasonPhrase;
         } // setReasonPhrase
+        
+        /**
+         * Gets a deep copy of this object.
+         * @return A deep copy of this object
+         */
+        public StatusCode deepCopy() {
+            StatusCode sc = new StatusCode();
+            sc.code = this.code;
+            sc.reasonPhrase = this.reasonPhrase;
+            return sc;
+        } // deepCopy
+        
+        @Override
+        public String toString() {
+            return "{\"code\":\"" + code + "\",\"reasonPhrase\":\"" + reasonPhrase + "\"}";
+        } // toString
         
     } // StatusCode
     

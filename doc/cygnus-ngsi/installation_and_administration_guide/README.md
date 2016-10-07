@@ -12,9 +12,11 @@
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a service](./running_as_service.md)
-* [Testing](./testing.md)
-* [Multitenancy](./multitenancy.md)
-* [Performance tips](./performance_tips.md)
+* Advanced features:
+    * [Testing](./testing.md)
+    * [Name mappings](./name_mappings.md)
+    * [Multitenancy](./multitenancy.md)
+    * [Performance tips](./performance_tips.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
 * [Reporting issues and contact information](./issues_and_contact.md)

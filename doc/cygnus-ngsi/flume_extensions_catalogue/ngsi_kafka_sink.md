@@ -131,7 +131,8 @@ Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIKafkaSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
 | broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
@@ -151,6 +152,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
     cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
     cygnus-ngsi.sinks.kafka-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.kafka-sink.broker_list = localhost:9092
     cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = localhost:2181
